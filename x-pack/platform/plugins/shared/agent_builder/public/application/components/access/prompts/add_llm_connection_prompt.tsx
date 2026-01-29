@@ -8,9 +8,11 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useObservable } from '@kbn/use-observable';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { PromptLayoutVariant } from '../../common/prompt/layout';
 
 export interface AddLlmConnectionPromptProps {
@@ -22,6 +24,11 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const llmDocsHref = docLinksService.models;
+  const {
+    services: { application },
+  } = useKibana();
+  const currentLocation = useObservable(application.currentLocation$, '');
+  const isOnConnectorsPage = currentLocation.includes('triggersActionsConnectors/connectors');
 
   const primaryButton = (
     <EuiButton
@@ -29,6 +36,9 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
       onClick={() => {
         navigationService.navigateToLlmConnectorsManagement();
       }}
+      disabled={isOnConnectorsPage}
+      aria-current={isOnConnectorsPage ? 'page' : undefined}
+      data-test-subj="connectLLMButton"
     >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.addLlm.actions.connectButton"

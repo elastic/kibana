@@ -319,5 +319,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const previousResponseText = await previousResponseElement.getVisibleText();
       expect(previousResponseText).to.contain(FIRST_RESPONSE);
     });
+
+    it('Connect LLM button is not present when on connectors page', async () => {
+      await deleteConnectors(supertest);
+
+      await agentBuilder.navigateToApp('conversations/new');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('connectLLMButton');
+      });
+
+      const connectButton = await testSubjects.find('connectLLMButton');
+      await connectButton.click();
+
+      await retry.try(async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('triggersActionsConnectors/connectors');
+      });
+
+      await testSubjects.missingOrFail('connectLLMButton');
+
+      await createConnector(llmProxy, supertest);
+    });
   });
 }
