@@ -34,7 +34,7 @@ export const lsTool = ({
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: filestoreTools.ls,
-    description: `List files and directories at the given path`,
+    description: `List files and directories at the given path from the filestore`,
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],

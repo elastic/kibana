@@ -23,7 +23,7 @@ export const globTool = ({
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: filestoreTools.glob,
-    description: `Find files matching a glob pattern`,
+    description: `Find files matching a glob pattern from the filestore`,
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],

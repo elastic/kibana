@@ -34,7 +34,7 @@ export const grepTool = ({
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: filestoreTools.grep,
-    description: `Search for text matching a pattern in files`,
+    description: `Search for text matching a pattern in files from the filestore`,
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
