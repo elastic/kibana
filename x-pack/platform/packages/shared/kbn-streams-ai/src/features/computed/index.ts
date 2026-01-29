@@ -7,73 +7,78 @@
 
 import type { BaseFeature } from '@kbn/streams-schema';
 import { datasetAnalysisGenerator } from './dataset_analysis';
-import type {
-  ComputedFeatureGenerator,
-  ComputedFeatureGeneratorOptions,
-  ComputedFeatureGeneratorResult,
-} from './types';
-
-export type { ComputedFeatureGenerator, ComputedFeatureGeneratorOptions };
+import type { ComputedFeatureGenerator, ComputedFeatureGeneratorOptions } from './types';
 
 /**
- * Registry of all computed feature generators.
+ * Internal registry for computed feature generators.
+ * Ensures each feature type is unique.
+ */
+class ComputedFeatureRegistry {
+  private generators = new Map<string, ComputedFeatureGenerator>();
+
+  register(generator: ComputedFeatureGenerator): void {
+    if (this.generators.has(generator.type)) {
+      throw new Error(`Computed feature type "${generator.type}" is already registered`);
+    }
+    this.generators.set(generator.type, generator);
+  }
+
+  getAll(): ComputedFeatureGenerator[] {
+    return Array.from(this.generators.values());
+  }
+}
+
+/**
+ * Internal registry instance.
  *
  * To add a new computed feature:
  * 1. Create a new file in this folder implementing ComputedFeatureGenerator
- * 2. Import and add your generator to this array
- *
- * Each generator must provide:
- * - type: Unique identifier for the feature
- * - llmInstructions: How the LLM should use this feature (auto-included in prompts)
- * - generate: Function that produces the feature's description and value
+ * 2. Import and register your generator below
  */
-export const computedFeatureGenerators: ComputedFeatureGenerator[] = [
-  datasetAnalysisGenerator,
-  // Add new generators here - one line per feature
-];
+const registry = new ComputedFeatureRegistry();
+registry.register(datasetAnalysisGenerator);
 
 /**
  * Returns formatted LLM instructions for all computed feature types.
  * This is automatically included in prompts so the LLM knows how to use each feature type.
  */
 export function getComputedFeatureInstructions(): string {
-  return computedFeatureGenerators
+  return registry
+    .getAll()
     .map((generator) => `**${generator.type}**: ${generator.llmInstructions}`)
     .join('\n\n');
 }
 
 /**
- * Converts a generator result into a full ComputedBaseFeature.
- * Enforces that name = type. The ID is generated using only stream + type,
- * so the value can change without creating duplicate features.
+ * Converts a generator and its computed value into a full ComputedBaseFeature.
+ * Enforces that name = type.
  */
-function toComputedFeature(type: string, result: ComputedFeatureGeneratorResult): BaseFeature {
+function toComputedFeature(
+  generator: ComputedFeatureGenerator,
+  value: Record<string, unknown>
+): BaseFeature {
   return {
-    type,
-    description: result.description,
-    properties: result.properties,
+    type: generator.type,
+    description: generator.description,
+    properties: value,
     confidence: 100,
     evidence: [],
     tags: [],
     meta: {},
-    id: type,
+    id: generator.type,
   };
 }
 
 /**
  * Generates all computed features by running all registered generators in parallel.
- * Generators that return null are filtered out from the results.
- *
- * The framework automatically sets name = type. The ID is generated using
- * only stream + type, so value changes update the existing feature.
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
 ): Promise<BaseFeature[]> {
   return Promise.all(
-    computedFeatureGenerators.map(async (generator) => {
-      const result = await generator.generate(options);
-      return toComputedFeature(generator.type, result);
+    registry.getAll().map(async (generator) => {
+      const value = await generator.generate(options);
+      return toComputedFeature(generator, value);
     })
   );
 }

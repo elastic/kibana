@@ -66,7 +66,6 @@ export async function generateSignificantEvents({
   logger.debug('Starting significant event generation');
 
   let formattedAnalysis: FormattedDocumentAnalysis | undefined;
-  let datasetAnalysisSource: 'filtered' | 'features';
 
   if (system?.filter) {
     logger.trace('Describing dataset for significant event generation (with filter)');
@@ -81,9 +80,6 @@ export async function generateSignificantEvents({
       })
     );
     formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
-    datasetAnalysisSource = 'filtered';
-  } else {
-    datasetAnalysisSource = 'features';
   }
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
@@ -94,7 +90,6 @@ export async function generateSignificantEvents({
       input: {
         name: system?.name || stream.name,
         dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
-        dataset_analysis_source: datasetAnalysisSource,
         description: system?.description || stream.description,
         features: JSON.stringify(
           features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))

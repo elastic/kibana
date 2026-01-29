@@ -19,7 +19,7 @@ export const baseFeatureSchema = z.object({
   subtype: z.string().optional(),
   title: z.string().optional(),
   description: z.string(),
-  properties: z.record(z.string(), z.string()),
+  properties: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()),
   tags: z.array(z.string()),

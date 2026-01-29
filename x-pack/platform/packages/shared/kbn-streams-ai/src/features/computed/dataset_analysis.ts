@@ -9,13 +9,10 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/streams-schema';
 import type { ComputedFeatureGenerator } from './types';
 
-/**
- * Generates a computed feature containing the dataset analysis for a stream.
- * The framework automatically sets name = type. The ID is generated using
- * only stream + type, so value updates replace the existing feature.
- */
 export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
   type: DATASET_ANALYSIS_FEATURE_TYPE,
+
+  description: 'Dataset schema and field analysis including value distributions and coverage',
 
   llmInstructions: `Contains the full schema, field distributions, and sample values from the log dataset.
 Use the \`value.analysis\` field to understand available fields and their value distributions.
@@ -32,10 +29,7 @@ This is useful for understanding what fields are available for querying and what
     const formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
 
     return {
-      description: 'Dataset schema and field analysis including value distributions and coverage',
-      properties: {
-        analysis: formattedAnalysis,
-      },
+      analysis: formattedAnalysis,
     };
   },
 };

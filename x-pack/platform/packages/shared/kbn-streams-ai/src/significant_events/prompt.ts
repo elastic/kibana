@@ -26,7 +26,6 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
       name: z.string(),
       description: z.string(),
       dataset_analysis: z.string(),
-      dataset_analysis_source: z.enum(['filtered', 'features']),
       features: z.string(),
       computed_feature_instructions: z.string(),
     }),

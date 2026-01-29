@@ -37,10 +37,10 @@ These are automatically computed metadata about the dataset. Each computed featu
 
 {{{computed_feature_instructions}}}
 
-**Understanding `dataset_analysis_source`:**
-The `dataset_analysis` input indicates its source:
-- `source: "filtered"` — A fresh analysis was generated specifically for this request because a filter was applied. Use the `dataset_analysis` content directly as it represents the filtered subset of data.
-- `source: "features"` — No filter was applied, so the analysis comes from a pre-computed feature in the features list. When the `dataset_analysis` field is empty, look for the appropriate computed feature in the features array and use its `value` content.
+**Understanding `dataset_analysis`:**
+The `dataset_analysis` input may be provided directly or as a computed feature:
+- When `dataset_analysis` contains content, use it directly as it represents the dataset schema and field analysis.
+- When `dataset_analysis` is empty, look for a computed feature of type `dataset_analysis` in the features list and use its `value` content.
 
 ### Using Features to Generate Queries
 
