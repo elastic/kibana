@@ -146,9 +146,9 @@ export async function getLogAiInsights({
   });
 
   const results = await Promise.allSettled(
-    contextParts.map(async (part) => {
-      const data = await part.handler();
-      return { part, data };
+    contextHandlers.map(async ({ name, handler }) => {
+      const result = await handler();
+      return { name, result };
     })
   );
 
