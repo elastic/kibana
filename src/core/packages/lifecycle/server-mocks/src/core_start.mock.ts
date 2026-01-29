@@ -43,7 +43,7 @@ export function createCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    userActivity: userActivityServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalStartContract(),
     security: securityServiceMock.createStart(),
     userProfile: userProfileServiceMock.createStart(),
     injection: injectionServiceMock.createStartContract(),
