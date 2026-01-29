@@ -46,7 +46,8 @@
     "@kbn/core-di-internal",
     "@kbn/i18n",
     "@kbn/zod-helpers",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/core-saved-objects-api-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
