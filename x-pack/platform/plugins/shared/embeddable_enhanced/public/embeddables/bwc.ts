@@ -34,9 +34,9 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
               action: {
                 config: {
                   dashboardId: dashboard_id,
-                  openInNewTab: open_in_new_tab ?? false,
-                  useCurrentDateRange: use_time_range ?? true,
-                  useCurrentFilters: use_filters ?? true,
+                  open_in_new_tab: open_in_new_tab ?? false,
+                  use_time_range: use_time_range ?? true,
+                  use_filters: use_filters ?? true,
                 },
                 factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
                 name: drilldown.label ?? '',
