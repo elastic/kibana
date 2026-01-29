@@ -31,7 +31,7 @@ import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 import type { RuleMigrationsDataClient } from '../../server/lib/siem_migrations/rules/data/rule_migrations_data_client';
-import { getBuildAgent } from '../../server/lib/detection_engine/ai_assisted_rule_creation/agent/build_agent_graph';
+import { getBuildAgent } from '../../server/lib/detection_engine/ai_rule_creation/agent/build_agent_graph';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;

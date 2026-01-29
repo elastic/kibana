@@ -37,7 +37,7 @@ import { useHeaderLinkBackStyles } from '../../../../common/components/header_pa
 import { AiRuleCreationUpdates } from './agent_builder_updates';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { AiRuleInfo } from './ai_assisted_rule_info';
+import { AiRuleInfo } from './ai_rule_creation_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   getDetectionEngineUrl,
