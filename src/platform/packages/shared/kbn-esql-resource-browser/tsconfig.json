@@ -20,13 +20,10 @@
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/esql-language",
-    "@kbn/kibana-react-plugin",
     "@kbn/react-field",
     "@kbn/field-utils",
     "@kbn/projects-solutions-groups",
     "@kbn/core",
     "@kbn/licensing-types",
-    "@kbn/monaco",
-    "@kbn/es-query"
   ]
 }
