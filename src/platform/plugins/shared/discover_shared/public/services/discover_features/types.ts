@@ -21,6 +21,7 @@ import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type React from 'react';
+import type { IndicatorType } from '@kbn/slo-schema';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -67,6 +68,7 @@ export interface ObservabilityCreateSLOFeature {
   createSLOFlyout: (props: {
     onClose: () => void;
     initialValues: Record<string, unknown>;
+    formSettings?: { isEditMode?: boolean; allowedIndicatorTypes?: IndicatorType[] };
   }) => React.ReactNode;
 }
 
@@ -75,6 +77,7 @@ export interface ObservabilityLogsFetchDocumentByIdFeature {
   fetchLogDocumentById: (
     params: {
       id: string;
+      index?: string;
     },
     signal: AbortSignal
   ) => Promise<
