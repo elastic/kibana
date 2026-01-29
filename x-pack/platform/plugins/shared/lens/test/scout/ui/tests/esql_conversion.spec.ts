@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout';
 
-import { test } from '../fixtures';
+import { test } from '@kbn/scout';
 
 const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
