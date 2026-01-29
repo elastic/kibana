@@ -928,7 +928,7 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1456,
+        "lineNumber": 1471,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1180,7 +1180,7 @@
           "EuiDataGridRefProps"
         ],
         "path": "node_modules/@elastic/eui/eui.d.ts",
-        "lineNumber": 16688,
+        "lineNumber": 16782,
         "columnNumber": 2,
         "deprecated": false,
         "trackAdoption": false,
@@ -1198,7 +1198,7 @@
               "(isFullScreen: boolean) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16689,
+            "lineNumber": 16783,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1214,7 +1214,7 @@
                   "boolean"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 16692,
+                "lineNumber": 16786,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1236,7 +1236,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16693,
+            "lineNumber": 16787,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1249,7 +1249,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 16700,
+                "lineNumber": 16794,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1262,7 +1262,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 16701,
+                    "lineNumber": 16795,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1275,7 +1275,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 16702,
+                    "lineNumber": 16796,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1298,7 +1298,7 @@
               "(cell: { rowIndex: number; colIndex: number; }) => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16704,
+            "lineNumber": 16798,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1311,7 +1311,7 @@
                 "label": "cell",
                 "description": [],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
-                "lineNumber": 16707,
+                "lineNumber": 16801,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1324,7 +1324,7 @@
                     "label": "rowIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 16708,
+                    "lineNumber": 16802,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1337,7 +1337,7 @@
                     "label": "colIndex",
                     "description": [],
                     "path": "node_modules/@elastic/eui/eui.d.ts",
-                    "lineNumber": 16709,
+                    "lineNumber": 16803,
                     "columnNumber": 10,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1360,7 +1360,7 @@
               "() => void"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16711,
+            "lineNumber": 16805,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -1380,7 +1380,7 @@
               "((params: { scrollLeft?: number | undefined; scrollTop?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16715,
+            "lineNumber": 16809,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -1400,7 +1400,7 @@
               " | undefined; columnIndex?: number | undefined; rowIndex?: number | undefined; }) => void) | undefined"
             ],
             "path": "node_modules/@elastic/eui/eui.d.ts",
-            "lineNumber": 16719,
+            "lineNumber": 16813,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false
@@ -2224,7 +2224,7 @@
         "label": "DataLoadingState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 127,
+        "lineNumber": 129,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2453,7 +2453,7 @@
           "[string, string]"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 125,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2519,7 +2519,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.tsx",
-        "lineNumber": 1458,
+        "lineNumber": 1473,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

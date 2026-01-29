@@ -3148,42 +3148,148 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.InsightsResult",
+        "id": "def-common.Insight",
         "type": "Interface",
         "tags": [],
-        "label": "InsightsResult",
+        "label": "Insight",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-        "lineNumber": 8,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.InsightsResult.summary",
+            "id": "def-common.Insight.title",
             "type": "string",
             "tags": [],
-            "label": "summary",
+            "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-            "lineNumber": 9,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.InsightsResult.tokenUsage",
-            "type": "Object",
+            "id": "def-common.Insight.description",
+            "type": "string",
             "tags": [],
-            "label": "tokenUsage",
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.impact",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "impact",
             "description": [],
             "signature": [
-              "{ prompt: number; completion: number; cached: number; }"
+              "\"medium\" | \"high\" | \"low\" | \"critical\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-            "lineNumber": 10,
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.evidence",
+            "type": "Array",
+            "tags": [],
+            "label": "evidence",
+            "description": [],
+            "signature": [
+              "InsightEvidence[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.recommendations",
+            "type": "Array",
+            "tags": [],
+            "label": "recommendations",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InsightsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InsightsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.insights",
+            "type": "Array",
+            "tags": [],
+            "label": "insights",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Insight",
+                "text": "Insight"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.tokensUsed",
+            "type": "Object",
+            "tags": [],
+            "label": "tokensUsed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompletionTokenCount",
+                "text": "ChatCompletionTokenCount"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4456,6 +4562,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
         "lineNumber": 90,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InsightImpactLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "InsightImpactLevel",
+        "description": [],
+        "signature": [
+          "\"medium\" | \"high\" | \"low\" | \"critical\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
