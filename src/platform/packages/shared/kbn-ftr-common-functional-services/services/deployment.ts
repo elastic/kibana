@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import { Agent } from 'undici';
+import { fetch, Agent } from 'undici';
 import { getUrl } from '@kbn/test';
 
 import { FtrService } from './ftr_provider_context';
@@ -53,7 +53,7 @@ export class DeploymentService extends FtrService {
         Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
       },
       dispatcher,
-    } as RequestInit);
+    });
     const data = await response.json();
     return get(data, 'usage.cloud.is_cloud_enabled', false);
   }

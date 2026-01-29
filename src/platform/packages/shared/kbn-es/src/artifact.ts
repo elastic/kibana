@@ -11,9 +11,9 @@ import fs from 'fs';
 import { promisify } from 'util';
 import path from 'path';
 import { createHash } from 'crypto';
-import { pipeline, Transform, Readable } from 'stream';
-import type { ReadableStream as WebReadableStream } from 'stream/web';
+import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
+import type { Headers } from 'undici';
 import { fetch } from 'undici';
 
 import chalk from 'chalk';
@@ -63,7 +63,7 @@ interface ArtifactDownloaded {
   etag?: string;
   contentLength: number;
   first500Bytes: Buffer;
-  headers: globalThis.Headers;
+  headers: Headers;
 }
 interface ArtifactCached {
   cached: true;
@@ -77,7 +77,7 @@ function getChecksumType(checksumUrl: string): ChecksumType {
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
 }
 
-function headersToString(headers: globalThis.Headers, indent = '') {
+function headersToString(headers: Headers, indent = '') {
   return [...headers.entries()].reduce(
     (acc, [key, value]) => `${acc}\n${indent}${key}: ${value}`,
     ''
@@ -305,10 +305,8 @@ export class Artifact {
       throw new Error('Response body is null');
     }
 
-    const bodyStream = Readable.fromWeb(resp.body as WebReadableStream);
-
     await asyncPipeline(
-      bodyStream,
+      resp.body,
       new Transform({
         transform(chunk, encoding, cb) {
           contentLength += Buffer.byteLength(chunk);
