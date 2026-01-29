@@ -22,7 +22,7 @@ export interface ApmServicesListItem {
   'agent.name'?: string;
   'transaction.type'?: string;
   alertsCount: number;
-  healthStatus: ServiceHealthStatus;
+  anomalyHealthStatus: ServiceHealthStatus;
   'service.environment'?: string[];
 }
 
@@ -36,7 +36,7 @@ export async function getApmServiceList({
 }: {
   arguments: {
     serviceEnvironment?: string | undefined;
-    healthStatus?: ServiceHealthStatus[] | undefined;
+    anomalyHealthStatus?: ServiceHealthStatus[] | undefined;
     start: string;
     end: string;
   };
@@ -46,7 +46,7 @@ export async function getApmServiceList({
   logger: Logger;
   randomSampler: RandomSampler;
 }): Promise<ApmServicesListItem[]> {
-  const { healthStatus } = args;
+  const { anomalyHealthStatus } = args;
 
   const start = datemath.parse(args.start)?.valueOf()!;
   const end = datemath.parse(args.end)?.valueOf()!;
@@ -72,14 +72,16 @@ export async function getApmServiceList({
       'service.name': item.serviceName,
       'agent.name': item.agentName,
       alertsCount: item.alertsCount ?? 0,
-      healthStatus: item.healthStatus ?? ServiceHealthStatus.unknown,
+      anomalyHealthStatus: item.anomalyHealthStatus ?? ServiceHealthStatus.unknown,
       'service.environment': item.environments,
       'transaction.type': item.transactionType,
     };
   });
 
-  if (healthStatus && healthStatus.length) {
-    mappedItems = mappedItems.filter((item): boolean => healthStatus.includes(item.healthStatus));
+  if (anomalyHealthStatus && anomalyHealthStatus.length) {
+    mappedItems = mappedItems.filter((item): boolean =>
+      anomalyHealthStatus.includes(item.anomalyHealthStatus)
+    );
   }
 
   return mappedItems;

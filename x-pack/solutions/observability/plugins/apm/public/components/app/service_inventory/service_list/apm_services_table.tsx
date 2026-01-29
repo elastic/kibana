@@ -149,7 +149,7 @@ export function getServiceColumns({
     ...(showHealthStatusColumn
       ? [
           {
-            field: ServiceInventoryFieldName.HealthStatus,
+            field: ServiceInventoryFieldName.AnomalyHealthStatus,
             name: (
               <>
                 {i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
@@ -170,8 +170,10 @@ export function getServiceColumns({
             ),
             width: `${unit * 6}px`,
             sortable: true,
-            render: (_, { healthStatus }) => {
-              return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
+            render: (_, { anomalyHealthStatus }) => {
+              return (
+                <HealthBadge healthStatus={anomalyHealthStatus ?? ServiceHealthStatus.unknown} />
+              );
             },
           } as ITableColumn<ServiceListItem>,
         ]

@@ -19,18 +19,18 @@ interface AggregationParams {
   searchQuery: string | undefined;
 }
 
-export type ServiceHealthStatusesResponse = Array<{
+export type ServiceAnomalyHealthStatusesResponse = Array<{
   serviceName: string;
-  healthStatus: ServiceHealthStatus;
+  anomalyHealthStatus: ServiceHealthStatus;
 }>;
 
-export async function getHealthStatuses({
+export async function getAnomalyHealthStatuses({
   environment,
   mlClient,
   start,
   end,
   searchQuery,
-}: AggregationParams): Promise<ServiceHealthStatusesResponse> {
+}: AggregationParams): Promise<ServiceAnomalyHealthStatusesResponse> {
   if (!mlClient) {
     return [];
   }
@@ -45,10 +45,10 @@ export async function getHealthStatuses({
 
   return anomalies.serviceAnomalies.map((anomalyStats) => {
     const severity = getSeverity(anomalyStats.anomalyScore);
-    const healthStatus = getServiceHealthStatus({ severity });
+    const anomalyHealthStatus = getServiceHealthStatus({ severity });
     return {
       serviceName: anomalyStats.serviceName,
-      healthStatus,
+      anomalyHealthStatus,
     };
   });
 }

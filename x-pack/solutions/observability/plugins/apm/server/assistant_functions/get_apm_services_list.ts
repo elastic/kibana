@@ -46,9 +46,9 @@ export function registerGetApmServicesListFunction({
             ...NON_EMPTY_STRING,
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
-          healthStatus: {
+          anomalyHealthStatus: {
             type: 'array',
-            description: 'Filter service list by health status',
+            description: 'Filter service list by anomaly detection health status',
             items: {
               type: 'string',
               enum: [

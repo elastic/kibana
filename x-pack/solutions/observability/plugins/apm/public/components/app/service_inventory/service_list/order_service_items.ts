@@ -19,8 +19,14 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 ];
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
-  [ServiceInventoryFieldName.HealthStatus]: (item) =>
-    item.healthStatus ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus) : -1,
+  [ServiceInventoryFieldName.AnomalyHealthStatus]: (item) =>
+    item.anomalyHealthStatus
+      ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.anomalyHealthStatus)
+      : -1,
+  [ServiceInventoryFieldName.CombinedHealthStatus]: (item) =>
+    item.combinedHealthStatus
+      ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.combinedHealthStatus)
+      : -1,
   [ServiceInventoryFieldName.ServiceName]: (item) => item.serviceName.toLowerCase(),
   [ServiceInventoryFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',
@@ -46,11 +52,14 @@ export function orderServiceItems({
   tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
 }): ServiceListItem[] {
-  // For healthStatus, sort items by healthStatus first, then by tie-breaker
+  // For health status, sort items by health status first, then by tie-breaker
 
   const sortFn = sorts[primarySortField as ServiceInventoryFieldName];
 
-  if (primarySortField === ServiceInventoryFieldName.HealthStatus) {
+  if (
+    primarySortField === ServiceInventoryFieldName.CombinedHealthStatus ||
+    primarySortField === ServiceInventoryFieldName.AnomalyHealthStatus
+  ) {
     const tiebreakerSortDirection =
       tiebreakerField === ServiceInventoryFieldName.ServiceName
         ? reverseSortDirection(sortDirection)

@@ -15,7 +15,7 @@ import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { getHealthStatuses } from './get_health_statuses';
+import { getAnomalyHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
@@ -78,21 +78,24 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
-      await Promise.all([
-        getServiceTransactionStats({
-          ...commonParams,
-          apmEventClient,
-        }),
-        getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
-          logger.debug(err);
-          return [];
-        }),
-        getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
-          logger.debug(err);
-          return [];
-        }),
-      ]);
+    const [
+      { serviceStats, serviceOverflowCount, maxCountExceeded },
+      anomalyHealthStatuses,
+      alertCounts,
+    ] = await Promise.all([
+      getServiceTransactionStats({
+        ...commonParams,
+        apmEventClient,
+      }),
+      getAnomalyHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
+        logger.debug(err);
+        return [];
+      }),
+      getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+        logger.debug(err);
+        return [];
+      }),
+    ]);
 
     const sloStats = await getServicesSloStats({
       ...commonParams,
@@ -107,7 +110,7 @@ export async function getServicesItems({
       items:
         mergeServiceStats({
           serviceStats,
-          healthStatuses,
+          anomalyHealthStatuses,
           alertCounts,
           sloStats,
         }) ?? [],

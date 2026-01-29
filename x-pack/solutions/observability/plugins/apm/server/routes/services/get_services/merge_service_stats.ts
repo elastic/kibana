@@ -6,12 +6,13 @@
  */
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import type { ServiceHealthStatusesResponse } from './get_health_statuses';
+import type { ServiceAnomalyHealthStatusesResponse } from './get_health_statuses';
 import type { ServiceAlertsResponse } from './get_service_alerts';
 import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { calculateCombinedHealthStatus } from '../../../../common/service_health_status';
 import type { SloStatus, ServiceAlertsSeverity } from '../../../../common/service_inventory';
 
 export interface MergedServiceStat {
@@ -22,7 +23,8 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
+  anomalyHealthStatus?: ServiceHealthStatus; // ML anomaly detection health status
+  combinedHealthStatus?: ServiceHealthStatus; // Combined health from alerts, SLOs, and anomalies
   alertsCount?: number;
   alertsSeverity?: ServiceAlertsSeverity;
   sloStatus?: SloStatus;
@@ -31,20 +33,20 @@ export interface MergedServiceStat {
 
 export function mergeServiceStats({
   serviceStats,
-  healthStatuses,
+  anomalyHealthStatuses,
   alertCounts,
   sloStats,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
-  healthStatuses: ServiceHealthStatusesResponse;
+  anomalyHealthStatuses: ServiceAnomalyHealthStatusesResponse;
   alertCounts: ServiceAlertsResponse;
   sloStats: ServiceSloStatsResponse;
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // Make sure to exclude health statuses and alerts from services
+  // Make sure to exclude anomaly health statuses from services
   // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
-  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+  const matchedAnomalyHealthStatuses = anomalyHealthStatuses.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
@@ -60,10 +62,10 @@ export function mergeServiceStats({
     allServiceNames.includes(serviceName)
   );
 
-  return joinByKey(
+  const mergedStats = joinByKey(
     asMutableArray([
       ...serviceStats,
-      ...matchedHealthStatuses,
+      ...matchedAnomalyHealthStatuses,
       ...matchedAlertCounts,
       ...matchedSloStats,
     ] as const),
@@ -81,4 +83,17 @@ export function mergeServiceStats({
       };
     }
   );
+
+  // Calculate combined health status for each service
+  return mergedStats.map((service): MergedServiceStat => {
+    const mergedService = service as MergedServiceStat;
+    return {
+      ...mergedService,
+      combinedHealthStatus: calculateCombinedHealthStatus({
+        alertsSeverity: mergedService.alertsSeverity,
+        sloStatus: mergedService.sloStatus,
+        anomalyHealthStatus: mergedService.anomalyHealthStatus,
+      }),
+    };
+  });
 }

@@ -18,7 +18,8 @@ export interface ServiceAlertsSeverity {
 
 export interface ServiceListItem {
   serviceName: string;
-  healthStatus?: ServiceHealthStatus;
+  anomalyHealthStatus?: ServiceHealthStatus; // ML anomaly detection health status
+  combinedHealthStatus?: ServiceHealthStatus; // Combined health from alerts, SLOs, and anomalies
   transactionType?: string;
   agentName?: AgentName;
   throughput?: number;
@@ -34,7 +35,8 @@ export interface ServiceListItem {
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
-  HealthStatus = 'healthStatus',
+  AnomalyHealthStatus = 'anomalyHealthStatus',
+  CombinedHealthStatus = 'combinedHealthStatus',
   Environments = 'environments',
   TransactionType = 'transactionType',
   Throughput = 'throughput',

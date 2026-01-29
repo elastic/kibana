@@ -111,6 +111,8 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
     ]
   );
 
+  console.log('mainStatisticsData items', data.items);
+
   return { mainStatisticsData: data, mainStatisticsStatus: status };
 }
 
@@ -180,7 +182,9 @@ export function ServiceInventory() {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services');
 
-  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
+  const displayHealthStatus = mainStatisticsData.items.some(
+    (item) => 'anomalyHealthStatus' in item
+  );
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -191,7 +195,7 @@ export function ServiceInventory() {
   const tiebreakerField = ServiceInventoryFieldName.Throughput;
 
   const initialSortField = displayHealthStatus
-    ? ServiceInventoryFieldName.HealthStatus
+    ? ServiceInventoryFieldName.AnomalyHealthStatus
     : tiebreakerField;
 
   const initialSortDirection = 'desc';
