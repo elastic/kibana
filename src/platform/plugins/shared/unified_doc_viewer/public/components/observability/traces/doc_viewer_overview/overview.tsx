@@ -108,6 +108,9 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
 
     return (
       <DataSourcesProvider indexes={indexes}>
+        {/* TODO: think about the overview not opened from Discover directly,
+    so it might not have actions. 
+    Do we want to send actions when opening from the waterfall? We could.*/}
         <DocViewerExtensionActionsProvider actions={actions}>
           <TraceRootSpanProvider traceId={traceId}>
             <div
