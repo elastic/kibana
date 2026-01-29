@@ -51,7 +51,7 @@ This produces alerts that look/behave like real detections (full `kibana.alert.*
 
 ### Alert attribution + timestamp interleaving
 
-The generator runs rule preview and then rewrites `kibana.alert.rule.*` so alerts are attributed to **real installed+enabled rules** (the rules matched by `--ruleset`).
+The generator runs rule preview and then rewrites `kibana.alert.rule.*` so alerts are attributed to **real installed+enabled rules** (a set of 15 prebuilt rules, unique by title).
 
 To avoid alerts appearing in large grouped blocks per rule (a common artifact of batch generation), the generator also applies a deterministic per-alert timestamp “jitter” (within your requested time window) while copying preview alerts into `.alerts-security.alerts-<spaceId>`.
 
@@ -106,7 +106,7 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
       - `${indexPrefix}.events.*.<YYYY.MM.DD>`, `${indexPrefix}.alerts.*.<YYYY.MM.DD>`, `insights-alerts-*-<YYYY.MM.DD>`
     - generated Security alerts in `.alerts-security.alerts-<spaceId>`
       - prefers deleting alerts tagged `data-generator`
-      - falls back to deleting alerts matching the resolved ruleset rule UUIDs / `rule_id`s (for older generator runs)
+      - falls back to deleting alerts matching the resolved prebuilt rule UUIDs / `rule_id`s (for older generator runs)
       - note: Security alert deletion is not time-filtered (to avoid leaving generator-owned docs behind due to timestamp jitter)
     - Attack Discoveries created by this script (Synthetic (no-LLM)) from:
       - `.alerts-security.attack.discovery.alerts-<spaceId>` (current)
@@ -129,15 +129,9 @@ node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_c
 
 ### Rules
 
-- `--ruleset`: Path to a YAML ruleset file (default: `x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml`)
 - `--indexPrefix`: Prefix for the endpoint event/alert indices created by this script (default: `logs-endpoint`)
   - If your cluster has templates/data streams that conflict with creating concrete indices under `logs-endpoint.*`, set this to something else (e.g. `security-solution-data-gen`).
   - **Serverless / API key note**: avoid prefixes that match `logs-*-*` (for example `logs-endpoint-generator`), because Elasticsearch can reject creating concrete indices that match data-stream-only templates. Prefer something like `logs-endpoint_generator`, or keep the default `logs-endpoint`.
-
-Ruleset entries are resolved
-
-- If a `rule_id` is provided, it must exist (or the entry is skipped in non-strict mode)
-- Otherwise, rules are matched by `name_contains_any` tokens against installed rules’ names (ANY token must match)
 
 ### Reproducibility
 
@@ -150,7 +144,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 - `--max-preview-invocations`: Caps rule preview invocations per rule (lower is faster). Default: `12`
 - `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
 - `--skip-alerts` also skips Attack Discoveries / Cases (because they depend on Security alerts)
-- `--skip-ruleset-preview`: Skip previews of the ruleset rules (baseline attribution only; faster)
+- `--skip-ruleset-preview`: Skip previews of the selected prebuilt rules (baseline attribution only; faster)
 - `--attacks`: Generate synthetic Attack Discoveries (**opt-in**)
 - `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries (**implies `--attacks`**)
   - Creates a case per selected discovery and attaches:
@@ -174,7 +168,7 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
 
 1. **Connects to Kibana + Elasticsearch** and logs basic connectivity details.
 2. **Installs prebuilt rules** if missing (non-blocking)
-   - On a fresh Kibana (0 prebuilt rules installed), it installs **only the rules matched by `--ruleset`** (not all rules).
+   - On a fresh Kibana (0 prebuilt rules installed), it installs **15 prebuilt Elastic rules** (unique by title) to keep the demo environment consistent and avoid confusing duplicate titles.
    - If prebuilt rules are already installed, it does not uninstall or expand the install set.
 3. Loads vendored episode fixtures from `episodes/attacks/` and `episodes/noise/` (supports `.ndjson` and `.ndjson.gz`)
 4. **Scales** episodes (time-shift + clone + rewrite IDs)
@@ -187,14 +181,14 @@ Rule preview can be the slowest step for large time ranges (e.g. `--start-date 6
      - other episode ids: `${indexPrefix}.alerts.<episode>.<YYYY.MM.DD>`
    - a copy of endpoint alerts into `insights-alerts-<episode>-<YYYY.MM.DD>` (for the Insights-style baseline)
 6. **Initializes detections** (so `.alerts-security.alerts-<spaceId>` exists)
-7. Ensures the ruleset rules are **enabled**
+7. Ensures the selected prebuilt rules are **enabled**
 8. Ensures the preview alerts index exists and **clears existing preview documents** (without deleting the index)
 9. If `--skip-alerts` is set, stops after raw indexing.
 10. If `.alerts-security.alerts-<spaceId>` doesn’t exist yet, stops after raw indexing (with a warning).
 11. Runs Rule Preview and copies preview alerts into `.alerts-security.alerts-<spaceId>`:
 
-- Baseline: runs a single Insights-style preview once, then **copies/attributes** the resulting preview alerts across **all** ruleset rules
-- Optional: previews each ruleset rule directly (skippable with `--skip-ruleset-preview`)
+- Baseline: runs a single Insights-style preview once, then **copies/attributes** the resulting preview alerts across the selected prebuilt rules
+- Optional: previews each selected prebuilt rule directly (skippable with `--skip-ruleset-preview`)
 - While copying, alert IDs are namespaced per target rule and `kibana.alert.rule.*` is rewritten so alerts are attributed to **real installed+enabled rules**
 - Alert timestamps are deterministically jittered within the requested time range so alerts interleave across rules in time-sorted views
 

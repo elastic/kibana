@@ -13,7 +13,6 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
 } from '../../../common/api/detection_engine/prebuilt_rules';
-import { resolveRulesetForInstall } from './ruleset';
 
 interface PrebuiltRulesStatusResponse {
   stats: {
@@ -25,15 +24,14 @@ interface PrebuiltRulesStatusResponse {
 }
 
 const INTERNAL_API_VERSION = '1';
+const TARGET_PREBUILT_RULE_INSTALL_COUNT = 15;
 
 export const ensurePrebuiltRulesInstalled = async ({
   kbnClient,
   log,
-  rulesetPath,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
-  rulesetPath: string;
 }) => {
   const statusResp = await kbnClient.request<PrebuiltRulesStatusResponse>({
     method: 'GET',
@@ -56,7 +54,7 @@ export const ensurePrebuiltRulesInstalled = async ({
   }
 
   // If there are already many installed rules, we cannot "uninstall" from here.
-  // We'll only install the ruleset subset on completely fresh installs.
+  // We'll only auto-install on completely fresh installs.
   if (stats.num_prebuilt_rules_installed > 0) {
     log.warning(
       `Prebuilt rules are partially installed already (installed=${stats.num_prebuilt_rules_installed}). ` +
@@ -66,7 +64,7 @@ export const ensurePrebuiltRulesInstalled = async ({
   }
 
   log.info(
-    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing ruleset subset...`
+    `Prebuilt rules missing (installed=${stats.num_prebuilt_rules_installed}, to_install=${stats.num_prebuilt_rules_to_install}). Installing up to ${TARGET_PREBUILT_RULE_INSTALL_COUNT} prebuilt rules...`
   );
 
   try {
@@ -80,9 +78,9 @@ export const ensurePrebuiltRulesInstalled = async ({
       },
     });
 
-    // Get the list of installable rules (rule_id + version) and install only the ones in the ruleset.
+    // Get the list of installable rules and install a small deterministic subset.
     const review = await kbnClient.request<{
-      rules: Array<{ rule_id: string; name: string; version?: number }>;
+      rules: Array<{ rule_id: string; name: string; version?: number; immutable?: boolean }>;
     }>({
       method: 'POST',
       path: REVIEW_RULE_INSTALLATION_URL,
@@ -92,16 +90,44 @@ export const ensurePrebuiltRulesInstalled = async ({
       },
     });
 
-    const toInstall = resolveRulesetForInstall({
-      log,
-      rulesetPath,
-      installableRules: review.data.rules,
-      strict: false,
-    });
+    const installablePool = review.data.rules
+      .filter((r): r is { rule_id: string; name: string; version: number; immutable?: boolean } => {
+        return (
+          typeof r.rule_id === 'string' &&
+          typeof r.name === 'string' &&
+          typeof r.version === 'number'
+        );
+      })
+      // Prefer immutable=true (prebuilt Elastic rules), but don't hard-require it since the review API
+      // can vary across environments.
+      .sort((a, b) => {
+        const aImm = a.immutable === true ? 1 : 0;
+        const bImm = b.immutable === true ? 1 : 0;
+        if (aImm !== bImm) return bImm - aImm;
+        return (
+          a.name.localeCompare(b.name) ||
+          b.version - a.version ||
+          a.rule_id.localeCompare(b.rule_id)
+        );
+      })
+      .map((r) => ({ rule_id: r.rule_id, name: r.name, version: r.version }));
 
-    if (toInstall.length === 0) {
-      log.warning(`No installable prebuilt rules matched the ruleset; skipping install.`);
-      return;
+    // Pick the first N installable prebuilt rules, unique by title (and rule_id).
+    const finalSelection: Array<{ rule_id: string; name: string; version: number }> = [];
+    const seenRuleIds = new Set<string>();
+    const seenNames = new Set<string>();
+    for (const r of installablePool) {
+      if (finalSelection.length >= TARGET_PREBUILT_RULE_INSTALL_COUNT) break;
+      if (seenRuleIds.has(r.rule_id)) continue;
+      if (seenNames.has(r.name)) continue;
+      seenRuleIds.add(r.rule_id);
+      seenNames.add(r.name);
+      finalSelection.push(r);
+    }
+    if (finalSelection.length < TARGET_PREBUILT_RULE_INSTALL_COUNT) {
+      log.warning(
+        `Requested ${TARGET_PREBUILT_RULE_INSTALL_COUNT} prebuilt rules but only selected ${finalSelection.length} unique titles to install.`
+      );
     }
 
     await kbnClient.request({
@@ -113,7 +139,7 @@ export const ensurePrebuiltRulesInstalled = async ({
       },
       body: {
         mode: 'SPECIFIC_RULES',
-        rules: toInstall.map((r) => ({ rule_id: r.rule_id, version: r.version })),
+        rules: finalSelection.map((r) => ({ rule_id: r.rule_id, version: r.version })),
       },
     });
   } catch (e) {

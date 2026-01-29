@@ -33,9 +33,8 @@ import { loadInsightsRuleCreateProps } from './lib/insights_rule';
 import { copyPreviewAlertsToRealAlertsIndex, previewRule } from './lib/rule_preview';
 import {
   enableRules,
+  fetchAllInstalledRules,
   fetchRuleById,
-  readRulesetFile,
-  resolveRuleset,
   toRuleCreateProps,
 } from './lib/ruleset';
 import {
@@ -47,6 +46,7 @@ const ATTACKS_DIR = scriptsDataDir('episodes', 'attacks');
 const NOISE_DIR = scriptsDataDir('episodes', 'noise');
 const MAPPING_PATH = path.join(ATTACKS_DIR, 'mapping.json');
 const DATA_GENERATOR_CASE_TAG = 'data-generator';
+const TARGET_PREBUILT_RULES_COUNT = 15;
 
 const normalizeApiKey = (input: string): string => input.trim().replace(/^ApiKey\s+/i, '');
 
@@ -570,7 +570,7 @@ const cleanGeneratedData = async ({
     }
   } else {
     log.warning(
-      `--clean: skipping Security alert deletion because no rule UUIDs or rule_ids were resolved from the ruleset.`
+      `--clean: skipping Security alert deletion because no prebuilt rules were resolved.`
     );
   }
 
@@ -898,7 +898,6 @@ export const cli = () => {
         await ensurePrebuiltRulesInstalled({
           kbnClient,
           log,
-          rulesetPath: getStringFlag(cliContext.flags, 'ruleset'),
         });
       } catch (e) {
         // don’t block generation if the user doesn’t have Kibana privileges.
@@ -939,22 +938,35 @@ export const cli = () => {
 
         const effectiveSpaceId = spaceId && spaceId.length > 0 ? spaceId : 'default';
 
-        const rulesetPath = getStringFlag(cliContext.flags, 'ruleset');
-        const resolvedRules = await resolveRuleset({
-          kbnClient,
-          log,
-          rulesetPath,
-          strict: false,
-        });
+        const installedRules = await fetchAllInstalledRules({ kbnClient });
+        const resolvedRules = (() => {
+          const prebuilt = installedRules
+            .filter((r) => r.immutable === true)
+            .sort((a, b) => a.name.localeCompare(b.name) || a.rule_id.localeCompare(b.rule_id));
+
+          const out: Array<{ id: string; rule_id: string; name: string }> = [];
+          const seenNames = new Set<string>();
+          for (const r of prebuilt) {
+            if (out.length >= TARGET_PREBUILT_RULES_COUNT) break;
+            if (seenNames.has(r.name)) continue;
+            seenNames.add(r.name);
+            out.push({ id: r.id, rule_id: r.rule_id, name: r.name });
+          }
+          return out;
+        })();
+
+        if (resolvedRules.length === 0) {
+          log.warning(
+            `No installed immutable (prebuilt) rules were found. Rule enable/attribution steps will be skipped.`
+          );
+        } else if (resolvedRules.length < TARGET_PREBUILT_RULES_COUNT) {
+          log.warning(
+            `Only resolved ${resolvedRules.length} unique prebuilt rule title(s) for enabling/attribution (target=${TARGET_PREBUILT_RULES_COUNT}).`
+          );
+        }
 
         if (clean) {
-          const rulesetFile = readRulesetFile(rulesetPath);
-          const explicitRuleIds = rulesetFile.rules
-            .map((r) => r.rule_id)
-            .filter((v): v is string => typeof v === 'string' && v.length > 0);
-          const ruleIdsForClean = Array.from(
-            new Set([...resolvedRules.map((r) => r.rule_id), ...explicitRuleIds])
-          );
+          const ruleIdsForClean = Array.from(new Set([...resolvedRules.map((r) => r.rule_id)]));
 
           await cleanGeneratedData({
             esClient,
@@ -1075,7 +1087,7 @@ export const cli = () => {
 
         if (!skipRulesetPreview) {
           for (const ruleRef of resolvedRules) {
-            log.info(`Previewing ruleset rule: ${ruleRef.name} (${ruleRef.rule_id})`);
+            log.info(`Previewing prebuilt rule: ${ruleRef.name} (${ruleRef.rule_id})`);
             const fullRule = await fetchRuleById({ kbnClient, id: ruleRef.id });
             const createProps = toRuleCreateProps(fullRule);
             createProps.interval = previewInterval;
@@ -1107,7 +1119,7 @@ export const cli = () => {
           );
         }
 
-        log.info(`Done generating/copying canonical Security alerts for ruleset.`);
+        log.info(`Done generating/copying canonical Security alerts for prebuilt rules.`);
 
         if (shouldGenerateAttackDiscoveries) {
           const discoveries = await generateAndIndexAttackDiscoveries({
@@ -1160,7 +1172,6 @@ export const cli = () => {
           'seed',
           'start-date',
           'end-date',
-          'ruleset',
           'indexPrefix',
           'max-preview-invocations',
         ],
@@ -1188,7 +1199,6 @@ export const cli = () => {
           users: '5',
           'start-date': '1d',
           'end-date': 'now',
-          ruleset: scriptsDataDir('rulesets', 'default_ruleset.yml'),
           indexPrefix: 'logs-endpoint',
           'max-preview-invocations': '12',
           clean: false,
@@ -1207,12 +1217,11 @@ export const cli = () => {
         --end-date                       Date math end (e.g. now) (Default: now)
         --episodes                       Comma-separated episode IDs or numbers (e.g. ep1,ep2 or 1,2). Default: ep1-ep8,noise1,noise2
         --seed                           Optional seed for deterministic scaling
-        --ruleset                        Path to ruleset file (Default: x-pack/solutions/security/plugins/security_solution/scripts/data/rulesets/default_ruleset.yml)
         --clean                          Delete previously generated data for the selected time range before generating new data
         --indexPrefix                    Prefix for endpoint event/alert indices (Default: logs-endpoint)
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
         --skip-alerts                     Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
-        --skip-ruleset-preview            Skip previews of the ruleset rules (baseline attribution only; faster)
+        --skip-ruleset-preview            Skip previews of the selected prebuilt rules (baseline attribution only; faster)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)
