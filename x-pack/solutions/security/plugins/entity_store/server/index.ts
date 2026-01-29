@@ -19,12 +19,11 @@ export async function plugin(initializerContext: PluginInitializerContext) {
  *
  * @example
  * import { euid, type EntityType } from '@kbn/entity-store-plugin/server';
- * euid.getIdFromObject('host', doc);
+ * euid.getEuidFromObject('host', doc);
  * euid.getEuidPainlessEvaluation('user');
  */
 export const euid = {
-  getIdFromObject: euidModule.getIdFromObject,
-  getFieldValue: euidModule.getFieldValue,
+  getEuidFromObject: euidModule.getEuidFromObject,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
   getEuidEsqlFilter: euidModule.getEuidEsqlFilter,

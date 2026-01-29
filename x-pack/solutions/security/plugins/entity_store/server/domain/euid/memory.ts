@@ -8,7 +8,7 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 
-export function getIdFromObject(entityType: EntityType, obj: any) {
+export function getEuidFromObject(entityType: EntityType, obj: any) {
   if (!obj) {
     return undefined;
   }

@@ -16,7 +16,7 @@ import {
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { getEuidPainlessEvaluation } from '../../../../server/domain/euid/painless';
-import { getIdFromObject } from '../../../../server/domain/euid/memory';
+import { getEuidFromObject } from '../../../../server/domain/euid/memory';
 import { EntityType } from '../../../../server/domain/definitions/entity_schema';
 
 function toRuntimeFieldEmitScript(painless: string): string {
@@ -90,7 +90,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
         expect(hits.length).toBeGreaterThan(0);
 
         for (const hit of hits) {
-          const expectedEuid = getIdFromObject(entityType, hit._source);
+          const expectedEuid = getEuidFromObject(entityType, hit._source);
           const actualEuid = (hit.fields?.entity_id as string[] | undefined)?.[0];
 
           expect(actualEuid).toBe(expectedEuid);

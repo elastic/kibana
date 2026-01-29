@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getIdFromObject, getFieldValue } from './memory';
+export { getEuidFromObject } from './memory';
 export { getEuidPainlessEvaluation } from './painless';
 export { getEuidDslFilterBasedOnDocument } from './dsl';
 export { getEuidEsqlFilter, getEuidEsqlEvaluation } from './esql';
