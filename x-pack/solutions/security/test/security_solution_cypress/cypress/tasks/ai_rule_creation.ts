@@ -22,7 +22,7 @@ import {
   AGENT_BUILDER_CONVERSATION_FLYOUT_WRAPPER,
   AGENT_BUILDER_CONVERSATION_INPUT_EDITOR,
   AI_RULE_CREATION_CANCELLED_CALLOUT,
-} from '../screens/ai_assisted_rule_creation';
+} from '../screens/ai_rule_creation';
 import { ESQL_QUERY_BAR } from '../screens/create_new_rule';
 import { visit } from './navigation';
 import { AI_ASSISTED_RULE_CREATE_URL } from '../urls/navigation';

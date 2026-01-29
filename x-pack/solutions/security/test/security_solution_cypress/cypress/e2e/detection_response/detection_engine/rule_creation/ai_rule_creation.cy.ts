@@ -26,7 +26,7 @@ import {
   assertEsqlQueryBarContains,
   assertCancelledCalloutVisible,
   assertPromptTextareaVisible,
-} from '../../../../tasks/ai_assisted_rule_creation';
+} from '../../../../tasks/ai_rule_creation';
 import { createAzureConnector } from '../../../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 
@@ -110,7 +110,7 @@ data: {"data":{"time_to_first_token":18486}}`;
 const userPrompt = 'Create a rule to detect suspicious login attempts';
 
 describe(
-  'AI Assisted Rule Creation',
+  'AI Rule Creation',
   {
     // skipping in MKI due to feature flags
     tags: ['@serverless', '@ess', '@skipInServerlessMKI'],
