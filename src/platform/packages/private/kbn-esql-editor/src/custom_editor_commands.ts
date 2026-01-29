@@ -8,10 +8,15 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { ESQLVariableType, type ESQLControlVariable, QuerySource } from '@kbn/esql-types';
-import { ControlTriggerSource } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  QuerySource,
+  type ESQLControlsContext,
+  ControlTriggerSource,
+  type ESQLControlVariable,
+} from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
-import type { ESQLEditorDeps, ControlsContext } from './types';
+import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 
 export interface MonacoCommandDependencies {
@@ -21,7 +26,7 @@ export interface MonacoCommandDependencies {
   editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
   getCurrentQuery: () => string;
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
-  controlsContext: React.RefObject<ControlsContext | undefined>;
+  controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
 }
 
@@ -32,8 +37,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onSaveControl?: ESQLControlsContext['onSaveControl'],
+  onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -160,8 +165,9 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
 
 export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
-  onQuerySubmit: (source: any) => void,
-  toggleVisor: () => void
+  onQuerySubmit: (source: QuerySource) => void,
+  toggleVisor: () => void,
+  onPrettifyQuery: () => void
 ) => {
   // Add editor key bindings
   editor.addCommand(
@@ -174,6 +180,14 @@ export const addEditorKeyBindings = (
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
     () => toggleVisor()
+  );
+
+  editor.addCommand(
+    // eslint-disable-next-line no-bitwise
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+    () => {
+      onPrettifyQuery();
+    }
   );
 };
 

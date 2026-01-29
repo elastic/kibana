@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import type { GenerateContentResponse, Part } from '@google/generative-ai';
+import type {
+  GenerateContentResponse as VertexGenerateContentResponse,
+  Part,
+} from '@google/generative-ai';
 
 export interface GenerateContentResponseUsageMetadata {
   promptTokenCount: number;
   candidatesTokenCount: number;
   totalTokenCount: number;
+  thoughtsTokenCount?: number;
 }
 
 /**
- * Actual type for chunks, as the type from the google package is missing the
+ * Actual type for chunks, as the type from the google package is missing some
  * usage metadata.
  */
-export type GenerateContentResponseChunk = GenerateContentResponse & {
+export type GenerateContentResponseChunk = VertexGenerateContentResponse & {
+  usageMetadata?: GenerateContentResponseUsageMetadata;
+};
+
+/**
+ * Actual type for the whole response, as the type from the google package is missing some
+ * usage metadata.
+ */
+export type GenerateContentResponse = VertexGenerateContentResponse & {
   usageMetadata?: GenerateContentResponseUsageMetadata;
 };
 

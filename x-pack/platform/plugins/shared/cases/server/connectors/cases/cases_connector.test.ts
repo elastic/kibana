@@ -17,11 +17,11 @@ import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
-import { fullJitterBackoffFactory } from '../../common/retry_service/full_jitter_backoff';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./cases_connector_executor');
-jest.mock('../../common/retry_service/full_jitter_backoff');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 
 const CasesConnectorExecutorMock = CasesConnectorExecutor as jest.Mock;
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
@@ -46,6 +46,7 @@ describe('CasesConnector', () => {
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
   const templateId = null;
+  const autoPushCase = null;
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
@@ -103,6 +104,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
@@ -126,6 +128,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
 
     expect(mockExecute).toBeCalledWith({
@@ -139,6 +142,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
   });
 
@@ -154,6 +158,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
 
     expect(getCasesClient).toBeCalled();
@@ -173,6 +178,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        autoPushCase,
       });
     } catch (error) {
       caughtError = error;
@@ -200,6 +206,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        autoPushCase,
       });
     } catch (error) {
       caughtError = error;
@@ -227,6 +234,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        autoPushCase,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
 
@@ -252,6 +260,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        autoPushCase,
       });
     } catch (err) {
       caughtError = err;
@@ -282,6 +291,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
 
     expect(nextBackOff).toBeCalledTimes(2);
@@ -305,6 +315,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        autoPushCase,
       });
     } catch (err) {
       caughtError = err;
@@ -333,6 +344,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      autoPushCase,
     });
 
     expect(getCasesClient).not.toBeCalled();

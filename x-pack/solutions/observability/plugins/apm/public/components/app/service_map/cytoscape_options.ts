@@ -7,7 +7,7 @@
 
 import type cytoscape from 'cytoscape';
 import type { CSSProperties } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
@@ -97,8 +97,12 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
+const getStyle = (
+  euiTheme: EuiThemeComputed,
+  colorMode: EuiThemeColorModeStandard
+): cytoscape.StylesheetJson => {
   const lineColor = euiTheme.colors.mediumShade;
+  const isDarkMode = colorMode === 'DARK';
   return [
     {
       selector: 'core',
@@ -111,7 +115,7 @@ const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
         'background-color': euiTheme.colors.backgroundBasePlain,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el, isDarkMode),
         'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'border-color': getBorderColorFn(euiTheme),
@@ -200,6 +204,16 @@ const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
       },
     },
     {
+      selector: 'edge.hover',
+      style: {
+        width: 4,
+        'z-index': zIndexEdgeHover,
+        'line-color': euiTheme.colors.darkShade,
+        'source-arrow-color': euiTheme.colors.darkShade,
+        'target-arrow-color': euiTheme.colors.darkShade,
+      },
+    },
+    {
       selector: 'edge.highlight',
       style: {
         width: 4,
@@ -237,9 +251,12 @@ ${euiTheme.colors.lightShade}`,
   marginTop: 0,
 });
 
-export const getCytoscapeOptions = (euiTheme: EuiThemeComputed): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = (
+  euiTheme: EuiThemeComputed,
+  colorMode: EuiThemeColorModeStandard
+): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(euiTheme),
+  style: getStyle(euiTheme, colorMode),
 });

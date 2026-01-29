@@ -464,7 +464,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -884,6 +884,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#485975",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -895,7 +902,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -1315,6 +1322,13 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                     "colors.backgroundBaseHighlighted",
                   ],
                 },
+                "tourStepIndicatorActiveColor": Computed {
+                  "computer": [Function],
+                  "dependencies": Array [
+                    "colors.backgroundFilledSuccess",
+                  ],
+                },
+                "tourStepIndicatorInactiveColor": "#A2B1C9",
                 "treeViewItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [

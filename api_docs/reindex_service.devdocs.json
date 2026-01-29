@@ -10,6 +10,8 @@
         "label": "ReindexService",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "HttpSetup"
                 ],
                 "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "lineNumber": 21,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -72,6 +78,8 @@
               ", any>>"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -86,6 +94,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "lineNumber": 25,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -128,6 +138,8 @@
               ", any>>"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -148,6 +160,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "lineNumber": 32,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -182,6 +196,8 @@
               ", any>>"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +212,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/private/reindex_service/public/src/reindex_service.ts",
+                "lineNumber": 40,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -220,6 +238,8 @@
       "label": "ReindexServicePublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+      "lineNumber": 10,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -240,6 +260,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+          "lineNumber": 11,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -255,6 +277,8 @@
       "label": "ReindexServicePublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -275,6 +299,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/private/reindex_service/public/types.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -300,6 +326,8 @@
           "\"/api/reindex_service/reindex\""
         ],
         "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -314,6 +342,8 @@
       "label": "ReindexServiceServerPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -328,6 +358,8 @@
             "(indexNames: string[]) => Promise<void>"
           ],
           "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -342,6 +374,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+              "lineNumber": 22,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -363,6 +397,8 @@
             "ReindexServiceScopedClient"
           ],
           "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -377,6 +413,8 @@
                 "ReindexServiceScopedClientArgs"
               ],
               "path": "x-pack/platform/plugins/private/reindex_service/server/types.ts",
+              "lineNumber": 23,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -401,6 +439,8 @@
         "label": "IndexWarning",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -415,6 +455,8 @@
               "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,6 +471,8 @@
               "\"reindex\" | \"all\" | \"readonly\""
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -445,6 +489,8 @@
               "{ [key: string]: string | boolean | string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -459,6 +505,8 @@
         "label": "QueueSettings",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -472,6 +520,8 @@
               "\nA Unix timestamp of when the reindex operation was enqueued.\n"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -488,6 +538,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -502,6 +554,8 @@
         "label": "ReindexArgs",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -513,6 +567,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,6 +580,8 @@
             "label": "newIndexName",
             "description": [],
             "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -538,6 +596,8 @@
               "{ enqueue?: boolean | undefined; deleteOldIndex?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -554,6 +614,8 @@
               ", \"mode\">> | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -568,6 +630,8 @@
         "label": "ReindexOperation",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -579,6 +643,8 @@
             "label": "indexName",
             "description": [],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -590,6 +656,8 @@
             "label": "newIndexName",
             "description": [],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -610,6 +678,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,6 +700,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -644,6 +716,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +732,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -672,6 +748,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -686,6 +764,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -700,6 +780,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -714,6 +796,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +814,8 @@
               "{ 'index.number_of_replicas'?: number | undefined; 'index.refresh_interval'?: number | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -753,6 +839,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -767,6 +855,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -781,6 +871,8 @@
         "label": "ReindexOperationCancelResponse",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -795,6 +887,8 @@
               "true"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -809,6 +903,8 @@
         "label": "ReindexOptions",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -825,6 +921,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -848,6 +946,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -862,6 +962,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -876,6 +978,8 @@
         "label": "ReindexStatusResponse",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -890,6 +994,8 @@
               "{ indexName: string; reindexName?: string | undefined; aliases: string[]; isReadonly: boolean; isFrozen: boolean; isInDataStream: boolean; isFollowerIndex: boolean; }"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -911,6 +1017,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,6 +1040,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -946,6 +1056,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -962,6 +1074,8 @@
         "label": "ReindexStep",
         "description": [],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 123,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -987,6 +1101,8 @@
           ", \"reindexOptions\"> & { reindexOptions?: Omit<{ enqueue?: boolean | undefined; deleteOldIndex?: boolean | undefined; } | undefined, \"enqueue\"> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1002,6 +1118,8 @@
           "{ mode?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1017,6 +1135,8 @@
           "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
         ],
         "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1032,6 +1152,8 @@
           "\"/api/reindex_service/reindex\""
         ],
         "path": "x-pack/platform/plugins/private/reindex_service/common/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

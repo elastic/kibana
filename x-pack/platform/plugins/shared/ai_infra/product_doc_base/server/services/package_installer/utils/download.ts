@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { type ReadStream, createReadStream, createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import Path from 'path';
-import fetch from 'node-fetch';
+import { type ReadStream, createReadStream } from 'fs';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+import { createWriteStream, getSafePath } from '@kbn/fs';
+import { pipeline } from 'stream/promises';
 import { resolveLocalArtifactsPath } from './local_artifacts';
 
-export const downloadToDisk = async (fileUrl: string, filePath: string) => {
-  const dirPath = Path.dirname(filePath);
-  await mkdir(dirPath, { recursive: true });
-  const writeStream = createWriteStream(filePath);
+export const downloadToDisk = async (
+  fileUrl: string,
+  filePathAtVolume: string
+): Promise<string> => {
+  const { fullPath: artifactFullPath } = getSafePath(filePathAtVolume);
+  const writeStream = createWriteStream(filePathAtVolume);
   let readStream: ReadStream;
 
   const parsedUrl = new URL(fileUrl);
@@ -25,12 +28,13 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
   } else {
     const res = await fetch(fileUrl);
 
-    readStream = res.body as ReadStream;
+    if (!res.body) {
+      throw new Error('Response body is null');
+    }
+    readStream = Readable.fromWeb(res.body as WebReadableStream) as unknown as ReadStream;
   }
 
-  await new Promise<void>((resolve, reject) => {
-    readStream.pipe(writeStream);
-    readStream.on('error', reject);
-    writeStream.on('finish', resolve);
-  });
+  await pipeline(readStream, writeStream);
+
+  return artifactFullPath;
 };

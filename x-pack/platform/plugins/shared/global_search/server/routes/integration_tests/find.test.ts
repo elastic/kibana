@@ -123,6 +123,35 @@ describe('POST /internal/global_search/find', () => {
     );
   });
 
+  it('allows requests with max length options.preference string', async () => {
+    const longPreference = 'a'.repeat(64); // maxLength is 64
+
+    const response = await supertest(server.listener)
+      .post('/internal/global_search/find')
+      .send({ params: { term: 'search' }, options: { preference: longPreference } })
+      .expect(200);
+
+    expect(response.body).toEqual({});
+  });
+
+  it('disallows requests with large options.preference string', async () => {
+    const longPreference = 'a'.repeat(65); // maxLength is 64
+
+    const response = await supertest(server.listener)
+      .post('/internal/global_search/find')
+      .send({ params: { term: 'search' }, options: { preference: longPreference } })
+      .expect(400);
+
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        error: 'Bad Request',
+        message:
+          '[request body.options.preference]: value has length [65] but it must have a maximum length of [64].',
+        statusCode: 400,
+      })
+    );
+  });
+
   it('returns the default error when the observable throws any other error', async () => {
     globalSearchHandlerContext.find.mockReturnValue(throwError('any-error'));
 

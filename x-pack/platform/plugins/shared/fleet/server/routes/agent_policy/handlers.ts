@@ -10,11 +10,9 @@ import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/s
 import pMap from 'p-map';
 import { dump } from 'js-yaml';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 
 import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
-
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
@@ -77,6 +75,8 @@ import { cleanupPolicyRevisions } from '../../tasks/fleet_policy_revisions_clean
 
 import { createPackagePolicyHandler } from '../package_policy/handlers';
 import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents';
+
+const deduplicateIds = (ids: string[]) => uniq(ids);
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -234,7 +234,8 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
         ? coreContext.savedObjects.client
         : fleetContext.internalSoClient;
 
-    const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+    const { full: withPackagePolicies = false, ignoreMissing = false } = request.body;
+    const ids = deduplicateIds(request.body.ids);
     if (!authzFleetReadAgentPolicies && withPackagePolicies) {
       throw new FleetUnauthorizedError(
         'full query parameter require agent policies read permissions'
@@ -357,7 +358,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 
   const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const { space_ids: spaceIds } = request.body;
 
   logger.debug(`Creating agent policy [${newPolicy.name}]`);
@@ -396,7 +396,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
     });
 
@@ -901,7 +901,7 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  const { ids } = request.body;
+  const ids = deduplicateIds(request.body.ids);
 
   if (!ids) {
     return response.ok({

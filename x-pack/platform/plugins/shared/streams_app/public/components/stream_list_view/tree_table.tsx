@@ -498,8 +498,10 @@ export function StreamsTreeTable({
                 {
                   stream: item.stream,
                   data_stream_exists: !!item.data_stream,
+                  index_mode: item.data_stream?.index_mode,
                 } as Streams.ingest.all.GetResponse
               }
+              isWiredStream={item.type === 'wired'}
             />
           ),
         },

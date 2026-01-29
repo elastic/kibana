@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,31 +31,37 @@ interface ResourceCardProps {
   description: string;
   actionHref: string;
   actionText: string;
+  dataTestSubj: string;
 }
 
-const ResourceCard = ({ title, icon, description, actionHref, actionText }: ResourceCardProps) => {
+const ResourceCard = ({
+  title,
+  icon,
+  description,
+  actionHref,
+  actionText,
+  dataTestSubj,
+}: ResourceCardProps) => {
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiSplitPanel.Outer
       direction="row"
-      css={css({
-        maxWidth: euiTheme.base * 36,
-      })}
+      responsive={['xs', 's', 'm']}
+      data-test-subj={dataTestSubj}
+      css={css({ height: '100%' })}
     >
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        })}
-      >
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <div css={css({ margin: `${euiTheme.size.xxl} 0` })}>
-              <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner paddingSize="none" color="subdued">
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={css({
+            height: '100%',
+            padding: `${euiTheme.size.xxl} 0`,
+          })}
+        >
+          <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="l">
@@ -63,7 +70,7 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
             <h4>{title}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s" color="subdued">
             <p>{description}</p>
           </EuiText>
           <EuiSpacer size="xs" />
@@ -73,9 +80,10 @@ const ResourceCard = ({ title, icon, description, actionHref, actionText }: Reso
               iconSide="left"
               iconType="sortRight"
               color="text"
-              data-test-subj="searchHomepageSearchHomepageBodyEnableElasticInferenceServiceButton"
+              data-test-subj="searchHomepageSearchCloudResourceCardAction"
               href={actionHref}
               target="_blank"
+              flush="both"
             >
               {actionText}
             </EuiButtonEmpty>
@@ -114,6 +122,7 @@ export const CloudResources = () => {
         defaultMessage: 'Go to Billing',
       }),
       actionHref: billingUrl,
+      dataTestSubj: 'cloudResourceCard-billing',
     },
     {
       icon: (assetBasePath: string) => `${assetBasePath}/search_analytics.svg`,
@@ -127,7 +136,8 @@ export const CloudResources = () => {
       actionText: i18n.translate('xpack.searchHomepage.cloudResources.autoops.actionText', {
         defaultMessage: 'AutoOps',
       }),
-      actionHref: cloud?.performanceUrl ?? '',
+      actionHref: cloud?.performanceUrl || `https://cloud.elastic.co`,
+      dataTestSubj: 'cloudResourceCard-autoops',
     },
   ];
   const HOSTED_CARDS: ResourceCardProps[] = [
@@ -144,6 +154,7 @@ export const CloudResources = () => {
         defaultMessage: 'Connect this cluster',
       }),
       actionHref: docLinks.cloudConnect,
+      dataTestSubj: 'cloudResourceCard-cloudConnect',
     },
     {
       icon: (assetBasePath: string) => `${assetBasePath}/search_serverless.svg`,
@@ -158,6 +169,7 @@ export const CloudResources = () => {
         defaultMessage: 'Elastic Cloud',
       }),
       actionHref: docLinks.elasticCloud,
+      dataTestSubj: 'cloudResourceCard-serverless',
     },
   ];
 
@@ -166,11 +178,13 @@ export const CloudResources = () => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h6>
-            {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
-              defaultMessage: 'Cloud resources',
-            })}
+            <EuiTextColor color="subdued">
+              {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
+                defaultMessage: 'Cloud resources',
+              })}
+            </EuiTextColor>
           </h6>
         </EuiTitle>
       </EuiFlexItem>
@@ -184,6 +198,7 @@ export const CloudResources = () => {
                 description={card.description}
                 actionHref={card.actionHref}
                 actionText={card.actionText}
+                dataTestSubj={card.dataTestSubj}
               />
             </EuiFlexItem>
           ))}

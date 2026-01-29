@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
@@ -54,7 +54,7 @@ describe('createAlertingRuleFromTemplate', () => {
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'fleet-default-test-package-template-id' });
     expect(rulesClient.create).toHaveBeenCalledWith({
       data: {
-        enabled: true,
+        enabled: false,
         alertTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',
@@ -152,7 +152,7 @@ describe('stepCreateAlertingRules', () => {
         rulesClient: {} as any,
       },
       logger: loggingSystemMock.createLogger(),
-      authorizationHeader: 'Basic abc123',
+      request: httpServerMock.createKibanaRequest(),
     };
 
     await stepCreateAlertingRules(context as any);
@@ -202,7 +202,7 @@ describe('stepCreateAlertingRules', () => {
         rulesClient: {} as any,
       },
       logger: loggingSystemMock.createLogger(),
-      authorizationHeader: 'Basic abc123',
+      request: httpServerMock.createKibanaRequest(),
     };
 
     await stepCreateAlertingRules(context as any);

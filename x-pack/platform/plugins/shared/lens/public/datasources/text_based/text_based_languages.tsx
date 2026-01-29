@@ -11,13 +11,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -222,7 +222,7 @@ export function getTextBasedDatasource({
     const context = state.initialContext;
     // on text based mode we offer suggestions for the query and not for a specific field
     if (fieldName) return [];
-    if (context && 'dataViewSpec' in context && context.dataViewSpec.title && context.query) {
+    if (context && 'dataViewSpec' in context && context.dataViewSpec.id && context.query) {
       const newLayerId = generateId();
       const textBasedQueryColumns = context.textBasedColumns?.slice(0, MAX_NUM_OF_COLUMNS) ?? [];
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
@@ -260,7 +260,7 @@ export function getTextBasedDatasource({
               indexPatternRefs: [
                 {
                   id: context.dataViewSpec.id,
-                  title: context.dataViewSpec.title,
+                  title: context.dataViewSpec.title ?? '',
                   timeField: context.dataViewSpec.timeFieldName,
                 },
               ],
@@ -498,13 +498,15 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
-      const context = state?.initialContext;
-      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
-        const language = getAggregateQueryMode(context.query);
-        // it will eventually log render_lens_esql_chart
-        return [`${language}_chart`];
-      }
-      return [];
+      const counters = flatten(
+        Object.values(state?.layers ?? {}).map((layer) => {
+          if (isOfAggregateQueryType(layer.query)) {
+            return ['esql_chart'];
+          }
+          return [];
+        })
+      );
+      return counters;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
@@ -525,7 +527,7 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.label ?? column.fieldName);
         });
       });
 

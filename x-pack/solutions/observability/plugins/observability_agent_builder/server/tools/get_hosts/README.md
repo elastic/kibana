@@ -36,6 +36,18 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
+### Filter hosts by service name
+
+```
+POST kbn://api/agent_builder/tools/_execute
+{
+  "tool_id": "observability.get_hosts",
+  "tool_params": {
+    "kqlFilter": "service.name: frontend"
+  }
+}
+```
+
 ### Filter hosts by cloud provider
 
 ```

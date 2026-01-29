@@ -9,14 +9,17 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/onechat-server/tools';
+import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import type {
   ModelProvider,
   ToolProvider,
   ScopedRunner,
   ToolResultStore,
   ToolEventEmitter,
-} from '@kbn/onechat-server';
+  ToolPromptManager,
+  ToolStateManager,
+} from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Creates common mocks for tool tests
@@ -84,6 +87,38 @@ const createMockToolEventEmitter = (): ToolEventEmitter =>
     reportProgress: jest.fn(),
   } as unknown as ToolEventEmitter);
 
+const createMockToolPromptManager = (): ToolPromptManager =>
+  ({
+    checkConfirmationStatus: jest.fn(),
+    askForConfirmation: jest.fn(),
+  } as unknown as ToolPromptManager);
+
+const createMockToolStateManager = (): ToolStateManager =>
+  ({
+    getState: jest.fn(),
+    setState: jest.fn(),
+  } as unknown as ToolStateManager);
+
+const createMockAttachmentStateManager = (): AttachmentStateManager =>
+  ({
+    get: jest.fn(),
+    getLatest: jest.fn(),
+    getVersion: jest.fn(),
+    getActive: jest.fn().mockReturnValue([]),
+    getAll: jest.fn().mockReturnValue([]),
+    getDiff: jest.fn(),
+    add: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    restore: jest.fn(),
+    permanentDelete: jest.fn(),
+    rename: jest.fn(),
+    resolveRefs: jest.fn().mockReturnValue([]),
+    getTotalTokenEstimate: jest.fn().mockReturnValue(0),
+    hasChanges: jest.fn().mockReturnValue(false),
+    markClean: jest.fn(),
+  } as unknown as AttachmentStateManager);
+
 /**
  * Creates a tool handler context object
  */
@@ -103,6 +138,9 @@ export const createToolHandlerContext = (
     runner: additionalContext.runner ?? createMockScopedRunner(),
     resultStore: additionalContext.resultStore ?? createMockToolResultStore(),
     events: additionalContext.events ?? createMockToolEventEmitter(),
+    prompts: additionalContext.prompts ?? createMockToolPromptManager(),
+    stateManager: additionalContext.stateManager ?? createMockToolStateManager(),
+    attachments: additionalContext.attachments ?? createMockAttachmentStateManager(),
   };
 };
 

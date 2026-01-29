@@ -14,6 +14,24 @@ import type { ESQLSourceResult, IndexAutocompleteItem } from './sources_autocomp
 import type { ESQLControlVariable } from './variables_types';
 import type { InferenceEndpointsAutocompleteResult } from './inference_endpoint_autocomplete_types';
 
+export interface ESQLControlsContext {
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControl: () => void;
+}
+
+export interface ESQLQueryStats {
+  /** Duration of the last query in milliseconds */
+  durationInMs?: string;
+  /** Total number of documents queried in the last query */
+  totalDocumentsProcessed?: number;
+}
+
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
@@ -73,9 +91,29 @@ export interface ESQLFieldWithMetadata {
   userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
+  isUnmappedField?: boolean;
   metadata?: {
     description?: string;
   };
+}
+
+enum KQLInESQLSuggestionType {
+  Value = 'Value',
+  Operator = 'Operator',
+  Field = 'Field',
+}
+/** Maps KQL suggestion types to ISuggestionItem kind values */
+export const KQL_TYPE_TO_KIND_MAP: Record<string, KQLInESQLSuggestionType> = {
+  operator: KQLInESQLSuggestionType.Operator,
+  field: KQLInESQLSuggestionType.Field,
+  value: KQLInESQLSuggestionType.Value,
+};
+
+interface KQLInESQLSuggestion {
+  text: string;
+  label: string;
+  kind: KQLInESQLSuggestionType;
+  detail?: string;
 }
 
 export interface ESQLCallbacks {
@@ -105,4 +143,10 @@ export interface ESQLCallbacks {
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getKqlSuggestions?: (
+    kqlQuery: string,
+    cursorPositionInKql: number
+    // it shoud be ISuggestionItem[] but we need to carry this first from the kbn-esql-language package
+    // to avoid circular dependency
+  ) => Promise<KQLInESQLSuggestion[] | undefined>;
 }

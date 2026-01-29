@@ -18,18 +18,18 @@ import type {
 } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
 import fs from 'node:fs';
 import path from 'node:path';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const ScoutTestConfigStatsEntrySchema = z.object({
   path: z.string(),
-  runCount: z.number().int(),
+  runCount: z.int(),
   runtime: z.object({
-    avg: z.number().int(),
-    median: z.number().int(),
-    pc95th: z.number().int(),
-    pc99th: z.number().int(),
-    max: z.number().int(),
-    estimate: z.number().int(),
+    avg: z.int(),
+    median: z.int(),
+    pc95th: z.int(),
+    pc99th: z.int(),
+    max: z.int(),
+    estimate: z.int(),
   }),
 });
 
@@ -37,7 +37,7 @@ export type ScoutTestConfigStatsEntry = z.infer<typeof ScoutTestConfigStatsEntry
 
 export const ScoutTestConfigStatsDataSchema = z.object({
   lastUpdated: z.coerce.date(),
-  lookbackDays: z.number().int().min(1).max(7),
+  lookbackDays: z.int().min(1).max(7),
   buildkite: z.object({
     branch: z.optional(z.string()),
     pipeline: z.optional(

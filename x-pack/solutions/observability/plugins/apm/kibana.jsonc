@@ -30,6 +30,7 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
       "lens",
       "maps",
@@ -37,8 +38,7 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared",
-      "observabilityAgentBuilder"
+      "discoverShared"
     ],
     "optionalPlugins": [
       "actions",
@@ -52,6 +52,7 @@
       "home",
       "ml",
       "security",
+      "slo",
       "spaces",
       "serverless",
       "taskManager",
@@ -62,8 +63,17 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "onechat"
+      "agentBuilder",
+      "slo",
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "ml",
+      "observability",
+      "maps",
+      "observabilityAgentBuilder"
+    ]
   }
 }

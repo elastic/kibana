@@ -35,6 +35,8 @@
           "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
         ],
         "path": "src/core/packages/capabilities/common/src/capabilities.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

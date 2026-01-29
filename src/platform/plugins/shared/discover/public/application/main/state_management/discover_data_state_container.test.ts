@@ -79,7 +79,10 @@ describe('test getDataStateContainer', () => {
     expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith(
       {
         dataSource: stateContainer.getCurrentTab().appState.dataSource,
-        dataView: stateContainer.savedSearchState.getState().searchSource.getField('index'),
+        dataView: selectTabRuntimeState(
+          stateContainer.runtimeStateManager,
+          stateContainer.getCurrentTab().id
+        ).currentDataView$.getValue(),
         query: stateContainer.getCurrentTab().appState.query,
       },
       expect.any(Function)
@@ -172,14 +175,20 @@ describe('test getDataStateContainer', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    stateContainer.actions.initializeAndSync();
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+    );
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
     );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewMock,
+      })
+    );
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
         resetDefaultProfileState: {
@@ -209,21 +218,29 @@ describe('test getDataStateContainer', () => {
     expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
     expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
     dataUnsub();
-    stateContainer.actions.stopSyncing();
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+    );
   });
 
   it('should not update app state from default profile state', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
-    stateContainer.actions.initializeAndSync();
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.initializeAndSync)()
+    );
     const { scopedProfilesManager$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
     );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewMock,
+      })
+    );
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
         resetDefaultProfileState: {
@@ -251,6 +268,8 @@ describe('test getDataStateContainer', () => {
     expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
     expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
     dataUnsub();
-    stateContainer.actions.stopSyncing();
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
+    );
   });
 });

@@ -57,7 +57,6 @@
     "@kbn/esql-composer",
     "@kbn/deeplinks-analytics",
     "@kbn/lens-embeddable-utils",
-    "@kbn/core-chrome-layout-constants"
   ],
   "exclude": ["target/**/*"]
 }

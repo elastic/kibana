@@ -11,7 +11,8 @@
         "20s",
         "-1",
         "0"
-      ]
+      ],
+      "close_job": "__flag__"
     },
     "methods": [
       "POST"
