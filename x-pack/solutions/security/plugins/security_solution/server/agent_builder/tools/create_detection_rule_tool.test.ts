@@ -20,10 +20,10 @@ import {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
-import { getBuildAgent } from '../../lib/detection_engine/ai_assisted_rule_creation/agent';
+import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
-jest.mock('../../lib/detection_engine/ai_assisted_rule_creation/agent', () => ({
+jest.mock('../../lib/detection_engine/ai_rule_creation/agent', () => ({
   getBuildAgent: jest.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe('createDetectionRuleTool', () => {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
   };
-  const mockExperimentalFeatures = { aiAssistedRuleCreationEnabled: true } as ExperimentalFeatures;
+  const mockExperimentalFeatures = { aiRuleCreationEnabled: true } as ExperimentalFeatures;
   const tool = createDetectionRuleTool(
     mockCore,
     mockLogger,
@@ -108,7 +108,7 @@ describe('createDetectionRuleTool', () => {
   describe('availability', () => {
     it('returns unavailable when experimental feature is disabled', async () => {
       const toolWithFeatureDisabled = createDetectionRuleTool(mockCore, mockLogger, {
-        aiAssistedRuleCreationEnabled: false,
+        aiRuleCreationEnabled: false,
       } as ExperimentalFeatures);
 
       const availability = await toolWithFeatureDisabled.availability?.handler(
@@ -118,7 +118,7 @@ describe('createDetectionRuleTool', () => {
       expect(availability).toEqual({
         status: 'unavailable',
         reason:
-          'AI assisted rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+          'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
       });
     });
 

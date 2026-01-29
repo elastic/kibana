@@ -115,4 +115,4 @@ export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActio
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
 
 // AI Assisted Rule Creation
-export const AI_ASSISTED_RULE_CREATE_URL = '/app/security/rules/ai_assisted_create';
+export const AI_RULE_CREATION_URL = '/app/security/rules/ai_rule_creation';

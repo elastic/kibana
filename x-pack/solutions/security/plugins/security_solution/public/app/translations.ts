@@ -225,7 +225,7 @@ export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation
 });
 
 export const AI_RULE_CREATE = i18n.translate(
-  'xpack.securitySolution.navigation.aiAssistedRuleCreateTitle',
+  'xpack.securitySolution.navigation.aiRuleCreationTitle',
   {
     defaultMessage: 'AI rule creation',
   }

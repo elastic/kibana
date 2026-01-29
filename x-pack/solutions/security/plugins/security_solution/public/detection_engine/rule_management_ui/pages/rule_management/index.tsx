@@ -59,11 +59,11 @@ const RulesPageComponent: React.FC = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
 
-  const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
-    'aiAssistedRuleCreationEnabled'
+  const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled(
+    'aiRuleCreationEnabled'
   );
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const isAiRuleCreationAvailable = aiAssistedRuleCreationEnabled && isAgentBuilderEnabled;
+  const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
 
   if (
     redirectToDetections(

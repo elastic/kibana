@@ -16,7 +16,7 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
-import { getBuildAgent } from '../../lib/detection_engine/ai_assisted_rule_creation/agent';
+import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
@@ -44,11 +44,11 @@ export function createDetectionRuleTool(
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
-        if (!experimentalFeatures?.aiAssistedRuleCreationEnabled) {
+        if (!experimentalFeatures?.aiRuleCreationEnabled) {
           return {
             status: 'unavailable',
             reason:
-              'AI assisted rule creation is not enabled. Enable it via experimental feature flag "aiAssistedRuleCreationEnabled".',
+              'AI rule creation is not enabled. Enable it via experimental feature flag "aiRuleCreationEnabled".',
           };
         }
 

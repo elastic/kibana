@@ -31,7 +31,7 @@ import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 import type { RuleMigrationsDataClient } from '../../server/lib/siem_migrations/rules/data/rule_migrations_data_client';
-import { getBuildAgent } from '../../server/lib/detection_engine/ai_assisted_rule_creation/agent/build_agent_graph';
+import { getBuildAgent } from '../../server/lib/detection_engine/ai_rule_creation/agent/build_agent_graph';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -96,7 +96,7 @@ async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
   return graph.getGraphAsync({ xray: true });
 }
 
-async function getAiAssistedRuleCreationGraph(logger: Logger): Promise<Drawable> {
+async function getAiRuleCreationGraph(logger: Logger): Promise<Drawable> {
   const graph = await getBuildAgent({
     model: mockLlm,
     esClient: {} as unknown as ElasticsearchClient,
@@ -145,7 +145,7 @@ export const draw = async () => {
     outputFilename: '../../docs/siem_migration/img/dashboard_migration_agent_graph.png',
   });
   await drawGraph({
-    getGraphAsync: getAiAssistedRuleCreationGraph,
-    outputFilename: '../../docs/ai_assisted_rule_creation/img/ai_assisted_rule_creation_graph.png',
+    getGraphAsync: getAiRuleCreationGraph,
+    outputFilename: '../../docs/ai_rule_creation/img/ai_rule_creation_graph.png',
   });
 };
