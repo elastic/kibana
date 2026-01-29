@@ -70,7 +70,7 @@ test.describe(
       ).toStrictEqual([
         'aiops',
         'discover',
-        "embeddableEnhanced",
+        'embeddableEnhanced',
         'eventAnnotation',
         'expressionXY',
         'kbn-ui-shared-deps-npm',
