@@ -167,8 +167,6 @@ describe('getServiceUrls', () => {
     });
 
     it('should discover auth for local https service urls', async () => {
-      const expectedValidAuth = 'elastic_serverless:changeme';
-
       mockFetchWithAllowedSegments([
         'https://elastic_serverless:changeme@localhost:9200',
         'https://localhost:5601',
