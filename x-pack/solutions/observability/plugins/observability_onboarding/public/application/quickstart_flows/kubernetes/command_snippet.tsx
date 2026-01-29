@@ -66,15 +66,18 @@ export function CommandSnippet({
   return (
     <>
       {!isWiredStreamsLoading && (
-        <WiredStreamsIngestionSelector
-          ingestionMode={ingestionMode}
-          onChange={setIngestionMode}
-          streamsDocLink={docLinks?.links.observability.logsStreams}
-          isWiredStreamsEnabled={isWiredStreamsEnabled}
-          isEnabling={isEnabling}
-          flowType="elastic_agent_kubernetes"
-          onEnableWiredStreams={enableWiredStreams}
-        />
+        <>
+          <WiredStreamsIngestionSelector
+            ingestionMode={ingestionMode}
+            onChange={setIngestionMode}
+            streamsDocLink={docLinks?.links.observability.logsStreams}
+            isWiredStreamsEnabled={isWiredStreamsEnabled}
+            isEnabling={isEnabling}
+            flowType="elastic_agent_kubernetes"
+            onEnableWiredStreams={enableWiredStreams}
+          />
+          <EuiSpacer size="xl" />
+        </>
       )}
 
       <EuiText>

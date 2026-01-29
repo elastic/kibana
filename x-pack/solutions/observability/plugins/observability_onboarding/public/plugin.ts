@@ -30,6 +30,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -67,6 +68,7 @@ export interface ObservabilityOnboardingPluginStartDeps {
   fleet: FleetStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  streams?: StreamsPluginStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &

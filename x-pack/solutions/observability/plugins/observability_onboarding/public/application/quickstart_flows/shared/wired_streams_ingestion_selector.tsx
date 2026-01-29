@@ -79,7 +79,7 @@ export function WiredStreamsIngestionSelector({
     {
       id: 'wired' as const,
       label: (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} component="span">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
           <EuiFlexItem grow={false} component="span">
             {i18n.translate('xpack.observability_onboarding.wiredStreams.wiredStreamsOption', {
               defaultMessage: 'Wired Streams',
@@ -112,7 +112,7 @@ export function WiredStreamsIngestionSelector({
     <>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
+          <EuiText size="s">
             <strong>
               {i18n.translate('xpack.observability_onboarding.wiredStreams.ingestionLabel', {
                 defaultMessage: 'Ingestion selector',
@@ -136,7 +136,7 @@ export function WiredStreamsIngestionSelector({
         {showDescription && ingestionMode === 'wired' && (
           <EuiFlexItem grow={false}>
             <EuiText
-              size="xs"
+              size="s"
               color="subdued"
               data-test-subj="observabilityOnboardingWiredStreamsDescription"
             >
@@ -162,12 +162,10 @@ export function WiredStreamsIngestionSelector({
         {ingestionMode === 'classic' && !isWiredStreamsEnabled && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              <em>
-                {i18n.translate('xpack.observability_onboarding.wiredStreams.willEnableNote', {
-                  defaultMessage:
-                    'Selecting Wired Streams will automatically enable the feature for your cluster.',
-                })}
-              </em>
+              {i18n.translate('xpack.observability_onboarding.wiredStreams.willEnableNote', {
+                defaultMessage:
+                  'Selecting Wired Streams will automatically enable the feature for your cluster.',
+              })}
             </EuiText>
           </EuiFlexItem>
         )}

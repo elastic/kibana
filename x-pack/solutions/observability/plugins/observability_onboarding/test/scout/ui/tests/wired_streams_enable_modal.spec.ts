@@ -105,7 +105,7 @@ test.describe(
 
       await test.step('command includes wired streams flag', async () => {
         const command = await pageObjects.onboarding.getAutoDetectCommandContent();
-        expect(command).toContain('--write-to-logs-streams=true');
+        expect(command).toContain('--write-to-logs-stream=true');
       });
     });
 

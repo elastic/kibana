@@ -59,13 +59,13 @@ test.describe('Wired Streams - Auto-detect Flow', { tag: ['@ess', '@svlOblt'] },
 
     await test.step('command does NOT include wired streams flag in Classic mode', async () => {
       const classicCommand = await pageObjects.onboarding.getAutoDetectCommandContent();
-      expect(classicCommand).not.toContain('--write-to-logs-streams');
+      expect(classicCommand).not.toContain('--write-to-logs-stream');
     });
 
     await test.step('command includes wired streams flag after switching to Wired Streams', async () => {
       await pageObjects.onboarding.selectWiredStreams();
       const wiredCommand = await pageObjects.onboarding.getAutoDetectCommandContent();
-      expect(wiredCommand).toContain('--write-to-logs-streams=true');
+      expect(wiredCommand).toContain('--write-to-logs-stream=true');
     });
   });
 });

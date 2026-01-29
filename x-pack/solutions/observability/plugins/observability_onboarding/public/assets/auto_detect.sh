@@ -43,7 +43,7 @@ help() {
   echo "  --kibana-url=<value>  Kibana API endpoint."
   echo "  --id=<value>   Onboarding flow ID."
   echo "  --ea-version=<value>   Elastic Agent version."
-  echo "  --write-to-logs-streams=<true|false>   Route logs to wired streams (default: false)."
+  echo "  --write-to-logs-stream=<true|false>   Route logs to wired streams (default: false)."
   exit 1
 }
 
@@ -85,7 +85,7 @@ for i in "$@"; do
     esac
     shift
     ;;
-  --write-to-logs-streams=*)
+  --write-to-logs-stream=*)
     val="${i#*=}"
     case "$val" in
       true) write_to_logs_streams=true ;;

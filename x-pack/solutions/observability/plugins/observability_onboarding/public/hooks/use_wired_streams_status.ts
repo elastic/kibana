@@ -9,11 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
-interface WiredStreamsStatus {
-  enabled: boolean | 'conflict';
-  can_manage: boolean;
-}
-
 export type FlowType = 'otel_host' | 'otel_kubernetes' | 'elastic_agent_kubernetes' | 'auto_detect';
 
 export interface UseWiredStreamsStatusResult {
@@ -27,7 +22,7 @@ export interface UseWiredStreamsStatusResult {
 
 export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
   const {
-    services: { http, notifications, analytics },
+    services: { streams, notifications, analytics },
   } = useKibana();
 
   const [status, setStatus] = useState<{
@@ -45,14 +40,21 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchStatus = useCallback(async () => {
+    if (!streams) {
+      setStatus({
+        isEnabled: false,
+        isLoading: false,
+        error: null,
+      });
+      return;
+    }
+
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     try {
-      const response = await http.get<WiredStreamsStatus>('/api/streams/_status', {
-        signal: controller.signal,
-      });
+      const response = await streams.getWiredStatus();
 
       if (!controller.signal.aborted) {
         setStatus({
@@ -63,22 +65,14 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
       }
     } catch (err) {
       if (!controller.signal.aborted) {
-        if (err.response?.status === 404) {
-          setStatus({
-            isEnabled: false,
-            isLoading: false,
-            error: null,
-          });
-        } else {
-          setStatus({
-            isEnabled: false,
-            isLoading: false,
-            error: err,
-          });
-        }
+        setStatus({
+          isEnabled: false,
+          isLoading: false,
+          error: err,
+        });
       }
     }
-  }, [http]);
+  }, [streams]);
 
   useEffect(() => {
     fetchStatus();
@@ -94,16 +88,19 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
 
   const enableWiredStreams = useCallback(
     async (flowType: FlowType): Promise<boolean> => {
+      if (!streams) {
+        return false;
+      }
+
       if (status.isEnabled) {
         return true;
       }
 
       setIsEnabling(true);
+      const controller = new AbortController();
 
       try {
-        await http.post('/api/streams/_enable', {
-          version: '2023-10-31',
-        });
+        await streams.enableWiredMode(controller.signal);
 
         analytics?.reportEvent('observability_onboarding_wired_streams_auto_enabled', {
           flow_type: flowType,
@@ -140,7 +137,7 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
         setIsEnabling(false);
       }
     },
-    [http, analytics, notifications, status.isEnabled, fetchStatus]
+    [streams, analytics, notifications, status.isEnabled, fetchStatus]
   );
 
   return {

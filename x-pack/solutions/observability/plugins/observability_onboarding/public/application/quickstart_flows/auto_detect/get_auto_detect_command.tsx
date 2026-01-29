@@ -36,7 +36,7 @@ export function getAutoDetectCommand({
       --ingest-key=${ingestApiKey}
       --ea-version=${elasticAgentVersion}
       ${!metricsEnabled ? '--metrics-enabled=false' : ''}
-      ${useWiredStreams ? '--write-to-logs-streams=true' : ''}
+      ${useWiredStreams ? '--write-to-logs-stream=true' : ''}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {

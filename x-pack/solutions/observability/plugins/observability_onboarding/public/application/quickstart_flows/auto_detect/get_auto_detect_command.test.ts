@@ -27,32 +27,32 @@ describe('getAutoDetectCommand', () => {
     expect(command).toContain('--install-key=install-api-key');
     expect(command).toContain('--ingest-key=ingest-api-key');
     expect(command).toContain('--ea-version=9.1.0');
-    expect(command).not.toContain('--write-to-logs-streams');
+    expect(command).not.toContain('--write-to-logs-stream');
     expect(command).not.toContain('--metrics-enabled=false');
   });
 
-  it('includes --write-to-logs-streams=true when useWiredStreams is true', () => {
+  it('includes --write-to-logs-stream=true when useWiredStreams is true', () => {
     const command = getAutoDetectCommand({
       ...baseParams,
       useWiredStreams: true,
     });
 
-    expect(command).toContain('--write-to-logs-streams=true');
+    expect(command).toContain('--write-to-logs-stream=true');
   });
 
-  it('does NOT include --write-to-logs-streams when useWiredStreams is false', () => {
+  it('does NOT include --write-to-logs-stream when useWiredStreams is false', () => {
     const command = getAutoDetectCommand({
       ...baseParams,
       useWiredStreams: false,
     });
 
-    expect(command).not.toContain('--write-to-logs-streams');
+    expect(command).not.toContain('--write-to-logs-stream');
   });
 
-  it('does NOT include --write-to-logs-streams when useWiredStreams is undefined', () => {
+  it('does NOT include --write-to-logs-stream when useWiredStreams is undefined', () => {
     const command = getAutoDetectCommand(baseParams);
 
-    expect(command).not.toContain('--write-to-logs-streams');
+    expect(command).not.toContain('--write-to-logs-stream');
   });
 
   it('includes --metrics-enabled=false when metricsEnabled is false', () => {
@@ -72,6 +72,6 @@ describe('getAutoDetectCommand', () => {
     });
 
     expect(command).toContain('--metrics-enabled=false');
-    expect(command).toContain('--write-to-logs-streams=true');
+    expect(command).toContain('--write-to-logs-stream=true');
   });
 });
