@@ -36,7 +36,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let connectorId: string;
       let logsSynthtraceEsClient: LogsSynthtraceEsClient;
       let logData: LogData;
+      let errorLogId: string;
       let errorLogIndex: string;
+      let infoLogId: string;
       let infoLogIndex: string;
 
       before(async () => {
@@ -48,45 +50,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           environment: 'production',
         }));
 
-        const errorLogResponse = await es.search({
-          index: 'logs-*',
-          query: {
-            bool: {
-              must: [
-                { term: { 'service.name': logData.serviceName } },
-                { term: { 'trace.id': logData.traceId } },
-                { term: { 'log.level': 'error' } },
-              ],
+        const findLogByLevel = async (logLevel: string) => {
+          const response = await es.search({
+            index: 'logs-*',
+            query: {
+              bool: {
+                must: [
+                  { term: { 'service.name': logData.serviceName } },
+                  { term: { 'trace.id': logData.traceId } },
+                  { term: { 'log.level': logLevel } },
+                ],
+              },
             },
-          },
-          size: 1,
-        });
-        const errorLogDoc = errorLogResponse.hits.hits[0];
-        if (!errorLogDoc) {
-          throw new Error('Error log not found');
-        }
-        errorLogIndex = errorLogDoc._index as string;
-        logData.errorLogId = errorLogDoc._id as string;
+            size: 1,
+          });
+          const doc = response.hits.hits[0];
+          if (!doc) {
+            throw new Error(`${logLevel} log not found`);
+          }
+          return { id: doc._id as string, index: doc._index as string };
+        };
 
-        const infoLogResponse = await es.search({
-          index: 'logs-*',
-          query: {
-            bool: {
-              must: [
-                { term: { 'service.name': logData.serviceName } },
-                { term: { 'trace.id': logData.traceId } },
-                { term: { 'log.level': 'info' } },
-              ],
-            },
-          },
-          size: 1,
-        });
-        const infoLogDoc = infoLogResponse.hits.hits[0];
-        if (!infoLogDoc) {
-          throw new Error('Info log not found');
-        }
-        infoLogIndex = infoLogDoc._index as string;
-        logData.infoLogId = infoLogDoc._id as string;
+        ({ id: errorLogId, index: errorLogIndex } = await findLogByLevel('error'));
+        ({ id: infoLogId, index: infoLogIndex } = await findLogByLevel('info'));
       });
 
       after(async () => {
@@ -101,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
-      it('returns summary and context for error log with CorrelatedLogSequence', async () => {
+      it('returns summary and context for error log with additional context', async () => {
         void llmProxy.interceptors.userMessage({
           name: 'error-log-ai-insight',
           response: MOCKED_AI_SUMMARY_ERROR,
@@ -112,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             body: {
               index: errorLogIndex,
-              id: logData.errorLogId,
+              id: errorLogId,
             },
           },
         });
@@ -130,11 +116,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const userMessage = llmRequest?.requestBody?.messages?.find(
           (m: { role: string }) => m.role === 'user'
         );
-        expect(userMessage?.content).to.contain('<CorrelatedLogSequence>');
-        expect(userMessage?.content).to.contain('<LogCategories>');
+
+        const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
+        const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
+        expect(hasCorrelatedLogs || hasLogCategories).to.be(true);
       });
 
-      it('returns summary and context for info log with CorrelatedLogSequence', async () => {
+      it('returns summary and context for info log with additional context', async () => {
         llmProxy.clear();
 
         void llmProxy.interceptors.userMessage({
@@ -147,7 +135,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             body: {
               index: infoLogIndex,
-              id: logData.infoLogId,
+              id: infoLogId,
             },
           },
         });
@@ -165,8 +153,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const userMessage = llmRequest?.requestBody?.messages?.find(
           (m: { role: string }) => m.role === 'user'
         );
-        expect(userMessage?.content).to.contain('<CorrelatedLogSequence>');
-        expect(userMessage?.content).to.contain('<LogCategories>');
+
+        const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
+        const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
+        expect(hasCorrelatedLogs || hasLogCategories).to.be(true);
       });
     });
   });

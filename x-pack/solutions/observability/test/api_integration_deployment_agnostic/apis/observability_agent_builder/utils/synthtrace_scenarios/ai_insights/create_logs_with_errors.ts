@@ -11,9 +11,6 @@ import { log, timerange } from '@kbn/synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export interface LogData {
-  errorLogId: string;
-  warningLogId: string;
-  infoLogId: string;
   traceId: string;
   serviceName: string;
   errorMessage: string;
@@ -27,6 +24,9 @@ export interface LogsResult {
 }
 
 const SERVICE_NAME = 'payment-service';
+const ERROR_MESSAGE = 'Failed to process payment: Connection timeout';
+const WARNING_MESSAGE = 'High latency detected in payment processing';
+const INFO_MESSAGE = 'Payment request received';
 
 export const createLogsWithErrors = async ({
   getService,
@@ -46,14 +46,9 @@ export const createLogsWithErrors = async ({
   const range = timerange(start, end);
 
   const getLogLevelAndMessage = (index: number) => {
-    if (index === 0)
-      return {
-        logLevel: 'error' as const,
-        message: 'Failed to process payment: Connection timeout',
-      };
-    if (index === 1)
-      return { logLevel: 'warn' as const, message: 'High latency detected in payment processing' };
-    return { logLevel: 'info' as const, message: 'Payment request received' };
+    if (index === 0) return { logLevel: 'error' as const, message: ERROR_MESSAGE };
+    if (index === 1) return { logLevel: 'warn' as const, message: WARNING_MESSAGE };
+    return { logLevel: 'info' as const, message: INFO_MESSAGE };
   };
 
   const logs = range
@@ -78,33 +73,14 @@ export const createLogsWithErrors = async ({
   await logsSynthtraceEsClient.index([logs]);
   await logsSynthtraceEsClient.refresh();
 
-  const es = getService('es');
-  const searchResponse = await es.search({
-    index: 'logs-*',
-    query: {
-      bool: {
-        must: [{ term: { 'service.name': SERVICE_NAME } }, { term: { 'trace.id': traceId } }],
-      },
-    },
-    size: 10,
-  });
-
-  const hits = searchResponse.hits.hits as Array<{ _id: string; _source: any }>;
-  const errorLog = hits.find((h) => h._source['log.level'] === 'error');
-  const warningLog = hits.find((h) => h._source['log.level'] === 'warn');
-  const infoLog = hits.find((h) => h._source['log.level'] === 'info');
-
   return {
     logsSynthtraceEsClient,
     logData: {
-      errorLogId: errorLog?._id || '',
-      warningLogId: warningLog?._id || '',
-      infoLogId: infoLog?._id || '',
       traceId,
       serviceName: SERVICE_NAME,
-      errorMessage,
-      warningMessage,
-      infoMessage,
+      errorMessage: ERROR_MESSAGE,
+      warningMessage: WARNING_MESSAGE,
+      infoMessage: INFO_MESSAGE,
     },
   };
 };

@@ -4,16 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import moment from 'moment';
-import { MessageRole, type InferenceClient } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
+import { concat, of } from 'rxjs';
+import type { ChatCompletionEvent, InferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
-import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import { getLogDocumentById } from './get_log_document_by_id';
-import type { ObservabilityAgentBuilderPluginSetupDependencies } from '../../types';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
@@ -32,16 +37,20 @@ export interface GetLogAiInsightsParams {
   logger: Logger;
 }
 
+export interface LogDocument {
+  '@timestamp'?: string;
+  message?: string;
+  'log.level'?: string;
+  [key: string]: unknown;
+}
+
 export async function getLogAiInsights({
   index,
   id,
-  request,
   esClient,
-  dataRegistry,
   inferenceClient,
   connectorId,
   core,
-  plugins,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
   const logEntry = await getLogDocumentById({
@@ -53,29 +62,47 @@ export async function getLogAiInsights({
   if (!logEntry) {
     throw new Error('Log entry not found');
   }
-  const isErrorOrWarning = isWarningOrAbove(logEntry);
-  const systemPrompt = isErrorOrWarning
-    ? dedent(`
-        You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
 
-        - **What happened**: Summarize the error in plain language
-        - **Where it originated**: Identify the service, component, or code path
-        - **Root cause**: Analyze using CorrelatedLogSequence and LogCategories to understand what happened before and after the error
-        - **Pattern analysis**: Use LogCategories to identify if this is a recurring pattern or anomaly
-        - **Impact**: Note any affected downstream services or dependencies
-        - **Next steps**: Suggest specific actions for investigation or remediation
+  const context = await fetchLogContext({
+    core,
+    logger,
+    esClient,
+    index,
+    id,
+    logEntry,
+  });
 
-        Base your analysis strictly on the provided data.
-      `)
-    : dedent(`
-        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
+  const events$ = generateLogSummary({
+    inferenceClient,
+    connectorId,
+    logEntry,
+    context,
+  });
 
-        - Explain what the log message means in context
-        - Identify the source (service, host, container)
-        - Use LogCategories to show common log patterns in the time window
+  const streamWithContext$ = concat(of<ContextEvent>({ type: 'context', context }), events$);
 
-        Base your analysis strictly on the provided data. Be specific and reference actual field values.
-      `);
+  return { events$: streamWithContext$, context };
+}
+
+async function fetchLogContext({
+  core,
+  logger,
+  esClient,
+  index,
+  id,
+  logEntry,
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  index: string;
+  id: string;
+  logEntry: LogDocument;
+}): Promise<string> {
+  const logTimestamp = logEntry['@timestamp'] as string;
+  const logTime = moment(logTimestamp);
+  const windowStart = logTime.clone().subtract(60, 'minutes').toISOString();
+  const windowEnd = logTime.clone().add(60, 'minutes').toISOString();
 
   let context = dedent(`
     <LogEntryIndex>
@@ -91,114 +118,144 @@ export async function getLogAiInsights({
     </LogEntryFields>
   `);
 
-  const logTimestamp = logEntry['@timestamp'] as string;
-  const windowStart = moment(logTimestamp).subtract(1, 'hours').toISOString();
-  const windowEnd = moment(logTimestamp).add(1, 'hours').toISOString();
+  const additionalContext = await fetchCorrelatedLogsOrCategories({
+    core,
+    logger,
+    esClient,
+    index,
+    id,
+    windowStart,
+    windowEnd,
+  });
 
-  interface ContextPart {
-    name: string;
-    handler: () => Promise<unknown>;
+  if (additionalContext) {
+    context += additionalContext;
   }
 
-  const contextParts: ContextPart[] = [];
+  return context;
+}
 
-  contextParts.push({
-    name: 'CorrelatedLogSequence',
-    handler: async () => {
-      try {
-        const { sequences } = await getCorrelatedLogs({
-          core,
-          logger,
-          esClient,
-          index,
-          start: windowStart,
-          end: windowEnd,
-          logId: id,
-        });
+async function fetchCorrelatedLogsOrCategories({
+  core,
+  logger,
+  esClient,
+  index,
+  id,
+  windowStart,
+  windowEnd,
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  index: string;
+  id: string;
+  windowStart: string;
+  windowEnd: string;
+}): Promise<string | null> {
+  try {
+    const { sequences } = await getCorrelatedLogs({
+      core,
+      logger,
+      esClient,
+      index,
+      start: windowStart,
+      end: windowEnd,
+      logId: id,
+      errorLogsOnly: false,
+    });
 
-        return sequences[0] || null;
-      } catch (error) {
-        logger.debug(`Failed to fetch correlated logs: ${error.message}`);
-        return null;
-      }
-    },
-  });
+    const correlatedSequence = sequences[0];
+    if (correlatedSequence?.logs?.length) {
+      return formatContextPart('CorrelatedLogSequence', windowStart, windowEnd, correlatedSequence);
+    }
+  } catch (error) {
+    logger.debug(`Failed to fetch correlated logs: ${error.message}`);
+  }
 
-  contextParts.push({
-    name: 'LogCategories',
-    handler: async () => {
-      try {
-        const categories = await getLogCategories({
-          core,
-          logger,
-          esClient,
-          index,
-          start: windowStart,
-          end: windowEnd,
-          fields: ['service.name', 'host.name', 'container.id'],
-        });
-        return categories;
-      } catch (error) {
-        logger.debug(`Failed to fetch log categories: ${error.message}`);
-        return null;
-      }
-    },
-  });
+  try {
+    const categories = await getLogCategories({
+      core,
+      logger,
+      esClient,
+      index,
+      start: windowStart,
+      end: windowEnd,
+      fields: ['service.name', 'host.name', 'container.id'],
+    });
 
-  const results = await Promise.allSettled(
-    contextHandlers.map(async ({ name, handler }) => {
-      const result = await handler();
-      return { name, result };
-    })
-  );
+    if (categories?.length) {
+      return formatContextPart('LogCategories', windowStart, windowEnd, categories);
+    }
+  } catch (error) {
+    logger.debug(`Failed to fetch log categories: ${error.message}`);
+  }
 
-  const contextPartsStrings = results
-    .filter((result): result is PromiseFulfilledResult<{ part: ContextPart; data: unknown }> => {
-      if (result.status === 'rejected') {
-        logger.debug(`Log AI Insight: fetch failed: ${result.reason}`);
-        return false;
-      }
-      return true;
-    })
-    .map((result) => result.value)
-    .filter(({ data }) => data && (!Array.isArray(data) || data.length > 0))
-    .map(({ name, result }) =>
-      dedent(`
-        <${part.name}>
-        Time window: ${windowStart} to ${windowEnd}
-        \`\`\`json
-        ${safeJsonStringify(data)}
-        \`\`\`
-        </${part.name}>
+  return null;
+}
+
+function formatContextPart(
+  name: string,
+  windowStart: string,
+  windowEnd: string,
+  data: unknown
+): string {
+  return dedent(`
+    <${name}>
+    Time window: ${windowStart} to ${windowEnd}
+    \`\`\`json
+    ${safeJsonStringify(data)}
+    \`\`\`
+    </${name}>
+  `);
+}
+
+function generateLogSummary({
+  inferenceClient,
+  connectorId,
+  logEntry,
+  context,
+}: {
+  inferenceClient: InferenceClient;
+  connectorId: string;
+  logEntry: LogDocument;
+  context: string;
+}): Observable<ChatCompletionEvent> {
+  const isErrorOrWarning = isWarningOrAbove(logEntry);
+
+  const systemPrompt = isErrorOrWarning
+    ? dedent(`
+        You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
+
+        - **What happened**: Summarize the error in plain language
+        - **Where it originated**: Identify the service, component, or code path
+        - **Root cause**: Analyze using CorrelatedLogSequence (or LogCategories if no correlated logs) to understand what happened before and after the error
+        - **Impact**: Note any affected downstream services or dependencies
+        - **Next steps**: Suggest specific actions for investigation or remediation
+
+        Base your analysis strictly on the provided data.
       `)
-    );
+    : dedent(`
+        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
 
-  if (contextPartsStrings.length > 0) {
-    context += contextPartsStrings.join('\n\n');
-  }
+        - Explain what the log message means in context
+        - Identify the source (service, host, container)
+        - If CorrelatedLogSequence or LogCategories is available, use it to provide additional context
 
-  const events$ = inferenceClient.chatComplete({
+        Base your analysis strictly on the provided data. Be specific and reference actual field values.
+      `);
+
+  const userPrompt = dedent(`
+    <LogContext>
+    ${context}
+    </LogContext>
+    Analyze this log entry and generate a summary explaining what it means.
+    Ensure the analysis is grounded in the provided context, and concise.
+  `);
+
+  return inferenceClient.chatComplete({
     connectorId,
     system: systemPrompt,
-    messages: [
-      {
-        role: MessageRole.User,
-        content: dedent(`
-          <LogContext>
-          ${context}
-          </LogContext>
-          Analyze this log entry and generate a summary explaining what it means.
-          Ensure the analysis is grounded in the provided context, and concise.
-        `),
-      },
-    ],
+    messages: [{ role: MessageRole.User, content: userPrompt }],
     stream: true,
   });
-
-  const streamWithContext$ = concat(of<ContextEvent>({ type: 'context', context }), events$);
-
-  return {
-    events$: streamWithContext$,
-    context,
-  };
 }
