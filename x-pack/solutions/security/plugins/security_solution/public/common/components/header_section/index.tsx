@@ -150,6 +150,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                     responsive={false}
                     gutterSize={'none'}
                     className="header-section-titles"
+                    alignItems="center"
                   >
                     {toggleQuery && (
                       <EuiFlexItem grow={false}>
