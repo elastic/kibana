@@ -39,7 +39,6 @@ import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
@@ -73,7 +72,6 @@ export const useDiscoverHistogram = (
     inspectorAdapters,
     getAbortController,
   } = stateContainer.dataState;
-  const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -217,6 +215,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const tabAttributes = useCurrentTabSelector((tab) => tab.attributes);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
   const getModifiedVisAttributes = useCallback<
@@ -241,8 +240,8 @@ export const useDiscoverHistogram = (
       controlsState: currentTabControlState,
       // visContext should be in sync with current query
       externalVisContext:
-        isEsqlMode && canImportVisContext(savedSearchState?.visContext)
-          ? savedSearchState?.visContext
+        isEsqlMode && canImportVisContext(tabAttributes.visContext)
+          ? tabAttributes.visContext
           : undefined,
       getModifiedVisAttributes,
     };
@@ -259,7 +258,7 @@ export const useDiscoverHistogram = (
     relativeTimeRange,
     searchSessionId,
     query,
-    savedSearchState?.visContext,
+    tabAttributes.visContext,
     getModifiedVisAttributes,
   ]);
 
@@ -267,7 +266,6 @@ export const useDiscoverHistogram = (
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
-      const visContext = collectedFetchParams?.externalVisContext ?? savedSearchState?.visContext;
       const { table, esqlQueryColumns } = getUnifiedHistogramTableForEsql({
         documentsValue: documents$.getValue(),
         isEsqlMode,
@@ -278,7 +276,6 @@ export const useDiscoverHistogram = (
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
         columns: isEsqlMode ? esqlQueryColumns : undefined,
         table: isEsqlMode ? table : undefined,
-        externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
@@ -327,6 +324,7 @@ export const useDiscoverHistogram = (
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
+  const setAttributeVisContext = useCurrentTabAction(internalStateActions.setAttributeVisContext);
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
@@ -340,9 +338,7 @@ export const useDiscoverHistogram = (
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
           // (only this action should trigger Unsaved changes badge)
-          stateContainer.savedSearchState.updateVisContext({
-            nextVisContext,
-          });
+          dispatch(setAttributeVisContext({ visContext: nextVisContext }));
           dispatch(
             setOverriddenVisContextAfterInvalidation({
               overriddenVisContextAfterInvalidation: undefined,
@@ -377,7 +373,7 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
+    [dispatch, setOverriddenVisContextAfterInvalidation, setAttributeVisContext]
   );
 
   const onBreakdownFieldChange = useCallback<

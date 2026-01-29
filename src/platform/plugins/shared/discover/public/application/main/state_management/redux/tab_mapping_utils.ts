@@ -55,7 +55,6 @@ export const fromSavedObjectTabToTabState = ({
     label: tab.label,
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
-      visContext: tab.visContext,
       controlGroupJson: tab.controlGroupJson,
     },
     appState,
@@ -65,6 +64,10 @@ export const fromSavedObjectTabToTabState = ({
       refreshInterval: tab.timeRange
         ? tab.refreshInterval
         : existingTab?.globalState.refreshInterval,
+    },
+    attributes: {
+      ...DEFAULT_TAB_STATE.attributes,
+      visContext: tab.visContext,
     },
   };
 };
@@ -104,7 +107,7 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
-  visContext: tab.visContext,
+  visContext: undefined, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson,
 });
 
@@ -144,7 +147,7 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField,
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
-    visContext: tab.initialInternalState?.visContext,
+    visContext: tab.attributes?.visContext,
     controlGroupJson: tab.initialInternalState?.controlGroupJson,
   };
 };
@@ -154,7 +157,9 @@ export const fromSavedSearchToSavedObjectTab = ({
   savedSearch,
   services,
 }: {
-  tab: Pick<TabState, 'id' | 'label'>;
+  tab: Pick<TabState, 'id' | 'label'> & {
+    attributes?: TabState['attributes'];
+  };
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
@@ -185,7 +190,7 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
-    visContext: savedSearch.visContext,
+    visContext: tab.attributes?.visContext,
     controlGroupJson: savedSearch.controlGroupJson,
   };
 };

@@ -26,8 +26,13 @@ import type { TabsUrlState } from '../../../../common/types';
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
+interface LegacyInternalState {
+  visContext?: TabState['attributes']['visContext']; // visContext got moved from internalState to attributes
+}
+
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
-  internalState: TabState['initialInternalState'] | undefined;
+  internalState: (TabState['initialInternalState'] & LegacyInternalState) | undefined;
+  attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
 };
@@ -179,6 +184,7 @@ export const createTabsStorageManager = ({
       id: tabState.id,
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
+      attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
     };
@@ -206,6 +212,7 @@ export const createTabsStorageManager = ({
     defaultTabState: Omit<TabState, keyof TabItem>
   ): TabState => {
     const internalState = getDefinedStateOnly(tabStateInStorage.internalState);
+    const attributes = getDefinedStateOnly(tabStateInStorage.attributes);
     const appState = getDefinedStateOnly(tabStateInStorage.appState);
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.globalState
@@ -217,14 +224,25 @@ export const createTabsStorageManager = ({
       ? extractEsqlVariables(controlGroupState)
       : defaultTabState.esqlVariables;
 
-    return {
+    const tabState = {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
+      attributes: {
+        ...defaultTabState.attributes,
+        ...attributes,
+      },
       appState: appState || {},
       globalState: globalState || {},
       esqlVariables,
     };
+
+    // migration from the older format where visContext was stored in internalState
+    if (internalState?.visContext && !tabState.attributes.visContext) {
+      tabState.attributes.visContext = internalState.visContext;
+    }
+
+    return tabState;
   };
 
   const toRecentlyClosedTabState = (

@@ -25,6 +25,8 @@ const tab1 = getTabStateMock({
   duplicatedFromId: '0',
   initialInternalState: {
     serializedSearchSource: { index: 'test-data-view-1' },
+  },
+  attributes: {
     visContext: { foo: 'bar' },
   },
   globalState: {
@@ -38,6 +40,8 @@ const tab2 = getTabStateMock({
   label: 'Tab 2',
   initialInternalState: {
     serializedSearchSource: { index: 'test-data-view-2' },
+  },
+  attributes: {
     visContext: { bar: 'foo' },
   },
   globalState: {
@@ -79,6 +83,11 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "attributes": Object {
+            "visContext": Object {
+              "bar": "foo",
+            },
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -105,9 +114,6 @@ describe('tab mapping utils', () => {
             "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
-            },
-            "visContext": Object {
-              "bar": "foo",
             },
           },
           "initializationState": Object {
@@ -160,6 +166,11 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
+          "attributes": Object {
+            "visContext": Object {
+              "bar": "foo",
+            },
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -186,9 +197,6 @@ describe('tab mapping utils', () => {
             "controlGroupJson": undefined,
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
-            },
-            "visContext": Object {
-              "bar": "foo",
             },
           },
           "initializationState": Object {
@@ -283,9 +291,7 @@ describe('tab mapping utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
-          "visContext": Object {
-            "foo": "bar",
-          },
+          "visContext": undefined,
         }
       `);
     });

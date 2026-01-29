@@ -23,6 +23,9 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     searchSessionId: undefined,
     isSearchSessionRestored: false,
   },
+  attributes: {
+    visContext: undefined,
+  },
   overriddenVisContextAfterInvalidation: undefined,
   controlGroupState: undefined,
   esqlVariables: [],

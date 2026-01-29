@@ -244,6 +244,14 @@ export const internalStateSlice = createSlice({
         tab.appState = action.payload.appState;
       }),
 
+    setAttributeVisContext: (
+      state,
+      action: TabAction<{ visContext: TabState['attributes']['visContext'] }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.attributes.visContext = action.payload.visContext;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>

@@ -501,10 +501,11 @@ describe('useDiscoverHistogram', () => {
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
       } as UnifiedHistogramVisContext;
       act(() => {
-        stateContainer.savedSearchState.set({
-          ...stateContainer.savedSearchState.getState(),
-          visContext,
-        });
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.setAttributeVisContext)({
+            visContext,
+          })
+        );
       });
       expect(api.fetch).toHaveBeenCalledTimes(2);
       expect(api.fetch).toHaveBeenLastCalledWith(

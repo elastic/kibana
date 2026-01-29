@@ -50,10 +50,6 @@ export function updateSavedSearch({
     }
   }
 
-  if (initialInternalState?.visContext) {
-    savedSearch.visContext = initialInternalState.visContext;
-  }
-
   if (initialInternalState?.controlGroupJson) {
     savedSearch.controlGroupJson = initialInternalState.controlGroupJson;
   }
