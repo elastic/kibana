@@ -287,10 +287,14 @@ export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsReq
 };
 
 export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
-  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
-    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
-    method: 'get',
-    shouldSendRequest: !!agentPolicyId,
-    version: API_VERSIONS.public.v1,
-  } as SendConditionalRequestConfig);
+  return useQuery({
+    queryKey: ['get_info_outputs_for_policy', agentPolicyId],
+    enabled: !!agentPolicyId,
+    queryFn: () =>
+      sendRequestForRq<GetAgentPolicyOutputsResponse>({
+        path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : '',
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 };
