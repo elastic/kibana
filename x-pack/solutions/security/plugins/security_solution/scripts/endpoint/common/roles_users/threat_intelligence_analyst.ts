@@ -24,7 +24,7 @@ export const getThreatIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
             'endpoint_exceptions_all',
             'actions_log_management_read',
           ],
-          securitySolutionRulesV1: ['all'],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

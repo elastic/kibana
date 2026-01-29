@@ -53,7 +53,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'endpoint_exceptions_all',
           'policy_management_all',
         ],
-        securitySolutionRulesV1: ['all'],
+        securitySolutionRulesV2: ['all'],
         securitySolutionTimeline: ['all'],
         securitySolutionNotes: ['all'],
         stackAlerts: ['all'],
