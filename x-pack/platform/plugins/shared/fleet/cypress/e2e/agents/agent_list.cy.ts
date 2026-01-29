@@ -85,7 +85,8 @@ function assertTableIsEmpty() {
   cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
 }
 
-describe('View agents list', () => {
+// Flaky tests: https://github.com/elastic/kibana/issues/250728
+describe.skip('View agents list', () => {
   before(() => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();
