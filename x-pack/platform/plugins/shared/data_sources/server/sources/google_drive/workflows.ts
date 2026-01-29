@@ -29,9 +29,9 @@ steps:
     type: google_drive.searchFiles
     connector-id: ${stackConnectorId}
     with:
-      query: "{{ inputs.query }}"
-      pageSize: "{{ inputs.pageSize }}"
-      pageToken: "{{ inputs.pageToken }}"
+      query: "\${{inputs.query}}"
+      pageSize: \${{inputs.pageSize}}
+      pageToken: "\${{inputs.pageToken}}"
 `;
 }
 
@@ -64,10 +64,10 @@ steps:
     type: google_drive.listFiles
     connector-id: ${stackConnectorId}
     with:
-      folderId: "{{ inputs.folderId }}"
-      pageSize: "{{ inputs.pageSize }}"
-      pageToken: "{{ inputs.pageToken }}"
-      orderBy: "{{ inputs.orderBy }}"
+      folderId: "\${{inputs.folderId}}"
+      pageSize: \${{inputs.pageSize}}
+      pageToken: "\${{inputs.pageToken}}"
+      orderBy: "\${{inputs.orderBy}}"
 `;
 }
 
@@ -94,20 +94,20 @@ steps:
     type: google_drive.downloadFile
     connector-id: ${googleDriveConnectorId}
     with:
-      fileId: "{{ inputs.fileId }}"
+      fileId: "\${{inputs.fileId}}"
   - name: convert_to_markdown
     type: jina.fileToMarkdown
     connector-id: ${jinaConnectorId}
     with:
-      file: "{{ steps.download_file.output.content }}"
-      filename: "{{ steps.download_file.output.name }}"
+      file: "\${{steps.download_file.output.content}}"
+      filename: "\${{steps.download_file.output.name}}"
 `;
 }
 
 /**
  * Generates a composite workflow that downloads a file from Google Drive
  * and extracts its content using Elasticsearch's attachment processor
- * via the ingest.simulate API.
+ * via the ingest pipeline simulate API.
  *
  * This is the fallback when no Jina Reader connector is configured.
  * Uses Apache Tika under the hood for text extraction.
@@ -130,20 +130,23 @@ steps:
     type: google_drive.downloadFile
     connector-id: ${googleDriveConnectorId}
     with:
-      fileId: "{{ inputs.fileId }}"
+      fileId: "\${{inputs.fileId}}"
   - name: extract_content
-    type: elasticsearch.ingest.simulate
+    type: elasticsearch.request
     with:
-      pipeline:
-        processors:
-          - attachment:
-              field: data
-              indexed_chars: -1
-              remove_binary: true
-      docs:
-        - _id: "{{ inputs.fileId }}"
-          _source:
-            filename: "{{ steps.download_file.output.name }}"
-            data: "{{ steps.download_file.output.content }}"
+      method: POST
+      path: /_ingest/pipeline/_simulate
+      body:
+        pipeline:
+          processors:
+            - attachment:
+                field: data
+                indexed_chars: -1
+                remove_binary: true
+        docs:
+          - _id: "\${{inputs.fileId}}"
+            _source:
+              filename: "\${{steps.download_file.output.name}}"
+              data: "\${{steps.download_file.output.content}}"
 `;
 }

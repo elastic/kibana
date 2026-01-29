@@ -113,8 +113,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({
         folderId: z
-          .string()
-          .optional()
+          .preprocess((val) => (val === '' ? undefined : val), z.string().optional())
           .default(DEFAULT_FOLDER_ID)
           .describe("Parent folder ID ('root' for root folder)"),
         pageSize: z
@@ -124,8 +123,10 @@ export const GoogleDriveConnector: ConnectorSpec = {
           .describe('Maximum number of files to return (1-1000)'),
         pageToken: z.string().optional().describe('Token for pagination'),
         orderBy: z
-          .enum(['name', 'modifiedTime', 'createdTime'])
-          .optional()
+          .preprocess(
+            (val) => (val === '' ? undefined : val),
+            z.enum(['name', 'modifiedTime', 'createdTime']).optional()
+          )
           .describe('Field to order results by'),
       }),
       handler: async (ctx, input) => {
