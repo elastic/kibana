@@ -52,7 +52,7 @@ function isValidUrl(value: string): boolean {
 export function getEncodedCustomLinkUrl(url: string, transaction?: Transaction) {
   try {
     const templateVariables = extractTemplateVariableNames(url);
-    const encodedTemplateVariables = {};
+    const encodedTemplateVariables: Record<string, any> = {};
     templateVariables.forEach((name) => {
       const value = get(transaction, name);
       if (value) {
