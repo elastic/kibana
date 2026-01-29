@@ -8,6 +8,7 @@
  */
 
 import { execFile, spawn } from 'child_process';
+import { promisify } from 'util';
 import { availableParallelism } from 'os';
 import { isAbsolute, join, resolve } from 'path';
 import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
@@ -18,11 +19,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { findPackageForPath, type Package } from '@kbn/repo-packages';
 import { Listr, type ListrTask } from 'listr2';
+import chalk from 'chalk';
 
 const MAX_PARALLELISM = availableParallelism();
 const IS_CI = process.env.CI === 'true';
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
 const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
+
+const execFileAsync = promisify(execFile);
+
 const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
 
 interface QuickCheck {
@@ -56,7 +61,7 @@ const scriptOptions: RunOptions = {
   `,
   flags: {
     string: ['dir', 'checks', 'file', 'files'],
-    boolean: ['fix', 'show-commands'],
+    boolean: ['fix', 'show-commands', 'branch'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
@@ -64,10 +69,11 @@ const scriptOptions: RunOptions = {
         --files            Optional list of target files (comma or newline delimited). When provided,
                            the script identifies which Kibana plugins/packages contain these files
                            and scopes checks to those packages.
+        --branch           Run checks on files changed in the current branch compared to upstream main.
+                           Automatically detects the elastic/kibana remote (upstream, origin, etc.).
         --fix              Enable auto-fix mode. When enabled, checks that may change files run
                            sequentially to avoid conflicts. Defaults to true in CI, false locally.
         --show-commands    Show the exact command being run for each check. Useful for debugging.
-                           
       `,
   },
   log: {
@@ -93,15 +99,49 @@ void run(async ({ log, flagsReader }) => {
   // Set environment variable so check scripts know where to write the marker file
   process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
 
+  // Handle --branch flag: get changed files compared to upstream main
+  const branchFlag = flagsReader.boolean('branch');
+  let fileListArray: string[] | undefined;
+
+  if (branchFlag) {
+    // Find the elastic/kibana remote
+    const elasticRemote = await findElasticKibanaRemote();
+    const remoteName = elasticRemote || 'origin';
+    const baseRef = `${remoteName}/main`;
+
+    logger.info(`Comparing against ${baseRef}...`);
+
+    // Fetch the latest from the remote to ensure we have up-to-date refs
+    try {
+      await execFileAsync('git', ['fetch', remoteName, 'main:refs/remotes/' + baseRef], {
+        cwd: REPO_ROOT,
+      });
+      logger.info(`Fetched latest from ${remoteName}/main`);
+    } catch {
+      logger.warning(`Could not fetch from remote, using local ref`);
+    }
+
+    fileListArray = await getChangedFilesFromBranch(baseRef);
+
+    if (fileListArray.length === 0) {
+      logger.info('No changed files found in current branch');
+    } else {
+      logger.info(`Found ${fileListArray.length} changed file(s) in branch`);
+    }
+  }
+
   // Handle optional --files parameter
   const filesArg = flagsReader.string('files');
   if (filesArg) {
-    const fileListArray = filesArg
+    fileListArray = filesArg
       .trim()
       .split(/[,\n]/)
       .map((f) => f.trim())
       .filter(Boolean);
+  }
 
+  // Process the file list (from either --branch or --files)
+  if (fileListArray && fileListArray.length > 0) {
     // Find affected packages for the given files
     const affectedPackages = findAffectedPackages(fileListArray);
 
@@ -287,13 +327,14 @@ interface ListrContext {
 function createListrTask(check: CheckToRun, label: string): ListrTask<ListrContext> {
   const scriptName = getScriptShortName(check.script);
   const command = getCommandForCheck(check);
+  const commandSuffix = showCommands ? `\n${chalk.dim(`$ ${command}`)}` : '';
   return {
-    title: `${label} ${scriptName}`,
+    title: `${label} ${scriptName}${commandSuffix}`,
     task: async (ctx, task) => {
       const result = await runCheckAsync(check);
       ctx.results.push(result);
       const time = humanizeTime(result.durationMs);
-      const commandSuffix = showCommands ? ` (${command})` : '';
+
       if (result.success) {
         task.title = `${label} ${scriptName} (${time})${commandSuffix}`;
       } else {
@@ -685,4 +726,53 @@ async function pushCommits(): Promise<void> {
       reject(error);
     });
   });
+}
+
+/** Find the remote that points to elastic/kibana */
+async function findElasticKibanaRemote(): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync('git', ['remote', '-v'], { cwd: REPO_ROOT });
+    const lines = stdout.trim().split('\n');
+
+    for (const line of lines) {
+      if (
+        line.includes('elastic/kibana') ||
+        line.includes('github.com:elastic/kibana') ||
+        line.includes('github.com/elastic/kibana')
+      ) {
+        const remoteName = line.split(/\s+/)[0];
+        return remoteName;
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null;
+}
+
+/** Get files changed in the current branch compared to a base ref */
+async function getChangedFilesFromBranch(baseRef: string): Promise<string[]> {
+  try {
+    // First, find the merge base between HEAD and the base ref
+    const { stdout: mergeBase } = await execFileAsync('git', ['merge-base', baseRef, 'HEAD'], {
+      cwd: REPO_ROOT,
+    });
+    const base = mergeBase.trim();
+
+    // Then diff from the merge base to HEAD
+    const { stdout } = await execFileAsync(
+      'git',
+      ['diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD'],
+      {
+        cwd: REPO_ROOT,
+        maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large diffs
+      }
+    );
+    return stdout
+      .trim()
+      .split('\n')
+      .filter((f) => f.length > 0);
+  } catch {
+    return [];
+  }
 }
