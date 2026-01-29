@@ -74,7 +74,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       <EuiContextMenuPanel>
         <EuiContextMenuItem key="ai-rule-creation" style={{ padding: `${m} ${xl}` }}>
           <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.aiAssistedRuleCreate}
+            deepLinkId={SecurityPageName.aiRuleCreation}
             data-test-subj="ai-rule-creation"
           >
             <FormattedMessage

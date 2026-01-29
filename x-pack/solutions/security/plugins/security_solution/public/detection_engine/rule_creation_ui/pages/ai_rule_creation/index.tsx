@@ -318,7 +318,7 @@ const AiRuleCreationPageComponent: React.FC = () => {
         </EuiResizableContainer>
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.aiAssistedRuleCreate} />
+      <SpyRoute pageName={SecurityPageName.aiRuleCreation} />
     </>
   );
 };

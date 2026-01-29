@@ -6,7 +6,7 @@
  */
 
 import {
-  visitAiAssistedRuleCreationPage,
+  visitAiRuleCreationPage,
   selectAiRuleCreation,
   submitRuleCreationPrompt,
   clickCancelButton,
@@ -144,7 +144,7 @@ describe(
     it('should generate a rule and save it', () => {
       interceptAgentBuilderConverseAsync({ mockResponse: mockChatResponse, delay: 3000 });
 
-      visitAiAssistedRuleCreationPage();
+      visitAiRuleCreationPage();
       assertConnectorSelected(azureConnectorAPIPayload.name);
 
       submitRuleCreationPrompt(userPrompt);
@@ -167,7 +167,7 @@ describe(
     it('should add rule attachment to the chat', () => {
       interceptAgentBuilderConverseAsync({ mockResponse: mockChatResponse });
 
-      visitAiAssistedRuleCreationPage();
+      visitAiRuleCreationPage();
       assertConnectorSelected(azureConnectorAPIPayload.name);
       submitRuleCreationPrompt(userPrompt);
 
@@ -185,7 +185,7 @@ describe(
     it('should generate a rule and allow to go back to the prompt', () => {
       interceptAgentBuilderConverseAsync({ mockResponse: mockChatResponse });
 
-      visitAiAssistedRuleCreationPage();
+      visitAiRuleCreationPage();
       assertConnectorSelected(azureConnectorAPIPayload.name);
       submitRuleCreationPrompt(userPrompt);
       assertEsqlQueryBarContains(esqlQuery);
@@ -197,7 +197,7 @@ describe(
     });
 
     it('should allow cancelling rule creation and show regenerate button', () => {
-      visitAiAssistedRuleCreationPage();
+      visitAiRuleCreationPage();
       assertConnectorSelected(azureConnectorAPIPayload.name);
       submitRuleCreationPrompt(userPrompt);
 

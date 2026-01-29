@@ -25,10 +25,10 @@ import {
 } from '../screens/ai_rule_creation';
 import { ESQL_QUERY_BAR } from '../screens/create_new_rule';
 import { visit } from './navigation';
-import { AI_ASSISTED_RULE_CREATE_URL } from '../urls/navigation';
+import { AI_RULE_CREATION_URL } from '../urls/navigation';
 
-export const visitAiAssistedRuleCreationPage = () => {
-  visit(AI_ASSISTED_RULE_CREATE_URL);
+export const visitAiRuleCreationPage = () => {
+  visit(AI_RULE_CREATION_URL);
   cy.get(AI_RULE_CREATION_PROMPT_TEXTAREA).should('be.visible');
 };
 
