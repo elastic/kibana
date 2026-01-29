@@ -12,11 +12,16 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
-  getMissingAssistantKibanaPrivilegesError,
+  getMissingAssistantAndScheduleKibanaPrivilegesError,
+  getMissingScheduleKibanaPrivilegesError,
 } from '../../utils/helpers';
 import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
 import { getSimpleAttackDiscoverySchedule } from '../../mocks';
-import { noKibanaPrivileges, securitySolutionOnlyAllSpace2 } from '../../../../utils/auth/roles';
+import {
+  noKibanaPrivileges,
+  securitySolutionOnlyAllSpace2,
+  securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll,
+} from '../../../../utils/auth/roles';
 import { checkIfScheduleExists } from '../../utils/check_schedule_exists';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -38,7 +43,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path for predefined users', () => {
       const roles = [
-        'viewer',
         'editor',
         ROLES.t1_analyst,
         ROLES.t2_analyst,
@@ -64,12 +68,30 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ ...getSimpleAttackDiscoverySchedule() })
           );
 
-          checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
+          await checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
         });
       });
     });
 
     describe('RBAC', () => {
+      it('should not be able to create a schedule with the "viewer" role', async () => {
+        const testAgent = await utils.createSuperTest('viewer');
+
+        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+        const result = await apis.create({
+          schedule: getSimpleAttackDiscoverySchedule(),
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
+          })
+        );
+      });
+
       it('should not be able to create a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
@@ -81,7 +103,26 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
+          })
+        );
+      });
+
+      it('should not be able to create a schedule without `update schedule` kibana privileges', async () => {
+        const superTest = await utils.createSuperTestWithCustomRole(
+          securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll
+        );
+
+        const apisNoPrivileges = getAttackDiscoverySchedulesApis({ supertest: superTest });
+
+        const result = await apisNoPrivileges.create({
+          schedule: getSimpleAttackDiscoverySchedule(),
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
             routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
           })
         );
@@ -99,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
             routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
           })
         );

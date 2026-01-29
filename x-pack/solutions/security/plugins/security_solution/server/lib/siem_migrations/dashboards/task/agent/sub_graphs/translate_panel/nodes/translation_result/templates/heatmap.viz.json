@@ -1,0 +1,92 @@
+{
+    "type": "lens",
+    "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6,
+        "i": "07fdc318-57e3-4e3a-916e-1b949c047e15"
+    },
+    "panelIndex": "07fdc318-57e3-4e3a-916e-1b949c047e15",
+    "embeddableConfig": {
+        "attributes": {
+            "title": "",
+            "references": [
+                {
+                    "type": "index-pattern",
+                    "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                    "name": "textBasedLanguages-datasource-layer-413744a0-350a-42a5-bff3-2b6d0ebc808c"
+                }
+            ],
+            "state": {
+                "datasourceStates": {
+                    "textBased": {
+                        "layers": {
+                            "3a5310ab-2832-41db-bdbe-1b6939dd5651": {
+                                "index": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "query": {
+                                    "esql": ""
+                                },
+                                "columns": [],
+                                "timeField": "@timestamp"
+                            }
+                        },
+                        "indexPatternRefs": [
+                            {
+                                "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "title": "logs-*",
+                                "timeField": "@timestamp"
+                            }
+                        ]
+                    }
+                },
+                "filters": [],
+                "query": {
+                    "esql": ""
+                },
+                "visualization": {
+                    "shape": "heatmap",
+                    "layerId": "3a5310ab-2832-41db-bdbe-1b6939dd5651",
+                    "layerType": "data",
+                    "legend": {
+                        "isVisible":true,
+                        "position": "right",
+                        "type": "heatmap_legend"
+                    },
+                    "gridConfig": {
+                        "type": "heatmap_grid",
+                        "isCellLabelVisible":false,
+                        "isYAxisLabelVisible":true,
+                        "isXAxisLabelVisible":true,
+                        "isYAxisTitleVisible":false,
+                        "isXAxisTitleVisible":false
+                    },
+                    "valueAccessor": "count()",
+                    "xAccessor": "agent.name",
+                    "yAccessor": "agent.id"
+                },
+                "adHocDataViews": {
+                    "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da": {
+                        "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                        "title": "logs-*",
+                        "timeFieldName": "@timestamp",
+                        "sourceFilters": [],
+                        "type": "esql",
+                        "fieldFormats": {},
+                        "runtimeFieldMap": {},
+                        "allowNoIndex": false,
+                        "name": "logs-*",
+                        "allowHidden": false
+                    }
+                }
+            },
+            "visualizationType": "lnsHeatmap",
+            "type": "lens"
+        },
+        "disabledActions": [
+            "OPEN_FLYOUT_ADD_DRILLDOWN"
+        ],
+        "enhancements": {}
+    },
+    "title": ""
+}

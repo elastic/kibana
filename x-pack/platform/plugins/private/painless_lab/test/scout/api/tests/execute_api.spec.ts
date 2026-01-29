@@ -17,20 +17,24 @@ apiTest.describe(
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
-    apiTest('should execute a valid painless script', async ({ apiClient }) => {
-      const response = await apiClient.post('api/painless_lab/execute', {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: TEST_INPUT.script,
-      });
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toStrictEqual({
-        result: 'true',
-      });
-    });
+
+    apiTest(
+      'should execute a valid painless script using admin credentials',
+      async ({ apiClient }) => {
+        const response = await apiClient.post('api/painless_lab/execute', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: TEST_INPUT.script,
+        });
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toStrictEqual({
+          result: 'true',
+        });
+      }
+    );
 
     apiTest('should return error response for invalid painless script', async ({ apiClient }) => {
       const response = await apiClient.post('api/painless_lab/execute', {

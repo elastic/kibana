@@ -7,7 +7,7 @@
 
 import Piscina from 'piscina';
 import type { Logger } from '@kbn/logging';
-import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
+import type { AnonymizationRegexWorkerTaskPayload } from './types';
 import type { AnonymizationWorkerConfig } from '../../config';
 import type { DetectedMatch } from './types';
 import { executeRegexRulesTask } from './execute_regex_rule_task';
@@ -36,6 +36,7 @@ export class RegexWorkerService {
         filename: require.resolve('./regex_worker_wrapper.js'),
         minThreads: this.config.minThreads,
         maxThreads: this.config.maxThreads,
+        maxQueue: this.config.maxQueue,
         idleTimeout: this.config.idleTimeout.asMilliseconds(),
       });
     }

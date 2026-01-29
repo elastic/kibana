@@ -2,6 +2,8 @@
   "id": "@kbn/box",
   "type": "shared-common",
   "description": "test fixture",
+  "group": "platform",
+  "visibility": "private",
   "devOnly": false,
   "owner": "@elastic/kibana-operations",
 }

@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
+  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('search solution', () => {
@@ -34,58 +35,57 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
-        const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
-
         await solutionNavigation.expectExists();
         await solutionNavigation.breadcrumbs.expectExists();
-
+        // Navigate to the home page to account for the getting started page redirect
+        await common.navigateToApp('elasticsearch/home', { basePath: `/s/${spaceCreated.id}` });
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
 
-        // check the Data > Indices section
         await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'elasticsearchIndexManagement',
+          deepLinkId: 'discover',
         });
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'elasticsearchIndexManagement',
-        });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Indices',
+          deepLinkId: 'discover',
         });
 
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
+
         // navigate to a different section
-        await solutionNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'agent_builder',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'agent_builder',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'agent_builder',
+        });
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'searchHomepage',
         });
-
-        // Redirected to Onboarding Page to Create Index
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Create your first index',
-        });
-
-        await expectNoPageReload();
       });
 
-      it('renders a feedback callout', async () => {
+      it('renders a feedback callout', async function () {
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.feedbackCallout.expectExists();
         await solutionNavigation.sidenav.feedbackCallout.dismiss();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

@@ -17,8 +17,7 @@ import type {
   GroupedNode,
 } from './types';
 import { getEdgeId, isSpanGroupingSupported } from './utils';
-
-const MINIMUM_GROUP_SIZE = 4;
+import { MINIMUM_GROUP_SIZE } from './constants';
 
 const isEdge = (el: ConnectionElement): el is { data: ConnectionEdge } =>
   Boolean(el.data.source && el.data.target);
@@ -92,11 +91,18 @@ function groupNodes({
   nodesMap: Map<string, ConnectionElement>;
   groupedConnections: ReturnType<typeof groupConnections>;
 }) {
-  return groupedConnections.map(
-    ({ id, targets }): GroupedNode => ({
+  return groupedConnections.map(({ id, targets }): GroupedNode => {
+    // Get spanType and spanSubtype from the first target node
+    const firstTarget = nodesMap.get(targets[0]);
+    const firstTargetData = firstTarget && isNode(firstTarget) ? firstTarget.data : undefined;
+    const spanType = firstTargetData?.[SPAN_TYPE];
+    const spanSubtype = firstTargetData?.[SPAN_SUBTYPE];
+
+    return {
       data: {
         id,
-        [SPAN_TYPE]: 'external',
+        [SPAN_TYPE]: spanType || 'external',
+        ...(spanSubtype && { [SPAN_SUBTYPE]: spanSubtype }),
         label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
           defaultMessage: '{count} resources',
           values: { count: targets.length },
@@ -113,8 +119,8 @@ function groupNodes({
           })
           .filter((target): target is GroupedConnection => !!target),
       },
-    })
-  );
+    };
+  });
 }
 
 function groupEdges({

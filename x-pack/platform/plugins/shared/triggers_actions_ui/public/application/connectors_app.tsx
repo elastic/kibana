@@ -12,7 +12,6 @@ import type { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { Observable } from 'rxjs';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -21,11 +20,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 
@@ -60,6 +60,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
   isServerless: boolean;
+  uiActions?: UiActionsStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -76,16 +77,14 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const sectionsRegex = sections.join('|');
 
   setDataViewsService(dataViews);
-  return (
-    <KibanaRenderContextProvider {...deps}>
-      <KibanaContextProvider services={{ ...deps }}>
-        <Router history={deps.history}>
-          <QueryClientProvider client={queryClient}>
-            <AppWithoutRouter sectionsRegex={sectionsRegex} />
-          </QueryClientProvider>
-        </Router>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+  return deps.rendering.addContext(
+    <KibanaContextProvider services={{ ...deps }}>
+      <Router history={deps.history}>
+        <QueryClientProvider client={queryClient}>
+          <AppWithoutRouter sectionsRegex={sectionsRegex} />
+        </QueryClientProvider>
+      </Router>
+    </KibanaContextProvider>
   );
 };
 

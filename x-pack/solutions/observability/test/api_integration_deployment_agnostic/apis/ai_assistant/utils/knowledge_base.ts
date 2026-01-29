@@ -150,6 +150,7 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -294,4 +295,17 @@ export function getKnowledgeBaseEntriesFromApi({
     endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
     params: { query: { query, sortBy, sortDirection } },
   });
+}
+
+export async function clearIntegrationKnowledgeIndex(es: Client) {
+  await es
+    .deleteByQuery({
+      index: '.integration_knowledge*',
+      query: { match_all: {} },
+      refresh: true,
+      conflicts: 'proceed',
+    })
+    .catch(() => {
+      // ignore if index doesn't exist
+    });
 }

@@ -41,7 +41,7 @@ export const DeleteActionName: FC<DeleteActionNameProps> = ({ isDisabled, item }
             : createPermissionFailureMessage('canStartStopDataFrameAnalytics')
         }
       >
-        <>{deleteActionNameText}</>
+        <span tabIndex={0}>{deleteActionNameText}</span>
       </EuiToolTip>
     );
   }

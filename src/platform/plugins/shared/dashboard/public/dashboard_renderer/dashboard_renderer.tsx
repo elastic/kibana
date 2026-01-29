@@ -11,40 +11,55 @@ import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+
 import type { DashboardLocatorParams } from '../../common';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
-import { coreServices, screenshotModeService } from '../services/kibana_services';
 import type { DashboardCreationOptions } from '..';
-import { Dashboard404Page } from './dashboard_404';
-import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import { DashboardViewport } from './viewport/dashboard_viewport';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
+import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
+import { coreServices, screenshotModeService } from '../services/kibana_services';
+
+import { Dashboard404Page } from './dashboard_404';
+import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 
+/**
+ * Props for the {@link DashboardRenderer} component.
+ */
 export interface DashboardRendererProps {
-  onApiAvailable?: (api: DashboardApi) => void;
-  savedObjectId?: string;
-  showPlainSpinner?: boolean;
-  dashboardRedirect?: DashboardRedirect;
-  getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  /** Optional locator for dashboard navigation and URL generation. */
   locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  /** The ID of the saved dashboard to load. If not provided, creates a new dashboard. */
+  savedObjectId?: string;
+  /** Whether to show a plain spinner instead of the Elastic loading animation. */
+  showPlainSpinner?: boolean;
+  /** Callback for redirecting within the dashboard application. */
+  dashboardRedirect?: DashboardRedirect;
+  /** Function that returns the creation options for the dashboard. */
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  /**
+   * Callback invoked when the dashboard API becomes available.
+   *
+   * @param api - The {@link DashboardApi} instance.
+   * @param internalApi - The {@link DashboardInternalApi} instance.
+   */
+  onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
 }
 
 export function DashboardRenderer({
-  savedObjectId,
-  getCreationOptions,
-  dashboardRedirect,
-  showPlainSpinner,
   locator,
+  savedObjectId,
+  showPlainSpinner,
+  dashboardRedirect,
+  getCreationOptions,
   onApiAvailable,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
@@ -59,6 +74,15 @@ export function DashboardRenderer({
     /* In case the locator prop changes, we need to reassign the value in the container */
     if (dashboardApi) dashboardApi.locator = locator;
   }, [dashboardApi, locator]);
+
+  useEffect(() => {
+    if (
+      dashboardInternalApi &&
+      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+    ) {
+      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+    }
+  }, [dashboardInternalApi]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -78,7 +102,7 @@ export function DashboardRenderer({
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(results.api);
+        onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
         if (!canceled) setError(err);
@@ -131,7 +155,12 @@ export function DashboardRenderer({
         className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
-        ref={(e) => (dashboardContainerRef.current = e)}
+        ref={(e) => {
+          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
+            dashboardInternalApi.setDashboardContainerRef(e);
+          }
+          dashboardContainerRef.current = e;
+        }}
       >
         <GlobalPrintStyles />
         <ExitFullScreenButtonKibanaProvider
@@ -139,7 +168,7 @@ export function DashboardRenderer({
         >
           <DashboardContext.Provider value={dashboardApi}>
             <DashboardInternalContext.Provider value={dashboardInternalApi}>
-              <DashboardViewport dashboardContainerRef={dashboardContainerRef} />
+              <DashboardViewport />
             </DashboardInternalContext.Provider>
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>

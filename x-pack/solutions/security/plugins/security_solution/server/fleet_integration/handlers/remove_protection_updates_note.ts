@@ -22,11 +22,7 @@ export const removeProtectionUpdatesNote = async (
 
   logger.debug(`Processing policy [${policy.id}]`);
 
-  const isSpacesEnabled =
-    endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
-  const soClient = isSpacesEnabled
-    ? endpointServices.savedObjects.createInternalUnscopedSoClient(false)
-    : endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
+  const soClient = endpointServices.savedObjects.createInternalUnscopedSoClient(false);
 
   if (policy.id) {
     const foundProtectionUpdatesNotes = await soClient
@@ -36,7 +32,7 @@ export const removeProtectionUpdatesNote = async (
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           id: policy.id,
         },
-        namespaces: isSpacesEnabled ? ['*'] : undefined,
+        namespaces: ['*'],
       })
       .catch(
         catchAndWrapError.withMessage(
@@ -51,12 +47,10 @@ export const removeProtectionUpdatesNote = async (
     await pMap(foundProtectionUpdatesNotes.saved_objects, (protectionUpdatesNote) => {
       logger.debug(() => `Deleting protections note:\n${stringify(protectionUpdatesNote)}`);
 
-      const soClientForUpdate = isSpacesEnabled
-        ? endpointServices.savedObjects.createInternalScopedSoClient({
-            spaceId: protectionUpdatesNote.namespaces?.at(0) ?? DEFAULT_SPACE_ID,
-            readonly: false,
-          })
-        : soClient;
+      const soClientForUpdate = endpointServices.savedObjects.createInternalScopedSoClient({
+        spaceId: protectionUpdatesNote.namespaces?.at(0) ?? DEFAULT_SPACE_ID,
+        readonly: false,
+      });
 
       return soClientForUpdate
         .delete(protectionUpdatesNoteSavedObjectType, protectionUpdatesNote.id, {

@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import { faker } from '@faker-js/faker';
-import type { LensRuntimeState, VisualizationContext } from '../types';
+import type { LensRuntimeState, VisualizationContext } from '@kbn/lens-common';
 import { initializeActionApi } from './initialize_actions';
 import {
   getLensApiMock,

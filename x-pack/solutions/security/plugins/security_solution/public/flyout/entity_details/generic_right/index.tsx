@@ -26,14 +26,15 @@ import {
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
-import { useGetGenericEntity } from './hooks/use_get_generic_entity';
+import {
+  useGetGenericEntity,
+  type UseGetGenericEntityParams,
+} from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { GenericEntityFlyoutHeader } from './header';
 import { GenericEntityFlyoutContent } from './content';
 import { GenericEntityFlyoutFooter } from './footer';
-import { useKibana } from '../../../common/lib/kibana';
-import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 
 interface CommonError {
@@ -53,25 +54,27 @@ export const isCommonError = (error: unknown): error is CommonError => {
   return true;
 };
 
-export interface GenericEntityPanelProps {
-  entityDocId: string;
+interface BaseGenericEntityPanelProps {
   scopeId: string;
+  isPreviewMode?: boolean;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
+  isEngineMetadataExist?: boolean;
 }
+
+export type GenericEntityPanelProps = BaseGenericEntityPanelProps & UseGetGenericEntityParams;
 
 export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'generic-entity-panel';
   params: GenericEntityPanelProps;
 }
 
-export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
+export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
+  const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
 
-export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelProps) => {
-  const { uiSettings } = useKibana().services;
-  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-
-  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  // When you destructuring params in the function signature TypeScript loses track
+  // of the union type constraints and infers them as potentially undefined
+  const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!genericInsightsValue,
@@ -83,8 +86,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     insightsField: 'related.entity',
     insightsValue: genericInsightsValue || '',
-    entityDocId,
-    scopeId,
+    ...params,
   });
 
   const openGenericEntityDetailsPanelByPath = (path: EntityDetailsPath) => {
@@ -126,6 +128,26 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
       uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, GENERIC_ENTITY_FLYOUT_OPENED);
     }
   }, [getGenericEntity.data?._id]);
+
+  if (!isEngineMetadataExist) {
+    return (
+      <>
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          data-test-subj="generic-right-flyout-error-prompt-missing-engineMetadataType"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.genericEntityFlyout.missingEngineMetadataType.errorTitle"
+                defaultMessage="Unable to load entity: 'EngineMetadata.Type' is missing or not set."
+              />
+            </h2>
+          }
+        />
+      </>
+    );
+  }
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
@@ -176,6 +198,8 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+  const fields = getGenericEntity.data.fields || {};
+  const assetCriticalityLevel = getAssetCriticality.data?.criticality_level;
 
   return (
     <>
@@ -184,6 +208,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         expandDetails={() =>
           openGenericEntityDetailsPanelByPath({ tab: EntityDetailsLeftPanelTab.FIELDS_TABLE })
         }
+        isPreviewMode={isPreviewMode}
       />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
       <GenericEntityFlyoutContent
@@ -193,7 +218,13 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         insightsValue={source.entity.id}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
-      {assetInventoryEnabled && <GenericEntityFlyoutFooter entityId={entity.id} />}
+      <GenericEntityFlyoutFooter
+        scopeId={scopeId}
+        isPreviewMode={isPreviewMode ?? false}
+        entityId={entity.id}
+        entityFields={fields}
+        assetCriticalityLevel={assetCriticalityLevel}
+      />
     </>
   );
 };

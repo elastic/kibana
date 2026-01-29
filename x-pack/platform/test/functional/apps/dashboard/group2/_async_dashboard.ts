@@ -130,7 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should launch sample flights data set dashboard', async () => {
       await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
-      await header.waitUntilLoadingHasFinished();
       await timePicker.setCommonlyUsedTime('sample_data range');
       await header.waitUntilLoadingHasFinished();
 

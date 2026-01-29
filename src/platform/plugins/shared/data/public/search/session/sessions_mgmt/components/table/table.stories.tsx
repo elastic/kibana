@@ -23,6 +23,7 @@ import type { SearchSessionSavedObject } from '../../types';
 import { ACTION } from '../../types';
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
 import { columns } from '.';
+import { SearchSessionEBTManager } from '../../../ebt_manager';
 
 export default {
   title: 'components/SearchSessionsMgmtTable',
@@ -39,7 +40,7 @@ const Component = ({
 }: {
   data?: SearchSessionSavedObject[];
   statuses?: Record<string, SearchSessionStatusResponse>;
-  props?: Partial<typeof SearchSessionsMgmtTable>;
+  props?: Partial<React.ComponentProps<typeof SearchSessionsMgmtTable>>;
 }) => {
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
@@ -47,6 +48,10 @@ const Component = ({
 
   const sessionsClient = new SessionsClient({
     http: mockCoreSetup.http,
+  });
+  const ebtManager = new SearchSessionEBTManager({
+    core: mockCoreSetup,
+    logger: coreMock.createPluginInitializerContext().logger.get(),
   });
 
   const mockConfig = {
@@ -64,11 +69,11 @@ const Component = ({
     application: mockCoreStart.application,
     featureFlags: mockCoreStart.featureFlags,
   });
-  api.fetchTableData = async () => {
+  sessionsClient.find = async () => {
     return {
-      savedObjects: data,
+      saved_objects: data,
       statuses,
-    };
+    } as unknown as ReturnType<typeof sessionsClient.find>;
   };
 
   const mockSearchUsageCollector = createSearchUsageCollectorMock();
@@ -83,6 +88,8 @@ const Component = ({
         kibanaVersion="8.0.0"
         locators={mockShareStart.url.locators}
         searchUsageCollector={mockSearchUsageCollector}
+        trackingProps={{ renderedIn: 'storybook', openedFrom: 'storybook' }}
+        searchSessionEBTManager={ebtManager}
         {...props}
       />
     </IntlProvider>
@@ -274,6 +281,65 @@ export const NoFiltersAndRefreshButton = {
         hideRefreshButton: true,
         getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
           columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        ],
+      }}
+    />
+  ),
+};
+
+export const PreFilteredSessions = {
+  name: 'PreFiltered sessions',
+  argTypes: {
+    appId: {
+      options: ['discover', 'dashboard'],
+      control: { type: 'select' },
+    },
+  },
+  args: {
+    appId: 'discover',
+  },
+  render: (args: { appId: string }) => (
+    <Component
+      data={getSearchSessionSavedObjectMocks({
+        length: 50,
+        overrides: ({ idx }) => {
+          const mappings = Array.from({ length: idx }, (_, i) => [`index-${i}`, `doc-${i}`]);
+          const idMapping = Object.fromEntries(mappings);
+
+          return {
+            attributes: getPersistedSearchSessionSavedObjectAttributesMock({
+              idMapping,
+              appId: idx % 2 === 0 ? 'discover' : 'dashboard',
+            }),
+            numSearches: idx,
+          };
+        },
+      })}
+      props={{
+        appId: args.appId,
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.appIdColumn,
+        ],
+      }}
+    />
+  ),
+};
+
+export const OnClickHandler = {
+  name: 'On click handler',
+  render: () => (
+    <Component
+      data={getSearchSessionSavedObjectMocks({ length: 10 })}
+      props={{
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({
+            core,
+            searchUsageCollector,
+            kibanaVersion,
+            onBackgroundSearchOpened: ({ session }) =>
+              alert(`You have clicked session ${session.name}`),
+          }),
         ],
       }}
     />

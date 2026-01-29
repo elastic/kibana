@@ -11,8 +11,7 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiTitle,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
@@ -24,6 +23,7 @@ import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
+import { EdgeContents } from './edge_contents';
 import { DependencyContents } from './dependency_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
@@ -47,6 +47,9 @@ function getContentsComponent(
   }
   if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
+  }
+  if (selectedElementData?.source && selectedElementData?.target) {
+    return EdgeContents;
   }
 
   if (selectedElementData.label) {
@@ -129,6 +132,8 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       cy.on('unselect', 'node', deselect);
       cy.on('viewport', deselect);
       cy.on('drag', 'node', deselect);
+      cy.on('select', 'edge', selectHandler);
+      cy.on('unselect', 'edge', deselect);
     }
 
     return () => {
@@ -194,14 +199,13 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
               <h3 style={{ wordBreak: 'break-all' }}>
                 {selectedElementData.label ?? selectedElementId}
                 {kuery && (
-                  <EuiToolTip
+                  <EuiIconTip
                     position="bottom"
                     content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
                       defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                     })}
-                  >
-                    <EuiIcon tabIndex={0} type="info" />
-                  </EuiToolTip>
+                    type="info"
+                  />
                 )}
               </h3>
             </EuiTitle>

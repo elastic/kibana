@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const retry = getService('retry');
 
-  describe('default State', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/237709
+  describe.skip('default State', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       // creates security data view if it does not exist

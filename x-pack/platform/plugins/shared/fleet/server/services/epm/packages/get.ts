@@ -39,12 +39,15 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
+
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../../../constants';
+
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -73,9 +76,13 @@ import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
-import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
+import type {
+  PackageAssetReference,
+  RegistryPolicyTemplate,
+} from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
+import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
 import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
@@ -84,7 +91,11 @@ import {
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
-import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import {
+  shouldIncludePackageWithDatastreamTypes,
+  filterOutExcludedDataStreamTypes,
+  shouldIncludePolicyTemplateWithDatastreamTypes,
+} from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
 
@@ -185,7 +196,9 @@ export async function getPackages(
     });
   }
 
-  packageList = filterOutExcludedDataStreamTypes(packageList);
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  packageList = filterOutExcludedDataStreamTypes(packageList, excludeDataStreamTypes);
 
   if (!excludeInstallStatus) {
     return packageList;
@@ -203,29 +216,6 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus as PackageList;
-}
-
-function filterOutExcludedDataStreamTypes(
-  packageList: Array<Installable<any>>
-): Array<Installable<any>> {
-  const excludeDataStreamTypes =
-    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
-  if (excludeDataStreamTypes.length > 0) {
-    // filter out packages where all data streams have excluded types e.g. metrics
-    return packageList.reduce((acc, pkg) => {
-      const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
-      if (shouldInclude) {
-        // filter out excluded data stream types
-        const filteredDataStreams =
-          pkg.data_streams?.filter(
-            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
-          ) ?? [];
-        acc.push({ ...pkg, data_streams: filteredDataStreams });
-      }
-      return acc;
-    }, []);
-  }
-  return packageList;
 }
 
 interface GetInstalledPackagesOptions {
@@ -555,7 +545,6 @@ export async function getPackageInfo({
     }));
   }
 
-  // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
     latestVersion:
       latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
@@ -582,6 +571,7 @@ export async function getPackageInfo({
       'Package is not compatible with the current project data stream types'
     );
   }
+
   const updated = {
     ...packageInfo,
     ...additions,
@@ -610,6 +600,16 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
       (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
         const policyTemplateIntegrationTemplate =
           policyTemplate as RegistryPolicyIntegrationTemplate;
+
+        const shouldIncludePolicyTemplate = shouldIncludePolicyTemplateWithDatastreamTypes(
+          packageInfo,
+          policyTemplate,
+          excludeDataStreamTypes
+        );
+        if (!shouldIncludePolicyTemplate) {
+          return acc;
+        }
+
         if (policyTemplateIntegrationTemplate.inputs) {
           const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
             const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
@@ -827,18 +827,20 @@ export async function getInstalledPackageWithAssets(options: {
   if (!installation) {
     return;
   }
-  const assetsReference =
-    (typeof options.assetsFilter !== 'undefined'
-      ? installation.package_assets?.filter(({ path }) =>
-          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
-        )
-      : installation.package_assets) ?? [];
 
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    assetsReference,
-    options.savedObjectsClient
+    installation.package_assets ?? [],
+    options.savedObjectsClient,
+    {
+      shouldFetchBuffer: (reference: PackageAssetReference) => {
+        if (typeof options.assetsFilter === 'undefined' || typeof reference.path === 'undefined') {
+          return true;
+        }
+        return options.assetsFilter(reference.path);
+      },
+    }
   );
 
   if (!esPackage) {
@@ -965,5 +967,42 @@ export async function getAgentTemplateAssetsMap({
   } catch (error) {
     logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
+  }
+}
+
+/**
+ * Get knowledge base content for a package
+ * @param options Object with esClient and package name
+ * @returns The knowledge base content or undefined if not found
+ */
+export async function getPackageKnowledgeBase(options: {
+  esClient: ElasticsearchClient;
+  pkgName: string;
+  abortController?: AbortController;
+}): Promise<PackageKnowledgeBase | undefined> {
+  const { esClient, pkgName, abortController } = options;
+
+  try {
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      abortController
+    );
+
+    if (knowledgeBaseItems.length === 0) {
+      return undefined;
+    }
+
+    return {
+      package: {
+        name: pkgName,
+      },
+      items: knowledgeBaseItems,
+    };
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error fetching knowledge base for package ${pkgName}: ${error.message}`);
+    return undefined;
   }
 }

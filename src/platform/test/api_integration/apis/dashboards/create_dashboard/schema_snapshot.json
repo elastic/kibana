@@ -1,0 +1,27 @@
+[
+  {
+    "type": "object",
+    "description": "Markdown embeddable schema",
+    "properties": {
+      "content": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "hide_title": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "required": ["content"]
+  },
+  {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": true
+  }
+]

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
-import { ExpandableSection } from './expandable_section';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'visualizations';
 
@@ -25,23 +24,20 @@ const KEY = 'visualizations';
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
   const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
 
-  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
-
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
+  const { shouldShowGraph } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
-
-  const shouldShowGraphPreview = useMemo(
-    () => graphVisualizationEnabled && hasGraphRepresentation,
-    [graphVisualizationEnabled, hasGraphRepresentation]
-  );
 
   return (
     <ExpandableSection
@@ -52,13 +48,14 @@ export const VisualizationsSection = memo(() => {
           defaultMessage="Visualizations"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       data-test-subj={VISUALIZATIONS_TEST_ID}
     >
       <SessionPreviewContainer />
       <EuiSpacer />
       <AnalyzerPreviewContainer />
-      {shouldShowGraphPreview && (
+      {shouldShowGraph && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />

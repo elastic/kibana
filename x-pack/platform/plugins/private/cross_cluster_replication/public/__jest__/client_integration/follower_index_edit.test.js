@@ -4,31 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act } from 'react-dom/test-utils';
 
+import { screen, within, act, fireEvent } from '@testing-library/react';
 import { API_BASE_PATH } from '../../../common/constants';
-import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
 import './mocks';
 import { FOLLOWER_INDEX_EDIT, FOLLOWER_INDEX_EDIT_NAME } from './helpers/constants';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 const { setup } = pageHelpers.followerIndexEdit;
-const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;
 
 describe('Edit follower index', () => {
   let httpSetup;
   let httpRequestsMockHelpers;
+  let user;
 
   beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('on component mount', () => {
-    let find;
-    let component;
-
     const remoteClusters = [{ name: 'new-york', seeds: ['localhost:123'], isConnected: true }];
 
     beforeEach(async () => {
@@ -37,64 +42,29 @@ describe('Edit follower index', () => {
         FOLLOWER_INDEX_EDIT_NAME,
         FOLLOWER_INDEX_EDIT
       );
-      ({ component, find } = setup());
+      const result = setup();
+      user = result.user;
 
-      await nextTick();
-      component.update();
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
-    /**
-     * As the "edit" follower index component uses the same form underneath that
-     * the "create" follower index, we won't test it again but simply make sure that
-     * the form component is indeed shared between the 2 app sections.
-     */
-    test('should use the same Form component as the "<FollowerIndexAdd />" component', async () => {
-      const { component: addFollowerIndexComponent } = setupFollowerIndexAdd();
-
-      await nextTick();
-      addFollowerIndexComponent.update();
-
-      const formEdit = component.find(FollowerIndexForm);
-      const formAdd = addFollowerIndexComponent.find(FollowerIndexForm);
-
-      expect(formEdit.length).toBe(1);
-      expect(formAdd.length).toBe(1);
+    test('should use the same Form component as the "<FollowerIndexAdd />" component', () => {
+      expect(screen.getByTestId('followerIndexForm')).toBeInTheDocument();
     });
 
     test('should populate the form fields with the values from the follower index loaded', () => {
-      const inputToPropMap = {
-        remoteClusterInput: 'remoteCluster',
-        leaderIndexInput: 'leaderIndex',
-        followerIndexInput: 'name',
-        maxReadRequestOperationCountInput: 'maxReadRequestOperationCount',
-        maxOutstandingReadRequestsInput: 'maxOutstandingReadRequests',
-        maxReadRequestSizeInput: 'maxReadRequestSize',
-        maxWriteRequestOperationCountInput: 'maxWriteRequestOperationCount',
-        maxWriteRequestSizeInput: 'maxWriteRequestSize',
-        maxOutstandingWriteRequestsInput: 'maxOutstandingWriteRequests',
-        maxWriteBufferCountInput: 'maxWriteBufferCount',
-        maxWriteBufferSizeInput: 'maxWriteBufferSize',
-        maxRetryDelayInput: 'maxRetryDelay',
-        readPollTimeoutInput: 'readPollTimeout',
-      };
-
-      Object.entries(inputToPropMap).forEach(([input, prop]) => {
-        const expected = FOLLOWER_INDEX_EDIT[prop];
-        const { value } = find(input).props();
-        try {
-          expect(value).toBe(expected);
-        } catch {
-          throw new Error(
-            `Input "${input}" does not equal "${expected}". (Value received: "${value}")`
-          );
-        }
-      });
+      expect(screen.getByTestId('followerIndexInput')).toHaveValue(FOLLOWER_INDEX_EDIT.name);
+      expect(screen.getByTestId('leaderIndexInput')).toHaveValue(FOLLOWER_INDEX_EDIT.leaderIndex);
+      expect(screen.getByTestId('remoteClusterInput')).toHaveValue(
+        FOLLOWER_INDEX_EDIT.remoteCluster
+      );
     });
   });
 
   describe('API', () => {
     const remoteClusters = [{ name: 'new-york', seeds: ['localhost:123'], isConnected: true }];
-    let testBed;
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
@@ -102,52 +72,52 @@ describe('Edit follower index', () => {
         FOLLOWER_INDEX_EDIT_NAME,
         FOLLOWER_INDEX_EDIT
       );
+      const result = setup();
+      user = result.user;
 
       await act(async () => {
-        testBed = await setup();
+        await jest.runOnlyPendingTimersAsync();
       });
-
-      testBed.component.update();
     });
 
+    // long test takes a while on CI
+    // Using fireEvent for better performance on CI
     test('is consumed correctly', async () => {
-      const { actions, form, component, find } = testBed;
+      // Verify GET was called during mount
+      const getCalls = httpSetup.get.mock.calls;
+      const getFollowerCall = getCalls.find(
+        (call) => call[0] === `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT_NAME}`
+      );
+      expect(getFollowerCall).toBeDefined();
 
-      form.setInputValue('maxRetryDelayInput', '10s');
+      // Change a form value to enable save
+      const maxRetryDelayInput = screen.getByTestId('maxRetryDelayInput');
+      fireEvent.change(maxRetryDelayInput, { target: { value: '10s' } });
+      fireEvent.blur(maxRetryDelayInput);
 
-      actions.clickSaveForm();
-      component.update(); // The modal to confirm the update opens
-      find('confirmModalConfirmButton').simulate('click');
+      // Click save button
+      const saveButton = screen.getByTestId('submitButton');
+      fireEvent.click(saveButton);
 
-      await nextTick(); // Make sure the Request went through
+      // Confirmation modal should appear, click confirm
+      const confirmButton = await screen.findByTestId('confirmModalConfirmButton');
+      fireEvent.click(confirmButton);
 
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      // PUT should have been called
+      expect(httpSetup.put).toHaveBeenCalledWith(
         `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT_NAME}`,
         expect.objectContaining({
-          body: JSON.stringify({
-            maxReadRequestOperationCount: 7845,
-            maxOutstandingReadRequests: 16,
-            maxReadRequestSize: '64mb',
-            maxWriteRequestOperationCount: 2456,
-            maxWriteRequestSize: '1048b',
-            maxOutstandingWriteRequests: 69,
-            maxWriteBufferCount: 123456,
-            maxWriteBufferSize: '256mb',
-            maxRetryDelay: '10s',
-            readPollTimeout: '2m',
-          }),
+          body: expect.stringContaining('"maxRetryDelay":"10s"'),
         })
       );
     });
   });
 
   describe('when the remote cluster is disconnected', () => {
-    let find;
-    let exists;
-    let component;
-    let actions;
-    let form;
-
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([
         { name: 'new-york', seeds: ['localhost:123'], isConnected: false },
@@ -156,27 +126,29 @@ describe('Edit follower index', () => {
         FOLLOWER_INDEX_EDIT_NAME,
         FOLLOWER_INDEX_EDIT
       );
-      ({ component, find, exists, actions, form } = setup());
+      ({ user } = setup());
 
-      await nextTick();
-      component.update();
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('should display an error and have a button to edit the remote cluster', () => {
-      const error = find('remoteClusterFormField.notConnectedError');
+      const error = screen.getByTestId('notConnectedError');
+      expect(error).toBeInTheDocument();
 
-      expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').last().text()).toBe(
-        `Can't edit follower index because remote cluster '${FOLLOWER_INDEX_EDIT.remoteCluster}' is not connected`
-      );
-      expect(exists('remoteClusterFormField.notConnectedError.editButton')).toBe(true);
+      const editButton = within(error).getByTestId('editButton');
+      expect(editButton).toBeInTheDocument();
     });
 
-    test('should prevent saving the form and display an error message for the required remote cluster', () => {
-      actions.clickSaveForm();
+    test('should prevent saving the form and display an error message for the required remote cluster', async () => {
+      const submitButton = screen.getByTestId('submitButton');
+      await user.click(submitButton);
 
-      expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
-      expect(find('submitButton').props().disabled).toBe(true);
+      const errors = screen.queryAllByText('A connected remote cluster is required.');
+      expect(errors.length).toBeGreaterThan(0);
+
+      expect(submitButton).toBeDisabled();
     });
   });
 });

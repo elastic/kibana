@@ -9,6 +9,15 @@
 
 import datemath from '@kbn/datemath';
 
+/**
+ * Represents a time range with from and to ISO string dates
+ */
+export interface TimeRange {
+  from: string;
+  to: string;
+  mode?: 'absolute' | 'relative';
+}
+
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
     const parsed = datemath.parse(rawDate, options);
@@ -53,19 +62,19 @@ export function getDateISORange({ from, to }: { from: string; to: string }) {
   };
 }
 
-export function getTimeDifferenceInSeconds({
-  startDate,
-  endDate,
-}: {
-  startDate: number;
-  endDate: number;
-}): number {
-  if (!startDate || !endDate || startDate > endDate) {
-    throw new Error(`Invalid Dates: from: ${startDate}, to: ${endDate}`);
+export function getTimeDifferenceInSeconds(
+  input: { startDate: number; endDate: number } | TimeRange
+): number {
+  const isTimestampInput = 'startDate' in input && 'endDate' in input;
+
+  const from = isTimestampInput ? input.startDate : new Date(input.from).getTime();
+  const to = isTimestampInput ? input.endDate : new Date(input.to).getTime();
+
+  if (from > to) {
+    return NaN;
   }
 
-  const rangeInSeconds = (endDate - startDate) / 1000;
-  return Math.round(rangeInSeconds);
+  return Math.round((to - from) / 1000);
 }
 
 export function getOffsetFromNowInSeconds(epochDate: number) {

@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
+// Note: Processor type correctness (grok, dissect, date, rename, set, remove, uppercase,
+// lowercase, trim, convert, etc.) is covered by API tests in
+// test/scout/api/tests/processing_simulate.spec.ts
+// These UI tests focus on preview table behavior, auto-update, and UI-specific features
 test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -27,11 +24,12 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+    await pageObjects.streams.switchToColumnsView();
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display default samples when no processors are configured', async ({
@@ -48,34 +46,14 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     }
   });
 
-  test('should display simulation preview when configuring a new processor', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
-    await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="to"]').fill('message');
-
-    const rows = await pageObjects.streams.getPreviewTableRows();
-    expect(rows.length).toBeGreaterThan(0);
-
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'message',
-        rowIndex,
-        value: 'Test log message',
-      });
-    }
-  });
-
+  // UI-specific test: Tests that preview auto-updates as user types (reactive behavior)
   test('should automatically update the simulation preview when changing a new processor config', async ({
     page,
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.selectProcessorType('Rename');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
@@ -107,8 +85,8 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.selectProcessorType('Rename');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
@@ -142,14 +120,14 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     pageObjects,
   }) => {
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('rename');
-    await pageObjects.streams.fillFieldInput('message');
+    await pageObjects.streams.selectProcessorType('Rename');
+    await pageObjects.streams.fillProcessorFieldInput('message');
     await page.locator('input[name="to"]').fill('message');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('set');
-    await pageObjects.streams.fillFieldInput('custom_threshold');
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput('custom_threshold', { isCustomValue: true });
     await page.locator('input[name="value"]').fill('1024');
     await pageObjects.streams.clickSaveProcessor();
 
@@ -188,4 +166,88 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
       });
     }
   });
+
+  test('should update the simulation preview with processed dates from another locale/timezone', async ({
+    page,
+    pageObjects,
+  }) => {
+    const sourceField = 'french_date';
+    const targetField = 'processed_french_date';
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput(sourceField, { isCustomValue: true });
+    await page.locator('input[name="value"]').fill('08 avril 1999');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Set');
+    await pageObjects.streams.fillProcessorFieldInput(targetField, {
+      isCustomValue: true,
+    });
+    await page.locator('input[name="value"]').fill('null');
+    await pageObjects.streams.clickSaveProcessor();
+
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Date');
+    await pageObjects.streams.fillDateProcessorSourceFieldInput(sourceField);
+    await pageObjects.streams.fillDateProcessorFormatInput('dd MMMM yyyy');
+    await pageObjects.streams.clickDateProcessorAdvancedSettings();
+    await pageObjects.streams.fillDateProcessorTargetFieldInput(targetField);
+    await pageObjects.streams.fillDateProcessorTimezoneInput('Europe/Paris');
+    await pageObjects.streams.fillDateProcessorLocaleInput('fr');
+    await pageObjects.streams.fillDateProcessorOutputFormatInput('yyyy-MM-dd');
+    await pageObjects.streams.clickSaveProcessor();
+
+    const updatedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(updatedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: targetField,
+        rowIndex,
+        value: '1999-04-08',
+      });
+    }
+  });
+
+  // UI-specific test: Tests the Skipped/Dropped tabs which are UI-only features
+  test('should show dropped documents in the simulation preview', async ({ pageObjects }) => {
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Drop document');
+    // drop 'info' logs, perhaps they create too much noise/cost for a customer
+    await pageObjects.streams.fillConditionEditor({
+      field: 'log.level',
+      operator: 'equals',
+      value: 'info',
+    });
+    await pageObjects.streams.clickSaveProcessor();
+
+    // info logs should not appear in the 'Skipped' data preview since they were dropped by the simulation
+    await pageObjects.streams.clickProcessorPreviewTab('Skipped');
+    const skippedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(skippedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < skippedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'log.level',
+        rowIndex,
+        value: 'info',
+        invertCondition: true,
+      });
+    }
+
+    // info logs should appear in the 'Dropped' data preview since they were dropped by the simulation
+    await pageObjects.streams.clickProcessorPreviewTab('Dropped');
+    const droppedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(droppedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < droppedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'log.level',
+        rowIndex,
+        value: 'info',
+      });
+    }
+  });
+
+  // Note: Individual processor type tests (uppercase, lowercase, trim, etc.) have been
+  // removed as they are covered by API tests in processing_simulate.spec.ts
 });

@@ -8,18 +8,18 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 
+import { useLicense } from '../../common/hooks/use_license';
 import { Paywall } from '../components/paywall';
-import { useSecurityContext } from '../hooks/use_security_context';
-import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
+import { SecuritySolutionTemplateWrapper } from '../../app/home/template_wrapper';
 
 export const EnterpriseGuard = memo<PropsWithChildren<unknown>>(({ children }) => {
-  const { licenseService } = useSecurityContext();
+  const licenseService = useLicense();
 
   if (licenseService.isEnterprise()) {
     return <>{children}</>;
   }
 
-  return <SecuritySolutionPluginTemplateWrapper isEmptyState emptyPageBody={<Paywall />} />;
+  return <SecuritySolutionTemplateWrapper isEmptyState emptyPageBody={<Paywall />} />;
 });
 
 EnterpriseGuard.displayName = 'EnterpriseGuard';

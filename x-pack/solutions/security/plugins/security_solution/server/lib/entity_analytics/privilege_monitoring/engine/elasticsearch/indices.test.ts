@@ -63,7 +63,7 @@ describe('Privileged User Monitoring: Indices Service', () => {
       };
 
       mockCreateOrUpdateIndex.mockRejectedValue(error);
-      await indexService.upsertIndex();
+      await indexService._upsertIndex();
 
       expect(loggerMock.debug).toHaveBeenCalledWith(
         expect.stringContaining('Privilege monitoring index already exists.')
@@ -77,7 +77,7 @@ describe('Privileged User Monitoring: Indices Service', () => {
         [PRIVMON_EVENT_INGEST_PIPELINE_ID]: {},
       });
 
-      await indexService.createIngestPipelineIfDoesNotExist();
+      await indexService._createIngestPipelineIfDoesNotExist();
 
       expect(clusterClientMock.asInternalUser.ingest.getPipeline).toHaveBeenCalled();
       expect(loggerMock.info).toHaveBeenCalledWith(
@@ -88,7 +88,7 @@ describe('Privileged User Monitoring: Indices Service', () => {
     it('should only create a pipeline if no existing pipeline exists', async () => {
       clusterClientMock.asInternalUser.ingest.getPipeline.mockResolvedValue({});
 
-      await indexService.createIngestPipelineIfDoesNotExist();
+      await indexService._createIngestPipelineIfDoesNotExist();
 
       expect(clusterClientMock.asInternalUser.ingest.putPipeline).toHaveBeenCalledWith(
         expect.objectContaining(eventIngestPipeline)

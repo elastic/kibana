@@ -49,6 +49,25 @@ import { executeWatch } from '../../../../lib/api';
 import { SectionError } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    watcherThresholdDeleteButton: css`
+      opacity: 0;
+
+      &:focus,
+      .euiAccordion:hover & {
+        opacity: 1;
+      }
+
+      ${euiCanAnimate} {
+        transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+      }
+    `,
+  };
+};
+
 const actionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
   [ACTION_TYPES.SLACK]: SlackActionFields,
@@ -78,7 +97,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
   settings,
   actionErrors,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
   const {
     links: { watchActionsConfigurationMap },
     toasts,
@@ -126,18 +145,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
             <EuiButtonIcon
               iconType="cross"
               color="danger"
-              css={css`
-                opacity: 0;
-
-                &:focus,
-                .euiAccordion:hover & {
-                  opacity: 1;
-                }
-
-                ${euiCanAnimate} {
-                  transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
-                }
-              `}
+              css={styles.watcherThresholdDeleteButton}
               aria-label={i18n.translate(
                 'xpack.watcher.sections.watchEdit.threshold.accordion.deleteIconAriaLabel',
                 {
@@ -189,6 +197,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
               {settings && settings.actionTypes[action.type].enabled === false ? (
                 <Fragment>
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.translate(
                       'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
                       {

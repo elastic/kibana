@@ -19,6 +19,7 @@ import type {
   RegistryVarsEntry,
   RegistryRequiredVars,
   NewPackagePolicyInputStream,
+  RegistryVarGroup,
 } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
@@ -33,6 +34,92 @@ import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
+
+interface DurationParseResult {
+  isValid: boolean;
+  valueNs: number; // in nanoseconds
+  errors: string[];
+}
+
+/**
+ * Parses a duration string into nanoseconds and validates the format.
+ * Valid time units are "ms", "s", "m", "h".
+ *
+ * @param durationStr - The duration string to parse (e.g., "1h30m45s")
+ * @returns An object with parsing results
+ */
+export const parseDuration = (durationStr: string): DurationParseResult => {
+  const result: DurationParseResult = {
+    isValid: true,
+    valueNs: 0,
+    errors: [],
+  };
+
+  if (!durationStr || typeof durationStr !== 'string' || durationStr.trim() === '') {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.emptyDurationErrorMessage', {
+        defaultMessage: 'Duration cannot be empty',
+      })
+    );
+    return result;
+  }
+
+  // Regular expression to match duration components.
+  const durationRegex = /(\d+)(ms|s|m|h)/g;
+  const matches = [...durationStr.matchAll(durationRegex)];
+
+  if (matches.length === 0) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationFormatErrorMessage', {
+        defaultMessage: 'Invalid duration format. Expected format like "1h30m45s"',
+      })
+    );
+    return result;
+  }
+
+  // Check if the entire string is matched
+  const fullMatch = matches.reduce((acc, match) => acc + match[0], '');
+  if (fullMatch !== durationStr) {
+    result.isValid = false;
+    result.errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationCharactersErrorMessage', {
+        defaultMessage: 'Duration contains invalid characters',
+      })
+    );
+  }
+
+  const NANOSECONDS_PER_MS = 1_000_000;
+  const NANOSECONDS_PER_SECOND = 1_000_000_000;
+  const NANOSECONDS_PER_MINUTE = 60 * NANOSECONDS_PER_SECOND;
+  const NANOSECONDS_PER_HOUR = 60 * NANOSECONDS_PER_MINUTE;
+
+  // Calculate the total duration in nanoseconds
+  let totalNs = 0;
+  for (const match of matches) {
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    switch (unit) {
+      case 'h':
+        totalNs += value * NANOSECONDS_PER_HOUR;
+        break;
+      case 'm':
+        totalNs += value * NANOSECONDS_PER_MINUTE;
+        break;
+      case 's':
+        totalNs += value * NANOSECONDS_PER_SECOND;
+        break;
+      case 'ms':
+        totalNs += value * NANOSECONDS_PER_MS;
+        break;
+    }
+  }
+
+  result.valueNs = totalNs;
+  return result;
+};
 
 type ValidationEntry = Record<string, Errors>;
 interface ValidationRequiredVarsEntry {
@@ -110,6 +197,75 @@ const validatePackageRequiredVars = (
   return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
+/**
+ * Get all variable names that are controlled by any var_group.
+ */
+const getVarsControlledByVarGroups = (varGroups: RegistryVarGroup[]): Set<string> => {
+  return new Set(varGroups.flatMap((group) => group.options.flatMap((option) => option.vars)));
+};
+
+/**
+ * Determines if a variable should be validated based on var_group selections.
+ * Returns false if the var is controlled by a var_group but not in the selected option.
+ */
+const shouldValidateVar = (
+  varName: string,
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined
+): boolean => {
+  if (!varGroups || varGroups.length === 0) {
+    return true; // No var_groups, validate all vars
+  }
+
+  const controlledVars = getVarsControlledByVarGroups(varGroups);
+
+  // If this var is not controlled by any var_group, always validate it
+  if (!controlledVars.has(varName)) {
+    return true;
+  }
+
+  // Check if this var is in the selected option for any var_group
+  for (const group of varGroups) {
+    const selectedOptionName = varGroupSelections?.[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption?.vars.includes(varName)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Determines if a variable should be treated as required based on var_group settings.
+ * When var_group.required is true, all vars in the selected option are required.
+ */
+const isVarRequiredByVarGroup = (
+  varName: string,
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined
+): boolean => {
+  if (!varGroups || varGroups.length === 0) {
+    return false;
+  }
+
+  for (const group of varGroups) {
+    if (!group.required) continue;
+
+    const selectedOptionName = varGroupSelections?.[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption?.vars.includes(varName)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
   /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
 
@@ -172,14 +328,31 @@ export const validatePackagePolicy = (
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
+  const packageVarGroups = packageInfo.var_groups;
+  const packageVarGroupSelections = packagePolicy.var_group_selections;
 
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
+      // Skip validation for vars that are controlled by var_groups but not currently visible
+      if (!shouldValidateVar(name, packageVarGroups, packageVarGroupSelections)) {
+        results[name] = null;
+        return results;
+      }
+
+      // Check if var is required due to var_group.required
+      const requiredByVarGroup = isVarRequiredByVarGroup(
+        name,
+        packageVarGroups,
+        packageVarGroupSelections
+      );
+
       results[name] = validatePackagePolicyConfig(
         varEntry,
         packageVarsByName[name],
         name,
-        safeLoadYaml
+        safeLoadYaml,
+        undefined,
+        requiredByVarGroup
       );
       return results;
     }, {} as ValidationEntry);
@@ -244,6 +417,14 @@ export const validatePackagePolicy = (
     return reqVarDefs;
   }, {});
 
+  // Build cache for stream-level var_groups
+  const streamVarGroupsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, RegistryVarGroup[] | undefined>
+  >((varGroupDefs, [path, stream]) => {
+    varGroupDefs[path] = stream.var_groups;
+    return varGroupDefs;
+  }, {});
+
   // Validate each package policy input with either its own var fields and stream vars
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
@@ -288,12 +469,28 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
+        const streamKey = `${stream.data_stream.dataset}-${input.type}`;
 
-        const streamVarDefs =
-          streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
+        const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
+        const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
+        const streamVarGroupSelections = stream.var_group_selections;
+
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
+
+            // Skip validation for vars not visible due to var_group selections
+            if (!shouldValidateVar(name, streamVarGroups, streamVarGroupSelections)) {
+              results[name] = null;
+              return results;
+            }
+
+            // Check if var is required due to var_group.required
+            const requiredByVarGroup = isVarRequiredByVarGroup(
+              name,
+              streamVarGroups,
+              streamVarGroupSelections
+            );
 
             results[name] =
               input.enabled && stream.enabled
@@ -302,7 +499,8 @@ export const validatePackagePolicy = (
                     streamVarDefs[name],
                     name,
                     safeLoadYaml,
-                    packageInfo.type
+                    packageInfo.type,
+                    requiredByVarGroup
                   )
                 : null;
 
@@ -313,7 +511,7 @@ export const validatePackagePolicy = (
         if (stream.vars && stream.enabled) {
           const requiredVars = validatePackageRequiredVars(
             stream,
-            streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
+            streamRequiredVarsDefsByDataAndInput[streamKey]
           );
           if (requiredVars) {
             streamValidationResults.required_vars = requiredVars;
@@ -343,7 +541,8 @@ export const validatePackagePolicyConfig = (
   varDef: RegistryVarsEntry,
   varName: string,
   safeLoadYaml: (yaml: string) => any,
-  packageType?: string
+  packageType?: string,
+  isRequiredByVarGroup?: boolean
 ): string[] | null => {
   const errors: string[] = [];
 
@@ -363,7 +562,10 @@ export const validatePackagePolicyConfig = (
     return null;
   }
 
-  if (varDef.required) {
+  // Check if var is required - either by varDef.required or by var_group.required
+  const isRequired = varDef.required || isRequiredByVarGroup;
+
+  if (isRequired) {
     if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
@@ -440,7 +642,7 @@ export const validatePackagePolicyConfig = (
       );
       return errors;
     }
-    if (varDef.required && Array.isArray(parsedValue)) {
+    if (isRequired && Array.isArray(parsedValue)) {
       const hasEmptyString =
         varDef.type === 'text' &&
         parsedValue.some((item) => typeof item === 'string' && item.trim() === '');
@@ -514,6 +716,56 @@ export const validatePackagePolicyConfig = (
           defaultMessage: 'Invalid integer',
         })
       );
+    }
+  }
+
+  if (varDef.type === 'duration' && parsedValue !== undefined && !Array.isArray(parsedValue)) {
+    const durationResult = parseDuration(parsedValue);
+
+    if (!durationResult.isValid) {
+      errors.push(...durationResult.errors);
+    } else {
+      // Check min_duration if specified
+      if (varDef.min_duration !== undefined) {
+        const minDurationResult = parseDuration(varDef.min_duration as string);
+        if (!minDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMinDurationErrorMessage', {
+              defaultMessage: 'Invalid min_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs < minDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationBelowMinErrorMessage', {
+              defaultMessage: 'Duration is below the minimum allowed value of {minDuration}',
+              values: {
+                minDuration: varDef.min_duration,
+              },
+            })
+          );
+        }
+      }
+
+      // Check max_duration if specified
+      if (varDef.max_duration !== undefined) {
+        const maxDurationResult = parseDuration(varDef.max_duration as string);
+        if (!maxDurationResult.isValid) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.invalidMaxDurationErrorMessage', {
+              defaultMessage: 'Invalid max_duration specification',
+            })
+          );
+        } else if (durationResult.valueNs > maxDurationResult.valueNs) {
+          errors.push(
+            i18n.translate('xpack.fleet.packagePolicyValidation.durationAboveMaxErrorMessage', {
+              defaultMessage: 'Duration is above the maximum allowed value of {maxDuration}',
+              values: {
+                maxDuration: varDef.max_duration,
+              },
+            })
+          );
+        }
+      }
     }
   }
 

@@ -8,52 +8,70 @@
  */
 
 export type {
-  // elasticsearch documents types
-  EsWorkflow,
-  EsWorkflowExecution,
-  EsWorkflowStepExecution,
-  WorkflowExecutionLogModel,
-  WorkflowExecutionHistoryModel,
-
-  // dtos
-  WorkflowDetailDto,
-  WorkflowListDto,
-  WorkflowListItemDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowExecutionListItemDto,
-  WorkflowListItemAction,
-
   // commands
   CreateWorkflowCommand,
-  UpdatedWorkflowResponseDto,
-
+  // elasticsearch documents types
+  EsWorkflow,
+  EsWorkflowCreate,
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
   // execution engine
   Provider,
   ProviderInput,
+  RunWorkflowCommand,
+  RunStepCommand,
+  RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+  StackFrame,
+  UpdatedWorkflowResponseDto,
+  // dtos
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
   WorkflowExecutionEngineModel,
+  WorkflowExecutionHistoryModel,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+  WorkflowExecutionLogModel,
+  WorkflowStepExecutionDto,
+  WorkflowListDto,
+  WorkflowListItemAction,
+  WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
+  ExecutionStatusUnion,
+  ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorContractUnion,
+  InternalConnectorContract,
+  DynamicConnectorContract,
+  BaseConnectorContract,
+  HttpMethod,
+  StepPropertyHandler,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
+  PropertyValidationContext,
+  RequestOptions,
 } from './v1';
 
 // exported full to use enum as values
 export {
-  ExecutionStatus,
-
   // command schemas
   CreateWorkflowCommandSchema,
-  UpdateWorkflowCommandSchema,
+  ExecutionStatus,
+  ExecutionType,
+  ExecutionStatusValues,
+  ExecutionTypeValues,
+  TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
 } from './v1';
-
-export type {
-  EnterIfNode,
-  ExitIfNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  EnterForeachNode,
-  ExitForeachNode,
-  AtomicGraphNode,
-  WaitGraphNodeSchema,
-  WaitGraphNode,
-} from './execution';

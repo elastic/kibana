@@ -5,27 +5,35 @@
  * 2.0.
  */
 
+import { render, waitFor } from '@testing-library/react';
 import * as React from 'react';
-import { mount } from 'enzyme';
 import { ClosablePopoverTitle } from './closable_popover_title';
 
 describe('closable popover title', () => {
   it('renders with defined options', () => {
     const onClose = jest.fn();
-    const children = <div className="foo" />;
-    const wrapper = mount(
+    const children = <div role="code">hello_world()</div>;
+    const { getByRole } = render(
       <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>
     );
-    expect(wrapper.contains(<div className="foo" />)).toBeTruthy();
+    const child = getByRole('code');
+    expect(child).toBeInTheDocument();
+    expect(child.textContent).toBe('hello_world()');
   });
 
-  it('onClose function gets called', () => {
+  it('onClose function gets called', async () => {
     const onClose = jest.fn();
     const children = <div className="foo" />;
-    const wrapper = mount(
+    const { getByRole } = render(
       <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>
     );
-    wrapper.find('EuiButtonIcon').simulate('click');
-    expect(onClose).toHaveBeenCalled();
+
+    const closeButton = getByRole('button');
+
+    closeButton.click();
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 });

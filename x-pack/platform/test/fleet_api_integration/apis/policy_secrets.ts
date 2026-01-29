@@ -990,15 +990,12 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should not store secrets if there are no fleet servers', async () => {
+      it('should store secrets if there are no fleet servers', async () => {
         await createFleetServerAgentPolicy();
         const agentPolicy = await createAgentPolicy();
-        // agent with new version shouldn't make storage secrets enabled
-        await createFleetServerAgent(agentPolicy.id, 'server_2', '8.12.0');
         const packagePolicyWithSecrets = await createPackagePolicyWithSecrets(agentPolicy.id);
 
-        // secret should be in plain text i.e not a secret refrerence
-        expect(packagePolicyWithSecrets.vars.package_var_secret.value).eql('package_secret_val');
+        expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
       });
 
       it('should convert plain text values to secrets once fleet server requirements are met', async () => {

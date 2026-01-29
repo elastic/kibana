@@ -15,21 +15,7 @@ actions:
         variables:
           kibana_url:
             default: <KIBANA_URL>
-# Add some tag descriptions and displayNames
-  - target: '$.tags[?(@.name=="streams")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
-      x-displayName: "Streams"
-  - target: '$.tags[?(@.name=="data views")]'
-    description: Change displayName
-    update:
-      x-displayName: "Data views"
-  - target: '$.tags[?(@.name=="ml")]'
-    description: Change displayName
-    update:
-      x-displayName: "Machine learning"
+# Add some tag descriptions that are specific to the Serverless APIs
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
@@ -38,21 +24,6 @@ actions:
       externalDocs:
         description: Kibana role management
         url: https://www.elastic.co/docs/deploy-manage/users-roles/serverless-custom-roles
-  - target: '$.tags[?(@.name=="slo")]'
-    description: Change displayName
-    update:
-      x-displayName: "Service level objectives"
-  - target: '$.tags[?(@.name=="spaces")]'
-    description: Change displayName
-    update:
-      x-displayName: "Spaces"
-      description: Manage your Kibana spaces.
-  - target: '$.tags[?(@.name=="system")]'
-    description: Change displayName and description
-    update:
-      x-displayName: "System"
-      description: >
-        Get information about the system status, resource usage, and installed plugins.
   - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:
@@ -64,6 +35,20 @@ actions:
         For example, use:
 
         [Data views](../group/endpoint-data-views).
+  - target: '$.tags[?(@.name=="agent builder")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      externalDocs:
+        description: Learn about working with Agent Builder programmatically
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
+      # externalDocs:
+        # description: 
+        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      x-displayName: 'Agent Builder'
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

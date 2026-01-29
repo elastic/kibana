@@ -4,42 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { badRequest } from '@hapi/boom';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  SignificantEventsGenerateResponse,
-  SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-} from '@kbn/streams-schema';
-import { createTracedEsClient } from '@kbn/traced-es-client';
-import { z } from '@kbn/zod';
-import moment from 'moment';
-import { from as fromRxjs, map, mergeMap } from 'rxjs';
+import { conditionSchema } from '@kbn/streamlang';
 import {
-  STREAMS_API_PRIVILEGES,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '../../../../common/constants';
+  systemSchema,
+  type SignificantEventsGenerateResponse,
+  type SignificantEventsGetResponse,
+  type SignificantEventsPreviewResponse,
+} from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
+import { catchError, from as fromRxjs, map } from 'rxjs';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
-import type { StreamsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
-
-async function assertLicenseAndPricingTier(
-  server: StreamsServer,
-  licensing: LicensingPluginStart
-): Promise<void> {
-  const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-  );
-  if (!isAvailableForTier) {
-    throw new SecurityError(`Cannot access API on the current pricing tier`);
-  }
-  await assertEnterpriseLicense(licensing);
-}
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
+import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -52,6 +35,13 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
+        feature: z
+          .object({
+            name: z.string(),
+            filter: conditionSchema,
+            type: z.literal('system'),
+          })
+          .optional(),
         kql: z.object({
           query: z.string(),
         }),
@@ -78,15 +68,11 @@ const previewSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsPreviewResponse> => {
-    const { streamsClient, scopedClusterClient, licensing } = await getScopedClients({
-      request,
-    });
-    await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
+    const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       body: { query },
@@ -111,7 +97,7 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readSignificantEventsRoute = createServerRoute({
+const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
@@ -119,6 +105,10 @@ const readSignificantEventsRoute = createServerRoute({
       from: dateFromString,
       to: dateFromString,
       bucketSize: z.string(),
+      query: z
+        .string()
+        .optional()
+        .describe('Query string to filter significant events on metadata fields'),
     }),
   }),
 
@@ -142,56 +132,51 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
-      request,
-    });
-    await assertLicenseAndPricingTier(server, licensing);
+    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize } = params.query;
+    const { from, to, bucketSize, query } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    return readSignificantEventsFromAlertsIndices(
       {
-        name,
+        streamNames: [name],
         from,
         to,
         bucketSize,
+        query,
       },
-      { assetClient, scopedClusterClient }
+      { queryClient, scopedClusterClient }
     );
   },
 });
 
-const durationSchema = z.string().transform((value) => {
-  const match = value.match(/^(\d+)([mhd])$/);
-  if (!match) {
-    throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');
-  }
-
-  const [, numberStr, unit] = match;
-  const number = parseInt(numberStr, 10);
-
-  // Map units to moment duration units
-  const unitMap: Record<string, moment.unitOfTime.DurationConstructor> = {
-    m: 'minute',
-    h: 'hour',
-    d: 'day',
-  };
-
-  const momentUnit = unitMap[unit];
-  return moment.duration(number, momentUnit);
-});
-
 const generateSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
+  endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({
-      connectorId: z.string(),
-      currentDate: dateFromString.optional(),
-      shortLookback: durationSchema.optional(),
-      longLookback: durationSchema.optional(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+      from: dateFromString,
+      to: dateFromString,
+      sampleDocsSize: z
+        .number()
+        .optional()
+        .describe(
+          'Number of sample documents to use for generation from the current data of stream'
+        ),
+    }),
+    body: z.object({
+      system: systemSchema.optional(),
     }),
   }),
   options: {
@@ -215,44 +200,68 @@ const generateSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
-      await getScopedClients({ request });
-    await assertLicenseAndPricingTier(server, licensing);
+    const {
+      streamsClient,
+      scopedClusterClient,
+      licensing,
+      inferenceClient,
+      uiSettingsClient,
+      soClient,
+      featureClient,
+    } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    const definition = await streamsClient.getStream(params.path.name);
+    const connectorId = await resolveConnectorId({
+      connectorId: params.query.connectorId,
+      uiSettingsClient,
+      logger,
+    });
+
+    // Get connector info for error enrichment
+    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        featureClient.getFeatures(params.path.name),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
         {
           definition,
-          connectorId: params.query.connectorId,
-          currentDate: params.query.currentDate,
-          shortLookback: params.query.shortLookback,
-          longLookback: params.query.longLookback,
+          system: params.body?.system,
+          connectorId,
+          start: params.query.from.valueOf(),
+          end: params.query.to.valueOf(),
+          sampleDocsSize: params.query.sampleDocsSize,
+          systemPrompt: significantEventsPromptOverride,
+          features,
         },
         {
           inferenceClient,
-          esClient: createTracedEsClient({
-            client: scopedClusterClient.asCurrentUser,
-            logger,
-            plugin: 'streams',
-          }),
-          logger,
+          esClient: scopedClusterClient.asCurrentUser,
+          logger: logger.get('significant_events'),
+          signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(
-      mergeMap((queries) => fromRxjs(queries)),
-      map((query) => ({
-        query,
-        type: 'generated_query' as const,
-      }))
+      map(({ queries, tokensUsed }) => ({
+        type: 'generated_queries' as const,
+        queries,
+        tokensUsed,
+      })),
+      catchError((error: Error) => {
+        throw createConnectorSSEError(error, connector);
+      })
     );
   },
 });
 
 export const significantEventsRoutes = {
-  ...readSignificantEventsRoute,
+  ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
 };

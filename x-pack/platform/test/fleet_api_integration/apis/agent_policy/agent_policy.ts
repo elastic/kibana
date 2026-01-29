@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupMockServer } from '../agents/helpers/mock_agentless_api';
+import { cleanFleetIndices } from '../space_awareness/helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -18,6 +21,8 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
+  const mockAgentlessApiService = setupMockServer();
+  const logger = getService('log');
 
   const getPackage = async (pkgName: string) => {
     const getPkgRes = await supertest
@@ -163,7 +168,11 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
+      let mockApiServer: http.Server;
       before(async () => {
+        // Start the mock agentless API server
+        mockApiServer = await mockAgentlessApiService.listen(8089);
+
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
         await fleetAndAgents.setup();
@@ -186,6 +195,11 @@ export default function (providerContext: FtrProviderContext) {
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
         await kibanaServer.savedObjects.cleanStandardList();
+
+        // Close the mock agentless API server
+        if (mockApiServer) {
+          mockApiServer.close();
+        }
       });
       it('should work with valid minimum required values', async () => {
         const {
@@ -652,6 +666,100 @@ export default function (providerContext: FtrProviderContext) {
           'Output of type "logstash" is not usable with policy "test-agentless-policy".'
         );
       });
+
+      it('should create agent policy with cloud connectors enabled', async () => {
+        // Create default Fleet server host for agentless tests
+        const fleetServerHostResponse = await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'fleet-default-fleet-server-host',
+            name: 'Default Fleet server',
+            is_default: true,
+            host_urls: ['https://localhost:8220'],
+          });
+
+        if (fleetServerHostResponse.status === 409) {
+          logger.info('Fleet server host already exists, continuing...');
+        } else if (fleetServerHostResponse.status !== 200) {
+          throw new Error(
+            `Failed to create Fleet server host: ${fleetServerHostResponse.status} ${fleetServerHostResponse.body}`
+          );
+        }
+        const response = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-cloud-connectors',
+            description: 'Test agent policy with cloud connectors enabled',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: true,
+                target_csp: 'aws',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(response.status).to.equal(200);
+        const createdPolicy = response.body.item;
+
+        expect(createdPolicy).to.have.property('id');
+        expect(createdPolicy.name).to.equal('test-agent-policy-cloud-connectors');
+        expect(createdPolicy.supports_agentless).to.equal(true);
+        expect(createdPolicy.agentless).to.have.property('cloud_connectors');
+        expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(true);
+        expect(createdPolicy.agentless.cloud_connectors.target_csp).to.equal('aws');
+      });
+
+      it('should create agent policy without cloud connectors', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-no-cloud-connectors',
+            description: 'Test agent policy without cloud connectors',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: false,
+              },
+            },
+          })
+          .expect(200);
+
+        expect(createdPolicy).to.have.property('id');
+        expect(createdPolicy.name).to.equal('test-agent-policy-no-cloud-connectors');
+        expect(createdPolicy.supports_agentless).to.equal(true);
+        expect(createdPolicy.agentless).to.have.property('cloud_connectors');
+        expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(false);
+      });
+
+      it('should validate cloud connector target_csp when enabled', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-invalid-csp',
+            description: 'Test agent policy with invalid CSP target',
+            namespace: 'default',
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: true,
+                target_csp: 'invalid-csp', // Invalid CSP target
+              },
+            },
+          })
+          .expect(400);
+      });
     });
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
@@ -699,7 +807,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
@@ -1211,7 +1318,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1272,7 +1378,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1433,7 +1538,6 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
@@ -1494,7 +1598,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1612,7 +1715,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1688,19 +1790,8 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const agentPolicyResponse = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'test-agentless-policy',
-            namespace: 'default',
-          })
-          .expect(200);
-
-        const agentPolicy = agentPolicyResponse.body.item;
-
         const response = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
+          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'test-agentless-policy',
@@ -2010,6 +2101,17 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      before(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
       it('should get auto upgrade agents status', async () => {
         const {
           body: { item: policyWithAgents },
@@ -2025,14 +2127,34 @@ export default function (providerContext: FtrProviderContext) {
         await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
+          action_id: 'test-action-automatic',
+        });
+        await generateAgent(providerContext, 'healthy', 'agent-3', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_DOWNLOADING',
+          target_version: '8.16.3',
+          action_id: 'test-action-automatic',
         });
         await generateAgent(
           providerContext,
           'uninstalled',
-          'agent-3',
+          'agent-4',
           policyWithAgents.id,
           '8.16.1'
         );
+        await es.index({
+          index: '.fleet-actions',
+          refresh: 'wait_for',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            expiration: new Date().toISOString(),
+            agents: ['agent-2', 'agent-3'],
+            action_id: 'test-action-automatic',
+            data: {},
+            is_automatic: true,
+            type: 'UPGRADE',
+          },
+        });
+
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')
@@ -2041,17 +2163,21 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           currentVersions: [
             {
-              agents: 2,
+              agents: 3,
               failedUpgradeAgents: 0,
+              inProgressUpgradeAgents: 0,
               version: '8.16.1',
             },
             {
               agents: 0,
-              failedUpgradeAgents: 1,
               version: '8.16.3',
+              failedUpgradeAgents: 1,
+              failedUpgradeActionIds: ['test-action-automatic'],
+              inProgressUpgradeAgents: 1,
+              inProgressUpgradeActionIds: ['test-action-automatic'],
             },
           ],
-          totalAgents: 2,
+          totalAgents: 3,
         });
 
         await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
@@ -2153,18 +2279,20 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213370
-    describe.skip('POST /internal/fleet/agent_and_package_policies', () => {
+    describe('POST /internal/fleet/agent_and_package_policies', () => {
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
-        await fleetAndAgents.setup();
       });
 
       after(async () => {
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
+      });
+
+      beforeEach(async () => {
+        await fleetAndAgents.setup();
       });
 
       afterEach(async () => {
@@ -2268,11 +2396,13 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(createdPolicy.id).to.eql(requestBody.id);
-        expect(createdPolicy.package_policies[0].id).to.eql(requestBody.package_policies[0].id);
+        expect(createdPolicy.package_policies.map((policy: any) => policy.id).sort()).to.eql([
+          'test-package-policy-with-id',
+          'test-package-policy-with-id-2',
+        ]);
         expect(createdPolicy.package_policies[0].policy_ids).to.eql(
           requestBody.package_policies[0].policy_ids
         );
-        expect(createdPolicy.package_policies[1].id).to.eql(requestBody.package_policies[1].id);
         expect(createdPolicy.package_policies[1].policy_ids).to.eql(
           requestBody.package_policies[1].policy_ids
         );

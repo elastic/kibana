@@ -939,16 +939,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      describe('public', function () {
-        // Public but undocumented, hence 'internal' in path
-        it('reset session page', async function () {
-          const { status } = await supertestAdminWithCookieCredentials.get(
-            '/internal/security/reset_session_page.js'
-          );
-          expect(status).toBe(200);
-        });
-      });
-
       describe('custom roles', function () {
         describe('internal', function () {
           it('get built-in elasticsearch privileges', async function () {
@@ -993,22 +983,34 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('available features', function () {
-      it('all Dashboard and Discover sub-feature privileges are disabled', async function () {
+      it('all Dashboard sub-features privileges are disabled', async function () {
         const { body } = await supertestAdminWithCookieCredentials.get('/api/features').expect(200);
 
-        // We should make sure that neither Discover nor Dashboard displays any sub-feature privileges in Serverless.
+        // We should make sure that Dashboard displays any sub-feature privileges in Serverless.
         // If any of these features adds a new sub-feature privilege we should make an explicit decision whether it
         // should be displayed in Serverless.
         const features = body as KibanaFeatureConfig[];
-        for (const featureId of ['discover_v2', 'dashboard_v2']) {
-          const feature = features.find((f) => f.id === featureId)!;
-          const subFeaturesPrivileges = collectSubFeaturesPrivileges(feature);
-          for (const privilege of subFeaturesPrivileges.values()) {
-            log.debug(
-              `Verifying that ${privilege.id} sub-feature privilege of ${featureId} feature is disabled.`
-            );
-            expect(privilege.disabled).toBe(true);
-          }
+        const feature = features.find((f) => f.id === 'dashboard_v2')!;
+        const subFeaturesPrivileges = collectSubFeaturesPrivileges(feature);
+        for (const privilege of subFeaturesPrivileges.values()) {
+          log.debug(
+            `Verifying that ${privilege.id} sub-feature privilege of dashboard_v2 feature is disabled.`
+          );
+          if (privilege.id === 'store_search_session') continue;
+          expect(privilege.disabled).toBe(true);
+        }
+      });
+
+      it('all Discover sub-features except store search session privilege are disabled', async function () {
+        const { body } = await supertestAdminWithCookieCredentials.get('/api/features').expect(200);
+
+        const features = body as KibanaFeatureConfig[];
+        const feature = features.find((f) => f.id === 'discover_v2')!;
+        const subFeaturesPrivileges = collectSubFeaturesPrivileges(feature);
+
+        for (const privilege of subFeaturesPrivileges.values()) {
+          if (privilege.id === 'store_search_session') expect(privilege.disabled).not.toBe(true);
+          else expect(privilege.disabled).toBe(true);
         }
       });
     });

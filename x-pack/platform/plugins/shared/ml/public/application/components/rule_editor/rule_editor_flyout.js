@@ -658,6 +658,7 @@ class RuleEditorFlyoutUI extends Component {
               />
             ) : (
               <EuiCallOut
+                announceOnMount={false}
                 title={
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsNotSupportedTitle"
@@ -689,6 +690,7 @@ class RuleEditorFlyoutUI extends Component {
             />
 
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
@@ -726,7 +728,12 @@ class RuleEditorFlyoutUI extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.saveEdit} isDisabled={!isValidRule(rule)} fill>
+                <EuiButton
+                  onClick={this.saveEdit}
+                  isDisabled={!isValidRule(rule)}
+                  fill
+                  data-test-subj="mlRuleEditorSaveButton"
+                >
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
                     defaultMessage="Save"

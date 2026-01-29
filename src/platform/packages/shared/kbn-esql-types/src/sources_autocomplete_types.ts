@@ -23,3 +23,19 @@ export interface ESQLSourceResult {
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
 }
+
+// response from resolve_index api
+interface ResolveIndexResponseItem {
+  name: string;
+  mode?: 'lookup' | 'time_series' | string;
+  indices?: string[];
+  aliases?: string[];
+  attributes?: string[];
+  backing_indices?: string[];
+}
+
+export interface ResolveIndexResponse {
+  indices?: ResolveIndexResponseItem[];
+  aliases?: ResolveIndexResponseItem[];
+  data_streams?: ResolveIndexResponseItem[];
+}

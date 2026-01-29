@@ -138,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .post(
         `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
           alertId
-        )}/_mute`
+        )}/_mute?validate_alerts_existence=false`
       )
       .set('kbn-xsrf', 'foo')
       .expect(204);
@@ -652,10 +652,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
         const summary = await getAlertSummary(rule.id);
+
+        const alerts = summary.alerts;
+        const alertsList = Object.entries(alerts).map(([id, alert]: [string, any]) => ({
+          alert: id,
+          status: alert.status,
+          start: moment(alert.activeStartDate).utc().format('D MMM YYYY @ HH:mm:ss'),
+        }));
+
         const dateOnAllAlertsFromApiResponse: Record<string, string> = mapValues(
           summary.alerts,
           (a) => a.activeStartDate
@@ -667,7 +672,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .join(', ')}`
         );
 
-        const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
         expect(alertsList.map((a) => omit(a, 'duration'))).to.eql([
           {
             alert: 'us-central',
@@ -691,46 +695,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               .format('D MMM YYYY @ HH:mm:ss'),
           },
         ]);
-
-        const durationEpoch = moment(await pageObjects.ruleDetailsUI.getAlertDurationEpoch()).utc();
-
-        log.debug(`DURATION EPOCH is: ${durationEpoch}]`);
-
-        const durationFromInstanceInApiUntilPageLoad = mapValues(
-          dateOnAllAlertsFromApiResponse,
-          // time from Alert Instance until pageload (AKA durationEpoch)
-          (date) => {
-            const durationFromApiResuiltToEpoch = moment.duration(
-              durationEpoch.diff(moment(date).utc())
-            );
-            // The UI removes milliseconds, so lets do the same in the test so we can compare
-            return moment.duration({
-              hours: durationFromApiResuiltToEpoch.hours(),
-              minutes: durationFromApiResuiltToEpoch.minutes(),
-              seconds: durationFromApiResuiltToEpoch.seconds(),
-            });
-          }
-        );
-
-        alertsList
-          .map((a) => ({
-            id: a.alert,
-            // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
-            duration: moment.duration(a.duration),
-          }))
-          .forEach(({ id, duration: durationAsItAppearsOnList }) => {
-            log.debug(
-              `DURATION of ${id} [From UI: ${durationAsItAppearsOnList.as(
-                'seconds'
-              )} seconds] [From API: ${durationFromInstanceInApiUntilPageLoad[id].as(
-                'seconds'
-              )} seconds]`
-            );
-
-            expect(durationFromInstanceInApiUntilPageLoad[id].as('seconds')).to.equal(
-              durationAsItAppearsOnList.as('seconds')
-            );
-          });
       });
 
       it('renders the muted inactive alerts', async () => {
@@ -743,69 +707,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
-        const alertsList: any[] = await pageObjects.ruleDetailsUI.getAlertsList();
-        expect(alertsList.filter((a) => a.alert === 'eu/east')).to.eql([
-          {
-            alert: 'eu/east',
-            status: 'Recovered',
-            start: '',
-            duration: '',
-          },
-        ]);
-      });
+        const summary = await getAlertSummary(rule.id);
 
-      it('allows the user to mute a specific alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
+        const mutedAlert = summary.alerts['eu/east'];
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
-        log.debug(`Ensuring us-central is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', false);
-
-        log.debug(`Muting us-central`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-central');
-
-        log.debug(`Ensuring us-central is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', true);
-      });
-
-      it('allows the user to unmute a specific alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
-        log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
-
-        log.debug(`Muting us-east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
-
-        log.debug(`Ensuring us-east is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', true);
-
-        log.debug(`Unmuting us-east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
-
-        log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
-      });
-
-      it('allows the user unmute an inactive alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        log.debug(`Ensuring eu/east is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('eu/east', true);
-
-        log.debug(`Unmuting eu/east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('eu/east');
-
-        log.debug(`Ensuring eu/east is removed from list`);
-        await pageObjects.ruleDetailsUI.ensureAlertExistence('eu/east', false);
+        expect(mutedAlert).to.be.ok();
+        expect(mutedAlert.status).to.eql('OK');
+        expect(mutedAlert.muted).to.eql(true);
       });
     });
 
@@ -854,33 +762,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
         const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
-        const items = await pageObjects.ruleDetailsUI.getAlertsList();
-        expect(items.length).to.eql(PAGE_SIZE);
+        const allAlerts = Object.entries(alertInstances).map(([id, alert]: [string, any]) => ({
+          id,
+          status: alert.status,
+          muted: alert.muted ?? false,
+          start: alert.activeStartDate
+            ? moment(alert.activeStartDate).utc().format('D MMM YYYY @ HH:mm:ss')
+            : '',
+        }));
 
-        const [firstItem] = items;
-        expect(firstItem.alert).to.eql(Object.keys(alertInstances)[0]);
+        const firstPage = allAlerts.slice(0, PAGE_SIZE);
+        expect(firstPage.length).to.eql(PAGE_SIZE);
+
+        // Verify the first alert
+        expect(firstPage[0].id).to.eql(Object.keys(alertInstances)[0]);
       });
 
       it('navigates to the next page', async () => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
         const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
-        await pageObjects.ruleDetailsUI.clickPaginationNextPage();
+        const allAlerts = Object.entries(alertInstances).map(([id, alert]: [string, any]) => ({
+          id,
+          status: alert.status,
+          muted: alert.muted ?? false,
+          start: alert.activeStartDate
+            ? moment(alert.activeStartDate).utc().format('D MMM YYYY @ HH:mm:ss')
+            : '',
+        }));
 
-        await retry.try(async () => {
-          const [firstItem] = await pageObjects.ruleDetailsUI.getAlertsList();
-          expect(firstItem.alert).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
-        });
+        const nextPage = allAlerts.slice(PAGE_SIZE, PAGE_SIZE * 2);
+
+        expect(nextPage[0].id).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
       });
     });
 

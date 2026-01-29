@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiBadge,
   EuiErrorBoundary,
-  EuiToolTip,
+  EuiIconTip,
   EuiBetaBadge,
   EuiSplitPanel,
   EuiCallOut,
@@ -179,11 +179,14 @@ export const SystemActionTypeForm = ({
       }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem, disableErrorMessages]);
+  }, [actionItem, disableErrorMessages, actionConnector]);
 
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
@@ -232,7 +235,7 @@ export const SystemActionTypeForm = ({
                   {warning ? (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut size="s" color="warning" title={warning} />
+                      <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
                     </>
                   ) : null}
                 </Suspense>
@@ -328,19 +331,18 @@ const ButtonContent: React.FC<{
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {showActionGroupErrorIcon ? (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate(
               'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
               { defaultMessage: 'Action contains errors.' }
             )}
-          >
-            <EuiIcon
-              data-test-subj="action-group-error-icon"
-              type="warning"
-              color="danger"
-              size="m"
-            />
-          </EuiToolTip>
+            type="warning"
+            color="danger"
+            size="m"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
+          />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>

@@ -8,9 +8,15 @@
 export type * from './data_request_descriptor_types';
 export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
-export type * from './style_property_descriptor_types';
 
 export type {
+  CustomIcon,
+  MapCenter,
+  MapSettings,
+
+  //
+  // Source types
+  //
   AggDescriptor,
   CountAggDescriptor,
   FieldedAggDescriptor,
@@ -34,4 +40,47 @@ export type {
   TiledSingleLayerVectorSourceDescriptor,
   JoinSourceDescriptor,
   SourceDescriptor,
+
+  //
+  // Style types
+  //
+  Category,
+  CategoryColorStop,
+  ColorDynamicOptions,
+  ColorStaticOptions,
+  ColorDynamicStylePropertyDescriptor,
+  ColorStaticStylePropertyDescriptor,
+  ColorStylePropertyDescriptor,
+  DynamicStyleProperties,
+  DynamicStylePropertyOptions,
+  EMSVectorTileStyleDescriptor,
+  FieldMetaOptions,
+  HeatmapStyleDescriptor,
+  IconDynamicOptions,
+  IconStaticOptions,
+  IconStop,
+  IconStylePropertyDescriptor,
+  LabelDynamicOptions,
+  LabelBorderSizeOptions,
+  LabelPositionStylePropertyDescriptor,
+  LabelStaticOptions,
+  LabelStylePropertyDescriptor,
+  LabelZoomRangeStylePropertyDescriptor,
+  OrdinalColorStop,
+  OrientationDynamicOptions,
+  OrientationStaticOptions,
+  OrientationStylePropertyDescriptor,
+  PercentilesFieldMeta,
+  SizeDynamicOptions,
+  SizeStaticOptions,
+  SizeStylePropertyDescriptor,
+  StaticStylePropertyOptions,
+  StyleDescriptor,
+  StyleMetaDescriptor,
+  StylePropertyField,
+  StylePropertyOptions,
+  SymbolizeAsOptions,
+  RangeFieldMeta,
+  VectorStyleDescriptor,
+  VectorStylePropertiesDescriptor,
 } from '../../server';

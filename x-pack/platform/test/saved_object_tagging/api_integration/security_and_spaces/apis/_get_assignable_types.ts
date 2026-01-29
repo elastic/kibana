@@ -42,6 +42,8 @@ export default function (ftrContext: FtrProviderContext) {
         'osquery-pack',
         'osquery-pack-asset',
         'osquery-saved-query',
+        'alerting_rule_template',
+        'slo_template',
       ],
       [USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_READ_USER.username]: [],

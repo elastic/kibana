@@ -10,12 +10,15 @@
 import Path from 'path';
 import os from 'os';
 
-import type { KibanaPackageJson } from '@kbn/repo-info';
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
-import type { Package, PluginSelector, PluginPackage } from '@kbn/repo-packages';
-import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
-import { type KibanaProject } from '@kbn/projects-solutions-groups';
-
+import { REPO_ROOT, kibanaPackageJson, type KibanaPackageJson } from '@kbn/repo-info';
+import {
+  type Package,
+  getPackages,
+  type PluginSelector,
+  type PluginPackage,
+  getPluginPackagesFilter,
+} from '@kbn/repo-packages';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { VersionInfo } from './version_info';
 import { getVersionInfo } from './version_info';
 import type { PlatformName, PlatformArchitecture } from './platform';
@@ -273,7 +276,7 @@ export class Config {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 
-  getPrivateSolutionPackagesFromRepo(project: KibanaProject) {
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
     return getPackages(this.repoRoot).filter(
       (p) => p.group === project && p.visibility === 'private'
     );

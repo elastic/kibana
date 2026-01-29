@@ -36,10 +36,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      log.debug('Checking for section heading to say Ingest Pipelines.');
+      log.debug('Checking for section heading to say Ingest pipelines.');
 
       const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
-      expect(headingText).to.be('Ingest Pipelines');
+      expect(headingText).to.be('Ingest pipelines');
     });
 
     describe('Pipelines list', () => {
@@ -52,8 +52,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        // Delete the test pipeline
-        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        const pipeline = await es.ingest.getPipeline({ id: TEST_PIPELINE_NAME });
+
+        // Only if the pipeline exists after all runs, we delete it
+        if (pipeline) {
+          await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        }
       });
 
       it('Displays the test pipeline in the list of pipelines', async () => {

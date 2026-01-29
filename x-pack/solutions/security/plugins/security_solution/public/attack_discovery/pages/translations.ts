@@ -14,13 +14,6 @@ export const CONNECTOR_ERROR = i18n.translate(
   }
 );
 
-export const ERROR_CANCELING_ATTACK_DISCOVERIES = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.errorCancelingAttackDiscoveriesToastTitle',
-  {
-    defaultMessage: 'Error canceling attack discoveries',
-  }
-);
-
 export const ERROR_GENERATING_ATTACK_DISCOVERIES = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorGeneratingAttackDiscoveriesToastTitle',
   {
@@ -35,9 +28,9 @@ export const SHOW_ANONYMIZED_LABEL = i18n.translate(
   }
 );
 
-export const SHOW_REAL_VALUES = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.showRealValuesLabel',
+export const ANONYMIZATION_ARIAL_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.anonymizationArialLabel',
   {
-    defaultMessage: 'Show real values',
+    defaultMessage: 'Anonymization',
   }
 );

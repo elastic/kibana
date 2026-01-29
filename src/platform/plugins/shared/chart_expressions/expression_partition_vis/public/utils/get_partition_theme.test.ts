@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getPartitionTheme } from './get_partition_theme';
 import { createMockPieParams, createMockDonutParams, createMockPartitionVisParams } from '../mocks';
 import type { PartitionVisParams } from '../../common/types';

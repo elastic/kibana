@@ -19,6 +19,7 @@ export const RootPrivilegesCallout: React.FC<{
   return rootIntegrations.length > 0 ? (
     <>
       <EuiCallOut
+        announceOnMount={false}
         color="warning"
         iconType="warning"
         title={i18n.translate('xpack.fleet.agentEnrollmentCallout.rootPrivilegesTitle', {

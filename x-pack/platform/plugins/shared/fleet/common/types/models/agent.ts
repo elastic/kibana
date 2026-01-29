@@ -13,6 +13,8 @@ import type {
   AgentStatuses,
 } from '../../constants';
 
+import type { SecretReference, SOSecret } from './secret';
+
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
@@ -42,7 +44,8 @@ export type AgentActionType =
   | 'REQUEST_DIAGNOSTICS'
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
-  | 'MIGRATE';
+  | 'MIGRATE'
+  | 'PRIVILEGE_LEVEL_CHANGE';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -75,6 +78,12 @@ export interface NewAgentAction {
   total?: number;
   is_automatic?: boolean;
   policyId?: string;
+  secrets?: {
+    user_info?: {
+      password?: SOSecret;
+    };
+    enrollment_token?: SOSecret;
+  };
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -117,12 +126,22 @@ interface AgentBase {
   agent?: FleetServerAgentMetadata;
   unhealthy_reason?: UnhealthyReason[];
   namespaces?: string[];
+  upgrade?: AgentUpgrade;
 }
 
 export enum UnhealthyReason {
   INPUT = 'input',
   OUTPUT = 'output',
   OTHER = 'other',
+}
+
+export interface AgentUpgrade {
+  rollbacks?: AgentRollback[];
+}
+
+export interface AgentRollback {
+  valid_until: string;
+  version: string;
 }
 
 export interface AgentMetrics {
@@ -377,6 +396,10 @@ export interface FleetServerAgent {
    * The last known agent status
    */
   last_known_status?: AgentStatus;
+  /**
+   * Upgrade information including available upgrade rollbacks for the Elastic Agent
+   */
+  upgrade?: AgentUpgrade;
 }
 
 /**
@@ -451,6 +474,7 @@ export interface FleetServerAgentAction {
 
   /**
    * The opaque payload.
+   * Secret properties contain a secret reference instead of a value.
    */
   data?: {
     [k: string]: unknown;
@@ -473,6 +497,11 @@ export interface FleetServerAgentAction {
 
   // the id of the policy associated with the action
   policyId?: string;
+
+  /**
+   * List of secret references associated with the action.
+   */
+  secret_references?: SecretReference[];
 
   [k: string]: unknown;
 }

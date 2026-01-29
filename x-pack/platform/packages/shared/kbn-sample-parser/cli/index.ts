@@ -9,11 +9,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Command } from 'commander';
 import pLimit from 'p-limit';
 import { partition } from 'lodash';
-import { ensureLoghubRepo } from '../src/ensure_loghub_repo';
-import { readLoghubSystemFiles } from '../src/read_loghub_system_files';
-import { ensureValidParser } from '../src/ensure_valid_parser';
+import { ensureLoghubRepo } from '../src/loghub/ensure_loghub_repo';
+import { readLoghubSystemFiles } from '../src/loghub/read_loghub_system_files';
+import { ensureValidParser } from '../src/loghub/ensure_valid_parser';
 import { createOpenAIClient } from '../src/create_openai_client';
-import { ensureValidQueries } from '../src/ensure_valid_queries';
+import { ensureValidQueries } from '../src/loghub/ensure_valid_queries';
 
 async function run({ log }: { log: ToolingLog }) {
   await ensureLoghubRepo({ log });

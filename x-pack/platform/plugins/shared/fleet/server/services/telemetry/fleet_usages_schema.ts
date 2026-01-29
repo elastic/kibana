@@ -138,6 +138,7 @@ export const fleetAgentsSchema: RootSchema<any> = {
         _meta: {
           description:
             'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
+          optional: true,
         },
       },
     },
@@ -515,6 +516,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
   deployment_id: {
     type: 'keyword',
     _meta: { description: 'id of the deployment', optional: true },
+  },
+  modified_ilms: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'list of managed ILMs modified by users' },
+    },
   },
 };
 

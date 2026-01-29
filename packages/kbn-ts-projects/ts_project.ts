@@ -72,6 +72,10 @@ export class TsProject {
 
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
 
+    if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
+      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+    }
+
     const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
     const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
 
@@ -253,12 +257,19 @@ export class TsProject {
       return undefined;
     }
 
-    return TsProject.createFromCache(
+    const absolutePath =
+      this.config.extends === '@kbn/tsconfig-base/tsconfig.json'
+        ? Path.join(REPO_ROOT, 'tsconfig.base.json')
+        : Path.resolve(this.directory, this.config.extends);
+
+    const tsProject = TsProject.createFromCache(
       this.cache,
-      Path.resolve(this.directory, this.config.extends),
+      absolutePath,
       {},
       `extends: ${JSON.stringify(this.config.extends)}`
     );
+
+    return tsProject;
   }
 
   isRefable(): this is RefableTsProject {

@@ -34,6 +34,8 @@
           "<T>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "string | number | symbol"
             ],
             "path": "src/core/packages/di/common/src/services/plugin.ts",
+            "lineNumber": 41,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
           "<T>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,6 +95,8 @@
               "string | number | symbol"
             ],
             "path": "src/core/packages/di/common/src/services/plugin.ts",
+            "lineNumber": 50,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -109,6 +117,8 @@
           "\nPublic setup contract of the DI service."
         ],
         "path": "src/core/packages/di/common/src/contracts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,6 +136,8 @@
               "Container"
             ],
             "path": "src/core/packages/di/common/src/contracts.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -149,6 +161,8 @@
           "CoreDiServiceSetup"
         ],
         "path": "src/core/packages/di/common/src/contracts.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +180,8 @@
               "Container"
             ],
             "path": "src/core/packages/di/common/src/contracts.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,6 +193,84 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.Logger",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Logger",
+        "description": [
+          "\nPlugin's default logger instance."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-di",
+        "id": "def-common.LoggerFactory",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "LoggerFactory",
+        "description": [
+          "\nPlugin's logger factory."
+        ],
+        "signature": [
+          "string | symbol | Function | ",
+          "Newable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]> | ",
+          "AbstractNewable",
+          "<",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.LoggerFactory",
+            "text": "LoggerFactory"
+          },
+          ", any[]>"
+        ],
+        "path": "src/core/packages/di/common/src/services/logging.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-di",
         "id": "def-common.OnSetup",
@@ -198,6 +292,8 @@
           ") => void, any[]>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -223,6 +319,8 @@
           ") => void, any[]>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -244,6 +342,8 @@
           "<unknown, any[]>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -265,6 +365,8 @@
           "<unknown, any[]>"
         ],
         "path": "src/core/packages/di/common/src/services/plugin.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -37,6 +37,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorId,
+  threadId,
   contentReferencesStore,
   conversationId,
   core,
@@ -75,8 +76,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * creating a new instance, we prevent other uses of llm from binding and changing
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = async () =>
-    !inferenceChatModelDisabled
+  const createLlmInstance = async () => {
+    const connector = await actionsClient.get({ id: connectorId });
+    const defaultModel = connector?.config?.defaultModel;
+    return !inferenceChatModelDisabled
       ? inference.getChatModel({
           request,
           connectorId,
@@ -87,10 +90,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             // prevents the agent from retrying on failure
             // failure could be due to bad connector, we should deliver that result to the client asap
             maxRetries: 0,
-            metadata: {
-              connectorTelemetry: {
-                pluginId: 'security_ai_assistant',
-              },
+            telemetryMetadata: {
+              pluginId: 'security_ai_assistant',
             },
             // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
             // timeout,
@@ -103,7 +104,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           logger,
           // possible client model override,
           // let this be undefined otherwise so the connector handles the model
-          model: request.body.model,
+          model: request.body.model ?? defaultModel,
           // ensure this is defined because we default to it in the language_models
           // This is where the LangSmith logs (Metadata > Invocation Params) are set
           temperature: getDefaultArguments(llmType).temperature,
@@ -118,6 +119,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
             pluginId: 'security_ai_assistant',
           },
         });
+  };
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -234,6 +236,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     contentReferencesStore,
+    checkpointSaver: await assistantContext.getCheckpointSaver(),
   });
 
   const conversationMessages = await getConversationWithNewMessage({
@@ -265,6 +268,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     responseLanguage,
     conversationId,
     connectorId,
+    threadId,
     llmType,
     isStream,
     isOssModel,

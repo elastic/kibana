@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { GRAPH_ENTITY_NODE_DETAILS_ID } from '../test_ids';
 import { Tag } from './tag/tag';
 import { Ips } from './ips/ips';
 import { CountryFlags } from './country_flags/country_flags';
@@ -19,9 +20,19 @@ interface NodeDetailsProps {
   label?: string;
   ips?: string[];
   countryCodes?: string[];
+  onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetailsProps) => {
+export const NodeDetails = ({
+  count,
+  tag,
+  label,
+  ips,
+  countryCodes,
+  onIpClick,
+  onCountryClick,
+}: NodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
 
   const shouldRenderTag = !!tag || (count && count > 1);
@@ -34,6 +45,7 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
 
   return (
     <EuiFlexGroup
+      data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}
       direction="column"
       gutterSize={shouldRenderTop && shouldRenderBottom ? 's' : 'none'}
       css={css`
@@ -48,8 +60,10 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
       {shouldRenderBottom ? (
         <EuiFlexItem grow={false} css={{ alignItems: 'center', gap: euiTheme.size.xxs }}>
           {shouldRenderLabel ? <Label text={label} /> : null}
-          {shouldRenderIps ? <Ips ips={ips} /> : null}
-          {shouldRenderFlags ? <CountryFlags countryCodes={countryCodes} /> : null}
+          {shouldRenderIps ? <Ips ips={ips} onIpClick={onIpClick} /> : null}
+          {shouldRenderFlags ? (
+            <CountryFlags countryCodes={countryCodes} onCountryClick={onCountryClick} />
+          ) : null}
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

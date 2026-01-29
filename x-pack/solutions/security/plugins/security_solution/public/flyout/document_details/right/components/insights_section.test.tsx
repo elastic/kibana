@@ -9,11 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
-  INSIGHTS_HEADER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   CORRELATIONS_TEST_ID,
   INSIGHTS_CONTENT_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
@@ -27,8 +27,8 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../shared/hooks/use_alert_prevalence');
@@ -64,7 +64,7 @@ const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
 
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../shared/hooks/use_expand_section');
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
@@ -106,9 +106,7 @@ const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
 
 describe('<InsightsSection />', () => {
   beforeEach(() => {
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });

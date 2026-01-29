@@ -32,7 +32,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import type { SearchBarCustomization } from '../../../../customizations';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
@@ -47,11 +47,6 @@ const mockSearchBarCustomization: SearchBarCustomization = {
     .mockName('CustomDataViewPickerMock'),
 };
 
-const mockFieldListCustomisation: FieldListCustomization = {
-  id: 'field_list',
-  logsFieldsEnabled: true,
-};
-
 let mockUseCustomizations = false;
 
 jest.mock('../../../../customizations', () => ({
@@ -64,11 +59,21 @@ jest.mock('../../../../customizations', () => ({
     switch (id) {
       case 'search_bar':
         return mockSearchBarCustomization;
-      case 'field_list':
-        return mockFieldListCustomisation;
       default:
         throw new Error(`Unknown customization id: ${id}`);
     }
+  }),
+}));
+
+const mockGetRecommendedFieldsAccessor = jest.fn();
+
+jest.mock('../../../../context_awareness', () => ({
+  ...jest.requireActual('../../../../context_awareness'),
+  useProfileAccessor: jest.fn((accessorId: string) => {
+    if (accessorId === 'getRecommendedFields') {
+      return mockGetRecommendedFieldsAccessor;
+    }
+    return jest.fn(() => ({}));
   }),
 }));
 
@@ -190,10 +195,14 @@ function getStateContainer({
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.appState.set({
-    query: query ?? { query: '', language: 'lucene' },
-    filters: [],
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+      appState: {
+        query: query ?? { query: '', language: 'lucene' },
+        filters: [],
+      },
+    })
+  );
   if (fieldListUiState) {
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
@@ -229,7 +238,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.appState.getState());
+    .mockImplementation(() => stateContainer.getCurrentTab().appState);
 
   const component = (
     <DiscoverTestProvider
@@ -271,11 +280,15 @@ describe('discover responsive sidebar', function () {
     }));
     props = getCompProps();
     mockUseCustomizations = false;
+
+    // Setup default recommended fields mock
+    mockGetRecommendedFieldsAccessor.mockImplementation(() => () => ({ recommendedFields: [] }));
   });
 
   afterEach(() => {
     mockCalcFieldCounts.mockClear();
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
+    mockGetRecommendedFieldsAccessor.mockClear();
     resetExistingFieldsCache();
   });
 
@@ -309,11 +322,15 @@ describe('discover responsive sidebar', function () {
     expect(compLoadingExistence.find(EuiProgress).exists()).toBe(true);
 
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-      appStateContainer.set({
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      stateContainer.internalState.dispatch(
+        stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+          appState: {
+            query: { query: '', language: 'lucene' },
+            filters: [],
+          },
+        })
+      );
       resolveFunction!({
         indexPatternTitle: 'test-loaded',
         existingFieldNames: Object.keys(mockfieldCounts),
@@ -722,6 +739,7 @@ describe('discover responsive sidebar', function () {
     const addFieldButton = findTestSubject(comp, 'dataView-add-field_btn');
     expect(addFieldButton.length).toBe(1);
     addFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -736,6 +754,7 @@ describe('discover responsive sidebar', function () {
     const editFieldButton = findTestSubject(comp, 'discoverFieldListPanelEdit-bytes');
     expect(editFieldButton.length).toBe(1);
     editFieldButton.simulate('click');
+    await new Promise(process.nextTick);
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
@@ -858,6 +877,43 @@ describe('discover responsive sidebar', function () {
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
       findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
+    });
+  });
+
+  describe('recommended fields', () => {
+    it('should call getRecommendedFieldsAccessor on component mount', async () => {
+      await mountComponent(props);
+
+      expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
+    });
+
+    it('should use profile accessor to get recommended fields', async () => {
+      const mockRecommendedFields = [
+        { name: 'service.name', type: 'keyword' },
+        { name: 'host.name', type: 'keyword' },
+      ];
+      const mockAccessorFn = jest.fn(() => ({ recommendedFields: mockRecommendedFields }));
+      mockGetRecommendedFieldsAccessor.mockImplementation(() => mockAccessorFn);
+
+      await mountComponent(props);
+
+      expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
+      expect(mockAccessorFn).toHaveBeenCalled();
+    });
+
+    it('should use fallback function when profile accessor returns fallback', async () => {
+      mockGetRecommendedFieldsAccessor.mockImplementation((fallback) => {
+        expect(typeof fallback).toBe('function');
+        return fallback;
+      });
+
+      await mountComponent(props);
+
+      expect(mockGetRecommendedFieldsAccessor).toHaveBeenCalled();
+      // Verify the fallback function was called with the expected structure
+      const fallbackCall = mockGetRecommendedFieldsAccessor.mock.calls[0];
+      expect(typeof fallbackCall[0]).toBe('function');
+      expect(fallbackCall[0]()).toEqual({ recommendedFields: [] });
     });
   });
 });

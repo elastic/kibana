@@ -141,6 +141,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
+    tableCaption: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.tableCaption', {
+      defaultMessage: 'Component templates list',
+    }),
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
     sorting,
@@ -195,8 +198,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         <EuiButton
           fill
           iconType="plusInCircle"
-          data-test-subj="createPipelineButton"
-          key="createPipelineButton"
+          data-test-subj="createComponentTemplateButton"
+          key="createComponentTemplateButton"
           {...reactRouterNavigate(history, '/create_component_template')}
         >
           {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {

@@ -62,6 +62,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metrics_expression';
 import { ExpressionDropDown } from './expression_dropdown';
+import { SupportedDataTooltipLink } from '../../../components/supported_data_tooltip_link';
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -71,7 +72,6 @@ export interface AlertContextMeta {
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
   schema?: DataSchemaFormat;
-  hostOtelEnabled?: boolean;
 }
 
 type Criteria = InventoryMetricConditions[];
@@ -89,7 +89,6 @@ export type ExpressionsProps = Omit<
       accountId?: string;
       region?: string;
       schema?: DataSchemaFormat | null;
-      hostOtelEnabled?: boolean;
     },
     AlertContextMeta
   >,
@@ -112,7 +111,6 @@ export const defaultExpression = {
 
 export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { hostOtelEnabled = false } = metadata ?? {};
   const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
@@ -292,7 +290,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
         </h4>
       </EuiText>
       <div css={StyledExpressionCss}>
-        <EuiFlexGroup css={StyledExpressionRowCss}>
+        <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="s">
           <div css={NonCollapsibleExpressionCss}>
             <ExpressionDropDown
               options={nodeTypeOptions}
@@ -319,11 +317,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               )}
             />
           </div>
+          <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
-      {hostOtelEnabled && ruleParams.nodeType === 'host' && (
+      {ruleParams.nodeType === 'host' && (
         <div css={StyledExpressionCss}>
-          <EuiFlexGroup css={StyledExpressionRowCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
@@ -643,7 +642,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiFlexGroup css={StyledExpressionRowCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={StyledExpressionCss}>
               <MetricExpression
                 metric={{
@@ -667,7 +666,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
           </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {criticalThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="danger">
                   <FormattedMessage
@@ -676,7 +675,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   />
                 </EuiHealth>
               </EuiFlexGroup>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {warningThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="warning">
                   <FormattedMessage
@@ -704,7 +703,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
             <>
               {' '}
               <EuiSpacer size="xs" />
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
                 <EuiButtonEmpty
                   aria-label={i18n.translate(
                     'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',

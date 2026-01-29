@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -17,5 +17,6 @@
     "@kbn/inference-tracing",
     "@kbn/std",
     "@kbn/tracing-config",
+    "@kbn/cleanup-before-exit",
   ]
 }

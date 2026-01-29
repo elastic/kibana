@@ -127,8 +127,8 @@ export class JobsExportService {
       const jobId = j.job_id;
       return {
         jobId,
-        calendarIds: [...new Set(calendarsPerJob[jobId])] ?? [],
-        filterIds: [...new Set(filtersPerJob[jobId])] ?? [],
+        calendarIds: [...new Set(calendarsPerJob[jobId] ?? [])],
+        filterIds: [...new Set(filtersPerJob[jobId] ?? [])],
       };
     });
   }

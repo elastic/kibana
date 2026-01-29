@@ -27,6 +27,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
 } from '../../../lib';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformCreateBodyV1 } from './transforms';
@@ -70,7 +71,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
-          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
@@ -84,20 +84,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const ruleType = ruleTypes.get(createRuleData.rule_type_id);
-
-            /**
-             * Throws a bad request (400) if the rule type is internallyManaged
-             * ruleType will always exist here because ruleTypes.get will throw a 400
-             * error if the rule type is not registered.
-             */
-            if (ruleType?.internallyManaged) {
-              return res.badRequest({
-                body: {
-                  message: `Cannot create rule of type "${createRuleData.rule_type_id}" because it is internally managed.`,
-                },
-              });
-            }
+            validateInternalRuleType({
+              ruleTypeId: createRuleData.rule_type_id,
+              ruleTypes,
+              operationText: 'create',
+            });
 
             /**
              * Throws an error if the group is not defined in default actions
@@ -113,8 +104,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               actionsClient.isSystemAction(action.id)
             );
 
-            const flappingSettings = await rulesSettingsClient.flapping().get();
-
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
@@ -123,7 +112,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              isFlappingEnabled: flappingSettings.enabled,
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

@@ -10,7 +10,7 @@ import { SecuritySolutionConfigurableCypressTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const svlSharedConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-serverless/shared/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
   );
 
   return {
@@ -33,11 +33,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'security', product_tier: 'complete' },
           { product_line: 'endpoint', product_tier: 'complete' },
           { product_line: 'cloud', product_tier: 'complete' },
-        ])}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'bulkEditAlertSuppressionEnabled',
-          'doesNotMatchForIndicatorMatchRuleEnabled',
-          'continueSuppressionWindowAdvancedSettingEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

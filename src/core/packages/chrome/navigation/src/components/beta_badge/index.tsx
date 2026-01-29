@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiBetaBadge, EuiThemeProvider } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import type { BadgeType } from '../../../types';
 
@@ -22,23 +23,30 @@ interface BetaBadgeProps {
 /**
  * A badge to indicate that a feature is in beta.
  * It can be aligned to the middle or bottom of the text.
- *
- * TODO: support `bottom` and `text-bottom` alignment in EUI
  */
 export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeProps) => {
   const betaBadgeStyles = css`
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
 
-  // TODO: translate
   const config =
     type === 'techPreview'
-      ? { iconType: 'flask', label: 'Tech preview' }
-      : { iconType: 'beta', label: 'Beta' };
+      ? {
+          iconType: 'flask',
+          label: i18n.translate('core.ui.chrome.sideNavigation.techPreviewBadgeLabel', {
+            defaultMessage: 'Tech preview',
+          }),
+        }
+      : {
+          iconType: 'beta',
+          label: i18n.translate('core.ui.chrome.sideNavigation.betaBadgeLabel', {
+            defaultMessage: 'Beta',
+          }),
+        };
 
   return (
     <EuiThemeProvider
-      colorMode={isInverted ? 'inverse' : undefined}
+      colorMode={isInverted ? 'dark' : undefined}
       wrapperProps={{ cloneElement: true }}
     >
       <EuiBetaBadge

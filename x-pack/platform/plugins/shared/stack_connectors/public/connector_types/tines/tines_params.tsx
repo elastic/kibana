@@ -25,7 +25,7 @@ import {
   useSubAction,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SUB_ACTION } from '../../../common/tines/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/tines/constants';
 import type {
   TinesStoryObject,
   TinesWebhookObject,
@@ -33,7 +33,7 @@ import type {
   TinesStoriesActionResponse,
   TinesWebhooksActionResponse,
   TinesStoriesActionParams,
-} from '../../../common/tines/types';
+} from '@kbn/connector-schemas/tines';
 import type { TinesExecuteActionParams, TinesExecuteSubActionParams } from './types';
 import * as i18n from './translations';
 
@@ -287,6 +287,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {showFallbackFrom === 'error' && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_ERROR_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"
@@ -299,6 +300,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           {(showFallbackFrom === 'Story' || showFallbackFrom === 'Webhook') && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.WEBHOOK_URL_FALLBACK_TITLE}
                 color="primary"
                 data-test-subj="tines-fallbackCallout"

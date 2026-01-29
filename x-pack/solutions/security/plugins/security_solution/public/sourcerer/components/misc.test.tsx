@@ -10,16 +10,17 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
-import { initialSourcererState, type SelectedDataView, SourcererScopeName } from '../store/model';
+import { initialSourcererState, type SelectedDataView } from '../store/model';
 import { Sourcerer } from '.';
-import { sourcererActions, sourcererModel } from '../store';
+import { sourcererActions } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockDispatch = jest.fn();
 
@@ -58,7 +59,7 @@ jest.mock('../../common/utils/global_query_string', () => {
 });
 
 const defaultProps = {
-  scope: sourcererModel.SourcererScopeName.default,
+  scope: PageScope.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
@@ -82,7 +83,9 @@ const sourcererDataView: Partial<SelectedDataView> = {
   },
 };
 
-describe('No data', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('No data', () => {
   const mockNoIndicesState = {
     ...mockGlobalState,
     sourcerer: {
@@ -117,7 +120,7 @@ describe('No data', () => {
   test('Hide sourcerer - detections ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+        <Sourcerer scope={PageScope.alerts} />
       </TestProviders>
     );
 
@@ -126,7 +129,7 @@ describe('No data', () => {
   test('Hide sourcerer - timeline ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -134,7 +137,9 @@ describe('No data', () => {
   });
 });
 
-describe('Update available', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Update available', () => {
   const state2 = {
     ...mockGlobalState,
     sourcerer: {
@@ -156,8 +161,8 @@ describe('Update available', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: null,
@@ -182,7 +187,7 @@ describe('Update available', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
   });
@@ -247,7 +252,7 @@ describe('Update available', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: 'security-solution',
           selectedPatterns: ['myFakebeat-*'],
           shouldValidateSelectedPatterns: false,
@@ -257,7 +262,9 @@ describe('Update available', () => {
   });
 });
 
-describe('Update available for timeline template', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Update available for timeline template', () => {
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -289,8 +296,8 @@ describe('Update available for timeline template', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: null,
@@ -311,7 +318,7 @@ describe('Update available for timeline template', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
   });
@@ -333,7 +340,9 @@ describe('Update available for timeline template', () => {
   });
 });
 
-describe('Missing index patterns', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Missing index patterns', () => {
   const state2 = {
     ...mockGlobalState,
     timeline: {
@@ -365,8 +374,8 @@ describe('Missing index patterns', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        [PageScope.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
           loading: false,
           patternList,
           selectedDataViewId: 'fake-data-view-id',
@@ -400,7 +409,7 @@ describe('Missing index patterns', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -431,7 +440,7 @@ describe('Missing index patterns', () => {
 
     render(
       <TestProviders store={store}>
-        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+        <Sourcerer scope={PageScope.timeline} />
       </TestProviders>
     );
 
@@ -459,7 +468,9 @@ describe('Missing index patterns', () => {
   });
 });
 
-describe('Sourcerer integration tests', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('Sourcerer integration tests', () => {
   const state = {
     ...mockGlobalState,
     sourcerer: {
@@ -475,8 +486,8 @@ describe('Sourcerer integration tests', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           loading: false,
           selectedDataViewId: id,
           selectedPatterns: patternListNoSignals.slice(0, 2),
@@ -519,7 +530,7 @@ describe('Sourcerer integration tests', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId: '1234',
         selectedPatterns: ['fakebeat-*'],
       })

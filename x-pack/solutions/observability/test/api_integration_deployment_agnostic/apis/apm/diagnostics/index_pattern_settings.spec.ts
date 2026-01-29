@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
@@ -88,6 +88,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           'metrics-apm.transaction.1m@template',
           'metrics-apm.transaction.60m@template',
           'metrics-otel@template',
+          'metrics-service_destination.10m.otel@template',
+          'metrics-service_destination.1m.otel@template',
+          'metrics-service_destination.60m.otel@template',
           'metrics-service_summary.10m.otel@template',
           'metrics-service_summary.1m.otel@template',
           'metrics-service_summary.60m.otel@template',

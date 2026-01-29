@@ -34,6 +34,26 @@ describe('HeaderPage', () => {
     expect(screen.getByText('Test supplement')).toBeInTheDocument();
   });
 
+  it('renders the `incremental_id` when provided', () => {
+    renderWithTestingProviders(
+      <TestProviders>
+        <HeaderPage border title="Test title" incrementalId={1337} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('#1337')).toBeInTheDocument();
+  });
+
+  it('does not render the `incremental_id` when not provided', () => {
+    renderWithTestingProviders(
+      <TestProviders>
+        <HeaderPage border title="Test title" />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('cases-incremental-id-text')).not.toBeInTheDocument();
+  });
+
   it('DOES NOT render the back link when not provided', () => {
     const wrapper = mount(
       <TestProviders>

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/automatic-import-plugin",
-  "owner": "@elastic/security-scalability",
+  "owner": "@elastic/integration-experience",
   "group": "platform",
   "visibility": "shared",
   "description": "Plugin implementing the Automatic Import API and UI",
@@ -19,6 +19,7 @@
       "triggersActionsUi",
       "actions",
       "stackConnectors",
+      "inference",
     ],
     "requiredBundles": [
       "kibanaUtils"

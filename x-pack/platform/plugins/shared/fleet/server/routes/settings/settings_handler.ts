@@ -12,8 +12,9 @@ import type {
   PutSettingsRequestSchema,
   PutSpaceSettingsRequestSchema,
 } from '../../types';
-import { settingsService, agentPolicyService, appContextService } from '../../services';
+import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
+import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -69,12 +70,14 @@ export const putSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(esClient, { user });
+
+    if (request.body.integration_knowledge_enabled) {
+      await scheduleReindexIntegrationKnowledgeTask(appContextService.getTaskManagerStart()!);
+    }
+
     const body = {
       item: settings,
     };

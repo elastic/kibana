@@ -69,8 +69,6 @@ export interface ExtensionsSetup {
   addIndexDetailsTab(tab: IndexDetailsTab): void;
   // sets content to render instead of the code block on the overview tab of the index page
   setIndexOverviewContent(content: IndexContent): void;
-  // sets content to render below the docs link on the mappings tab of the index page
-  setIndexMappingsContent(content: IndexContent): void;
   // sets index details page route
   setIndexDetailsPageRoute(route: IndexDetailsPageRoute, detailsTabId?: string): void;
 }

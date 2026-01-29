@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow resetting column width in Dashboard panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
       await testResizeColumn('_source');
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should use custom column width on Dashboard when specified', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
       const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);

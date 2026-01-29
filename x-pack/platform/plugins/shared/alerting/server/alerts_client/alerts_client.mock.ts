@@ -17,6 +17,7 @@ const createAlertsClientMock = () => {
       getProcessedAlerts: jest.fn(),
       getRawAlertInstancesForState: jest.fn(),
       hasReachedAlertLimit: jest.fn(),
+      getMaxAlertLimit: jest.fn().mockReturnValue(1000),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
       getSummarizedAlerts: jest.fn(),
@@ -24,7 +25,9 @@ const createAlertsClientMock = () => {
       client: jest.fn(),
       determineDelayedAlerts: jest.fn(),
       determineFlappingAlerts: jest.fn(),
-      getTrackedExecutions: jest.fn(),
+      updatePersistedAlerts: jest.fn(),
+      getAlertsToUpdateWithMaintenanceWindows: jest.fn(),
+      getAlertsToUpdateWithLastScheduledActions: jest.fn(),
     };
   });
 };

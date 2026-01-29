@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -8,7 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
+    "types/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -83,10 +83,12 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
+    "@kbn/core-saved-objects-api-server",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
+    "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/search-types",
     "@kbn/alerting-comparators",
@@ -101,7 +103,6 @@
     "@kbn/core-analytics-browser",
     "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
-    "@kbn/shared-ux-page-no-data-types",
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
@@ -111,6 +112,7 @@
     "@kbn/deeplinks-management",
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
+    "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser",
     "@kbn/object-utils",
     "@kbn/coloring",
@@ -119,7 +121,16 @@
     "@kbn/cases-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-card-no-data-types",
     "@kbn/licensing-types",
+    "@kbn/apm-types",
+    "@kbn/control-group-renderer",
+    "@kbn/react-query",
+    "@kbn/deeplinks-analytics",
+    "@kbn/esql-composer",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

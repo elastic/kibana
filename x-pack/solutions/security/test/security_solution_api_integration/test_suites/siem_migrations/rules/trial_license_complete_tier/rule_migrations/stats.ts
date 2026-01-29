@@ -51,13 +51,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId,
-          rules: {
+          items: {
             total,
             pending,
             processing,
             completed,
             failed,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -100,13 +101,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId1,
-          rules: {
+          items: {
             total: 42,
             pending: 4,
             processing: 3,
             completed: 33,
             failed: 2,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -118,13 +120,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect.objectContaining({
           status: 'interrupted',
           id: migrationId2,
-          rules: {
+          items: {
             total: 28,
             pending: 2,
             processing: 5,
             completed: 14,
             failed: 7,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -160,22 +163,20 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await migrationRulesRoutes.translationStats({
         migrationId,
       });
-      expect(response.body).toEqual(
-        expect.objectContaining({
-          id: migrationId,
-          rules: {
-            total,
-            success: {
-              total: completed,
-              result: { full: 4, partial: 5, untranslatable: 1 },
-              installable: 4,
-              prebuilt: 0,
-              missing_index: completed,
-            },
-            failed,
+      expect(response.body).toEqual({
+        id: migrationId,
+        rules: {
+          total,
+          success: {
+            total: completed,
+            result: { full: 4, partial: 5, untranslatable: 1 },
+            installable: 4,
+            prebuilt: 0,
+            missing_index: 10,
           },
-        })
-      );
+          failed,
+        },
+      });
     });
 
     describe('Error handling', () => {

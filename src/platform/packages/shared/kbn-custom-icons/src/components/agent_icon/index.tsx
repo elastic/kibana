@@ -21,7 +21,7 @@ export function AgentIcon({ agentName, size = 'l', ...props }: AgentIconProps) {
   const theme = useEuiTheme();
   const icon = getAgentIcon(agentName, theme.colorMode === 'DARK');
 
-  return <EuiIcon type={icon} size={size} title={agentName} {...props} aria-label={agentName} />;
+  return <EuiIcon type={icon} size={size} title={agentName} {...props} />;
 }
 
 // eslint-disable-next-line import/no-default-export

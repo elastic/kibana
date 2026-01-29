@@ -6,10 +6,10 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
@@ -49,7 +49,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   const { storage } = useKibana().services;
 
-  const { eventCollectionDataReductionBannerEnabled, trustedDevices } = useEnableExperimental();
+  const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
 
   const renderDeviceControlSection = () => {
     if (!trustedDevices) {
@@ -69,8 +69,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   };
 
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    eventCollectionDataReductionBannerEnabled &&
-      (storage.get('securitySolution.showEventMergingBanner') ?? true)
+    storage.get('securitySolution.showEventMergingBanner') ?? true
   );
   const onBannerDismiss = useCallback(() => {
     setShowEventMergingBanner(false);

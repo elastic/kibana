@@ -127,6 +127,9 @@ export class IconMapSelect extends Component<Props, State> {
           valueOfSelected={valueOfSelected}
           hasDividers={true}
           compressed
+          aria-label={i18n.translate('xpack.maps.styles.icon.iconPaletteSelectAriaLabel', {
+            defaultMessage: 'Icon palette',
+          })}
         />
         <EuiSpacer size="s" />
       </Fragment>

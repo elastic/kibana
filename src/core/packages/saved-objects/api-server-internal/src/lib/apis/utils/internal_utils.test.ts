@@ -91,8 +91,7 @@ describe('#getSavedObjectFromSource', () => {
   registry.isNamespaceAgnostic.mockImplementation((type) => type === NAMESPACE_AGNOSTIC_TYPE);
 
   const id = 'obj-id';
-  const _seq_no = 1;
-  const _primary_term = 1;
+  const { _seq_no, _primary_term } = { _seq_no: 1, _primary_term: 1 };
   const attributes = { foo: 'bar' };
   const references = [{ type: 'ref-type', id: 'ref-id', name: 'ref-name' }];
   const migrationVersion = { foo: 'migrationVersion' };

@@ -67,11 +67,6 @@ Your final output MUST be a single, valid JSON object. Do not include any text o
 
 ```json
 {
-  "summary": {
-    "factual_accuracy_summary": "ACCURATE | MINOR_INACCURACIES | MAJOR_INACCURACIES",
-    "relevance_summary": "RELEVANT | PARTIALLY_RELEVANT | IRRELEVANT",
-    "sequence_accuracy_summary": "MATCH | MISMATCH | NOT_APPLICABLE"
-  },
   "analysis": [
     {
       "claim": "The specific claim extracted from the agent's response.",
@@ -82,7 +77,12 @@ Your final output MUST be a single, valid JSON object. Do not include any text o
       "justification_snippet": "A direct snippet from the Ground Truth Response or null.",
       "explanation": "A brief explanation of the verdict reasoning."
     }
-  ]
+  ],
+  "summary": {
+    "factual_accuracy_summary": "ACCURATE | MINOR_INACCURACIES | MAJOR_INACCURACIES",
+    "relevance_summary": "RELEVANT | PARTIALLY_RELEVANT | IRRELEVANT",
+    "sequence_accuracy_summary": "MATCH | MISMATCH | NOT_APPLICABLE"
+  }
 }
 ```
 
@@ -95,16 +95,13 @@ EXAMPLE 1: Procedural HR Query
 
 ```json
 {
-  "summary": {
-    "factual_accuracy_summary": "MAJOR_INACCURACIES",
-    "relevance_summary": "RELEVANT"
-  },
   "analysis": [
     {
       "claim": "log into WorkDay and go to the 'Time Entry' panel.",
       "centrality": "central",
       "centrality_reason": "These are the first two essential steps in the procedure the user asked for.",
       "verdict": "FULLY_SUPPORTED",
+      "sequence_match": "MATCH",
       "justification_snippet": "Login to WorkDay. Navigate to the 'Time Entry' panel.",
       "explanation": "The claims directly match the instructions in the ground truth."
     },
@@ -113,6 +110,7 @@ EXAMPLE 1: Procedural HR Query
       "centrality": "central",
       "centrality_reason": "This is the final action in the procedure.",
       "verdict": "PARTIALLY_SUPPORTED",
+      "sequence_match": "MATCH",
       "justification_snippet": "click the 'Submit' button located at the top-right.",
       "explanation": "The core action 'press the Submit button' is correct, but the adjectives 'prominent green' are unverified embellishments not present in the ground truth."
     },
@@ -121,10 +119,16 @@ EXAMPLE 1: Procedural HR Query
       "centrality": "central",
       "centrality_reason": "The submission deadline is a critical detail of the process.",
       "verdict": "CONTRADICTED",
+      "sequence_match": "MATCH",
       "justification_snippet": "Timesheets are due by 5 PM Friday EST.",
       "explanation": "The agent's claim of 'local time' is explicitly contradicted by the ground truth's specific 'EST' timezone."
     }
-  ]
+  ],
+  "summary": {
+    "factual_accuracy_summary": "MAJOR_INACCURACIES",
+    "relevance_summary": "RELEVANT",
+    "sequence_accuracy_summary": "MATCH"
+  }
 }
 ```
 
@@ -136,16 +140,13 @@ EXAMPLE 2: Factual Sales Query
 
 ```json
 {
-  "summary": {
-    "factual_accuracy_summary": "MAJOR_INACCURACIES",
-    "relevance_summary": "PARTIALLY_RELEVANT"
-  },
   "analysis": [
     {
       "claim": "the total value of open deals is $250,000",
       "centrality": "central",
       "centrality_reason": "This directly answers the first part of the user's query.",
       "verdict": "FULLY_SUPPORTED",
+      "sequence_match": "NOT_APPLICABLE",
       "justification_snippet": "The total value of open deals for Acme Corp is $250,000.",
       "explanation": "The value given by the agent is an exact match with the ground truth."
     },
@@ -154,6 +155,7 @@ EXAMPLE 2: Factual Sales Query
       "centrality": "central",
       "centrality_reason": "This attempts to answer the second part of the user's query about the contact person.",
       "verdict": "CONTRADICTED",
+      "sequence_match": "NOT_APPLICABLE",
       "justification_snippet": "The primary contact is Jane Doe",
       "explanation": "The agent incorrectly identifies Jane Doe's role as 'account manager' when the ground truth specifies 'primary contact'. In a sales context, these are different roles."
     },
@@ -162,6 +164,7 @@ EXAMPLE 2: Factual Sales Query
       "centrality": "peripheral",
       "centrality_reason": "The user did not ask for the account creation date.",
       "verdict": "FULLY_SUPPORTED",
+      "sequence_match": "NOT_APPLICABLE",
       "justification_snippet": "The account was created on July 15, 2025.",
       "explanation": "This claim is factually correct per the ground truth but is not relevant to the user's question."
     },
@@ -170,10 +173,16 @@ EXAMPLE 2: Factual Sales Query
       "centrality": "peripheral",
       "centrality_reason": "This is conversational advice and was not requested by the user.",
       "verdict": "NOT_IN_GROUND_TRUTH",
+      "sequence_match": "NOT_APPLICABLE",
       "justification_snippet": null,
       "explanation": "This claim is a suggestion made by the agent and its core fact is not present anywhere in the ground truth data."
     }
-  ]
+  ],
+  "summary": {
+    "factual_accuracy_summary": "MAJOR_INACCURACIES",
+    "relevance_summary": "PARTIALLY_RELEVANT",
+    "sequence_accuracy_summary": "NOT_APPLICABLE"
+  }
 }
 ```
 
@@ -185,11 +194,6 @@ EXAMPLE 3: Accurate but Sequentially Incorrect Procedural Query
 
 ```json
 {
-  "summary": {
-    "factual_accuracy_summary": "ACCURATE",
-    "relevance_summary": "RELEVANT",
-    "sequence_accuracy_summary": "MISMATCH"
-  },
   "analysis": [
     {
       "claim": "Navigate to the 'Reports' dashboard.",
@@ -227,6 +231,11 @@ EXAMPLE 3: Accurate but Sequentially Incorrect Procedural Query
       "justification_snippet": "3. Add your desired data sources and visuals, then click the 'Save' button...",
       "explanation": "This action is factually correct but is presented as step 4, after the impossible 'Share' step. It should be step 3."
     }
-  ]
+  ],
+  "summary": {
+    "factual_accuracy_summary": "ACCURATE",
+    "relevance_summary": "RELEVANT",
+    "sequence_accuracy_summary": "MISMATCH"
+  }
 }
 ```

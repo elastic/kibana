@@ -21,7 +21,6 @@ import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
-  setup(adhocAttackDiscoveryDataClient: IRuleDataClient | undefined): void;
   create(
     context: RequestHandlerContext,
     request: KibanaRequest,
@@ -36,20 +35,18 @@ interface ConstructorOptions {
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
   assistantService: AIAssistantService;
+  adhocAttackDiscoveryDataClient: IRuleDataClient;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
-  private adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+  private adhocAttackDiscoveryDataClient: IRuleDataClient;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
-  }
-
-  public setup(adhocAttackDiscoveryDataClient: IRuleDataClient | undefined) {
-    this.adhocAttackDiscoveryDataClient = adhocAttackDiscoveryDataClient;
+    this.adhocAttackDiscoveryDataClient = options.adhocAttackDiscoveryDataClient;
   }
 
   public async create(
@@ -91,10 +88,9 @@ export class RequestContextFactory implements IRequestContextFactory {
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
     const actionsClient = await startPlugins.actions.getActionsClientWithRequest(request);
-
     return {
       core: coreContext,
-
+      userProfile: coreStart.userProfile,
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
@@ -117,6 +113,12 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       checkPrivileges: () => {
         return startPlugins.security.authz.checkPrivilegesWithRequest(request);
+      },
+      /**
+       * Test purpose only.
+       */
+      updateAnonymizationFields: async () => {
+        return this.assistantService.createDefaultAnonymizationFields(getSpaceId());
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
@@ -217,7 +219,20 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          contentReferencesEnabled: params?.contentReferencesEnabled,
+          assistantInterruptsEnabled: params?.assistantInterruptsEnabled,
+        });
+      }),
+
+      getCheckpointSaver: memoize(async () => {
+        if (!this.assistantService.getIsCheckpointSaverEnabled()) {
+          return null;
+        }
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createCheckpointSaver({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
         });
       }),
     };

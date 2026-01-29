@@ -22,8 +22,8 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
-      username: 'my_username',
+    context.elasticAssistant.getCurrentUser.mockResolvedValue({
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',
@@ -41,7 +41,6 @@ describe('Find user conversations route', () => {
       );
       expect(response.status).toEqual(200);
     });
-
     test('catches error if search throws error', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockImplementation(
         async () => {

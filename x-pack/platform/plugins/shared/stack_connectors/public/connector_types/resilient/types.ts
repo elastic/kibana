@@ -6,7 +6,7 @@
  */
 
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { ExecutorSubActionPushParams } from '../../../server/connector_types/resilient/types';
+import type { ExecutorSubActionPushParams } from '@kbn/connector-schemas/resilient';
 
 export type ResilientActionConnector = UserConfiguredActionConnector<
   ResilientConfig,
@@ -15,7 +15,9 @@ export type ResilientActionConnector = UserConfiguredActionConnector<
 
 export interface ResilientActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
+  subActionParams: ExecutorSubActionPushParams & {
+    incident: { additionalFields: string | null };
+  };
 }
 
 export interface ResilientConfig {

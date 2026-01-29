@@ -37,6 +37,7 @@ export function AlertSubtitle({ alert }: AlertSubtitleProps) {
       </EuiText>
       <EuiToolTip position="top" content={alert.fields[ALERT_RULE_NAME]}>
         <EuiText
+          tabIndex={0}
           css={css`
             font-weight: ${euiTheme.font.weight.semiBold};
           `}

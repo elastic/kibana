@@ -24,6 +24,7 @@ export const analyzeFileQuerySchema = schema.object({
   timeout: schema.maybe(schema.string()),
   timestamp_field: schema.maybe(schema.string()),
   timestamp_format: schema.maybe(schema.string()),
+  includePreview: schema.maybe(schema.boolean()),
 });
 
 const ingestPipeline = schema.object({

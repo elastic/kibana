@@ -27,6 +27,24 @@ describe('convertToRRule', () => {
     });
   });
 
+  test('should convert a recurring schedule that is recurring on a hourly schedule', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.HOURLY,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 1,
+    });
+  });
+
   test('should convert a recurring schedule that is recurring on a daily schedule', () => {
     const rRule = convertToRRule({
       startDate,
@@ -150,6 +168,26 @@ describe('convertToRRule', () => {
     });
   });
 
+  test('should convert a recurring schedule that is recurring on a custom hourly schedule', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        customFrequency: Frequency.HOURLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 3,
+    });
+  });
+
   test('should convert a recurring schedule that is recurring on a custom daily schedule', () => {
     const rRule = convertToRRule({
       startDate,
@@ -255,6 +293,28 @@ describe('convertToRRule', () => {
       interval: 3,
       bymonth: [3],
       bymonthday: [22],
+    });
+  });
+
+  test('should convert a recurring schedule that is recurring on a custom hourly schedule with includeTime', () => {
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      includeTime: true,
+      recurringSchedule: {
+        customFrequency: Frequency.HOURLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
+    });
+
+    expect(rRule).toEqual({
+      dtstart: startDate,
+      tzid: 'UTC',
+      freq: Frequency.HOURLY,
+      interval: 3,
+      byminute: [0],
     });
   });
 

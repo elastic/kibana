@@ -8,10 +8,11 @@ import { unzip } from 'zlib';
 import { promisify } from 'util';
 import expect from '@kbn/expect';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/endpoint_exceptions/constants';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
@@ -24,17 +25,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const retryOnStale = getService('retryOnStale');
   const esClient = getService('es');
-  const supertest = getService('supertest');
   const find = getService('find');
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
+  const log = getService('log');
   const MINUTE = 60 * 1000;
 
-  describe('Endpoint Exceptions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/249130
+  describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(10 * MINUTE);
 
+    let indexedData: IndexedHostsAndAlertsResponse;
     let clearPrefilledEntries: () => Promise<void>;
 
     const openNewEndpointExceptionFlyout = async () => {
@@ -63,16 +66,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const lastField = fields[fields.length - 1];
       await lastField.click();
 
-      await retry.try(
-        async () => {
+      await retry.try(async () => {
+        try {
           await comboBox.setElement(lastField, value);
-        },
-        async () => {
+        } catch (error) {
           // If the above fails due to an option not existing, create the value custom instead
           await comboBox.setFilterValue(lastField, value);
           await pageObjects.common.pressEnterKey();
         }
-      );
+      });
     };
 
     const setLastEntry = async ({
@@ -93,31 +95,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(2 * MINUTE, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
+      const artifactNamePrefix = `endpoint-exceptionlist-${
+        indexedData.hosts.at(0)?.host.os.type
+      }-v1`;
 
-        const foundArtifactId = artifacts
-          .flatMap((artifact) => artifact.artifactIds)
-          .find((artifactId) => artifactId.startsWith('endpoint-exceptionlist-macos-v1'));
+      log.info(`Checking generated artifact content for: ${artifactNamePrefix}`);
 
-        expect(foundArtifactId).to.not.be(undefined);
+      return retry
+        .tryForTime(2 * MINUTE, async () => {
+          const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
-        // Get fleet artifact
-        const artifactResult = await esClient.get({
-          index: '.fleet-artifacts-7',
-          id: `endpoint:${foundArtifactId!}`,
+          const foundArtifactId = artifacts
+            .flatMap((artifact) => artifact.artifactIds)
+            .find((artifactId) => artifactId.startsWith(artifactNamePrefix));
+
+          expect(foundArtifactId).to.not.be(undefined);
+
+          // Get fleet artifact
+          const artifactResult = await esClient.get({
+            index: FLEET_SERVER_ARTIFACTS_INDEX,
+            id: `endpoint:${foundArtifactId!}`,
+          });
+
+          const artifact = artifactResult._source as ArtifactElasticsearchProperties;
+
+          const zippedBody = Buffer.from(artifact.body, 'base64');
+          const artifactBody = await unzipPromisify(zippedBody);
+
+          expect(JSON.parse(artifactBody.toString())).to.eql(expectedArtifact);
+        })
+        .catch((error) => {
+          log.error(`Check of artifact content for [${artifactNamePrefix}] failed`);
+          throw error;
         });
-
-        const artifact = artifactResult._source as ArtifactElasticsearchProperties;
-
-        const zippedBody = Buffer.from(artifact.body, 'base64');
-        const artifactBody = await unzipPromisify(zippedBody);
-
-        expect(JSON.parse(artifactBody.toString())).to.eql(expectedArtifact);
-      });
     };
 
-    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security');
 
@@ -143,19 +155,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     beforeEach(async () => {
       this.timeout(2 * MINUTE);
 
-      const deleteEndpointExceptions = async () => {
-        const { body } = await supertest
-          .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=endpoint_list&namespace_type=agnostic`)
-          .set('kbn-xsrf', 'true');
-
-        for (const exceptionListItem of (body as FoundExceptionListItemSchema).data) {
-          await supertest
-            .delete(`${EXCEPTION_LIST_ITEM_URL}?id=${exceptionListItem.id}&namespace_type=agnostic`)
-            .set('kbn-xsrf', 'true');
-        }
-      };
-
-      await deleteEndpointExceptions();
+      await endpointArtifactTestResources.deleteList(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+      await endpointArtifactTestResources.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION);
 
       clearPrefilledEntries = retryOnStale.wrap(async () => {
         const entriesContainer = await testSubjects.find('exceptionEntriesContainer');

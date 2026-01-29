@@ -12,6 +12,8 @@ import {
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -115,14 +117,25 @@ const useConditionalTabs = () => {
   const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   const { featureFlags } = usePluginConfig();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
+  const isInfrastructureAssetCustomDashboardsEnabled = useUiSetting<boolean>(
+    enableInfrastructureAssetCustomDashboards
+  );
+  const { schema } = useAssetDetailsRenderPropsContext();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs',
       [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
       [ContentTabIds.ANOMALIES]: isTopbarMenuVisible,
+      [ContentTabIds.DASHBOARDS]: isInfrastructureAssetCustomDashboardsEnabled,
     }),
-    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible]
+    [
+      featureFlags.osqueryEnabled,
+      isProfilingPluginEnabled,
+      isTopbarMenuVisible,
+      schema,
+      isInfrastructureAssetCustomDashboardsEnabled,
+    ]
   );
 
   const isTabEnabled = useCallback(

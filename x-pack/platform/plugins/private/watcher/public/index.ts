@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
 import { WatcherUIPlugin } from './plugin';
 
 export const plugin = () => new WatcherUIPlugin();

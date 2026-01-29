@@ -11,6 +11,7 @@ import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 
 import { getCreatedAttackDiscoveryAlerts } from '.';
 import { getResponseMock } from '../../../../../__mocks__/attack_discovery_alert_document_response';
+import * as transforms from '../../transforms/transform_search_response_to_alerts';
 
 describe('getCreatedAttackDiscoveryAlerts', () => {
   const attackDiscoveryAlertsIndex = 'test-index';
@@ -33,13 +34,15 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
     const result = await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,
+      enableFieldRendering: true,
       logger,
       readDataClient: readDataClient as unknown as IRuleDataReader,
+      withReplacements: false,
     });
 
     expect(result).toEqual([
       {
-        alertIds: [
+        alert_ids: [
           'ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21',
           '46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5',
           '857f6434220ff27f807bef6829f32d1ad1c337026db016bc54e302eecf95cf93',
@@ -104,22 +107,22 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
           'fbf23653042416c886f12df972a885d847fe5681f466aff64a611aa01f9a5011',
           'b0c92ae7ecaa07702798fbb161ce189a80da259390876c14daace753d73896f9',
         ],
-        alertRuleUuid: 'attack_discovery_ad_hoc_rule_id',
-        alertStart: '2025-06-23T14:25:24.104Z',
-        alertUpdatedAt: '2025-06-23T15:16:52.984Z',
-        alertUpdatedByUserId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        alertUpdatedByUserName: 'elastic',
-        alertWorkflowStatus: 'acknowledged',
-        alertWorkflowStatusUpdatedAt: '2025-06-23T15:16:52.984Z',
-        connectorId: 'gemini_2_5_pro',
-        connectorName: 'Gemini 2.5 Pro',
-        detailsMarkdown:
+        alert_rule_uuid: 'attack_discovery_ad_hoc_rule_id',
+        alert_start: '2025-06-23T14:25:24.104Z',
+        alert_updated_at: '2025-06-23T15:16:52.984Z',
+        alert_updated_by_user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        alert_updated_by_user_name: 'elastic',
+        alert_workflow_status: 'acknowledged',
+        alert_workflow_status_updated_at: '2025-06-23T15:16:52.984Z',
+        connector_id: 'gemini_2_5_pro',
+        connector_name: 'Gemini 2.5 Pro',
+        details_markdown:
           'A widespread attack campaign was executed across multiple Windows hosts, unified by the use of a single compromised user account, {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }}. The attacker leveraged this access to deploy a variety of malware families using different initial access and execution techniques, culminating in a ransomware attack.\n* **Qakbot Infection:** On host {{ host.name 0d7534c9-79f5-46ed-9df9-3dfcff57e5ed }}, the attack began with a malicious OneNote file. This led to {{ process.name mshta.exe }} executing a script, which used {{ process.name curl.exe }} to download a payload from {{ source.ip 77.75.230.128 }}. The payload was executed via {{ process.name rundll32.exe }} and injected into {{ process.name AtBroker.exe }}, identified as the {{ rule.name Windows.Trojan.Qbot }} trojan.\n* **Emotet Infection:** On host {{ host.name deb5784c-55d3-4422-9d7c-06f1f71c04b3 }}, a malicious Excel document spawned {{ process.name regsvr32.exe }} to load a malicious DLL, ultimately leading to the execution of the {{ rule.name Windows.Trojan.Emotet }} trojan and the establishment of persistence via registry run keys.\n* **Bumblebee Trojan:** On host {{ host.name 4d9943f7-cbef-462b-a882-e39db5da7abd }}, the attacker used {{ process.parent.name msiexec.exe }} to proxy the execution of a malicious PowerShell script, which injected the {{ rule.name Windows.Trojan.Bumblebee }} trojan into its own memory and established C2 communication.\n* **Generic Droppers:** On other hosts, similar initial access vectors were used. On host {{ host.name 9a98cc1d-a7a3-4924-b939-b17b2ec5dbdd }}, a Word document dropped and executed a VBScript, which then used PowerShell and created a scheduled task for persistence. On host {{ host.name 7c9a79a0-c029-4acb-b61c-d5831b409943 }}, an Excel file used {{ process.name certutil.exe }} to decode and execute a payload.\n* **Ransomware Deployment:** The campaign culminated on host {{ host.name 6aece05f-675e-4dc0-b8fa-ba0f1a43d691 }} with the deployment of Sodinokibi (REvil) ransomware. A malicious executable used DLL side-loading to compromise the legitimate Microsoft Defender process, {{ process.name MsMpEng.exe }}, which then executed the ransomware and began encrypting files.',
-        entitySummaryMarkdown:
+        entity_summary_markdown:
           'A widespread malware campaign using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }} impacted multiple Windows hosts, including {{ host.name 6aece05f-675e-4dc0-b8fa-ba0f1a43d691 }} and {{ host.name 0d7534c9-79f5-46ed-9df9-3dfcff57e5ed }}.',
-        generationUuid: 'c10c51a5-10d2-481d-853a-e7fd5f393b23',
+        generation_uuid: 'c10c51a5-10d2-481d-853a-e7fd5f393b23',
         id: '29ceb1fa1482f02a2eb6073991078544e529edfc633a5621b20a93eefbb63083',
-        mitreAttackTactics: [
+        mitre_attack_tactics: [
           'Initial Access',
           'Execution',
           'Persistence',
@@ -140,13 +143,13 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
           '6aece05f-675e-4dc0-b8fa-ba0f1a43d691': 'SRVWIN02',
           '7c9a79a0-c029-4acb-b61c-d5831b409943': 'SRVWIN01',
         },
-        riskScore: 6237,
-        summaryMarkdown:
+        risk_score: 6237,
+        summary_markdown:
           'A widespread campaign was conducted using the compromised account of user {{ user.name 6f53c297-f5cb-48c3-8aff-2e2d7a390169 }}, deploying various malware including Sodinokibi, Emotet, Qakbot, and Bumblebee across multiple Windows hosts.',
         timestamp: '2025-06-23T14:25:24.104Z',
         title: 'Widespread Malware Campaign via Compromised Account',
-        userId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        userName: 'elastic',
+        user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        user_name: 'elastic',
         users: [
           {
             name: 'elastic',
@@ -163,8 +166,10 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
     const result = await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds: emptyIds,
+      enableFieldRendering: true,
       logger,
       readDataClient: readDataClient as unknown as IRuleDataReader,
+      withReplacements: false,
     });
 
     expect(result).toEqual([]);
@@ -177,8 +182,10 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
       getCreatedAttackDiscoveryAlerts({
         attackDiscoveryAlertsIndex,
         createdDocumentIds,
+        enableFieldRendering: true,
         logger,
         readDataClient: readDataClient as unknown as IRuleDataReader,
+        withReplacements: false,
       })
     ).rejects.toThrow('search failed');
   });
@@ -189,8 +196,10 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
     await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds: emptyIds,
+      enableFieldRendering: true,
       logger,
       readDataClient: readDataClient as unknown as IRuleDataReader,
+      withReplacements: false,
     });
 
     expect(logger.debug).toHaveBeenCalled();
@@ -203,8 +212,10 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
       await getCreatedAttackDiscoveryAlerts({
         attackDiscoveryAlertsIndex,
         createdDocumentIds,
+        enableFieldRendering: true,
         logger,
         readDataClient: readDataClient as unknown as IRuleDataReader,
+        withReplacements: false,
       });
     } catch {
       // ignore, assert is for the logger
@@ -224,12 +235,61 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
     await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,
+      enableFieldRendering: true,
       logger,
       readDataClient: readDataClient as unknown as IRuleDataReader,
+      withReplacements: false,
     });
 
     expect(readDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({ size: createdDocumentIds.length })
     );
+  });
+
+  describe('transformSearchResponseToAlerts invocation', () => {
+    let spy: jest.SpyInstance;
+    const mockResponse = getResponseMock();
+
+    beforeEach(() => {
+      spy = jest.spyOn(transforms, 'transformSearchResponseToAlerts');
+    });
+
+    afterEach(() => {
+      spy.mockRestore();
+    });
+
+    it('invokes transformSearchResponseToAlerts with true', async () => {
+      readDataClient.search.mockResolvedValueOnce(
+        mockResponse as unknown as estypes.SearchResponse<unknown>
+      );
+
+      await getCreatedAttackDiscoveryAlerts({
+        attackDiscoveryAlertsIndex,
+        createdDocumentIds,
+        enableFieldRendering: true,
+        logger,
+        readDataClient: readDataClient as unknown as IRuleDataReader,
+        withReplacements: true,
+      });
+
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ withReplacements: true }));
+    });
+
+    it('invokes transformSearchResponseToAlerts with false', async () => {
+      readDataClient.search.mockResolvedValueOnce(
+        mockResponse as unknown as estypes.SearchResponse<unknown>
+      );
+
+      await getCreatedAttackDiscoveryAlerts({
+        attackDiscoveryAlertsIndex,
+        createdDocumentIds,
+        enableFieldRendering: true,
+        logger,
+        readDataClient: readDataClient as unknown as IRuleDataReader,
+        withReplacements: false,
+      });
+
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ withReplacements: false }));
+    });
   });
 });

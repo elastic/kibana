@@ -131,6 +131,8 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'elasticsearch',
   'description',
   'format_version',
+  'discovery',
+  'var_groups',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);

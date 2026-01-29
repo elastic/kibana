@@ -214,8 +214,6 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
-  // TODO: change it to just a value instead of a function
-  //  when responseActionsSentinelOneV1Enabled is enabled/removed
   types: (countOfTypes: number) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
       defaultMessage: `{countOfTypes, plural, one {Type} other {Types}}`,

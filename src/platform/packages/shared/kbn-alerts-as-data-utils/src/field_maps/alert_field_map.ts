@@ -15,6 +15,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
@@ -53,6 +54,12 @@ import {
   EVENT_ORIGINAL,
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
+  ALERT_INDEX_PATTERN,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_MUTED,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -88,6 +95,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: {
     type: 'keyword',
     array: true,
     required: false,
@@ -258,6 +270,20 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_SCHEDULED_ACTION_DATE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_SCHEDULED_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_SCHEDULED_ACTION_THROTTLING]: {
+    type: 'unmapped',
+    required: false,
+  },
   [EVENT_ACTION]: {
     type: 'keyword',
     array: false,
@@ -293,6 +319,21 @@ export const alertFieldMap = {
   },
   [VERSION]: {
     type: 'version',
+    array: false,
+    required: false,
+  },
+  [ALERT_INDEX_PATTERN]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_MUTED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_STATE_NAMESPACE]: {
+    type: 'unmapped',
     array: false,
     required: false,
   },

@@ -7,10 +7,13 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import type { ReindexStatusResponse, IndexWarning } from '../../../../../../common/types';
-import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexStatusResponse, IndexWarning } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import type { ApiService } from '../../../../lib/api';
+import { generateNewIndexName } from './index_settings';
 
 const POLL_INTERVAL = 3000;
 
@@ -113,12 +116,14 @@ export const useReindex = ({
   isInDataStream,
   isClosedIndex,
   api,
+  kibanaVersion,
 }: {
   indexName: string;
   isFrozen: boolean;
   isInDataStream: boolean;
   isClosedIndex: boolean;
   api: ApiService;
+  kibanaVersion: Version;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
@@ -198,6 +203,12 @@ export const useReindex = ({
 
     const { data, error } = await api.getReindexStatus(indexName);
 
+    // The request can resolve after unmount; avoid setting state (and scheduling poll timers)
+    // when the hook is no longer mounted.
+    if (!isMounted.current) {
+      return;
+    }
+
     if (error) {
       setReindexState((prevValue: ReindexState) => {
         return {
@@ -214,17 +225,25 @@ export const useReindex = ({
       return;
     }
 
+    data.meta.reindexName = generateNewIndexName(indexName, kibanaVersion);
+
     setReindexState((prevValue: ReindexState) => {
       return getReindexState(prevValue, data);
     });
 
     if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
       // Only keep polling if it exists and is in progress.
-      pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
+      pollIntervalIdRef.current = setTimeout(() => {
+        if (!isMounted.current) {
+          return;
+        }
+
+        void updateStatus();
+      }, POLL_INTERVAL);
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
       simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
+  }, [clearPollInterval, api, indexName, simulateExtraSteps, kibanaVersion]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
@@ -240,7 +259,9 @@ export const useReindex = ({
       };
     });
 
-    const { data: reindexOp, error } = await api.startReindexTask(indexName);
+    const newIndexName = generateNewIndexName(indexName, kibanaVersion);
+
+    const { data: reindexOp, error } = await api.startReindexTask({ indexName, newIndexName });
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -261,7 +282,7 @@ export const useReindex = ({
       });
     });
     updateStatus();
-  }, [api, indexName, updateStatus]);
+  }, [api, indexName, updateStatus, kibanaVersion]);
 
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {

@@ -1,0 +1,1109 @@
+{
+  "id": "@kbn/streamlang-yaml-editor",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.generateStreamlangJsonSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "generateStreamlangJsonSchema",
+        "description": [
+          "\nGenerate JSON Schema from Streamlang Zod schema for Monaco YAML validation\n"
+        ],
+        "signature": [
+          "(streamType: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamType",
+            "text": "StreamType"
+          },
+          " | undefined) => object | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.generateStreamlangJsonSchema.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "streamType",
+            "description": [
+              "- Optional stream type to filter available actions\nReturns null if schema generation fails, allowing fallback to basic syntax highlighting"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamType",
+                "text": "StreamType"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+            "lineNumber": 20,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.getStepDecorations",
+        "type": "Function",
+        "tags": [],
+        "label": "getStepDecorations",
+        "description": [
+          "\nConvert step summary (status map) to Monaco decorations using the line map"
+        ],
+        "signature": [
+          "(stepSummary: ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.StepSummary",
+            "text": "StepSummary"
+          },
+          ", yamlLineMap: ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.YamlLineMap",
+            "text": "YamlLineMap"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.StepDecoration",
+            "text": "StepDecoration"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.getStepDecorations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "stepSummary",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang-yaml-editor",
+                "scope": "common",
+                "docId": "kibKbnStreamlangYamlEditorPluginApi",
+                "section": "def-common.StepSummary",
+                "text": "StepSummary"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.getStepDecorations.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "yamlLineMap",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang-yaml-editor",
+                "scope": "common",
+                "docId": "kibKbnStreamlangYamlEditorPluginApi",
+                "section": "def-common.YamlLineMap",
+                "text": "YamlLineMap"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.getStreamlangMonacoSchemaConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getStreamlangMonacoSchemaConfig",
+        "description": [
+          "\nGet Monaco YAML schema configuration for Streamlang\n"
+        ],
+        "signature": [
+          "(streamType: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamType",
+            "text": "StreamType"
+          },
+          " | undefined) => { uri: string; fileMatch: string[]; schema: object; } | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.getStreamlangMonacoSchemaConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "streamType",
+            "description": [
+              "- Optional stream type to filter available actions"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamType",
+                "text": "StreamType"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/validation/schema_generator.ts",
+            "lineNumber": 38,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.mapStepsToYamlLines",
+        "type": "Function",
+        "tags": [],
+        "label": "mapStepsToYamlLines",
+        "description": [
+          "\nParse YAML string and map each step's deterministic customIdentifier to its line ranges.\nSince customIdentifiers are stripped from the YAML before rendering, we regenerate them\nusing the same deterministic approach as addStepIdentifiers (content hash + path)."
+        ],
+        "signature": [
+          "(yamlString: string) => ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.YamlLineMap",
+            "text": "YamlLineMap"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.mapStepsToYamlLines.$1",
+            "type": "string",
+            "tags": [],
+            "label": "yamlString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 25,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.StreamlangYamlEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "StreamlangYamlEditor",
+        "description": [],
+        "signature": [
+          "({ dsl, onDslChange, readOnly, height, onMount, \"data-test-subj\": dataTestSubj, stepSummary, processorsMetrics, hasSimulationResult, onRunUpToStep, canRunSimulation, additiveStepIds, reinitializationDeps, simulationMode, streamType, validationErrors, }: ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.StreamlangYamlEditorProps",
+            "text": "StreamlangYamlEditorProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dsl,\n  onDslChange,\n  readOnly = false,\n  height = '100%',\n  onMount,\n  'data-test-subj': dataTestSubj = 'streamlangYamlEditor',\n  stepSummary,\n  processorsMetrics,\n  hasSimulationResult = false,\n  onRunUpToStep,\n  canRunSimulation = false,\n  additiveStepIds = [],\n  reinitializationDeps = [],\n  simulationMode = 'partial',\n  streamType,\n  validationErrors,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang-yaml-editor",
+                "scope": "common",
+                "docId": "kibKbnStreamlangYamlEditorPluginApi",
+                "section": "def-common.StreamlangYamlEditorProps",
+                "text": "StreamlangYamlEditorProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/streamlang_yaml_editor.tsx",
+            "lineNumber": 40,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.stripCustomIdentifiers",
+        "type": "Function",
+        "tags": [],
+        "label": "stripCustomIdentifiers",
+        "description": [
+          "\nRecursively removes customIdentifier from all steps in the DSL.\nThis is used to clean the DSL before displaying it to users, as customIdentifiers\nare internal implementation details used for tracking and should not be visible."
+        ],
+        "signature": [
+          "(dsl: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.stripCustomIdentifiers.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
+            "lineNumber": 16,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.useStepDecorations",
+        "type": "Function",
+        "tags": [],
+        "label": "useStepDecorations",
+        "description": [],
+        "signature": [
+          "(editor: ",
+          "editor",
+          ".IStandaloneCodeEditor | null, decorations: ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.StepDecoration",
+            "text": "StepDecoration"
+          },
+          "[]) => { styles: ",
+          "SerializedStyles",
+          "; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.useStepDecorations.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "editor",
+            "description": [],
+            "signature": [
+              "editor",
+              ".IStandaloneCodeEditor | null"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.useStepDecorations.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "decorations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang-yaml-editor",
+                "scope": "common",
+                "docId": "kibKbnStreamlangYamlEditorPluginApi",
+                "section": "def-common.StepDecoration",
+                "text": "StepDecoration"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/hooks/use_step_decorations.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.StepDecoration",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepDecoration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StepDecoration.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StepDecoration.lineStart",
+            "type": "number",
+            "tags": [],
+            "label": "lineStart",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StepDecoration.lineEnd",
+            "type": "number",
+            "tags": [],
+            "label": "lineEnd",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StepDecoration.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.StreamlangYamlEditorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamlangYamlEditorProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.dsl",
+            "type": "Object",
+            "tags": [],
+            "label": "dsl",
+            "description": [
+              "Streamlang DSL object (customIdentifiers will be stripped automatically)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.onDslChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onDslChange",
+            "description": [
+              "Called when the YAML content changes and is parsable. Debounced internally."
+            ],
+            "signature": [
+              "((dsl: ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              },
+              ", yaml: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang-yaml-editor",
+                "id": "def-common.StreamlangYamlEditorProps.onDslChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dsl",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/streamlang",
+                    "scope": "common",
+                    "docId": "kibKbnStreamlangPluginApi",
+                    "section": "def-common.StreamlangDSL",
+                    "text": "StreamlangDSL"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 17,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/streamlang-yaml-editor",
+                "id": "def-common.StreamlangYamlEditorProps.onDslChange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "yaml",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 17,
+                "columnNumber": 38,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.readOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.height",
+            "type": "string",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.onMount",
+            "type": "Function",
+            "tags": [],
+            "label": "onMount",
+            "description": [],
+            "signature": [
+              "((editor: ",
+              "editor",
+              ".IStandaloneCodeEditor) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang-yaml-editor",
+                "id": "def-common.StreamlangYamlEditorProps.onMount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "editor",
+                "description": [],
+                "signature": [
+                  "editor",
+                  ".IStandaloneCodeEditor"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 20,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.stepSummary",
+            "type": "Object",
+            "tags": [],
+            "label": "stepSummary",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang-yaml-editor",
+                "scope": "common",
+                "docId": "kibKbnStreamlangYamlEditorPluginApi",
+                "section": "def-common.StepSummary",
+                "text": "StepSummary"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.processorsMetrics",
+            "type": "Object",
+            "tags": [],
+            "label": "processorsMetrics",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.ProcessorMetrics",
+                "text": "ProcessorMetrics"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.hasSimulationResult",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasSimulationResult",
+            "description": [
+              "Indicates whether a simulation result exists for the current DSL"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.reinitializationDeps",
+            "type": "Array",
+            "tags": [],
+            "label": "reinitializationDeps",
+            "description": [
+              "Depedencies that should trigger reinitialisation of the editor when changed"
+            ],
+            "signature": [
+              "unknown[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.onRunUpToStep",
+            "type": "Function",
+            "tags": [],
+            "label": "onRunUpToStep",
+            "description": [
+              "Callback for when user wants to run simulation up to a specific step"
+            ],
+            "signature": [
+              "((stepId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang-yaml-editor",
+                "id": "def-common.StreamlangYamlEditorProps.onRunUpToStep.$1",
+                "type": "string",
+                "tags": [],
+                "label": "stepId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.canRunSimulation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canRunSimulation",
+            "description": [
+              "Whether the simulation can be run (used to enable/disable the run button)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.additiveStepIds",
+            "type": "Array",
+            "tags": [],
+            "label": "additiveStepIds",
+            "description": [
+              "Array of step IDs that are new/additive (only these can have simulation run up to them)"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.simulationMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "simulationMode",
+            "description": [
+              "Simulation mode of the active data source"
+            ],
+            "signature": [
+              "\"complete\" | \"partial\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.streamType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "streamType",
+            "description": [
+              "Stream type to filter available actions (e.g., exclude manual_ingest_pipeline for wired streams)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamType",
+                "text": "StreamType"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.StreamlangYamlEditorProps.validationErrors",
+            "type": "Object",
+            "tags": [],
+            "label": "validationErrors",
+            "description": [
+              "Validation errors grouped by step ID"
+            ],
+            "signature": [
+              "Map<string, ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangValidationError",
+                "text": "StreamlangValidationError"
+              },
+              "[]> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.ValidationError",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidationError",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.ValidationError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.ValidationError.line",
+            "type": "number",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.ValidationError.column",
+            "type": "number",
+            "tags": [],
+            "label": "column",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.ValidationError.severity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              "\"error\" | \"warning\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.YamlLineMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "YamlLineMap",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang-yaml-editor",
+            "id": "def-common.YamlLineMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[stepId: string]: { lineStart: number; lineEnd: number; }",
+            "description": [],
+            "signature": [
+              "[stepId: string]:  { lineStart: number; lineEnd: number; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.StepStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "StepStatus",
+        "description": [],
+        "signature": [
+          "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang-yaml-editor",
+        "id": "def-common.StepSummary",
+        "type": "Type",
+        "tags": [],
+        "label": "StepSummary",
+        "description": [],
+        "signature": [
+          "Map<string, ",
+          {
+            "pluginId": "@kbn/streamlang-yaml-editor",
+            "scope": "common",
+            "docId": "kibKbnStreamlangYamlEditorPluginApi",
+            "section": "def-common.StepStatus",
+            "text": "StepStatus"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

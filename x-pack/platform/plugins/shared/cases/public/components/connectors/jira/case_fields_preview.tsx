@@ -31,9 +31,17 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
   });
 
   const issueTypes = issueTypesData?.data;
+  const otherFields = fields?.otherFields ?? '';
 
-  const listItems = useMemo(
-    () => [
+  const listItems = useMemo(() => {
+    let otherFieldsParsed: Record<string, string> = {};
+    try {
+      otherFieldsParsed = otherFields ? JSON.parse(otherFields) : {};
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing other fields:', error, { otherFields });
+    }
+    return [
       ...(issueType != null && issueType.length > 0
         ? [
             {
@@ -58,9 +66,14 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
             },
           ]
         : []),
-    ],
-    [issueType, issueTypes, parent, priority]
-  );
+      ...(otherFields != null && otherFields.length > 0
+        ? Object.keys(otherFieldsParsed).map((key) => ({
+            title: key,
+            description: otherFieldsParsed[key],
+          }))
+        : []),
+    ];
+  }, [issueType, issueTypes, parent, priority, otherFields]);
 
   return (
     <ConnectorCard

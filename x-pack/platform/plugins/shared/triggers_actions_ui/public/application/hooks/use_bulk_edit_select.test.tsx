@@ -100,6 +100,31 @@ describe('useBulkEditSelectTest', () => {
     expect(result.current.getFilter()?.arguments.length).toEqual(1);
   });
 
+  it('should ignore internally managed items', async () => {
+    const internallyManagedItem = {
+      id: 'id5',
+      isEditable: true,
+      isInternallyManaged: true,
+    };
+
+    const itemsWithInternallyManaged = [...items, internallyManagedItem] as RuleTableItem[];
+
+    const { result } = renderHook(() =>
+      useBulkEditSelect({
+        items: itemsWithInternallyManaged,
+        totalItemCount: 5,
+      })
+    );
+
+    act(() => {
+      result.current.onSelectPage();
+    });
+
+    expect(result.current.selectedIds).not.toContain('id5');
+    expect(result.current.isPageSelected).toBe(true);
+    expect(result.current.isAllSelected).toBe(false);
+  });
+
   it('getFilter should return rule list filter when selecting all', async () => {
     const { result } = renderHook(() =>
       useBulkEditSelect({

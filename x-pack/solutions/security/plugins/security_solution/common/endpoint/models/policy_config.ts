@@ -154,8 +154,9 @@ export const policyFactory = ({
     },
     linux: {
       events: {
-        process: true,
+        dns: true,
         file: true,
+        process: true,
         network: true,
         session_data: false,
         tty_io: false,
@@ -440,3 +441,4 @@ export const policyFactoryWithSupportedFeatures = (
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
 export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';
+export const DefaultPolicyDeviceNotificationMessage = 'Device Control activity was detected';

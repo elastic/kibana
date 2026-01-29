@@ -6,7 +6,7 @@
  */
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import type { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
 import { GEOHASH_GRID } from './geo_hash';
@@ -26,9 +26,7 @@ export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   } else if (vis.data.indexPattern) {
     // attempt to default to first geo point field when geohash is not configured yet
     const geoField = vis.data.indexPattern.fields.find((field) => {
-      return (
-        !indexPatterns.isNestedField(field) && field.aggregatable && field.type === 'geo_point'
-      );
+      return !isNestedField(field) && field.aggregatable && field.type === 'geo_point';
     });
     if (geoField) {
       params.geoFieldName = geoField.name;

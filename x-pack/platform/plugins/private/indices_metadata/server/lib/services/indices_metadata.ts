@@ -64,11 +64,12 @@ export class IndicesMetadataService {
   public start(
     taskManager: TaskManagerStartContract,
     analytics: AnalyticsServiceStart,
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    isServerless: boolean
   ) {
     this.logger.debug('Starting indices metadata service');
 
-    this.receiver = new MetadataReceiver(this.logger, esClient);
+    this.receiver = new MetadataReceiver(this.logger, esClient, isServerless);
     this.sender = new MetadataSender(this.logger, analytics);
 
     this.subscription$ = this.configurationService
@@ -103,7 +104,19 @@ export class IndicesMetadataService {
       this.receiver.getIndices(),
       this.receiver.getDataStreams(),
       this.receiver.getIndexTemplatesStats(),
-    ]);
+    ]).catch((error) => {
+      this.logger.error('Error fetching indices metadata', { error });
+      return [undefined, undefined, undefined];
+    });
+
+    if (
+      indicesSettings === undefined ||
+      dataStreams === undefined ||
+      indexTemplates === undefined
+    ) {
+      this.logger.debug('Skipping indices metadata publish due to fetch errors');
+      return;
+    }
 
     const indices = indicesSettings.map((index) => index.index_name);
 
@@ -229,7 +242,9 @@ export class IndicesMetadataService {
       indicesStats.items.push(stat);
     }
     this.sender.reportEBT(INDEX_STATS_EVENT, indicesStats);
-    this.logger.debug('Indices stats sent', { count: indicesStats.items.length } as LogMeta);
+    this.logger.debug('Indices stats sent', {
+      count: indicesStats.items.length,
+    } as LogMeta);
     return indicesStats.items.length;
   }
 
@@ -242,6 +257,7 @@ export class IndicesMetadataService {
     this.logger.debug('Indices settings sent', { count: indicesSettings.items.length } as LogMeta);
     return indicesSettings.items.length;
   }
+
   private async publishIlmStats(indices: string[]): Promise<Set<string>> {
     const ilmNames = new Set<string>();
     const ilmsStats: IlmsStats = {

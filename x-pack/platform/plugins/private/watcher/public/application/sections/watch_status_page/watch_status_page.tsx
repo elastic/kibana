@@ -174,7 +174,7 @@ export const WatchStatusPage = ({
                         />
                       }
                     >
-                      <EuiBadge color="hollow">
+                      <EuiBadge color="hollow" tabIndex={0}>
                         <FormattedMessage
                           id="xpack.watcher.sections.watchDetail.headerBadgeText"
                           defaultMessage="System watch"

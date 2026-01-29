@@ -59,7 +59,9 @@ export const ComparePercentageBadge = ({
         `}
       >
         <EuiToolTip content={percentInfo.note}>
-          <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
+          <EuiBadge color={percentInfo.color} tabIndex={0}>
+            {percentInfo.percent}
+          </EuiBadge>
         </EuiToolTip>
         {timeRange && (
           <EuiText size="xs" color="subdued">
@@ -85,7 +87,7 @@ export const ComparePercentageBadge = ({
         z-index: 9999;
         position: relative;
         // positioning hack for Lens Metric
-        top: ${positionForLens ? '-55px' : 'initial'};
+        top: ${positionForLens ? '-40px' : 'initial'};
         left: ${positionForLens ? '20px' : 'initial'};
       `}
     >
