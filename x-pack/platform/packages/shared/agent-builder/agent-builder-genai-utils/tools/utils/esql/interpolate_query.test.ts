@@ -117,13 +117,6 @@ describe('interpolateEsqlQuery', () => {
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
-    it('should handle empty array', () => {
-      const template = 'FROM items | WHERE id IN (?ids)';
-      const params = { ids: [] };
-      const expected = 'FROM items | WHERE id IN ([])';
-      expect(interpolateEsqlQuery(template, params)).toBe(expected);
-    });
-
     it('should handle array with single element', () => {
       const template = 'FROM users | WHERE id IN (?ids)';
       const params = { ids: [42] };

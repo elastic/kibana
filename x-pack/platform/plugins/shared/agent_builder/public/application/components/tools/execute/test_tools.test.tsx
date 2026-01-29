@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import moment from 'moment';
-import { parseFormData, ToolTestFlyout } from './test_tools';
+import { parseArrayEntry, parseFormData, ToolTestFlyout } from './test_tools';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 
 const mockUseTool = jest.fn();
@@ -131,6 +131,27 @@ describe('parseFormData', () => {
     // Without parameter type info, values pass through as-is
     expect(result.settings).toBe('{"key": "value"}');
     expect(result.description).toBe('text');
+  });
+});
+
+describe('parseArrayEntry', () => {
+  it('returns undefined for empty or whitespace values', () => {
+    expect(parseArrayEntry('')).toBeUndefined();
+    expect(parseArrayEntry('   ')).toBeUndefined();
+  });
+
+  it('returns unquoted numeric values as numbers', () => {
+    expect(parseArrayEntry('123')).toBe(123);
+    expect(parseArrayEntry('  45.6  ')).toBe(45.6);
+  });
+
+  it('returns quoted values as strings', () => {
+    expect(parseArrayEntry('"123"')).toBe('123');
+    expect(parseArrayEntry("'alpha'")).toBe('alpha');
+  });
+
+  it('returns non-numeric values as strings', () => {
+    expect(parseArrayEntry('alpha')).toBe('alpha');
   });
 });
 
