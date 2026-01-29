@@ -11,6 +11,14 @@ import type { HttpHandler } from '@kbn/core/public';
 import { isAxiosError } from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+/**
+ * When running locally, only UUIDs are allowed for non-preconfigured connectors.
+ * We generate a deterministic UUID from the logical connector id so runs are stable/idempotent.
+ */
+export function getConnectorIdAsUuid(connectorId: string) {
+  return v5(connectorId, v5.DNS);
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -27,7 +35,7 @@ export async function createConnectorFixture({
   // one for this test run. only UUIDs are allowed for non-preconfigured
   // connectors, so we generate a seeded uuid using the preconfigured
   // connector id.
-  const connectorIdAsUuid = v5(predefinedConnector.id, v5.DNS);
+  const connectorIdAsUuid = getConnectorIdAsUuid(predefinedConnector.id);
 
   const connectorWithUuid = {
     ...predefinedConnector,
