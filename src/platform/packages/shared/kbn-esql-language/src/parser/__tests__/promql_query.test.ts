@@ -94,3 +94,19 @@ function 13-31 "="
     });
   });
 });
+
+describe('PromQL sub-query deep parsing', () => {
+  it('parses PromQL AST', () => {
+    const text = `PROMQL hello = ?world bytes_in{job="prometheus"}`;
+    const query = EsqlQuery.fromSrc(text);
+
+    expect('\n' + printAst((query.ast.commands[0] as ESQLAstPromqlCommand).query!)).toBe(`
+query 22-47
+└─ selector 22-47 "bytes_in"
+   ├─ identifier 22-29 "bytes_in"
+   └─ label-map 31-46
+      └─ label 31-46 "job"
+         ├─ identifier 31-33 "job"
+         └─ literal 35-46 ""prometheus""`);
+  });
+});
