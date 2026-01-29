@@ -70,6 +70,11 @@ export function DashboardRenderer({
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
+  /** Default showControlGroup to true. This simplifies embedding DashboardRenderer outside of the dashboard app,
+   *  ensuring that DashboardRenderer, by default, will never fail to render a dashboard due to missing controls.
+   *  Other contexts that want to render the control group in a different location in the UI should explicitly pass `false`
+   *  to the DashboardRenderer.
+   */
   showControlGroup = true,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
