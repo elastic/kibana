@@ -96,7 +96,7 @@ export function QueryDetailsFlyout({ item, onClose }: QueryDetailsFlyoutProps) {
             'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.duplicateInfo',
             {
               defaultMessage:
-                "You want to make edits to a query, duplicate it. If you want to edit the details, you must duplicate the rule, we don't allow this, as it might cause conflicting results.",
+                "If you want to edit the details you must duplicate the rule. Edits might cause conflicting results.",
             }
           )}
         />
