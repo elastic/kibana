@@ -37,14 +37,6 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
     vertical-align: ${alignment === 'text-bottom' ? 'text-bottom' : 'bottom'};
   `;
 
-  // TODO: use a proper EuiBetaBadge variant once available https://github.com/elastic/eui/issues/9268
-  const newBadgeStyles = css`
-    border-radius: 50px;
-    border: none;
-    font-size: ${euiTheme.size.m};
-    line-height: calc(${euiTheme.size.base} * 1.25);
-  `;
-
   const config: Record<BadgeType, BadgeConfig> = {
     techPreview: {
       iconType: 'flask',
@@ -68,7 +60,7 @@ export const BetaBadge = ({ type, isInverted, alignment = 'bottom' }: BetaBadgeP
   return (
     <EuiThemeProvider colorMode={isInverted ? 'dark' : undefined}>
       {isNew ? (
-        <EuiBadge css={newBadgeStyles} children={config[type].label} color="primary" />
+        <EuiBadge children={config[type].label} color={euiTheme.colors.backgroundFilledPrimary} />
       ) : (
         <EuiBetaBadge
           css={betaBadgeStyles}
