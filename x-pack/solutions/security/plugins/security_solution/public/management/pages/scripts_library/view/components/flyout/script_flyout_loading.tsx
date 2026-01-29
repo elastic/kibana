@@ -14,7 +14,7 @@ export const EndpointScriptFlyoutLoading = ({
   'data-test-subj'?: string;
 }) => (
   <>
-    <EuiFlyoutHeader hasBorder data-test-subj={dataTestSubj}>
+    <EuiFlyoutHeader hasBorder data-test-subj={`${dataTestSubj}-loading-header`}>
       <EuiSkeletonText lines={2} />
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
