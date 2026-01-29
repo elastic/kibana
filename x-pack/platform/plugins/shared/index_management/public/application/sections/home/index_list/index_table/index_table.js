@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
+import numeral from '@elastic/numeral';
 
 import {
   EuiButton,
@@ -135,6 +136,7 @@ const getColumnConfigs = ({
         label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
           defaultMessage: 'Storage size',
         }),
+        render: (index) => numeral(index.size).format('0.00 b'),
         order: 70,
       }
     );

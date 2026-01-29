@@ -9,7 +9,6 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
-import numeral from '@elastic/numeral';
 import { API_BASE_PATH } from '../common/constants';
 const SOURCE = i18n.translate('xpack.idxMgmt.indexStatsEnricher.source', {
   defaultMessage: 'index stats',
@@ -29,11 +28,9 @@ export const indexStatsEnricher = {
             status: indices[name]?.status,
             uuid: indices[name]?.uuid,
             documents_deleted: indices[name]?.primaries?.docs?.deleted ?? 0,
-            primary_size: numeral(indices[name]?.primaries?.store?.size_in_bytes ?? 0).format(
-              '0.00 b'
-            ),
+            primary_size: indices[name]?.primaries?.store?.size_in_bytes ?? 0,
             documents: indices[name]?.primaries?.docs?.count ?? 0,
-            size: numeral(indices[name]?.total?.store?.size_in_bytes ?? 0).format('0.00 b'),
+            size: indices[name]?.total?.store?.size_in_bytes ?? 0,
           })),
           source: SOURCE,
         };

@@ -145,8 +145,8 @@ export interface IndexAttributes {
   status?: IndicesStatsIndexMetadataState;
   uuid?: Uuid;
   documents?: number;
-  size?: string;
-  primary_size?: string;
+  size?: number;
+  primary_size?: number;
   documents_deleted?: number;
 }
 
