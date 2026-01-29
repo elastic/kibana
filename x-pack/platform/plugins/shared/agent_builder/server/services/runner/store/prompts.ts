@@ -27,11 +27,11 @@ export const getFileSystemInstructions = async ({
   const treeRepresentation = await buildFolderTree(filesystem, { maxFilesPerFolder: 3 });
 
   return cleanPrompt(`
-  ## Filesystem
+  ## FILESTORE
 
-  You have access to a virtual filesystem containing files representing assets that you can use to perform your tasks
+  You have access to a file store, exposing a virtual filesystem containing files representing assets that you can use to perform your tasks.
 
-  ### Filesystem tools
+  ### Filestore tools
 
   You have access to the following tools to access and interact with the filesystem:
   - ${tools.read}: access the content of a file
