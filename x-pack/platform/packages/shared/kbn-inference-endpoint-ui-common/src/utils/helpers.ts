@@ -11,7 +11,13 @@ import { FieldType } from '../types/types';
 import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
-import { TASK_SETTINGS, SERVICE_SETTINGS, TASK_TYPE_CONFIG, PROVIDER_CONFIG } from '../constants';
+import {
+  PROVIDER_CONFIG,
+  PROVIDER_SECRETS,
+  SERVICE_SETTINGS,
+  TASK_SETTINGS,
+  TASK_TYPE_CONFIG,
+} from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -52,8 +58,11 @@ export const getNonEmptyValidator = (
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular
           if (isSecrets ? field.sensitive : !field.sensitive) {
-            const fieldLocation =
-              field.location === TASK_SETTINGS ? TASK_TYPE_CONFIG : PROVIDER_CONFIG;
+            const fieldLocation = isSecrets
+              ? PROVIDER_SECRETS
+              : field.location === TASK_SETTINGS
+              ? TASK_TYPE_CONFIG
+              : PROVIDER_CONFIG;
             if (
               path.includes(fieldLocation) &&
               (!configData[field.key] ||
