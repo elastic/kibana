@@ -141,7 +141,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
       <EuiAccordion
         id={accordionId}
         buttonContent={itemButtonContent(iconType, color, item.translate.title, item.milestoneId)}
-        buttonProps={{ css: css({ '&:hover': { 'text-decoration': 'none' } }) }}
+        buttonProps={{ css: css({ '&:hover': { textDecoration: 'none' } }) }}
         arrowDisplay="right"
         onToggle={onToggle}
         forceState={trigger}
@@ -248,7 +248,7 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
         <EuiAccordion
           id={accordionId}
           buttonContent={buttonContent(completed.length, todoItems.length, euiTheme)}
-          buttonProps={{ css: css({ '&:hover': { 'text-decoration': 'none' } }) }}
+          buttonProps={{ css: css({ '&:hover': { textDecoration: 'none' } }) }}
           arrowProps={{ css: css({ alignSelf: 'flex-start', marginTop: '0rem' }) }}
           arrowDisplay="right"
           paddingSize="none"
@@ -264,7 +264,7 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
           <EuiFlexGroup alignItems={'center'} direction={'column'} css={{ gap: euiTheme.size.m }}>
             {todoItems.map((item) => {
               return (
-                <EuiFlexItem>
+                <EuiFlexItem key={item.milestoneId}>
                   <YourTrialCompanionTODOItem
                     key={item.milestoneId}
                     item={item}
@@ -278,7 +278,7 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
               );
             })}
           </EuiFlexGroup>
-          {!showDismiss && (
+          {showDismiss && (
             <>
               {!lastLineSelected && <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />}
               <EuiHorizontalRule margin="none" />
