@@ -10,7 +10,7 @@ import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { NBA_TODO_LIST } from './nba_translations';
 import { Milestone } from '../../common/trial_companion/types';
 import type { YourTrialCompanionProps } from './nba_get_setup_panel';
-import { YourTrialCompanion } from './nba_get_setup_panel';
+import YourTrialCompanion from './nba_get_setup_panel';
 
 const meta: Meta<typeof YourTrialCompanion> = {
   component: YourTrialCompanion,
