@@ -1,0 +1,350 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// ignoring linter about api calls because we are testing DSL and esql only.
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
+import { apiTest, expect } from '@kbn/scout-security';
+import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { getEuidDslFilterBasedOnDocument } from '../../../../server/domain/euid/dsl';
+
+const UPDATES_INDEX = {
+  generic: '.entities.v2.updates.security_generic_default',
+  host: '.entities.v2.updates.security_host_default',
+  user: '.entities.v2.updates.security_user_default',
+  service: '.entities.v2.updates.security_service_default',
+} as const;
+
+function getTotal(hits: { total?: number | { value: number } }): number {
+  const total = hits.total;
+  if (total === undefined) return 0;
+  return typeof total === 'number' ? total : total.value;
+}
+
+apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
+  let defaultHeaders: Record<string, string>;
+
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...COMMON_HEADERS,
+    };
+
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
+
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(response.statusCode).toBe(200);
+
+    await esArchiver.loadIfNeeded(
+      'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
+    );
+  });
+
+  apiTest.afterAll(async ({ apiClient }) => {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  apiTest(
+    'generic: DSL from doc with entity.id returns exactly that document',
+    async ({ esClient }) => {
+      const docSource = { entity: { id: 'generic-id' } };
+      const dsl = getEuidDslFilterBasedOnDocument('generic', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.generic,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits).toHaveLength(1);
+      expect(result.hits.hits[0]._source).toMatchObject({ entity: { id: 'generic-id' } });
+    }
+  );
+
+  apiTest(
+    'host: DSL from doc with host.entity.id returns exactly that document',
+    async ({ esClient }) => {
+      const docSource = {
+        host: { entity: { id: 'host-with-entity-id' }, name: 'server-01', domain: 'example.com' },
+      };
+      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.host,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        host: expect.objectContaining({ entity: { id: 'host-with-entity-id' } }),
+      });
+    }
+  );
+
+  apiTest('host: DSL from doc with host.id returns exactly that document', async ({ esClient }) => {
+    const docSource = { host: { id: 'host-123' } };
+    const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+    expect(dsl).toBeDefined();
+
+    const result = await esClient.search({
+      index: UPDATES_INDEX.host,
+      body: { ...dsl, size: 10 },
+    });
+
+    const total = getTotal(result.hits);
+    expect(total).toBe(1);
+    expect(result.hits.hits[0]._source).toMatchObject({
+      host: { id: 'host-123' },
+    });
+  });
+
+  apiTest(
+    'host: DSL from doc with host.name + host.domain returns expected document(s)',
+    async ({ esClient }) => {
+      const docSource = { host: { name: 'server-01', domain: 'example.com' } };
+      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.host,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBeGreaterThanOrEqual(1);
+      const hasExpected = result.hits.hits.some((h) => {
+        const src = h._source as { host?: { name?: string; domain?: string } } | undefined;
+        return src?.host?.name === 'server-01' && src?.host?.domain === 'example.com';
+      });
+      expect(hasExpected).toBe(true);
+    }
+  );
+
+  apiTest(
+    'host: DSL from doc with host.hostname + host.domain returns expected document',
+    async ({ esClient }) => {
+      const docSource = { host: { hostname: 'workstation-05', domain: 'corp.local' } };
+      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.host,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        host: { hostname: 'workstation-05', domain: 'corp.local' },
+      });
+    }
+  );
+
+  apiTest(
+    'host: DSL from doc with host.name only returns expected document',
+    async ({ esClient }) => {
+      const docSource = { host: { name: 'desktop-02' } };
+      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.host,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        host: { name: 'desktop-02' },
+      });
+    }
+  );
+
+  apiTest(
+    'host: DSL from doc with host.hostname only returns expected document',
+    async ({ esClient }) => {
+      const docSource = { host: { hostname: 'laptop-01' } };
+      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.host,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        host: { hostname: 'laptop-01' },
+      });
+    }
+  );
+
+  apiTest(
+    'user: DSL from doc with user.entity.id returns exactly that document',
+    async ({ esClient }) => {
+      const docSource = { user: { entity: { id: 'non-generated-user' } } };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.user,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { entity: { id: 'non-generated-user' } },
+      });
+    }
+  );
+
+  apiTest(
+    'user: DSL from doc with user.name + host.entity.id returns expected document',
+    async ({ esClient }) => {
+      const docSource = {
+        user: { name: 'john.doe' },
+        host: { entity: { id: 'host-123' } },
+      };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.user,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'john.doe' },
+        host: { entity: { id: 'host-123' } },
+      });
+    }
+  );
+
+  apiTest('user: DSL from doc with user.id returns expected document', async ({ esClient }) => {
+    const docSource = { user: { id: 'user-101' } };
+    const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+    expect(dsl).toBeDefined();
+
+    const result = await esClient.search({
+      index: UPDATES_INDEX.user,
+      body: { ...dsl, size: 10 },
+    });
+
+    const total = getTotal(result.hits);
+    expect(total).toBe(1);
+    expect(result.hits.hits[0]._source).toMatchObject({
+      user: { id: 'user-101' },
+    });
+  });
+
+  apiTest('user: DSL from doc with user.email returns expected document', async ({ esClient }) => {
+    const docSource = { user: { email: 'test@example.com' } };
+    const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+    expect(dsl).toBeDefined();
+
+    const result = await esClient.search({
+      index: UPDATES_INDEX.user,
+      body: { ...dsl, size: 10 },
+    });
+
+    const total = getTotal(result.hits);
+    expect(total).toBe(1);
+    expect(result.hits.hits[0]._source).toMatchObject({
+      user: { email: 'test@example.com' },
+    });
+  });
+
+  apiTest(
+    'user: DSL from doc with user.name only returns expected document',
+    async ({ esClient }) => {
+      const docSource = { user: { name: 'david.lee' } };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.user,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'david.lee' },
+      });
+    }
+  );
+
+  apiTest(
+    'service: DSL from doc with service.entity.id returns exactly that document',
+    async ({ esClient }) => {
+      const docSource = { service: { entity: { id: 'non-generated-service-id' } } };
+      const dsl = getEuidDslFilterBasedOnDocument('service', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.service,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        service: { entity: { id: 'non-generated-service-id' } },
+      });
+    }
+  );
+
+  apiTest(
+    'service: DSL from doc with service.name returns expected document',
+    async ({ esClient }) => {
+      const docSource = { service: { name: 'service-name' } };
+      const dsl = getEuidDslFilterBasedOnDocument('service', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX.service,
+        body: { ...dsl, size: 10 },
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        service: { name: 'service-name' },
+      });
+    }
+  );
+
+  apiTest('DSL from doc with no matching euid fields returns undefined', async () => {
+    const dsl = getEuidDslFilterBasedOnDocument('host', {});
+    expect(dsl).toBeUndefined();
+  });
+
+  apiTest('DSL from null doc returns undefined', async () => {
+    expect(getEuidDslFilterBasedOnDocument('host', null)).toBeUndefined();
+  });
+});

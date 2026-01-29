@@ -40,7 +40,7 @@ function getComposedFieldValues(obj: any, euidFields: EuidAttribute[][]): string
   return [];
 }
 
-function getFieldValue(obj: any, field: string) {
+export function getFieldValue(obj: any, field: string) {
   const brokenFields = field.split('.');
 
   let fieldInObject = obj;
