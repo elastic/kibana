@@ -8,5 +8,4 @@
  */
 
 export { type SerializedTitles } from './src/types';
-
 export { serializedTitlesSchema } from './src/titles_schema';
