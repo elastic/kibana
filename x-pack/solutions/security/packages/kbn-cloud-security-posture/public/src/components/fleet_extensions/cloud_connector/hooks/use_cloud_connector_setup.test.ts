@@ -28,40 +28,6 @@ jest.mock('../utils', () => ({
   }),
 }));
 
-// Mock accessor functions from fleet common
-jest.mock('@kbn/fleet-plugin/common', () => ({
-  extractRawCredentialVars: jest.fn((policy, _packageInfo) => {
-    // Return stream vars by default (input mode)
-    return policy.inputs?.[0]?.streams?.[0]?.vars ?? policy.vars ?? {};
-  }),
-  getCredentialStorageScope: jest.fn(() => 'input'),
-  resolveVarTarget: jest.fn((policy, mode) => {
-    if (mode === 'package') {
-      return { target: { mode: 'package' }, vars: policy.vars };
-    }
-    return {
-      target: { mode: 'input', inputIndex: 0, streamIndex: 0 },
-      vars: policy.inputs?.[0]?.streams?.[0]?.vars,
-    };
-  }),
-  applyVarsAtTarget: jest.fn((policy, updatedVars, target) => {
-    if (target.mode === 'package') {
-      return { ...policy, vars: updatedVars };
-    }
-    const { inputIndex, streamIndex } = target;
-    if (inputIndex === -1 || streamIndex === -1) {
-      return policy;
-    }
-    const updatedInputs = [...policy.inputs];
-    const updatedInput = { ...updatedInputs[inputIndex] };
-    const updatedStreams = [...updatedInput.streams];
-    updatedStreams[streamIndex] = { ...updatedStreams[streamIndex], vars: updatedVars };
-    updatedInput.streams = updatedStreams;
-    updatedInputs[inputIndex] = updatedInput;
-    return { ...policy, inputs: updatedInputs };
-  }),
-}));
-
 import { updateInputVarsWithCredentials, isAzureCloudConnectorVars } from '../utils';
 
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
@@ -1342,22 +1308,6 @@ describe('Azure credentials with mixed secret and text vars', () => {
   });
 
   describe('getAccountTypeFromInputs', () => {
-    const mockInput = {
-      type: 'cloudbeat/cis_aws',
-      policy_template: 'cis_aws',
-      enabled: true,
-      streams: [
-        {
-          enabled: true,
-          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
-          vars: {
-            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
-            external_id: { value: 'test-external-id' },
-          },
-        },
-      ],
-    } as NewPackagePolicyInput;
-
     const mockPolicy = {
       id: 'test-policy-id',
       enabled: true,
@@ -1394,18 +1344,6 @@ describe('Azure credentials with mixed secret and text vars', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(
           {
-            ...mockInput,
-            streams: [
-              {
-                ...mockInput.streams[0],
-                vars: {
-                  ...mockInput.streams[0].vars,
-                  'aws.account_type': { value: 'single-account' },
-                },
-              },
-            ],
-          },
-          {
             ...mockPolicy,
             inputs: [
               {
@@ -1423,6 +1361,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
             ],
           },
           mockUpdatePolicy,
+          mockPackageInfo,
           'aws'
         )
       );
@@ -1433,18 +1372,6 @@ describe('Azure credentials with mixed secret and text vars', () => {
     it('should extract organization account type from AWS policy inputs', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(
-          {
-            ...mockInput,
-            streams: [
-              {
-                ...mockInput.streams[0],
-                vars: {
-                  ...mockInput.streams[0].vars,
-                  'aws.account_type': { value: 'organization-account' },
-                },
-              },
-            ],
-          },
           {
             ...mockPolicy,
             inputs: [
@@ -1463,6 +1390,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
             ],
           },
           mockUpdatePolicy,
+          mockPackageInfo,
           'aws'
         )
       );
@@ -1473,18 +1401,6 @@ describe('Azure credentials with mixed secret and text vars', () => {
     it('should extract account type from Azure policy inputs', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(
-          {
-            ...mockInput,
-            type: 'cloudbeat/cis_azure',
-            streams: [
-              {
-                ...mockInput.streams[0],
-                vars: {
-                  'azure.account_type': { value: 'single-account' },
-                },
-              },
-            ],
-          },
           {
             ...mockPolicy,
             inputs: [
@@ -1504,6 +1420,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
             ],
           },
           mockUpdatePolicy,
+          mockPackageInfo,
           'azure'
         )
       );
@@ -1513,7 +1430,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
 
     it('should return undefined when no account type is present', () => {
       const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'aws')
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo, 'aws')
       );
 
       expect(result.current.accountTypeFromInputs).toBeUndefined();
@@ -1521,7 +1438,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
 
     it('should return undefined when cloudProvider is not provided', () => {
       const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, undefined)
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo, undefined)
       );
 
       expect(result.current.accountTypeFromInputs).toBeUndefined();
@@ -1529,7 +1446,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
 
     it('should return undefined for unsupported cloud provider', () => {
       const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'gcp')
+        useCloudConnectorSetup(mockPolicy, mockUpdatePolicy, mockPackageInfo, 'gcp')
       );
 
       expect(result.current.accountTypeFromInputs).toBeUndefined();
