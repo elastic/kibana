@@ -11,7 +11,15 @@
 export * as cli from './src/cli';
 
 // Test framework
-export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
+export {
+  expect,
+  test,
+  spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  tags,
+} from './src/playwright';
 
 // Fixtures & configuration
 export {
