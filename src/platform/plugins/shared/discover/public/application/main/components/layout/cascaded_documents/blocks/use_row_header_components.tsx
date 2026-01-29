@@ -29,6 +29,7 @@ import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-d
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { StatsCommandSummary } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import {
   type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
@@ -37,8 +38,8 @@ import {
 } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { StatsCommandSummary } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
@@ -209,7 +210,7 @@ const ContextMenu = React.memo(
     const rowDataViewField = useMemo(() => {
       const fieldParamDef = getFieldParamDefinition(
         row.groupId,
-        rowStatsFieldSummary?.terminals ?? [],
+        rowStatsFieldSummary?.definition ? getFieldTerminals(rowStatsFieldSummary.definition) : [],
         esqlVariables
       );
 
@@ -218,7 +219,7 @@ const ContextMenu = React.memo(
       }
 
       return dataView.fields.getByName(fieldParamDef ?? row.groupId);
-    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.terminals]);
+    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.definition]);
 
     const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       return [
@@ -381,7 +382,7 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   };
 };
 
-const textSlotStyles = {
+const rowHeaderTitleStyles = {
   textWrapper: css({
     minWidth: 0,
     textWrap: 'nowrap',
@@ -391,6 +392,13 @@ const textSlotStyles = {
     textOverflow: 'ellipsis',
   }),
 };
+
+const textSlotStyles = css({
+  width: '20ch',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
 
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
@@ -436,7 +444,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
             }
           >
             {(truncatedText) => {
-              return <h4 css={textSlotStyles.textInner}>{truncatedText}</h4>;
+              return <h4 css={rowHeaderTitleStyles.textInner}>{truncatedText}</h4>;
             }}
           </EuiTextTruncate>
         </EuiText>
@@ -468,17 +476,27 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   selectedColumn,
                   selectedColumnValue: rowData[selectedColumn] as string,
                   bold: (chunks) => (
-                    <EuiFlexItem grow={false} css={textSlotStyles.textWrapper}>
-                      <span css={textSlotStyles.textInner}>{chunks}</span>
+                    <EuiFlexItem grow={false} css={rowHeaderTitleStyles.textWrapper}>
+                      <span css={rowHeaderTitleStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
-                  badge: ([chunk]) => {
+                  badge: (badgeContent) => {
                     return (
                       <EuiFlexItem grow={false}>
-                        {Number.isNaN(Number(chunk)) ? (
-                          <EuiBadge color="hollow">{chunk}</EuiBadge>
+                        {badgeContent.length === 1 && badgeContent.filter(Number)[0] ? (
+                          <NumberBadge value={Number(badgeContent[0])} shortenAtExpSize={3} />
                         ) : (
-                          <NumberBadge value={Number(chunk)} shortenAtExpSize={3} />
+                          <EuiBadge color="hollow" css={textSlotStyles}>
+                            {badgeContent
+                              .map(
+                                (chunk) =>
+                                  chunk ||
+                                  i18n.translate('discover.dataCascade.row.action.noValue', {
+                                    defaultMessage: '(blank)',
+                                  })
+                              )
+                              .join(', ')}
+                          </EuiBadge>
                         )}
                       </EuiFlexItem>
                     );

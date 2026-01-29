@@ -22,12 +22,14 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import {
+  type LabelNodeId,
   type GraphEdge,
   type RelationshipEdge,
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
+
 
 interface ConnectorEdges {
   source: string;
@@ -51,10 +53,17 @@ interface ParseContext {
   readonly nodesMap: Record<string, NodeDataModel>;
   readonly edgesMap: Record<string, EdgeDataModel>;
   // Label nodes (events/actions)
-  readonly edgeLabelsNodes: Record<string, string[]>;
-  readonly labelEdges: Record<string, ConnectorEdges>;
-  // Relationship nodes - consolidated by relationship + target
   readonly relationshipEdges: Record<string, RelationshipConnectorEdges>;
+  /**
+   * Used to group multiple labels that share the same document set.
+   */
+  readonly edgeLabelsNodes: Record<LabelNodeId, LabelNodeId[]>;
+  /**
+   * Maps label node ID to array of edges (source-target pairs).
+   * A single label can connect to multiple actor-target pairs when
+   * MV_EXPAND creates multiple rows from the same document(s).
+   */
+  readonly labelEdges: Record<LabelNodeId, ConnectorEdges[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -296,13 +305,14 @@ const createGroupedActorAndTargetNodes = (
   };
 };
 
-const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel => {
+const createLabelNode = (record: GraphEdge): LabelNodeDataModel => {
   const {
+    labelNodeId,
     action,
     docs,
-    isAlert,
     isOrigin,
     isOriginAlert,
+    isAlert,
     badge,
     uniqueEventsCount,
     uniqueAlertsCount,
@@ -310,7 +320,9 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
     sourceCountryCodes,
   } = record;
 
-  const labelId = edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`;
+  const labelId = `label(${action})ln(${labelNodeId})oe(${isOrigin ? 1 : 0})oa(${
+    isOriginAlert ? 1 : 0
+  })`;
   const color =
     uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
       ? 'danger'
@@ -335,25 +347,33 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
 const processLabelNodes = (
   context: ParseContext,
   nodeData: {
-    edgeId: string;
+    labelNodeId: string;
     sourceId: string;
     targetId: string;
     labelNode: LabelNodeDataModel;
   }
 ) => {
   const { nodesMap, edgeLabelsNodes, labelEdges } = context;
-  const { edgeId, sourceId, targetId, labelNode } = nodeData;
-  if (edgeLabelsNodes[edgeId] === undefined) {
-    edgeLabelsNodes[edgeId] = [];
+  const { labelNodeId, sourceId, targetId, labelNode } = nodeData;
+
+  // Group labels by labelNodeId (document-based)
+  if (edgeLabelsNodes[labelNodeId] === undefined) {
+    edgeLabelsNodes[labelNodeId] = [];
   }
 
-  nodesMap[labelNode.id] = labelNode;
-  edgeLabelsNodes[edgeId].push(labelNode.id);
-  labelEdges[labelNode.id] = {
+  // Only add the label node if it doesn't exist yet
+  if (nodesMap[labelNode.id] === undefined) {
+    nodesMap[labelNode.id] = labelNode;
+    edgeLabelsNodes[labelNodeId].push(labelNode.id);
+    labelEdges[labelNode.id] = [];
+  }
+
+  // Add the edge (source-target pair) for this label node
+  labelEdges[labelNode.id].push({
     source: sourceId,
     target: targetId,
     edgeType: 'solid',
-  };
+  });
 };
 
 const isAboveAPINodesLimit = (context: ParseContext) => {
@@ -377,12 +397,12 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
     }
 
     const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+    const { labelNodeId } = record;
 
-    const edgeId = `a(${actorId})-b(${targetId})`;
-    const labelNode = createLabelNode(record, edgeId);
+    const labelNode = createLabelNode(record);
 
     processLabelNodes(context, {
-      edgeId,
+      labelNodeId,
       sourceId: actorId,
       targetId,
       labelNode,
@@ -632,7 +652,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
 const processConnectorGroup = (
   edgeId: string,
   connectorIds: string[],
-  connectorEdgesMap: Record<string, ConnectorEdges>,
+  connectorEdgesMap: Record<string, ConnectorEdges[]>,
   edgesMap: Record<string, EdgeDataModel>,
   nodesMap: Record<string, NodeDataModel>,
   connectorType: 'label' | 'relationship'
@@ -642,10 +662,10 @@ const processConnectorGroup = (
     connectEntitiesAndConnectorNode(
       edgesMap,
       nodesMap,
-      connectorEdgesMap[connectorId].source,
+      connectorEdgesMap[connectorId][0].source,
       connectorId,
-      connectorEdgesMap[connectorId].target,
-      connectorEdgesMap[connectorId].edgeType
+      connectorEdgesMap[connectorId][0].target,
+      connectorEdgesMap[connectorId][0].edgeType
     );
   } else {
     // Create group node for multiple connectors
@@ -662,9 +682,9 @@ const processConnectorGroup = (
     connectEntitiesAndConnectorNode(
       edgesMap,
       nodesMap,
-      connectorEdgesMap[connectorIds[0]].source,
+      connectorEdgesMap[connectorIds[0]][0].source,
       groupNode.id,
-      connectorEdgesMap[connectorIds[0]].target,
+      connectorEdgesMap[connectorIds[0]][0].target,
       'solid',
       groupEdgesColor
     );
@@ -679,7 +699,7 @@ const processConnectorGroup = (
         groupNode.id,
         connectorId,
         groupNode.id,
-        connectorEdgesMap[connectorId].edgeType
+        connectorEdgesMap[connectorId][0].edgeType
       );
 
       // Update group color if any label node is danger
