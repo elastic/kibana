@@ -7,6 +7,7 @@
 import {
   EuiBadge,
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiDescriptionList,
@@ -94,10 +95,6 @@ export function FeatureDetailsFlyout({
       ),
     },
     {
-      title: LAST_SEEN_LABEL,
-      description: <EuiText size="s">{feature.last_seen || noDataPlaceholder}</EuiText>,
-    },
-    {
       title: TAGS_LABEL,
       description:
         feature.tags.length > 0 ? (
@@ -111,6 +108,31 @@ export function FeatureDetailsFlyout({
         ) : (
           <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
+    },
+    {
+      title: ID_LABEL,
+      description: (
+        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          <code
+            css={css`
+              font-family: ${euiTheme.font.familyCode};
+              font-size: ${euiTheme.font.scale.s};
+            `}
+          >
+            {feature.id}
+          </code>
+        </EuiText>
+      ),
+    },
+    {
+      title: LAST_SEEN_LABEL,
+      description: <EuiText size="s">{feature.last_seen || noDataPlaceholder}</EuiText>,
+    },
+    {
+      title: EXPIRES_AT_LABEL,
+      description: (
+        <EuiText size="s">{feature.expires_at ?? noDataPlaceholder}</EuiText>
+      ),
     },
   ];
 
@@ -222,6 +244,17 @@ export function FeatureDetailsFlyout({
               )}
             </InfoPanel>
           </EuiFlexItem>
+          <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutMeta">
+            <InfoPanel title={META_LABEL}>
+              {Object.keys(feature.meta).length === 0 ? (
+                <EuiText size="s">{NO_META_AVAILABLE}</EuiText>
+              ) : (
+                <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
+                  {JSON.stringify(feature.meta, null, 2)}
+                </EuiCodeBlock>
+              )}
+            </InfoPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       {isDeleteModalVisible && onDelete && (
@@ -237,6 +270,10 @@ export function FeatureDetailsFlyout({
 }
 
 // i18n labels
+
+const ID_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.idLabel', {
+  defaultMessage: 'ID',
+});
 
 const NAME_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
   defaultMessage: 'Name',
@@ -268,6 +305,10 @@ const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.conf
 
 const LAST_SEEN_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
   defaultMessage: 'Last seen',
+});
+
+const EXPIRES_AT_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.expiresAtLabel', {
+  defaultMessage: 'Expires at',
 });
 
 const TAGS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
@@ -309,4 +350,13 @@ const EVIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.eviden
 const NO_EVIDENCE_AVAILABLE = i18n.translate(
   'xpack.streams.featureDetailsFlyout.noEvidenceAvailable',
   { defaultMessage: 'No evidence available' }
+);
+
+const META_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.metaLabel', {
+  defaultMessage: 'Meta',
+});
+
+const NO_META_AVAILABLE = i18n.translate(
+  'xpack.streams.featureDetailsFlyout.noMetaAvailable',
+  { defaultMessage: 'No meta information' }
 );
