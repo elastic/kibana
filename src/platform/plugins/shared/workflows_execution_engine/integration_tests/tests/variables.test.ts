@@ -41,7 +41,7 @@ steps:
         with:
           array: '\${{variables.array | push: foreach.item}}'
 
-      - name: loop2
+      - name: inner_loop
         type: foreach
         foreach: '["2", "4", "6"]'
         steps:
