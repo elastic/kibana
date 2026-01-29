@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '@kbn/file-upload-common/src/constants';
+import { FileUploadTelemetryService } from '@kbn/file-upload-common';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
 import { hasSidecarFiles } from '../utils';
@@ -16,8 +17,13 @@ import { hasSidecarFiles } from '../utils';
 export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
   importer: GeoFileImporter;
-  file: File;
-  getFilesTelemetry: () => { total_files: number; total_size_bytes: number };
+  getFilesTelemetry: () => {
+    total_files: number;
+    total_size_bytes: number;
+    main_file_size: number;
+    main_file_extension: string;
+    sidecar_files: Array<{ size: number; extension: string }>;
+  };
 };
 
 interface Props {
@@ -128,22 +134,28 @@ export class GeoFilePicker extends Component<Props, State> {
         ...preview,
         importer: this.state.importer,
         indexName: this.state.defaultIndexName ? this.state.defaultIndexName : 'features',
-        file: this.state.file,
         getFilesTelemetry: () => {
-          // Include main file
-          let totalFiles = 1;
-          let totalSize = this.state.file?.size ?? 0;
+          const mainFile = this.state.file!;
+          const mainFileExtension = FileUploadTelemetryService.getFileExtension(mainFile.name);
 
-          // For shapefiles include sidecar files
-          if (hasSidecarFiles(this.state.importer)) {
-            const sidecarFiles = this.state.importer.getSidecarFiles();
-            totalFiles += sidecarFiles.length;
-            totalSize += sidecarFiles.reduce((total, file) => total + file.size, 0);
-          }
+          // Get sidecar files if available
+          const sidecarFiles = hasSidecarFiles(this.state.importer)
+            ? this.state.importer.getSidecarFiles?.() ?? []
+            : [];
+
+          const totalFiles = 1 + sidecarFiles.length;
+          const totalSize =
+            mainFile.size + sidecarFiles.reduce((total, file) => total + file.size, 0);
 
           return {
             total_files: totalFiles,
             total_size_bytes: totalSize,
+            main_file_size: mainFile.size,
+            main_file_extension: mainFileExtension,
+            sidecar_files: sidecarFiles.map((file) => ({
+              size: file.size,
+              extension: FileUploadTelemetryService.getFileExtension(file.name),
+            })),
           };
         },
       });

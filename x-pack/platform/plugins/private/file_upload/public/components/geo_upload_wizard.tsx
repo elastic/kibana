@@ -18,7 +18,7 @@ import { ImportCompleteView } from './import_complete_view';
 import type { GeoUploadWizardProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
-import { getPartialImportMessage, hasSidecarFiles } from './utils';
+import { getPartialImportMessage } from './utils';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -53,10 +53,15 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
   private _uploadSessionId: string = '';
   private _fileId: string = '';
   private _sessionStartTime: number = 0;
-  private _file?: File;
   private _sessionTelemetryTracked: boolean = false;
-  private _getFilesTelemetry?: () => { total_files: number; total_size_bytes: number };
-  private _sidecarFiles: Array<{ file: File; fileId: string }> = [];
+  private _sidecarFileIds: string[] = [];
+  private _getFilesTelemetry?: () => {
+    total_files: number;
+    total_size_bytes: number;
+    main_file_size: number;
+    main_file_extension: string;
+    sidecar_files: Array<{ size: number; extension: string }>;
+  };
 
   state: State = {
     failedPermissionCheck: false,
@@ -84,7 +89,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     // Track cancel action
     if (
       this._telemetryService &&
-      this._file &&
+      this._getFilesTelemetry &&
       this._sessionStartTime > 0 &&
       !this._sessionTelemetryTracked &&
       (this.state.phase === PHASE.IMPORT || this.state.phase === PHASE.CONFIGURE)
@@ -123,45 +128,46 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     uploadSuccess: boolean,
     uploadCancelled: boolean = false
   ) {
-    if (!this._telemetryService || !this._file) {
+    if (!this._telemetryService || !this._getFilesTelemetry) {
       return;
     }
 
-    // Track main file upload event
-    const fileSizeBytes = this._file.size;
+    const filesTelemetry = this._getFilesTelemetry();
     const documentsFailed = importResults.failures?.length ?? 0;
     const documentsSuccess =
       importResults.docCount !== undefined ? importResults.docCount - documentsFailed : 0;
 
+    // Track main file upload event
     this._telemetryService.trackUploadFile({
       upload_session_id: this._uploadSessionId,
       file_id: this._fileId,
       mapping_clash_new_fields: 0, // Geo files don't have mapping clashes
       mapping_clash_missing_fields: 0,
-      file_size_bytes: fileSizeBytes,
+      file_size_bytes: filesTelemetry.main_file_size,
       documents_success: documentsSuccess,
       documents_failed: documentsFailed,
       upload_success: uploadSuccess,
       upload_cancelled: uploadCancelled,
       upload_time_ms: uploadTimeMs,
-      file_extension: FileUploadTelemetryService.getFileExtension(this._file.name),
+      file_extension: filesTelemetry.main_file_extension,
     });
 
     // Track telemetry for each sidecar file
-    if (this._sidecarFiles.length > 0) {
-      this._sidecarFiles.forEach(({ file: sidecarFile, fileId: sidecarFileId }) => {
+    if (this._sidecarFileIds.length > 0) {
+      this._sidecarFileIds.forEach((sidecarFileId, index) => {
+        const sidecarData = filesTelemetry.sidecar_files[index];
         this._telemetryService!.trackUploadFile({
           upload_session_id: this._uploadSessionId,
           file_id: sidecarFileId,
           mapping_clash_new_fields: 0, // Sidecar files don't have mapping clashes
           mapping_clash_missing_fields: 0,
-          file_size_bytes: sidecarFile.size,
+          file_size_bytes: sidecarData.size,
           documents_success: 0, // Sidecar files don't produce documents
           documents_failed: 0,
           upload_success: uploadSuccess, // Same success status as main file
           upload_cancelled: uploadCancelled,
           upload_time_ms: 0, // Sidecar files don't have separate upload time
-          file_extension: FileUploadTelemetryService.getFileExtension(sidecarFile.name),
+          file_extension: sidecarData.extension,
         });
       });
     }
@@ -173,20 +179,13 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     sessionTimeMs: number,
     cancelled: boolean = false
   ) {
-    if (!this._telemetryService || !this._file) {
-      return;
-    }
-
-    if (this._sessionTelemetryTracked) {
+    if (!this._telemetryService || !this._getFilesTelemetry || this._sessionTelemetryTracked) {
       return;
     }
 
     this._sessionTelemetryTracked = true;
 
-    const filesTelemetry = this._getFilesTelemetry?.() ?? {
-      total_files: 1,
-      total_size_bytes: this._file.size,
-    };
+    const filesTelemetry = this._getFilesTelemetry();
 
     this._telemetryService.trackUploadSession({
       upload_session_id: this._uploadSessionId,
@@ -414,22 +413,16 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     importer,
     indexName,
     previewCoverage,
-    file,
     getFilesTelemetry,
   }: OnFileSelectParameters) => {
     this._geoFileImporter = importer;
-    this._file = file;
     this._getFilesTelemetry = getFilesTelemetry;
 
-    // Generate file IDs for sidecar files
-    this._sidecarFiles = [];
-    if (hasSidecarFiles(this._geoFileImporter)) {
-      const sidecarFiles = this._geoFileImporter.getSidecarFiles();
-      this._sidecarFiles = sidecarFiles.map((sidecarFile: File) => ({
-        file: sidecarFile,
-        fileId: FileUploadTelemetryService.generateId(),
-      }));
-    }
+    // Generate IDs for sidecar files
+    const filesTelemetryData = getFilesTelemetry();
+    this._sidecarFileIds = filesTelemetryData.sidecar_files.map(() =>
+      FileUploadTelemetryService.generateId()
+    );
 
     this.props.onFileSelect(
       {
@@ -446,8 +439,8 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       this._geoFileImporter.destroy();
       this._geoFileImporter = undefined;
     }
-    this._file = undefined;
-    this._sidecarFiles = [];
+    this._getFilesTelemetry = undefined;
+    this._sidecarFileIds = [];
 
     this.props.onFileClear();
   };

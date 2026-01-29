@@ -13,14 +13,10 @@ import { NdjsonReader } from '@kbn/file-upload-common';
 import type { ImportFailure } from '@kbn/file-upload-common';
 import { ShapefileEditor } from './shapefile_editor';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
-import type { GeoFileImporterWithSidecarFiles } from '../types';
 
 export const SHAPEFILE_TYPES = ['.shp'];
 
-export class ShapefileImporter
-  extends AbstractGeoFileImporter
-  implements GeoFileImporterWithSidecarFiles
-{
+export class ShapefileImporter extends AbstractGeoFileImporter {
   private _tableRowCount: number | null = null;
   private _dbfFile: File | null = null;
   private _prjFile: File | null = null;
