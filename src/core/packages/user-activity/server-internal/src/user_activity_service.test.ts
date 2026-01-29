@@ -123,11 +123,11 @@ describe('UserActivityService', () => {
     });
 
     it('does nothing when service is disabled', () => {
-      const coreWithDesabledConfig = mockCoreContext.create();
-      coreWithDesabledConfig.configService.atPath.mockReturnValue(
+      const coreWithDisabledConfig = mockCoreContext.create();
+      coreWithDisabledConfig.configService.atPath.mockReturnValue(
         new BehaviorSubject({ ...defaultConfig, enabled: false })
       );
-      const disabledService = new UserActivityService(coreWithDesabledConfig).setup({
+      const disabledService = new UserActivityService(coreWithDisabledConfig).setup({
         logging: loggingService,
       });
 
@@ -137,7 +137,7 @@ describe('UserActivityService', () => {
         object: { id: 'obj-1', name: 'Test', type: 'test', tags: [] },
       });
 
-      expect(loggingSystemMock.collect(coreWithDesabledConfig.logger).info).toHaveLength(0);
+      expect(loggingSystemMock.collect(coreWithDisabledConfig.logger).info).toHaveLength(0);
     });
   });
 
