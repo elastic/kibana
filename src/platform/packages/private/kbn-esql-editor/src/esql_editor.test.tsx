@@ -104,6 +104,8 @@ describe('ESQLEditor', () => {
           webkitBackingStorePixelRatio: 1,
         } as unknown as RenderingContext)
     );
+
+    localStorage.clear();
   });
 
   afterAll(() => {
@@ -344,7 +346,7 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is visible
-        expect(visor.firstChild).toHaveStyle({ opacity: 1 });
+        expect(visor).toHaveStyle({ opacity: 1 });
       });
     });
 
@@ -360,7 +362,7 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is hidden
-        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+        expect(visor).toHaveStyle({ opacity: 0 });
       });
     });
 
@@ -376,7 +378,25 @@ describe('ESQLEditor', () => {
         const visor = getByTestId('ESQLEditor-quick-search-visor');
         expect(visor).toBeInTheDocument();
         // Visor is hidden
-        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+        expect(visor).toHaveStyle({ opacity: 0 });
+      });
+    });
+
+    it('should not open the visor if user has previously dismissed it', async () => {
+      // Simulate user having dismissed the visor in a previous session
+      localStorage.setItem('esql:visorAutoOpenDismissed', 'true');
+
+      const newProps = {
+        ...props,
+        query: { esql: 'FROM test_index' },
+        openVisorOnSourceCommands: true,
+      };
+      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+
+      await waitFor(() => {
+        const visor = getByTestId('ESQLEditor-quick-search-visor');
+        expect(visor).toBeInTheDocument();
+        expect(visor).toHaveStyle({ opacity: 0 });
       });
     });
   });
