@@ -346,10 +346,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async clickHostsAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesHostComboBoxItem');
       await testSubjects.click('anomaliesHostComboBoxItem');
     },
     async clickK8sAnomaliesDropdown() {
       await testSubjects.click('anomaliesComboBoxType');
+      await testSubjects.existOrFail('anomaliesK8sComboBoxItem');
       await testSubjects.click('anomaliesK8sComboBoxItem');
     },
     async findAnomalies() {

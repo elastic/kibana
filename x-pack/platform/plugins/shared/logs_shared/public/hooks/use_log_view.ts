@@ -9,7 +9,7 @@ import { useActorRef, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import { waitFor } from 'xstate';
-import type { LogViewAttributes, LogViewReference } from '../../common/log_views';
+import type { LogViewAttributes, LogViewReference, LogViewStatus } from '../../common/log_views';
 import { DEFAULT_LOG_VIEW } from '../../common/log_views';
 import type {
   InitializeFromUrl,
@@ -97,12 +97,14 @@ export const useLogView = ({
       : undefined
   );
 
-  const logViewStatus = useSelector(logViewStateService, (state) =>
-    (state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')) &&
-    'status' in state.context
-      ? state.context.status
-      : undefined
-  );
+  const logViewStatus = useSelector(logViewStateService, (state) => {
+    const matchesResolved =
+      state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView');
+    const hasStatus = 'status' in state.context;
+    return matchesResolved && hasStatus
+      ? (state.context as { status: LogViewStatus }).status
+      : undefined;
+  });
 
   const isLoadingLogView = useSelector(logViewStateService, (state) => state.matches('loading'));
   const isResolvingLogView = useSelector(logViewStateService, (state) =>

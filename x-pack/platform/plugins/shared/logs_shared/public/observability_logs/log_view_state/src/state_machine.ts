@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { catchError, from, map, of, throwError } from 'rxjs';
-import { assign, fromCallback, fromObservable, setup } from 'xstate';
+import { of } from 'rxjs';
+import { assign, fromCallback, fromObservable, fromPromise, setup } from 'xstate';
 import type { NotificationChannel } from '@kbn/xstate-utils';
 import type { ILogViewsClient } from '../../../services/log_views';
 import type { LogViewNotificationEvent } from './notifications';
@@ -46,34 +46,31 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             } as LogViewContextWithReference)
           : {}
       ),
-      storeLogView: assign(({ event }) =>
-        'logView' in event
-          ? ({
-              logView: event.logView,
-            } as LogViewContextWithLogView)
-          : {}
-      ),
-      storeResolvedLogView: assign(({ event }) =>
-        'resolvedLogView' in event
-          ? ({
-              resolvedLogView: event.resolvedLogView,
-            } as LogViewContextWithResolvedLogView)
-          : {}
-      ),
-      storeStatus: assign(({ event }) =>
-        'status' in event
-          ? ({
-              status: event.status,
-            } as LogViewContextWithStatus)
-          : {}
-      ),
-      storeError: assign(({ event }) =>
-        'error' in event
-          ? ({
-              error: event.error,
-            } as LogViewContextWithError)
-          : {}
-      ),
+      storeLogView: assign(({ event }) => {
+        if ('output' in event && event.output) {
+          return { logView: event.output } as LogViewContextWithLogView;
+        }
+        return {};
+      }),
+      storeResolvedLogView: assign(({ event }) => {
+        if ('output' in event && event.output) {
+          return { resolvedLogView: event.output } as LogViewContextWithResolvedLogView;
+        }
+        return {};
+      }),
+      storeStatus: assign(({ event }) => {
+        if ('output' in event && event.output) {
+          return { status: event.output } as LogViewContextWithStatus;
+        }
+        return {};
+      }),
+      storeError: assign(({ event }) => {
+        // XState v5: onError events have the error in event.error
+        if ('error' in event && event.error) {
+          return { error: event.error as Error } as LogViewContextWithError;
+        }
+        return {};
+      }),
       convertInlineLogViewReferenceToPersistedLogViewReference: assign(({ context, event }) =>
         'logView' in event && context.logViewReference.type === 'log-view-inline'
           ? ({
@@ -103,13 +100,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         sendBack({ type: 'INITIALIZED_FROM_URL', logViewReference: null });
       }),
       listenForUrlChanges: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      loadLogView: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      updateLogView: fromObservable<LogViewEvent, { context: LogViewContext; event: LogViewEvent }>(
-        () => of()
+      loadLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
+      updateLogView: fromPromise<unknown, { context: LogViewContext; event: LogViewEvent }>(
+        async () => undefined
       ),
-      persistInlineLogView: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      resolveLogView: fromObservable<LogViewEvent, LogViewContext>(() => of()),
-      loadLogViewStatus: fromObservable<LogViewEvent, LogViewContext>(() => of()),
+      persistInlineLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
+      resolveLogView: fromPromise<unknown, LogViewContext>(async () => undefined),
+      loadLogViewStatus: fromPromise<unknown, LogViewContext>(async () => undefined),
     },
     guards: {
       isPersistedLogView: ({ context }) => context.logViewReference.type === 'log-view-reference',
@@ -141,13 +138,11 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         invoke: {
           src: 'loadLogView',
           input: ({ context }) => context,
-        },
-        on: {
-          LOADING_SUCCEEDED: {
+          onDone: {
             target: 'resolving',
             actions: 'storeLogView',
           },
-          LOADING_FAILED: {
+          onError: {
             target: 'loadingFailed',
             actions: 'storeError',
           },
@@ -157,15 +152,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         invoke: {
           src: 'resolveLogView',
           input: ({ context }) => context,
-        },
-        on: {
-          RESOLUTION_FAILED: {
-            target: 'resolutionFailed',
-            actions: 'storeError',
-          },
-          RESOLUTION_SUCCEEDED: {
+          onDone: {
             target: 'checkingStatus',
             actions: 'storeResolvedLogView',
+          },
+          onError: {
+            target: 'resolutionFailed',
+            actions: 'storeError',
           },
         },
       },
@@ -173,13 +166,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         invoke: {
           src: 'loadLogViewStatus',
           input: ({ context }) => context,
-        },
-        on: {
-          CHECKING_STATUS_FAILED: {
-            target: 'checkingStatusFailed',
-            actions: 'storeError',
-          },
-          CHECKING_STATUS_SUCCEEDED: [
+          onDone: [
             {
               target: 'resolvedPersistedLogView',
               actions: 'storeStatus',
@@ -190,6 +177,10 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               actions: 'storeStatus',
             },
           ],
+          onError: {
+            target: 'checkingStatusFailed',
+            actions: 'storeError',
+          },
         },
       },
       resolvedPersistedLogView: {
@@ -227,15 +218,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         invoke: {
           src: 'persistInlineLogView',
           input: ({ context }) => context,
-        },
-        on: {
-          PERSISTING_INLINE_LOG_VIEW_FAILED: {
-            target: 'persistingInlineLogViewFailed',
-            actions: 'storeError',
-          },
-          PERSISTING_INLINE_LOG_VIEW_SUCCEEDED: {
+          onDone: {
             target: 'resolving',
             actions: ['convertInlineLogViewReferenceToPersistedLogViewReference', 'storeLogView'],
+          },
+          onError: {
+            target: 'persistingInlineLogViewFailed',
+            actions: 'storeError',
           },
         },
       },
@@ -276,15 +265,13 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         invoke: {
           src: 'updateLogView',
           input: ({ context, event }) => ({ context, event }),
-        },
-        on: {
-          UPDATING_FAILED: {
-            target: 'updatingFailed',
-            actions: 'storeError',
-          },
-          UPDATING_SUCCEEDED: {
+          onDone: {
             target: 'resolving',
             actions: ['updateLogViewReference', 'storeLogView'],
+          },
+          onError: {
+            target: 'updatingFailed',
+            actions: 'storeError',
           },
         },
       },
@@ -345,118 +332,46 @@ export const createLogViewStateMachine = ({
     actors: {
       ...(initializeFromUrl ? { initializeFromUrl } : {}),
       ...(listenForUrlChanges ? { listenForUrlChanges } : {}),
-      loadLogView: fromObservable(({ input }: { input: LogViewContext }) =>
-        from(
-          'logViewReference' in input
-            ? logViews.getLogView(input.logViewReference)
-            : throwError(() => new Error('Failed to load log view'))
-        ).pipe(
-          map(
-            (logView): LogViewEvent => ({
-              type: 'LOADING_SUCCEEDED',
-              logView,
-            })
-          ),
-          catchError((error) =>
-            of<LogViewEvent>({
-              type: 'LOADING_FAILED',
-              error,
-            })
-          )
-        )
+      // XState v5: Use fromPromise for single-value async operations
+      // Return value directly - XState will call onDone with { output: value }
+      // Throw error - XState will call onError with { error }
+      loadLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+        if (!('logViewReference' in input)) {
+          throw new Error('Failed to load log view');
+        }
+        return await logViews.getLogView(input.logViewReference);
+      }),
+      updateLogView: fromPromise(
+        async ({ input }: { input: { context: LogViewContext; event: LogViewEvent } }) => {
+          if (!('logViewReference' in input.context) || input.event.type !== 'UPDATE') {
+            throw new Error(
+              'Failed to update log view: Not invoked by update event with matching id.'
+            );
+          }
+          return await logViews.putLogView(input.context.logViewReference, input.event.attributes);
+        }
       ),
-      updateLogView: fromObservable(
-        ({ input }: { input: { context: LogViewContext; event: LogViewEvent } }) =>
-          from(
-            'logViewReference' in input.context && input.event.type === 'UPDATE'
-              ? logViews.putLogView(input.context.logViewReference, input.event.attributes)
-              : throwError(
-                  () =>
-                    new Error(
-                      'Failed to update log view: Not invoked by update event with matching id.'
-                    )
-                )
-          ).pipe(
-            map(
-              (logView): LogViewEvent => ({
-                type: 'UPDATING_SUCCEEDED',
-                logView,
-              })
-            ),
-            catchError((error) =>
-              of<LogViewEvent>({
-                type: 'UPDATING_FAILED',
-                error,
-              })
-            )
-          )
-      ),
-      persistInlineLogView: fromObservable(({ input }: { input: LogViewContext }) =>
-        from(
-          'logViewReference' in input && input.logViewReference.type === 'log-view-inline'
-            ? logViews.putLogView(
-                { type: 'log-view-reference', logViewId: input.logViewReference.id },
-                input.logViewReference.attributes
-              )
-            : throwError(() => new Error('Failed to persist inline Log View.'))
-        ).pipe(
-          map(
-            (logView): LogViewEvent => ({
-              type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED',
-              logView,
-            })
-          ),
-          catchError((error) =>
-            of<LogViewEvent>({
-              type: 'PERSISTING_INLINE_LOG_VIEW_FAILED',
-              error,
-            })
-          )
-        )
-      ),
-      resolveLogView: fromObservable(({ input }: { input: LogViewContext }) =>
-        from(
-          'logView' in input
-            ? logViews.resolveLogView(input.logView.id, input.logView.attributes)
-            : throwError(
-                () => new Error('Failed to resolve log view: No log view found in context.')
-              )
-        ).pipe(
-          map(
-            (resolvedLogView): LogViewEvent => ({
-              type: 'RESOLUTION_SUCCEEDED',
-              resolvedLogView,
-            })
-          ),
-          catchError((error) =>
-            of<LogViewEvent>({
-              type: 'RESOLUTION_FAILED',
-              error,
-            })
-          )
-        )
-      ),
-      loadLogViewStatus: fromObservable(({ input }: { input: LogViewContext }) =>
-        from(
-          'resolvedLogView' in input
-            ? logViews.getResolvedLogViewStatus(input.resolvedLogView)
-            : throwError(
-                () => new Error('Failed to resolve log view: No log view found in context.')
-              )
-        ).pipe(
-          map(
-            (status): LogViewEvent => ({
-              type: 'CHECKING_STATUS_SUCCEEDED',
-              status,
-            })
-          ),
-          catchError((error) =>
-            of<LogViewEvent>({
-              type: 'CHECKING_STATUS_FAILED',
-              error,
-            })
-          )
-        )
-      ),
-    },
+      persistInlineLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+        if (!('logViewReference' in input) || input.logViewReference.type !== 'log-view-inline') {
+          throw new Error('Failed to persist inline Log View.');
+        }
+        return await logViews.putLogView(
+          { type: 'log-view-reference', logViewId: input.logViewReference.id },
+          input.logViewReference.attributes
+        );
+      }),
+      resolveLogView: fromPromise(async ({ input }: { input: LogViewContext }) => {
+        if (!('logView' in input)) {
+          throw new Error('Failed to resolve log view: No log view found in context.');
+        }
+        return await logViews.resolveLogView(input.logView.id, input.logView.attributes);
+      }),
+      loadLogViewStatus: fromPromise(async ({ input }: { input: LogViewContext }) => {
+        if (!('resolvedLogView' in input)) {
+          throw new Error('Failed to resolve log view: No log view found in context.');
+        }
+        return await logViews.getResolvedLogViewStatus(input.resolvedLogView);
+      }),
+      // Type assertion needed because placeholder actors in setup() have `unknown` output type
+    } as any,
   });
