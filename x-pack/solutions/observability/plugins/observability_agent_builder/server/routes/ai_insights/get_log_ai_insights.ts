@@ -22,8 +22,6 @@ import { getLogDocumentById } from './get_log_document_by_id';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
-import { getLogDocumentById } from './get_log_document_by_id';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import type { AiInsightResult, ContextEvent } from './types';
 
@@ -36,7 +34,6 @@ export interface GetLogAiInsightsParams {
   connectorId: string;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
-  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }
@@ -55,10 +52,9 @@ export async function getLogAiInsights({
   esClient,
   inferenceClient,
   connectorId,
-  core,
+  request,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
-
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
@@ -83,6 +79,8 @@ export async function getLogAiInsights({
     connectorId,
     logEntry,
     context,
+    core,
+    request,
   });
 
   const streamWithContext$ = concat(of<ContextEvent>({ type: 'context', context }), events$);
@@ -220,11 +218,15 @@ function generateLogSummary({
   connectorId,
   logEntry,
   context,
+  core,
+  request,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
   logEntry: LogDocument;
   context: string;
+  core: ObservabilityAgentBuilderCoreSetup;
+  request: KibanaRequest;
 }): Observable<ChatCompletionEvent> {
   const isErrorOrWarning = isWarningOrAbove(logEntry);
 
@@ -239,7 +241,7 @@ function generateLogSummary({
         - **Next steps**: Suggest specific actions for investigation or remediation
 
         Base your analysis strictly on the provided data.
-        
+
         ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
       `)
     : dedent(`
@@ -250,7 +252,7 @@ function generateLogSummary({
         - If CorrelatedLogSequence or LogCategories is available, use it to provide additional context
 
         Base your analysis strictly on the provided data. Be specific and reference actual field values.
-        
+
         ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
       `);
 
