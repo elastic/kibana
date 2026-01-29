@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
-  validateResponseActionsPermissions,
+  validateRuleResponseActionsPermissions,
   validateRuleResponseActionsPayload,
 } from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -76,7 +76,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateResponseActionsPermissions(securitySolutionCtx, params, existingRule);
+          await validateRuleResponseActionsPermissions({
+            endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
+            endpointService: securitySolutionCtx.getEndpointService(),
+            ruleUpdate: params,
+            existingRule,
+          });
 
           await validateRuleResponseActionsPayload({
             ruleResponseActions: request.body.response_actions,

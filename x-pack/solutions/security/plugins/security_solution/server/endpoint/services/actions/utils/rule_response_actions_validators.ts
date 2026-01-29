@@ -6,14 +6,12 @@
  */
 
 import { isEqual, xorWith } from 'lodash';
+import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
   BaseOptionalFields,
-  PatchRuleRequestBody,
   ResponseAction,
-  RuleCreateProps,
   RuleResponseAction,
-  RuleUpdateProps,
 } from '../../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
@@ -21,7 +19,6 @@ import { stringify } from '../../../utils/stringify';
 import { EndpointHttpError } from '../../../errors';
 import type { EndpointScript } from '../../../../../common/endpoint/types';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
@@ -106,21 +103,29 @@ export const validateRuleResponseActionsPayload = async ({
   }
 };
 
+interface ValidateRuleResponseActionsPermissionsOptions<
+  T extends Pick<BaseOptionalFields, 'response_actions'>
+> {
+  endpointAuthz: EndpointAuthz;
+  endpointService: EndpointAppContextService;
+  ruleUpdate: T;
+  /** Existing rule SHOULD ALWAYS be provided for flows that update rules */
+  existingRule?: RuleAlertType | null;
+}
+
 /**
  * Used in Rule Management APIs to validate that users have Authz to Elastic Defend response actions that may
  * be included in rule definitions
- *
- * @param securitySolution
- * @param ruleUpdate
- * @param existingRule
  */
-export const validateResponseActionsPermissions = async (
-  securitySolution: SecuritySolutionApiRequestHandlerContext,
-  ruleUpdate: RuleCreateProps | RuleUpdateProps | PatchRuleRequestBody,
-  existingRule?: RuleAlertType | null
-): Promise<void> => {
-  const endpointService = securitySolution.getEndpointService();
-  const logger = endpointService.createLogger('validateResponseActionsPermissions');
+export const validateRuleResponseActionsPermissions = async <
+  T extends Pick<BaseOptionalFields, 'response_actions'>
+>({
+  endpointService,
+  endpointAuthz,
+  ruleUpdate,
+  existingRule,
+}: ValidateRuleResponseActionsPermissionsOptions<T>): Promise<void> => {
+  const logger = endpointService.createLogger('validateRuleResponseActionsPermissions');
 
   logger.debug(
     () => `Validating response actions permissions for rule payload: ${stringify(ruleUpdate)}`
@@ -130,8 +135,6 @@ export const validateResponseActionsPermissions = async (
     logger.debug(() => `Nothing to do - no response action in payload`);
     return;
   }
-
-  const endpointAuthz = await securitySolution.getEndpointAuthz();
 
   // finds elements that are not included in both arrays
   const symmetricDifference = xorWith<ResponseAction | RuleResponseAction>(
@@ -148,6 +151,7 @@ export const validateResponseActionsPermissions = async (
     if (!('command' in action?.params)) {
       return;
     }
+
     const authzPropName =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
         RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
