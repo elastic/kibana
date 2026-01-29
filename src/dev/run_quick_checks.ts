@@ -798,48 +798,75 @@ async function getChangedFilesFromBranch(baseRef: string): Promise<string[]> {
 /** Find files that import any of the given files */
 async function findDependentFiles(files: string[], log: ToolingLog): Promise<string[]> {
   const dependents = new Set<string>();
+  const originalFiles = new Set(files);
 
   // Filter to only JS/TS files
   const jsFiles = files.filter((f) => /\.(ts|tsx|js|jsx)$/.test(f));
-  const total = jsFiles.length;
 
-  if (total === 0) {
+  if (jsFiles.length === 0) {
     return [];
   }
 
-  log.info(`Scanning imports for ${total} file(s)...`);
+  log.info(`Scanning imports for ${jsFiles.length} file(s)...`);
 
-  for (let i = 0; i < jsFiles.length; i++) {
-    const file = jsFiles[i];
-    const progress = `[${i + 1}/${total}]`;
+  // Collect all patterns from all files
+  const allPatterns: string[] = [];
+  for (const file of jsFiles) {
+    allPatterns.push(...getImportPatterns(file));
+  }
 
-    // Show progress every 5 files or for the last file
-    if ((i + 1) % 5 === 0 || i === jsFiles.length - 1) {
-      log.info(`${progress} Searching for dependents... (found ${dependents.size} so far)`);
-    }
+  // Deduplicate patterns
+  const uniquePatterns = [...new Set(allPatterns)];
+  log.info(`Generated ${uniquePatterns.length} unique import patterns`);
 
-    // Generate possible import patterns for this file
-    const importPatterns = getImportPatterns(file);
+  // Batch patterns into groups to avoid command line length limits
+  const BATCH_SIZE = 50;
+  const batches: string[][] = [];
+  for (let i = 0; i < uniquePatterns.length; i += BATCH_SIZE) {
+    batches.push(uniquePatterns.slice(i, i + BATCH_SIZE));
+  }
 
-    for (const pattern of importPatterns) {
-      try {
-        // Use git grep for speed - search for import/require of this file
-        const { stdout } = await execFileAsync(
-          'git',
-          ['grep', '-l', '--extended-regexp', pattern, '--', '*.ts', '*.tsx', '*.js', '*.jsx'],
-          { cwd: REPO_ROOT, maxBuffer: 10 * 1024 * 1024 }
-        );
-        const matches = stdout.trim().split('\n').filter(Boolean);
-        for (const match of matches) {
-          // Don't add the file itself as its own dependent
-          if (match !== file) {
-            dependents.add(match);
+  log.info(`Running ${batches.length} batched git grep search(es)...`);
+
+  // Run batches in parallel (limit concurrency to avoid overwhelming git)
+  const CONCURRENCY = 4;
+  for (let i = 0; i < batches.length; i += CONCURRENCY) {
+    const batchGroup = batches.slice(i, i + CONCURRENCY);
+    const progress = `[${Math.min(i + CONCURRENCY, batches.length)}/${batches.length}]`;
+
+    const results = await Promise.all(
+      batchGroup.map(async (patterns) => {
+        try {
+          // Build git grep args with multiple -e patterns
+          const args = ['grep', '-l', '--extended-regexp'];
+          for (const pattern of patterns) {
+            args.push('-e', pattern);
           }
+          args.push('--', '*.ts', '*.tsx', '*.js', '*.jsx');
+
+          const { stdout } = await execFileAsync('git', args, {
+            cwd: REPO_ROOT,
+            maxBuffer: 10 * 1024 * 1024,
+          });
+          return stdout.trim().split('\n').filter(Boolean);
+        } catch {
+          // git grep returns exit code 1 when no matches found
+          return [];
         }
-      } catch {
-        // git grep returns exit code 1 when no matches found, ignore
+      })
+    );
+
+    // Collect results
+    for (const matches of results) {
+      for (const match of matches) {
+        // Don't add original files as their own dependents
+        if (!originalFiles.has(match)) {
+          dependents.add(match);
+        }
       }
     }
+
+    log.info(`${progress} Found ${dependents.size} dependent file(s) so far`);
   }
 
   return Array.from(dependents);
