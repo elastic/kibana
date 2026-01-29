@@ -37,6 +37,15 @@ export const ConfigRecordSchema = schema.recordOf(
   }
 );
 
+export const VarGroupSelectionsSchema = schema.maybe(
+  schema.recordOf(schema.string(), schema.string(), {
+    meta: {
+      description:
+        'Variable group selections. Maps var_group name to the selected option name within that group.',
+    },
+  })
+);
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -60,6 +69,7 @@ const PackagePolicyStreamsSchema = {
     ),
   }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
 };
@@ -169,6 +179,7 @@ export const PackagePolicyBaseSchema = {
 
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema), { maxSize: 1000 }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -334,6 +345,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
               })
             ),
             vars: schema.maybe(SimplifiedVarsSchema),
+            var_group_selections: VarGroupSelectionsSchema,
           }),
           {
             meta: {
@@ -394,6 +406,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   inputs: SimplifiedPackagePolicyInputsSchema,
   supports_agentless: schema.maybe(
     schema.nullable(
