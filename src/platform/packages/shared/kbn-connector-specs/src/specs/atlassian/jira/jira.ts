@@ -2,7 +2,8 @@ import { ActionContext, ConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import { z } from 'zod/v4';
 
-const buildBaseUrl = (ctx: ActionContext) => `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+const buildBaseUrl = (ctx: ActionContext) =>
+  `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
 
 export const JiraConnector: ConnectorSpec = {
   metadata: {
@@ -89,6 +90,20 @@ export const JiraConnector: ConnectorSpec = {
         const response = await ctx.client.get(`${baseUrl}/rest/api/3/project/search`, {
           params: typedInput,
         });
+        return response.data;
+      },
+    },
+    getProject: {
+      isTool: false,
+      input: z.object({
+        projectId: z.string(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          projectId: string;
+        };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/rest/api/3/project/${typedInput.projectId}`);
         return response.data;
       },
     },
