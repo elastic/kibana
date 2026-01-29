@@ -12,6 +12,7 @@ import type { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearchQuery } from '@kbn/ml-query-utils';
+import type { ProjectRouting } from '@kbn/es-query';
 
 import type { LatestFunctionConfig } from '../../../../../../../server/routes/api_schemas/transforms';
 import type { EsFieldName } from '../../../../../../../common/types/fields';
@@ -53,6 +54,7 @@ export interface StepDefineExposedState {
   isRuntimeMappingsEditorEnabled: boolean;
   timeRangeMs?: TimeRangeMs;
   isDatePickerApplyEnabled: boolean;
+  projectRouting?: ProjectRouting;
   /**
    * Undefined when the form is incomplete or invalid
    */

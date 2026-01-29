@@ -111,13 +111,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
 
     const previewRequest = useMemo(() => {
-      const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
+      const { searchQuery, previewRequest: partialPreviewRequest, projectRouting } = stepDefineState;
       const transformConfigQuery = getTransformConfigQuery(searchQuery);
       return getPreviewTransformRequestBody(
         searchItems.dataView,
         transformConfigQuery,
         partialPreviewRequest,
-        stepDefineState.runtimeMappings
+        stepDefineState.runtimeMappings,
+        undefined,
+        projectRouting
       );
     }, [searchItems.dataView, stepDefineState]);
 

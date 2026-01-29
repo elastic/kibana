@@ -62,9 +62,10 @@ import { getPreviewTransformRequestBody } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications, useAppDependencies } from '../../../../app_dependencies';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
+import { ProjectPicker } from '@kbn/cps-utils';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
@@ -115,7 +116,15 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
   const toastNotifications = useToastNotifications();
+  const { cps } = useAppDependencies();
   const stepDefineForm = useStepDefineForm(props);
+
+  useEffect(() => {
+    if (cps?.cpsManager && stepDefineForm.projectRouting === undefined) {
+      const defaultProjectRouting = cps.cpsManager.getDefaultProjectRouting();
+      stepDefineForm.setProjectRouting(defaultProjectRouting);
+    }
+  }, [cps, stepDefineForm]);
 
   const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
@@ -166,7 +175,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     transformConfigQuery,
     requestPayload,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+    isDatePickerApplyEnabled ? timeRangeMs : undefined,
+    stepDefineForm.projectRouting
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
@@ -186,7 +196,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       validationStatus,
       requestPayload,
       runtimeMappings,
-      timeRangeMs
+      timeRangeMs,
+      stepDefineForm.projectRouting
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
@@ -317,6 +328,20 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             })}
           >
             <span>{indexPattern}</span>
+          </EuiFormRow>
+        )}
+
+        {cps?.cpsManager && (
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDefineForm.projectRoutingLabel', {
+              defaultMessage: 'Projects',
+            })}
+          >
+            <ProjectPicker
+              projectRouting={stepDefineForm.projectRouting}
+              onProjectRoutingChange={stepDefineForm.setProjectRouting}
+              fetchProjects={() => cps.cpsManager!.fetchProjects()}
+            />
           </EuiFormRow>
         )}
 

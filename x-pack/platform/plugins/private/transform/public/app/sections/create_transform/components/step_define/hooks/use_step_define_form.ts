@@ -29,6 +29,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   const { dataView } = searchItems;
 
   const [transformFunction, setTransformFunction] = useState(defaults.transformFunction);
+  const [projectRouting, setProjectRouting] = useState(defaults.projectRouting);
 
   const datePicker = useDatePicker(defaults, dataView);
   const searchBar = useSearchBar(defaults, dataView);
@@ -44,7 +45,9 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     dataView,
     searchBar.state.transformConfigQuery,
     pivotConfig.state.requestPayload,
-    defaults?.runtimeMappings
+    defaults?.runtimeMappings,
+    undefined,
+    projectRouting
   );
 
   // pivot config hook
@@ -63,7 +66,9 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
         dataView,
         searchBar.state.transformConfigQuery,
         pivotConfig.state.requestPayload,
-        runtimeMappings
+        runtimeMappings,
+        undefined,
+        projectRouting
       );
 
       const stringifiedSourceConfigUpdate = JSON.stringify(
@@ -102,6 +107,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
       runtimeMappingsUpdated: runtimeMappingsEditor.state.runtimeMappingsUpdated,
       isRuntimeMappingsEditorEnabled: runtimeMappingsEditor.state.isRuntimeMappingsEditorEnabled,
       timeRangeMs: datePicker.state.timeRangeMs,
+      projectRouting,
     });
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -118,11 +124,14 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     ]),
     latestFunctionConfig.config,
     transformFunction,
+    projectRouting,
   ]);
 
   return {
     transformFunction,
     setTransformFunction,
+    projectRouting,
+    setProjectRouting,
     advancedPivotEditor,
     advancedSourceEditor,
     runtimeMappingsEditor,
