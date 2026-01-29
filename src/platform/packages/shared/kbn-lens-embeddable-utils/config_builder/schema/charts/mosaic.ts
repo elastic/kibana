@@ -101,17 +101,14 @@ export const mosaicStateSchemaNoESQL = schema.object(
         meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
-    group_by: schema.maybe(
-      schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-        {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
-        }
-      )
+    group_by: schema.arrayOf(
+      mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      }
     ),
-
     /**
      * Unfortunately due to the collapsed feature, it is necessary to distinct between primary and secondary groups
      * at the api level as well.  Secondary groups are rendered inside the primary groups.
@@ -136,15 +133,14 @@ export const mosaicStateSchemaNoESQL = schema.object(
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
     validate: ({
-      metrics,
       group_by,
       group_breakdown_by,
     }: {
       metrics: Array<PartitionMetric>;
-      group_by?: Array<{ collapse_by?: string }>;
+      group_by: Array<{ collapse_by?: string }>;
       group_breakdown_by?: Array<{ collapse_by?: string }>;
     }) => {
-      if (group_by && group_by.filter((def) => def.collapse_by == null).length > 1) {
+      if (group_by.filter((def) => def.collapse_by == null).length > 1) {
         return 'Only a single non-collapsed dimension is allowed for group_by';
       }
       if (
@@ -153,7 +149,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       ) {
         return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
       }
-      return validateGroupings({ metrics, group_by });
+      return;
     },
   }
 );

@@ -49,6 +49,39 @@ describe('Mosaic Schema', () => {
       expect(validated.group_by).toHaveLength(1);
     });
 
+    it('should throw if no grouping is defined', () => {
+      const input = {
+        ...baseMosaicConfig,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: true,
+          },
+        ],
+      };
+
+      expect(() => mosaicStateSchema.validate(input)).toThrow();
+    });
+
+    it('should throw if multiple metrics are defined', () => {
+      const input = {
+        ...baseMosaicConfig,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: true,
+          },
+          {
+            operation: 'sum',
+            field: 'sales',
+            empty_as_null: false,
+          },
+        ],
+      };
+
+      expect(() => mosaicStateSchema.validate(input)).toThrow();
+    });
+
     it('validates configuration with both outer and inner grouping', () => {
       const input: MosaicState = {
         ...baseMosaicConfig,
@@ -529,6 +562,40 @@ describe('Mosaic Schema', () => {
 
         expect(() => mosaicStateSchema.validate(input)).not.toThrow();
       });
+    });
+  });
+
+  describe('ES|QL Schema', () => {
+    it('should throw if no grouping is defined', () => {
+      const input = {
+        ...baseMosaicConfig,
+        metrics: [
+          {
+            operation: 'value',
+            column: 'sales',
+          },
+        ],
+      };
+
+      expect(() => mosaicStateSchema.validate(input)).toThrow();
+    });
+
+    it('should throw if multiple metrics are defined', () => {
+      const input = {
+        ...baseMosaicConfig,
+        metrics: [
+          {
+            operation: 'value',
+            column: 'sales',
+          },
+          {
+            operation: 'value',
+            column: 'sales',
+          },
+        ],
+      };
+
+      expect(() => mosaicStateSchema.validate(input)).toThrow();
     });
   });
 });
