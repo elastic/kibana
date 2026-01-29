@@ -10,7 +10,7 @@ import Path from 'path';
 import { execFileSync } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 
-const SCOUT_SERVER_CONFIG_PATH = '.scout/servers/local.json';
+const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
 export const doctorCmd: Command<void> = {
   name: 'doctor',
@@ -59,13 +59,6 @@ export const doctorCmd: Command<void> = {
       );
     }
 
-    const scoutConfigExists = Fs.existsSync(Path.join(process.cwd(), SCOUT_SERVER_CONFIG_PATH));
-    if (!scoutConfigExists) {
-      warnings.push(
-        `No ${SCOUT_SERVER_CONFIG_PATH} found. If you want to target a local Kibana, create it or start Scout.`
-      );
-    }
-
     const dockerPs = safeExec('docker', [
       'ps',
       '--filter',
@@ -81,13 +74,41 @@ export const doctorCmd: Command<void> = {
       runtimeChecks.push({ label: 'EDOT collector', status: 'not running' });
     }
 
-    const scoutPids = safeExec('pgrep', ['-f', 'scripts/scout.js start-server']);
-    if (scoutPids === null) {
+    const scoutProcesses = safeExec('pgrep', ['-af', 'scripts/scout.js start-server']);
+    const scoutIsRunning = scoutProcesses !== null && scoutProcesses.length > 0;
+
+    if (scoutProcesses === null) {
       runtimeChecks.push({ label: 'Scout server', status: 'unknown (pgrep not available)' });
-    } else if (scoutPids.length > 0) {
-      runtimeChecks.push({ label: 'Scout server', status: 'running' });
+    } else if (scoutIsRunning) {
+      const configDirMatch = scoutProcesses.match(/--config-dir(?:=|\s+)(\S+)/);
+      const configDir = configDirMatch?.[1];
+      const mode = scoutProcesses.includes('--stateful')
+        ? 'stateful'
+        : scoutProcesses.includes('--serverless')
+          ? 'serverless'
+          : undefined;
+
+      const details = [mode, configDir ? `config-dir=${configDir}` : undefined]
+        .filter(Boolean)
+        .join(', ');
+
+      runtimeChecks.push({
+        label: 'Scout server',
+        status: details.length ? `running (${details})` : 'running',
+      });
     } else {
       runtimeChecks.push({ label: 'Scout server', status: 'not running' });
+    }
+
+    // Only relevant when you're targeting your own Kibana (not starting via Scout).
+    // If Scout is running, it already owns its own runtime config.
+    const scoutConfigExists = Fs.existsSync(
+      Path.join(process.cwd(), SCOUT_LOCAL_SERVER_CONFIG_PATH)
+    );
+    if (!scoutIsRunning && !scoutConfigExists) {
+      warnings.push(
+        `No ${SCOUT_LOCAL_SERVER_CONFIG_PATH} found. If you want to target a local Kibana instance (instead of starting one via Scout), create it.`
+      );
     }
 
     if (issues.length === 0) {

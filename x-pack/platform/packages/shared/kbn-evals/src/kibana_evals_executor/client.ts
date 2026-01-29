@@ -73,7 +73,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     return withInferenceContext(async () => {
       const datasetId = computeDatasetId(dataset);
       const experimentId = randomUUID();
-      const repetitions = this.options.repetitions ?? 1;
+      const repetitions = this.options.repetitions ?? 5;
       const runConcurrency = Math.max(1, concurrency ?? 1);
       const limiter = pLimit(runConcurrency);
 
