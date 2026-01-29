@@ -143,7 +143,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
               });
-              const isDeprecated = !!item.deprecated;
+              const isDeprecated = !!item.installationInfo?.deprecated;
 
               return (
                 <EuiLink href={url}>

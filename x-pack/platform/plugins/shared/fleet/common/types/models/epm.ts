@@ -236,11 +236,10 @@ export interface ConfigurationLink {
   type: Action | NextStep;
   content?: string;
 }
-
 export interface DeprecationInfo {
   description: string;
   since?: string;
-  replaced_by?: Record<string, string>;
+  replaced_by?: Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>;
 }
 
 export enum RegistryPolicyTemplateKeys {
@@ -367,6 +366,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates'
   | 'categories'
   | 'discovery'
+  | 'deprecated'
 >;
 
 // from /categories
@@ -725,6 +725,7 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
+  deprecated?: DeprecationInfo;
 }
 
 export interface PackageUsageStats {

@@ -699,7 +699,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
   if ('savedObject' in pkg && pkg.savedObject?.attributes) {
     const { attributes } = pkg.savedObject;
     const installationInfo: InstallationInfo = {
-      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
+      ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type', 'deprecated']),
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,

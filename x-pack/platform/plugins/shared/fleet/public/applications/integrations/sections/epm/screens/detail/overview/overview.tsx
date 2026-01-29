@@ -135,7 +135,6 @@ export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ pac
   const { getHref } = useLink();
   return (
     <>
-      <EuiSpacer size="l" />
       <EuiCallOut
         announceOnMount
         data-test-subj="deprecationCallout"
@@ -164,10 +163,10 @@ export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ pac
                 link: (
                   <EuiLink
                     href={getHref('integration_details_overview', {
-                      pkgkey: packageInfo?.deprecated?.replaced_by?.package,
+                      pkgkey: packageInfo.deprecated.replaced_by.package,
                     })}
                   >
-                    {packageInfo?.deprecated?.replaced_by?.package}
+                    {packageInfo.deprecated.replaced_by.package}
                   </EuiLink>
                 ),
               }}
@@ -175,7 +174,7 @@ export const DeprecationCallout: React.FC<{ packageInfo: PackageInfo }> = ({ pac
           </p>
         )}
       </EuiCallOut>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
     </>
   );
 };

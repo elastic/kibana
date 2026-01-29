@@ -102,7 +102,7 @@ export const mapToCard = ({
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
   let isDeprecated = false;
-  let deprecationInfo: IntegrationCardItem['deprecationInfo'];
+  let deprecationInfo: DeprecationInfo | undefined;
 
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
@@ -120,11 +120,7 @@ export const mapToCard = ({
     // Extract deprecation information
     if ('deprecated' in item && item.deprecated) {
       isDeprecated = true;
-      deprecationInfo = {
-        description: item.deprecated.description,
-        since: item.deprecated.since,
-        replaced_by: item.deprecated.replaced_by?.package,
-      };
+      deprecationInfo = item.deprecated;
     }
 
     const url = getHref('integration_details_overview', {

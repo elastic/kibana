@@ -154,6 +154,22 @@ export const PackageInfoSchema = schema
     description: schema.maybe(schema.string()),
     title: schema.string(),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    deprecated: schema.maybe(
+      schema.object({
+        description: schema.string(),
+        since: schema.string(),
+        replaced_by: schema.recordOf(
+          schema.oneOf([
+            schema.literal('package'),
+            schema.literal('policyTemplate'),
+            schema.literal('input'),
+            schema.literal('dataStream'),
+            schema.literal('variable'),
+          ]),
+          schema.string()
+        ),
+      })
+    ),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
