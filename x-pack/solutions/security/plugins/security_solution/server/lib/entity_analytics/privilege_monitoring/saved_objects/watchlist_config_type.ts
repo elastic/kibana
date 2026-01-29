@@ -22,12 +22,8 @@ export const watchlistConfigTypeNameMappings: SavedObjectsType['mappings'] = {
     riskModifier: {
       type: 'float',
     },
-
-    createdAt: {
-      type: 'date',
-    },
-    modifiedAt: {
-      type: 'date',
+    managed: {
+      type: 'boolean',
     },
   },
 };
