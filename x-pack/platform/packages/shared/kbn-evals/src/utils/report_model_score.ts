@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import { hostname } from 'os';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
@@ -19,6 +17,7 @@ import {
 } from './score_repository';
 import { getGitMetadata } from './git_metadata';
 import { getCurrentTraceId } from './tracing';
+import type { RanExperiment } from '../types';
 
 function computeInputHash(input: unknown): string {
   try {
@@ -35,54 +34,23 @@ export async function buildFlattenedScoreDocuments({
   evaluatorModel,
   runId,
   totalRepetitions,
-  phoenixClient,
-  datasetInfoById = new Map(),
 }: {
   experiments: RanExperiment[];
   taskModel: ModelInfo;
   evaluatorModel: ModelInfo | null;
   runId: string;
   totalRepetitions: number;
-  phoenixClient?: KibanaPhoenixClient;
-  datasetInfoById?: Map<string, { id: string; name: string }>;
 }): Promise<EvaluationScoreDocument[]> {
   const documents: EvaluationScoreDocument[] = [];
   const timestamp = new Date().toISOString();
   const gitMetadata = getGitMetadata();
   const hostName = hostname();
-  const datasetExamplesById = new Map<string, Array<{ id: string; input?: unknown }>>();
-
-  if (phoenixClient) {
-    const datasetIds = Array.from(new Set(experiments.map((experiment) => experiment.datasetId)));
-    await Promise.all(
-      datasetIds.map(async (datasetId) => {
-        try {
-          const examples = await phoenixClient.getDatasetExamples(datasetId);
-          datasetExamplesById.set(datasetId, examples);
-        } catch {
-          datasetExamplesById.set(datasetId, []);
-        }
-      })
-    );
-  }
 
   for (const experiment of experiments) {
     const { datasetId, evaluationRuns, runs } = experiment;
-    const datasetName = datasetInfoById.get(datasetId)?.name ?? datasetId;
-    const datasetExamples = datasetExamplesById.get(datasetId) ?? [];
-    const datasetExampleIndexMap = new Map<string, number>();
-
-    const exampleIndexMap = new Map<string, number>();
-    if (runs) {
-      let idx = 0;
-      for (const exampleId of Object.keys(runs)) {
-        exampleIndexMap.set(exampleId, idx++);
-      }
-    }
-
-    datasetExamples.forEach((example, index) => {
-      datasetExampleIndexMap.set(example.id, index);
-    });
+    const datasetName = experiment.datasetName ?? datasetId;
+    const runsById = runs ?? {};
+    const runsList = Object.values(runsById);
 
     if (!evaluationRuns) {
       continue;
@@ -93,6 +61,7 @@ export async function buildFlattenedScoreDocuments({
         exampleId?: string;
         exampleIndex?: number;
         repetitionIndex?: number;
+        experimentRunId?: string;
         traceId?: string;
         name: string;
         result?: {
@@ -102,20 +71,24 @@ export async function buildFlattenedScoreDocuments({
           metadata?: Record<string, unknown> | null;
         };
       };
-      let exampleId = evalRunInfo.exampleId ?? '';
-      const repetitionIndex = evalRunInfo.repetitionIndex ?? 0;
-      const exampleIndex =
-        exampleIndexMap.get(exampleId) ??
-        datasetExampleIndexMap.get(exampleId) ??
-        evalRunInfo.exampleIndex ??
-        0;
-      const runData = runs?.[exampleId] as { input?: unknown; traceId?: string } | undefined;
-      const exampleFromIndex = datasetExamples[exampleIndex];
-      if (!exampleId && exampleFromIndex?.id) {
-        exampleId = exampleFromIndex.id;
+      let runEntry: (typeof runsById)[string] | undefined;
+      if (evalRunInfo.experimentRunId && runsById[evalRunInfo.experimentRunId]) {
+        runEntry = runsById[evalRunInfo.experimentRunId];
+      } else if (evalRunInfo.exampleIndex !== undefined && evalRunInfo.repetitionIndex !== undefined) {
+        runEntry = runsList.find(
+          (run) =>
+            run.exampleIndex === evalRunInfo.exampleIndex &&
+            run.repetition === evalRunInfo.repetitionIndex
+        );
       }
-      const exampleInput = runData?.input ?? exampleFromIndex?.input;
-      const inputHash = exampleInput ? computeInputHash(exampleInput) : '';
+
+      const exampleIndex = runEntry?.exampleIndex ?? evalRunInfo.exampleIndex ?? 0;
+      const repetitionIndex = evalRunInfo.repetitionIndex ?? runEntry?.repetition ?? 0;
+      const exampleId =
+        evalRunInfo.exampleId ??
+        (runEntry as any)?.datasetExampleId ??
+        (exampleIndex !== undefined ? String(exampleIndex) : '');
+      const inputHash = runEntry?.input ? computeInputHash(runEntry.input) : '';
 
       documents.push({
         '@timestamp': timestamp,
@@ -131,7 +104,7 @@ export async function buildFlattenedScoreDocuments({
           },
         },
         task: {
-          trace_id: runData?.traceId ?? getCurrentTraceId(),
+          trace_id: (runEntry as any)?.traceId ?? getCurrentTraceId(),
           repetition_index: repetitionIndex,
           model: taskModel,
         },

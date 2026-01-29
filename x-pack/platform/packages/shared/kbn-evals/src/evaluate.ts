@@ -11,15 +11,16 @@ import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { getPhoenixConfig } from './utils/get_phoenix_config';
+import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { buildFlattenedScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
-import { createConnectorFixture } from './utils/create_connector_fixture';
+import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
@@ -34,7 +35,7 @@ import {
 
 /**
  * Test type for evaluations. Loads an inference client and a
- * (Kibana-flavored) Phoenix client.
+ * executor client (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
  */
 
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
@@ -64,7 +65,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
       ).evaluationConnector;
 
-      if (predefinedConnector.id !== connector.id) {
+      const evaluationConnectorUuid = getConnectorIdAsUuid(predefinedConnector.id);
+
+      if (evaluationConnectorUuid !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
       } else {
         // If the evaluation connector is the same as the main connector, reuse it
@@ -154,8 +157,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
       use
     ) => {
-      const config = getPhoenixConfig();
-
       function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
         const inferenceConnector: InferenceConnector = {
           type: connectorWithId.actionTypeId as InferenceConnectorType,
@@ -179,18 +180,25 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
-      const phoenixClient = new KibanaPhoenixClient({
-        config,
-        log,
-        model,
-        runId: process.env.TEST_RUN_ID!,
-        repetitions,
-      });
+      const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
 
-      await use(phoenixClient);
+      const executorClient = usePhoenixExecutor
+        ? new KibanaPhoenixClient({
+            config: getPhoenixConfig(),
+            log,
+            model,
+            runId: process.env.TEST_RUN_ID!,
+            repetitions,
+          })
+        : new KibanaEvalsClient({
+            log,
+            model,
+            runId: process.env.TEST_RUN_ID!,
+            repetitions,
+          });
 
-      const experiments = await phoenixClient.getRanExperiments();
       const currentRunId = process.env.TEST_RUN_ID;
+      await use(executorClient);
 
       if (!currentRunId) {
         throw new Error(
@@ -198,33 +206,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         );
       }
 
+      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.EVALUATIONS_ES_URL,
+          })
+        : esClient;
+
+      const experiments = await executorClient.getRanExperiments();
       const documents = await buildFlattenedScoreDocuments({
         experiments,
         taskModel: model,
         evaluatorModel,
         runId: currentRunId,
         totalRepetitions: repetitions,
-        phoenixClient,
-        datasetInfoById: await (async () => {
-          const datasetIds = Array.from(
-            new Set(experiments.map((experiment) => experiment.datasetId).filter(Boolean))
-          );
-          if (datasetIds.length === 0) {
-            return new Map();
-          }
-          try {
-            const datasetInfos = await phoenixClient.getDatasets(datasetIds);
-            return new Map(datasetInfos.map((dataset) => [dataset.id, dataset]));
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            log.warning(`Failed to fetch dataset metadata for run ID: ${currentRunId}. ${message}`);
-            return new Map();
-          }
-        })(),
       });
 
       try {
-        await exportEvaluations(documents, esClient, log);
+        await exportEvaluations(documents, evaluationsEsClient, log);
       } catch (error) {
         log.error(
           new Error(
@@ -235,12 +233,18 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       await reportModelScore(scoreRepository, currentRunId, log);
     },
     {
       scope: 'worker',
     },
+  ],
+  executorClient: [
+    async ({ phoenixClient }, use) => {
+      await use(phoenixClient);
+    },
+    { scope: 'worker' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
@@ -318,7 +322,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   evaluationAnalysisService: [
     async ({ esClient, log }, use) => {
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.EVALUATIONS_ES_URL,
+          })
+        : esClient;
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const helper = new EvaluationAnalysisService(scoreRepository, log);
       await use(helper);
     },
