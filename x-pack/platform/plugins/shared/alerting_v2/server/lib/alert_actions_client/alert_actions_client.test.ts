@@ -9,9 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { of } from 'rxjs';
 import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
-import type { QueryService } from '../services/query_service/query_service';
 import { createQueryService } from '../services/query_service/query_service.mock';
-import type { StorageService } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
@@ -45,7 +43,7 @@ describe('AlertActionsClient', () => {
     };
 
     it('should successfully create an action', async () => {
-      queryServiceSearchClient.search.mockReturnValue(
+      queryServiceSearchClient.search.mockReturnValueOnce(
         of({ rawResponse: anAlertEventESQLResponse() })
       );
 
@@ -56,9 +54,12 @@ describe('AlertActionsClient', () => {
 
       expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
       const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
-      expect(callArgs.index).toBe('.alerts-actions');
-      expect(callArgs.docs).toHaveLength(1);
-      expect(callArgs.docs[0]).toMatchObject({
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(operations).toHaveLength(2);
+      expect(operations[0]).toEqual({ create: { _index: '.alerts-actions' } });
+      expect(docs).toHaveLength(1);
+      expect(docs[0]).toMatchObject({
         group_hash: 'test-group-hash',
         action_type: 'ack',
         episode_id: 'episode-1',
@@ -66,11 +67,13 @@ describe('AlertActionsClient', () => {
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
         actor: 'test-user',
       });
-      expect(callArgs.docs[0]).toHaveProperty('@timestamp');
+      expect(docs[0]).toHaveProperty('@timestamp');
     });
 
     it('should throw when alert event is not found', async () => {
-      queryService.executeQuery.mockResolvedValueOnce(anEmptyESQLResponse());
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({ rawResponse: anEmptyESQLResponse() })
+      );
 
       await expect(
         client.createAction({
@@ -81,7 +84,7 @@ describe('AlertActionsClient', () => {
         'Alert event with group_hash [unknown-group-hash] and episode_id [episode-1] not found'
       );
 
-      expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should handle action with episode_id', async () => {
@@ -90,8 +93,8 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-2',
       };
 
-      queryService.executeQuery.mockResolvedValueOnce(
-        anAlertEventESQLResponse({ episode_id: 'episode-2' })
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({ rawResponse: anAlertEventESQLResponse({ episode_id: 'episode-2' }) })
       );
 
       await client.createAction({
@@ -99,18 +102,22 @@ describe('AlertActionsClient', () => {
         action: actionWithEpisode,
       });
 
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-      const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
-      expect(callArgs.docs[0].episode_id).toBe('episode-2');
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs[0]).toMatchObject({ episode_id: 'episode-2' });
     });
 
     it('should handle null username when security is not available', async () => {
-      queryService.executeQuery.mockResolvedValueOnce(anAlertEventESQLResponse());
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({ rawResponse: anAlertEventESQLResponse() })
+      );
 
       const clientWithoutSecurity = new AlertActionsClient(
         request,
-        queryService as unknown as QueryService,
-        storageService as unknown as StorageService,
+        queryService,
+        storageService,
         undefined
       );
 
@@ -119,9 +126,11 @@ describe('AlertActionsClient', () => {
         action: actionData,
       });
 
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-      const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
-      expect(callArgs.docs[0].actor).toBeNull();
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs[0]).toMatchObject({ actor: null });
     });
   });
 
@@ -132,20 +141,23 @@ describe('AlertActionsClient', () => {
         { group_hash: 'group-hash-2', action_type: 'snooze' as const },
       ];
 
-      queryService.executeQuery.mockResolvedValueOnce(
-        aBulkAlertEventsESQLResponse([
-          { group_hash: 'group-hash-1', episode_id: 'episode-1' },
-          { group_hash: 'group-hash-2', episode_id: 'episode-2' },
-        ])
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({
+          rawResponse: aBulkAlertEventsESQLResponse([
+            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+            { group_hash: 'group-hash-2', episode_id: 'episode-2' },
+          ]),
+        })
       );
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 2, total: 2 });
-      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-      const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
-      expect(callArgs.docs).toHaveLength(2);
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs).toHaveLength(2);
     });
 
     it('should handle partial failures and return correct counts', async () => {
@@ -154,18 +166,22 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-group-hash', action_type: 'ack' as const, episode_id: 'episode-1' },
       ];
 
-      // Only return one matching alert event (the second action's group_hash won't match)
-      queryService.executeQuery.mockResolvedValueOnce(
-        aBulkAlertEventsESQLResponse([{ group_hash: 'group-hash-1', episode_id: 'episode-1' }])
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({
+          rawResponse: aBulkAlertEventsESQLResponse([
+            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+          ]),
+        })
       );
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 1, total: 2 });
-      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
-      expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
-      const callArgs = storageService.bulkIndexDocs.mock.calls[0][0];
-      expect(callArgs.docs).toHaveLength(1);
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs).toHaveLength(1);
     });
 
     it('should return processed 0 when all actions fail', async () => {
@@ -174,14 +190,14 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-2', action_type: 'snooze' as const },
       ];
 
-      // Return empty response - no matching alert events
-      queryService.executeQuery.mockResolvedValueOnce(aBulkAlertEventsESQLResponse([]));
+      queryServiceSearchClient.search.mockReturnValueOnce(
+        of({ rawResponse: aBulkAlertEventsESQLResponse([]) })
+      );
 
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 0, total: 2 });
-      expect(queryService.executeQuery).toHaveBeenCalledTimes(1);
-      expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 });
