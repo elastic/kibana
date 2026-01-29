@@ -61,7 +61,7 @@ export const TourCallout = ({
   ...rest
 }: TourCalloutProps) => {
   const { notifications } = useKibana().services;
-  const isTourEnabled = notifications.tours.isEnabled();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   const [isStepOpen, setIsStepOpen] = useState<boolean>(false);
 
