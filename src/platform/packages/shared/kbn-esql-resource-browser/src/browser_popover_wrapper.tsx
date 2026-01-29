@@ -28,6 +28,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
+export const MAX_LIST_HEIGHT = 250;
 
 // Filter popover positioning constants
 const FILTER_POPOVER_HORIZONTAL_OFFSET = 60; // Horizontal offset in pixels for the filter popover
@@ -59,11 +60,8 @@ export interface BrowserPopoverWrapperProps<TItem> {
   items: EuiSelectableOption[];
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (options: EuiSelectableOption[], event: unknown, changedOption: EuiSelectableOption | undefined) => void;
+  onSelect: (changedOption: EuiSelectableOption | undefined) => void;
   position?: { top?: number; left?: number };
-  // Data fetching
-  fetchData: () => Promise<TItem[]>;
-  // Type extraction
   // i18n keys
   i18nKeys: {
     title: string;
@@ -88,7 +86,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   onClose,
   onSelect,
   position,
-  fetchData,
   i18nKeys,
   numTypes,
   numActiveFilters,
@@ -202,7 +199,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
           ),
         }}
         options={items}
-        onChange={onSelect}
+        onChange={(newOptions, event, changedOption) => onSelect(changedOption)}
         isLoading={isLoading}
         loadingMessage={i18nKeys.loading}
         emptyMessage={i18nKeys.empty}
@@ -230,7 +227,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               </EuiFlexGroup>
             </EuiPopoverTitle>
             <div style={{ padding: euiTheme.size.s }}>{search}</div>
-            <div style={{ maxHeight: BROWSER_POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
+            <div style={{ maxHeight: MAX_LIST_HEIGHT, overflowY: 'auto' }}>{list}</div>
           </div>
         )}
       </EuiSelectable>

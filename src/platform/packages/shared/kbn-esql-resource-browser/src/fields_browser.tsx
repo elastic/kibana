@@ -53,7 +53,7 @@ const getFieldTypeIconType = (typeLabel: string): string => {
 interface FieldsBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (fieldName: string, oldLength: number) => void;
+  onSelect: (fieldNames: string[], previousCount: number) => void;
   getColumnMap?: GetColumnMapFn;
   position?: { top?: number; left?: number };
   queryString?: string;
@@ -74,7 +74,6 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   suggestedFieldNames,
   http,
 }) => {
-
   const [items, setItems] = useState<ESQLFieldWithMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -328,15 +327,18 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   }, [options, searchValue, selectedTypes]);
 
   const handleSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const newlySelected = newOptions
-        .filter((o) => o.checked === 'on')
-        .map((o) => o.key as string)
-        .filter(Boolean);
+    (changedOption: EuiSelectableOption | undefined) => {
+      let newSelected;
 
-      const oldLength = selectedItems.join(',').length;
-      setSelectedItems(newlySelected);
-      onSelect(newlySelected.join(','), oldLength);
+      if (changedOption?.checked === 'on') {
+        newSelected = [...selectedItems, changedOption.key as string];
+      } else {
+        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
+      }
+
+      const oldCount = selectedItems.length;
+      setSelectedItems(newSelected);
+      onSelect(newSelected, oldCount);
     },
     [onSelect, selectedItems]
   );
@@ -407,7 +409,6 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       onClose={onClose}
       onSelect={handleSelectionChange}
       position={position}
-      fetchData={fetchData}
       i18nKeys={i18nKeys}
       numTypes={availableTypes.length}
       numActiveFilters={selectedTypes.length}

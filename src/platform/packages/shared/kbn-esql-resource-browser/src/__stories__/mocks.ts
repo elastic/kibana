@@ -11,6 +11,7 @@ import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { ESQLSourceResult, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
 import type { ColumnsMap } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
+import type { ILicense } from '@kbn/licensing-types';
 
 // Mock data sources
 export const mockDataSources: ESQLSourceResult[] = [
@@ -69,15 +70,22 @@ export const createMockCore = (): Pick<CoreStart, 'application' | 'http'> => {
 };
 
 // Mock getLicense function
-export const mockGetLicense = async () => {
+export const mockGetLicense = async (): Promise<ILicense | undefined> => {
   return {
+    isActive: true,
+    isAvailable: true,
+    signature: 'mock-signature',
+    toJSON: () => ({ signature: 'mock-signature' }),
+    getUnavailableReason: () => undefined,
+    hasAtLeast: () => true,
+    check: () => ({ state: 'valid' as const, message: '' }),
     getFeature: (featureName: string) => {
       if (featureName === 'ccr') {
         return { isAvailable: true, isEnabled: true };
       }
       return { isAvailable: false, isEnabled: false };
     },
-  } as any;
+  } as unknown as ILicense;
 };
 
 // Mock getColumnMap function that returns mock fields

@@ -89,7 +89,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const [selectedItems, setSelectedItems] = useState<string[]>(initialSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
-  console.log('initialSources', initialSources);
 
   // Reset state when popover opens and pre-select initial sources
   useEffect(() => {
@@ -288,13 +287,13 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [options, searchValue, selectedTypes, selectedIntegrations, availableIntegrations.length]);
 
   const handleSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[], event: unknown, changedOption: EuiSelectableOption | undefined) => {
+    (changedOption: EuiSelectableOption | undefined) => {
       let newSelected;
 
       if (changedOption?.checked === 'on') {
         newSelected = [...selectedItems, changedOption.key as string];
       } else {
-        newSelected = selectedItems.filter((o) => o !== changedOption?.key as string);
+        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
       }
 
       setSelectedItems(newSelected);
@@ -449,7 +448,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       onClose={onClose}
       onSelect={handleSelectionChange}
       position={position}
-      fetchData={fetchData}
       i18nKeys={i18nKeys}
       numTypes={availableTypes.length + availableIntegrations.length}
       isLoading={isLoading}
