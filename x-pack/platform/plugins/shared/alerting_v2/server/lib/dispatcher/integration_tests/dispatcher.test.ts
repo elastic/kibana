@@ -232,7 +232,9 @@ async function cleanupDataStreams(esClient: ElasticsearchClient): Promise<void> 
       query: { match_all: {} },
       refresh: true,
     });
-  } catch (error) {}
+  } catch (error) {
+    // noop
+  }
 
   try {
     await esClient.deleteByQuery({
@@ -240,7 +242,9 @@ async function cleanupDataStreams(esClient: ElasticsearchClient): Promise<void> 
       query: { match_all: {} },
       refresh: true,
     });
-  } catch (error) {}
+  } catch (error) {
+    // noop
+  }
 }
 
 async function seedAlertEvents(
