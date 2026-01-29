@@ -132,7 +132,7 @@
     {
       "repoOwner": "elastic",
       "repoName": "kibana",
-      "pipelineSlug": "kibana-deploy-storybooks-from-pr",
+      "pipelineSlug": "kibana-storybooks-from-pr",
       "enabled": true,
       "allow_org_users": true,
       "allowed_repo_permissions": [
@@ -143,11 +143,13 @@
         "elastic-vault-github-plugin-prod[bot]"
       ],
       "set_commit_status": true,
-      "commit_status_context": "kibana-deploy-storybooks-from-pr",
+      "commit_status_context": "kibana-storybooks-from-pr",
       "build_on_commit": false,
       "build_drafts": false,
       "enable_trigger_checkbox": true,
-      "kibana_versions_check": true
+      "kibana_versions_check": true,
+      "build_on_comment": true,
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:deploy)\\W+(?:storybook))$"
     },
     {
       "repoOwner": "elastic",

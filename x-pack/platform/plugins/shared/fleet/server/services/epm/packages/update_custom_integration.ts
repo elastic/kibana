@@ -176,7 +176,7 @@ export async function incrementVersionAndUpdate(
     spaceId: 'default',
     force: true,
     paths: packageInstallContext.paths,
-    authorizationHeader: null,
+    request: undefined,
     keepFailedInstallation: true,
   });
 
