@@ -27,7 +27,6 @@ import {
   ConnectorInputSchemas,
   ConnectorOutputSchemas,
   ConnectorSpecsInputSchemas,
-  ConnectorSpecsOutputSchemas,
   staticConnectors,
 } from './connector_action_schema';
 // Import the singleton instance of StepSchemas
@@ -76,15 +75,6 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
     const actionSchema = actionsSchema[subActionName];
     if (actionSchema) {
       return actionSchema;
-    }
-  }
-
-  // Check connector specs v2 output schemas
-  const connectorSpec = ConnectorSpecsOutputSchemas.get(actionTypeId);
-  if (connectorSpec) {
-    const outputSchema = connectorSpec[subActionName];
-    if (outputSchema) {
-      return outputSchema as z.ZodSchema;
     }
   }
 
