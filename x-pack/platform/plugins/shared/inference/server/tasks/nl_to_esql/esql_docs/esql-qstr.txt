@@ -115,3 +115,12 @@ Filters the books dataset to include rows where the title is similar to "Hobbjt"
 FROM books
 | WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})
 ```
+
+This example filters rows where any field contains the term "Great" and limits the output to 10 rows.
+
+```esql
+FROM books
+| WHERE QSTR("""Great""")
+| LIMIT 10
+
+```

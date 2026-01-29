@@ -2,6 +2,9 @@
 
 The KQL function performs a query using the KQL query string format and returns true if the provided query matches the row.
 
+Below characters must be escaped with a backslash.
+- \():<>"*
+
 ## Syntax
 
 `KQL(query, options, boost, time_zone, case_insensitive, default_field)`
@@ -39,11 +42,18 @@ Filters the `books` table to only include rows where the author is Faulkner.
 FROM books
 | WHERE KQL("author: Faulkner")
 ```
-This example filters rows in the `books` table where the author is Faulkner.
 
 Filters the `employees` table to only include rows where the first name matches "mary", using case-insensitive matching and a custom boost value.
 ```esql
 FROM employees
 | WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})
 ```
-This example filters rows in the `employees` table where the first name matches "mary", using case-insensitive matching and a custom boost value.
+
+
+Filters rows where any field contains the term "Great" and limits the output to 10 rows.
+
+```esql
+FROM books
+| WHERE KQL("""Great""")
+| LIMIT 10
+```
