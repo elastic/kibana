@@ -45,7 +45,7 @@ export interface OsqueryDataProvider {
     value: string | string[];
     operator: ':' | ':*' | 'includes';
   };
-  and: OsqueryDataProvider[];
+  and: Omit<OsqueryDataProvider, 'and'>[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
