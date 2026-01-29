@@ -27,7 +27,15 @@ export function createTestConfig<
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
-      ...(!enableFleetDockerRegistry && { dockerServers: undefined }),
+      dockerServers: enableFleetDockerRegistry
+        ? svlSharedConfig.get('dockerServers')
+        : {
+            ...svlSharedConfig.get('dockerServers'),
+            registry: {
+              ...svlSharedConfig.get('dockerServers.registry'),
+              enabled: false,
+            },
+          },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [

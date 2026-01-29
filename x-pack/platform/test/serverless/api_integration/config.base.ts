@@ -24,7 +24,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...services,
         ...options.services,
       },
-      ...(!enableFleetDockerRegistry && { dockerServers: undefined }),
+      dockerServers: enableFleetDockerRegistry
+        ? svlSharedConfig.get('dockerServers')
+        : {
+            ...svlSharedConfig.get('dockerServers'),
+            registry: {
+              ...svlSharedConfig.get('dockerServers.registry'),
+              enabled: false,
+            },
+          },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
