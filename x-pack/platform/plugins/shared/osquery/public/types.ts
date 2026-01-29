@@ -27,11 +27,14 @@ import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_a
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
 /**
- * Minimal DataProvider type for timeline integration.
+ * Minimal DataProvider type for timeline integration within the osquery plugin.
  * This is a local definition to avoid direct dependency on @kbn/timelines-plugin.
  * The structure is compatible with the timelines plugin's DataProvider type.
+ *
+ * @internal Use this only within the osquery plugin. For security_solution,
+ * import DataProvider from 'timelines/components/timeline/data_providers/data_provider'.
  */
-export interface DataProvider {
+export interface OsqueryDataProvider {
   id: string;
   name: string;
   enabled: boolean;
@@ -42,7 +45,7 @@ export interface DataProvider {
     value: string | string[];
     operator: ':' | ':*' | 'includes';
   };
-  and: DataProvider[];
+  and: OsqueryDataProvider[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -81,4 +84,4 @@ export interface SetupPlugins {
 
 export type StartServices = CoreStart & StartPlugins;
 
-export type AddToTimelineHandler = (dataProviders: DataProvider[]) => void;
+export type AddToTimelineHandler = (dataProviders: OsqueryDataProvider[]) => void;

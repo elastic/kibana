@@ -17,7 +17,7 @@ import { TimelineId } from '../../../common/types/timeline';
  * Hook that returns a callback to add data providers to the active timeline.
  * Shows a success toast notification after adding.
  */
-export const useAddToTimeline = () => {
+export const useAddToTimeline = (): ((dataProviders: DataProvider[]) => void) => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
 

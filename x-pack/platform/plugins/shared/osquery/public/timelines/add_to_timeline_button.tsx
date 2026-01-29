@@ -10,7 +10,7 @@ import { isArray } from 'lodash';
 import { EuiButtonEmpty, EuiButtonIcon, type EuiButtonIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
-import type { AddToTimelineHandler, DataProvider } from '../types';
+import type { AddToTimelineHandler, OsqueryDataProvider } from '../types';
 
 export interface AddToTimelineButtonProps {
   field: string;
@@ -31,7 +31,7 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
 
   const queryIds = useMemo(() => (isArray(value) ? value : [value]), [value]);
 
-  const providers: DataProvider[] = useMemo(
+  const providers: OsqueryDataProvider[] = useMemo(
     () =>
       queryIds.map((queryId) => ({
         and: [],
