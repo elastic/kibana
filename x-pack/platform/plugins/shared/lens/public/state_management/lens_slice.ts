@@ -77,6 +77,7 @@ export const initialState: LensAppState = {
   annotationGroups: {},
   projectRouting: undefined,
   managed: false,
+  hideTextBasedEditor: false,
 };
 
 export const getPreloadedState = ({
@@ -163,6 +164,8 @@ export interface InitialAppState {
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
   inlineEditing?: boolean;
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
