@@ -58,7 +58,7 @@ describe('downloadToDisk', () => {
 
     await downloadToDisk(mockFileUrl, mockFilePathAtVolume);
 
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl);
+    expect(fetch).toHaveBeenCalledWith(mockFileUrl, {});
   });
 
   it('should copy a file from a local file URL', async () => {
