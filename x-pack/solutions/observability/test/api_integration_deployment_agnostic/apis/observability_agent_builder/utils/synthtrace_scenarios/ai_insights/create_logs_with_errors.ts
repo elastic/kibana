@@ -41,8 +41,9 @@ export const createLogsWithErrors = async ({
   await logsSynthtraceEsClient.clean();
 
   const traceId = 'test-trace-id';
-  const baseTime = moment().subtract(15, 'minutes').valueOf();
-  const range = timerange(baseTime, baseTime + 60000);
+  const start = moment().subtract(15, 'minutes').valueOf();
+  const end = moment().subtract(14, 'minutes').valueOf();
+  const range = timerange(start, end);
 
   const errorMessage = 'Failed to process payment: Connection timeout';
   const warningMessage = 'High latency detected in payment processing';
