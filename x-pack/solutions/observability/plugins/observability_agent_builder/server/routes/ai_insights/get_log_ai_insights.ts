@@ -162,7 +162,7 @@ export async function getLogAiInsights({
     })
     .map((result) => result.value)
     .filter(({ data }) => data && (!Array.isArray(data) || data.length > 0))
-    .map(({ part, data }) =>
+    .map(({ name, result }) =>
       dedent(`
         <${part.name}>
         Time window: ${windowStart} to ${windowEnd}
