@@ -18,6 +18,7 @@ import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
@@ -588,35 +589,29 @@ export class HttpServer {
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
       // TODO: is it ok to pull the values like this or should we
       // look for an alternative?
-      interface AuthCredentials {
-        username?: string;
-        email?: string;
-        roles?: string[];
-        profile_uid?: string;
-      }
-      const isAuthCredentials = (value: unknown): value is AuthCredentials => {
+      const isAuthenticatedUser = (value: unknown): value is AuthenticatedUser => {
         if (typeof value !== 'object' || value === null) return false;
         const v = value as Record<string, unknown>;
         return (
-          (v.username === undefined || typeof v.username === 'string') &&
+          typeof v.username === 'string' &&
           (v.email === undefined || typeof v.email === 'string') &&
-          (v.roles === undefined ||
-            (Array.isArray(v.roles) && v.roles.every((r) => typeof r === 'string'))) &&
+          Array.isArray(v.roles) &&
+          v.roles.every((r) => typeof r === 'string') &&
           (v.profile_uid === undefined || typeof v.profile_uid === 'string')
         );
       };
 
-      const credentials = isAuthCredentials(request?.auth?.credentials)
+      const user = isAuthenticatedUser(request?.auth?.credentials)
         ? request.auth.credentials
         : undefined;
 
       userActivity?.setInjectedContext({
         user: {
           ip: request.info.remoteAddress,
-          id: credentials?.profile_uid,
-          username: credentials?.username,
-          email: credentials?.email,
-          roles: credentials?.roles,
+          id: user?.profile_uid,
+          username: user?.username,
+          email: user?.email,
+          roles: user?.roles ? [...user.roles] : undefined,
         },
         session: {
           id: request.state?.sid?.sid,
