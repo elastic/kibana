@@ -78,7 +78,7 @@ const getScriptsLibraryTableColumns = ({
             <ScriptNameNavLink
               name={name}
               onClick={() => onClickAction({ show: 'details', script: item })}
-              data-test-subj={`${getTestId(`column-name-${item.id}`)}`}
+              data-test-subj={`${getTestId('column-name')}-${item.id}`}
             />
           </EuiToolTip>
         );
@@ -104,7 +104,7 @@ const getScriptsLibraryTableColumns = ({
           <EuiBadge
             color="hollow"
             key={`${sortedTag}-${i}`}
-            data-test-subj={getTestId(`tags-${sortedTag}`)}
+            data-test-subj={getTestId(`types-${sortedTag}`)}
           >
             {SCRIPT_TAGS[sortedTag as ScriptTagKey] || sortedTag}
           </EuiBadge>
@@ -116,7 +116,7 @@ const getScriptsLibraryTableColumns = ({
             popoverButtonIcon="tag"
             popoverButtonTitle={tags.length.toString()}
             renderItem={renderItem}
-            dataTestPrefix={getTestId('tags')}
+            dataTestPrefix={getTestId('types')}
           />
         );
       },
@@ -159,6 +159,7 @@ const getScriptsLibraryTableColumns = ({
       render: (updatedAt: string) => {
         return (
           <FormattedDate
+            data-test-subj={getTestId('column-updated-at')}
             fieldName={tableLabels.table.columns.updatedAt}
             value={updatedAt}
             className="eui-textTruncate"
@@ -170,8 +171,9 @@ const getScriptsLibraryTableColumns = ({
       field: 'fileSize',
       name: tableLabels.table.columns.size,
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.size,
+      sortable: true,
       render: (fileSize: number) => (
-        <EuiText size="s" data-test-subj={getTestId('file-size')}>
+        <EuiText size="s" data-test-subj={getTestId('column-file-size')}>
           {formatBytes(fileSize).toLowerCase()}
         </EuiText>
       ),

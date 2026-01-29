@@ -110,7 +110,7 @@ describe('ScriptsLibraryTable', () => {
       const columns = renderResult.getAllByRole('columnheader');
       expect(columns).toHaveLength(7);
       expect(columns.map((column) => column.textContent).join(',')).toEqual(
-        'Name,Platforms,Tags,Updated by,Last updated,Size,Actions'
+        'Name,Platforms,Types,Updated by,Last updated,Size,Actions'
       );
     });
 
@@ -145,17 +145,15 @@ describe('ScriptsLibraryTable', () => {
       expect(range).toHaveTextContent(`Showing 1-10 of 11 scripts`);
     });
 
-    it('shows script name as link for opening details flyout', () => {
+    it('shows script name as a button for opening details flyout', () => {
       reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const nameLink = getByTestId('test-column-name-script-1');
-      expect(nameLink).toHaveTextContent('Script One');
-      expect(nameLink).toHaveAttribute(
-        'href',
-        `${APP_SCRIPTS_LIBRARY_PATH}?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details`
-      );
+      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+      expect(nameButton).toHaveTextContent('Script One');
+      // should be a button element
+      expect(nameButton.tagName).toBe('BUTTON');
     });
 
     it('shows platform badges for each script', () => {
@@ -179,19 +177,19 @@ describe('ScriptsLibraryTable', () => {
       });
     });
 
-    it('shows tags for each script', () => {
+    it('shows Types for each script', () => {
       reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const tagsCell = getByTestId('test-tags');
-      expect(tagsCell.textContent).toEqual('11');
+      const typesCell = getByTestId('test-types');
+      expect(typesCell.textContent).toEqual('11');
 
-      const tagsPopover = getByTestId('test-tagsDisplayPopoverButton');
-      // click on tags cell and verify popover content
-      userEve.click(tagsPopover).then(() => {
-        expect(getByTestId('test-tagsDisplayPopoverTitle')).toHaveTextContent('Tags');
-        const badges = getByTestId('test-tagsDisplayPopoverWrapper').querySelectorAll('.euiBadge');
+      const typesPopover = getByTestId('test-typesDisplayPopoverButton');
+      // click on types cell and verify popover content
+      userEve.click(typesPopover).then(() => {
+        expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
+        const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
         expect(badges).toHaveLength(11);
         // verify all tags are present and are in sorted order
         const tags = Array.from(badges).map((badge) => badge.textContent);
@@ -221,7 +219,7 @@ describe('ScriptsLibraryTable', () => {
       });
 
       const { getByTestId } = renderResult;
-      const fileSizeCell = getByTestId('test-file-size');
+      const fileSizeCell = getByTestId('test-column-file-size');
       expect(fileSizeCell).toHaveTextContent('784kb');
     });
 
