@@ -22,7 +22,7 @@ export const convertCamelCasedKeysToSnakeCase = (camelCased: {
     snakeCased: { [key: string]: any } = {}
   ): object => {
     for (const [key, value] of Object.entries(camelCasedSubObject)) {
-      if (typeof value === 'object' && !Array.isArray(value)) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         snakeCased[snakeCase(key)] = convertSubObject(value);
       } else {
         snakeCased[snakeCase(key)] = value;

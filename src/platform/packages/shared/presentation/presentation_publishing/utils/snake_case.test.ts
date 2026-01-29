@@ -24,8 +24,8 @@ describe('snake case', () => {
   test('deeply nested object', () => {
     const deeplyNestedCamelCasedObject = {
       fruitColours: {
-        anApple: 'red',
-        aBanana: 'yellow',
+        someApples: 'red',
+        banana: 'yellow',
         cucumbersAreFruits: 'green',
         tomatoesAreAlsoFruits: {
           romaTomatoes: 'red',
@@ -35,8 +35,8 @@ describe('snake case', () => {
     };
     expect(convertCamelCasedKeysToSnakeCase(deeplyNestedCamelCasedObject)).toEqual({
       fruit_colours: {
-        an_apple: 'red',
-        a_banana: 'yellow',
+        some_apples: 'red',
+        banana: 'yellow',
         cucumbers_are_fruits: 'green',
         tomatoes_are_also_fruits: {
           roma_tomatoes: 'red',
@@ -62,6 +62,30 @@ describe('snake case', () => {
         count_to_two: [1, 2],
       },
       count_to_ten: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    });
+  });
+
+  test('object with null', () => {
+    const camelCasedObjectWithArray = {
+      iAmDefined: 'safe!',
+      iAmNull: null,
+      iAmUndefined: undefined,
+    };
+    expect(convertCamelCasedKeysToSnakeCase(camelCasedObjectWithArray)).toEqual({
+      i_am_defined: 'safe!',
+      i_am_null: null,
+      i_am_undefined: undefined,
+    });
+  });
+
+  test('object with snake cased keys', () => {
+    const camelCasedObjectWithArray = {
+      iAmCamelCased: true,
+      i_am_snake_cased: 'true',
+    };
+    expect(convertCamelCasedKeysToSnakeCase(camelCasedObjectWithArray)).toEqual({
+      i_am_camel_cased: true,
+      i_am_snake_cased: 'true',
     });
   });
 });
