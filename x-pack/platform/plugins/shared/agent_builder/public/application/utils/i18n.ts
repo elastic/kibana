@@ -523,6 +523,9 @@ export const labels = {
       defaultMessage: 'Last updated',
     }),
     // Actions
+    startChatButtonLabel: i18n.translate('xpack.agentBuilder.prompts.startChatButtonLabel', {
+      defaultMessage: 'Start chat with prompt',
+    }),
     editPromptButtonLabel: i18n.translate('xpack.agentBuilder.prompts.editPromptButtonLabel', {
       defaultMessage: 'Edit prompt',
     }),

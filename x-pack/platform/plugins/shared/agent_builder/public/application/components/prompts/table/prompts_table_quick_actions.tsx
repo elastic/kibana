@@ -15,9 +15,15 @@ export interface PromptsQuickActionsProps {
   prompt: UserPrompt;
   onEdit: (promptId: string) => void;
   onDelete: (promptId: string) => void;
+  startChatHref: string;
 }
 
-export const PromptsQuickActions = ({ prompt, onEdit, onDelete }: PromptsQuickActionsProps) => {
+export const PromptsQuickActions = ({
+  prompt,
+  onEdit,
+  onDelete,
+  startChatHref,
+}: PromptsQuickActionsProps) => {
   return (
     <EuiFlexGroup
       css={css`
@@ -28,6 +34,12 @@ export const PromptsQuickActions = ({ prompt, onEdit, onDelete }: PromptsQuickAc
       alignItems="center"
       justifyContent="flexEnd"
     >
+      <EuiButtonIcon
+        data-test-subj={`agentBuilderPromptsRowStartChatButton-${prompt.id}`}
+        iconType="comment"
+        href={startChatHref}
+        aria-label={labels.prompts.startChatButtonLabel}
+      />
       <EuiButtonIcon
         data-test-subj={`agentBuilderPromptsRowEditButton-${prompt.id}`}
         iconType="documentEdit"

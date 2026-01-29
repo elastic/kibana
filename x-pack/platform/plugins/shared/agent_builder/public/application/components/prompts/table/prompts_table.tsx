@@ -22,6 +22,9 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { UserPrompt } from '../../../../../common/http_api/user_prompts';
 import { usePrompts } from '../../../hooks/prompts/use_prompts';
 import { usePromptsTableSearch } from '../../../hooks/prompts/use_prompts_table_search';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
+import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { PromptFormModal } from '../prompt_form_modal';
 import { DeletePromptModal } from '../delete_prompt_modal';
@@ -63,6 +66,8 @@ export const AgentBuilderPromptsTable = memo(() => {
     per_page: tablePageSize,
     query: searchQuery || undefined,
   });
+
+  const { createAgentBuilderUrl } = useNavigation();
 
   const handleEdit = useCallback((promptId: string) => {
     setEditPromptId(promptId);
@@ -118,12 +123,19 @@ export const AgentBuilderPromptsTable = memo(() => {
         name: '',
         render: (prompt: UserPrompt) => (
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-            <PromptsQuickActions prompt={prompt} onEdit={handleEdit} onDelete={handleDelete} />
+            <PromptsQuickActions
+              prompt={prompt}
+              startChatHref={createAgentBuilderUrl(appPaths.chat.new, {
+                [searchParamNames.promptId]: prompt.id,
+              })}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </EuiFlexGroup>
         ),
       },
     ],
-    [dateFormat, handleEdit, handleDelete]
+    [dateFormat, createAgentBuilderUrl, handleEdit, handleDelete]
   );
 
   return (
