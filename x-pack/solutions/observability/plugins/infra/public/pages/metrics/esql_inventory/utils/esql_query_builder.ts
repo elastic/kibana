@@ -19,11 +19,13 @@ import {
   isColumn,
 } from '@kbn/esql-language';
 import type { ESQLCommandOption, ESQLColumn, ESQLCommand } from '@kbn/esql-language';
+import { buildQuery as buildCuratedQuery } from '@kbn/unified-chart-section-viewer';
 import type { SortConfig, SelectedMetric } from '../types';
 import { parseEsqlQuery } from '../hooks/use_esql_query_info';
 
 /**
  * Build the chart query based on metric instrument type.
+ * - Managed (curated) metrics: Use the query builder from entity definitions
  * - Gauges: TS index | STATS AVG(metric) BY entity | SORT ...
  * - Counters: Two-stage aggregation with RATE for per-second rates
  */
@@ -36,12 +38,31 @@ export const buildChartQuery = (
 ): string => {
   if (!metric) return esql`TS ${index}`.pipe`LIMIT 1`.print('wrapping');
 
+  let query: string;
+
+  // Handle managed (curated) metrics using the centralized query builder
+  if (metric.isManaged && metric.curatedMetric) {
+    const curatedMetric = metric.curatedMetric;
+    query = buildCuratedQuery(curatedMetric, {
+      index,
+      entityField,
+      trend: false, // Summary query for the grid
+    });
+
+    // Apply sort if specified (curated queries have default sort)
+    if (sort) {
+      query = addSortToQuery(query, sort);
+    }
+
+    // Add group by fields if specified (handled here to return early)
+    return groupByFields?.length ? addGroupByToQuery(query, groupByFields) : query;
+  }
+
+  // Standard metrics: build query based on instrument type
   const sortDir = (sort?.direction?.toUpperCase() ?? 'DESC') as 'ASC' | 'DESC';
   const col = esql.col(metric.name);
   const entity = esql.col(entityField);
 
-  // Build base query based on metric type
-  let query: string;
   if (metric.instrument === 'counter') {
     // Counter: two-stage aggregation with RATE
     const sortField = sort?.field === 'entity' ? entityField : 'AVG(metric_rate)';

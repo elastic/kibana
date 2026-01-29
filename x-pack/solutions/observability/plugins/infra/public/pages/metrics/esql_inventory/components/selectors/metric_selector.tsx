@@ -17,12 +17,14 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { CuratedMetricQuery } from '@kbn/unified-chart-section-viewer';
 import type { MetricFieldInfo } from '../../hooks/use_available_metrics';
 import type { SelectedMetric, MetricInstrument, CustomMetric } from '../../types';
 
 interface MetricSelectorProps {
   metricFields: MetricFieldInfo[];
   customMetrics?: CustomMetric[];
+  curatedMetrics?: CuratedMetricQuery[];
   selectedMetric: SelectedMetric | null;
   onChange: (metric: SelectedMetric | null) => void;
   onDeleteCustomMetric?: (id: string) => void;
@@ -38,6 +40,8 @@ interface MetricOptionValue {
   isCustom?: boolean;
   customQuery?: string;
   customId?: string;
+  isManaged?: boolean;
+  curatedMetric?: CuratedMetricQuery;
 }
 
 type MetricOption = EuiComboBoxOptionOption<MetricOptionValue>;
@@ -45,6 +49,7 @@ type MetricOption = EuiComboBoxOptionOption<MetricOptionValue>;
 export const MetricSelector: React.FC<MetricSelectorProps> = ({
   metricFields,
   customMetrics = [],
+  curatedMetrics = [],
   selectedMetric,
   onChange,
   onDeleteCustomMetric,
@@ -54,6 +59,28 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
   // Convert metric fields and custom metrics to combo box options with groups
   const options = useMemo<MetricOption[]>(() => {
     const result: MetricOption[] = [];
+
+    // Add managed (curated) metrics group if there are any
+    if (curatedMetrics.length > 0) {
+      result.push({
+        key: 'managed-metrics-group',
+        label: i18n.translate('xpack.infra.esqlInventory.metricSelector.managedMetricsGroup', {
+          defaultMessage: 'Managed Metrics',
+        }),
+        options: curatedMetrics.map((cm) => ({
+          key: `managed-${cm.id}`,
+          label: cm.displayName,
+          value: {
+            name: cm.displayName,
+            type: 'managed',
+            instrument: cm.instrument,
+            unit: cm.unit,
+            isManaged: true,
+            curatedMetric: cm,
+          },
+        })),
+      });
+    }
 
     // Add custom metrics group if there are any
     if (customMetrics.length > 0) {
@@ -98,7 +125,7 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
     }
 
     return result;
-  }, [metricFields, customMetrics]);
+  }, [metricFields, customMetrics, curatedMetrics]);
 
   // Flatten options for finding selected option
   const flatOptions = useMemo(() => {
@@ -118,10 +145,17 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
     if (!selectedMetric) return [];
 
     const found = flatOptions.find((opt) => {
+      if (selectedMetric.isManaged) {
+        return (
+          opt.value?.isManaged && opt.value?.curatedMetric?.id === selectedMetric.curatedMetric?.id
+        );
+      }
       if (selectedMetric.isCustom) {
         return opt.value?.isCustom && opt.value?.name === selectedMetric.name;
       }
-      return !opt.value?.isCustom && opt.value?.name === selectedMetric.name;
+      return (
+        !opt.value?.isCustom && !opt.value?.isManaged && opt.value?.name === selectedMetric.name
+      );
     });
     return found ? [found] : [];
   }, [selectedMetric, flatOptions]);
@@ -139,14 +173,17 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
         isCustom: value.isCustom,
         customQuery: value.customQuery,
         customId: value.customId,
+        isManaged: value.isManaged,
+        curatedMetric: value.curatedMetric,
       });
     }
   };
 
-  // Custom render for options showing instrument badge or custom badge
+  // Custom render for options showing instrument badge or custom/managed badge
   const renderOption = (option: MetricOption) => {
     const value = option.value;
     const isCustom = value?.isCustom;
+    const isManaged = value?.isManaged;
     const instrument = value?.instrument;
 
     return (
@@ -154,6 +191,15 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
         <EuiFlexItem grow={true}>
           <span>{option.label}</span>
         </EuiFlexItem>
+        {isManaged && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="success">
+              {i18n.translate('xpack.infra.esqlInventory.metricSelector.managedBadge', {
+                defaultMessage: 'Managed',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {isCustom && (
           <>
             <EuiFlexItem grow={false}>
@@ -190,7 +236,7 @@ export const MetricSelector: React.FC<MetricSelectorProps> = ({
             )}
           </>
         )}
-        {!isCustom && instrument && (
+        {!isCustom && !isManaged && instrument && (
           <EuiFlexItem grow={false}>
             <EuiBadge color={instrument === 'counter' ? 'primary' : 'hollow'}>
               {instrument}

@@ -56,6 +56,7 @@ export const EsqlEditorSection: React.FC = () => {
     metricsForSelectedEntity,
     fieldsForGroupBy,
     customMetricsForEntity,
+    curatedMetricsForEntity,
     commonlyUsedRanges,
     isLoadingFields,
     isLoadingMetrics,
@@ -106,6 +107,7 @@ export const EsqlEditorSection: React.FC = () => {
               <MetricSelector
                 metricFields={metricsForSelectedEntity}
                 customMetrics={customMetricsForEntity}
+                curatedMetrics={curatedMetricsForEntity}
                 selectedMetric={selectedMetric}
                 onChange={handleMetricChange}
                 onDeleteCustomMetric={deleteCustomMetric}

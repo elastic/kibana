@@ -186,7 +186,14 @@ export interface SelectedMetric {
   customQuery?: string;
   /** The ID of the custom metric (only for custom metrics) */
   customId?: string;
+  /** If true, this is a managed (curated) metric from entity definitions */
+  isManaged?: boolean;
+  /** The curated metric definition (only for managed metrics) */
+  curatedMetric?: CuratedMetricQuery;
 }
+
+// Re-export CuratedMetricQuery for convenience
+export type { CuratedMetricQuery } from '@kbn/unified-chart-section-viewer';
 
 /**
  * Available unit options for custom metrics

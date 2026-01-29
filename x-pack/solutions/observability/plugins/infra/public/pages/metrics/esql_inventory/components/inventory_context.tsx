@@ -9,6 +9,11 @@ import React, { createContext, useContext, useMemo, useCallback, useEffect, useR
 import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import {
+  findEntityByAttribute,
+  findAvailableCuratedMetrics,
+  type CuratedMetricQuery,
+} from '@kbn/unified-chart-section-viewer';
 import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 import {
@@ -54,6 +59,7 @@ interface FieldOptionsContext {
   metricsForSelectedEntity: MetricFieldInfo[];
   fieldsForGroupBy: EntityFieldInfo[];
   customMetricsForEntity: CustomMetric[];
+  curatedMetricsForEntity: CuratedMetricQuery[];
   commonlyUsedRanges: DurationRange[];
 }
 
@@ -174,6 +180,21 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({ children }
     selectedEntity: inventory.entityField,
   });
 
+  // Curated metrics for the selected entity
+  const curatedMetricsForEntity = useMemo<CuratedMetricQuery[]>(() => {
+    if (!inventory.entityField) return [];
+
+    // Find the entity definition by its identifying attribute
+    const entity = findEntityByAttribute(inventory.entityField);
+    if (!entity) return [];
+
+    // Get available field names from the metrics for this entity
+    const availableFields = metricsForSelectedEntity.map((m) => m.name);
+
+    // Find curated metrics that are available based on the fields in the data
+    return findAvailableCuratedMetrics(entity.id, availableFields);
+  }, [inventory.entityField, metricsForSelectedEntity]);
+
   // Sync entity changes to useAvailableMetrics
   useEffect(() => {
     if (inventory.entityField) {
@@ -273,6 +294,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({ children }
       metricsForSelectedEntity,
       fieldsForGroupBy,
       customMetricsForEntity: customMetrics.customMetricsForEntity,
+      curatedMetricsForEntity,
       commonlyUsedRanges,
 
       // Loading states
@@ -315,6 +337,7 @@ export const InventoryProvider: React.FC<InventoryProviderProps> = ({ children }
       metricsForSelectedEntity,
       fieldsForGroupBy,
       customMetrics,
+      curatedMetricsForEntity,
       commonlyUsedRanges,
       isLoadingFields,
       isLoadingMetrics,
