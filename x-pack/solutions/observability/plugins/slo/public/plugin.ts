@@ -220,6 +220,11 @@ export class SLOPlugin
       { spinnerSize: 'm' }
     );
 
+    const getSLODetailsFlyout = lazyWithContextProviders(
+      lazy(() => import('./pages/slo_details/shared_flyout/slo_details_flyout')),
+      { spinnerSize: 'm' }
+    );
+
     plugins.discoverShared.features.registry.register({
       id: 'observability-create-slo',
       createSLOFlyout: getCreateSLOFormFlyout,
@@ -227,6 +232,7 @@ export class SLOPlugin
 
     return {
       getCreateSLOFormFlyout,
+      getSLODetailsFlyout,
     };
   }
 
