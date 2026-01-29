@@ -179,7 +179,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     },
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
-
   const onConnectorCreated = useCallback(
     async (createdConnector: ActionConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);

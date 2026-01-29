@@ -89,7 +89,7 @@ export const AllTemplatesPage: React.FC = () => {
         onRefresh={refetch}
         isLoading={isLoading}
       />
-      {!isInitialLoading ? (
+      {isInitialLoading ? (
         <EuiSkeletonText data-test-subj="templates-table-loading" lines={10} />
       ) : (
         <>

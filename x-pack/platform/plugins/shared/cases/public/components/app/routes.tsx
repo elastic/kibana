@@ -31,9 +31,9 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
-import { AllTemplatesPage } from '../templates_v2/all_templates_page';
+import { AllTemplatesPage } from '../templates_v2/pages/all_templates_page';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { CreateTemplatePage } from '../templates_v2/create_template_page';
+import { CreateTemplatePage } from '../templates_v2/pages/create_template_page';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
