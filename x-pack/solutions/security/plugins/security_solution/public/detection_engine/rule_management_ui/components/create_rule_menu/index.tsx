@@ -78,7 +78,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
             data-test-subj="ai-rule-creation"
           >
             <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiAssisted"
+              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation"
               defaultMessage="AI rule creation"
             />
           </SecuritySolutionLinkAnchor>
