@@ -6591,6 +6591,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-resource-browser-storybook-config@link:src/platform/packages/shared/kbn-esql-resource-browser/.storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-resource-browser@link:src/platform/packages/shared/kbn-esql-resource-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-types@link:src/platform/packages/shared/kbn-esql-types":
   version "0.0.0"
   uid ""
