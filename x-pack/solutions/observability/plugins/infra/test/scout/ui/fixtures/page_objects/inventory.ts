@@ -6,6 +6,13 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import {
+  EXTENDED_TIMEOUT,
+  KUBERNETES_TOUR_STORAGE_KEY,
+  KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
+  KUBERNETES_TOAST_STORAGE_KEY,
+} from '../constants';
+import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -17,6 +24,9 @@ export class InventoryPage {
   public readonly inventorySwitcherHostsButton: Locator;
   public readonly inventorySwitcherPodsButton: Locator;
   public readonly inventorySwitcherContainersButton: Locator;
+
+  public readonly metricSwitcherButton: Locator;
+  public readonly metricsContextMenu: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -35,7 +45,28 @@ export class InventoryPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  public readonly k8sPodWaffleContextMenu: Locator;
+
+  public readonly alertsHeaderButton: Locator;
+  public readonly alertsMenu: Locator;
+
+  public readonly inventoryAlertsMenuOption: Locator;
+  public readonly createInventoryRuleButton: Locator;
+
+  public readonly metricsAlertsMenuOption: Locator;
+  public readonly createMetricsThresholdRuleButton: Locator;
+
+  public readonly customThresholdAlertMenuOption: Locator;
+
+  public readonly alertsFlyout: Locator;
+  public readonly alertsFlyoutRuleDefinitionSection: Locator;
+  public readonly alertsFlyoutRuleTypeName: Locator;
+
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    private readonly savedViews: SavedViews
+  ) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
 
@@ -45,6 +76,9 @@ export class InventoryPage {
     this.inventorySwitcherHostsButton = this.page.getByTestId('goToHost');
     this.inventorySwitcherPodsButton = this.page.getByTestId('goToPods');
     this.inventorySwitcherContainersButton = this.page.getByTestId('goToContainer');
+
+    this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
+    this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -62,16 +96,45 @@ export class InventoryPage {
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+
+    this.k8sPodWaffleContextMenu = this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Kubernetes Pod details' });
+
+    this.alertsHeaderButton = this.page.getByTestId('infrastructure-alerts-and-rules');
+    this.alertsMenu = this.page.getByTestId('metrics-alert-menu');
+
+    this.inventoryAlertsMenuOption = this.alertsMenu.getByTestId('inventory-alerts-menu-option');
+    this.createInventoryRuleButton = this.alertsMenu.getByTestId('inventory-alerts-create-rule');
+
+    this.metricsAlertsMenuOption = this.alertsMenu.getByTestId(
+      'metrics-threshold-alerts-menu-option'
+    );
+    this.createMetricsThresholdRuleButton = this.alertsMenu.getByTestId(
+      'metrics-threshold-alerts-create-rule'
+    );
+
+    this.customThresholdAlertMenuOption = this.alertsMenu.getByTestId(
+      'custom-threshold-alerts-menu-option'
+    );
+
+    this.alertsFlyout = this.page.getByRole('dialog').filter({ hasText: 'Create rule' });
+    this.alertsFlyoutRuleDefinitionSection = this.alertsFlyout.getByTestId('ruleDefinition');
+    this.alertsFlyoutRuleTypeName = this.alertsFlyout.getByTestId(
+      'ruleDefinitionHeaderRuleTypeName'
+    );
   }
 
-  private async waitForNodesToLoad() {
-    await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
+  public async waitForNodesToLoad() {
+    await this.page
+      .getByTestId('infraNodesOverviewLoadingPanel')
+      .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
   private async waitForPageToLoad() {
-    await this.page.getByTestId('infraMetricsPage').waitFor();
+    await this.page.getByTestId('infraMetricsPage').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
-    await this.page.getByTestId('savedViews-openPopover-loaded').waitFor();
+    await this.savedViews.waitForViewsToLoad();
   }
 
   public async goToPage(opts: { skipLoadWait?: boolean } = {}) {
@@ -79,6 +142,43 @@ export class InventoryPage {
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
     }
+  }
+
+  public async goToPageWithSavedView(savedViewId: string) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    await this.page.goto(url);
+
+    await this.waitForPageToLoad();
+  }
+
+  public async goToPageWithSavedViewAndAssetDetailsFlyout({
+    savedViewId,
+    assetId,
+    entityType,
+  }: {
+    savedViewId: string;
+    assetId: string;
+    entityType: 'host' | 'container';
+  }) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        assetDetailsFlyout: `(detailsItemId:${assetId},entityType:${entityType})`,
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    await this.page.goto(url);
+
+    await this.waitForPageToLoad();
   }
 
   public async reload() {
@@ -102,6 +202,36 @@ export class InventoryPage {
     await this.k8sTourDismissButton.click();
   }
 
+  public async addDismissK8sTourInitScript() {
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    await this.page.addInitScript(
+      ([k8sTourStorageKey]) => {
+        window.localStorage.setItem(k8sTourStorageKey, 'true');
+      },
+      [KUBERNETES_TOUR_STORAGE_KEY]
+    );
+  }
+
+  public async addClearK8sCardDismissedInitScript() {
+    // Clear the K8s dashboard promotion card dismissed state to ensure cards are visible
+    await this.page.addInitScript(
+      ([k8sCardDismissedKey]) => {
+        window.localStorage.removeItem(k8sCardDismissedKey);
+      },
+      [KUBERNETES_CARD_DISMISSED_STORAGE_KEY]
+    );
+  }
+
+  public async addDismissK8sToastInitScript() {
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    await this.page.addInitScript(
+      ([k8sToastStorageKey]) => {
+        window.localStorage.setItem(k8sToastStorageKey, 'true');
+      },
+      [KUBERNETES_TOAST_STORAGE_KEY]
+    );
+  }
+
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Escape');
@@ -116,6 +246,11 @@ export class InventoryPage {
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
     };
+  }
+
+  public async clickWaffleNode(nodeName: string) {
+    const node = await this.getWaffleNode(nodeName);
+    await node.container.click();
   }
 
   public async showHosts() {
@@ -138,5 +273,31 @@ export class InventoryPage {
 
   public async clickNoDataPageAddDataButton() {
     await this.noDataPageActionButton.click();
+  }
+
+  public async filterByQueryBar(query: string) {
+    const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.clear();
+    await queryBar.fill(query);
+    await queryBar.press('Enter');
+    await this.waitForNodesToLoad();
+  }
+
+  public async selectPalette(
+    palette: 'status' | 'temperature' | 'cool' | 'warm' | 'positive' | 'negative'
+  ) {
+    await this.page.getByTestId('openLegendControlsButton').click();
+    await this.page.getByTestId('legendControlsPalette').selectOption(palette);
+    await this.page.getByTestId('applyLegendControlsButton').click();
+    await this.page
+      .getByRole('dialog')
+      .filter({ hasText: 'Legend Options' })
+      .waitFor({ state: 'hidden' });
+  }
+
+  public async selectMetric(metricName: string) {
+    await this.metricSwitcherButton.click();
+    await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.waitForNodesToLoad();
   }
 }

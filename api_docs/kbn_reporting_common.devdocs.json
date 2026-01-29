@@ -1560,7 +1560,7 @@
         "label": "REPORTING_EXPORT_TYPES",
         "description": [],
         "signature": [
-          "(\"scheduled\" | \"single\")[]"
+          "(\"single\" | \"scheduled\")[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
         "lineNumber": 58,

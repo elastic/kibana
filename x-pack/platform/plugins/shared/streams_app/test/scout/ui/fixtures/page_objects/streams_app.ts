@@ -29,6 +29,8 @@ export class StreamsApp {
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
+  public readonly concatFieldInput;
+  public readonly concatLiteralInput;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -62,6 +64,8 @@ export class StreamsApp {
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
   }
 
   async goto() {
@@ -154,7 +158,7 @@ export class StreamsApp {
     ).toContainText(expectedIlmPolicy);
   }
 
-  async verifyDiscoverButtonLink(streamName: string) {
+  async verifyDiscoverButtonLink(streamName: string, sourceCommand: 'FROM' | 'TS' = 'FROM') {
     const locator = this.page.locator(
       `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
     );
@@ -166,13 +170,36 @@ export class StreamsApp {
     }
 
     // Expect encoded ESQL snippet to appear (basic validation)
-    // 'FROM <streamName>' should appear URL-encoded
-    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    // '<sourceCommand> <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`${sourceCommand} ${streamName}`);
     if (!href.includes(expectedFragment)) {
       throw new Error(
         `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
       );
     }
+  }
+
+  async getDiscoverButtonLinkSourceCommand(streamName: string): Promise<'FROM' | 'TS' | null> {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      return null;
+    }
+
+    // Check which source command is used in the URL
+    const fromFragment = encodeURIComponent(`FROM ${streamName}`);
+    const tsFragment = encodeURIComponent(`TS ${streamName}`);
+
+    if (href.includes(tsFragment)) {
+      return 'TS';
+    } else if (href.includes(fromFragment)) {
+      return 'FROM';
+    }
+    return null;
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -750,6 +777,13 @@ export class StreamsApp {
     await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
   }
 
+  async typeFieldName(value: string) {
+    await this.page.testSubj.typeWithDelay('streamsAppSchemaEditorAddFieldFlyoutFieldName', value, {
+      delay: 75,
+    });
+    await this.page.keyboard.press('Enter');
+  }
+
   async searchFields(searchTerm: string) {
     const searchBox = this.page
       .getByTestId('streamsAppSchemaEditorControls')
@@ -1079,5 +1113,21 @@ export class StreamsApp {
 
   async clickProcessorPreviewTab(label: string) {
     await this.page.getByText(label).click();
+  }
+
+  async clickAddConcatField() {
+    await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
+  }
+
+  async clickAddConcatLiteral() {
+    await this.page.getByTestId('streamsAppConcatAddLiteralButton').click();
+  }
+
+  async fillConcatFieldInput(value: string) {
+    await this.concatFieldInput.selectOption(value);
+  }
+
+  async fillConcatLiteralInput(value: string) {
+    await this.concatLiteralInput.fill(value);
   }
 }
