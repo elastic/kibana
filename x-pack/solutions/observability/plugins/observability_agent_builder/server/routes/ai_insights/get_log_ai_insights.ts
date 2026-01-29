@@ -7,42 +7,27 @@
 
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import { concat, of } from 'rxjs';
 import type { ChatCompletionEvent, InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
-import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
-import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
-} from '../../types';
-import { getLogDocumentById } from './get_log_document_by_id';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
-import type { AiInsightResult, ContextEvent } from './types';
+import { createAiInsightResult, type AiInsightResult } from './types';
 
 export interface GetLogAiInsightsParams {
   core: ObservabilityAgentBuilderCoreSetup;
   index: string;
   id: string;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
-}
-
-export interface LogDocument {
-  '@timestamp'?: string;
-  message?: string;
-  'log.level'?: string;
-  [key: string]: unknown;
 }
 
 export async function getLogAiInsights({
@@ -83,9 +68,7 @@ export async function getLogAiInsights({
     request,
   });
 
-  const streamWithContext$ = concat(of<ContextEvent>({ type: 'context', context }), events$);
-
-  return { events$: streamWithContext$, context };
+  return createAiInsightResult(context, events$);
 }
 
 async function fetchLogContext({
@@ -117,7 +100,7 @@ async function fetchLogContext({
     </LogEntryId>
     <LogEntryFields>
     \`\`\`json
-    ${safeJsonStringify(logEntry)}
+    ${JSON.stringify(logEntry, null, 2)}
     \`\`\`
     </LogEntryFields>
   `);
@@ -207,7 +190,7 @@ function formatContextPart(
     <${name}>
     Time window: ${windowStart} to ${windowEnd}
     \`\`\`json
-    ${safeJsonStringify(data)}
+    ${JSON.stringify(data, null, 2)}
     \`\`\`
     </${name}>
   `);
@@ -229,6 +212,9 @@ function generateLogSummary({
   request: KibanaRequest;
 }): Observable<ChatCompletionEvent> {
   const isErrorOrWarning = isWarningOrAbove(logEntry);
+  const entityLinkingInstructions = getEntityLinkingInstructions({
+    urlPrefix: core.http.basePath.get(request),
+  });
 
   const systemPrompt = isErrorOrWarning
     ? dedent(`
@@ -242,7 +228,7 @@ function generateLogSummary({
 
         Base your analysis strictly on the provided data.
 
-        ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
+        ${entityLinkingInstructions}
       `)
     : dedent(`
         You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
@@ -253,7 +239,7 @@ function generateLogSummary({
 
         Base your analysis strictly on the provided data. Be specific and reference actual field values.
 
-        ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
+        ${entityLinkingInstructions}
       `);
 
   const userPrompt = dedent(`

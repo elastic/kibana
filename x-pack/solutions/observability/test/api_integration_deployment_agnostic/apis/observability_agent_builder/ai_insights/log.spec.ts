@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createLlmProxyActionConnector,
-  deleteActionConnector,
-} from '../utils/llm_proxy/action_connectors';
+  setupLlmProxy,
+  teardownLlmProxy,
+  getLlmMessages,
+} from '../utils/llm_proxy/llm_test_helpers';
 import {
   createLogsWithErrors,
   type LogData,
@@ -23,7 +23,6 @@ const MOCKED_AI_SUMMARY_ERROR = 'This is a mocked AI insight summary for the err
 const MOCKED_AI_SUMMARY_INFO = 'This is a mocked AI insight summary for the info log.';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const log = getService('log');
   const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
   const es = getService('es');
 
@@ -42,8 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let infoLogIndex: string;
 
       before(async () => {
-        llmProxy = await createLlmProxy(log);
-        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+        ({ llmProxy, connectorId } = await setupLlmProxy(getService));
 
         ({ logsSynthtraceEsClient, logData } = await createLogsWithErrors({
           getService,
@@ -79,11 +77,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (logsSynthtraceEsClient) {
           await logsSynthtraceEsClient.clean();
         }
-        if (connectorId) {
-          await deleteActionConnector(getService, { actionId: connectorId });
-        }
-        if (llmProxy) {
-          llmProxy.close();
+        if (llmProxy && connectorId) {
+          await teardownLlmProxy(getService, { llmProxy, connectorId });
         }
       });
 
@@ -110,13 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body).to.have.property('context');
         expect(body.summary).to.contain(MOCKED_AI_SUMMARY_ERROR);
 
-        const llmRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'error-log-ai-insight'
-        );
-        const userMessage = llmRequest?.requestBody?.messages?.find(
-          (m: { role: string }) => m.role === 'user'
-        );
-
+        const { user: userMessage } = getLlmMessages(llmProxy, 'error-log-ai-insight');
         const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
         const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
         expect(hasCorrelatedLogs || hasLogCategories).to.be(true);
@@ -147,13 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body).to.have.property('context');
         expect(body.summary).to.contain(MOCKED_AI_SUMMARY_INFO);
 
-        const llmRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'info-log-ai-insight'
-        );
-        const userMessage = llmRequest?.requestBody?.messages?.find(
-          (m: { role: string }) => m.role === 'user'
-        );
-
+        const { user: userMessage } = getLlmMessages(llmProxy, 'info-log-ai-insight');
         const hasCorrelatedLogs = userMessage?.content?.includes('<CorrelatedLogSequence>');
         const hasLogCategories = userMessage?.content?.includes('<LogCategories>');
         expect(hasCorrelatedLogs || hasLogCategories).to.be(true);

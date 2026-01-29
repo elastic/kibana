@@ -150,7 +150,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         request,
         esClient,
         dataRegistry,
-        core,
         plugins,
         logger,
       });
