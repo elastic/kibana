@@ -14,6 +14,7 @@ import type { SavedReport } from '@kbn/reporting-plugin/server/lib/store';
 import { FleetError } from '../../errors';
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 import type {
   FleetRequestHandlerContext,
   PostGenerateAgentsReportRequestSchema,
@@ -23,6 +24,7 @@ import { xpackMocks, createAppContextStartContractMock } from '../../mocks';
 import { generateReportHandler, getSortFieldForAPI } from './generate_report_handler';
 
 jest.mock('../../services/agents/build_status_runtime_field');
+jest.mock('../../services/spaces/helpers');
 
 const mockBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.Mock;
 const baseRequestBodyMock = {
@@ -32,15 +34,15 @@ const baseRequestBodyMock = {
   sort: { field: 'enrolled_at', direction: 'desc' },
 };
 
-const expectedAgentIdFilterQuery = {
+const expectedNamespacesFilterQuery = {
   bool: {
     should: [
       {
         bool: {
           should: [
             {
-              match: {
-                'agent.id': 'agent1',
+              match_phrase: {
+                namespaces: 'default',
               },
             },
           ],
@@ -51,16 +53,71 @@ const expectedAgentIdFilterQuery = {
         bool: {
           should: [
             {
-              match: {
-                'agent.id': 'agent2',
+              match_phrase: {
+                namespaces: '*',
               },
             },
           ],
           minimum_should_match: 1,
         },
       },
+      {
+        bool: {
+          must_not: {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'namespaces',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      },
     ],
     minimum_should_match: 1,
+  },
+};
+
+const expectedAgentIdFilterQuery = {
+  bool: {
+    filter: [
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'agent.id': 'agent1',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'agent.id': 'agent2',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      expectedNamespacesFilterQuery,
+    ],
   },
 };
 
@@ -91,6 +148,7 @@ const expectedKueryFilterQuery = {
           minimum_should_match: 1,
         },
       },
+      expectedNamespacesFilterQuery,
     ],
   },
 };
@@ -131,6 +189,8 @@ describe('generateReportHandler', () => {
         },
       },
     });
+
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
   });
 
   afterEach(() => {

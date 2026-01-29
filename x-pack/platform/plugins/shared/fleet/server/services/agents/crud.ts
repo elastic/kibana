@@ -244,7 +244,7 @@ export async function getAgentsByKuery(
     aggregations,
     spaceId,
   } = options;
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilter(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -455,7 +455,7 @@ export async function fetchAllAgentsByKuery(
     spaceId,
   } = options;
 
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilter(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
@@ -846,7 +846,7 @@ export async function getAgentPolicyForAgents(
   return agentPolicies;
 }
 
-async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+export async function getSpaceAwarenessFilter(spaceId: string | undefined) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !spaceId) {
     return [];

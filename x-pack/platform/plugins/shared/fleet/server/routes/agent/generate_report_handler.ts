@@ -20,6 +20,7 @@ import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from 
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
+import { getSpaceAwarenessFilter } from '../../services/agents/crud';
 
 type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
@@ -29,6 +30,8 @@ export const generateReportHandler: FleetRequestHandler<
   TypeOf<typeof PostGenerateAgentsReportRequestSchema.body>
 > = async (context, request, response) => {
   const { agents, fields, timezone, sort } = request.body;
+  const fleetContext = await context.fleet;
+  const spaceId = fleetContext.spaceId;
   const logger = appContextService.getLogger();
 
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
@@ -40,7 +43,7 @@ export const generateReportHandler: FleetRequestHandler<
   }
 
   const jobConfig = {
-    jobParams: getJobParams(agents, fields, runtimeFields, timezone, sort),
+    jobParams: await getJobParams(agents, fields, runtimeFields, timezone, spaceId, sort),
     exportTypeId: 'csv_searchsource',
   };
 
@@ -87,11 +90,12 @@ export const getSortFieldForAPI = (field: string): string => {
   return field;
 };
 
-const getJobParams = (
+const getJobParams = async (
   agents: string[] | string,
   fields: string[],
   runtimeFields: string,
   timezone: string,
+  spaceId: string,
   sortOptions?: { field?: string; direction?: string }
 ) => {
   const index = new DataView({
@@ -110,15 +114,18 @@ const getJobParams = (
     fieldFormats: {} as FieldFormatsStartCommon,
   });
 
-  const query = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
+  const agentsQuery = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
+  const spaceFilter = await getSpaceAwarenessFilter(spaceId);
+  const filterQuery = spaceFilter.length
+    ? `${agentsQuery} AND (${spaceFilter.join(' AND ')})`
+    : agentsQuery;
 
   const sortField = getSortFieldForAPI(sortOptions?.field ?? 'enrolled_at');
   const sortOrder = (sortOptions?.direction as SortDirection) ?? SortDirection.desc;
 
   const sort = getSortConfig(sortField, sortOrder) as EsQuerySortValue[];
 
-  const filterQuery = toElasticsearchQuery(fromKueryExpression(removeSOAttributes(query)));
-
+  const filterQueryDsl = toElasticsearchQuery(fromKueryExpression(removeSOAttributes(filterQuery)));
   const searchSource: SearchSourceFields = {
     query: {
       query: '',
@@ -129,7 +136,7 @@ const getJobParams = (
         index: 'fleet-agents',
         params: {},
       },
-      query: filterQuery,
+      query: filterQueryDsl,
     },
     fields,
     index,
