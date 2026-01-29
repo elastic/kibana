@@ -948,9 +948,10 @@ export const cli = () => {
           const seenNames = new Set<string>();
           for (const r of prebuilt) {
             if (out.length >= TARGET_PREBUILT_RULES_COUNT) break;
-            if (seenNames.has(r.name)) continue;
-            seenNames.add(r.name);
-            out.push({ id: r.id, rule_id: r.rule_id, name: r.name });
+            if (!seenNames.has(r.name)) {
+              seenNames.add(r.name);
+              out.push({ id: r.id, rule_id: r.rule_id, name: r.name });
+            }
           }
           return out;
         })();

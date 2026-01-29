@@ -118,11 +118,11 @@ export const ensurePrebuiltRulesInstalled = async ({
     const seenNames = new Set<string>();
     for (const r of installablePool) {
       if (finalSelection.length >= TARGET_PREBUILT_RULE_INSTALL_COUNT) break;
-      if (seenRuleIds.has(r.rule_id)) continue;
-      if (seenNames.has(r.name)) continue;
-      seenRuleIds.add(r.rule_id);
-      seenNames.add(r.name);
-      finalSelection.push(r);
+      if (!seenRuleIds.has(r.rule_id) && !seenNames.has(r.name)) {
+        seenRuleIds.add(r.rule_id);
+        seenNames.add(r.name);
+        finalSelection.push(r);
+      }
     }
     if (finalSelection.length < TARGET_PREBUILT_RULE_INSTALL_COUNT) {
       log.warning(
