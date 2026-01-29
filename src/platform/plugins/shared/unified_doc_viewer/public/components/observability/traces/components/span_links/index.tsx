@@ -36,7 +36,13 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+
+const sectionTitle = i18n.translate(
+  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
+  { defaultMessage: 'Span links' }
+);
 
 export interface Props {
   traceId: string;
@@ -103,15 +109,27 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     [generateDiscoverLink, type]
   );
 
-  const openInDiscoverLink = useMemo(() => {
+  const whereClause = useMemo(() => {
     if (type === 'incoming') {
-      return generateDiscoverLink(getIncomingSpanLinksESQL(traceId, docId));
+      return getIncomingSpanLinksESQL(traceId, docId);
     }
 
     if (spanLinks.length) {
-      return generateDiscoverLink(getOutgoingSpanLinksESQL(spanLinks));
+      return getOutgoingSpanLinksESQL(spanLinks);
     }
-  }, [docId, generateDiscoverLink, spanLinks, traceId, type]);
+  }, [docId, spanLinks, traceId, type]);
+
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.apm.traces,
+    whereClause,
+  });
+
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'docViewerSpanLinksOpenInDiscoverButton',
+  });
 
   if (
     loading ||
@@ -124,27 +142,12 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     <ContentFrameworkSection
       data-test-subj="unifiedDocViewerSpanLinksAccordion"
       id="spanLinksSection"
-      title={i18n.translate(
-        'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
-        { defaultMessage: 'Span links' }
-      )}
+      title={sectionTitle}
       description={i18n.translate(
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.description',
         { defaultMessage: 'Links to spans or transactions that are causally related' }
       )}
-      actions={
-        openInDiscoverLink
-          ? [
-              {
-                icon: 'discoverApp',
-                label: OPEN_IN_DISCOVER_LABEL,
-                ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
-                href: openInDiscoverLink,
-                dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
-              },
-            ]
-          : undefined
-      }
+      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
     >
       <EuiSpacer size="s" />
       {error ? (
