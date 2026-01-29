@@ -54,7 +54,7 @@ export const DependencyNode = memo(
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;
@@ -79,10 +79,8 @@ export const DependencyNode = memo(
         responsive={false}
         data-test-subj={`serviceMapNode-dependency-${data.id}`}
       >
-        {/* Container sized for the rotated diamond visual */}
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
-          {/* Diamond shape */}
           <div css={diamondStyles}>
             <div css={iconContainerStyles}>
               {iconUrl && (
@@ -96,7 +94,6 @@ export const DependencyNode = memo(
           </div>
           <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
         </EuiFlexItem>
-        {/* Label */}
         <NodeLabel label={data.label} selected={selected} />
       </EuiFlexGroup>
     );

@@ -37,15 +37,12 @@ export const ServiceNode = memo(
 
     const borderWidth = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
-      // Critical gets a thicker border (6px) to stand out more
       if (status === ServiceHealthStatus.critical) return euiTheme.size.xs;
-      // Warning and default use thick border (4px)
       return euiTheme.size.xxs;
     }, [data.serviceAnomalyStats?.healthStatus, euiTheme.size.xxs, euiTheme.size.xs]);
 
     const borderStyle = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
-      // Critical uses double border for extra emphasis
       if (status === ServiceHealthStatus.critical) return 'double';
       return 'solid';
     }, [data.serviceAnomalyStats?.healthStatus]);
@@ -76,7 +73,7 @@ export const ServiceNode = memo(
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
       cursor: pointer;
       pointer-events: all;
     `;
@@ -96,7 +93,6 @@ export const ServiceNode = memo(
         responsive={false}
         data-test-subj={`serviceMapNode-service-${data.id}`}
       >
-        {/* Circle container with handles inside for proper edge positioning */}
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           <div css={circleStyles}>
@@ -104,7 +100,6 @@ export const ServiceNode = memo(
           </div>
           <Handle type="source" position={sourcePosition ?? Position.Right} css={handleStyles} />
         </EuiFlexItem>
-        {/* Label */}
         <NodeLabel label={data.label} selected={selected} />
       </EuiFlexGroup>
     );

@@ -61,7 +61,7 @@ export const GroupedResourcesNode = memo(
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs} ${euiTheme.colors.lightShade};
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;

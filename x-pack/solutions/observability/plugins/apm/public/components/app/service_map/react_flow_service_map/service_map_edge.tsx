@@ -8,10 +8,6 @@
 import React, { memo } from 'react';
 import { BaseEdge, getBezierPath, type EdgeProps } from '@xyflow/react';
 
-/**
- * Custom edge component for the service map.
- * Styling (stroke, markers) is handled by the parent graph component.
- */
 export const ServiceMapEdge = memo(
   ({
     id,
