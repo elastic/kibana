@@ -9,7 +9,7 @@
 
 import type { OptionsListSearchTechnique, OptionsListSortingType } from '@kbn/controls-schemas';
 
-export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
+export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'wildcard';
 export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
   by: '_count',
   direction: 'desc',
