@@ -9,7 +9,8 @@ import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-hel
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_ACTIONS_DATA_STREAM } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { createMockLoggerService } from '../../services/logger_service/logger_service.mock';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
   StorageService,
   type StorageServiceContract,
@@ -83,7 +84,7 @@ describe('DispatcherService integration tests', () => {
   let esClient: ElasticsearchClient;
   let dispatcherService: DispatcherServiceContract;
   let storageService: StorageServiceContract;
-  let mockLoggerService: ReturnType<typeof createMockLoggerService>;
+  let mockLoggerService: LoggerServiceContract;
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -106,13 +107,10 @@ describe('DispatcherService integration tests', () => {
   beforeEach(async () => {
     await cleanupDataStreams(esClient);
 
-    mockLoggerService = createMockLoggerService();
-    storageService = new StorageService(esClient, mockLoggerService.loggerService);
-    dispatcherService = new DispatcherService(
-      esClient,
-      mockLoggerService.loggerService,
-      storageService
-    );
+    mockLoggerService = createLoggerService().loggerService;
+
+    storageService = new StorageService(esClient, mockLoggerService);
+    dispatcherService = new DispatcherService(esClient, mockLoggerService, storageService);
   });
 
   describe('when there are no alert events', () => {
