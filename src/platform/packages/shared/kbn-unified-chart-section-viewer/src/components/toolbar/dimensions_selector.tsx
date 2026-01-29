@@ -9,7 +9,15 @@
 
 import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiNotificationBadge, EuiText, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiText,
+  EuiToolTip,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -18,7 +26,7 @@ import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
-  DEBOUNCE_TIME
+  DEBOUNCE_TIME,
 } from '../../common/constants';
 
 interface DimensionsSelectorProps {
@@ -174,7 +182,7 @@ export const DimensionsSelector = ({
               values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
             />
           ) : (
-            <EuiFlexGroup alignItems='center'>
+            <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
@@ -182,21 +190,21 @@ export const DimensionsSelector = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {
-                  isAtMaxDimensions ? (
-                    <EuiToolTip content={
+                {isAtMaxDimensions ? (
+                  <EuiToolTip
+                    content={
                       <FormattedMessage
                         id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
                         defaultMessage="Maximum of {maxDimensions} dimensions selected"
                         values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
                       />
-                    }>
-                      <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                    </EuiToolTip>
-                  ) : (
+                    }
+                  >
                     <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                  )
-                }
+                  </EuiToolTip>
+                ) : (
+                  <EuiNotificationBadge>{count}</EuiNotificationBadge>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
@@ -233,11 +241,7 @@ export const DimensionsSelector = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonEmpty
-            size="xs"
-            flush="left"
-            onClick={handleClearAll}
-          >
+          <EuiButtonEmpty size="xs" flush="left" onClick={handleClearAll}>
             <FormattedMessage
               id="metricsExperience.dimensionsSelector.clearAll"
               defaultMessage="Clear all"

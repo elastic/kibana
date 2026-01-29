@@ -21,7 +21,6 @@ interface CreateESQLQueryParams {
 
 const separator = '\u203A'.normalize('NFC');
 
-
 /**
  * Creates a complete ESQL query string for metrics visualizations.
  * The function constructs a query that includes time series aggregation
