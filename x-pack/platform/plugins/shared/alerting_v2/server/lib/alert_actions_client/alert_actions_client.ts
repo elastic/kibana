@@ -16,8 +16,8 @@ import { groupBy, omit } from 'lodash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 import type {
-  BulkCreateAlertActionItemData,
-  CreateAlertActionData,
+  BulkCreateAlertActionItemBody,
+  CreateAlertActionBody,
 } from '../../routes/schemas/alert_action_schema';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { QueryService, type QueryServiceContract } from '../services/query_service/query_service';
@@ -35,7 +35,7 @@ export class AlertActionsClient {
 
   public async createAction(params: {
     groupHash: string;
-    action: CreateAlertActionData;
+    action: CreateAlertActionBody;
   }): Promise<void> {
     const [username, alertEvent] = await Promise.all([
       this.getUserName(),
@@ -58,7 +58,7 @@ export class AlertActionsClient {
   }
 
   public async createBulkActions(
-    actions: BulkCreateAlertActionItemData[]
+    actions: BulkCreateAlertActionItemBody[]
   ): Promise<{ processed: number; total: number }> {
     const [username, records] = await Promise.all([
       this.getUserName(),
@@ -96,7 +96,7 @@ export class AlertActionsClient {
   }
 
   private async fetchLastAlertEventRecordsForActions(
-    actions: BulkCreateAlertActionItemData[]
+    actions: BulkCreateAlertActionItemBody[]
   ): Promise<AlertEventRecord[]> {
     let whereClause = esql.exp`TRUE`;
     for (const action of actions) {
@@ -127,7 +127,7 @@ export class AlertActionsClient {
   }
 
   private buildAlertActionDocument(params: {
-    action: CreateAlertActionData;
+    action: CreateAlertActionBody;
     alertEvent: AlertEventRecord;
     username: string | null;
   }): AlertAction {

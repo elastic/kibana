@@ -45,7 +45,7 @@ const deactivateActionSchema = z.object({
   reason: z.string(),
 });
 
-export const createAlertActionDataSchema = z.discriminatedUnion('action_type', [
+export const createAlertActionBodySchema = z.discriminatedUnion('action_type', [
   ackActionSchema,
   unackActionSchema,
   tagActionSchema,
@@ -56,7 +56,7 @@ export const createAlertActionDataSchema = z.discriminatedUnion('action_type', [
   deactivateActionSchema,
 ]);
 
-export type CreateAlertActionData = z.infer<typeof createAlertActionDataSchema>;
+export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;
 
 export const createAlertActionParamsSchema = z.object({
   group_hash: z.string(),
@@ -64,10 +64,13 @@ export const createAlertActionParamsSchema = z.object({
 
 export type CreateAlertActionParams = z.infer<typeof createAlertActionParamsSchema>;
 
-export const bulkCreateAlertActionItemDataSchema = createAlertActionDataSchema.and(
+export const bulkCreateAlertActionItemBodySchema = createAlertActionBodySchema.and(
   z.object({ group_hash: z.string() })
 );
-export type BulkCreateAlertActionItemData = z.infer<typeof bulkCreateAlertActionItemDataSchema>;
+export type BulkCreateAlertActionItemBody = z.infer<typeof bulkCreateAlertActionItemBodySchema>;
 
-export const bulkCreateAlertActionDataSchema = z.array(bulkCreateAlertActionItemDataSchema).min(1);
-export type BulkCreateAlertActionData = z.infer<typeof bulkCreateAlertActionDataSchema>;
+export const bulkCreateAlertActionBodySchema = z
+  .array(bulkCreateAlertActionItemBodySchema)
+  .min(1, 'At least one action must be provided')
+  .max(100, 'Cannot process more than 100 actions in a single request');
+export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;

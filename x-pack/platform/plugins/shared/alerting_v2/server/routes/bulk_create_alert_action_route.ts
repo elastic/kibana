@@ -13,8 +13,8 @@ import { AlertActionsClient } from '../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_ALERT_API_PATH } from './constants';
 import {
-  bulkCreateAlertActionDataSchema,
-  type BulkCreateAlertActionData,
+  bulkCreateAlertActionBodySchema,
+  type BulkCreateAlertActionBody,
 } from './schemas/alert_action_schema';
 
 @injectable()
@@ -29,13 +29,13 @@ export class BulkCreateAlertActionRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: bulkCreateAlertActionDataSchema,
+      body: bulkCreateAlertActionBodySchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionData>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkCreateAlertActionBody>,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
   ) {}
