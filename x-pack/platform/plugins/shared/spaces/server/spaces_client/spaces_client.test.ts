@@ -252,8 +252,6 @@ describe('#getAll', () => {
       saved_objects: savedObjects,
     } as any);
     const mockConfig = createMockConfig();
-    const mockCpsSetup = createMockCpsSetup();
-    const mockNpreClient = createMockNpreClient();
 
     const client = new SpacesClient(
       mockDebugLogger,
@@ -262,8 +260,8 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      mockCpsSetup,
-      mockNpreClient
+      undefined,
+      undefined
     );
     const actualSpaces = await client.getAll();
 
@@ -292,8 +290,8 @@ describe('#getAll', () => {
       [],
       'serverless',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const [actualSpace] = await client.getAll();
     const [{ solution, disabledFeatures, ...expectedSpace }] = expectedSpaces;
@@ -322,8 +320,8 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
@@ -372,8 +370,8 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -398,8 +396,8 @@ describe('#get', () => {
       [],
       'serverless',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -424,8 +422,8 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -497,8 +495,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -545,8 +543,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -584,8 +582,8 @@ describe('#create', () => {
       [],
       'serverless',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     await expect(
@@ -634,8 +632,8 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -684,8 +682,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -724,8 +722,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
 
       await expect(
@@ -767,8 +765,8 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
 
       await expect(
@@ -838,8 +836,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
     const actualSpace = await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -869,8 +867,8 @@ describe('#update', () => {
       [],
       'serverless',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
 
@@ -904,8 +902,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
 
@@ -933,8 +931,8 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -965,8 +963,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -994,8 +992,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
       const id = savedObject.id;
 
@@ -1029,8 +1027,8 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        createMockCpsSetup(),
-        createMockNpreClient()
+        undefined,
+        undefined
       );
       const id = savedObject.id;
 
@@ -1085,8 +1083,8 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1109,8 +1107,8 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
 
     await client.delete(id);
@@ -1134,8 +1132,8 @@ describe('#disableLegacyUrlAliases', () => {
       [],
       'traditional',
       featuresStart,
-      createMockCpsSetup(),
-      createMockNpreClient()
+      undefined,
+      undefined
     );
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
@@ -1152,6 +1150,37 @@ describe('#disableLegacyUrlAliases', () => {
 });
 
 describe('projectRouting functionality', () => {
+  test('throws error when cpsSetup is provided but mockNpreClient is undefined', async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue({
+      id: 'foo',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'foo-name',
+        disabledFeatures: [],
+      },
+    } as any);
+    const mockConfig = createMockConfig();
+    const mockCpsSetup = createMockCpsSetup();
+    (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
+
+    expect(
+      () =>
+        new SpacesClient(
+          mockDebugLogger,
+          mockConfig,
+          mockCallWithRequestRepository,
+          [],
+          'traditional',
+          featuresStart,
+          mockCpsSetup,
+          undefined
+        )
+    ).toThrow();
+  });
+
   describe('#get with projectRouting', () => {
     test('includes projectRouting when CPS is enabled and npre exists', async () => {
       const mockDebugLogger = createMockDebugLogger();

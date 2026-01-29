@@ -68,9 +68,12 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
           <EuiButtonIcon
             display="empty"
             iconType="ellipsis"
-            aria-label={i18n.translate('cpsUtils.projectPicker.settingsButtonLabel', {
-              defaultMessage: 'Manage cross-project search',
-            })}
+            aria-label={i18n.translate(
+              'xpack.spaces.management.manageSpacePage.customizeCps.settingsButtonLabel',
+              {
+                defaultMessage: 'Manage cross-project search',
+              }
+            )}
             onClick={() => setSettingsIsOpen(!settingsIsOpen)}
             size="s"
             color="text"
@@ -110,14 +113,14 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.spaces.management.manageSpacePage.cpsDefaultScopeTitle"
+                id="xpack.spaces.management.manageSpacePage.customizeCps.cpsDefaultScopeTitle"
                 defaultMessage="Cross-project search"
               />
             </h3>
           </EuiTitle>
         }
         description={i18n.translate(
-          'xpack.spaces.management.manageSpacePage.cpsDefaultScopeDescription',
+          'xpack.spaces.management.manageSpacePage.customizeCps.cpsDefaultScopeDescription',
           {
             defaultMessage:
               'Search across this project and any linked projects from a single location with cross-project search. ' +
