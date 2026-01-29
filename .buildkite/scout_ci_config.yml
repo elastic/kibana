@@ -20,6 +20,7 @@ plugins:
     - workflows_extensions
     - transform
     - fleet
+    - gen_ai_settings
   disabled:
 
 packages:
