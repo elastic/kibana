@@ -102,7 +102,7 @@ export interface AttachmentStateManager {
       context: AttachmentResolveContext;
       version: number;
     }
-  ): Promise<unknown>;
+  ): Promise<unknown | undefined>;
   /** Get total estimated tokens for all active attachments */
   getTotalTokenEstimate(): number;
   /** Check if any changes have been made */
@@ -183,7 +183,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       id,
       version,
       type: attachment.type as AttachmentType,
-      data: resolved ?? attachmentVersion,
+      data: resolved ? { ...attachment, resolved } : attachmentVersion,
     };
   }
 
@@ -421,7 +421,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       version: number;
       context: AttachmentResolveContext;
     }
-  ): Promise<AttachmentVersion | undefined> {
+  ): Promise<unknown | undefined> {
     const { version, context } = options;
     const { id, type } = attachment;
     const data = getVersion(attachment, version);
