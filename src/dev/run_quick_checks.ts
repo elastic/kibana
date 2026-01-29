@@ -30,6 +30,14 @@ interface QuickCheck {
   nodeCommand?: string;
   mayChangeFiles?: boolean;
   skipLocal?: boolean;
+  /** Argument name for passing target files as comma-separated list (e.g., "--files") */
+  filesArg?: string;
+  /** Argument name for passing target packages as multiple arguments (e.g., "--path" becomes "--path ./pkg1 --path ./pkg2") */
+  pathArg?: string;
+  /** Argument name for passing target packages as comma-separated list (e.g., "--packages") */
+  packagesArg?: string;
+  /** If true, append target packages as positional arguments (e.g., "cmd pkg1 pkg2") */
+  positionalPackages?: boolean;
 }
 
 interface CheckResult {
@@ -128,6 +136,10 @@ void run(async ({ log, flagsReader }) => {
     .map((check) => ({
       script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
       nodeCommand: check.nodeCommand,
+      filesArg: check.filesArg,
+      pathArg: check.pathArg,
+      packagesArg: check.packagesArg,
+      positionalPackages: check.positionalPackages,
     }));
 
   const regularChecks = checksToRun
@@ -135,6 +147,10 @@ void run(async ({ log, flagsReader }) => {
     .map((check) => ({
       script: isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script),
       nodeCommand: check.nodeCommand,
+      filesArg: check.filesArg,
+      pathArg: check.pathArg,
+      packagesArg: check.packagesArg,
+      positionalPackages: check.positionalPackages,
     }));
 
   logger.write(
@@ -229,6 +245,10 @@ function collectScriptsToRun(inputOptions: {
 interface CheckToRun {
   script: string;
   nodeCommand?: string;
+  filesArg?: string;
+  pathArg?: string;
+  packagesArg?: string;
+  positionalPackages?: boolean;
 }
 
 interface ListrContext {
@@ -319,21 +339,50 @@ function getScriptShortName(script: string): string {
 }
 
 async function runCheckAsync(checkToRun: CheckToRun): Promise<CheckResult> {
-  const { script, nodeCommand } = checkToRun;
+  const { script, nodeCommand, filesArg, pathArg, packagesArg, positionalPackages } = checkToRun;
   const startTime = Date.now();
 
-  // When target packages are specified, use shell scripts instead of nodeCommand
-  // because shell scripts have logic to filter based on QUICK_CHECK_TARGET_PACKAGES
-  const hasTargetPackages = Boolean(process.env.QUICK_CHECK_TARGET_PACKAGES);
+  const targetFiles = process.env.QUICK_CHECK_TARGET_FILES;
+  const targetPackages = process.env.QUICK_CHECK_TARGET_PACKAGES;
 
   // When running locally (not CI) and a nodeCommand is available, run it directly
   // This is faster than running through the shell script
-  // But if we have target packages, prefer shell script for filtering support
-  if (!IS_CI && nodeCommand && !hasTargetPackages) {
-    return runNodeCommand(nodeCommand, script, startTime);
+  if (!IS_CI && nodeCommand) {
+    // Build the command with file/path/packages arguments if supported
+    let fullCommand = nodeCommand;
+    const args: string[] = [];
+
+    // Add files argument if supported and target files exist
+    if (targetFiles && filesArg) {
+      args.push(`${filesArg} ${targetFiles}`);
+    }
+
+    // Add packages argument if supported and target packages exist
+    if (targetPackages) {
+      if (positionalPackages) {
+        // Script accepts packages as positional arguments (space-separated)
+        args.push(targetPackages.split(',').join(' '));
+      } else if (packagesArg) {
+        // Script supports --packages argument, pass target packages as comma-separated list
+        args.push(`${packagesArg} ${targetPackages}`);
+      } else if (pathArg) {
+        // Script supports --path argument, pass target packages as multiple arguments
+        const pathArgs = targetPackages
+          .split(',')
+          .map((pkg) => `${pathArg} ./${pkg}`)
+          .join(' ');
+        args.push(pathArgs);
+      }
+    }
+
+    if (args.length > 0) {
+      fullCommand = `${nodeCommand} ${args.join(' ')}`;
+    }
+
+    return runNodeCommand(fullCommand, script, startTime);
   }
 
-  // In CI, when no nodeCommand, or when target packages need filtering, use shell script
+  // In CI or when no nodeCommand, use shell script (which handles env vars)
   return runShellScript(script, startTime);
 }
 

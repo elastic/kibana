@@ -10,13 +10,5 @@ if is_pr && ! is_auto_commit_disabled; then
   cmd="$cmd --fix"
 fi
 
-# If target packages are specified, only lint those packages
-if [[ -n "${QUICK_CHECK_TARGET_PACKAGES:-}" ]]; then
-  echo "Scoping TS projects lint to packages: ${QUICK_CHECK_TARGET_PACKAGES}"
-  # Convert comma-separated list to space-separated positional arguments
-  PACKAGE_ARGS="${QUICK_CHECK_TARGET_PACKAGES//,/ }"
-  cmd="$cmd $PACKAGE_ARGS"
-fi
-
 eval "$cmd"
 check_for_changed_files "$cmd" true

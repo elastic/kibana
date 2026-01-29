@@ -25,10 +25,84 @@ import {
   writeToFileTask,
 } from '../tools/tasks';
 
+// Patterns that indicate telemetry collector files
+const COLLECTOR_PATTERNS = [
+  'collectors/',
+  '_collector',
+  'usage_collector',
+  'telemetry_collector',
+  '/server/telemetry/',
+  '/server/usage/',
+  '.telemetryrc.json',
+];
+
+/**
+ * Check if any of the provided files are telemetry-related.
+ * If files are provided and none match collector patterns, we can skip the check.
+ */
+function shouldSkipTelemetryCheck(files: string[] | undefined): boolean {
+  if (!files || files.length === 0) {
+    return false; // No file filter, run the check
+  }
+
+  // Check if any file matches collector patterns
+  for (const file of files) {
+    for (const pattern of COLLECTOR_PATTERNS) {
+      if (file.includes(pattern)) {
+        return false; // Found a telemetry-related file, run the check
+      }
+    }
+  }
+
+  return true; // No telemetry files found, skip
+}
+
+/**
+ * Map package paths to telemetry roots.
+ * e.g., "x-pack/solutions/observability/plugins/foo" -> "x-pack/solutions/observability"
+ */
+function mapPackagesToRoots(packages: string[]): string[] {
+  const roots = new Set<string>();
+
+  for (const pkg of packages) {
+    let root: string;
+
+    if (pkg.startsWith('x-pack/solutions/')) {
+      // Extract solution name: x-pack/solutions/observability/... -> x-pack/solutions/observability
+      const parts = pkg.split('/');
+      root = parts.slice(0, 3).join('/');
+    } else if (pkg.startsWith('x-pack/platform/')) {
+      root = 'x-pack/platform';
+    } else if (pkg.startsWith('x-pack/')) {
+      root = 'x-pack/plugins';
+    } else if (pkg.startsWith('src/platform/')) {
+      root = 'src/platform';
+    } else if (pkg.startsWith('src/plugins/')) {
+      root = 'src/plugins';
+    } else if (pkg.startsWith('packages/')) {
+      root = 'packages';
+    } else {
+      root = pkg;
+    }
+
+    roots.add(root);
+  }
+
+  return Array.from(roots);
+}
+
 export function runTelemetryCheck() {
   run(
     async ({
-      flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path, root },
+      flags: {
+        baselineSha,
+        fix,
+        'ignore-stored-json': ignoreStoredJson,
+        path,
+        root,
+        files,
+        packages,
+      },
       log,
     }) => {
       if (typeof baselineSha !== 'undefined' && typeof baselineSha !== 'string') {
@@ -50,6 +124,16 @@ export function runTelemetryCheck() {
         throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --root requires a value`);
       }
 
+      if (typeof files === 'boolean') {
+        throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --files requires a value`);
+      }
+
+      if (typeof packages === 'boolean') {
+        throw createFailError(
+          `${chalk.white.bgRed(' TELEMETRY ERROR ')} --packages requires a value`
+        );
+      }
+
       if (fix && typeof path !== 'undefined') {
         throw createFailError(
           `${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix is incompatible with --path flag.`
@@ -64,12 +148,29 @@ export function runTelemetryCheck() {
         );
       }
 
-      // Parse root filter - can be a single string or array of strings
-      const rootFilter: string[] | undefined = root
-        ? Array.isArray(root)
-          ? root
-          : [root]
-        : undefined;
+      // Parse files list for smart-skip check
+      const filesString = Array.isArray(files) ? files.join(',') : files;
+      const filesList = filesString ? filesString.split(',').filter(Boolean) : undefined;
+
+      // Check if we should skip based on changed files
+      if (shouldSkipTelemetryCheck(filesList)) {
+        log.success('No telemetry-related files changed. Skipping telemetry check.');
+        return;
+      }
+
+      // Parse packages and map to roots if provided
+      const packagesString = Array.isArray(packages) ? packages.join(',') : packages;
+      const packagesList = packagesString ? packagesString.split(',').filter(Boolean) : undefined;
+      const packagesRoots = packagesList ? mapPackagesToRoots(packagesList) : undefined;
+
+      // Parse root filter - can be a single string, array of strings, or derived from packages
+      let rootFilter: string[] | undefined;
+      if (root) {
+        rootFilter = Array.isArray(root) ? root : [root];
+      } else if (packagesRoots && packagesRoots.length > 0) {
+        rootFilter = packagesRoots;
+        log.info(`Scoping telemetry check to roots: ${rootFilter.join(', ')}`);
+      }
 
       const list = new Listr<TaskContext>(
         [
@@ -166,7 +267,7 @@ export function runTelemetryCheck() {
           baseline: 'baselineSha',
         },
         boolean: ['fix'],
-        string: ['baselineSha', 'root'],
+        string: ['baselineSha', 'root', 'files', 'packages'],
         default: {
           fix: false,
         },
@@ -175,6 +276,10 @@ export function runTelemetryCheck() {
         help: `
           --root             Filter to only scan specific roots (can be specified multiple times).
                              Example: --root src/platform --root x-pack/solutions/observability
+          --files            Comma-separated list of changed files. If provided and none are
+                             telemetry-related, the check is skipped.
+          --packages         Comma-separated list of affected packages. Automatically maps to
+                             telemetry roots for scoped checking.
         `,
       },
     }

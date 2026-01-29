@@ -2,17 +2,20 @@
   {
     "script": ".buildkite/scripts/steps/checks/ts_projects.sh",
     "nodeCommand": "node scripts/lint_ts_projects",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "positionalPackages": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/packages.sh",
     "nodeCommand": "node scripts/lint_packages",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "positionalPackages": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_notice.sh",
     "nodeCommand": "node scripts/notice --validate",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "filesArg": "--files"
   },
   {
     "script": ".buildkite/scripts/steps/checks/plugin_list_docs.sh",
@@ -27,7 +30,9 @@
   {
     "script": ".buildkite/scripts/steps/checks/telemetry.sh",
     "nodeCommand": "node scripts/telemetry_check",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "filesArg": "--files",
+    "packagesArg": "--packages"
   },
   {
     "script": ".buildkite/scripts/steps/checks/jest_configs.sh",
@@ -39,7 +44,8 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/i18n.sh",
-    "nodeCommand": "node scripts/i18n_check --quiet"
+    "nodeCommand": "node scripts/i18n_check --quiet",
+    "pathArg": "--path"
   },
   {
     "script": ".buildkite/scripts/steps/checks/file_casing.sh",
@@ -96,7 +102,8 @@
   {
     "script": ".buildkite/scripts/steps/checks/styled_components_mapping.sh",
     "nodeCommand": "node scripts/styled_components_mapping",
-    "mayChangeFiles": true
+    "mayChangeFiles": true,
+    "filesArg": "--files"
   },
   {
     "script": ".buildkite/scripts/steps/checks/dependencies_missing_owner.sh",
