@@ -58,8 +58,8 @@ jest.mock('./span_flyout', () => ({
 
 jest.mock('./logs_flyout', () => ({
   logsFlyoutId: 'logsFlyout',
-  LogFlyoutContent: ({ hit, logDataView, error }: any) => (
-    <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id} data-error={error}>
+  LogFlyoutContent: ({ hit, logDataView }: any) => (
+    <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id}>
       Log Flyout Content
     </div>
   ),
@@ -271,7 +271,7 @@ describe('DocumentDetailFlyout', () => {
   });
 
   describe('log flyout edge cases', () => {
-    it('should render LogFlyoutContent with error when data has error', () => {
+    it('should render EuiCallOut when data has error', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
         type: 'logsFlyout',
         hit: mockLogHit,
@@ -283,8 +283,8 @@ describe('DocumentDetailFlyout', () => {
 
       render(<DocumentDetailFlyout {...defaultLogProps} />);
 
-      const logContent = screen.getByTestId('logFlyoutContent');
-      expect(logContent).toHaveAttribute('data-error', 'Failed to load data view');
+      expect(screen.getByText('Failed to load data view')).toBeInTheDocument();
+      expect(screen.getByTestId('logFlyoutContent')).toBeInTheDocument();
     });
 
     it('should not render LogFlyoutContent when logDataView is null', () => {

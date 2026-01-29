@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
@@ -22,16 +21,12 @@ export const logsFlyoutId = 'logsFlyout' as const;
 export interface LogFlyoutContentProps {
   hit: DataTableRecord;
   logDataView: DocViewRenderProps['dataView'];
-  error: string | null;
 }
 
-export function LogFlyoutContent({ hit, logDataView, error }: LogFlyoutContentProps) {
+export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
   const { indexes } = useDataSourcesContext();
 
   return (
-    <>
-      {error ? <EuiCallOut announceOnMount title={error} color="danger" /> : null}
-      <LogsOverview hit={hit} dataView={logDataView} indexes={indexes} showTraceWaterfall={false} />
-    </>
+    <LogsOverview hit={hit} dataView={logDataView} indexes={indexes} showTraceWaterfall={false} />
   );
 }

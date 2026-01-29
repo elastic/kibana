@@ -13,17 +13,14 @@ import { flattenObject } from '@kbn/object-utils';
 import { useMemo } from 'react';
 import { isSpanHit } from '../../helpers/is_span';
 import { useFetchSpan } from '../../hooks/use_fetch_span';
+import type { BaseFlyoutData } from '../use_document_flyout_data';
 
 export interface UseSpanFlyoutDataParams {
   spanId: string;
   traceId: string;
 }
 
-export interface SpanFlyoutData {
-  hit: DataTableRecord | null;
-  loading: boolean;
-  title: string;
-}
+export type SpanFlyoutData = BaseFlyoutData;
 
 export function useSpanFlyoutData({ spanId, traceId }: UseSpanFlyoutDataParams): SpanFlyoutData {
   const { span, loading } = useFetchSpan({ spanId, traceId });

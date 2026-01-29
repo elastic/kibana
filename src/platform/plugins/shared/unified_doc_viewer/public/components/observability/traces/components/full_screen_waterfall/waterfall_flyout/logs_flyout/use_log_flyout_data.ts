@@ -14,16 +14,14 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useMemo } from 'react';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
 import { useFetchLog } from '../../hooks/use_fetch_log';
+import type { BaseFlyoutData } from '../use_document_flyout_data';
 
 export interface UseLogFlyoutDataParams {
   id: string;
   index?: string;
 }
 
-export interface LogFlyoutData {
-  hit: DataTableRecord | null;
-  loading: boolean;
-  title: string;
+export interface LogFlyoutData extends BaseFlyoutData {
   error: string | null;
   logDataView: DocViewRenderProps['dataView'] | null;
 }

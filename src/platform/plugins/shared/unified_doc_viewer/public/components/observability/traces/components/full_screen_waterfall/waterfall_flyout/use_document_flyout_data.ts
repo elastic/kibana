@@ -21,11 +21,18 @@ export interface UseDocumentFlyoutDataParams {
   docIndex?: string;
 }
 
-export interface DocumentFlyoutData {
-  type: DocumentType;
+/**
+ * Base interface that all flyout data hooks must implement.
+ * Any new flyout type should extend this interface.
+ */
+export interface BaseFlyoutData {
   hit: DataTableRecord | null;
   loading: boolean;
   title: string;
+}
+
+export interface DocumentFlyoutData extends BaseFlyoutData {
+  type: DocumentType;
   // Log-specific fields (only present when type is 'logsFlyout')
   logDataView?: DocViewRenderProps['dataView'] | null;
   error?: string | null;

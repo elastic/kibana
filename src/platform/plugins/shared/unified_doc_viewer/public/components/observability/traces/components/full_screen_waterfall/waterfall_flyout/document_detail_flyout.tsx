@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { EuiCallOut } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import { WaterfallFlyout } from '.';
@@ -24,20 +24,23 @@ export type { DocumentType } from './use_document_flyout_data';
 
 interface FlyoutContentProps {
   data: DocumentFlyoutData;
-  hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
   activeSection?: TraceOverviewSections;
 }
 
-function FlyoutContent({ data, hit, dataView, activeSection }: FlyoutContentProps) {
+function FlyoutContent({ data, dataView, activeSection }: FlyoutContentProps) {
+  if (!data.hit) {
+    return null;
+  }
+
   const isSpanType = data.type === spanFlyoutId;
   if (isSpanType) {
-    return <SpanFlyoutContent hit={hit} dataView={dataView} activeSection={activeSection} />;
+    return <SpanFlyoutContent hit={data.hit} dataView={dataView} activeSection={activeSection} />;
   }
 
   const isLogType = data.type === logsFlyoutId;
   if (isLogType && data.logDataView) {
-    return <LogFlyoutContent hit={hit} logDataView={data.logDataView} error={data.error ?? null} />;
+    return <LogFlyoutContent hit={data.hit} logDataView={data.logDataView} />;
   }
 
   return null;
@@ -72,13 +75,9 @@ export function DocumentDetailFlyout({
       loading={data.loading}
       title={data.title}
     >
+      {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {data.hit ? (
-        <FlyoutContent
-          data={data}
-          hit={data.hit}
-          dataView={dataView}
-          activeSection={activeSection}
-        />
+        <FlyoutContent data={data} dataView={dataView} activeSection={activeSection} />
       ) : null}
     </WaterfallFlyout>
   );
