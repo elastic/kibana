@@ -163,7 +163,10 @@ export class DashboardApp {
     if (isViewMode) {
       await this.editModeButton.click();
       // Wait for edit mode to be active (drag handles appear)
-      await expect(this.page.testSubj.locator('embeddablePanelDragHandle')).toBeVisible();
+      // Multiple drag handles are expected when multiple panels exist.
+      await expect
+        .poll(() => this.page.testSubj.locator('embeddablePanelDragHandle').count())
+        .toBeGreaterThan(0);
     }
   }
 
