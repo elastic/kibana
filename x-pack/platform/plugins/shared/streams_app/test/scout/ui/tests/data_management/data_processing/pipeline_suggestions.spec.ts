@@ -22,8 +22,20 @@ const STATUS_ENDPOINT_PATTERN =
 
 /**
  * Helper to set up mock pipeline suggestion task endpoints
+ * Returns a tracker object to verify which actions were called
  */
 async function setupMockPipelineTaskEndpoints(page: ScoutPage) {
+  const callTracker = {
+    scheduleCalls: 0,
+    cancelCalls: 0,
+    acknowledgeCalls: 0,
+    resetCounts: () => {
+      callTracker.scheduleCalls = 0;
+      callTracker.cancelCalls = 0;
+      callTracker.acknowledgeCalls = 0;
+    },
+  };
+
   // Mock the task schedule endpoint - returns task ID
   await page.route(
     '**/internal/streams/logs-generic-default/_pipeline_suggestion/_task',
@@ -32,6 +44,7 @@ async function setupMockPipelineTaskEndpoints(page: ScoutPage) {
       const body = request.postDataJSON();
 
       if (body?.action === 'schedule') {
+        callTracker.scheduleCalls++;
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -41,12 +54,14 @@ async function setupMockPipelineTaskEndpoints(page: ScoutPage) {
           }),
         });
       } else if (body?.action === 'cancel') {
+        callTracker.cancelCalls++;
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({ status: 'canceled' }),
         });
       } else if (body?.action === 'acknowledge') {
+        callTracker.acknowledgeCalls++;
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -73,6 +88,8 @@ async function setupMockPipelineTaskEndpoints(page: ScoutPage) {
       }),
     });
   });
+
+  return callTracker;
 }
 
 test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }, () => {
@@ -143,7 +160,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
   test('should generate suggestion and allow accept/reject', async ({ page, pageObjects }) => {
     // Wait for page to load
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await setupMockPipelineTaskEndpoints(page);
+    const callTracker = await setupMockPipelineTaskEndpoints(page);
 
     // Generate suggestion
     await pageObjects.streams.clickSuggestPipelineButton();
@@ -151,12 +168,18 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     await expect(page.getByText('Review processing suggestions')).toBeVisible();
 
     // Reject and verify we're back to empty state
+    // Also verify acknowledge was called to clear server state
+    callTracker.resetCounts();
     await pageObjects.streams.rejectPipelineSuggestion();
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
     expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
+    // Wait a tick for the fire-and-forget acknowledge call to complete
+    await page.waitForTimeout(100);
+    expect(callTracker.acknowledgeCalls).toBe(1);
 
     // Generate again and accept
+    callTracker.resetCounts();
     await pageObjects.streams.clickSuggestPipelineButton();
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
     await pageObjects.streams.acceptPipelineSuggestion();
@@ -165,11 +188,15 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
     const processors = await pageObjects.streams.getProcessorsListItems();
     expect(processors.length).toBeGreaterThan(0);
+    // Wait a tick for the fire-and-forget acknowledge call to complete
+    await page.waitForTimeout(100);
+    expect(callTracker.acknowledgeCalls).toBe(1);
   });
 
   test('should regenerate suggestions', async ({ page, pageObjects }) => {
     // Wait for page to load
     await expect(page.getByText('Extract fields from your data')).toBeVisible();
+    // Note: we don't need the callTracker for this test, but the function returns it
     await setupMockPipelineTaskEndpoints(page);
 
     // Generate first suggestion
@@ -205,5 +232,79 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     // Wait for page to load and check that suggestion is shown immediately
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
     await expect(page.getByText('Review processing suggestions')).toBeVisible();
+  });
+
+  test('should acknowledge when dismissing "no suggestions found" state', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Wait for page to load
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
+
+    // Set up mock with an empty pipeline to simulate "no suggestions found"
+    const callTracker = {
+      acknowledgeCalls: 0,
+    };
+
+    await page.route(
+      '**/internal/streams/logs-generic-default/_pipeline_suggestion/_task',
+      async (route) => {
+        const request = route.request();
+        const body = request.postDataJSON();
+
+        if (body?.action === 'schedule') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              status: 'completed',
+              // Empty pipeline triggers noSuggestionsFound state
+              pipeline: [],
+            }),
+          });
+        } else if (body?.action === 'acknowledge') {
+          callTracker.acknowledgeCalls++;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ status: 'acknowledged', pipeline: [] }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
+
+    // Unroute any existing status endpoint mock
+    await page.unroute(STATUS_ENDPOINT_PATTERN);
+
+    await page.route(STATUS_ENDPOINT_PATTERN, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'completed',
+          pipeline: [],
+        }),
+      });
+    });
+
+    // Generate suggestion - should go to noSuggestionsFound state
+    await pageObjects.streams.clickSuggestPipelineButton();
+
+    // Should show the "no suggestions found" callout with the title
+    await expect(page.getByText('Could not generate suggestions')).toBeVisible();
+
+    // Dismiss using the EuiCallOut's built-in dismiss button (has aria-label="Dismiss")
+    const dismissButton = page.getByRole('button', { name: 'Dismiss' });
+    await expect(dismissButton).toBeVisible();
+    await dismissButton.click();
+
+    // Wait a tick for the fire-and-forget acknowledge call to complete
+    await page.waitForTimeout(100);
+    expect(callTracker.acknowledgeCalls).toBe(1);
+
+    // Should be back to empty state
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
   });
 });
