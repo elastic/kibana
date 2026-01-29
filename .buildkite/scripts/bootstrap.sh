@@ -52,3 +52,6 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
+
+# Temporary fix for missing chromedriver binaries
+node node_modules/chromedriver/install.js
