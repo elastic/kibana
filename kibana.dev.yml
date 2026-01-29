@@ -1,0 +1,68 @@
+elasticsearch:
+  hosts: https://edge-lite-oblt-ccs-lxmmh.es.us-west2.gcp.elastic-cloud.com:443
+  username: kibana_system_user
+  password: 2wnOO4gFcrJLfqHLj4qiO483
+  ssl:
+    verificationMode: none
+server:
+  host: 0.0.0.0
+  restrictInternalApis: false
+#
+# Enable HTTP/2 and TLS
+# To generate a new encryption key and self-signed certificate, run:
+# openssl req -x509 -newkey rsa:2048 -keyout ${PWD}/key.pem -out ${PWD}/cert.crt -days 365 -subj '/CN=*' -nodes
+#
+#  protocol: http2
+#  ssl:
+#    enabled: true
+#    key: path/to/key.pem
+#    certificate: path/my/cerf.crt
+# Logs and Metrics - see https://elastic.github.io/observability-test-environments/tools/oblt-cli/local-kibana/#post-configuration
+# Monitoring
+monitoring.ui.logs.index: remote_cluster:filebeat-*,filebeat-*
+xpack:
+  encryptedSavedObjects:
+    encryptionKey: +8v9e/XMV54RsPThrAfoOWMxOyh9ZZ1BCyTA0z8A97I=
+  security:
+    encryptionKey: AdKUEsCmSj40lfIzuIhhdX2wdIiMRLHo
+    loginAssistanceMessage: 'Credentials: admin / 2wnOO4gFcrJLfqHLj4qiO483'
+# APM
+  apm_sources_access:
+    indices:
+      error: remote_cluster:apm-*,remote_cluster:logs-apm*,remote_cluster:logs-*.otel-*,apm-*,logs-apm*,logs-*.otel-*
+      onboarding: remote_cluster:apm-*,apm-*
+      span: remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*
+      transaction: remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*
+      metric: remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*
+      sourcemap: remote_cluster:apm-*,apm-*
+  uptime:
+    index: synthetics-*,heartbeat-*,remote_cluster:heartbeat-*,remote_cluster:synthetics-*
+    service:
+      manifestUrl: https://manifest.synthetics.elastic.dev/v1/manifest.json
+      password: BMEPfe6Ag9IG0PKUsN7YI0WW6j
+      username: synthetics
+      hosts: ["https://edge-lite-oblt-ccs-lxmmh.es.us-west2.gcp.elastic-cloud.com:443"]
+uiSettings:
+  overrides:
+    'observability:logSources': ["remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:kibana_sample_data_logs*,filebeat-*,kibana_sample_data_logs*,logs-*"]
+# Miscellaneous
+# only valid on dev mode
+# elasticsearch.ignoreVersionMismatch: true
+# Monitoring with APM
+# elastic:
+#   apm:
+#     active: true
+#     serverUrl: https://monitoring-oblt.apm.us-west2.gcp.elastic-cloud.com:443
+#     secretToken: VwTJMFNGvRaiwVdxnW
+#     centralConfig: false
+#     breakdownMetrics: true
+#     transactionSampleRate: 0.5
+#     metricsInterval: '120s'
+#     globalLabels:
+#       deploymentName: edge-lite-oblt-ccs-lxmmh
+#       elasticStack: 9.4.0-SNAPSHOT
+# Add this to kibana.dev.yml to see debug statements just for the APM plugin
+# logging.loggers:
+#   - name: plugins.apm
+#     level: debug
+#     appenders: [console]
