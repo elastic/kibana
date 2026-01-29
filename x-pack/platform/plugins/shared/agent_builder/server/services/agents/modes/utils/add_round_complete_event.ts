@@ -19,6 +19,7 @@ import type {
   ToolCallStep,
   ToolProgressEvent,
   ToolResultEvent,
+  RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -67,6 +68,7 @@ export const addRoundCompleteEvent = ({
   modelProvider,
   stateManager,
   attachmentStateManager,
+  configurationOverrides,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -76,6 +78,7 @@ export const addRoundCompleteEvent = ({
   getConversationState: () => ConversationInternalState;
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -94,6 +97,7 @@ export const addRoundCompleteEvent = ({
                 endTime,
                 modelProvider,
                 attachmentRefs,
+                configurationOverrides,
               })
             : createRound({
                 events,
@@ -102,6 +106,7 @@ export const addRoundCompleteEvent = ({
                 endTime,
                 modelProvider,
                 attachmentRefs,
+                configurationOverrides,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -131,6 +136,7 @@ const resumeRound = ({
   endTime = new Date(),
   modelProvider,
   attachmentRefs,
+  configurationOverrides,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -139,6 +145,7 @@ const resumeRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
@@ -165,6 +172,7 @@ const resumeRound = ({
     endTime,
     modelProvider,
     attachmentRefs,
+    configurationOverrides,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -196,6 +204,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
   return mergedRound;
@@ -238,6 +247,7 @@ const createRound = ({
   endTime = new Date(),
   modelProvider,
   attachmentRefs,
+  configurationOverrides,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -245,6 +255,7 @@ const createRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -310,6 +321,7 @@ const createRound = ({
           structured_output: lastMessage.structured_output,
         }
       : { message: '' },
+    configuration_overrides: configurationOverrides,
   };
 
   return round;

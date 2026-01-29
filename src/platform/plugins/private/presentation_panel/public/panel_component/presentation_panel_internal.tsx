@@ -40,6 +40,7 @@ const PresentationPanelChrome = <
   showNotifications,
   getActions,
   actionPredicate,
+  titleHighlight,
 
   setDragHandle,
 
@@ -136,6 +137,7 @@ const PresentationPanelChrome = <
             showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
+            titleHighlight={titleHighlight}
           />
         )}
         {children}

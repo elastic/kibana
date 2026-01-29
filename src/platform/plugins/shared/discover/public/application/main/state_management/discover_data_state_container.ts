@@ -84,7 +84,8 @@ export interface DiscoverLatestFetchDetails {
 
 export interface DiscoverDataStateContainer {
   /**
-   * Implicitly starting fetching data from ES
+   * Implicitly starting fetching data from ES,
+   * optionally with a new query (otherwise the current one from app state is used)
    */
   fetch: () => void;
   /**
@@ -129,7 +130,11 @@ export interface DiscoverDataStateContainer {
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
-  inspectorAdapters: { requests: RequestAdapter; lensRequests?: RequestAdapter };
+  inspectorAdapters: {
+    requests: RequestAdapter;
+    lensRequests?: RequestAdapter;
+    cascadeRequests?: RequestAdapter;
+  };
   /**
    * Return the initial fetch status
    *  UNINITIALIZED: data is not fetched initially, without user triggering it
