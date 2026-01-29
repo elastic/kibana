@@ -70,7 +70,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       href: discoverUrl,
       esql: esqlQueryString,
       tabLabel: sectionTitle,
-      dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
+      dataTestSubj: 'docViewerErrorsOpenInDiscoverButton',
     });
 
     const { columns } = useMemo(() => {
