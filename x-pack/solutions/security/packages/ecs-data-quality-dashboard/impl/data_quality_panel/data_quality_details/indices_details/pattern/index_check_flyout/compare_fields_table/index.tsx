@@ -47,12 +47,9 @@ const CompareFieldsTableComponent = <T extends EnrichedFieldMetadata>({
         search={search}
         sorting={true}
         pagination={true}
-        tableCaption={i18n.translate(
-          'xpack.securitySolution.dataQualityPanel.compareFieldsTable.caption',
-          {
-            defaultMessage: 'Compare fields',
-          }
-        )}
+        tableCaption={i18n.translate('securitySolutionPackages.compareFieldsTable.caption', {
+          defaultMessage: 'Compare fields',
+        })}
       />
     </>
   );
