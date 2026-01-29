@@ -175,6 +175,25 @@ function ReactFlowGraphInner({
             background-color: ${euiTheme.colors.backgroundBasePlain};
             border-radius: ${euiTheme.border.radius.medium};
             border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+            box-shadow: none;
+
+            button {
+              background-color: ${euiTheme.colors.backgroundBasePlain};
+              border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+              fill: ${euiTheme.colors.text};
+
+              &:hover {
+                background-color: ${euiTheme.colors.backgroundBaseSubdued};
+              }
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              svg {
+                fill: currentColor;
+              }
+            }
           `}
         />
       </ReactFlow>
