@@ -79,7 +79,10 @@ export const getFailureStoreDefaultRetentionRoute = createServerRoute({
   },
 });
 
+import { failureStoreReplayRoutes } from './replay_route';
+
 export const failureStoreRoutes = {
   ...getFailureStoreStatsRoute,
   ...getFailureStoreDefaultRetentionRoute,
+  ...failureStoreReplayRoutes,
 };

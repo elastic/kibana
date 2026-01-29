@@ -156,6 +156,7 @@ export const StreamDetailFailureStore = ({
                 timeState={timeState}
                 aggregations={data?.stats?.fs.aggregations}
                 failureStoreConfig={failureStoreConfig}
+                onRefreshStats={data.refresh}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

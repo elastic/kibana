@@ -11,6 +11,7 @@ import { SectionPanel } from '../common/section_panel';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
+import { ReplayCard } from './cards/replay_card';
 import { FailureStoreSummary } from './failure_store_summary';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
@@ -26,6 +27,7 @@ export const FailureStoreInfo = ({
   timeState,
   aggregations,
   failureStoreConfig,
+  onRefreshStats,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
@@ -35,6 +37,7 @@ export const FailureStoreInfo = ({
   timeState: TimeState;
   aggregations?: StreamAggregations;
   failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
+  onRefreshStats?: () => void;
 }) => {
   const hasPrivileges = definition.privileges?.manage_failure_store ?? false;
 
@@ -58,6 +61,13 @@ export const FailureStoreInfo = ({
           <FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />
         ) : null}
       </SectionPanel>
+      {/* Replay Section */}
+      <ReplayCard
+        streamName={definition.stream.name}
+        stats={stats}
+        hasPrivileges={hasPrivileges}
+        onReplayComplete={onRefreshStats}
+      />
       {/* Ingestion Section */}
       <SectionPanel
         topCard={
