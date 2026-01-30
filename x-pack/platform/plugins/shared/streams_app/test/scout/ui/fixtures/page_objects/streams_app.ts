@@ -1115,6 +1115,77 @@ export class StreamsApp {
     await this.page.getByText(label).click();
   }
 
+  /**
+   * Click on a condition block to filter by it using the context menu
+   */
+  async clickConditionToFilter(pos: number) {
+    // Open the context menu for the condition
+    const contextMenuButton = await this.getConditionContextMenuButton(pos);
+    await contextMenuButton.click();
+    // Click on "Preview this only" menu item using its test subject
+    await this.page.getByTestId('stepContextMenuPreviewConditionItem').click();
+  }
+
+  /**
+   * Get the "Load more matching samples" button
+   */
+  getFetchMoreMatchingSamplesButton() {
+    return this.page.getByTestId('streamsAppFetchMoreMatchingSamplesButton');
+  }
+
+  /**
+   * Click the "Load more matching samples" button
+   */
+  async clickFetchMoreMatchingSamplesButton() {
+    const button = this.getFetchMoreMatchingSamplesButton();
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  /**
+   * Expect the "Load more matching samples" button to be visible
+   */
+  async expectFetchMoreMatchingSamplesButtonVisible() {
+    await expect(this.getFetchMoreMatchingSamplesButton()).toBeVisible();
+  }
+
+  /**
+   * Expect the "Load more matching samples" button to be hidden
+   */
+  async expectFetchMoreMatchingSamplesButtonHidden() {
+    await expect(this.getFetchMoreMatchingSamplesButton()).toBeHidden();
+  }
+
+  /**
+   * Expect the "Load more matching samples" button to be in loading state
+   */
+  async expectFetchMoreMatchingSamplesButtonLoading() {
+    const button = this.getFetchMoreMatchingSamplesButton();
+    // Check if the button has a loading spinner
+    await expect(button.locator('.euiLoadingSpinner')).toBeVisible();
+  }
+
+  /**
+   * Get the condition filter button that shows when a condition is selected
+   */
+  getConditionFilterButton() {
+    return this.page.getByTestId('streamsAppConditionFilterButton');
+  }
+
+  /**
+   * Expect the condition filter button to be visible (indicates condition is selected)
+   */
+  async expectConditionFilterButtonVisible() {
+    await expect(this.getConditionFilterButton()).toBeVisible();
+  }
+
+  /**
+   * Get the condition filter selected badge showing percentage
+   */
+  getConditionFilterSelectedBadge() {
+    return this.page.getByTestId('streamsAppConditionFilterSelectedBadge');
+  }
+
   async clickAddConcatField() {
     await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
   }

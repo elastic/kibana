@@ -36,7 +36,23 @@ export function generateLogsData(
     docsPerMinute = 10,
     isMalformed = false,
     defaults = {},
-  }) => {
+    logLevel,
+  }: {
+    index?: string;
+    startTime?: string;
+    endTime?: string;
+    docsPerMinute?: number;
+    isMalformed?: boolean;
+    defaults?: Record<string, unknown>;
+    logLevel?: string | (() => string);
+  } = {}) => {
+    const getLevel = () => {
+      if (logLevel) {
+        return typeof logLevel === 'function' ? logLevel() : logLevel;
+      }
+      return isMalformed ? MORE_THAN_1024_CHARS : getLogLevel();
+    };
+
     const logsData = timerange(startTime, endTime)
       .interval('1m')
       .rate(docsPerMinute)
@@ -45,7 +61,7 @@ export function generateLogsData(
           .createForIndex(index)
           .message(`${new Date(timestamp).toISOString()} main Test log message`)
           .timestamp(timestamp)
-          .logLevel(isMalformed ? MORE_THAN_1024_CHARS : getLogLevel())
+          .logLevel(getLevel())
           .setHostIp('127.0.0.1')
           .defaults({
             'service.name': 'test-service',

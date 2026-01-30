@@ -123,6 +123,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         {filteringEnabled && !isUnderEdit && (
           <button
             onClick={onClick}
+            data-test-subj="streamsAppConditionFilterToggleButton"
             css={css`
               position: absolute;
               top: 0;
