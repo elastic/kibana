@@ -150,7 +150,7 @@ export const useAgentBuilderStream = () => {
               event.data?.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID
             ) {
               const result = event.data?.results?.[0];
-              if (result.type === 'error') {
+              if (result?.type === 'error') {
                 cancelRuleCreation();
                 showErrorToast(
                   new Error(result.data?.message ?? 'Unknown error during rule creation.')

@@ -83,7 +83,7 @@ export function createDetectionRuleTool(
         }
 
         const [coreStart, startPlugins] = await core.getStartServices();
-        const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const iterativeAgent = await getBuildAgent({
