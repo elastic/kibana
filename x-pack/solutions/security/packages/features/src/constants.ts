@@ -49,6 +49,7 @@ export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as co
 export const SECURITY_SOLUTION_RULES_APP_ID = 'securitySolutionRules' as const;
 export const RULES_FEATURE_ID_V1 = 'securitySolutionRulesV1' as const;
 export const RULES_FEATURE_ID_V2 = 'securitySolutionRulesV2' as const;
+export const RULES_FEATURE_LATEST = RULES_FEATURE_ID_V2;
 
 // Rules API privileges
 export const RULES_API_READ = 'rules-read' as const;

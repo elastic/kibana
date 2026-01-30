@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 import {
   EXCEPTIONS_API_ALL,
   EXCEPTIONS_API_READ,
@@ -49,8 +49,8 @@ export const getExceptionsSubFeature = (): SubFeatureConfig => ({
           includeIn: 'all',
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [EXCEPTION_LIST_NAMESPACE],
-            read: [EXCEPTION_LIST_NAMESPACE],
+            all: [EXCEPTION_LIST_NAMESPACE_AWARE],
+            read: [EXCEPTION_LIST_NAMESPACE_AWARE],
           },
           ui: [EXCEPTIONS_UI_READ, EXCEPTIONS_UI_EDIT],
           api: [EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL, LISTS_API_ALL, LISTS_API_READ],

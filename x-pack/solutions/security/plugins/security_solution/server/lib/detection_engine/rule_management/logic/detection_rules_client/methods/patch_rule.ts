@@ -27,7 +27,7 @@ import {
   formatBulkEditResultErrors,
 } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
-import { patchRuleWithReadPrivileges } from './rbac_methods/patch_rule_with_read_privileges';
+import { patchReadAuthEditRuleFields } from './rbac_methods/patch_rule_with_read_privileges';
 import type { RuleParams } from '../../../../rule_schema';
 import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
@@ -79,7 +79,7 @@ export const patchRule = async ({
     !isEmpty(rulePatchObjWithoutIds) &&
     Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
   ) {
-    const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchRuleWithReadPrivileges(
+    const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchReadAuthEditRuleFields(
       {
         rulesClient,
         // Don't want to pass ID fields to the read authz PATCH method as it will apply patches on all fields in the object
