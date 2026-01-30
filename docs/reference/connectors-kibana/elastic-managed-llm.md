@@ -7,16 +7,12 @@ applies_to:
 
 # Elastic Managed LLMs
 
-Elastic provides built-in LLMs through AI connectors vetted for GenAI product features across our platform.
-
-::::{important}
-* {applies_to}`self: ga 9.3+` Elastic Managed LLMs are available through [EIS with Cloud-Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md)
-* {applies_to}`stack: 9.0-9.2` The available built-in LLM model was called **Elastic Managed LLM** and it was available through the Elastic Managed LLM connector.
-::::
+Elastic provides built-in LLMs through AI connectors vetted for GenAI product features across our platform. You can use these models through the [Elastic {{infer-cap}} Service (EIS)](docs-content://explore-analyze/elastic-inference/eis.md).
 
 ## Prerequisites
 
 * Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
+* {applies_to}`self: ga 9.3+` Elastic Managed LLMs are available through [EIS with Cloud-Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md)
 
 ## Region and hosting
 
@@ -39,4 +35,5 @@ Elastic Managed LLMs incur a cost per million tokens for input and output tokens
 
 ## Available models
 
-Refer to [this list](docs-content://explore-analyze/elastic-inference/eis.md#supported models) for the supported models.
+Elastic Managed LLMs are available exclusively through the Elastic {{infer-cap}} Service.
+You can find the [list of supported models]((docs-content://explore-analyze/elastic-inference/eis.md#supported-models)) on the EIS documentation page.
