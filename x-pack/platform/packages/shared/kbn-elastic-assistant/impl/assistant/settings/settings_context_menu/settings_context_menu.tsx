@@ -197,6 +197,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           </EuiFlexGroup>
         </EuiContextMenuItem>,
         <TryAIAgentContextMenuItem
+          key="try-ai-agent"
           analytics={analytics}
           handleOpenAIAgentModal={handleOpenAIAgentModal}
           hasAgentBuilderManagePrivilege={assistantAvailability.hasAgentBuilderManagePrivilege}
