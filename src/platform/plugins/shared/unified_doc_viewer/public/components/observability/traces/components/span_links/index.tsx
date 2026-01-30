@@ -120,7 +120,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause, // TODO FIX THIS
+    whereClause,
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
@@ -199,10 +199,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
   );
 }
 
-export function getIncomingSpanLinksESQL(
-  traceId: string,
-  docId: string
-): Record<string, any> | undefined {
+export function getIncomingSpanLinksESQL(traceId: string, docId: string) {
   return where(
     `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
   );
