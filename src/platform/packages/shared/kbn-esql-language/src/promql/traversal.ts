@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { within } from '../ast/location';
 import { isPromqlNode } from './is';
 import type { PromQLAstNode, PromQLAstQueryExpression, PromQLPositionResult } from './types';
 
@@ -76,7 +77,11 @@ function traverseForPosition(
     return;
   }
 
-  if (node.location.min <= offset && node.location.max >= offset) {
+  const isInRange = within(offset, node);
+  // For incomplete nodes (missing closing delimiter), cursor may be past location.max.
+  const isPastIncomplete = node.incomplete && offset > node.location.max;
+
+  if (isInRange || isPastIncomplete) {
     result.node = node;
     result.parent = parent;
 

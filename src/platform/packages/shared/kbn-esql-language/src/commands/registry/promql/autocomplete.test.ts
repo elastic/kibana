@@ -15,18 +15,18 @@ import {
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
   promqlByCompleteItem,
+  promqlLabelSelectorItem,
+  promqlRangeSelectorItem,
 } from '../complete_items';
 import { getPromqlFunctionSuggestions } from '../../definitions/utils/promql';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
-import type { ICommandCallbacks, ICommandContext } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';
 import { getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
-import { arithmeticOperators, comparisonFunctions } from '../../definitions/all_operators';
+import type { ICommandCallbacks, ICommandContext } from '../types';
 
 const promqlParamItems = getPromqlParamKeySuggestions();
 const promqlParamTexts = promqlParamItems.map(({ text }) => text);
-const promqlParamNames = PROMQL_PARAM_NAMES;
 const promqlFunctionSuggestions = getPromqlFunctionSuggestions();
 const promqlFunctionLabels = promqlFunctionSuggestions.map(({ label }) => label);
 const promqlFunctionWrappedTexts = promqlFunctionSuggestions
@@ -138,7 +138,7 @@ describe('after PROMQL keyword', () => {
   test('does not suggest any params when all are used', async () => {
     await expectPromqlSuggestions(
       'PROMQL index=metrics step=5m start=?_tstart end=?_tend ',
-      { labelsNotContain: promqlParamNames },
+      { labelsNotContain: PROMQL_PARAM_NAMES },
       mockCallbacks
     );
   });
@@ -179,7 +179,7 @@ describe('after PROMQL keyword', () => {
 });
 
 describe('param keyword suggestions', () => {
-  test.each(promqlParamNames)('suggests = after %s keyword with space', async (param) => {
+  test.each(PROMQL_PARAM_NAMES)('suggests = after %s keyword with space', async (param) => {
     await expectPromqlSuggestions(`PROMQL ${param} `, {
       textsContain: [assignCompletionItem.text],
     });
@@ -280,23 +280,16 @@ describe('inside query', () => {
     );
   });
 
-  test('suggests numeric fields for rate()', async () => {
+  test.each([
+    ['rate()', 'PROMQL rate('],
+    ['abs() (instant_vector)', 'PROMQL abs('],
+  ])('suggests numeric fields for %s', async (_label, query) => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-    const rangeSuffix = '[${0:5m}]';
-    const numericTexts = numericFields.map((name) => `${name}${rangeSuffix}`);
+    const numericFieldTexts = numericFields.map((field) => `${field} `);
 
-    await expectPromqlSuggestions('PROMQL rate(', {
+    await expectPromqlSuggestions(query, {
       labelsContain: numericFields,
-      textsContain: numericTexts,
-    });
-  });
-
-  test('suggests all number types without range selector for abs() (instant_vector)', async () => {
-    const allNumericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
-
-    await expectPromqlSuggestions('PROMQL abs(', {
-      labelsContain: allNumericFields,
-      textsNotContain: allNumericFields.map((name) => `${name}[\${0:5m}]`),
+      textsContain: numericFieldTexts,
     });
   });
 
@@ -479,7 +472,7 @@ describe('after params (before query)', () => {
   test('suggests wrapped functions after custom column assignment', async () => {
     await expectPromqlSuggestions(
       'PROMQL step=5m start=?_tstart end=?_tend col0 = ',
-      { textsContain: promqlFunctionWrappedTexts, labelsNotContain: promqlParamNames },
+      { textsContain: promqlFunctionWrappedTexts, labelsNotContain: PROMQL_PARAM_NAMES },
       mockCallbacks
     );
   });
@@ -501,14 +494,14 @@ describe('after query (pipe suggestions)', () => {
   ])('suggests pipe and no params after parenthesized query (%s)', async (query) => {
     await expectPromqlSuggestions(query, {
       textsContain: [pipeCompleteItem.text],
-      labelsNotContain: promqlParamNames,
+      labelsNotContain: PROMQL_PARAM_NAMES,
     });
   });
 
   test('does not suggest params after custom column assignment', async () => {
     await expectPromqlSuggestions('PROMQL index=metrics col0=(rate(http_requests[5m])) ', {
       textsContain: [pipeCompleteItem.text],
-      labelsNotContain: [...promqlParamNames, ...promqlFunctionLabels],
+      labelsNotContain: [...PROMQL_PARAM_NAMES, ...promqlFunctionLabels],
     });
   });
 
@@ -517,7 +510,7 @@ describe('after query (pipe suggestions)', () => {
     async (query) => {
       await expectPromqlSuggestions(query, {
         textsContain: [pipeCompleteItem.text],
-        labelsNotContain: promqlParamNames,
+        labelsNotContain: PROMQL_PARAM_NAMES,
       });
     }
   );
@@ -557,17 +550,9 @@ describe('param value suggestions', () => {
     );
   });
 
-  test('suggests date literals for start=', async () => {
+  test.each(['start', 'end'])('suggests date literals for %s=', async (param) => {
     await expectPromqlSuggestions(
-      'PROMQL start=',
-      { textsContain: TIME_SYSTEM_PARAMS },
-      mockCallbacks
-    );
-  });
-
-  test('suggests date literals for end=', async () => {
-    await expectPromqlSuggestions(
-      'PROMQL end=',
+      `PROMQL ${param}=`,
       { textsContain: TIME_SYSTEM_PARAMS, labelsNotContain: promqlFunctionLabels },
       mockCallbacks
     );
@@ -642,49 +627,62 @@ describe('index= suggestions', () => {
   });
 });
 
-describe('operator suggestions', () => {
-  const arithmeticOperatorLabels = arithmeticOperators.map((op) => op.name);
-  const comparisonOperatorLabels = comparisonFunctions.map((op) => op.name);
-  const operatorLabels = [...arithmeticOperatorLabels, ...comparisonOperatorLabels];
+describe('label selector suggestions', () => {
+  const labelNames = getFieldNamesByType(ESQL_STRING_TYPES, true);
 
-  test('suggests arithmetic and comparison operators after complete expression', async () => {
-    await expectPromqlSuggestions('PROMQL rate(http_requests_total[5m]) ', {
-      labelsContain: operatorLabels,
+  test.each([
+    ['opening brace', 'PROMQL rate(http_requests{'],
+    ['comma', 'PROMQL rate(http_requests{job="api", '],
+  ])('suggests labels after %s in selector', async (_position, query) => {
+    await expectPromqlSuggestions(query, {
+      labelsContain: labelNames,
+      labelsNotContain: promqlFunctionLabels,
     });
   });
 
-  test('does not suggest operators inside function arguments', async () => {
-    await expectPromqlSuggestions('PROMQL sum( ', {
-      labelsNotContain: operatorLabels,
+  test('returns no suggestions inside label value (after opening quote)', async () => {
+    await expectPromqlSuggestions('PROMQL rate(http_requests{job="', {
+      labelsNotContain: [...labelNames, ...promqlFunctionLabels],
     });
   });
 
-  test('does not suggest operators after param keyword', async () => {
-    await expectPromqlSuggestions('PROMQL step ', {
-      labelsNotContain: operatorLabels,
+  test('suggests labels after complete label value', async () => {
+    await expectPromqlSuggestions('PROMQL rate(http_requests{job="api",', {
+      labelsContain: labelNames,
     });
   });
 
-  test('does not suggest pipe when cursor is between expression and literal', async () => {
-    const query = 'PROMQL avg(http_requests_total) 1000';
-    const cursorPosition = 'PROMQL avg(http_requests_total) '.length;
+  test('suggests selector items after metric name (range_vector function)', async () => {
+    const query = 'PROMQL rate(bytes_counter';
+    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
+    const labels = results.map((suggestion) => suggestion.label);
 
-    await expectPromqlSuggestions(
-      query,
-      {
-        labelsContain: operatorLabels,
-        textsNotContain: ['| '],
-      },
-      mockCallbacks,
-      undefined,
-      cursorPosition
-    );
+    expect(labels).toContain(promqlLabelSelectorItem.label);
+    expect(labels).toContain(promqlRangeSelectorItem.label);
   });
 
-  test('suggests metrics and functions after binary operator', async () => {
-    await expectPromqlSuggestions('PROMQL sum(rate(http_requests_total[5m])) by (job) + ', {
-      labelsContain: ['doubleField', 'rate', 'sum', 'avg'],
-      labelsNotContain: operatorLabels,
-    });
+  test('suggests selector item after metric name (instant_vector function)', async () => {
+    const query = 'PROMQL abs(bytes_counter';
+    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
+    const labels = results.map((suggestion) => suggestion.label);
+
+    expect(labels).toContain(promqlLabelSelectorItem.label);
+  });
+
+  test('suggests only range selector after closed label selector (range_vector function)', async () => {
+    const query = 'PROMQL rate(http_requests{job="api"} ';
+    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
+    const labels = results.map((suggestion) => suggestion.label);
+
+    expect(labels).toContain(promqlRangeSelectorItem.label);
+    expect(labels).not.toContain(promqlLabelSelectorItem.label);
+  });
+
+  test('suggests range selector in nested function after label selector', async () => {
+    const query = 'PROMQL sum(rate(bytes_counter { agent !=""}  ';
+    const results = await suggest(query, mockContext, 'promql', getMockCallbacks(), autocomplete);
+    const labels = results.map((suggestion) => suggestion.label);
+
+    expect(labels).toContain(promqlRangeSelectorItem.label);
   });
 });

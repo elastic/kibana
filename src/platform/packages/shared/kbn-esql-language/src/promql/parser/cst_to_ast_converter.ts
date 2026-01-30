@@ -254,6 +254,22 @@ export class PromQLCstToAstConverter {
     const evaluationCtx = ctx.evaluation();
     const evaluation = evaluationCtx ? this.fromEvaluation(evaluationCtx) : undefined;
 
+    const parserFields = this.getParserFields(ctx);
+
+    // ANTLR doesn't set ctx.exception when RCB (}) is missing, so check text explicitly.
+    const text = ctx.getText();
+    const openBraceIdx = text.indexOf('{');
+    const closeBraceIdx = text.indexOf('}');
+    const isMissingClosingBrace = openBraceIdx !== -1 && closeBraceIdx === -1;
+
+    if (isMissingClosingBrace) {
+      parserFields.incomplete = true;
+      // Propagate incomplete to labelMap so traversal can find it
+      if (labelMap) {
+        labelMap.incomplete = true;
+      }
+    }
+
     return PromQLBuilder.expression.selector.node(
       {
         metric,
@@ -261,7 +277,7 @@ export class PromQLCstToAstConverter {
         duration: range,
         evaluation,
       },
-      this.getParserFields(ctx)
+      parserFields
     );
   }
 
@@ -273,7 +289,23 @@ export class PromQLCstToAstConverter {
     const metric = identCtx ? this.fromIdentifier(identCtx) : undefined;
 
     const labelsCtx = ctx.labels();
-    const labelMap = labelsCtx ? this.fromLabels(labelsCtx) : undefined;
+    let labelMap: ast.PromQLLabelMap | undefined;
+
+    if (labelsCtx) {
+      labelMap = this.fromLabels(labelsCtx);
+    } else if (ctx.LCB()) {
+      // Empty braces {} - create empty labelMap
+      const lcbToken = ctx.LCB().symbol;
+      const rcbToken = ctx.RCB()?.symbol ?? lcbToken;
+      labelMap = PromQLBuilder.labelMap([], {
+        text: '{}',
+        location: {
+          min: lcbToken.start + this.offset,
+          max: (rcbToken.stop ?? rcbToken.start) + this.offset,
+        },
+        incomplete: !ctx.RCB(),
+      });
+    }
 
     return { metric, labelMap };
   }
@@ -415,7 +447,13 @@ export class PromQLCstToAstConverter {
       return this.fromParserRuleToUnknown(ctx);
     }
 
-    return PromQLBuilder.expression.parens(child, this.getParserFields(ctx));
+    const parserFields = this.getParserFields(ctx);
+
+    if (!ctx.getText().endsWith(')')) {
+      parserFields.incomplete = true;
+    }
+
+    return PromQLBuilder.expression.parens(child, parserFields);
   }
 
   // ----------------------------------------------------------------- subquery
