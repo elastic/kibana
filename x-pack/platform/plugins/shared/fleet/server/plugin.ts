@@ -410,18 +410,6 @@ export class FleetPlugin
                 ui: [],
               },
             },
-            // {
-            //   id: 'generate_reports',
-            //   privilege: {
-            //     // excludeFromBasePrivileges: true,
-            //     api: [`${PLUGIN_ID}-generate-reports`],
-            //     savedObject: {
-            //       all: allSavedObjectTypes,
-            //       read: allSavedObjectTypes,
-            //     },
-            //     ui: [`${PLUGIN_ID}-generate-reports`],
-            //   },
-            // },
           ],
         },
         subFeatures: [
