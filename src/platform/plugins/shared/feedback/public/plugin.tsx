@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import ReactDOM from 'react-dom';
+import type { CoreStart, OverlayRef, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FeedbackButton, FeedbackForm } from './src';
@@ -24,6 +25,8 @@ export interface FeedbackPluginStartDependencies {
 interface FeedbackPluginStart {}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
+  private feedbackFormRef?: OverlayRef | undefined;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(): FeedbackPluginSetup {
@@ -35,12 +38,15 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
     { licensing }: FeedbackPluginStartDependencies
   ): FeedbackPluginStart {
     const handleShowFeedbackForm = () => {
-      const feedbackFormRef = core.overlays.openModal(
+      this.feedbackFormRef?.close();
+
+      this.feedbackFormRef = core.overlays.openModal(
         toMountPoint(
           <FeedbackForm
             core={core}
             hideFeedbackForm={() => {
-              feedbackFormRef?.close();
+              this.feedbackFormRef?.close();
+              this.feedbackFormRef = undefined;
             }}
           />,
           core.rendering
@@ -50,17 +56,28 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
 
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: toMountPoint(
-        <FeedbackButton
-          handleShowFeedbackForm={handleShowFeedbackForm}
-          analytics={core.analytics}
-        />,
-        core.rendering
-      ),
+      mount: (element) => {
+        ReactDOM.render(
+          <FeedbackButton
+            handleShowFeedbackForm={handleShowFeedbackForm}
+            analytics={core.analytics}
+          />,
+          element
+        );
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
     });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.feedbackFormRef) {
+      this.feedbackFormRef.close();
+      this.feedbackFormRef = undefined;
+    }
+  }
 }
