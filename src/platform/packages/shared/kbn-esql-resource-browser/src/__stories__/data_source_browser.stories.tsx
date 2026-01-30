@@ -10,8 +10,8 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { DataSourceBrowser } from '../data_source_browser';
 import type { ESQLSourceResult } from '@kbn/esql-types';
+import { DataSourceBrowser } from '../data_source_browser';
 
 const mockDataSources: ESQLSourceResult[] = [
   { name: 'logs-*', type: 'data stream', title: 'logs-*', hidden: false },
