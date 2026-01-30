@@ -78,8 +78,8 @@ export function DashboardRenderer({
   const [error, setError] = useState<Error | undefined>();
   /** Default showControlGroup to true. This simplifies embedding DashboardRenderer outside of the dashboard app,
    *  ensuring that DashboardRenderer, by default, will never fail to render a dashboard due to missing controls.
-   *  Other contexts that want to render the control group in a different location in the UI should explicitly pass `false`
-   *  to the DashboardRenderer.
+   *  Other contexts that want to render the control group in a different location in the UI should explicitly set
+   *  `useControlsIntegration` to `false` in their `getCreationOptions` function
    */
   const [showControlGroup, setShowControlGroup] = useState<boolean>(true);
 
