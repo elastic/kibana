@@ -142,17 +142,6 @@ describe('getContentsComponent', () => {
       const Component = getContentsComponent(elementData, false);
       expect(Component).toBe(EdgeContents);
     });
-
-    it('returns null for edges when excludeEdges is true', () => {
-      const elementData: ElementData = {
-        id: 'edge-1',
-        source: 'node-1',
-        target: 'node-2',
-      };
-
-      const Component = getContentsComponent(elementData, false, { excludeEdges: true });
-      expect(Component).toBeNull();
-    });
   });
 
   describe('unknown nodes', () => {

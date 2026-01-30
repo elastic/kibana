@@ -133,10 +133,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
   // Check if we have a valid contents component for this element
-  const hasContentsComponent = !!getContentsComponent(
-    selectedElementData as any,
-    isDiagnosticModeEnabled
-  );
+  const hasContentsComponent = !!getContentsComponent(selectedElementData, isDiagnosticModeEnabled);
 
   const isOpen = !!selectedElement && hasContentsComponent;
 
@@ -160,7 +157,6 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
             start={start}
             end={end}
             onFocusClick={onFocusClick}
-            excludeEdges={false}
           />
         )}
       </EuiPopover>

@@ -56,13 +56,9 @@ interface ReactFlowGraphProps {
   edges: ServiceMapEdgeType[];
   /** Currently focused service name (for service-specific map) */
   serviceName?: string;
-  /** Environment filter */
   environment: Environment;
-  /** KQL filter */
   kuery: string;
-  /** Start time */
   start: string;
-  /** End time */
   end: string;
 }
 

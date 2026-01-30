@@ -236,7 +236,6 @@ export function ReactFlowPopover({
             start={start}
             end={end}
             onFocusClick={onFocusClick}
-            excludeEdges={false}
           />
         )}
       </EuiPopover>

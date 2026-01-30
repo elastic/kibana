@@ -31,24 +31,13 @@ export interface ElementData extends Record<string, unknown> {
 }
 
 /**
- * Options for determining the popover contents component
- */
-interface GetContentsComponentOptions {
-  /** Whether this is from React Flow (excludes edge contents since React Flow doesn't support edge selection in popover) */
-  excludeEdges?: boolean;
-}
-
-/**
  * Determines which content component to render based on the element data.
  * This function works with both Cytoscape and React Flow node data.
  */
 export function getContentsComponent(
   elementData: ElementData,
-  isDiagnosticModeEnabled: boolean,
-  options: GetContentsComponentOptions = {}
+  isDiagnosticModeEnabled: boolean
 ): ComponentType<any> | null {
-  const { excludeEdges = false } = options;
-
   // Grouped nodes (externals list)
   if (elementData.groupedConnections && Array.isArray(elementData.groupedConnections)) {
     return ExternalsListContents;
@@ -64,8 +53,8 @@ export function getContentsComponent(
     return ResourceContents;
   }
 
-  // Edge nodes (Cytoscape only)
-  if (!excludeEdges && elementData.source && elementData.target) {
+  // Edge elements
+  if (elementData.source && elementData.target) {
     return EdgeContents;
   }
 
@@ -78,22 +67,15 @@ export function getContentsComponent(
 }
 
 interface PopoverContentProps {
-  /** The element data to display */
   elementData: ElementData;
   /** The element ID (used as fallback for label) */
   elementId: string;
-  /** Environment filter */
   environment: Environment;
   /** KQL filter */
   kuery: string;
-  /** Start time */
   start: string;
-  /** End time */
   end: string;
-  /** Handler for Focus Map button click */
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
-  /** Whether to exclude edge contents (for React Flow) */
-  excludeEdges?: boolean;
 }
 
 /**
@@ -108,15 +90,12 @@ export function PopoverContent({
   start,
   end,
   onFocusClick,
-  excludeEdges = false,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
   const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
 
-  const ContentsComponent = getContentsComponent(elementData, isDiagnosticModeEnabled, {
-    excludeEdges,
-  });
+  const ContentsComponent = getContentsComponent(elementData, isDiagnosticModeEnabled);
 
   const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
 
