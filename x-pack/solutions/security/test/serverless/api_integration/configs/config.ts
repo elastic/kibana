@@ -37,4 +37,5 @@ export default createTestConfig({
     `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
     `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
   ],
+  enableFleetDockerRegistry: false,
 });

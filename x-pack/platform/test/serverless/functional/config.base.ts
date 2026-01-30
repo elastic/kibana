@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { dockerRegistryPort, type FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
@@ -18,9 +18,15 @@ export function createTestConfig<TServices extends {} = typeof services>(
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
+    const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
+    const dockerServers = svlSharedConfig.get('dockerServers');
+
     return {
       ...svlSharedConfig.getAll(),
-
+      dockerServers:
+        !enableFleetDockerRegistry && dockerServers?.registry
+          ? { ...dockerServers, registry: { ...dockerServers.registry, enabled: false } }
+          : dockerServers,
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects,
       services: { ...services, ...options.services },
@@ -45,6 +51,9 @@ export function createTestConfig<TServices extends {} = typeof services>(
             ? ['--xpack.security.roleManagementEnabled=true']
             : []),
           ...(options.kbnServerArgs ?? []),
+          ...(enableFleetDockerRegistry && dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
