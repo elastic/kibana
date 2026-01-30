@@ -270,6 +270,7 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
+  - '@kbn/sse-utils-client'
   - '@kbn/kql'
 tags:
   - plugin
