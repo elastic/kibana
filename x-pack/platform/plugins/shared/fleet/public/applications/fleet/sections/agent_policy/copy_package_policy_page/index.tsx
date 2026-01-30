@@ -11,7 +11,6 @@ import { useRouteMatch, useLocation } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
-import { omit } from 'lodash';
 
 import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../../../../../common/constants';
 
@@ -22,6 +21,8 @@ import type { EditPackagePolicyFrom } from '../create_package_policy_page/types'
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
 import { useBreadcrumbs, useGetOneAgentPolicy } from '../../../hooks';
 import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+
+import { copyPackagePolicy } from './services/copy_package_policy_utils';
 
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
@@ -62,16 +63,7 @@ export const CopyPackagePolicyPage = memo(() => {
 
   const packagePolicyData = useMemo(() => {
     if (packagePolicy.data?.item) {
-      return {
-        ...omit(packagePolicy.data.item, 'id'), // Delete id to force new id creation
-        name: 'copy-' + packagePolicy.data.item.name,
-        inputs: packagePolicy.data.item.inputs.map((input) => ({
-          ...omit(input, 'id'),
-          streams: input.streams?.map((stream) => ({
-            ...omit(stream, 'id'),
-          })),
-        })),
-      };
+      return copyPackagePolicy(packagePolicy.data.item);
     }
   }, [packagePolicy.data?.item]);
 
