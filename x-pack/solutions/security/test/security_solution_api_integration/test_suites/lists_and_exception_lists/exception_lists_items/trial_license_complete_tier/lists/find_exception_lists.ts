@@ -10,7 +10,7 @@ import expect from 'expect';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import { deleteAllExceptions } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -68,12 +68,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const role = ROLES.rules_read_exceptions_all;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should return a single exception list when a single exception list is loaded from a find with defaults added', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
@@ -100,12 +97,9 @@ export default ({ getService }: FtrProviderContext): void => {
         const role = ROLES.rules_read_exceptions_read;
 
         beforeEach(async () => {
-          await createUserAndRole(getService, role);
+          await deleteAndReCreateUserRole(getService, role);
         });
 
-        afterEach(async () => {
-          await deleteUserAndRole(getService, role);
-        });
         it('should return a single exception list when a single exception list is loaded from a find with defaults added', async () => {
           const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);

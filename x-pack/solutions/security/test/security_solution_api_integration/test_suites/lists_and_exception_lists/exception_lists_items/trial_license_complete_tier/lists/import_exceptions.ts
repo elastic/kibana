@@ -15,7 +15,7 @@ import {
   getImportExceptionsListSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
+import { deleteAndReCreateUserRole } from '../../../../../config/services/common';
 import { deleteAllExceptions } from '../../../utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -717,12 +717,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const role = ROLES.rules_read_exceptions_all;
 
       beforeEach(async () => {
-        await createUserAndRole(getService, role);
+        await deleteAndReCreateUserRole(getService, role);
       });
 
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
       it('should report that it imported an exception list successfully', async () => {
         const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
         const restrictedApis = exceptionsApi.withUser(restrictedUser);
@@ -752,12 +749,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const role = ROLES.rules_read_exceptions_read;
 
       beforeEach(async () => {
-        await createUserAndRole(getService, role);
+        await deleteAndReCreateUserRole(getService, role);
       });
 
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
       it('should NOT import an exception list', async () => {
         const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
         const restrictedApis = exceptionsApi.withUser(restrictedUser);
