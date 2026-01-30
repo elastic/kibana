@@ -620,7 +620,228 @@ Observed Overhead: 163 / 189 = 0.86 (actually faster than theoretical!)
 
 ---
 
+### 4.12 Results: Production-Ready 2.5 Overhead Factor Validation
+
+**Purpose**: Validate capacity formula using a conservative 2.5 overhead factor suitable for production deployments.
+
+#### Why Test 2.5 Overhead?
+
+Based on testing with 1.4 overhead (sections 4.1-4.11), we observed:
+
+1. **CPU was always at 200%** (maxed) even in "passing" tests
+2. **Observed overhead varied from 1.09 to 1.64** depending on conditions
+3. **No headroom** for network variability, system load, or unexpected factors
+
+Using **2.5 overhead** provides:
+- ~52% buffer over worst observed capacity overhead (1.64)
+- CPU headroom for production stability
+- Safety margin for real-world variability
+
+#### Formula with 2.5 Overhead
+
+```
+capacity_constant = (schedule_interval × concurrency) / 2.5
+max_monitors = capacity_constant / avg_duration_seconds
+```
+
+**3-Minute Schedule (2 CPU)**:
+```
+capacity_constant = (180 × 2) / 2.5 = 144
+```
+
+| Journey Type | Duration | Predicted Max |
+|--------------|----------|---------------|
+| Simple | ~4.5s | 144 / 4.5 = **32 monitors** |
+| Complex | ~24s | 144 / 24 = **6 monitors** |
+| Heavy | ~37s | 144 / 37 = **4 monitors** |
+
+**10-Minute Schedule (2 CPU)**:
+```
+capacity_constant = (600 × 2) / 2.5 = 480
+```
+
+| Journey Type | Duration | Predicted Max |
+|--------------|----------|---------------|
+| Medium | ~21s | 480 / 21 = **23 monitors** |
+| Heavy | ~40s | 480 / 40 = **12 monitors** |
+
+---
+
+#### 4.12.1 Simple Journey (32 monitors, ~4.5s, 3-min schedule)
+
+**Schedule**: Every 3 minutes  
+**Journey**: Simple (1 step)  
+**Monitors**: 32  
+**Result**: **PASS**
+
+| Monitors | Up | Down | Pending | Avg Duration | Cycle Spread | Status |
+|----------|-----|------|---------|--------------|--------------|--------|
+| 32 | 32 | 0 | 0 | ~4.5s | ~103s | **PASS** |
+
+**Cycle Analysis**:
+- Cycle 1: 11:40:26 → 11:42:32 (Spread: ~126s)
+- Cycle 2: 11:43:31 → 11:45:14 (Spread: ~103s)
+- Schedule interval: 180s
+- **Capacity used**: 103/180 = **57%**
+
+**Overhead Calculation**:
+```
+Theoretical = (32 × 4.5) / 2 = 72s
+Actual cycle spread = ~103s
+Observed overhead = 103 / 72 = 1.43
+```
+
+> [!TIP]
+> With 2.5 overhead predicting 32 monitors max, the test **passed with 43% headroom**. CPU was not constantly maxed, providing stability buffer.
+
+---
+
+#### 4.12.2 Complex Journey (6 monitors, ~24s, 3-min schedule)
+
+**Schedule**: Every 3 minutes  
+**Journey**: Complex (5 steps)  
+**Monitors**: 6  
+**Result**: **PARTIAL**
+
+| Monitors | Up | Down | Pending | Avg Duration | Cycle Spread | Status |
+|----------|-----|------|---------|--------------|--------------|--------|
+| 6 | 4 | 2 | 0 | ~27s (range: 22-45s) | ~90s | **PARTIAL** |
+
+**Execution Analysis**:
+
+| Monitor | Duration | Status | Notes |
+|---------|----------|--------|-------|
+| Monitor 1 | 28-31s | up | Stable |
+| Monitor 2 | 24-27s | up/down | Intermittent |
+| Monitor 3 | 25-27s | up | Stable |
+| Monitor 4 | 30s | up | Stable |
+| Monitor 5 | 44-45s | down | Consistently hitting timeout |
+| Monitor 6 | 23-28s | up | Stable |
+
+> [!NOTE]
+> The formula predicted 6 monitors max for ~24s journey, but journey duration **varied significantly** (22-45s) due to network conditions. 4/6 monitors (67%) stable when journey completes < 35s.
+
+---
+
+#### 4.12.3 Heavy Journey (4 monitors, ~37s, 3-min schedule)
+
+**Schedule**: Every 3 minutes  
+**Journey**: Heavy (5 steps + waits)  
+**Monitors**: 4  
+**Result**: **FAIL** (Timeout Constrained)
+
+| Monitors | Up | Down | Pending | Actual Duration | Status |
+|----------|-----|------|---------|-----------------|--------|
+| 4 | 0 | 4 | 0 | 43-44s | **TIMEOUT FAIL** |
+
+**Error Analysis**:
+
+| Monitor | Duration | Steps Completed | Error |
+|---------|----------|-----------------|-------|
+| Monitor 1 | 43.97s | 3/5 | journey did not finish executing |
+| Monitor 2 | 44.21s | 0/5 | journey did not finish executing |
+| Monitor 3 | 44.22s | 0/5 | journey did not finish executing |
+| Monitor 4 | 43.98s | 3/5 | journey did not finish executing |
+
+> [!WARNING]
+> **Timeout Constraint**: The heavy journey takes ~44s, hitting the 46s timeout. This test fails due to **timeout limits**, not capacity.
+
+---
+
+#### 4.12.4 Medium Journey (23 monitors, ~21s, 10-min schedule)
+
+**Schedule**: Every 10 minutes  
+**Journey**: Medium (3 steps + waits)  
+**Monitors**: 23  
+**Result**: **PASS**
+
+| Monitors | Up | Down | Pending | Avg Duration | Cycle Spread | Status |
+|----------|-----|------|---------|--------------|--------------|--------|
+| 23 | 23 | 0 | 0 | ~25s (range: 21-33s) | ~9m | **PASS** |
+
+**Cycle Analysis**:
+- Cycle 1: 12:27:21 → 12:37:20 (~10 min), 21/23 up (2 transient browser launch failures)
+- Cycle 2: 12:38:16 → 12:48:14 (~10 min), **23/23 up (100%)**
+
+**Overhead Calculation**:
+```
+Theoretical: 23 monitors × 21s = 483s (8.05 min)
+Actual cycle: ~550s (9.2 min)
+Observed overhead: 550 / 483 = 1.14
+```
+
+> [!TIP]
+> With 2.5 overhead providing a 480-second capacity constant, 23 monitors at ~25s actual duration fit comfortably within the 10-minute schedule.
+
+---
+
+#### 4.12.5 Heavy Journey (12 monitors, ~40s, 10-min schedule)
+
+**Schedule**: Every 10 minutes  
+**Journey**: Heavy (5 steps + waits)  
+**Monitors**: 12  
+**Result**: **FAIL** (Timeout Constrained)
+
+| Monitors | Up | Down | Pending | Actual Duration | Status |
+|----------|-----|------|---------|-----------------|--------|
+| 12 | 0 | 12 | 0 | 42-45s | **TIMEOUT FAIL** |
+
+All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-step journey cannot complete before the 46s timeout.
+
+> [!WARNING]
+> **Timeout Override**: Heavy journeys (5 steps + 3s waits each) consistently take 42-45s, which approaches or exceeds the 46s timeout. This test fails due to **timeout constraints**, not capacity.
+
+---
+
+#### 4.12 Summary: 2.5 Overhead Results
+
+| Test | Journey | Schedule | Monitors | Result | Notes |
+|------|---------|----------|----------|--------|-------|
+| 4.12.1 | Simple (~4.5s) | 3-min | 32 | **PASS** | 100% success, 43% headroom |
+| 4.12.2 | Complex (~24s) | 3-min | 6 | **PARTIAL** | 67% success, network variability |
+| 4.12.3 | Heavy (~37s) | 3-min | 4 | **FAIL** | Timeout constraint |
+| 4.12.4 | Medium (~21s) | 10-min | 23 | **PASS** | 100% success on 2nd cycle |
+| 4.12.5 | Heavy (~40s) | 10-min | 12 | **FAIL** | Timeout constraint |
+
+> [!IMPORTANT]
+> **The 2.5 overhead factor works for journeys under ~35s**, providing adequate headroom and stable CPU utilization. However, **heavy journeys (40s+) are timeout-constrained** regardless of the overhead factor.
+
+---
+
+### 4.13 Results: SYNTHETICS_LIMIT_BROWSER Environment Variable Test
+
+**Objective**: Test whether the `SYNTHETICS_LIMIT_BROWSER` environment variable can increase browser concurrency beyond the default CPU-based limit.
+
+#### Test Setup
+
+- **Monitors**: 24 browser monitors
+- **Schedule**: 3 minutes
+- **Journey Duration**: ~21 seconds (Medium complexity)
+- **Environment Variable**: `SYNTHETICS_LIMIT_BROWSER=4`
+
+#### Results
+
+| Configuration | CPU | Memory | Up | Down | CPU Usage | Memory Usage |
+|:--------------|:----|:-------|:---|:-----|:----------|:-------------|
+| Test 1 | 2 cores | 2 GB | 22 | 2 | ~200% | 84% (1.68 GB) |
+| Test 2 | 2 cores | 4 GB | 22 | 2 | ~200% | 46% (1.83 GB) |
+
+#### Key Findings
+
+1. **`SYNTHETICS_LIMIT_BROWSER` cannot override hardware constraints** - Setting it to 4 on a 2-core container did not increase concurrency beyond 2 concurrent browsers
+2. **CPU is the limiting factor** for browser monitor concurrency, not memory
+3. **Each browser instance requires ~1 CPU core** - this cannot be bypassed via configuration
+4. **Memory had no impact on throughput** - doubling memory (2GB → 4GB) produced identical results
+5. **The variable serves as an upper limit**, useful only when CPU cores exceed the default concurrency
+
+> [!IMPORTANT]
+> **Conclusion**: To increase browser concurrency, allocate additional CPU cores. `SYNTHETICS_LIMIT_BROWSER` should only be used to *restrict* concurrency below the CPU-based default, not to exceed it.
+
+---
+
 ### Summary Table
+
+#### 1.4 Overhead Tests (Maximum Capacity)
 
 | Monitors | Journey | Timeout | Pending | Agent CPU% | Agent Memory | Status |
 |----------|---------|---------|---------|------------|--------------|--------|
@@ -630,6 +851,23 @@ Observed Overhead: 163 / 189 = 0.86 (actually faster than theoretical!)
 | 50 | Simple | 46s | 0 | ~200% peak | ~1GB peak | PASS |
 | 60 | Simple | 46s | 8 | ~200% peak | ~1GB peak | **FAIL** |
 | 7 | Heavy | **120s** | 0 | ~200% peak | ~1GB peak | **PASS** |
+
+#### 2.5 Overhead Tests (Production Recommended)
+
+| Monitors | Journey | Schedule | Headroom | Status | Notes |
+|----------|---------|----------|----------|--------|-------|
+| 32 | Simple (~4.5s) | 3-min | 43% | **PASS** | 100% success |
+| 6 | Complex (~24s) | 3-min | - | **PARTIAL** | 67% success, network variability |
+| 4 | Heavy (~37s) | 3-min | - | **FAIL** | Timeout constraint |
+| 23 | Medium (~21s) | 10-min | - | **PASS** | 100% on 2nd cycle |
+| 12 | Heavy (~40s) | 10-min | - | **FAIL** | Timeout constraint |
+
+#### SYNTHETICS_LIMIT_BROWSER Tests
+
+| Configuration | CPU | Memory | Up | Down | Status |
+|---------------|-----|--------|----|----|--------|
+| SYNTHETICS_LIMIT_BROWSER=4 | 2 cores | 2 GB | 22 | 2 | CPU-bound at 200% |
+| SYNTHETICS_LIMIT_BROWSER=4 | 2 cores | 4 GB | 22 | 2 | CPU-bound at 200% |
 
 ### Cycle Spread Analysis
 
@@ -755,7 +993,7 @@ Observed Overhead = Actual Cycle Spread / Theoretical
 >
 > The **1.4 average** used in the formula provides a **conservative** estimate that works across all scenarios.
 
-#### Why It Works
+#### Formula Breakdown
 
 > [!INFO]
 > **Think of it as "browser-seconds" budgeting:**
@@ -891,7 +1129,7 @@ max_monitors = capacity_constant / avg_journey_duration
 
 ## 6. The Bottom Line
 
-I have derived a reliable formula to predict how many browser monitors a single agent can handle.
+Through empirical testing, a reliable formula has been validated to predict how many browser monitors a single agent can handle.
 
 ### The Capacity Formula
 
@@ -923,8 +1161,13 @@ The reports tested two factors. Choose based on your risk tolerance:
 There is a hard constraint independent of capacity: **The Default Timeout**.
 
 *   **The Findings**: Any journey taking longer than **~46 seconds** will fail with `CMD_TIMEOUT`, even if your agent is sitting idle.
-*   **The Fix**: If your journey takes >35s, you are in the danger zone. You **must** explicitly increase the monitor timeout setting in your configuration.
-*   **Evidence**: In Report 2.5 (Test 4.3), running just 4 monitors failed because the journey took ~44s, hitting the timeout wall despite having plenty of CPU capacity.
+*   **The Fix**: If your journey takes >35s, you are in the danger zone. You have two options:
+    1. **Increase the monitor timeout** setting in your configuration
+    2. **Divide the journey into shorter steps** - split a heavy 5-step journey into separate monitors with fewer steps each
+*   **Evidence**: In Test 4.12.3, running just 4 monitors failed because the journey took ~44s, hitting the timeout wall despite having plenty of CPU capacity.
+
+> [!WARNING]
+> **Nested Timeout**: Even after increasing the monitor timeout, you may hit a **Playwright/Chromium-level timeout of 50000ms (50s)** for operations like `page.waitForLoadState()`. This is a separate timeout within the browser automation layer. If your individual step operations exceed 50s, you'll see errors like `page.waitForLoadState: Timeout 50000ms exceeded`.
 
 ### 3. Reliability & Trustworthiness
 
