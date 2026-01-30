@@ -11,7 +11,7 @@ Elastic provides built-in LLMs through AI connectors vetted for GenAI product fe
 
 ::::{important}
 * {applies_to}`self: ga 9.3+` Elastic Managed LLMs are available through [EIS with Cloud-Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md)
-* {applies_to}`stack: 9.0-9.2` The available built-in LLM model was called **Elastic Managed LLM** and it was available through the Elastic Managed LLM connector.
+* {applies_to}`stack: ga 9.0-9.2` The available built-in LLM model was called **Elastic Managed LLM** and it was available through the Elastic Managed LLM connector.
 ::::
 
 ## Prerequisites
