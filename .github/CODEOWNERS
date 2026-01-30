@@ -3063,6 +3063,9 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 .moon         @elastic/kibana-operations
 /**/moon.yml  @elastic/kibana-operations
 
+# Leads approval
+/AGENTS.md @elastic/kibana-tech-leads
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
