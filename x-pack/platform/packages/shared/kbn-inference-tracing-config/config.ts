@@ -31,6 +31,7 @@ const phoenixExportConfigSchema: Type<InferenceTracingPhoenixExportConfig> = sch
   public_url: schema.maybe(schema.uri()),
   project_name: schema.maybe(schema.string()),
   api_key: schema.maybe(schema.string()),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   scheduled_delay: scheduledDelay,
 });
 

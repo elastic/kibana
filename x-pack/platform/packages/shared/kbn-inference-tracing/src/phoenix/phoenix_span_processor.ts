@@ -35,8 +35,13 @@ function getPhoenixUrl(base: string | URL, path: string): URL {
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
   constructor(private readonly config: InferenceTracingPhoenixExportConfig) {
+    // Build headers: start with default Bearer auth if api_key is provided,
+    // then merge/override with any custom headers from config.
+    // This allows Arize compatibility (which requires space_id and authorization headers)
+    // while maintaining backward compatibility with self-hosted Phoenix.
     const headers = {
       ...(config.api_key ? { Authorization: `Bearer ${config.api_key}` } : {}),
+      ...config.headers,
     };
 
     const exporter = new PhoenixProtoExporter({
