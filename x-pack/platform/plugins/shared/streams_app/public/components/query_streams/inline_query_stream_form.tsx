@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -49,6 +49,10 @@ export interface InlineQueryStreamFormProps {
    */
   onCancel: () => void;
   /**
+   * Callback when query changes (for live preview)
+   */
+  onQueryChange?: (esqlQuery: string) => void;
+  /**
    * Whether the form is currently saving
    */
   isSaving?: boolean;
@@ -89,6 +93,7 @@ export function InlineQueryStreamForm({
   initialEsqlQuery,
   onSave,
   onCancel,
+  onQueryChange,
   isSaving = false,
   readOnly = false,
   isLast = true,
@@ -107,29 +112,17 @@ export function InlineQueryStreamForm({
     return `FROM ${parentViewName}`;
   });
 
-  // The FROM clause is hardcoded - query from parent's ES|QL view
-  const parentViewName = getEsqlViewName(parentStreamName);
-  const fromClause = `FROM ${parentViewName}`;
+  // Notify parent of query changes for live preview
+  useEffect(() => {
+    onQueryChange?.(esqlQuery);
+  }, [esqlQuery, onQueryChange]);
 
-  // Build the full query for display in the editor
-  const fullQuery = useMemo(() => {
-    // Remove FROM clause with view name (which may contain dots)
-    const userPart = esqlQuery.replace(/^FROM\s+[^\s]+(\s*\n)?/i, '');
-    return { esql: userPart ? `${fromClause}\n${userPart}` : fromClause };
-  }, [esqlQuery, fromClause]);
-
-  // Handle query changes - extract user-editable part
-  const handleQueryChange = useCallback(
-    (newQuery: AggregateQuery) => {
-      if ('esql' in newQuery) {
-        // Always ensure the FROM clause is preserved - remove it and any newline after
-        const queryWithoutFrom = newQuery.esql.replace(/^FROM\s+[^\s]+(\s*\n)?/i, '');
-        const fullEsql = queryWithoutFrom ? `${fromClause}\n${queryWithoutFrom}` : fromClause;
-        setEsqlQuery(fullEsql);
-      }
-    },
-    [fromClause]
-  );
+  // Handle query changes - allow full query editing
+  const handleQueryChange = useCallback((newQuery: AggregateQuery) => {
+    if ('esql' in newQuery) {
+      setEsqlQuery(newQuery.esql);
+    }
+  }, []);
 
   const handleQuerySubmit = useCallback(
     (newQuery: AggregateQuery | undefined) => {
@@ -180,7 +173,8 @@ export function InlineQueryStreamForm({
             defaultMessage: 'ES|QL Query',
           })}
           helpText={i18n.translate('xpack.streams.inlineQueryStreamForm.esqlQueryHelpText', {
-            defaultMessage: 'The FROM clause is fixed to query from the parent stream.',
+            defaultMessage:
+              'The FROM clause defaults to the parent stream view, but you can modify the query.',
           })}
           fullWidth
         >
@@ -193,7 +187,7 @@ export function InlineQueryStreamForm({
             isLoading={isSaving}
             onTextLangQueryChange={handleQueryChange}
             onTextLangQuerySubmit={handleQuerySubmit}
-            query={fullQuery}
+            query={{ esql: esqlQuery }}
           />
         </EuiFormRow>
 

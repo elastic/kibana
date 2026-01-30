@@ -38,6 +38,7 @@ import {
   selectHasRoutingChanges,
 } from './state_management/stream_routing_state_machine';
 import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
+import { QueryStreamCreationProvider } from './query_stream_creation_context';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -87,19 +88,18 @@ export function StreamDetailRoutingImpl() {
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
-  
+
   const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
 
   const definition = routingSnapshot.context.definition;
 
   const shouldDisplayBottomBar =
     routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' }) && hasRoutingChanges;
-
+    routingSnapshot.can({ type: 'routingRule.save' }) &&
+    hasRoutingChanges;
 
   const { onPageReady } = usePerformanceContext();
   const { timeState } = useTimefilter();
-
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -173,50 +173,52 @@ export function StreamDetailRoutingImpl() {
           overflow: auto;
         `}
       >
-        <EuiPanel
-          hasShadow={false}
-          className={css`
-            display: flex;
-            max-width: 100%;
-            overflow: auto;
-            flex-grow: 1;
-          `}
-          paddingSize="none"
-        >
-          <EuiResizableContainer>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={40}
-                  minSize="400px"
-                  tabIndex={0}
-                  paddingSize="l"
-                  className={css`
-                    overflow: auto;
-                    display: flex;
-                  `}
-                >
-                  <ChildStreamList availableStreams={availableStreams} />
-                </EuiResizablePanel>
+        <QueryStreamCreationProvider>
+          <EuiPanel
+            hasShadow={false}
+            className={css`
+              display: flex;
+              max-width: 100%;
+              overflow: auto;
+              flex-grow: 1;
+            `}
+            paddingSize="none"
+          >
+            <EuiResizableContainer>
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    initialSize={40}
+                    minSize="400px"
+                    tabIndex={0}
+                    paddingSize="l"
+                    className={css`
+                      overflow: auto;
+                      display: flex;
+                    `}
+                  >
+                    <ChildStreamList availableStreams={availableStreams} />
+                  </EuiResizablePanel>
 
-                <EuiResizableButton indicator="border" />
+                  <EuiResizableButton indicator="border" />
 
-                <EuiResizablePanel
-                  initialSize={60}
-                  tabIndex={0}
-                  minSize="300px"
-                  paddingSize="l"
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                  `}
-                >
-                  <PreviewPanel />
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        </EuiPanel>
+                  <EuiResizablePanel
+                    initialSize={60}
+                    tabIndex={0}
+                    minSize="300px"
+                    paddingSize="l"
+                    className={css`
+                      display: flex;
+                      flex-direction: column;
+                    `}
+                  >
+                    <PreviewPanel />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
+          </EuiPanel>
+        </QueryStreamCreationProvider>
         {shouldDisplayBottomBar && (
           <EuiFlexItem grow={false}>
             <ManagementBottomBar

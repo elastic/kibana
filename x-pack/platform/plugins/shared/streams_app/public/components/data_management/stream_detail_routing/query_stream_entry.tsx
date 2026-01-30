@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,16 +18,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { Streams, getEsqlViewName } from '@kbn/streams-schema';
+import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
+import { useDebounceFn } from 'react-use';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { NestedView } from '../../nested_view';
 import { InlineQueryStreamForm } from '../../query_streams/inline_query_stream_form';
 import {
-  useQueryStreamForm,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import { useQueryStreamCreation } from './query_stream_creation_context';
 
 interface IdleQueryStreamEntryProps {
   streamName: string;
@@ -128,41 +129,76 @@ interface CreatingQueryStreamEntryProps {
   parentStreamName: string;
 }
 
+const DEBOUNCE_DELAY_MS = 500;
+
 /**
  * Inline form for creating a new query stream within the routing page.
- * This component bridges the routing state machine with the reusable InlineQueryStreamForm component.
+ * This component manages its own form state and uses the query stream creation context
+ * for preview data, keeping the state machine integration minimal.
  */
 export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStreamEntryProps) {
-  const {
-    cancelQueryStreamCreation,
-    updateQueryStreamName,
-    updateQueryStreamEsql,
-    saveQueryStream,
-  } = useStreamRoutingEvents();
-  const queryStreamForm = useQueryStreamForm();
+  const { cancelQueryStreamCreation, saveQueryStream } = useStreamRoutingEvents();
+  const { executeQuery } = useQueryStreamCreation();
+
   const isSaving = useStreamsRoutingSelector((state) =>
-    state.matches({ ready: { queryMode: { creating: 'saving' } } })
+    state.matches({ ready: { queryMode: 'saving' } })
   );
 
-  // Handle save by triggering state machine event
+  // Track the current query to execute previews
+  const currentQueryRef = useRef<string>('');
+
+  // Debounced query execution for preview
+  const debouncedExecuteQuery = useDebounceFn(
+    (query: string) => {
+      if (query && query.trim() !== '') {
+        executeQuery(query);
+      }
+    },
+    DEBOUNCE_DELAY_MS,
+    [executeQuery]
+  );
+
+  // Execute initial query on mount
+  useEffect(() => {
+    const initialQuery = `FROM ${getEsqlViewName(parentStreamName)}`;
+    currentQueryRef.current = initialQuery;
+    executeQuery(initialQuery);
+  }, [parentStreamName, executeQuery]);
+
+  // Handle query changes - execute debounced preview
+  const handleQueryChange = useCallback(
+    (esqlQuery: string) => {
+      currentQueryRef.current = esqlQuery;
+      debouncedExecuteQuery(esqlQuery);
+    },
+    [debouncedExecuteQuery]
+  );
+
+  // Validate and save the query stream
   const handleSave = useCallback(
     ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
-      // Sync the state machine with the latest form values
-      updateQueryStreamName(name);
-      updateQueryStreamEsql(esqlQuery);
-      // Trigger save
-      saveQueryStream();
+      // Validate name follows child naming convention
+      const fullName = `${parentStreamName}.${name}`;
+      if (!name || name.trim() === '' || !isChildOf(parentStreamName, fullName)) {
+        return;
+      }
+      if (!esqlQuery || esqlQuery.trim() === '') {
+        return;
+      }
+      // Trigger save with the form data
+      saveQueryStream({ name, esqlQuery });
     },
-    [updateQueryStreamName, updateQueryStreamEsql, saveQueryStream]
+    [parentStreamName, saveQueryStream]
   );
 
   return (
     <InlineQueryStreamForm
       parentStreamName={parentStreamName}
-      initialName={queryStreamForm?.name ?? ''}
-      initialEsqlQuery={queryStreamForm?.esqlQuery}
+      initialName=""
+      initialEsqlQuery={`FROM ${getEsqlViewName(parentStreamName)}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
+      onQueryChange={handleQueryChange}
       isSaving={isSaving}
       isFirst={false}
       isLast={true}

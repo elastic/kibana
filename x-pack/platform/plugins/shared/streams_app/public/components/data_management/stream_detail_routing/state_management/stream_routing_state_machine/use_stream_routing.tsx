@@ -136,14 +136,8 @@ export const useStreamRoutingEvents = () => {
       cancelQueryStreamCreation: () => {
         service.send({ type: 'queryStream.cancel' });
       },
-      updateQueryStreamName: (name: string) => {
-        service.send({ type: 'queryStream.updateName', name });
-      },
-      updateQueryStreamEsql: (esqlQuery: string) => {
-        service.send({ type: 'queryStream.updateEsql', esqlQuery });
-      },
-      saveQueryStream: () => {
-        service.send({ type: 'queryStream.save' });
+      saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
+        service.send({ type: 'queryStream.save', name, esqlQuery });
       },
     };
   }, [service]);
@@ -204,14 +198,6 @@ export const useStreamSamplesSelector = <T,>(
 };
 
 // Query stream selectors
-export const useQueryStreamForm = () => {
-  return useStreamsRoutingSelector((state) => state.context.queryStreamForm);
-};
-
-export const useQueryStreamSamples = () => {
-  return useStreamsRoutingSelector((state) => state.context.queryStreamSamples);
-};
-
 export const useIsQueryModeCreating = () => {
   return useStreamsRoutingSelector((state) =>
     state.matches({ ready: { queryMode: 'creating' } })

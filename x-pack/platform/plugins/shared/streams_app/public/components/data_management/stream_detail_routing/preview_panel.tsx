@@ -35,10 +35,12 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
+import { useQueryStreamCreationOptional } from './query_stream_creation_context';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
+  const queryStreamCreation = useQueryStreamCreationOptional();
   const { definition } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
@@ -52,14 +54,13 @@ export function PreviewPanel() {
 
   if (routingSnapshot.matches({ ready: 'queryMode' })) {
     // Query mode rendering branch
-    if (isQueryModeCreating) {
-      const queryStreamSamples = routingSnapshot.context.queryStreamSamples;
+    if (isQueryModeCreating && queryStreamCreation) {
       content = (
         <QueryStreamPreviewPanel
           streamName={definition.stream.name}
-          documents={queryStreamSamples.documents}
-          documentsError={queryStreamSamples.documentsError}
-          isLoading={queryStreamSamples.isLoading}
+          documents={queryStreamCreation.documents ?? []}
+          documentsError={queryStreamCreation.documentsError}
+          isLoading={queryStreamCreation.isLoading}
         />
       );
     } else {
