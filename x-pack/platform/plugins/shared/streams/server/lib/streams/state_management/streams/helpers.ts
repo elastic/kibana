@@ -7,6 +7,24 @@
 
 import type { IngestStreamSettings } from '@kbn/streams-schema';
 
+/**
+ * Determines if a change flag should be set for a stream property.
+ *
+ * For existing streams (isExistingStream=true): returns true if the values are not equal (hasChanged)
+ * For new streams (isExistingStream=false): returns true if the value is meaningful/non-empty (hasMeaningfulValue)
+ *
+ * @param isExistingStream - Whether the stream already exists in the starting state
+ * @param hasMeaningfulValue - Whether the new value is meaningful (non-empty/non-default)
+ * @param hasChanged - Whether the value changed compared to the starting state (only evaluated for existing streams)
+ */
+export function computeChange(
+  isExistingStream: boolean,
+  hasMeaningfulValue: boolean,
+  hasChanged: () => boolean
+): boolean {
+  return isExistingStream ? hasChanged() : hasMeaningfulValue;
+}
+
 export function formatSettings(settings: IngestStreamSettings, isServerless: boolean) {
   if (isServerless) {
     return {

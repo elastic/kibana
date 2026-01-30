@@ -38,7 +38,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { computeChange, formatSettings, settingsUpdateRequiresRollover } from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -92,47 +92,58 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    // For existing streams, check if the value changed
-    // For new streams, only mark as changed if the value is non-empty/meaningful
-    const hasProcessingSteps = (this._definition.ingest.processing.steps || []).length > 0;
-    this._changes.processing = startingStateStreamDefinition
-      ? !_.isEqual(
+    const isExistingStream = !!startingStateStreamDefinition;
+
+    this._changes.processing = computeChange(
+      isExistingStream,
+      (this._definition.ingest.processing.steps || []).length > 0,
+      () =>
+        !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),
-          _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
+          _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
         )
-      : hasProcessingSteps;
-
-    const hasNonInheritLifecycle = !isInheritLifecycle(this._definition.ingest.lifecycle);
-    this._changes.lifecycle = startingStateStreamDefinition
-      ? !_.isEqual(
-          this._definition.ingest.lifecycle,
-          startingStateStreamDefinition.ingest.lifecycle
-        )
-      : hasNonInheritLifecycle;
-
-    const hasSettings = Object.keys(this._definition.ingest.settings || {}).length > 0;
-    this._changes.settings = startingStateStreamDefinition
-      ? !_.isEqual(await this.getEffectiveSettings(), this._definition.ingest.settings)
-      : hasSettings;
-
-    const hasFieldOverrides = !!(
-      this._definition.ingest.classic.field_overrides &&
-      Object.keys(this._definition.ingest.classic.field_overrides).length > 0
     );
-    this._changes.field_overrides = startingStateStreamDefinition
-      ? !_.isEqual(
-          this._definition.ingest.classic.field_overrides,
-          startingStateStreamDefinition.ingest.classic.field_overrides
-        )
-      : hasFieldOverrides;
 
-    const hasNonInheritFailureStore = !isInheritFailureStore(this._definition.ingest.failure_store);
-    this._changes.failure_store = startingStateStreamDefinition
-      ? !_.isEqual(
-          this._definition.ingest.failure_store,
-          startingStateStreamDefinition.ingest.failure_store
+    this._changes.lifecycle = computeChange(
+      isExistingStream,
+      !isInheritLifecycle(this._definition.ingest.lifecycle),
+      () =>
+        !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition!.ingest.lifecycle
         )
-      : hasNonInheritFailureStore;
+    );
+
+    // Prefetch effective settings for existing streams to allow sync comparison
+    const effectiveSettings = isExistingStream ? await this.getEffectiveSettings() : undefined;
+    this._changes.settings = computeChange(
+      isExistingStream,
+      Object.keys(this._definition.ingest.settings || {}).length > 0,
+      () => !_.isEqual(effectiveSettings, this._definition.ingest.settings)
+    );
+
+    this._changes.field_overrides = computeChange(
+      isExistingStream,
+      !!(
+        this._definition.ingest.classic.field_overrides &&
+        Object.keys(this._definition.ingest.classic.field_overrides).length > 0
+      ),
+      () =>
+        !_.isEqual(
+          this._definition.ingest.classic.field_overrides,
+          startingStateStreamDefinition!.ingest.classic.field_overrides
+        )
+    );
+
+    this._changes.failure_store = computeChange(
+      isExistingStream,
+      !isInheritFailureStore(this._definition.ingest.failure_store),
+      () =>
+        !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition!.ingest.failure_store
+        )
+    );
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
