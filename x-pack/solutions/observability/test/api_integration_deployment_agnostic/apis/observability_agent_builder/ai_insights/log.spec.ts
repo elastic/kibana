@@ -84,7 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           getLogId: () => errorLogId,
           getLogIndex: () => errorLogIndex,
           mockedSummary: MOCKED_AI_SUMMARY_ERROR,
-          expectedContextTags: ['<CorrelatedLogSequence>', '<DistributedTrace>'],
+          expectedContextTags: ['<CorrelatedLogSequence>'],
         },
         {
           name: 'info',

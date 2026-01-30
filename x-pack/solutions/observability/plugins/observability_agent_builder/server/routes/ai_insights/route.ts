@@ -143,7 +143,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       const result = await getLogAiInsights({
         core,
-        plugins,
         index,
         id,
         inferenceClient,
