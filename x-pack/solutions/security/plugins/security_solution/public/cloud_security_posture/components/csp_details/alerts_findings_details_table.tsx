@@ -379,6 +379,12 @@ export const AlertsDetailsTable = memo(
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
             sorting={sorting}
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.alerts.tableCaption',
+              {
+                defaultMessage: 'Alerts details',
+              }
+            )}
           />
         </EuiPanel>
       </>

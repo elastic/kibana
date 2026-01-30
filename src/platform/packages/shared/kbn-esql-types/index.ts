@@ -55,6 +55,7 @@ export {
   type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
 
+export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
 export {
   type ESQLCallbacks,
   type PartialFieldsMetadataClient,
