@@ -32,24 +32,6 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          artifacts: {
-            properties: {
-              investigation_guide: {
-                properties: {
-                  blob: {
-                    type: 'text',
-                  },
-                },
-              },
-              dashboards: {
-                properties: {
-                  id: {
-                    type: 'keyword',
-                  },
-                },
-              },
-            },
-          },
           description: {
             type: 'text',
           },

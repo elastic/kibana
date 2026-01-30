@@ -37,7 +37,7 @@ describe('getInternalRuleTemplateRoute', () => {
   };
 
   const getResult = {
-    ...pick(mockedTemplate, 'name', 'schedule', 'tags', 'params'),
+    ...pick(mockedTemplate, 'name', 'schedule', 'tags', 'params', 'description'),
     rule_type_id: mockedTemplate.ruleTypeId,
     id: mockedTemplate.id,
   };
