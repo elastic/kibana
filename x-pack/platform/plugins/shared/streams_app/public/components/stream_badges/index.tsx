@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import {
   isIlmLifecycle,
   isErrorLifecycle,
   isDslLifecycle,
-  Streams,
   getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import React from 'react';
@@ -191,7 +191,7 @@ export function DiscoverBadgeButton({
   } = useKibana();
   const esqlQuery = getDiscoverEsqlQuery({
     definition: definition.stream,
-    indexMode: definition.index_mode,
+    indexMode: Streams.ingest.all.GetResponse.is(definition) ? definition.index_mode : undefined,
     includeMetadata: isWiredStream,
   });
   const useUrl = share.url.locators.useUrl;

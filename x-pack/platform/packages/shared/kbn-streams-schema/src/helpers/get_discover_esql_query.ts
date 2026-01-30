@@ -6,7 +6,7 @@
  */
 
 import type { IngestStreamIndexMode } from '../models/ingest/base';
-import type { Streams } from '../models/streams';
+import { Streams } from '../models/streams';
 import { getIndexPatternsForStream } from './hierarchy_helpers';
 
 export interface GetDiscoverEsqlQueryOptions {
@@ -50,6 +50,11 @@ export interface GetDiscoverEsqlQueryOptions {
  */
 export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): string | undefined {
   const { definition, indexMode, includeMetadata = false } = options;
+
+  if (Streams.QueryStream.Definition.is(definition)) {
+    // Use the ES|QL view name as the query source
+    return `FROM ${definition.query.view}`;
+  }
 
   const indexPatterns = getIndexPatternsForStream(definition);
   if (!indexPatterns) {

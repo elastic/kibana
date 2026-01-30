@@ -124,7 +124,7 @@ export function QueryStreamDetailManagement({
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {key}
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <DiscoverBadgeButton stream={definition.stream} />
+              <DiscoverBadgeButton definition={definition} />
               <QueryStreamBadge />
             </EuiFlexGroup>
           </EuiFlexGroup>
