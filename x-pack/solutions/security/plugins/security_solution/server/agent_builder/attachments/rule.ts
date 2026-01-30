@@ -57,7 +57,9 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
     ],
     getAgentDescription: () => {
-      const description = `You have access to a rule or query.
+      const description = `You have access to a rule, query, or migration rule.
+
+      If this is a migration rule, it includes both the old rule and the new rule.
 
 {ruleData}
 

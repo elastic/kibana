@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
@@ -167,9 +167,11 @@ export function LifecycleBadge({
 export function DiscoverBadgeButton({
   definition,
   isWiredStream,
+  spellOut = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   isWiredStream: boolean;
+  spellOut?: boolean;
 }) {
   const {
     dependencies: {
@@ -199,16 +201,29 @@ export function DiscoverBadgeButton({
     return null;
   }
 
-  return (
+  const ariaLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+    { defaultMessage: 'Open in Discover' }
+  );
+
+  return spellOut ? (
+    <EuiButton
+      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      href={discoverLink}
+      size="s"
+      aria-label={ariaLabel}
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel', {
+        defaultMessage: 'View in Discover',
+      })}
+    </EuiButton>
+  ) : (
     <EuiButtonIcon
       data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"
-      aria-label={i18n.translate(
-        'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-        { defaultMessage: 'Open in Discover' }
-      )}
+      aria-label={ariaLabel}
     />
   );
 }

@@ -272,6 +272,8 @@
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
     "@kbn/sse-utils-client",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/babel-register",
+    "@kbn/core-security-common"
   ]
 }
