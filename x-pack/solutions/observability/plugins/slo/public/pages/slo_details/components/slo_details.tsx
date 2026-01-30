@@ -12,7 +12,7 @@ import { ALERTS_TAB_ID, DEFINITION_TAB_ID, HISTORY_TAB_ID } from '@kbn/deeplinks
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel';
-import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
+import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts/historical_data_charts';
 import { SloDetailsHistory } from './history/slo_details_history';
 import { Definition } from './definition/definition';
@@ -70,7 +70,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: P
         <EuiFlexGroup direction="column" gutterSize="l">
           <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
           <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
-          <EventsChartPanel slo={slo} range={range} />
+          <EventsChartPanel slo={slo} range={range} isFlyout={isFlyout} />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </ActionModalProvider>
