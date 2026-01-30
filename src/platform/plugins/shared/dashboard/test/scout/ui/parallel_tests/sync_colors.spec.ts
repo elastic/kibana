@@ -47,14 +47,9 @@ declare global {
 }
 
 const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
-  let chart: ReturnType<ScoutPage['locator']> | null = null;
-  await expect
-    .poll(async () => {
-      const charts = await page.locator('.echChart').all();
-      chart = charts[panelIndex] ?? null;
-      return chart;
-    })
-    .not.toBeNull();
+  await expect.poll(() => page.locator('.echChart').count()).toBeGreaterThan(panelIndex);
+  const charts = await page.locator('.echChart').all();
+  const chart = charts[panelIndex];
   if (!chart) {
     throw new Error(`Chart panel index ${panelIndex} not found`);
   }
