@@ -11,11 +11,11 @@ import { BurnRateFlyoutPanel } from './burn_rate_flyout_panel';
 import { BurnRatePagePanel } from './burn_rate_page_panel';
 
 interface Props extends BurnRatePanelProps {
-  renderMode?: 'flyout' | 'page';
+  isFlyout?: boolean;
 }
 
-export function BurnRatePanel({ renderMode = 'page', ...props }: Props) {
-  if (renderMode === 'flyout') {
+export function BurnRatePanel({ isFlyout, ...props }: Props) {
+  if (isFlyout) {
     return <BurnRateFlyoutPanel {...props} />;
   }
 

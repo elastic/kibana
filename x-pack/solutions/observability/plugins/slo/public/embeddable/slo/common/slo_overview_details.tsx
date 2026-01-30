@@ -59,12 +59,7 @@ export function SloOverviewDetailsContent({
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <SloDetails
-        slo={slo}
-        isAutoRefreshing={false}
-        selectedTabId={selectedTabId}
-        renderMode="flyout"
-      />
+      <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />
     </>
   );
 }
