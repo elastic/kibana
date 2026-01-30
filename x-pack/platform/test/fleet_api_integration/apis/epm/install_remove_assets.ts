@@ -383,7 +383,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('reinstalls all assets 2.0.0', () => {
+    describe('reinstalls all assets 0.2.0', () => {
       const expectedVersion = '0.2.0';
 
       before(async () => {
@@ -394,7 +394,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       after(async () => {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
-        await uninstallPackage(pkgName);
+        await uninstallPackage(pkgName, expectedVersion);
       });
 
       expectAssetsInstalled({
