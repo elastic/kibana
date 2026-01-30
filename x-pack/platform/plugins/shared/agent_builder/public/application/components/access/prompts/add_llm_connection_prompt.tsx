@@ -9,6 +9,7 @@ import { EuiButton, EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+import { MANAGEMENT_APP_ID } from '../../../hooks/use_navigation';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
@@ -27,8 +28,8 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   const {
     services: { application },
   } = useKibana();
-  const currentLocation = useObservable(application.currentLocation$, '');
-  const isOnConnectorsPage = currentLocation.includes('triggersActionsConnectors/connectors');
+  const currentAppId = useObservable(application.currentAppId$, undefined);
+  const isOnConnectorsPage = currentAppId === MANAGEMENT_APP_ID;
 
   const primaryAction = isOnConnectorsPage ? (
     <EuiCallOut
