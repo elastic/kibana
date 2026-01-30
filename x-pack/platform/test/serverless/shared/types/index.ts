@@ -45,4 +45,5 @@ export interface CreateTestConfigOptions<
   apps?: Record<string, { pathname: string; hash?: string }>;
   screenshots?: { directory: string };
   indexRefreshInterval?: string | false;
+  enableFleetDockerRegistry?: boolean;
 }

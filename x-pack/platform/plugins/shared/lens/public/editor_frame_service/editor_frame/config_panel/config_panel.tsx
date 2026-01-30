@@ -37,6 +37,7 @@ import {
   selectVisualization,
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
+  selectCanEditTextBasedQuery,
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -60,7 +61,8 @@ export function ConfigPanel(
   }
 ) {
   const { datasourceMap } = useEditorFrameService();
-  const { activeVisualization, canEditTextBasedQuery, indexPatternService } = props;
+  const { activeVisualization, indexPatternService } = props;
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
