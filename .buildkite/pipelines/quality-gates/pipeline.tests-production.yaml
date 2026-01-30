@@ -27,14 +27,25 @@ steps:
         CHECK_SYNTHETICS: true
         CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
+  - input: 'Cancel bake time step early?'
+    if: build.env("ENVIRONMENT") == "production-canary"
+    fields:
+      - select: 'Enable the option below to skip the remaining bake time'
+        key: 'early-bake-time-cancel' # set BK meta-data key, which is checked during bake time wait
+        options:
+          - label: 'Cancel bake time'
+            value: 'cancel'
+
   - label: ':cookie: 20h bake time before continuing promotion'
     if: build.env("ENVIRONMENT") == "production-canary"
-    command: 'sleep 72000'
+    command: BAKE_SECONDS=72000 .buildkite/scripts/pipelines/quality_gates/bake_time_with_cancellation_check.sh
     soft_fail:
-      # A manual cancel of that step produces return code 255.
+      # Cancelling the bake time earlier through the BK input makes the script exit with code 42.
       # We're treating this case as a soft fail to allow manual bake time skipping.
-      # To stop the promotion entirely, instead click the "Cancel" button at the top of the page
-      - exit_status: 255
+      # To stop the promotion entirely, instead click the "Cancel" button at the top of the page.
+      - exit_status: 42
+    retry:
+      manual: false
     agents:
       # How long can this agent live for in minutes - 21 hours
       instanceMaxAge: 1260
