@@ -34,10 +34,7 @@ const QUERY_DEBOUNCE_MS = 500;
  * Creates an actor that executes ES|QL queries and emits events back to the parent machine.
  * It subscribes to time filter updates and re-executes the query when time changes.
  */
-export function createQueryStreamSamplesActor({
-  data,
-  timeState$,
-}: QueryStreamSamplesMachineDeps) {
+export function createQueryStreamSamplesActor({ data, timeState$ }: QueryStreamSamplesMachineDeps) {
   return fromEventObservable<QueryStreamSamplesEvent, QueryStreamSamplesInput>(({ input }) => {
     return collectQueryStreamDocuments({ data, timeState$, esqlQuery: input.esqlQuery });
   });
@@ -123,4 +120,3 @@ function getAbsoluteTimestamps(
     end: time.max?.valueOf() ?? Date.now(),
   };
 }
-
