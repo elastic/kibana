@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -41,6 +41,7 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
 
   const isIlm = isIlmLifecycle(definition.effective_lifecycle);
   const isDsl = isDslLifecycle(definition.effective_lifecycle);
+  const isRetentionDisabled = isDisabledLifecycle(definition.effective_lifecycle);
 
   const { value: ilmStatsValue, loading: ilmLoading } = useStreamsAppFetch(
     ({ signal }) => {
@@ -71,7 +72,7 @@ export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) =
       }));
     }
 
-    if (isDsl) {
+    if (isDsl || isRetentionDisabled) {
       const lifecycle = definition.effective_lifecycle;
       const retentionPeriod = isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined;
       const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;

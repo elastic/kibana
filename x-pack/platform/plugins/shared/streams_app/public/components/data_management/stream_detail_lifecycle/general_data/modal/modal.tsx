@@ -67,10 +67,11 @@ export function EditLifecycleModal({
   const isCurrentLifecycleInherit = isInheritLifecycle(definition.stream.ingest.lifecycle);
   const initialSelectedAction: LifecycleEditAction = isIlmLifecycle(definition.effective_lifecycle)
     ? 'ilm'
-    : isDslLifecycle(definition.effective_lifecycle) &&
-      !definition.effective_lifecycle.dsl.data_retention
-    ? 'indefinite'
-    : 'custom';
+    : (isDslLifecycle(definition.effective_lifecycle) &&
+      !definition.effective_lifecycle.dsl.data_retention) ||
+      isDisabledLifecycle(definition.effective_lifecycle)
+      ? 'indefinite'
+      : 'custom';
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
@@ -79,7 +80,7 @@ export function EditLifecycleModal({
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
-    selectedAction === 'ilm'
+    isCurrentLifecycleInherit || selectedAction === 'ilm'
   );
 
   const isWired = Streams.WiredStream.GetResponse.is(definition);
@@ -160,17 +161,17 @@ export function EditLifecycleModal({
                 <h5 data-test-subj="inheritRetentionHeading">
                   {isWired
                     ? i18n.translate(
-                        'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
-                        {
-                          defaultMessage: 'Inherit retention',
-                        }
-                      )
+                      'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
+                      {
+                        defaultMessage: 'Inherit retention',
+                      }
+                    )
                     : i18n.translate(
-                        'xpack.streams.streamDetailLifecycle.classicInheritSwitchLabel',
-                        {
-                          defaultMessage: 'Inherit from index template',
-                        }
-                      )}
+                      'xpack.streams.streamDetailLifecycle.classicInheritSwitchLabel',
+                      {
+                        defaultMessage: 'Inherit from index template',
+                      }
+                    )}
                 </h5>
               </EuiText>
               <EuiSpacer size="s" />
@@ -178,17 +179,17 @@ export function EditLifecycleModal({
                 label={
                   isWired
                     ? i18n.translate(
-                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
-                        {
-                          defaultMessage: 'Use the parent stream’s retention configuration',
-                        }
-                      )
+                      'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                      {
+                        defaultMessage: 'Use the parent stream’s retention configuration',
+                      }
+                    )
                     : i18n.translate(
-                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
-                        {
-                          defaultMessage: 'Use the stream’s index template retention configuration',
-                        }
-                      )
+                      'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                      {
+                        defaultMessage: 'Use the stream’s index template retention configuration',
+                      }
+                    )
                 }
                 checked={isInheritToggleOn}
                 onChange={(event) => {
@@ -201,6 +202,11 @@ export function EditLifecycleModal({
                     setIsSaveButtonDisabled(false);
                   } else {
                     setIsInheritToggleOn(false);
+                    // When disabling inheritance with 'indefinite' selected and lifecycle is disabled,
+                    // convert to DSL lifecycle without data retention so it can be saved
+                    if (selectedAction === 'indefinite' && isDisabledLifecycle(lifecycle)) {
+                      setLifecycle({ dsl: {} });
+                    }
                     setIsSaveButtonDisabled(selectedAction === 'ilm');
                   }
                 }}

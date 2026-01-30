@@ -36,7 +36,7 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 
 describe('LifecycleSummary', () => {
   const createMockDefinition = (
-    lifecycle: 'ilm' | 'dsl',
+    lifecycle: 'ilm' | 'dsl' | 'disabled',
     dataRetention?: string
   ): Streams.ingest.all.GetResponse =>
     ({
@@ -44,7 +44,9 @@ describe('LifecycleSummary', () => {
       effective_lifecycle:
         lifecycle === 'ilm'
           ? { ilm: { policy: 'test-policy' } }
-          : { dsl: { data_retention: dataRetention } },
+          : lifecycle === 'dsl'
+          ? { dsl: { data_retention: dataRetention } }
+          : { disabled: {} },
     } as Streams.ingest.all.GetResponse);
 
   const createMockStats = (sizeBytes: number): DataStreamStats =>
@@ -184,6 +186,15 @@ describe('LifecycleSummary', () => {
 
       expect(screen.queryByTestId('dataLifecycle-delete-icon')).not.toBeInTheDocument();
     });
+
+    it('should lifecycle summary for disabled lifecycle', () => {
+      const definition = createMockDefinition('disabled');
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-Hot-name')).toBeInTheDocument();
+    });
+
     describe('Non-Serverless', () => {
       it('should render "Hot" label', () => {
         const definition = createMockDefinition('dsl', '60d');
