@@ -10,68 +10,27 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
-import { GoodBadEventsChart } from './good_bad_events_chart';
-import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
+import type { EventsChartPanelProps } from './types';
+import { useEventsChartPanel } from './hooks/use_events_chart_panel';
 
-export interface Props {
-  slo: SLOWithSummaryResponse;
-  range: { from: Date; to: Date };
-  hideRangeDurationLabel?: boolean;
-  onBrushed?: (timeBounds: TimeBounds) => void;
-}
-
-export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, onBrushed }: Props) {
+export function EventsChartPagePanel({
+  slo,
+  range,
+  hideRangeDurationLabel = false,
+  onBrushed,
+}: EventsChartPanelProps) {
   const { discover, uiSettings } = useKibana().services;
-  const { isLoading, data } = useGetPreviewData({
-    range,
-    isValid: true,
-    indicator: slo.indicator,
-    groupings: slo.groupings,
-    objective: slo.objective,
-    remoteName: slo.remote?.remoteName,
-  });
 
-  function getChartTitle() {
-    switch (slo.indicator.type) {
-      case 'sli.metric.timeslice':
-        return i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
-          defaultMessage: 'Timeslice metric',
-        });
-      default:
-        return i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
-          defaultMessage: 'Good vs bad events',
-        });
-    }
-  }
-
-  function getChart() {
-    if (isLoading) {
-      return <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />;
-    }
-
-    switch (slo.indicator.type) {
-      case 'sli.metric.timeslice':
-        return (
-          <MetricTimesliceEventsChart slo={slo} data={data?.results ?? []} onBrushed={onBrushed} />
-        );
-
-      default:
-        return <GoodBadEventsChart data={data?.results ?? []} slo={slo} onBrushed={onBrushed} />;
-    }
-  }
+  const { getChart, getChartTitle } = useEventsChartPanel({ slo, range, onBrushed });
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">

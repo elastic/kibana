@@ -15,7 +15,7 @@ import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
-import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
+import { EventsChartPagePanel } from '../events_chart_panel/events_chart_page_panel';
 import { HistoricalDataCharts } from '../historical_data_charts/historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';
 
@@ -98,7 +98,7 @@ export function SloDetailsHistory({ slo }: Props) {
         hideHeaderDurationLabel={true}
       />
 
-      <EventsChartPanel
+      <EventsChartPagePanel
         slo={slo}
         range={state.range}
         hideRangeDurationLabel
