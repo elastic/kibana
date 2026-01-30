@@ -87,9 +87,9 @@ class UserPromptClientImpl implements UserPromptClient {
     let searchQuery: QueryDslQueryContainer | undefined;
     if (query?.trim()) {
       const trimmedQuery = query.trim();
-      // Use wildcard queries for substring matching on both fields
-      // This matches the exact query phrase as a substring within each field
-      // Note: Wildcards with leading * can be slower but provide flexible substring matching
+      // Use appropriate query types for each field:
+      // - wildcard on name (keyword field) for substring matching
+      // - match_phrase_prefix on content (text field) allows prefix matching on last term
       searchQuery = {
         bool: {
           should: [
@@ -102,12 +102,11 @@ class UserPromptClientImpl implements UserPromptClient {
                 },
               },
             },
-            // Wildcard on content (text field) - this works for substring matching on the analyzed text content
+            // match_phrase_prefix on content (text field) - allows prefix matching
             {
-              wildcard: {
+              match_phrase_prefix: {
                 content: {
-                  value: `*${trimmedQuery}*`,
-                  case_insensitive: true,
+                  query: trimmedQuery,
                 },
               },
             },
