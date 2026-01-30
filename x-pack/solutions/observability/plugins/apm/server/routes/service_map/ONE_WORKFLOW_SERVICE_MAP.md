@@ -202,8 +202,9 @@ steps:
           span_subtype:           { type: keyword }
           edge_type:              { type: keyword }
           span_count:             { type: long }
-          sample_span_id:         { type: keyword }
-          computed_at:            { type: date }
+          sample_span_id:          { type: keyword }
+          sample_span_ids:         { type: keyword }
+          computed_at:             { type: date }
     on-failure:
       continue: true
 

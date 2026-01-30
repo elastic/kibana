@@ -39,9 +39,12 @@ interface PrecomputedServiceMapResult {
   services: Map<string, ServiceInfo>;
 }
 
+const PAGE_SIZE = 1000; // Process edges in pages to avoid memory issues
+
 /**
  * Fetches service map data from the OneWorkflow pre-computed index.
  * Destinations are already resolved by the workflow - no runtime resolution needed.
+ * Paginates through all results to handle large service maps.
  */
 export async function getPrecomputedServiceMap({
   esClient,
@@ -77,79 +80,102 @@ export async function getPrecomputedServiceMap({
     });
   }
 
-  const response = await esClient.search({
-    index: WORKFLOW_SERVICE_MAP_INDEX,
-    size: 10000,
-    query: { bool: { filter: filters } },
-    _source: [
-      'source_service',
-      'source_agent',
-      'source_environment',
-      'destination_resource',
-      'destination_service',
-      'destination_environment',
-      'destination_agent',
-      'span_type',
-      'span_subtype',
-      'edge_type',
-    ],
-  });
-
   const services = new Map<string, ServiceInfo>();
   const edges: ServiceMapEdge[] = [];
+  // Use stable sort for pagination (same as in resolve_service_map_destinations.ts)
+  let searchAfter: Array<string | number> | undefined;
 
-  for (const hit of response.hits.hits) {
-    const src = hit._source as {
-      source_service: string;
-      source_agent?: string;
-      source_environment?: string;
-      destination_resource?: string;
-      destination_service?: string;
-      destination_environment?: string;
-      destination_agent?: string;
-      span_type?: string;
-      span_subtype?: string;
-      edge_type?: string;
-    };
-
-    const sourceAgentName = (src.source_agent as AgentName) ?? null;
-    const destAgentName = (src.destination_agent as AgentName) ?? null;
-
-    // Add source service to catalog
-    if (!services.has(src.source_service)) {
-      services.set(src.source_service, {
-        serviceName: src.source_service,
-        environment: src.source_environment ?? null,
-        agentName: sourceAgentName,
-      });
-    }
-
-    // Add destination service to catalog (if resolved)
-    if (src.destination_service && !services.has(src.destination_service)) {
-      services.set(src.destination_service, {
-        serviceName: src.destination_service,
-        environment: src.destination_environment ?? null,
-        agentName: destAgentName,
-      });
-    }
-
-    edges.push({
-      sourceService: src.source_service,
-      sourceEnvironment: src.source_environment ?? null,
-      sourceAgentName,
-      destinationResource: src.destination_resource ?? null,
-      destinationService: src.destination_service
-        ? {
-            serviceName: src.destination_service,
-            serviceEnvironment: src.destination_environment ?? null,
-            agentName: destAgentName,
-          }
-        : null,
-      spanType: src.span_type ?? null,
-      spanSubtype: src.span_subtype ?? null,
-      edgeType: src.edge_type ?? 'exit_span',
+  // Paginate through all edges
+  do {
+    const response = await esClient.search({
+      index: WORKFLOW_SERVICE_MAP_INDEX,
+      size: PAGE_SIZE,
+      sort: [
+        { computed_at: { order: 'asc' } },
+        { source_service: { order: 'asc' } },
+        { destination_resource: { order: 'asc' } },
+      ],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+      query: { bool: { filter: filters } },
+      _source: [
+        'source_service',
+        'source_agent',
+        'source_environment',
+        'destination_resource',
+        'destination_service',
+        'destination_environment',
+        'destination_agent',
+        'span_type',
+        'span_subtype',
+        'edge_type',
+      ],
     });
-  }
+
+    const hits = response.hits.hits;
+    if (hits.length === 0) {
+      break;
+    }
+
+    for (const hit of hits) {
+      const src = hit._source as {
+        source_service: string;
+        source_agent?: string;
+        source_environment?: string;
+        destination_resource?: string;
+        destination_service?: string;
+        destination_environment?: string;
+        destination_agent?: string;
+        span_type?: string;
+        span_subtype?: string;
+        edge_type?: string;
+      };
+
+      const sourceAgentName = (src.source_agent as AgentName) ?? null;
+      const destAgentName = (src.destination_agent as AgentName) ?? null;
+
+      // Add source service to catalog
+      if (!services.has(src.source_service)) {
+        services.set(src.source_service, {
+          serviceName: src.source_service,
+          environment: src.source_environment ?? null,
+          agentName: sourceAgentName,
+        });
+      }
+
+      // Add destination service to catalog (if resolved)
+      if (src.destination_service && !services.has(src.destination_service)) {
+        services.set(src.destination_service, {
+          serviceName: src.destination_service,
+          environment: src.destination_environment ?? null,
+          agentName: destAgentName,
+        });
+      }
+
+      edges.push({
+        sourceService: src.source_service,
+        sourceEnvironment: src.source_environment ?? null,
+        sourceAgentName,
+        destinationResource: src.destination_resource ?? null,
+        destinationService: src.destination_service
+          ? {
+              serviceName: src.destination_service,
+              serviceEnvironment: src.destination_environment ?? null,
+              agentName: destAgentName,
+            }
+          : null,
+        spanType: src.span_type ?? null,
+        spanSubtype: src.span_subtype ?? null,
+        edgeType: src.edge_type ?? 'exit_span',
+      });
+    }
+
+    // Get search_after from last hit for next page
+    if (hits.length > 0 && hits[hits.length - 1].sort) {
+      searchAfter = hits[hits.length - 1].sort as Array<string | number>;
+    } else {
+      break;
+    }
+  } while (true);
 
   return { edges, services };
 }

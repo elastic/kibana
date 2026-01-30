@@ -26,6 +26,7 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import {
   computeServiceMapEdges,
+  getLastProcessedTimestamp,
   type ComputeServiceMapEdgesResponse,
 } from './compute_service_map_edges';
 import {
@@ -201,8 +202,10 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Time windows for workflow operations
-const AGGREGATION_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const RESOLUTION_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+// Workflow runs every 5 minutes
+const RESOLUTION_WINDOW_MS = 60 * 60 * 1000; // 1 hour - window to catch transactions that happened after spans
+const LATE_ARRIVAL_BUFFER_MS = 1 * 60 * 1000; // 1 minute buffer for late-arriving spans
+const INITIAL_WINDOW_MS = 5 * 60 * 1000; // 5 minutes - initial window for first run
 
 const serviceMapWorkflowComputeRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-map/workflow/compute-edges',
@@ -222,17 +225,41 @@ const serviceMapWorkflowComputeRoute = createApmServerRoute({
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const apmEventClient = await getApmEventClient(resources);
+    const workflowLogger = logger.get('serviceMapWorkflow');
 
     const now = Date.now();
-    const start = now - AGGREGATION_WINDOW_MS;
     const end = now;
+
+    // Retrieve last processed timestamp to determine start time
+    const lastProcessedTimestamp = await getLastProcessedTimestamp({
+      esClient,
+      logger: workflowLogger,
+    });
+
+    let start: number;
+    if (lastProcessedTimestamp === null) {
+      // First run: use initial window
+      start = now - INITIAL_WINDOW_MS;
+      workflowLogger.info(
+        `First run detected, using ${INITIAL_WINDOW_MS / 1000 / 60}-minute initial window`
+      );
+    } else {
+      // Subsequent runs: query from last processed time minus buffer for late arrivals
+      start = lastProcessedTimestamp - LATE_ARRIVAL_BUFFER_MS;
+      const windowMinutes = Math.round((end - start) / 1000 / 60);
+      workflowLogger.debug(
+        `Querying spans from ${new Date(start).toISOString()} to ${new Date(
+          end
+        ).toISOString()} (${windowMinutes} minutes)`
+      );
+    }
 
     return computeServiceMapEdges({
       apmEventClient,
       esClient,
       start,
       end,
-      logger: logger.get('serviceMapWorkflow'),
+      logger: workflowLogger,
     });
   },
 });
