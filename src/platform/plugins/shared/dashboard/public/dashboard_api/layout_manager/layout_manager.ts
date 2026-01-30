@@ -28,6 +28,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
+import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { childrenUnsavedChanges$, type PanelPackage } from '@kbn/presentation-containers';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
@@ -552,6 +553,19 @@ export function initializeLayoutManager(
     },
     api: {
       layout$,
+      getLayout: (id: string) => {
+        const layout = layout$.getValue();
+        return layout.panels[id] ?? layout.pinnedPanels[id];
+      },
+      setLayout: (id: string, newLayout: DashboardLayoutPanel | PinnedPanelLayoutState) => {
+        const layout = { ...layout$.getValue() };
+        if (layout.panels[id] && 'grid' in newLayout) {
+          layout.panels[id] = newLayout;
+        } else if (layout.pinnedPanels[id] && 'width' in newLayout) {
+          layout.pinnedPanels[id] = newLayout;
+        }
+        layout$.next(layout);
+      },
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
           ...children$.value,
