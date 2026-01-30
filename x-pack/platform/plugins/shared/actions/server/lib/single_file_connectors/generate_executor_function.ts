@@ -36,19 +36,11 @@ export const generateExecutorFunction = ({
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
-    // Copy authType from config to secrets if it's missing in secrets
-    // This is needed because authType is stored in config (since secrets are stripped),
-    // but getAxiosInstanceWithAuth expects it in secrets
-    const secretsWithAuthType = {
-      ...secrets,
-      ...(config?.authType && !secrets?.authType ? { authType: config.authType } : {}),
-    } as Record<string, unknown>;
-
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
-      secrets: secretsWithAuthType,
+      secrets,
     });
 
     if (!actions[subAction]) {
