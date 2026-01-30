@@ -49,11 +49,13 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
       actionsStepData,
       actionTypeRegistry
     );
+    const ruleName = aboutStepData.name;
+
     return {
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: JSON.stringify(formattedRule),
-        attachmentLabel: aboutStepData.name,
+        attachmentLabel: ruleName,
       },
       attachmentPrompt: RULE_ATTACHMENT_PROMPT,
     };
