@@ -33,12 +33,15 @@ import { CONTENT_TYPE_CSV } from '../constants';
 import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
+import { overrideTimeRange } from './lib/override_time_range';
 
 export interface JobParamsCsvESQL {
   query: { esql: string };
   columns?: string[];
   filters?: Filter[];
   browserTimezone?: string;
+  forceNow?: string;
+  timeFieldName?: string;
 }
 
 interface Clients {
@@ -89,12 +92,34 @@ export class CsvESQLGenerator {
       }
     }
 
+    let currentFilters = this.job.filters;
+    if (this.job.forceNow) {
+      this.logger.debug(`Overriding time range filter using forceNow: ${this.job.forceNow}`, {
+        tags: [this.jobId],
+      });
+      this.logger.debug(() => `Current filters: ${JSON.stringify(currentFilters)}`, {
+        tags: [this.jobId],
+      });
+      const updatedFilters = overrideTimeRange({
+        currentFilters,
+        forceNow: this.job.forceNow,
+        logger: this.logger,
+        timeFieldName: this.job.timeFieldName,
+      });
+      this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
+        tags: [this.jobId],
+      });
+      if (updatedFilters) {
+        currentFilters = updatedFilters;
+      }
+    }
+
     const filter =
-      this.job.filters &&
+      currentFilters &&
       buildEsQuery(
         undefined,
         [],
-        this.job.filters,
+        currentFilters,
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 

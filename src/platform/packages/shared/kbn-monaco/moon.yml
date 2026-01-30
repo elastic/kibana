@@ -17,18 +17,33 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-monaco
-dependsOn: []
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/repo-info'
+  - '@kbn/esql-ast'
+  - '@kbn/esql-validation-autocomplete'
+  - '@kbn/esql-types'
 tags:
   - is-webpack-built
-  - platform
-  - shared
+  - package
   - prod
+  - group-platform
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
     - src/**/*
     - '**/*.ts'
-    - src/languages/painless/autocomplete_definitions/*.json
+    - src/painless/autocomplete_definitions/boolean_script_field_script_field.json
+    - src/painless/autocomplete_definitions/common.json
+    - src/painless/autocomplete_definitions/date_script_field.json
+    - src/painless/autocomplete_definitions/double_script_field_script_field.json
+    - src/painless/autocomplete_definitions/filter.json
+    - src/painless/autocomplete_definitions/ip_script_field_script_field.json
+    - src/painless/autocomplete_definitions/long_script_field_script_field.json
+    - src/painless/autocomplete_definitions/processor_conditional.json
+    - src/painless/autocomplete_definitions/score.json
+    - src/painless/autocomplete_definitions/string_script_field_script_field.json
     - '!target/**/*'
 tasks:
   jest:

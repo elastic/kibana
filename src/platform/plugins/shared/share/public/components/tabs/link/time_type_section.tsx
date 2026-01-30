@@ -165,6 +165,7 @@ export const TimeTypeSection = ({
             })}
             checked={isAbsoluteTime}
             onChange={handleTimeTypeChange}
+            data-test-subj="timeRangeSwitch"
           />
           <EuiSpacer size="m" />
         </>
@@ -192,6 +193,7 @@ export const TimeTypeSection = ({
           title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',
           })}
+          data-test-subj="relativeTimeCallout"
         />
       )}
     </>

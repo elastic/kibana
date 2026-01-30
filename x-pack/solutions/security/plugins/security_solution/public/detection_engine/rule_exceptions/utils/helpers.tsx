@@ -115,7 +115,6 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
 export const formatExceptionItemForUpdate = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchema => {
-  /* eslint-disable @typescript-eslint/naming-convention */
   const {
     created_at,
     created_by,
@@ -123,7 +122,6 @@ export const formatExceptionItemForUpdate = (
     tie_breaker_id,
     updated_at,
     updated_by,
-    /* eslint-enable @typescript-eslint/naming-convention */
     ...fieldsToUpdate
   } = exceptionItem;
   return {

@@ -19,3 +19,5 @@ export {
 } from './lib';
 
 export { sanitizeSvg } from './sanitizations/svg';
+
+export { getSafePath } from './utils';

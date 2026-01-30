@@ -16,7 +16,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import { silence } from '../../common';
-import { runElasticsearch, runKibanaServer } from '../../servers';
+import {
+  preCreateSecurityIndexesViaSamlAuth,
+  runElasticsearch,
+  runKibanaServer,
+} from '../../servers';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
@@ -124,6 +128,9 @@ async function runLocalServersAndTests(
 
     // wait for 5 seconds
     await silence(log, 5000);
+
+    // Pre-create Elasticsearch Security indexes after server startup
+    await preCreateSecurityIndexesViaSamlAuth(config, log);
 
     await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } finally {

@@ -6,14 +6,14 @@ pageLoadAssetSize:
   alerting: 28395
   apm: 38573
   apmSourcesAccess: 2278
-  banners: 21558
-  bfetch: 16261
+  banners: 23776
+  bfetch: 21865
   canvas: 15210
-  cases: 180325
+  cases: 180103
   charts: 72940
   cloud: 8836
   cloudDataMigration: 5687
-  cloudDefend: 20945
+  cloudDefend: 24800
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 32168
+  dashboardEnhanced: 31882
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -44,10 +44,10 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
-  enterpriseSearch: 59094
+  enterpriseSearch: 54683
   esql: 10370
   esqlDataGrid: 10209
-  esUiShared: 116884
+  esUiShared: 116879
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -73,35 +73,35 @@ pageLoadAssetSize:
   grokdebugger: 5484
   guidedOnboarding: 26999
   home: 13710
-  imageEmbeddable: 21450
+  imageEmbeddable: 21386
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368
   infra: 56302
   ingestPipelines: 17866
   inputControlVis: 9842
-  inspector: 35060
-  integrationAssistant: 21434
-  interactiveSetup: 73070
-  intercepts: 26158
+  inspector: 39401
+  integrationAssistant: 26455
+  interactiveSetup: 73035
+  intercepts: 21246
   kibanaOverview: 6339
-  kibanaReact: 54762
+  kibanaReact: 54760
   kibanaUsageCollection: 1736
   kibanaUtils: 62813
-  kubernetesSecurity: 20543
+  kubernetesSecurity: 20978
   lens: 66734
   licenseManagement: 13558
   licensing: 10078
   links: 9000
   lists: 5093
   logsDataAccess: 7900
-  logsExplorer: 30088
-  logsShared: 164475
+  logsExplorer: 39815
+  logsShared: 174084
   logstash: 15882
   management: 12951
   maps: 45917
   mapsEms: 6767
-  metricsDataAccess: 67934
+  metricsDataAccess: 78633
   ml: 89000
   mockIdpPlugin: 23090
   monitoring: 28983
@@ -111,22 +111,22 @@ pageLoadAssetSize:
   observability: 107869
   observabilityAIAssistant: 52565
   observabilityAIAssistantApp: 18553
-  observabilityAiAssistantManagement: 6600
-  observabilityLogsExplorer: 25634
+  observabilityAiAssistantManagement: 21508
+  observabilityLogsExplorer: 30254
   observabilityOnboarding: 12872
-  observabilityShared: 115322
+  observabilityShared: 115031
   osquery: 47588
-  painlessLab: 24476
+  painlessLab: 26273
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3058
-  productIntercept: 23846
+  productDocBase: 3074
+  productIntercept: 9860
   profiling: 20716
   remoteClusters: 10170
   reporting: 58600
   rollup: 12709
   runtimeFields: 11828
-  savedObjects: 30786
+  savedObjects: 30912
   savedObjectsFinder: 4319
   savedObjectsManagement: 22426
   savedObjectsTagging: 23144
@@ -135,7 +135,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 8417
   searchAssistant: 6150
-  searchConnectors: 66025
+  searchConnectors: 77984
   searchHomepage: 7962
   searchIndices: 10564
   searchInferenceEndpoints: 8071
@@ -150,11 +150,11 @@ pageLoadAssetSize:
   securitySolutionEss: 34480
   securitySolutionServerless: 49663
   serverless: 27520
-  serverlessObservability: 47018
+  serverlessObservability: 58479
   serverlessSearch: 28909
   sessionView: 47938
   share: 58677
-  slo: 59211
+  slo: 74006
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
@@ -162,20 +162,20 @@ pageLoadAssetSize:
   streams: 8494
   streamsApp: 12431
   streamsAppWrapper: 5787
-  synthetics: 63878
+  synthetics: 69540
   telemetry: 25755
   telemetryManagementSection: 5522
-  threatIntelligence: 25500
+  threatIntelligence: 28408
   timelines: 200384
   transform: 22722
-  triggersActionsUi: 128964
+  triggersActionsUi: 129667
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedHistogram: 24252
+  unifiedHistogram: 25433
   unifiedSearch: 23000
   upgradeAssistant: 27319
-  uptime: 76916
+  uptime: 84988
   urlDrilldown: 21563
   urlForwarding: 7349
   usageCollection: 5655

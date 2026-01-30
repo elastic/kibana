@@ -36,10 +36,8 @@ export const buildSortedEventsQuery = ({
   searchAfterSortId,
   sortOrder,
   timeField,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   track_total_hits,
   fields,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   runtime_mappings,
   _source,
 }: BuildSortedEventsQuery): ESSearchRequest => {

@@ -221,7 +221,6 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
             isAllowedSubAction ? 'allow' : 'deny'
           } execute of ${s1SubAction}`, async () => {
             const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,

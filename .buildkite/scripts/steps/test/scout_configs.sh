@@ -135,15 +135,24 @@ while read -r config_path; do
     continue
   fi
 
-  # Get server run flags for this config from the module data
-  if [[ -z "${module_data:-}" ]]; then
-    echo "⚠️ Warning: No module_data available for config: $config_path"
-    echo "   Skipping config (serverRunFlags cannot be determined)"
-    continue
+  # Get server run flags for this config
+  config_run_modes=""
+
+  if [[ -n "${module_data:-}" ]]; then
+    # Extract serverRunFlags array for this config from module data
+    config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
+  elif [[ -n "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+    # Use serverRunFlags from environment variable (Flaky-test-runner pipeline when JSON is not available)
+    config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
   fi
 
-  # Extract serverRunFlags array for this config
-  config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
+  if [[ -z "$config_run_modes" ]]; then
+    if [[ -z "${module_data:-}" && -z "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+      echo "⚠️ Warning: No module_data or SCOUT_SERVER_RUN_FLAGS available for config: $config_path"
+      echo "   Skipping config (serverRunFlags cannot be determined)"
+      continue
+    fi
+  fi
 
   if [[ -z "$config_run_modes" ]]; then
     echo "⚠️ No serverRunFlags found for config: $config_path"
@@ -163,7 +172,9 @@ while read -r config_path; do
   fi
 
   echo "--- Config: $config_path"
-  echo "   Tags: $(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .tags | join(\", \")")"
+  if [[ -n "${module_data:-}" ]]; then
+    echo "   Tags: $(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .tags | join(\", \")")"
+  fi
   echo "   Modes: $(echo "$config_run_modes" | tr '\n' ' ')"
 
   # Run config for each mode
