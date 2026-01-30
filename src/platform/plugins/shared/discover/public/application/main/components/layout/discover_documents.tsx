@@ -326,7 +326,7 @@ function DiscoverDocumentsComponent({
   );
   const { filters } = useQuerySubscriber({ data: services.data });
 
-  const additionalActions = useMemo(
+  const extensionActions = useMemo(
     () => ({
       openInNewTab: (params: OpenInNewTabParams) => {
         dispatch(internalStateActions.openInNewTabExtPointAction(params));
@@ -341,7 +341,7 @@ function DiscoverDocumentsComponent({
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
-    additionalActions,
+    extensionActions,
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);

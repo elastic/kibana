@@ -402,9 +402,7 @@ export type DiscoverCellAction = CellAction<DiscoverCellActionExecutionContext>;
  * Context object passed to additional cell action methods
  */
 export type AdditionalCellActionContext = CellActionsData &
-  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'> & {
-    additionalActions?: AdditionalCellActionsParams['actions'];
-  };
+  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'>;
 
 /**
  * Additional action to show within expanded cell popovers in the data grid
