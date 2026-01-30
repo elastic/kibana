@@ -11,6 +11,27 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { SavedDashboardPanel } from '../../../dashboard_saved_object';
 import { getReferencesForPanelId } from '../../../../common';
 
+// By reference types that store reference with name 'savedObjectRef'
+const BY_REF_TYPES = ['links', 'search', 'visualization', 'lens', 'map'];
+
+export function transformPanelReferencesOut(
+  panelReferences: SavedObjectReference[],
+  panelRefName?: string
+) {
+  return panelRefName
+    ? panelReferences.map((ref) => {
+        return ref.name === panelRefName && BY_REF_TYPES.includes(ref.type)
+          ? {
+              ...ref,
+              // Embeddable transforms for BY_REF_TYPES embeddable types
+              // are looking for by-reference reference with name 'savedObjectRef'
+              name: 'savedObjectRef',
+            }
+          : ref;
+      })
+    : panelReferences;
+}
+
 function getDrilldownReferences(
   containerReferences: SavedObjectReference[],
   panel: SavedDashboardPanel

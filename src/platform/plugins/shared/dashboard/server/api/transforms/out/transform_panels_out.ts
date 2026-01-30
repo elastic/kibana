@@ -12,7 +12,7 @@ import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
-import { getPanelReferences } from './get_panel_references';
+import { getPanelReferences, transformPanelReferencesOut } from './get_panel_references';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -66,29 +66,38 @@ function transformPanelProperties(
 ) {
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const matchingReference =
-    panelRefName && panelReferences
-      ? panelReferences.find((reference) => reference.name === panelRefName)
-      : undefined;
+  function getPanelType() {
+    if (type) {
+      return type;
+    }
 
-  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
-  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
-  const panelType = matchingReference ? matchingReference.type : type;
+    // Original by-reference implemenation stored embeddable type in reference
+    const matchingReference =
+      panelRefName && panelReferences
+        ? panelReferences.find((reference) => reference.name === panelRefName)
+        : undefined;
+
+    return matchingReference ? matchingReference.type : 'unknown';
+  }
+
+  const panelType = getPanelType();
 
   const transforms = embeddableService?.getTransforms(panelType);
 
   const config = {
     ...embeddableConfig,
-    // <8.19 savedObjectId and title stored as siblings to embeddableConfig
-    ...(savedObjectId !== undefined && { savedObjectId }),
+    // <8.19 title stored as siblings to embeddableConfig
     ...(title !== undefined && { title }),
   };
 
   let transformedPanelConfig;
   try {
     transformedPanelConfig =
-      transforms?.transformOut?.(config, panelReferences, containerReferences) ??
-      defaultTransform(config);
+      transforms?.transformOut?.(
+        config,
+        transformPanelReferencesOut(panelReferences, panelRefName),
+        containerReferences
+      ) ?? defaultTransform(config);
   } catch (transformOutError) {
     // do not prevent read on transformOutError
     logger.warn(
