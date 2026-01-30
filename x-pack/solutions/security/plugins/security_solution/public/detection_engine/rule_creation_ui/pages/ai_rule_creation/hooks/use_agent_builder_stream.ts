@@ -22,6 +22,7 @@ import { KibanaServices } from '../../../../../common/lib/kibana/services';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import * as i18n from '../translations';
+import type { ToolProgressUpdate } from '../agent_builder_updates';
 
 const AGENT_BUILDER_CONVERSE_ASYNC_API_PATH = '/api/agent_builder/converse/async';
 const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = 'security.create_detection_rule';
@@ -61,7 +62,7 @@ export const useAgentBuilderStream = () => {
   const [isCancelled, setIsCancelled] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
-  const [updates, setUpdates] = useState<Array<{ message: string; timestamp: Date }>>([]);
+  const [updates, setUpdates] = useState<Array<ToolProgressUpdate>>([]);
   const [rule, setRule] = useState<RuleResponse | null>(null);
 
   const showErrorToast = useCallback(
@@ -72,20 +73,17 @@ export const useAgentBuilderStream = () => {
   );
 
   const cancelRuleCreation = useCallback(() => {
-    if (abortControllerRef.current) {
-      try {
-        abortControllerRef.current.abort();
-      } catch (error) {
-        showErrorToast(error);
-      }
+    try {
+      abortControllerRef.current?.abort?.();
+    } catch (error) {
+      showErrorToast(error);
     }
 
-    if (subscriptionRef.current) {
-      try {
-        subscriptionRef.current.unsubscribe();
-      } catch (error) {
-        showErrorToast(error);
-      }
+    try {
+      subscriptionRef.current?.unsubscribe?.();
+    } catch (error) {
+      showErrorToast(error);
+    } finally {
       subscriptionRef.current = null;
     }
 
@@ -187,12 +185,8 @@ export const useAgentBuilderStream = () => {
 
   useEffect(() => {
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      subscriptionRef.current?.unsubscribe?.();
+      abortControllerRef.current?.abort?.();
     };
   }, []);
 
