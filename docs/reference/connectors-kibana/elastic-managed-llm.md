@@ -16,7 +16,7 @@ Elastic provides built-in LLMs through AI connectors vetted for GenAI product fe
 
 ## Region and hosting
 
-The Preconfigured AI Connectors use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
+The Elastic Managed LLMs use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](docs-content://explore-analyze/elastic-inference/eis.md) for details.
 
 ## Data protection
 
