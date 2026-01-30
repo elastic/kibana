@@ -7,36 +7,51 @@
 export function generateSharepointSearchWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.search'
-description: 'Search SharePoint sites, lists, list items, and drive items by query'
+description: 'Use this tool to run a Search query against SharePoint Online.'
 enabled: true
+tags:
+  - workflow
+  - example
 triggers:
   - type: 'manual'
 inputs:
   - name: query
     type: string
-  - name: entity_types
+    description: Search query
+    required: true
+  - name: entityTypes
     type: array
-    default:
-      - "site"
+    default: ["site"]
+    required: true
+    description: The type of entity to search
   - name: region
     type: string
-    default: "NAM"
-  - name: from
-    type: number
+    default: NAM
     required: false
-  - name: size
-    type: number
-    required: false
+    description: The region (NAM, EUR, APC, LAM, MEA)
 steps:
   - name: search-sharepoint
     type: sharepoint-online.search
     connector-id: ${stackConnectorId}
     with:
       query: "\${{inputs.query}}"
-      entityTypes: \${{inputs.entity_types}}
+      entityTypes: \${{inputs.entityTypes}}
       region: "\${{inputs.region}}"
-      from: \${{inputs.from}}
-      size: \${{inputs.size}}
+`;
+}
+
+export function generateSharepointGetAllSitesWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.get_all_sites'
+description: 'List all SharePoint sites'
+enabled: true
+triggers:
+  - type: 'manual'
+steps:
+  - name: get-all-sites
+    type: sharepoint-online.getAllSites
+    connector-id: ${stackConnectorId}
+    with: {}
 `;
 }
 
@@ -62,13 +77,19 @@ steps:
 export function generateSharepointGetSitePagesWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_pages'
-description: 'List pages for a SharePoint site'
+description: 'Use this tool to get all of the pages of a _specific_ SharePoint Online site'
+
 enabled: true
+tags:
+  - workflow
+  - example
 triggers:
   - type: 'manual'
 inputs:
   - name: site_id
     type: string
+    required: true
+    description: "The Site ID we want to get pages for"
 steps:
   - name: get-site-pages
     type: sharepoint-online.getSitePages
@@ -81,7 +102,7 @@ steps:
 export function generateSharepointGetSitePageContentsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_page_contents'
-description: 'Get SharePoint site page contents including canvas layout'
+description: "Use this tool to get the contents of a particular Site page."
 enabled: true
 triggers:
   - type: 'manual'
@@ -97,6 +118,66 @@ steps:
     with:
       siteId: "\${{inputs.site_id}}"
       pageId: "\${{inputs.page_id}}"
+`;
+}
+
+export function generateSharepointGetSiteDrivesWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.get_site_drives'
+description: 'List drives for a SharePoint site'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: site_id
+    type: string
+steps:
+  - name: get-site-drives
+    type: sharepoint-online.getSiteDrives
+    connector-id: ${stackConnectorId}
+    with:
+      siteId: "\${{inputs.site_id}}"
+`;
+}
+
+export function generateSharepointGetSiteListsWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.get_site_lists'
+description: 'List lists for a SharePoint site'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: site_id
+    type: string
+steps:
+  - name: get-site-lists
+    type: sharepoint-online.getSiteLists
+    connector-id: ${stackConnectorId}
+    with:
+      siteId: "\${{inputs.site_id}}"
+`;
+}
+
+export function generateSharepointGetSiteListItemsWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.get_site_list_items'
+description: 'List items for a SharePoint list'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: site_id
+    type: string
+  - name: list_id
+    type: string
+steps:
+  - name: get-site-list-items
+    type: sharepoint-online.getSiteListItems
+    connector-id: ${stackConnectorId}
+    with:
+      siteId: "\${{inputs.site_id}}"
+      listId: "\${{inputs.list_id}}"
 `;
 }
 
@@ -123,6 +204,28 @@ steps:
 `;
 }
 
+export function generateSharepointDownloadDriveItemWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.download_drive_item'
+description: 'Download drive item content as text'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: drive_id
+    type: string
+  - name: item_id
+    type: string
+steps:
+  - name: download-drive-item
+    type: sharepoint-online.downloadDriveItem
+    connector-id: ${stackConnectorId}
+    with:
+      driveId: "\${{inputs.drive_id}}"
+      itemId: "\${{inputs.item_id}}"
+`;
+}
+
 export function generateSharepointDownloadItemFromUrlWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.download_item_from_url'
@@ -139,5 +242,34 @@ steps:
     connector-id: ${stackConnectorId}
     with:
       downloadUrl: "\${{inputs.download_url}}"
+`;
+}
+
+export function generateSharepointCallGraphApiWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'sources.sharepoint.call_graph_api'
+description: 'Call a Microsoft Graph v1.0 endpoint by path'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: method
+    type: choice
+    options:
+      - "GET"
+      - "POST"
+  - name: path
+    type: string
+  - name: body
+    type: string
+    required: false
+steps:
+  - name: call-graph-api
+    type: sharepoint-online.callGraphAPI
+    connector-id: ${stackConnectorId}
+    with:
+      method: "\${{inputs.method}}"
+      path: "\${{inputs.path}}"
+      body: "\${{inputs.body}}"
 `;
 }
