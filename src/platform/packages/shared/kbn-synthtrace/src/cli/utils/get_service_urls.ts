@@ -13,13 +13,20 @@ import { readKibanaConfig } from './read_kibana_config';
 import type { Logger } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
-import { getApiKeyHeader } from './get_api_key_header';
+import { getApiKeyHeader, getBasicAuthHeader } from './get_auth_header';
 
 async function getFetchStatus(url: string, apiKey?: string) {
   try {
-    const response = await fetch(url, {
-      dispatcher: getFetchAgent(url),
-      headers: getApiKeyHeader(apiKey),
+    const parsedUrl = new URL(url);
+    const { username, password } = parsedUrl;
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    const response = await fetch(parsedUrl.toString(), {
+      dispatcher: getFetchAgent(parsedUrl.toString()),
+      headers: {
+        ...getBasicAuthHeader(username, password),
+        ...getApiKeyHeader(apiKey),
+      },
     } as RequestInit);
     return response.status;
   } catch (error) {
@@ -79,17 +86,15 @@ async function getKibanaUrl({
       return {
         kibanaUrl: targetKibanaUrl.replace(/\/$/, ''),
         kibanaHeaders: getApiKeyHeader(apiKey),
+        apiKey,
       };
     }
 
     const url = new URL(targetKibanaUrl);
-    const authHeaders: Record<string, string> = {};
-    if (url.username || url.password) {
-      const credentials = `${url.username}:${url.password}`;
-      authHeaders.Authorization = `Basic ${Buffer.from(credentials).toString('base64')}`;
-      url.username = '';
-      url.password = '';
-    }
+    const { username, password } = url;
+    url.username = '';
+    url.password = '';
+    const authHeaders = getBasicAuthHeader(username, password);
     targetKibanaUrl = url.toString();
 
     const unredirectedResponse = await fetch(targetKibanaUrl, {
@@ -124,6 +129,8 @@ async function getKibanaUrl({
     return {
       kibanaUrl: discoveredKibanaUrl.replace(/\/$/, ''),
       kibanaHeaders: authHeaders,
+      username,
+      password,
     };
   } catch (error) {
     throw new Error(
@@ -275,7 +282,7 @@ export async function getServiceUrls({
     });
   }
 
-  const { kibanaUrl, kibanaHeaders } = await getKibanaUrl({
+  const { kibanaUrl, kibanaHeaders, username, password } = await getKibanaUrl({
     targetKibanaUrl,
     apiKey,
     logger,
@@ -288,5 +295,8 @@ export async function getServiceUrls({
     esUrl: formattedEsUrl,
     kibanaHeaders,
     esHeaders,
+    username,
+    password,
+    apiKey,
   };
 }
