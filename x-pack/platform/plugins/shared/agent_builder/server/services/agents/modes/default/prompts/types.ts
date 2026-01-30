@@ -11,14 +11,12 @@ import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ResolvedConfiguration } from '../../types';
 import type { ProcessedConversation } from '../../utils/prepare_conversation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
-import { SkillsService } from '@kbn/agent-builder-server/runner';
 
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
   processedConversation: ProcessedConversation;
   filestore: IFileStore;
-  skillsService: SkillsService;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
 }

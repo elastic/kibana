@@ -1,14 +1,19 @@
-import { SkillsService } from '@kbn/agent-builder-server/runner';
+import { IFileStore } from '@kbn/agent-builder-server/runner';
+import { isSkillFileEntry } from '../runner/store/volumes/skills/utils';
 
 export const getSkillsInstructions = async ({
-    skills,
+    filesystem,
 }: {
-    skills: SkillsService;
+    filesystem: IFileStore;
 }): Promise<string> => {
 
-    const allSkills = skills.list()
+    const fileEntries = await filesystem.glob('/**/SKILL.md')
+    const skillsFileEntries = fileEntries
+        .filter(isSkillFileEntry)
+        .toSorted((a, b) => a.path.localeCompare(b.path))
+
     const description =
-        allSkills.length === 0
+        skillsFileEntries.length === 0
             ? [
                 "## SKILLS",
                 "Load a skill to get detailed instructions for a specific task. No skills are currently available."
@@ -20,10 +25,10 @@ export const getSkillsInstructions = async ({
                     "Use this when a task matches an available skill's description.",
                     "Only the skills listed here are available:"].join(" "),
                 "<available_skills>",
-                ...allSkills.flatMap((skill) => [
-                    `    <skill path="${skill.basePath}">`,
-                    `      <name>${skill.name}</name>`,
-                    `      <description>${skill.description}</description>`,
+                ...skillsFileEntries.flatMap((skillFileEntry) => [
+                    `    <skill path="${skillFileEntry.path}">`,
+                    `      <name>${skillFileEntry.metadata.skill_name}</name>`,
+                    `      <description>${skillFileEntry.metadata.skill_description}</description>`,
                     `    </skill>`,
                 ]),
                 "</available_skills>",

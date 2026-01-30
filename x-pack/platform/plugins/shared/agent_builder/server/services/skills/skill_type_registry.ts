@@ -53,12 +53,7 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   }
 
   list() {
-    return [...this.skills.values()].sort((a, b) => getSkillEntryPath({
-      skill: a,
-    }).localeCompare(
-      getSkillEntryPath({
-        skill: b,
-      })));
+    return [...this.skills.values()]
   }
 }
 

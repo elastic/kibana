@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
+import { FileEntry, FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 import { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
@@ -64,9 +64,10 @@ export const createSkillEntries = (skill: SkillTypeDefinition): (SkillFileEntry 
       readonly: true,
       // specific tool-result meta
       skill_name: skill.name,
+      skill_description: skill.description,
       skill_id: skill.id,
     },
-  } as SkillFileEntry,
+  } satisfies SkillFileEntry,
   ...skill.referencedContent?.map((referencedContent) => {
     return {
       type: 'file' as const,
@@ -87,7 +88,11 @@ export const createSkillEntries = (skill: SkillTypeDefinition): (SkillFileEntry 
         // specific tool-result meta
         skill_id: skill.id,
       }
-    } as SkillReferencedContentFileEntry
+    } satisfies SkillReferencedContentFileEntry
   }) ?? []
   ];
 };
+
+export const isSkillFileEntry = (entry: FileEntry): entry is SkillFileEntry => {
+  return entry.metadata.type === FileEntryType.skill;
+}

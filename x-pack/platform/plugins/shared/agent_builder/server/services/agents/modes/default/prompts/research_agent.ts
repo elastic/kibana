@@ -55,7 +55,6 @@ export const getBaseSystemMessage = async ({
   processedConversation: { attachmentTypes },
   outputSchema,
   filestore,
-  skillsService
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -70,7 +69,7 @@ That answering agent will have access to the conversation history and to all inf
 
 ${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
-${SKILLS_ENABLED ? await getSkillsInstructions({ skills: skillsService }) : ''}
+${SKILLS_ENABLED ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 
 ## INSTRUCTIONS
 
@@ -97,7 +96,6 @@ export const getResearchSystemMessage = async ({
   processedConversation: { attachmentTypes },
   outputSchema,
   filestore,
-  skillsService,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -186,7 +184,7 @@ Constraints:
 
 ${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
 
-${SKILLS_ENABLED ? await getSkillsInstructions({ skills: skillsService }) : ''}
+${SKILLS_ENABLED ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 
 ${customInstructionsBlock(customInstructions)}
 
