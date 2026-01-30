@@ -6,9 +6,12 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
+
+export const MANAGED_SOURCES_VERSION = 1; // increment this when changing the managed sources
 
 export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
@@ -21,6 +24,9 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     managed: {
       type: 'boolean',
+    },
+    managedVersion: {
+      type: 'integer',
     },
     enabled: {
       type: 'boolean',
@@ -42,10 +48,24 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
   },
 };
 
+const version1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        managedVersion: { type: 'integer' },
+      },
+    },
+  ],
+};
+
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: monitoringEntitySourceTypeNameMappings,
+  modelVersions: {
+    1: version1,
+  },
 };

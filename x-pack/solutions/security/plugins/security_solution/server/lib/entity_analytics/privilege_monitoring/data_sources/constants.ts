@@ -21,6 +21,7 @@ export const OKTA_ADMIN_ROLES: string[] = [
   'Read-only Administrator',
 ];
 
+// If updating matchers, bump MANAGED_SOURCES_VERSION in monitoring_entity_source_type.ts
 export const INTEGRATION_MATCHERS_DETAILED: Record<IntegrationType, Matcher> = {
   entityanalytics_okta: { fields: ['user.roles'], values: OKTA_ADMIN_ROLES },
   // Well-known Active Directory SIDs (RID → privilege mapping)
