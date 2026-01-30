@@ -7,30 +7,31 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+const LOG_DOCUMENT_FIELDS = [
+  '@timestamp',
+  'message',
+  'log.level',
+  'service.name',
+  'trace.id',
+  'span.id',
+  'http.response.status_code',
+  'error.exception.message',
+];
+
+
 export interface LogDocument {
   '@timestamp'?: string;
   message?: string;
   'log.level'?: string;
-  service?: {
-    name?: string;
-    namespace?: string;
-    version?: string;
-    environment?: string;
-    node?: { name?: string };
-  };
-  resource?: {
-    attributes?: Record<string, unknown>;
-  };
-  host?: { name?: string };
-  container?: { id?: string };
-  trace?: { id?: string };
-  span?: { id?: string };
-  error?: {
-    message?: string;
-    type?: string;
-    stack_trace?: string;
-  };
-  [key: string]: unknown;
+  'service.name'?: string;
+  'service.environment'?: string;
+  'host.name'?: string;
+  'container.id'?: string;
+  'trace.id'?: string;
+  'span.id'?: string;
+  'error.message'?: string;
+  'error.exception.message'?: string;
+  'http.response.status_code'?: number;
 }
 
 export const getLogDocumentById = async ({
@@ -46,7 +47,7 @@ export const getLogDocumentById = async ({
     index,
     size: 1,
     _source: false,
-    fields: ['*'],
+    fields: LOG_DOCUMENT_FIELDS,
     query: {
       ids: { values: [id] },
     },

@@ -12,10 +12,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 
 export interface LogData {
   traceId: string;
-  serviceName: string;
-  errorMessage: string;
-  warningMessage: string;
-  infoMessage: string;
 }
 
 export interface LogsResult {
@@ -23,16 +19,17 @@ export interface LogsResult {
   logData: LogData;
 }
 
-const SERVICE_NAME = 'payment-service';
 const ERROR_MESSAGE = 'Failed to process payment: Connection timeout';
 const WARNING_MESSAGE = 'High latency detected in payment processing';
 const INFO_MESSAGE = 'Payment request received';
 
 export const createLogsWithErrors = async ({
   getService,
+  serviceName = 'payment-service',
   environment = 'production',
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
+  serviceName?: string;
   environment?: string;
 }): Promise<LogsResult> => {
   const synthtrace = getService('synthtrace');
@@ -60,7 +57,7 @@ export const createLogsWithErrors = async ({
         .create()
         .message(message)
         .logLevel(logLevel)
-        .service(SERVICE_NAME)
+        .service(serviceName)
         .defaults({
           'service.environment': environment,
           'trace.id': traceId,
@@ -71,16 +68,11 @@ export const createLogsWithErrors = async ({
     });
 
   await logsSynthtraceEsClient.index([logs]);
-  await logsSynthtraceEsClient.refresh();
 
   return {
     logsSynthtraceEsClient,
     logData: {
       traceId,
-      serviceName: SERVICE_NAME,
-      errorMessage: ERROR_MESSAGE,
-      warningMessage: WARNING_MESSAGE,
-      infoMessage: INFO_MESSAGE,
     },
   };
 };

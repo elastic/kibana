@@ -83,7 +83,6 @@ async function fetchLogContext({
   esClient: IScopedClusterClient;
   index: string;
   id: string;
-  logEntry: LogDocument;
 }): Promise<string> {
   const logTimestamp = logEntry['@timestamp'] as string;
   const logTime = moment(logTimestamp);

@@ -40,11 +40,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let infoLogId: string;
       let infoLogIndex: string;
 
+      const serviceName = 'payment-service';
+
       before(async () => {
         ({ llmProxy, connectorId } = await setupLlmProxy(getService));
 
         ({ logsSynthtraceEsClient, logData } = await createLogsWithErrors({
           getService,
+          serviceName,
           environment: 'production',
         }));
 
@@ -54,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             query: {
               bool: {
                 must: [
-                  { term: { 'service.name': logData.serviceName } },
+                  { term: { 'service.name': serviceName } },
                   { term: { 'trace.id': logData.traceId } },
                   { term: { 'log.level': logLevel } },
                 ],

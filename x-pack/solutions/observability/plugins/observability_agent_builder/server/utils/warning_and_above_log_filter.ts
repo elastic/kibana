@@ -10,8 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 interface LogDocumentForSeverityCheck {
   'log.level'?: string;
   'http.response.status_code'?: number | string;
-  'exception.message'?: string;
-  'error.message'?: string;
+  'error.exception.message'?: string;
   message?: string;
 }
 
