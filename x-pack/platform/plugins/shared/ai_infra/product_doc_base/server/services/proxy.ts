@@ -20,7 +20,7 @@ export interface ArtifactRepositoryProxySettings {
 type ProxyAgent = HttpsProxyAgent | HttpProxyAgent;
 type GetProxyAgentParams = ArtifactRepositoryProxySettings & { targetUrl: string };
 
-export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
+function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   const isHttps = options.targetUrl.startsWith('https:');
   const agentOptions = isHttps ? getProxyAgentOptions(options) : options.proxyUrl;
   const agent: ProxyAgent = isHttps
@@ -30,7 +30,7 @@ export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
   return agent;
 }
 
-export function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOptions {
+function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOptions {
   const endpointParsed = new URL(options.targetUrl);
   const proxyParsed = new URL(options.proxyUrl);
   const authValue = proxyParsed.username
