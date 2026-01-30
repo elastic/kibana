@@ -14,8 +14,6 @@ import { isEmpty, uniq } from 'lodash';
 
 import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
-
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
   appContextService,
@@ -360,7 +358,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 
   const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const { space_ids: spaceIds } = request.body;
 
   logger.debug(`Creating agent policy [${newPolicy.name}]`);
@@ -399,7 +396,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
     });
 
