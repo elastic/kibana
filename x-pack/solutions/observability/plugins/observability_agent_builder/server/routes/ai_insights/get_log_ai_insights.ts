@@ -157,7 +157,7 @@ function generateLogSummary({
 
   const systemPrompt = isErrorOrWarning
     ? dedent(`
-        You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
+        You are an expert SRE assistant analyzing an ${log['log.level']} log entry. Provide a thorough investigation:
 
         - **What happened**: Summarize the error in plain language
         - **Where it originated**: Identify the service, component, or code path
