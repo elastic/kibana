@@ -20,7 +20,7 @@ export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () =
       {
         ...opts,
         attributes: {
-          'inscrumentationScope.name': '@kbn/evals',
+          'instrumentationScope.name': '@kbn/evals',
           'task.name': name,
           ...opts.attributes,
         },
@@ -42,7 +42,7 @@ export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb:
       {
         ...opts,
         attributes: {
-          'inscrumentationScope.name': '@kbn/evals',
+          'instrumentationScope.name': '@kbn/evals',
           'evaluator.name': name, // Set on this span too
           ...opts.attributes,
         },
