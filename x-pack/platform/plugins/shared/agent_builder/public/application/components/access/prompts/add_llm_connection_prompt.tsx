@@ -29,9 +29,9 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
     services: { application },
   } = useKibana();
   const currentAppId = useObservable(application.currentAppId$, undefined);
-  const isOnConnectorsPage = currentAppId === MANAGEMENT_APP_ID;
+  const isInManagementApp = currentAppId === MANAGEMENT_APP_ID;
 
-  const primaryAction = isOnConnectorsPage ? (
+  const primaryAction = isInManagementApp ? (
     <EuiCallOut
       announceOnMount
       size="s"
