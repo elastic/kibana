@@ -20,13 +20,8 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-types'
-  - '@kbn/esql-utils'
-  - '@kbn/esql-language'
   - '@kbn/react-field'
   - '@kbn/field-utils'
-  - '@kbn/projects-solutions-groups'
-  - '@kbn/core'
-  - '@kbn/licensing-types'
 tags:
   - shared-browser
   - package
@@ -37,6 +32,7 @@ fileGroups:
   src:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
+    - src/**/*
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
