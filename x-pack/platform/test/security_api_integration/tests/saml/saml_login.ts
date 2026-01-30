@@ -692,7 +692,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
-        expect(handshakeCookie.sameSite).to.be('none');
         checkIntermediateSessionCookiePropsDefault(handshakeCookie);
 
         const redirectURL = url.parse(
