@@ -82,11 +82,20 @@ async function getKibanaUrl({
       };
     }
 
-    const targetAuth = parse(targetKibanaUrl).auth;
+    const url = new URL(targetKibanaUrl);
+    const authHeaders: Record<string, string> = {};
+    if (url.username || url.password) {
+      const credentials = `${url.username}:${url.password}`;
+      authHeaders.Authorization = `Basic ${Buffer.from(credentials).toString('base64')}`;
+      url.username = '';
+      url.password = '';
+    }
+    targetKibanaUrl = url.toString();
 
     const unredirectedResponse = await fetch(targetKibanaUrl, {
       method: 'HEAD',
       redirect: 'manual',
+      headers: authHeaders,
       dispatcher: getFetchAgent(targetKibanaUrl),
     } as RequestInit);
 
@@ -96,28 +105,25 @@ async function getKibanaUrl({
         ?.replace('/spaces/enter', '')
         ?.replace('spaces/space_selector', '') || targetKibanaUrl;
 
-    const discoveredKibanaUrlWithAuth = format({
-      ...parse(discoveredKibanaUrl),
-      auth: targetAuth,
-    });
-
-    const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
+    const redirectedResponse = await fetch(discoveredKibanaUrl, {
       method: 'HEAD',
-      dispatcher: getFetchAgent(discoveredKibanaUrlWithAuth),
+      headers: authHeaders,
+      dispatcher: getFetchAgent(discoveredKibanaUrl),
     } as RequestInit);
 
     if (redirectedResponse.status !== 200) {
       throw new Error(
-        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}, got ${
+        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrl)}, got ${
           redirectedResponse.status
         }`
       );
     }
 
-    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
+    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrl)}`);
 
     return {
-      kibanaUrl: discoveredKibanaUrlWithAuth.replace(/\/$/, ''),
+      kibanaUrl: discoveredKibanaUrl.replace(/\/$/, ''),
+      kibanaHeaders: authHeaders,
     };
   } catch (error) {
     throw new Error(
