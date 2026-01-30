@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './components';
-export { FeedbackForm } from './components';
-export { FeedbackBody } from './components';
-export { FeedbackFooter } from './components';
-export { FeedbackHeader } from './components';
+import type { AnalyticsServiceStart, TelemetryCounter } from '@kbn/core/public';
+import { filter, firstValueFrom } from 'rxjs';
 
-export { getUserEmail } from './utils';
-export { getCurrentAppTitle } from './utils';
-export { canSendTelemetry } from './utils';
+export const canSendTelemetry = async (
+  analytics: AnalyticsServiceStart
+): Promise<TelemetryCounter> =>
+  firstValueFrom(
+    analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
+  );

@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import { filter, firstValueFrom } from 'rxjs';
+import { canSendTelemetry } from '../utils';
 
 interface Props {
   analytics: AnalyticsServiceStart;
@@ -24,16 +24,14 @@ export const FeedbackButton = ({ analytics, handleShowFeedbackForm }: Props) => 
 
   useEffect(() => {
     setIsLoading(true);
-    firstValueFrom(
-      analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
-    )
-      .then((isNotAdblocked) => {
-        if (isNotAdblocked) {
+
+    canSendTelemetry(analytics)
+      .then((canSend) => {
+        if (canSend) {
           setEnabledFeedbackButton(true);
         }
       })
       .catch(() => {
-        // firstValueFrom throws if the observable completes without emitting any value
         setEnabledFeedbackButton(false);
       })
       .finally(() => {

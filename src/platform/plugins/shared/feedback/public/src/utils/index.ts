@@ -9,3 +9,4 @@
 
 export { getUserEmail } from './get_user_email';
 export { getCurrentAppTitle } from './get_current_app_title';
+export { canSendTelemetry } from './can_send_telemetry';
