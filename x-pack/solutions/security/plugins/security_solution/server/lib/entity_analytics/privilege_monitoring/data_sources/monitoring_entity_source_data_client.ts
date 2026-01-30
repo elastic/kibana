@@ -50,12 +50,12 @@ export class MonitoringEntitySourceDataClient {
 
     const sanitizedUpdate: PartialMonitoringEntitySource = {
       ...update,
+      matchersModifiedByUser: true,
       matchers: update.matchers?.map((matcher: Matcher) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
       })),
     };
-
     return this.monitoringEntitySourceClient.update(sanitizedUpdate);
   }
 

@@ -86,6 +86,7 @@ export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySource
     type: MonitoringEntitySourceType.optional(),
     managed: z.boolean().optional(),
     managedVersion: z.number().int().optional(),
+    matchersModifiedByUser: z.boolean().optional(),
   })
 );
 

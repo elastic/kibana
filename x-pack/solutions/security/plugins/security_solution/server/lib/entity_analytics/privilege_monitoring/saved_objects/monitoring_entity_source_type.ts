@@ -41,6 +41,9 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
       type: 'object',
       dynamic: false,
     },
+    matchersModifiedByUser: {
+      type: 'boolean',
+    },
     filter: {
       dynamic: false,
       type: 'object',
@@ -59,6 +62,28 @@ const version1: SavedObjectsModelVersion = {
   ],
 };
 
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        matchersModifiedByUser: { type: 'boolean' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            matchersModifiedByUser: false,
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -67,5 +92,6 @@ export const monitoringEntitySourceType: SavedObjectsType = {
   mappings: monitoringEntitySourceTypeNameMappings,
   modelVersions: {
     1: version1,
+    2: version2,
   },
 };

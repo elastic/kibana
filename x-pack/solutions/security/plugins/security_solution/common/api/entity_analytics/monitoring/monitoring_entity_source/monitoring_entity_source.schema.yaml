@@ -208,6 +208,8 @@ components:
             type: boolean
           managedVersion:
             type: integer
+          matchersModifiedByUser: 
+            type: boolean
 
     Matcher:
       type: object
