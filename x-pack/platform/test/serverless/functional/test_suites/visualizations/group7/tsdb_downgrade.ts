@@ -19,7 +19,7 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, svlCommonPage } = getPageObjects(['common', 'lens', 'svlCommonPage']);
+  const { lens, svlCommonPage } = getPageObjects(['common', 'lens', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
