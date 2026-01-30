@@ -17,14 +17,22 @@ import {
 describe('shouldShowFieldFilterInOutActions', () => {
   const mockOnFilter: DocViewFilterFn = jest.fn();
 
-  const createMockField = (
-    filterable: boolean = true,
-    isComputedColumn: boolean = false
-  ): DataViewField => {
+  const createMockField = ({
+    name = 'test_field',
+    filterable = true,
+    scripted = false,
+    isComputedColumn = false,
+  }: {
+    name?: string;
+    filterable: boolean;
+    scripted?: boolean;
+    isComputedColumn: boolean;
+  }): DataViewField => {
     return {
-      name: 'test_field',
+      name,
       type: 'string',
       filterable,
+      scripted,
       isComputedColumn,
     } as DataViewField;
   };
@@ -35,7 +43,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
 
   describe('shouldShowFieldFilterInOutActions', () => {
     it('should return false when onFilter is undefined', () => {
-      const field = createMockField(true, false);
+      const field = createMockField({ filterable: true, isComputedColumn: false });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,
@@ -45,7 +53,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return true when onFilter is provided', () => {
-      const field = createMockField(true, false);
+      const field = createMockField({ filterable: true, isComputedColumn: false });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,
@@ -55,7 +63,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return false when field is not filterable', () => {
-      const field = createMockField(false, false);
+      const field = createMockField({ filterable: false, isComputedColumn: false });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,
@@ -65,7 +73,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return true for computed columns when hideFilteringOnComputedColumns is false', () => {
-      const field = createMockField(true, true);
+      const field = createMockField({ filterable: true, isComputedColumn: true });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,
@@ -75,7 +83,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return false for computed columns when hideFilteringOnComputedColumns is true', () => {
-      const field = createMockField(true, true);
+      const field = createMockField({ filterable: true, isComputedColumn: true });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: true,
@@ -85,7 +93,7 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return true for regular filterable fields when hideFilteringOnComputedColumns is true', () => {
-      const field = createMockField(true, false);
+      const field = createMockField({ filterable: true, isComputedColumn: false });
       const result = shouldShowFieldFilterInOutActions({
         dataViewField: field,
         hideFilteringOnComputedColumns: true,
@@ -97,13 +105,12 @@ describe('shouldShowFieldFilterInOutActions', () => {
 
   describe('shouldShowFieldFilterExistAction', () => {
     it('should return false when field is scripted', () => {
-      const field = {
+      const field = createMockField({
         name: 'scripted_field',
-        type: 'string',
         filterable: true,
         scripted: true,
-      } as DataViewField;
-
+        isComputedColumn: false,
+      });
       const result = shouldShowFieldFilterExistAction({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,
@@ -113,13 +120,12 @@ describe('shouldShowFieldFilterInOutActions', () => {
     });
 
     it('should return true when field is not scripted', () => {
-      const field = {
+      const field = createMockField({
         name: 'regular_field',
-        type: 'string',
         filterable: true,
         scripted: false,
-      } as DataViewField;
-
+        isComputedColumn: false,
+      });
       const result = shouldShowFieldFilterExistAction({
         dataViewField: field,
         hideFilteringOnComputedColumns: false,

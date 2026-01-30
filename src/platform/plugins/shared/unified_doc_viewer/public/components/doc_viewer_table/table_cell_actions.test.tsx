@@ -332,9 +332,9 @@ describe('TableActions', () => {
         ));
 
         render(<>{actions}</>);
-        expect(screen.queryByText('Copy value')).toBeNull();
-        expect(screen.queryByText('Filter for value')).toBeNull();
-        expect(screen.queryByText('Filter out value')).toBeNull();
+        expect(screen.queryByText('Copy value')).not.toBeInTheDocument();
+        expect(screen.queryByText('Filter for value')).not.toBeInTheDocument();
+        expect(screen.queryByText('Filter out value')).not.toBeInTheDocument();
       });
     });
   });
@@ -389,7 +389,7 @@ describe('TableActions', () => {
       ));
 
       render(<>{actions}</>);
-      expect(screen.queryByText('Filter for field present')).toBeNull();
+      expect(screen.queryByText('Filter for field present')).not.toBeInTheDocument();
     });
   });
 
