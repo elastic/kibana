@@ -7,7 +7,8 @@ applies_to:
 
 # Elastic Managed LLMs
 
-Elastic provides built-in LLMs through AI connectors vetted for GenAI product features across our platform. You can use these models through the [Elastic {{infer-cap}} Service (EIS)](docs-content://explore-analyze/elastic-inference/eis.md).
+Elastic provides built-in LLMs through managed AI connectors.  
+These connectors are accessed and managed through the [Elastic {{infer-cap}} Service (EIS)](docs-content://explore-analyze/elastic-inference/eis.md), which is the single entry point for using Elastic Managed LLMs.
 
 ## Prerequisites
 
