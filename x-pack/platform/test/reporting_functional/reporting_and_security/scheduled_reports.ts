@@ -73,7 +73,6 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     };
 
     before(async () => {
-      await reportingFunctional.loginReportingManager();
       await reportingFunctional.initEcommerce();
     });
 
@@ -90,6 +89,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     it('validates required fields', async () => {
+      await reportingFunctional.loginReportingManager();
       await openFlyout();
 
       // Verify the title field is pre-filled with the dashboard name
