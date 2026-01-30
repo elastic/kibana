@@ -28,6 +28,52 @@ Extensions registry:
 - Triggers for controls and query updates live in `public/triggers/`.
 - Registry is the integration point for recommended queries and fields.
 
+## Data flow and components
+```mermaid
+flowchart LR
+  subgraph Consumers["Consumers"]
+    App[Apps: Discover / Lens / Maps / ML / Alerts]
+  end
+
+  subgraph Public["@kbn/esql public plugin"]
+    ESQLLangEditor[ESQLLangEditor]
+    ESQLEditor[ESQLEditor (@kbn/esql-editor)]
+    KibanaServices[Kibana services<br/>(core, data, uiActions, kql, fieldsMetadata, usageCollection)]
+    VariablesService[EsqlVariablesService]
+    Triggers[UI Actions triggers]
+    UpdateAction[UpdateESQLQueryAction]
+    ControlAction[CreateESQLControlAction]
+    ControlFlyout[ES|QL control flyout]
+    ChooseColumn[ChooseColumnPopover]
+    IdentifierForm[IdentifierControlForm]
+    ValueForm[ValueControlForm]
+  end
+
+  subgraph Server["@kbn/esql server plugin"]
+    Routes[HTTP routes<br/>/internal/esql/autocomplete/*<br/>/internal/esql_registry/extensions/{query}<br/>/internal/esql/lookup/*<br/>/internal/esql/timefield]
+    EsqlService[EsqlService]
+    ExtensionsRegistry[ESQLExtensionsRegistry]
+  end
+
+  subgraph Elasticsearch["Elasticsearch"]
+    ES[indices.resolveIndex<br/>and inference endpoints]
+  end
+
+  App --> ESQLLangEditor --> ESQLEditor
+  ESQLLangEditor --> KibanaServices
+  KibanaServices --> ESQLEditor
+  ESQLEditor -->|autocomplete / extensions / lookup| Routes
+  Routes --> EsqlService --> ES
+  Routes --> ExtensionsRegistry
+
+  ESQLEditor --> VariablesService
+  ESQLEditor --> Triggers
+  Triggers --> UpdateAction -->|set query| KibanaServices
+  Triggers --> ControlAction --> ControlFlyout --> ChooseColumn
+  ControlFlyout --> IdentifierForm
+  ControlFlyout --> ValueForm
+```
+
 ## Change guidance
 - Add new commands using `ADD_COMMAND_GUIDE.md`.
 - Grammar updates come from Elasticsearch; keep changes isolated and well-tested.
