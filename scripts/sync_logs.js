@@ -111,26 +111,21 @@ function parseConfig(log = () => {}) {
       'target-index',
       'batch-size',
     ],
-    default: {
-      'index-pattern': process.env.SYNC_INDEX_PATTERN ?? 'logs*',
-      size: process.env.SYNC_SIZE ?? '100',
-      interval: process.env.SYNC_INTERVAL_SECONDS ?? '5',
-      'sample-mode': process.env.SYNC_SAMPLE_MODE ?? 'random',
-      'batch-size':
-        process.env.SYNC_BATCH_SIZE ?? process.env.ELASTICSEARCH_BATCH_SIZE ?? '100',
-    },
   });
 
-  // getopts sets string options to "" when not provided; treat "" as unset so env vars are used
-  const sourceHost =
-    opts['source-host']?.trim() || process.env.SOURCE_ELASTICSEARCH_HOST?.trim() || undefined;
-  const sourceApiKey =
-    opts['source-api-key']?.trim() || process.env.SOURCE_ELASTICSEARCH_API_KEY?.trim() || undefined;
-  const rawTargetIndex =
-    opts['target-index']?.trim() || process.env.SYNC_TARGET_INDEX?.trim() || undefined;
-  const targetIndex = rawTargetIndex ?? 'logs-generic-default';
-  const randomSeed =
-    opts['random-seed']?.trim() || process.env.SYNC_RANDOM_SEED?.trim() || undefined;
+  // Helper: CLI flag > env var > default (getopts sets "" for missing string opts)
+  const get = (opt, envVar, fallback) =>
+    opts[opt]?.trim() || process.env[envVar]?.trim() || fallback;
+
+  const sourceHost = get('source-host', 'SOURCE_ELASTICSEARCH_HOST', undefined);
+  const sourceApiKey = get('source-api-key', 'SOURCE_ELASTICSEARCH_API_KEY', undefined);
+  const indexPattern = get('index-pattern', 'SYNC_INDEX_PATTERN', 'logs*');
+  const size = get('size', 'SYNC_SIZE', '100');
+  const interval = get('interval', 'SYNC_INTERVAL_SECONDS', '1');
+  const sampleMode = get('sample-mode', 'SYNC_SAMPLE_MODE', 'random');
+  const randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
+  const targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
+  const batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
 
   const destEsConfig = readKibanaConfig(opts.config, log);
   const destHost =
@@ -146,13 +141,13 @@ function parseConfig(log = () => {}) {
     destHost: destHost.replace(/\/$/, ''),
     destUsername: destEsConfig.username || 'elastic',
     destPassword: destEsConfig.password || 'changeme',
-    indexPattern: opts['index-pattern'],
-    size: parseInt(opts.size, 10),
-    intervalSeconds: parseFloat(opts.interval),
-    sampleMode: opts['sample-mode'],
-    randomSeed: randomSeed !== undefined && randomSeed !== '' ? parseInt(randomSeed, 10) : null,
+    indexPattern,
+    size: parseInt(size, 10),
+    intervalSeconds: parseFloat(interval),
+    sampleMode,
+    randomSeed: randomSeed !== undefined ? parseInt(randomSeed, 10) : null,
     targetIndex,
-    batchSize: parseInt(opts['batch-size'], 10),
+    batchSize: parseInt(batchSize, 10),
     noVerifyCerts: opts['no-verify-certs'] ?? false,
     verbose: opts.verbose ?? false,
   };
