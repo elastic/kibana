@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DescriptionListColumns } from './description_list_columns';
 import type { PlaygroundsListEmptyStateProps } from './types';
+import { PlaygroundDeprecationNotice } from '../playground_deprecation_notice';
 
 export const PlaygroundsListEmptyStateBody = ({ CTAContent }: PlaygroundsListEmptyStateProps) => {
   return (
@@ -28,6 +29,9 @@ export const PlaygroundsListEmptyStateBody = ({ CTAContent }: PlaygroundsListEmp
       <EuiHorizontalRule />
       <EuiFlexItem>
         <DescriptionListColumns />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <PlaygroundDeprecationNotice />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
