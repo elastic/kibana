@@ -12,7 +12,6 @@ import userEvent from '@testing-library/user-event';
 import { AISummarySection } from './ai_summary_section';
 import { useOverviewTabData } from '../hooks/use_overview_tab_data';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
-import { ATTACK_DETAILS_FLYOUT_PREFIX } from '../constants/test_ids';
 
 jest.mock('@kbn/i18n-react', () => ({
   FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
