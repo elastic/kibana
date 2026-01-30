@@ -47,8 +47,14 @@ declare global {
 }
 
 const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
-  await expect.poll(() => page.locator('.echChart').count()).toBeGreaterThan(panelIndex);
-  const chart = (await page.locator('.echChart').all())[panelIndex];
+  let chart: ReturnType<ScoutPage['locator']> | null = null;
+  await expect
+    .poll(async () => {
+      const charts = await page.locator('.echChart').all();
+      chart = charts[panelIndex] ?? null;
+      return chart;
+    })
+    .not.toBeNull();
   if (!chart) {
     throw new Error(`Chart panel index ${panelIndex} not found`);
   }
@@ -162,50 +168,70 @@ spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
         await pageObjects.dashboard.toggleSyncColors(true);
         await pageObjects.dashboard.applyDashboardSettings();
         await page.testSubj.click('querySubmitButton');
-        await pageObjects.dashboard.waitForRenderComplete();
 
-        const colorMappings1 = Object.entries(getColorMapping(await getChartDebugState(page, 0)));
-        const colorMappings2 = Object.entries(getColorMapping(await getChartDebugState(page, 1)));
+        const getMergedColorAssignments = async () => {
+          const colorMappings1 = Object.entries(getColorMapping(await getChartDebugState(page, 0)));
+          const colorMappings2 = Object.entries(getColorMapping(await getChartDebugState(page, 1)));
 
-        await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+          await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+          await expect
+            .poll(() =>
+              page
+                .locator('[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]')
+                .count()
+            )
+            .toBeGreaterThan(0);
+
+          const els = await getDatatableCellsByColumn(page, 1);
+          const colorMappings3 = (
+            await Promise.all(
+              els.map(async (el) => {
+                const label = normalizeKey((await el.innerText()).trim());
+                if (!label) {
+                  return null;
+                }
+                const backgroundColor = await el.evaluate(
+                  (node) => getComputedStyle(node).backgroundColor
+                );
+                return [label, chroma(backgroundColor as string).hex()] as [string, string];
+              })
+            )
+          ).filter((entry): entry is [string, string] => Boolean(entry));
+
+          const sharedKeys = new Set<string>([
+            ...colorMappings1.map(([key]) => key),
+            ...colorMappings2.map(([key]) => key),
+          ]);
+          const sharedColorMappings3 = colorMappings3.filter(([key]) => sharedKeys.has(key));
+
+          const mergedColorAssignments = new Map<string, Set<string>>();
+          [...colorMappings1, ...colorMappings2, ...sharedColorMappings3].forEach(
+            ([key, color]) => {
+              mergedColorAssignments.set(key, mergedColorAssignments.get(key) ?? new Set());
+              mergedColorAssignments.get(key)?.add(color);
+            }
+          );
+
+          return {
+            colorMappings1,
+            colorMappings2,
+            sharedColorMappings3,
+            mergedColorAssignments,
+          };
+        };
+
         await expect
-          .poll(() =>
-            page
-              .locator('[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]')
-              .count()
-          )
-          .toBeGreaterThan(0);
+          .poll(async () => {
+            const { mergedColorAssignments } = await getMergedColorAssignments();
+            return [...mergedColorAssignments.values()].every((colors) => colors.size === 1);
+          })
+          .toBe(true);
 
-        const els = await getDatatableCellsByColumn(page, 1);
-        const colorMappings3 = (
-          await Promise.all(
-            els.map(async (el) => {
-              const label = normalizeKey((await el.innerText()).trim());
-              if (!label) {
-                return null;
-              }
-              const backgroundColor = await el.evaluate(
-                (node) => getComputedStyle(node).backgroundColor
-              );
-              return [label, chroma(backgroundColor as string).hex()] as [string, string];
-            })
-          )
-        ).filter((entry): entry is [string, string] => Boolean(entry));
-
-        const sharedKeys = new Set<string>([
-          ...colorMappings1.map(([key]) => key),
-          ...colorMappings2.map(([key]) => key),
-        ]);
-        const sharedColorMappings3 = colorMappings3.filter(([key]) => sharedKeys.has(key));
+        const { colorMappings1, colorMappings2, sharedColorMappings3, mergedColorAssignments } =
+          await getMergedColorAssignments();
 
         expect(colorMappings1).toHaveLength(colorMappings2.length);
         expect(sharedColorMappings3).toHaveLength(colorMappings1.length);
-
-        const mergedColorAssignments = new Map<string, Set<string>>();
-        [...colorMappings1, ...colorMappings2, ...sharedColorMappings3].forEach(([key, color]) => {
-          mergedColorAssignments.set(key, mergedColorAssignments.get(key) ?? new Set());
-          mergedColorAssignments.get(key)?.add(color);
-        });
 
         mergedColorAssignments.forEach((colors, key) => {
           expect(
