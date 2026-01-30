@@ -29,22 +29,27 @@ const options = ({ htmlId }: { htmlId: string }) => [
   {
     id: `${htmlId}_1`,
     label: '1',
+    value: 1,
   },
   {
     id: `${htmlId}_2`,
     label: '2',
+    value: 2,
   },
   {
     id: `${htmlId}_3`,
     label: '3',
+    value: 3,
   },
   {
     id: `${htmlId}_4`,
     label: '4',
+    value: 4,
   },
   {
     id: `${htmlId}_5`,
     label: '5',
+    value: 5,
   },
 ];
 

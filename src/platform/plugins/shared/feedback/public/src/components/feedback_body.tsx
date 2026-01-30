@@ -65,6 +65,7 @@ export const FeedbackBody = ({
           handleChangeCsatOptionId={handleChangeCsatOptionId}
         />
         <EuiSpacer size="m" />
+        {/* TODO: Both forms are replaced with custom questions if present */}
         <EuiFormRow fullWidth>
           <EuiTextArea
             fullWidth
@@ -107,6 +108,7 @@ export const FeedbackBody = ({
           />
         </EuiFormRow>
         <EuiFormRow>
+          {/* TODO: If checkbox is toggled show email input and prefill it if possible */}
           <EuiCheckbox
             id="feedbackFormCheckbox"
             label={i18n.translate('feedback.form.body.checkbox.consentLabel', {

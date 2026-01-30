@@ -7,23 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { filter, firstValueFrom } from 'rxjs';
 
 interface Props {
+  analytics: AnalyticsServiceStart;
   handleShowFeedbackForm: () => void;
 }
 
-export const FeedbackButton = ({ handleShowFeedbackForm }: Props) => (
-  <EuiHeaderSectionItemButton
-    data-test-subj="feedbackButton"
-    aria-haspopup="dialog"
-    aria-label={i18n.translate('feedback.button.ariaLabel', {
-      defaultMessage: 'Give feedback',
-    })}
-    onClick={handleShowFeedbackForm}
-  >
-    <EuiIcon type="comment" size="m" />
-  </EuiHeaderSectionItemButton>
-);
+export const FeedbackButton = ({ analytics, handleShowFeedbackForm }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    firstValueFrom(
+      analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
+    )
+      .then((isNotAdblocked) => {
+        if (isNotAdblocked) {
+          setEnabledFeedbackButton(true);
+        }
+      })
+      .catch(() => {
+        // firstValueFrom throws if the observable completes without emitting any value
+        setEnabledFeedbackButton(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [analytics]);
+
+  return (
+    <EuiHeaderSectionItemButton
+      data-test-subj="feedbackButton"
+      aria-haspopup="dialog"
+      aria-label={i18n.translate('feedback.button.ariaLabel', {
+        defaultMessage: 'Give feedback',
+      })}
+      onClick={handleShowFeedbackForm}
+      isLoading={isLoading}
+      disabled={!enabledFeedbackButton}
+    >
+      <EuiIcon type="comment" size="m" />
+    </EuiHeaderSectionItemButton>
+  );
+};

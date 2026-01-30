@@ -11,7 +11,6 @@ import React from 'react';
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { filter, firstValueFrom } from 'rxjs';
 import { FeedbackButton, FeedbackForm } from './src';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,9 +20,8 @@ export interface FeedbackPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 
-interface FeedbackPluginStart {
-  registeredItems: string[];
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface FeedbackPluginStart {}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
   constructor(initializerContext: PluginInitializerContext) {}
@@ -50,24 +48,18 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
       );
     };
 
-    firstValueFrom(
-      core.analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
-    ).then((isNotAdblocked) => {
-      if (isNotAdblocked) {
-        core.chrome.navControls.registerRight({
-          order: 1002,
-          mount: toMountPoint(
-            <FeedbackButton handleShowFeedbackForm={handleShowFeedbackForm} />,
-            core.rendering
-          ),
-        });
-      }
+    core.chrome.navControls.registerRight({
+      order: 1000,
+      mount: toMountPoint(
+        <FeedbackButton
+          handleShowFeedbackForm={handleShowFeedbackForm}
+          analytics={core.analytics}
+        />,
+        core.rendering
+      ),
     });
 
-    // TODO: Return a way to register additional feedback options
-    return {
-      registeredItems: ['securitySolutionQuestion1', 'securitySolutionQuestion2'],
-    };
+    return {};
   }
 
   public stop() {}

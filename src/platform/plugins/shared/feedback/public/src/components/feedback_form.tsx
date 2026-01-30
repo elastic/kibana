@@ -28,8 +28,8 @@ export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
   const [allowEmailContact, setAllowEmailContact] = useState(false);
 
-  const isSendFeedbackButtonDisabled =
-    !experienceFeedbackText.trim().length || !selectedCsatOptionId;
+  // TODO: If custom questions exist - at least one of them should be required
+  const isSendFeedbackButtonDisabled = !selectedCsatOptionId;
 
   const handleChangeCsatOptionId = (optionId: string) => {
     setSelectedCsatOptionId(optionId);
@@ -48,7 +48,7 @@ export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
   };
 
   const submitFeedback = () => {
-    // TODO
+    // TODO: Send to EBT
   };
 
   const formCss = css`
