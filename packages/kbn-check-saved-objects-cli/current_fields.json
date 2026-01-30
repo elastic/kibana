@@ -367,6 +367,7 @@
     "managed",
     "managedVersion",
     "matchers",
+    "matchersModifiedByUser",
     "name",
     "type"
   ],

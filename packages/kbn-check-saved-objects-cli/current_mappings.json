@@ -1225,6 +1225,9 @@
         "dynamic": false,
         "type": "object"
       },
+      "matchersModifiedByUser": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
