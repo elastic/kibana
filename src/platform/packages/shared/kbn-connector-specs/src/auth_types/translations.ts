@@ -79,6 +79,27 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const PAGERDUTY_TOKEN_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.pagerdutyTokenAuth.label',
+  {
+    defaultMessage: 'PagerDuty API token',
+  }
+);
+
+export const PAGERDUTY_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.pagerdutyTokenAuth.token.label',
+  {
+    defaultMessage: 'API token',
+  }
+);
+
+export const PAGERDUTY_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.pagerdutyTokenAuth.token.requiredMessage',
+  {
+    defaultMessage: 'API token is required',
+  }
+);
+
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });

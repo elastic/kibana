@@ -90,8 +90,6 @@ export interface AuthContext {
   logger: Logger;
   proxySettings?: ProxySettings;
   sslSettings: SSLSettings;
-  /** When set, bearer auth uses this to format the Authorization header instead of "Bearer <token>". */
-  authorizationHeaderFormat?: (token: string) => string;
 }
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
@@ -247,7 +245,6 @@ export interface ConnectorSpec {
   auth?: {
     types: Array<string | AuthTypeDef>;
     headers?: Record<string, AxiosHeaderValue>;
-    authorizationHeaderFormat?: (token: string) => string;
   };
 
   // Single unified schema for all connector fields (config + secrets)

@@ -18,11 +18,9 @@ type RecordUnknown = Record<string, unknown>;
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
-  authorizationHeaderFormat,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
-  authorizationHeaderFormat?: (token: string) => string;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -50,7 +48,6 @@ export const generateExecutorFunction = ({
       connectorId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
-      authorizationHeaderFormat,
       secrets: secretsWithAuthType,
     });
 

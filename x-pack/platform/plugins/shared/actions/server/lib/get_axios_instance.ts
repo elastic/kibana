@@ -30,7 +30,6 @@ type ValidatedSecrets = Record<string, unknown>;
 
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
-  authorizationHeaderFormat?: (token: string) => string;
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
@@ -45,7 +44,6 @@ export const getAxiosInstanceWithAuth = ({
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
   return async ({
     additionalHeaders,
-    authorizationHeaderFormat,
     connectorId,
     secrets,
     connectorTokenClient,
@@ -124,7 +122,6 @@ export const getAxiosInstanceWithAuth = ({
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
         sslSettings: configurationUtilities.getSSLSettings(),
-        authorizationHeaderFormat,
       };
 
       // use the registered auth type to configure authentication for the axios instance

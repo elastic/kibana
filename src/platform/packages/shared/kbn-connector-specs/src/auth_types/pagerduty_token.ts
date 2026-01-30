@@ -27,8 +27,8 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Bearer Token Authentication
  * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
  */
-export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'bearer',
+export const PagerDutyTokenAuth: AuthTypeSpec<AuthSchemaType> = {
+  id: 'pagerduty_token',
   schema: authSchema,
   configure: async (
     _: AuthContext,
@@ -36,7 +36,7 @@ export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
     // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
+    axiosInstance.defaults.headers.common.Authorization = `Token token=${secret.token}`;
 
     return axiosInstance;
   },

@@ -27,11 +27,10 @@ export const PagerDutyConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: ['bearer', 'oauth_client_credentials'],
+    types: ['pagerduty_token', 'oauth_client_credentials'],
     headers: {
       Accept: 'application/vnd.pagerduty+json;version=2',
     },
-    authorizationHeaderFormat: (token) => `Token token=${token}`,
   },
 
   actions: {
