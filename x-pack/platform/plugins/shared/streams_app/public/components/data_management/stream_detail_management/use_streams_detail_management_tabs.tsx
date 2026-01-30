@@ -24,17 +24,20 @@ export function useStreamsDetailManagementTabs({
   } = useStreamsPrivileges();
 
   const isSignificantEventsEnabled = !!significantEvents?.enabled;
+  const isProcessingEnabled = Streams.ingest.all.GetResponse.is(definition);
 
   return {
     isLoading,
-    processing: {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
-        defaultMessage: 'Processing',
-      }),
-    },
+    ...(isProcessingEnabled && {
+      processing: {
+        content: (
+          <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+        ),
+        label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+          defaultMessage: 'Processing',
+        }),
+      },
+    }),
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {

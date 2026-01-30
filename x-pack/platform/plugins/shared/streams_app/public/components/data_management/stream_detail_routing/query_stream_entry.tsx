@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
-import { useDebounceFn } from 'react-use';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { NestedView } from '../../nested_view';
@@ -148,14 +148,13 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const currentQueryRef = useRef<string>('');
 
   // Debounced query execution for preview
-  const debouncedExecuteQuery = useDebounceFn(
+  const { run: debouncedExecuteQuery } = useDebounceFn(
     (query: string) => {
       if (query && query.trim() !== '') {
         executeQuery(query);
       }
     },
-    DEBOUNCE_DELAY_MS,
-    [executeQuery]
+    { wait: DEBOUNCE_DELAY_MS }
   );
 
   // Execute initial query on mount
