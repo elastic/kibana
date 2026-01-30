@@ -27,7 +27,7 @@ const getTracesSchema = z.object({
   traceId: z
     .string()
     .describe(
-      'Trace ID to retrieve the full distributed trace (transactions, spans, errors, and correlated logs). Example: "abc123".'
+      'Trace ID to retrieve the full distributed trace (transactions, spans, errors, and logs). Example: "abc123".'
     ),
 });
 
@@ -43,7 +43,7 @@ export function createGetTracesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTracesSchema> = {
     id: OBSERVABILITY_GET_TRACES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves a full distributed trace (transactions, spans, errors, and correlated logs) for a specific \'trace.id\'.
+    description: `Retrieves a full distributed trace (transactions, spans, errors, and logs) for a specific \'trace.id\'.
 
 When to use:
 - You already have a \'trace.id\' from tools like observability.get_trace_metrics, observability.get_correlated_logs, or an error/log record

@@ -9,6 +9,8 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SearchHit } from '@kbn/es-types';
+import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -22,8 +24,111 @@ import {
   DEFAULT_MAX_APM_EVENTS,
   DEFAULT_MAX_LOG_EVENTS,
   DEFAULT_LOG_SOURCE_FIELDS,
+  DEFAULT_TRACE_FIELDS,
   type TraceSequence,
 } from './constants';
+
+export function getApmTraceError({
+  apmEventClient,
+  traceId,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  traceId: string;
+  start: number;
+  end: number;
+}) {
+  const excludedLogLevels = ['debug', 'info', 'warning'];
+  const ERROR_LOG_LEVEL = 'error.log.level';
+  return apmEventClient.search('get_errors_docs', {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
+    },
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', { start, end }),
+          ...termFilter('trace.id', traceId),
+        ],
+        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
+      },
+    },
+    fields: DEFAULT_TRACE_FIELDS,
+    _source: false,
+  });
+}
+
+export function getTraceDocs({
+  apmEventClient,
+  traceId,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  traceId: string;
+  start: number;
+  end: number;
+}) {
+  return apmEventClient.search('observability_agent_builder_get_trace_docs', {
+    apm: {
+      events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
+    },
+    track_total_hits: true,
+    size: DEFAULT_MAX_APM_EVENTS,
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    _source: false,
+    fields: DEFAULT_TRACE_FIELDS,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', { start, end }),
+          ...termFilter('trace.id', traceId),
+        ],
+      },
+    },
+  });
+}
+
+export function getCorrelatedLogs({
+  esClient,
+  start,
+  end,
+  traceId,
+  index,
+}: {
+  esClient: IScopedClusterClient;
+  start: number;
+  end: number;
+  traceId: string;
+  index: string[];
+}) {
+  const search = getTypedSearch(esClient.asCurrentUser);
+
+  return search({
+    index,
+    track_total_hits: true,
+    size: DEFAULT_MAX_LOG_EVENTS,
+    sort: [{ '@timestamp': { order: 'asc' } }],
+    _source: false,
+    fields: DEFAULT_LOG_SOURCE_FIELDS,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', { start, end }),
+          ...termFilter('trace.id', traceId),
+        ],
+      },
+    },
+  });
+}
 
 export async function getToolHandler({
   core,
@@ -52,74 +157,37 @@ export async function getToolHandler({
 
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
-  const apmResponse = await apmEventClient.search('observability_agent_builder_get_trace_docs', {
-    apm: {
-      events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
-    },
-    track_total_hits: true,
-    size: DEFAULT_MAX_APM_EVENTS,
-    sort: [{ '@timestamp': { order: 'asc' } }],
-    _source: false,
-    fields: [
-      '@timestamp',
-      'trace.id',
-      'processor.event',
-      'service.name',
-      'service.environment',
-      'event.outcome',
-      'transaction.id',
-      'transaction.name',
-      'transaction.duration.us',
-      'span.id',
-      'span.name',
-      'span.type',
-      'span.subtype',
-      'span.duration.us',
-      'parent.id',
-      'error.message',
-      'error.type',
-      'message',
-    ],
-    query: {
-      bool: {
-        filter: [
-          ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-          ...termFilter('trace.id', traceId),
-        ],
-      },
-    },
+  const apmResponse = await getTraceDocs({
+    apmEventClient,
+    traceId,
+    start: startTime,
+    end: endTime,
   });
-
   const apmHits = apmResponse.hits.hits;
 
-  const search = getTypedSearch(esClient.asCurrentUser);
+  const errorResponse = await getApmTraceError({
+    apmEventClient,
+    traceId,
+    start: startTime,
+    end: endTime,
+  });
 
-  const shouldSearchLogs = logsIndices.length > 0;
-  const logsResponse = shouldSearchLogs
-    ? await search({
-        index: logsIndices,
-        track_total_hits: true,
-        size: DEFAULT_MAX_LOG_EVENTS,
-        sort: [{ '@timestamp': { order: 'asc' } }],
-        _source: false,
-        fields: DEFAULT_LOG_SOURCE_FIELDS,
-        query: {
-          bool: {
-            filter: [
-              ...timeRangeFilter('@timestamp', { start: startTime, end: endTime }),
-              ...termFilter('trace.id', traceId),
-            ],
-          },
-        },
-      })
-    : undefined;
+  const errorHits = errorResponse.hits.hits;
 
+  const logsResponse = await getCorrelatedLogs({
+    esClient,
+    start: startTime,
+    end: endTime,
+    traceId,
+    index: logsIndices,
+  });
   const logHits = logsResponse?.hits.hits ?? [];
 
   const sequences: TraceSequence[] = [
     {
       traceId,
       traceItems: mapHitsToEntries(apmHits),
+      errorItems: mapHitsToEntries(errorHits),
       logs: mapHitsToEntries(logHits),
     },
   ];

@@ -26,12 +26,46 @@ export const DEFAULT_LOG_SOURCE_FIELDS = [
   'client.ip',
 ];
 
+export const DEFAULT_TRACE_FIELDS = [
+  '@timestamp',
+  'trace.id',
+  'agent.name',
+  'db.system',
+  'db.name',
+  'db.statement',
+  'error.exception.message',
+  'error.exception.type',
+  'event.outcome',
+  'host.name',
+  'http.request.method',
+  'http.response.status_code',
+  'log.level',
+  'message',
+  'parent.id',
+  'processor.event',
+  'service.name',
+  'service.environment',
+  'span.destination.service.resource',
+  'span.duration.us',
+  'span.id',
+  'span.name',
+  'span.type',
+  'transaction.duration.us',
+  'transaction.id',
+  'transaction.name',
+  'transaction.type',
+  'url.path',
+];
+
 export interface TraceSequence {
   traceId: string;
   traceItems: {
     [k: string]: unknown;
   }[];
   logs: {
+    [k: string]: unknown;
+  }[];
+  errorItems: {
     [k: string]: unknown;
   }[];
 }
