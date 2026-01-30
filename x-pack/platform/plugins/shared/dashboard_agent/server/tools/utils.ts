@@ -19,10 +19,6 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constan
 import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import {
-  AttachmentType,
-  type VisualizationAttachmentData,
-} from '@kbn/agent-builder-common/attachments';
-import {
   type AttachmentPanel,
   isLensAttachmentPanel,
   isGenericAttachmentPanel,
@@ -237,14 +233,16 @@ export const resolveLensConfigFromAttachment = (
   }
 
   const attachment = attachments.get(attachmentId);
-  if (!attachment || attachment.type !== AttachmentType.visualization) {
+  // TODO: Use const -  VISUALIZATION_ATTACHMENT_TYPE
+  if (!attachment || attachment.type !== 'visualization') {
     throw new Error(
       `Attachment "${attachmentId}" is not a visualization attachment (got "${attachment?.type}").`
     );
   }
 
-  const data = latestVersion.data as VisualizationAttachmentData;
-  const visualization = data.visualization;
+  // TODO: Fix types
+  const data = latestVersion.data;
+  const visualization = (data as { visualization?: unknown }).visualization;
 
   if (!visualization || typeof visualization !== 'object') {
     throw new Error(

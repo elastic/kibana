@@ -47,7 +47,13 @@ When the user asks to create a dashboard:
    - \`markdownContent\`: (optional) A markdown summary displayed at the top of the dashboard
      - Should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text)
-     - Example: "### Server Performance Overview\\n\\nThis dashboard displays key server metrics including:\\n- **CPU utilization** trends\\n- **Memory usage** patterns"
+     - **IMPORTANT**: Use actual line breaks in the string, NOT escape sequences like \\n
+     - Example:
+       "### Server Performance Overview
+
+       This dashboard displays key server metrics including:
+       - **CPU utilization** trends
+       - **Memory usage** patterns"
 
    Example input:
    \`\`\`
@@ -58,7 +64,9 @@ When the user asks to create a dashboard:
        { "query": "Show total CPU usage as a metric", "index": "metrics-*", "chartType": "Metric" },
        { "query": "Show memory usage over time", "index": "metrics-*", "chartType": "XY" }
      ],
-     "markdownContent": "### Server Metrics\\n\\nThis dashboard shows key performance indicators."
+     "markdownContent": "### Server Metrics
+
+This dashboard shows key performance indicators."
    }
    \`\`\`
 
@@ -161,7 +169,7 @@ Tool response includes:
     "url": "/app/dashboards#/create?...",
     "title": "My Dashboard",
     "description": "Dashboard showing metrics",
-    "markdownContent": "## Overview\\nThis dashboard shows...",
+    "markdownContent": "## Overview\nThis dashboard shows...",
     "panelCount": 3,
     "panels": [
       { "type": "inline", "panelId": "panel-1", "title": "CPU Usage", "chartType": "Metric" },
