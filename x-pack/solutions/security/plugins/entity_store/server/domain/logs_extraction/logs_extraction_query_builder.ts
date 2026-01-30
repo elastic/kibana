@@ -54,8 +54,6 @@ export const buildLogsExtractionEsqlQuery = ({
   docsLimit,
   latestIndex,
 }: LogsExtractionQueryParams): string => {
-  const idFieldName = getIdFieldName(identityField);
-
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
@@ -63,7 +61,7 @@ export const buildLogsExtractionEsqlQuery = ({
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
   | SORT ${TIMESTAMP_FIELD} ASC
   | LIMIT ${docsLimit}
-  ${entityFieldEvaluation(identityField, type)}
+  | EVAL ${recentData(MAIN_ENTITY_ID)} = ${getEuidEsqlEvaluation(type)}
   | STATS
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${recentFieldStats(fields)}
