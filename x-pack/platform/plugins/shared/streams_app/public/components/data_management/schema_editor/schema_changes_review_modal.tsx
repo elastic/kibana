@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiAccordion,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
@@ -381,77 +382,122 @@ export function SchemaChangesReviewModal({
             <EuiSpacer size="m" />
           </>
         )}
-        {fieldConflicts.length > 0 && (
+        {/* Conflicts checking section - only shown for wired streams */}
+        {Streams.WiredStream.GetResponse.is(definition) && (
           <>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsCalloutTitle',
-                {
-                  defaultMessage: 'Some fields have conflicting types in other streams',
-                }
-              )}
-              iconType="warning"
-              color="warning"
-              data-test-subj="streamsAppSchemaChangesFieldConflictsWarning"
-            >
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsDescription"
-                  defaultMessage="The following fields are defined with different types in other streams. This may cause issues if data is queried across streams."
-                />
-              </EuiText>
-              <EuiSpacer size="s" />
-              {fieldConflicts.map((conflict) => (
-                <EuiAccordion
-                  key={conflict.fieldName}
-                  id={`conflict-${conflict.fieldName}`}
-                  buttonContent={
+            {isSimulating ? (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  title={
                     <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiText size="s">
-                        <strong>{conflict.fieldName}</strong>
-                      </EuiText>
-                      <EuiBadge color="hollow">
-                        <FormattedMessage
-                          id="xpack.streams.schemaEditor.confirmChangesModal.conflictStreamCount"
-                          defaultMessage="{count} {count, plural, one {stream} other {streams}}"
-                          values={{ count: conflict.conflictingStreams.length }}
-                        />
-                      </EuiBadge>
+                      <EuiLoadingSpinner size="s" />
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.schemaEditor.confirmChangesModal.checkingConflictsTitle',
+                          {
+                            defaultMessage: 'Checking for conflicts...',
+                          }
+                        )}
+                      </span>
                     </EuiFlexGroup>
                   }
-                  paddingSize="s"
+                  color="primary"
+                  data-test-subj="streamsAppSchemaChangesCheckingConflicts"
+                />
+                <EuiSpacer size="m" />
+              </>
+            ) : fieldConflicts.length > 0 ? (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  title={i18n.translate(
+                    'xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsCalloutTitle',
+                    {
+                      defaultMessage: 'Some fields have conflicting types in other streams',
+                    }
+                  )}
+                  iconType="warning"
+                  color="warning"
+                  data-test-subj="streamsAppSchemaChangesFieldConflictsWarning"
                 >
-                  <EuiText size="xs">
+                  <EuiText size="s">
                     <FormattedMessage
-                      id="xpack.streams.schemaEditor.confirmChangesModal.conflictProposedType"
-                      defaultMessage="Proposed type: {type}"
-                      values={{
-                        type: (
-                          <strong>
-                            {FIELD_TYPE_MAP[conflict.proposedType as keyof typeof FIELD_TYPE_MAP]
-                              ?.label || conflict.proposedType}
-                          </strong>
-                        ),
-                      }}
+                      id="xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsDescription"
+                      defaultMessage="The following fields are defined with different types in other streams. This may cause issues if data is queried across streams."
                     />
                   </EuiText>
-                  <EuiSpacer size="xs" />
-                  <ul>
-                    {conflict.conflictingStreams.map((conflictingStream) => (
-                      <li key={conflictingStream.streamName}>
-                        <EuiText size="xs">
-                          <strong>{conflictingStream.streamName}</strong>:{' '}
-                          {FIELD_TYPE_MAP[
-                            conflictingStream.existingType as keyof typeof FIELD_TYPE_MAP
-                          ]?.label || conflictingStream.existingType}
-                        </EuiText>
-                      </li>
-                    ))}
-                  </ul>
-                </EuiAccordion>
-              ))}
-            </EuiCallOut>
-            <EuiSpacer size="m" />
+                  <EuiSpacer size="s" />
+                  {fieldConflicts.map((conflict) => (
+                    <EuiAccordion
+                      key={conflict.fieldName}
+                      id={`conflict-${conflict.fieldName}`}
+                      buttonContent={
+                        <EuiFlexGroup gutterSize="s" alignItems="center">
+                          <EuiText size="s">
+                            <strong>{conflict.fieldName}</strong>
+                          </EuiText>
+                          <EuiBadge color="hollow">
+                            <FormattedMessage
+                              id="xpack.streams.schemaEditor.confirmChangesModal.conflictStreamCount"
+                              defaultMessage="{count} {count, plural, one {stream} other {streams}}"
+                              values={{ count: conflict.conflictingStreams.length }}
+                            />
+                          </EuiBadge>
+                        </EuiFlexGroup>
+                      }
+                      paddingSize="s"
+                    >
+                      <EuiText size="xs">
+                        <FormattedMessage
+                          id="xpack.streams.schemaEditor.confirmChangesModal.conflictProposedType"
+                          defaultMessage="Proposed type: {type}"
+                          values={{
+                            type: (
+                              <strong>
+                                {FIELD_TYPE_MAP[
+                                  conflict.proposedType as keyof typeof FIELD_TYPE_MAP
+                                ]?.label || conflict.proposedType}
+                              </strong>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                      <ul>
+                        {conflict.conflictingStreams.map((conflictingStream) => (
+                          <li key={conflictingStream.streamName}>
+                            <EuiText size="xs">
+                              <strong>{conflictingStream.streamName}</strong>:{' '}
+                              {FIELD_TYPE_MAP[
+                                conflictingStream.existingType as keyof typeof FIELD_TYPE_MAP
+                              ]?.label || conflictingStream.existingType}
+                            </EuiText>
+                          </li>
+                        ))}
+                      </ul>
+                    </EuiAccordion>
+                  ))}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  title={i18n.translate(
+                    'xpack.streams.schemaEditor.confirmChangesModal.noConflictsTitle',
+                    {
+                      defaultMessage: 'No conflicts across streams found',
+                    }
+                  )}
+                  iconType="check"
+                  color="success"
+                  data-test-subj="streamsAppSchemaChangesNoConflicts"
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
           </>
         )}
         <EuiBasicTable items={changes} columns={fieldColumns} />
