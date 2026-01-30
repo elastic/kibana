@@ -300,12 +300,10 @@ function isQueryLocationUsable(
 
 interface PromQLQueryContext {
   text: string;
-  textBeforeCursor: string;
   textBeforeCursorTrimmed: string;
   start: number;
   root: PromQLAstQueryExpression;
   relativeCursor: number;
-  logicalCursor: number;
   position: PromQLPositionResult;
 }
 
@@ -325,27 +323,15 @@ function getPromQLQueryContext(
   const { root } = PromQLParser.parse(text);
   // Clamp cursor to original text length (cursor shouldn't appear on added closing brackets)
   const relativeCursor = Math.min(cursorPosition - start, originalLength);
-  let logicalCursor = Math.min(relativeCursor, text.length);
-
-  /* Normalize trailing whitespace so we compare against the actual AST boundary. */
-  while (logicalCursor > 0 && /\s/.test(text[logicalCursor - 1])) {
-    logicalCursor -= 1;
-  }
-
   const position = findPromqlAstPosition(root, relativeCursor);
-
-  // Cursor and text are relative to the PromQL query substring (not the full command).
-  const textBeforeCursor = text.slice(0, relativeCursor);
-  const textBeforeCursorTrimmed = textBeforeCursor.trimEnd();
+  const textBeforeCursorTrimmed = text.slice(0, relativeCursor).trimEnd();
 
   return {
     text,
-    textBeforeCursor,
     textBeforeCursorTrimmed,
     start,
     root,
     relativeCursor,
-    logicalCursor,
     position,
   };
 }
@@ -438,11 +424,12 @@ function isCursorInsideGrouping(
 
 /** Checks if cursor is after a complete aggregation that can have grouping added. */
 function checkCanAddGrouping(ctx: PromQLQueryContext): boolean {
-  if (ctx.logicalCursor === 0) {
+  const logicalCursor = ctx.textBeforeCursorTrimmed.length;
+  if (logicalCursor === 0) {
     return false;
   }
 
-  const beforePosition = ctx.logicalCursor - 1;
+  const beforePosition = logicalCursor - 1;
   const nearest = findNearestAggregationForGrouping(ctx.root, beforePosition);
 
   return !!nearest;
