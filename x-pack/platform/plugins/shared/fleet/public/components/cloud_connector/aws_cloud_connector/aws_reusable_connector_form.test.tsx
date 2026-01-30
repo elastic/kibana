@@ -11,8 +11,10 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
-import { AWSReusableConnectorForm } from './aws_reusable_connector_form';
+
 import type { AwsCloudConnectorCredentials } from '../types';
+
+import { AWSReusableConnectorForm } from './aws_reusable_connector_form';
 
 // Mock the useGetCloudConnectors hook
 jest.mock('../hooks/use_get_cloud_connectors');

@@ -11,8 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackagePolicyConfigRecord } from '../../../../common';
 import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
-import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
+
 import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
+
+import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
 
 describe('getAzureCloudConnectorsCredentialsFormOptions', () => {
   const createMockInputVars = (overrides: Partial<PackagePolicyConfigRecord> = {}) => ({

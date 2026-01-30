@@ -11,6 +11,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
 import type { CloudConnectorSecretReference, CloudProvider } from '../../types';
+
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;

@@ -16,10 +16,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { AccountType } from '../../../../common/types';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../../common';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
-import { CloudConnectorPoliciesFlyout } from '.';
+
 import type { CloudConnectorUsageItem } from '../hooks/use_cloud_connector_usage';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
+
+import { CloudConnectorPoliciesFlyout } from '.';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_cloud_connector_usage');

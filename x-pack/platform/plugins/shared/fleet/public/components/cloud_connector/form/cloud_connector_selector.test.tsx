@@ -17,8 +17,10 @@ import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { CloudConnectorSelector } from './cloud_connector_selector';
+
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+
+import { CloudConnectorSelector } from './cloud_connector_selector';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');

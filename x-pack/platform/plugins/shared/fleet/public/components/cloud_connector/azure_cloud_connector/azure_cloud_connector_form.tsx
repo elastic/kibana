@@ -16,7 +16,7 @@ import {
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import { extractRawCredentialVars } from '../../../../common';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
-import { AzureArmTemplateGuide } from './azure_arm_template_guide';
+
 import {
   type AzureCloudConnectorFieldNames,
   getCloudConnectorRemoteRoleTemplate,
@@ -27,9 +27,12 @@ import {
   getKibanaComponentId,
 } from '../utils';
 import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
-import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
+
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+
+import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
+import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 
 const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
   if (!cloud) return undefined;

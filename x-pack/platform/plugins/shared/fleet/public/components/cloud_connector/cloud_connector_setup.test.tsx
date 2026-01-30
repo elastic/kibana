@@ -11,6 +11,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { UseQueryResult } from '@kbn/react-query';
 
 import type { CloudConnector, CloudProvider } from '../../types';
+
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { TestProvider } from './test/test_provider';

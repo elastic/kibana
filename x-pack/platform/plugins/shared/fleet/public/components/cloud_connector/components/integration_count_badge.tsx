@@ -9,6 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiBadge, EuiToolTip, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 
 interface IntegrationCountBadgeProps {

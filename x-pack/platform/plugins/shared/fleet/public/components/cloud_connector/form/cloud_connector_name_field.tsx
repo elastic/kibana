@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { getCloudConnectorNameError } from '../utils';
 
 interface CloudConnectorNameFieldProps {

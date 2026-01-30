@@ -8,8 +8,11 @@
 import { renderHook, act } from '@testing-library/react';
 
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../../common';
-import { useCloudConnectorSetup } from './use_cloud_connector_setup';
+
 import type { UpdatePolicy, CloudConnectorCredentials } from '../types';
+import { updateInputVarsWithCredentials, isAzureCloudConnectorVars } from '../utils';
+
+import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
 // Mock utility functions
 jest.mock('../utils', () => ({
@@ -21,8 +24,6 @@ jest.mock('../utils', () => ({
     return trimmedLength > 0 && name.length <= 255;
   }),
 }));
-
-import { updateInputVarsWithCredentials, isAzureCloudConnectorVars } from '../utils';
 
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
   typeof isAzureCloudConnectorVars

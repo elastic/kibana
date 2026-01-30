@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+
 import { CloudConnectorNameField } from './cloud_connector_name_field';
 
 // Helper to render with I18n provider

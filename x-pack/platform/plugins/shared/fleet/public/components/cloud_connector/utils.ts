@@ -20,6 +20,7 @@ import type {
   AzureCloudConnectorVars,
   CloudConnectorVars,
 } from '../../../common/types';
+
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,

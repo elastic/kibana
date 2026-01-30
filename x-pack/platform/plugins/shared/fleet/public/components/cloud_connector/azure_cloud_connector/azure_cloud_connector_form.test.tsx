@@ -16,8 +16,10 @@ import {
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { AzureCloudConnectorForm } from './azure_cloud_connector_form';
+
 import type { CloudConnectorFormProps } from '../types';
+
+import { AzureCloudConnectorForm } from './azure_cloud_connector_form';
 
 // Mock the LazyPackagePolicyInputVarField
 jest.mock('../../..', () => ({

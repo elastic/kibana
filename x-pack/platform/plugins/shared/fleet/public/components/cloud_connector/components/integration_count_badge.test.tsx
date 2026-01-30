@@ -8,8 +8,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IntegrationCountBadge } from './integration_count_badge';
+
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
+
+import { IntegrationCountBadge } from './integration_count_badge';
 
 // Mock the useCloudConnectorUsage hook
 jest.mock('../hooks/use_cloud_connector_usage', () => ({

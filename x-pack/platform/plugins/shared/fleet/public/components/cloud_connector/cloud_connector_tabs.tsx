@@ -10,6 +10,7 @@ import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { CloudProvider } from '../../types';
+
 import { TABS } from './constants';
 
 export interface CloudConnectorTab {

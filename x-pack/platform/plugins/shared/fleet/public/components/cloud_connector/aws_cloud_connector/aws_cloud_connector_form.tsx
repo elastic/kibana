@@ -12,7 +12,7 @@ import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
 import { extractRawCredentialVars } from '../../../../common';
 import { type CloudConnectorFormProps } from '../types';
-import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
+
 import {
   updatePolicyWithAwsCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
@@ -21,9 +21,12 @@ import {
   type AwsCloudConnectorFieldNames,
 } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
-import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
+
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+
+import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
+import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 
 export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,

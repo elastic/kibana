@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
 import { CLOUD_CONNECTOR_API_ROUTES } from '../../../constants';
+
 import { useCloudConnectorUsage } from './use_cloud_connector_usage';
 
 jest.mock('@kbn/kibana-react-plugin/public');

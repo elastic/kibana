@@ -14,6 +14,7 @@ import type {
   PackageInfo,
 } from '../../../common';
 import type { AwsCloudConnectorVars, AzureCloudConnectorVars } from '../../../common/types';
+
 import {
   updateInputVarsWithCredentials,
   updatePolicyWithAwsCloudConnectorCredentials,

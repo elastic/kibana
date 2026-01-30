@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { AccountType } from '../../../../common/types';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../../common';
+
 import { AccountBadge } from './account_badge';
 
 describe('AccountBadge', () => {

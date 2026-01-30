@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AzureArmTemplateGuide } from './azure_arm_template_guide';
+
 import { I18nProvider } from '@kbn/i18n-react';
+
+import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 
 describe('AzureArmTemplateGuide', () => {
   const renderWithIntl = (component: React.ReactElement) => {
