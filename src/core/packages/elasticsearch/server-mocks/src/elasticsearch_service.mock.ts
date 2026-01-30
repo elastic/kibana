@@ -33,6 +33,7 @@ import type {
   ClusterInfo,
 } from '@kbn/core-elasticsearch-server-internal';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
+import { lazyObject } from '@kbn/lazy-object';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 
@@ -54,29 +55,30 @@ export type MockedElasticSearchServiceStart = jest.Mocked<
 };
 
 const createPrebootContractMock = () => {
-  const prebootContract: MockedElasticSearchServicePreboot = {
+  const prebootContract: MockedElasticSearchServicePreboot = lazyObject({
     config: { hosts: [], credentialsSpecified: false },
     createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
-  };
+  });
   return prebootContract;
 };
 
 const createSetupContractMock = () => {
-  const setupContract: MockedElasticSearchServiceSetup = {
+  const setupContract: MockedElasticSearchServiceSetup = lazyObject({
     setUnauthorizedErrorHandler: jest.fn(),
+    setCpsFeatureFlag: jest.fn(),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
-  };
+  });
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract: MockedElasticSearchServiceStart = {
+  const startContract: MockedElasticSearchServiceStart = lazyObject({
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
     getCapabilities: jest.fn().mockReturnValue(createCapabilities()),
-  };
+  });
   return startContract;
 };
 
@@ -85,7 +87,7 @@ const createInternalPrebootContractMock = createPrebootContractMock;
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<InternalElasticsearchServiceSetup>;
 const createInternalSetupContractMock = () => {
   const setupContract = createSetupContractMock();
-  const internalSetupContract: MockedInternalElasticSearchServiceSetup = {
+  const internalSetupContract: MockedInternalElasticSearchServiceSetup = lazyObject({
     ...setupContract,
     esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
       isCompatible: true,
@@ -104,7 +106,7 @@ const createInternalSetupContractMock = () => {
       summary: 'Elasticsearch is available',
     }),
     agentStatsProvider: createAgentStatsProviderMock(),
-  };
+  });
   return internalSetupContract;
 };
 
@@ -115,27 +117,23 @@ type MockedInternalElasticsearchServiceStart = jest.Mocked<
 
 const createInternalStartContractMock = () => {
   const startContract = createStartContractMock();
-  const internalStartContractMock: MockedInternalElasticsearchServiceStart = {
+  const internalStartContractMock: MockedInternalElasticsearchServiceStart = lazyObject({
     ...startContract,
     metrics: {
       elasticsearchWaitTime: 0,
     },
-  };
+  });
   return internalStartContractMock;
 };
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
-    preboot: jest.fn(),
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
-  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValueOnce(createInternalStartContractMock());
-  mocked.stop.mockResolvedValue();
+  const mocked: jest.Mocked<ElasticsearchServiceContract> = lazyObject({
+    preboot: jest.fn().mockResolvedValue(createInternalPrebootContractMock()),
+    setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
+    start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
+    stop: jest.fn().mockResolvedValue(void 0),
+  });
   return mocked;
 };
 

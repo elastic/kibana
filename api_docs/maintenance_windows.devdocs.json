@@ -1,0 +1,2195 @@
+{
+  "id": "maintenanceWindows",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicPlugin",
+            "text": "MaintenanceWindowsPublicPlugin"
+          },
+          " implements ",
+          "Plugin",
+          "<void, void, ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+            "text": "MaintenanceWindowsPublicSetupDependencies"
+          },
+          ", ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "public",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-public.MaintenanceWindowsPublicStartDependencies",
+            "text": "MaintenanceWindowsPublicStartDependencies"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<object>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreSetup",
+              "<{}, unknown>, plugins: ",
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "public",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                "text": "MaintenanceWindowsPublicSetupDependencies"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<{}, unknown>"
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 27,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maintenanceWindows",
+                "id": "def-public.MaintenanceWindowsPublicPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maintenanceWindows",
+                    "scope": "public",
+                    "docId": "kibMaintenanceWindowsPluginApi",
+                    "section": "def-public.MaintenanceWindowsPublicSetupDependencies",
+                    "text": "MaintenanceWindowsPublicSetupDependencies"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 27,
+                "columnNumber": 33,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicSetupDependencies.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSetup",
+                "text": "ManagementSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-public.MaintenanceWindowsPublicStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsPublicStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.serverless",
+            "type": "Object",
+            "tags": [],
+            "label": "serverless",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "serverless",
+                "scope": "public",
+                "docId": "kibServerlessPluginApi",
+                "section": "def-public.ServerlessPluginStart",
+                "text": "ServerlessPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-public.MaintenanceWindowsPublicStartDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-server.MaintenanceWindowsServerSetupDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsServerSetupDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-server.MaintenanceWindowsServerSetupDependencies.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-server.MaintenanceWindowsServerSetupDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginSetup",
+                "text": "LicensingPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-server.MaintenanceWindowsServerSetupDependencies.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-server.MaintenanceWindowsServerStartDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowsServerStartDependencies",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-server.MaintenanceWindowsServerStartDependencies.taskManager",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+              "TaskStore",
+              ", \"get\" | \"aggregate\" | \"fetch\" | \"bulkGet\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+              {
+                "pluginId": "@kbn/encrypted-saved-objects-shared",
+                "scope": "common",
+                "docId": "kibKbnEncryptedSavedObjectsSharedPluginApi",
+                "section": "def-common.EncryptedSavedObjectsClient",
+                "text": "EncryptedSavedObjectsClient"
+              },
+              ") => void; registerApiKeyInvalidateFn: (fn?: ",
+              "ApiKeyInvalidationFn",
+              " | undefined) => void; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-server.MaintenanceWindowClient",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowClient",
+        "description": [],
+        "signature": [
+          "{ create: (params: Readonly<{} & { data: Readonly<{ enabled?: boolean | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { title: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; update: (params: Readonly<{} & { id: string; data: Readonly<{ enabled?: boolean | undefined; title?: string | undefined; duration?: number | undefined; rRule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & {}>; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; get: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; perPage: number; total: number; }>>; bulkGet: (params: Readonly<{} & { ids: string[]; }>) => Promise<Readonly<{} & { errors: Readonly<{} & { id: string; error: string; message: string; statusCode: number; }>[]; maintenanceWindows: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; }>>; archive: (params: Readonly<{} & { id: string; archive: boolean; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; finish: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; getActiveMaintenanceWindows: (cacheIntervalMs?: number | undefined) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-server.MaintenanceWindowsConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowsConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/config.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-server.maintenanceWindowCategoryIdTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "maintenanceWindowCategoryIdTypes",
+        "description": [],
+        "signature": [
+          "{ readonly OBSERVABILITY: \"observability\"; readonly SECURITY_SOLUTION: \"securitySolution\"; readonly MANAGEMENT: \"management\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "start": {
+      "parentPluginId": "maintenanceWindows",
+      "id": "def-server.MaintenanceWindowsServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "MaintenanceWindowsServerStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+      "lineNumber": 40,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "maintenanceWindows",
+          "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientInternal",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaintenanceWindowClientInternal",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => ",
+            "MaintenanceWindowClientApi"
+          ],
+          "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientInternal.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 41,
+              "columnNumber": 38,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "maintenanceWindows",
+          "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithAuth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaintenanceWindowClientWithAuth",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => ",
+            "MaintenanceWindowClientApi"
+          ],
+          "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 42,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithAuth.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 42,
+              "columnNumber": 38,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "maintenanceWindows",
+          "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth",
+          "type": "Function",
+          "tags": [],
+          "label": "getMaintenanceWindowClientWithoutAuth",
+          "description": [],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>) => ",
+            "MaintenanceWindowClientApi"
+          ],
+          "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "maintenanceWindows",
+              "id": "def-server.MaintenanceWindowsServerStart.getMaintenanceWindowClientWithoutAuth.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 43,
+              "columnNumber": 41,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.getScopedQueryErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "getScopedQueryErrorMessage",
+        "description": [],
+        "signature": [
+          "(errorMessage: string) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.getScopedQueryErrorMessage.$1",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+            "lineNumber": 10,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.isScopedQueryError",
+        "type": "Function",
+        "tags": [],
+        "label": "isScopedQueryError",
+        "description": [],
+        "signature": [
+          "(errorMessage: string) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.isScopedQueryError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "errorMessage",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+            "lineNumber": 14,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.DateRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRange",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.DateRange.gte",
+            "type": "string",
+            "tags": [],
+            "label": "gte",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.DateRange.lte",
+            "type": "string",
+            "tags": [],
+            "label": "lte",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowAttributes",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.expirationDate",
+            "type": "string",
+            "tags": [],
+            "label": "expirationDate",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              "MaintenanceWindowEventAttributes",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.rRule",
+            "type": "Object",
+            "tags": [],
+            "label": "rRule",
+            "description": [],
+            "signature": [
+              "RRuleAttributes"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.createdBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.updatedBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.categoryIds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "categoryIds",
+            "description": [],
+            "signature": [
+              "MaintenanceWindowCategoryIdTypes",
+              "[] | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.scopedQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scopedQuery",
+            "description": [],
+            "signature": [
+              "AlertsFilterQueryAttributes",
+              " | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowClientContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowClientContext",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowClientContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowClientContext.getModificationMetadata",
+            "type": "Function",
+            "tags": [],
+            "label": "getModificationMetadata",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "common",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-common.MaintenanceWindowModificationMetadata",
+                "text": "MaintenanceWindowModificationMetadata"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowClientContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowClientContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowModificationMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "MaintenanceWindowModificationMetadata",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowModificationMetadata.createdBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowModificationMetadata.updatedBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowModificationMetadata.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowModificationMetadata.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowSOProperties",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "MaintenanceWindowSOProperties",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.expirationDate",
+            "type": "string",
+            "tags": [],
+            "label": "expirationDate",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.events",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "common",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-common.DateRange",
+                "text": "DateRange"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.rRule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rRule",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "RRuleRecord",
+              "> & Pick<",
+              "RRuleRecord",
+              ", \"dtstart\" | \"tzid\">"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.categoryIds",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "categoryIds",
+            "description": [],
+            "signature": [
+              "string[] | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowSOProperties.scopedQuery",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scopedQuery",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "maintenanceWindows",
+                "scope": "common",
+                "docId": "kibMaintenanceWindowsPluginApi",
+                "section": "def-common.ScopedQueryAttributes",
+                "text": "ScopedQueryAttributes"
+              },
+              " | null | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.ScopedQueryAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScopedQueryAttributes",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.ScopedQueryAttributes.kql",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.ScopedQueryAttributes.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "ScopeQueryFilter",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.ScopedQueryAttributes.dsl",
+            "type": "string",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "MaintenanceWindowStatus",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.BASE_ALERTING_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_ALERTING_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.BASE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.CreateMaintenanceWindowRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateMaintenanceWindowRequestBody",
+        "description": [],
+        "signature": [
+          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly title: string; readonly duration: number; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/create/types/v1.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.DELETE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DELETE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.FIND_MAINTENANCE_WINDOWS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "FIND_MAINTENANCE_WINDOWS_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.FindMaintenanceWindowsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FindMaintenanceWindowsResponse",
+        "description": [],
+        "signature": [
+          "{ readonly per_page: number; readonly page: number; readonly data: Readonly<{ category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; duration: number; events: Readonly<{} & { gte: string; lte: string; }>[]; created_at: string; created_by: string | null; updated_at: string; updated_by: string | null; expiration_date: string; r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; event_start_time: string | null; event_end_time: string | null; }>[]; readonly total: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/find/types/v1.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.FindMaintenanceWindowsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "FindMaintenanceWindowsResult",
+        "description": [],
+        "signature": [
+          "{ readonly page: number; readonly data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; readonly perPage: number; readonly total: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/methods/find/types/find_maintenance_window_result.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.GET_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window/_active\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/maintenance_window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_BASE_ALERTING_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_DATE_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DATE_FORMAT",
+        "description": [],
+        "signature": [
+          "\"MM/DD/YY hh:mm A\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_DEFAULT_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEFAULT_PER_PAGE",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"maintenanceWindow\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"maintenance-window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOWS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOWS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"maintenanceWindows\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindow",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindow",
+        "description": [],
+        "signature": [
+          "{ readonly categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowCategoryIds",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowCategoryIds",
+        "description": [],
+        "signature": [
+          "(\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/shared/types/v1.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowCreateBody",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowCreateBody",
+        "description": [],
+        "signature": [
+          "{ title: string; duration: number; rRule: ",
+          "RRuleParams",
+          "; categoryIds?: string[] | null | undefined; scopedQuery?: ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "common",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-common.ScopedQueryAttributes",
+            "text": "ScopedQueryAttributes"
+          },
+          " | null | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowDeepLinkIds",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowDeepLinkIds",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowResponse",
+        "description": [],
+        "signature": [
+          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly duration: number; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly created_at: string; readonly created_by: string | null; readonly updated_at: string; readonly updated_by: string | null; readonly expiration_date: string; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly event_start_time: string | null; readonly event_end_time: string | null; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/response/types/v1.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowSOAttributes",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "MaintenanceWindowSOAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "common",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-common.MaintenanceWindowSOProperties",
+            "text": "MaintenanceWindowSOProperties"
+          },
+          " & ",
+          {
+            "pluginId": "maintenanceWindows",
+            "scope": "common",
+            "docId": "kibMaintenanceWindowsPluginApi",
+            "section": "def-common.MaintenanceWindowModificationMetadata",
+            "text": "MaintenanceWindowModificationMetadata"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MANAGEMENT_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGEMENT_APP_ID",
+        "description": [],
+        "signature": [
+          "\"management\""
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.UpdateMaintenanceWindowRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "UpdateMaintenanceWindowRequestBody",
+        "description": [],
+        "signature": [
+          "{ readonly enabled?: boolean | undefined; readonly title?: string | undefined; readonly duration?: number | undefined; readonly r_rule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/update/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_API_PRIVILEGES",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW",
+            "type": "string",
+            "tags": [],
+            "label": "READ_MAINTENANCE_WINDOW",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW",
+            "type": "string",
+            "tags": [],
+            "label": "WRITE_MAINTENANCE_WINDOW",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_DEEP_LINK_IDS",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindows",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsCreate",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsCreate",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsEdit",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MAINTENANCE_WINDOW_PATHS",
+        "type": "Object",
+        "tags": [],
+        "label": "MAINTENANCE_WINDOW_PATHS",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_PATHS.maintenanceWindows",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindows",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_PATHS.maintenanceWindowsCreate",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsCreate",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MAINTENANCE_WINDOW_PATHS.maintenanceWindowsEdit",
+            "type": "string",
+            "tags": [],
+            "label": "maintenanceWindowsEdit",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

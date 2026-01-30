@@ -9,7 +9,7 @@ import { act, fireEvent, getByRole, render, screen } from '@testing-library/reac
 import React from 'react';
 import { SynonymRuleFlyout } from './synonym_rule_flyout';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 
 jest.mock('../../hooks/use_put_synonyms_rule', () => ({

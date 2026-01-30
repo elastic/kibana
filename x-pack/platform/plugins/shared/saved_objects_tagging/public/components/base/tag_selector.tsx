@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { Tag } from '../../../common/types';
 import { testSubjFriendly } from '../../utils';
 import type { CreateModalOpener } from '../edition_modal';
@@ -58,6 +59,12 @@ const renderCreateOption = () => {
       gutterSize="xs"
       alignItems="center"
       responsive={false}
+      title={i18n.translate(
+        'xpack.savedObjectsTagging.components.tagSelector.createTagOptionLabel',
+        {
+          defaultMessage: 'Create tag',
+        }
+      )}
     >
       <EuiFlexItem grow={false}>
         <EuiIcon type="tag" />
@@ -106,7 +113,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   allowCreate,
   openCreateModal,
   fullWidth = true,
-  ...otherProps
+  ...comboBoxProps
 }) => {
   const [currentSearch, setCurrentSearch] = useState('');
 
@@ -168,16 +175,26 @@ export const TagSelector: FC<TagSelectorProps> = ({
     [selected, onTagsSelected, openCreateModal, currentSearch]
   );
 
+  const { onSearchChange: onSearchChangeProp, ...restProps } = comboBoxProps;
+
+  const handleOnSearchChange = useCallback(
+    (searchValue: string) => {
+      setCurrentSearch(searchValue);
+      onSearchChangeProp?.(searchValue);
+    },
+    [onSearchChangeProp]
+  );
+
   return (
     <EuiComboBox<Tag | CreateOption>
       placeholder={''}
       options={options}
       selectedOptions={selectedOptions}
-      onSearchChange={setCurrentSearch}
+      onSearchChange={handleOnSearchChange}
       onChange={onChange}
       renderOption={renderOption}
       fullWidth={fullWidth}
-      {...otherProps}
+      {...restProps}
     />
   );
 };

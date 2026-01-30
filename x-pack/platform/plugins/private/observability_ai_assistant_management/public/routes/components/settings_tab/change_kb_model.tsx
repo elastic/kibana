@@ -29,6 +29,9 @@ import {
   InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
+  EisKnowledgeBaseCallout,
+  useEisKnowledgeBaseCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 export function ChangeKbModel({
@@ -42,6 +45,8 @@ export function ChangeKbModel({
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
+  const [eisKnowledgeBaseCalloutDismissed, setEisKnowledgeBaseCalloutDismissed] =
+    useEisKnowledgeBaseCalloutDismissed();
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
@@ -60,6 +65,10 @@ export function ChangeKbModel({
       InferenceModelState.MODEL_PENDING_DEPLOYMENT;
 
   const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
+
+  const isSelectedModelFromEis = EIS_PRECONFIGURED_INFERENCE_IDS.includes(selectedInferenceId);
+
+  const showEisKnowledgeBaseCallout = isSelectedModelFromEis && !eisKnowledgeBaseCalloutDismissed;
 
   const isKnowledgeBaseInLoadingState =
     knowledgeBase.isInstalling ||
@@ -195,10 +204,11 @@ export function ChangeKbModel({
     ),
   }));
 
-  const content = useMemo(() => {
+  const selectInferenceModelDropdown = useMemo(() => {
     if (error) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBase.errorLoadingModelsTitle',
             {
@@ -213,19 +223,35 @@ export function ChangeKbModel({
       );
     }
 
+    const handleDismissEisKnowledgeBaseCallout = () => {
+      setEisKnowledgeBaseCalloutDismissed(true);
+    };
+
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false} css={{ width: 354 }}>
-          <EuiSuperSelect
-            fullWidth
-            hasDividers
-            isLoading={isLoadingEndpoints}
-            options={superSelectOptions}
-            valueOfSelected={selectedInferenceId}
-            onChange={(value) => setSelectedInferenceId(value)}
-            disabled={isKnowledgeBaseInLoadingState}
-            data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
-          />
+          <EisKnowledgeBaseCallout
+            isOpen={showEisKnowledgeBaseCallout}
+            dismissCallout={handleDismissEisKnowledgeBaseCallout}
+            zIndex={0}
+          >
+            <EuiSuperSelect
+              fullWidth
+              hasDividers
+              isLoading={isLoadingEndpoints}
+              options={superSelectOptions}
+              valueOfSelected={selectedInferenceId}
+              onChange={(value) => setSelectedInferenceId(value)}
+              disabled={isKnowledgeBaseInLoadingState}
+              data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
+              aria-label={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBase.modelSelectAriaLabel',
+                {
+                  defaultMessage: 'Semantic search model',
+                }
+              )}
+            />
+          </EisKnowledgeBaseCallout>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -260,100 +286,148 @@ export function ChangeKbModel({
     knowledgeBase.status?.value?.inferenceModelState,
     knowledgeBase.status?.value?.endpoint?.inference_id,
     handleInstall,
+    showEisKnowledgeBaseCallout,
+    setEisKnowledgeBaseCalloutDismissed,
   ]);
 
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={
-        <h3>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.knowledgeBase.chooseModelLabel',
-            {
-              defaultMessage: 'Set text embeddings model',
-            }
-          )}
-        </h3>
-      }
-      description={
-        <>
-          <EuiText size="s" color="subdued">
+    <div css={{ marginBlockStart: 0 }}>
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
             {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBase.chooseModelDescription',
+              'xpack.observabilityAiAssistantManagement.knowledgeBase.setEmbeddingModelTitle',
               {
-                defaultMessage: "Choose the default language model for the Assistant's responses.",
+                defaultMessage: 'Set text embeddings model for Knowledge base',
               }
-            )}{' '}
-            <EuiLink
-              href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-built-in-models"
-              target="_blank"
-            >
+            )}
+          </h3>
+        }
+        description={
+          <>
+            <EuiText size="s" color="subdued">
               {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.knowledgeBase.subtitleLearnMore',
+                'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBase.setEmbeddingModelDescription',
                 {
-                  defaultMessage: 'Learn more',
+                  defaultMessage:
+                    "Choose the default model (and language) for the Assistant's responses. The Elastic documentation will be installed by default to help the Assistant answer questions.",
                 }
-              )}
-            </EuiLink>
-          </EuiText>
-          {knowledgeBase.status?.value?.inferenceModelState && (
-            <EuiFlexGroup gutterSize="s" alignItems="center" css={{ marginTop: 8 }}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.observabilityAiAssistantManagement.knowledgeBase.kbStateLabel',
-                    {
-                      defaultMessage: 'Knowledge Base Status:',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
-                      color={
-                        knowledgeBase.status.value.inferenceModelState === InferenceModelState.READY
-                          ? isKnowledgeBaseInLoadingState
-                            ? 'warning'
-                            : 'success'
-                          : 'default'
+              )}{' '}
+              <EuiLink
+                href="https://www.elastic.co/docs/explore-analyze/ai-assistant#observability-ai-assistant-requirements"
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBase.subtitleLearnMore',
+                  {
+                    defaultMessage: 'Learn more',
+                  }
+                )}
+              </EuiLink>
+            </EuiText>
+            {knowledgeBase.status?.value?.inferenceModelState && (
+              <EuiFlexGroup gutterSize="s" alignItems="center" css={{ marginTop: 8 }}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    •{' '}
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.knowledgeBase.EmbeddingModelStateLabel',
+                      {
+                        defaultMessage: 'Text embeddings model status:',
                       }
-                    >
-                      {knowledgeBase.status.value.inferenceModelState === InferenceModelState.READY
-                        ? isKnowledgeBaseInLoadingState
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateUpdatingModel',
-                              {
-                                defaultMessage: 'Updating model',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateInstalled',
-                              {
-                                defaultMessage: 'Installed',
-                              }
-                            )
-                        : knowledgeBase.status.value.inferenceModelState}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                  {isKnowledgeBaseInLoadingState && (
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner
-                        size="s"
-                        data-test-subj="observabilityAiAssistantKnowledgeBaseLoadingSpinner"
-                      />
+                      <EuiBadge
+                        data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
+                        color={
+                          knowledgeBase.status.value.inferenceModelState ===
+                          InferenceModelState.READY
+                            ? isKnowledgeBaseInLoadingState
+                              ? 'warning'
+                              : 'success'
+                            : 'default'
+                        }
+                      >
+                        {knowledgeBase.status.value.inferenceModelState ===
+                        InferenceModelState.READY
+                          ? isKnowledgeBaseInLoadingState
+                            ? i18n.translate(
+                                'xpack.observabilityAiAssistantManagement.knowledgeBase.stateUpdatingModel',
+                                {
+                                  defaultMessage: 'Updating model',
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.observabilityAiAssistantManagement.knowledgeBase.stateInstalled',
+                                {
+                                  defaultMessage: 'Installed',
+                                }
+                              )
+                          : knowledgeBase.status.value.inferenceModelState ===
+                            InferenceModelState.NOT_INSTALLED
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateNotInstalled',
+                              {
+                                defaultMessage: 'Not installed',
+                              }
+                            )
+                          : knowledgeBase.status.value.inferenceModelState ===
+                            InferenceModelState.MODEL_PENDING_ALLOCATION
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingAllocation',
+                              {
+                                defaultMessage: 'Model pending allocation',
+                              }
+                            )
+                          : knowledgeBase.status.value.inferenceModelState ===
+                            InferenceModelState.MODEL_PENDING_DEPLOYMENT
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
+                              {
+                                defaultMessage: 'Model pending deployment...',
+                              }
+                            )
+                          : knowledgeBase.status.value.inferenceModelState ===
+                            InferenceModelState.DEPLOYING_MODEL
+                          ? i18n.translate(
+                              'xpack.observabilityAiAssistantManagement.knowledgeBase.stateModelPendingDeployment',
+                              {
+                                defaultMessage: 'Deploying model...',
+                              }
+                            )
+                          : knowledgeBase.status.value.inferenceModelState}
+                      </EuiBadge>
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                    {isKnowledgeBaseInLoadingState && (
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner
+                          size="s"
+                          data-test-subj="observabilityAiAssistantKnowledgeBaseLoadingSpinner"
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </>
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.observabilityAiAssistantManagement.knowledgeBase.semanticSearchModelLabel',
+            { defaultMessage: 'Semantic search model' }
           )}
-        </>
-      }
-    >
-      <EuiFormRow fullWidth>{content}</EuiFormRow>
-    </EuiDescribedFormGroup>
+        >
+          {selectInferenceModelDropdown}
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    </div>
   );
 }

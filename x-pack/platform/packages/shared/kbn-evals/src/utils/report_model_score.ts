@@ -7,108 +7,107 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { sumBy, mean, keyBy, uniq } from 'lodash';
-import { table } from 'table';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import { hostname } from 'os';
+import {
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+  parseScoreDocuments,
+} from './score_repository';
+import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
+import type { EvaluationReport, RanExperiment } from '../types';
 
-interface DatasetScore {
-  id: string;
-  name: string;
-  totalScore: number;
-  numExamples: number;
-}
-
-export async function reportModelScore({
-  log,
-  phoenixClient,
-  model,
+export async function buildEvaluationReport({
   experiments,
+  model,
+  evaluatorModel,
+  repetitions,
+  runId,
 }: {
-  log: SomeDevLog;
-  phoenixClient: KibanaPhoenixClient;
-  model: Model;
   experiments: RanExperiment[];
-}): Promise<void> {
-  const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
+  model: Model;
+  evaluatorModel: Model;
+  repetitions: number;
+  runId?: string;
+}): Promise<EvaluationReport> {
+  const { datasetScores } = await buildEvaluationResults(experiments);
 
-  const datasetInfos = await phoenixClient.getDatasets(allDatasetIds);
+  const datasetScoresWithStats = datasetScores.map((dataset) => ({
+    ...dataset,
+    evaluatorStats: new Map(
+      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
+        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
+        return [evaluatorName, stats];
+      })
+    ),
+  }));
 
-  const datasetInfosById = keyBy(datasetInfos, (datasetInfo) => datasetInfo.id);
+  const currentRunId = runId || process.env.TEST_RUN_ID;
 
-  const datasetScoresMap = new Map<string, DatasetScore>();
-
-  for (const experiment of experiments) {
-    const { datasetId, evaluationRuns, runs } = experiment;
-
-    const totalScoreForExperiment = evaluationRuns
-      ? sumBy(evaluationRuns, (ev) => ev.result?.score ?? 0)
-      : 0;
-
-    const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
-
-    const existing = datasetScoresMap.get(datasetId);
-
-    if (existing) {
-      existing.totalScore += totalScoreForExperiment;
-      existing.numExamples += numExamplesForExperiment;
-    } else {
-      datasetScoresMap.set(datasetId, {
-        id: datasetId,
-        name: datasetInfosById[datasetId]?.name ?? datasetId,
-        totalScore: totalScoreForExperiment,
-        numExamples: numExamplesForExperiment,
-      });
-    }
+  if (!currentRunId) {
+    throw new Error(
+      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
+    );
   }
 
-  const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => {
-    return {
-      ...dataset,
-      percent: dataset.totalScore / dataset.numExamples,
-    };
-  });
+  return {
+    datasetScoresWithStats,
+    model,
+    evaluatorModel,
+    repetitions,
+    runId: currentRunId,
+  };
+}
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+export async function exportEvaluations(
+  report: EvaluationReport,
+  esClient: EsClient,
+  log: SomeDevLog
+): Promise<void> {
+  if (report.datasetScoresWithStats.length === 0) {
+    log.warning('No dataset scores available to export to Elasticsearch');
     return;
   }
 
-  // Average (unweighted) percent across datasets
-  const averagePercent = mean(datasetScores.map((d) => d.percent));
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  // Weighted percent across datasets (by number of examples)
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
-  const weightedPercent =
-    totalExamples === 0 ? 0 : sumBy(datasetScores, (d) => d.totalScore) / totalExamples;
+  const exporter = new EvaluationScoreRepository(esClient, log);
 
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
-  const tableHeader = ['Dataset', 'Total Score', '# Examples', '%'];
-
-  const datasetRows = datasetScores.map(({ name, totalScore, numExamples, percent }) => {
-    const values = [
-      name,
-      totalScore,
-      numExamples.toString(),
-      chalk.bold.yellow((percent! * 100).toFixed(1) + '%'),
-    ];
-    return values;
+  await exporter.exportScores({
+    datasetScoresWithStats: report.datasetScoresWithStats,
+    model: report.model,
+    evaluatorModel: report.evaluatorModel,
+    runId: report.runId,
+    repetitions: report.repetitions,
   });
 
-  const summaryRows = [
-    ['', '', '', ''],
-    ['Average %', '', '', chalk.bold.yellow((averagePercent * 100).toFixed(1) + '%')],
-    ['Weighted %', '', '', chalk.bold.yellow((weightedPercent * 100).toFixed(1) + '%')],
-  ];
+  const modelId = report.model.id || 'unknown';
 
-  const output = table([tableHeader, ...datasetRows, ...summaryRows], {
-    columns: {
-      1: { alignment: 'right' },
-      2: { alignment: 'right' },
-      3: { alignment: 'right' },
-    },
-  });
+  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${
+        report.runId
+      }"`
+    )
+  );
+}
 
-  log.info(`\n\n${header[0]}\n${output}`);
+export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
+  if (scores.length === 0) {
+    throw new Error('No documents to format');
+  }
+
+  const scoresWithStats = parseScoreDocuments(scores);
+
+  const repetitions = scores[0].repetitions ?? 1;
+
+  return {
+    datasetScoresWithStats: scoresWithStats,
+    model: scores[0].model as Model,
+    evaluatorModel: scores[0].evaluator_model as Model,
+    repetitions,
+    runId: scores[0].run_id,
+  };
 }

@@ -8,11 +8,16 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SINGLE_ACCOUNT,
-} from '@kbn/cloud-security-posture';
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
+  AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+  AZURE_PROVIDER_TEST_SUBJ,
+  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_PROVIDER_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
@@ -30,7 +35,13 @@ import {
   getMockPolicyVulnMgmtAWS,
   getPackageInfoMock,
 } from './mocks';
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+  type NewPackagePolicy,
+  type PackageInfo,
+  type PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { getPosturePolicy, POLICY_TEMPLATE_FORM_DTS } from './utils';
 import {
   CLOUDBEAT_AWS,
@@ -42,24 +53,14 @@ import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import {
-  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-  CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
-  CIS_AZURE_OPTION_TEST_SUBJ,
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-  CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  CIS_GCP_OPTION_TEST_SUBJ,
-  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
-} from '../test_subjects';
+
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import * as KibanaHook from '../../common/hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT } from '../test_subjects';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
@@ -247,7 +248,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // It should ensure the initial state is valid.
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...policy,
         namespace: 'default',
@@ -267,7 +268,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: `${policy.name}1` },
       });
     });
@@ -284,7 +285,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, description: `${policy.description}1` },
       });
     });
@@ -314,7 +315,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: eksPolicy,
       });
     });
@@ -414,7 +415,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -428,7 +429,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         name: 'cloud_security_posture-1',
@@ -438,7 +439,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments kspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -495,7 +496,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).nthCalledWith(1, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         name: 'cloud_security_posture-1',
@@ -505,7 +506,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments kspm template enabled input
     expect(onChange).nthCalledWith(2, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -522,7 +523,7 @@ describe('<CspPolicyTemplateForm />', () => {
     */
     expect(onChange).nthCalledWith(3, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -577,7 +578,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -591,7 +592,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         name: 'vuln_mgmt-2',
@@ -601,7 +602,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments vuln_mgmt template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -660,7 +661,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the CloudFormation template
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         name: 'cloud_security_posture-1',
@@ -679,7 +680,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => {
@@ -698,7 +699,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -711,7 +712,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -780,7 +781,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -818,7 +819,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -826,12 +827,12 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo() as PackageInfo} />
       );
 
-      await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'c');
-      policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'c' } });
+      await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'b');
+      policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -870,7 +871,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -878,12 +879,12 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfo() as PackageInfo} />
       );
 
-      await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'c');
-      policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'c' } });
+      await userEvent.type(getByTestId('passwordInput-secret-access-key'), 'b');
+      policy = getPosturePolicy(policy, CLOUDBEAT_EKS, { secret_access_key: { value: 'b' } });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -896,7 +897,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -932,7 +933,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -945,7 +946,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -955,7 +956,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders ${CLOUDBEAT_AWS} Account Type field, AWS Organization is enabled for supported versions`, () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
-        'aws.account_type': { value: AWS_ORGANIZATION_ACCOUNT },
+        'aws.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { getByLabelText } = render(
@@ -971,7 +972,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'cloud_formation' },
-        'aws.account_type': { value: AWS_SINGLE_ACCOUNT },
+        'aws.account_type': { value: SINGLE_ACCOUNT },
       });
 
       const { getByText, getByLabelText } = render(
@@ -991,7 +992,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyAWS();
       policy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'cloud_formation' },
-        'aws.account_type': { value: AWS_ORGANIZATION_ACCOUNT },
+        'aws.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { queryByText, getByLabelText } = render(
@@ -1083,7 +1084,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1123,7 +1124,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1136,7 +1137,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1173,13 +1174,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
-        updatedPolicy: policy,
-      });
 
-      expect(onChange).toHaveBeenCalledWith({
-        isExtensionLoaded: true,
-        isValid: true,
         updatedPolicy: policy,
       });
 
@@ -1192,7 +1187,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1205,7 +1200,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1242,7 +1237,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1255,7 +1250,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1294,7 +1289,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: expectedUpdatedPolicy,
       });
     });
@@ -1337,7 +1332,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders Google Cloud Shell forms when Setup Access is set to Google Cloud Shell`, async () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { getByTestId } = render(
@@ -1345,7 +1340,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       expect(
-        getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
+        getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
       ).toBeInTheDocument();
     });
 
@@ -1377,7 +1372,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      await userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
+      await userEvent.type(getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.file': { value: 'b' },
@@ -1385,7 +1380,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1394,7 +1389,7 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.type': { value: 'manual' },
-        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { queryByText, getByLabelText } = render(
@@ -1412,14 +1407,14 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is Google Cloud Shell`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+      expect(getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
 
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
@@ -1427,14 +1422,14 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`renders ${CLOUDBEAT_GCP} Organization fields when account type is Organization and Setup Access is manual`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+      expect(getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
 
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
@@ -1442,14 +1437,14 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`Should not render ${CLOUDBEAT_GCP} Organization fields when account type is Single`, () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
+        'gcp.account_type': { value: SINGLE_ACCOUNT },
       });
 
       const { queryByLabelText, queryByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      expect(queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
+      expect(queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
 
       expect(queryByLabelText('Organization ID')).toBeNull();
     });
@@ -1457,14 +1452,14 @@ describe('<CspPolicyTemplateForm />', () => {
     it(`updates ${CLOUDBEAT_GCP} organization id`, async () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
-        'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
+        'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
       });
 
       const { getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmGCP()} />
       );
 
-      await userEvent.type(getByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
+      await userEvent.type(getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.organization_id': { value: 'c' },
@@ -1472,7 +1467,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1517,7 +1512,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: 'cspm-1' },
       });
 
@@ -1537,7 +1532,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: 'cspm-1' },
       });
     });
@@ -1548,16 +1543,18 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
 
-      const { getByLabelText, getByRole } = render(
+      const { getByRole, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
       expect(
         getByRole('option', { name: 'Service principal with Client Secret', selected: true })
       ).toBeInTheDocument();
-      expect(getByLabelText('Tenant ID')).toBeInTheDocument();
-      expect(getByLabelText('Client ID')).toBeInTheDocument();
-      await waitFor(() => expect(getByLabelText('Client Secret')).toBeInTheDocument());
+      expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+      expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
+      await waitFor(() =>
+        expect(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET)).toBeInTheDocument()
+      );
     });
 
     it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {
@@ -1566,11 +1563,11 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.credentials.type': { value: 'service_principal_with_client_secret' },
       });
 
-      const { rerender, getByLabelText, getByTestId } = render(
+      const { rerender, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByLabelText('Tenant ID'), 'a');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID), 'a');
 
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.tenant_id': { value: 'a' },
@@ -1578,7 +1575,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1586,14 +1583,14 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByLabelText('Client ID'), 'b');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID), 'b');
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_id': { value: 'b' },
       });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1601,14 +1598,14 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
       );
 
-      await userEvent.type(getByTestId('passwordInput-client-secret'), 'c');
+      await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET), 'c');
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.client_secret': { value: 'c' },
       });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1654,9 +1651,9 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
 
       expect(
-        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
+        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUDFORMATION)
       ).toBeInTheDocument();
-      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
@@ -1731,7 +1728,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in ess gcp environment', async () => {
+    it('should render setup technology selector for AWS and showcloud connectors in ess gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1773,13 +1770,14 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
-    it('should render setup technology selector for AWS and hide cloud connectors in ess azure environment', async () => {
+
+    it('should render setup technology selector for AWS and show cloud connectors in ess azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1821,9 +1819,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
@@ -1880,7 +1878,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and should hide cloud connectors in serverless gcp environment', async () => {
+    it('should render setup technology selector for AWS and should show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1925,14 +1923,14 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
 
-    it('should render setup technology selector for AWS and should hide cloud connectors in serverless azure environment', async () => {
+    it('should render setup technology selector for AWS and should show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
@@ -1977,9 +1975,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
       });
     });
@@ -1996,21 +1994,15 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // navigate to GCP
-      const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
+      const gcpSelectorButton = getByTestId(GCP_PROVIDER_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
-      const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      const credentialsJsonField = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
-      );
-      const credentialsTypSelector = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
-      );
-      const credentialsFileField = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
-      );
+      const orgIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const credentialsJsonField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON);
+      const credentialsTypSelector = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE);
+      const credentialsFileField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE);
 
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -2026,14 +2018,16 @@ describe('<CspPolicyTemplateForm />', () => {
       const agentBasedOption = getByLabelText(/agent-based/i);
       await userEvent.click(agentBasedOption);
       await waitFor(() => {
-        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
-        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
+        expect(
+          getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL)
+        ).toBeInTheDocument();
+        expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
     });
 
     it.skip('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
-        'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
+        'gcp.account_type': { value: SINGLE_ACCOUNT, type: 'text' },
       });
 
       const { getByTestId, queryByTestId } = render(
@@ -2045,21 +2039,15 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // navigate to GCP
-      const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
+      const gcpSelectorButton = getByTestId(GCP_PROVIDER_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
       const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
-      const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      const credentialsJsonField = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
-      );
-      const credentialsTypSelector = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
-      );
-      const credentialsFileField = queryByTestId(
-        CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
-      );
+      const orgIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const credentialsJsonField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON);
+      const credentialsTypSelector = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE);
+      const credentialsFileField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE);
 
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -2083,7 +2071,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // navigate to Azure
-      const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
+      const azureSelectorButton = getByTestId(AZURE_PROVIDER_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
@@ -2092,8 +2080,8 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
       await waitFor(() => {
-        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
-        expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
+        expect(getByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
+        expect(getByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
 
       // select agent-based and check for ARM template option
@@ -2101,11 +2089,11 @@ describe('<CspPolicyTemplateForm />', () => {
       const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
-      const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+      const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      const clientIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      const clientSecretField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      const armTemplateSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      const manualSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
@@ -2131,7 +2119,7 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // navigate to Azure
-      const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
+      const azureSelectorButton = getByTestId(AZURE_PROVIDER_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
@@ -2141,11 +2129,11 @@ describe('<CspPolicyTemplateForm />', () => {
       const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
-      const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      const clientSecretField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+      const tenantIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      const clientIdField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      const clientSecretField = queryByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      const armTemplateSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      const manualSelector = queryByTestId(AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       // default state for Azure with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -2208,11 +2196,11 @@ describe('<CspPolicyTemplateForm />', () => {
       'azure.credentials.type': { value: 'service_principal_with_client_certificate' },
     });
 
-    const { rerender, getByLabelText, getByTestId } = render(
+    const { rerender, getByTestId } = render(
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Tenant ID'), 'a');
+    await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID), 'a');
 
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.tenant_id': { value: 'a' },
@@ -2220,7 +2208,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2228,14 +2215,13 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Client ID'), 'b');
+    await userEvent.type(getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID), 'b');
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.client_id': { value: 'b' },
     });
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2243,14 +2229,16 @@ describe('<CspPolicyTemplateForm />', () => {
       <WrappedComponent newPolicy={policy} packageInfo={getPackageInfoMock() as PackageInfo} />
     );
 
-    await userEvent.type(getByLabelText('Client Certificate Path'), 'c');
+    await userEvent.type(
+      getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH),
+      'c'
+    );
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.client_certificate_path': { value: 'c' },
     });
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2265,7 +2253,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
   });
@@ -2329,7 +2316,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2343,7 +2329,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2357,7 +2342,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2371,7 +2355,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
   });

@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
         template: sourceIndexTemplate.template,
         _meta: sourceIndexTemplate._meta,
         data_stream: sourceIndexTemplate.data_stream,
-        composed_of: sourceIndexTemplate.composed_of.filter(
+        composed_of: sourceIndexTemplate.composed_of?.filter(
           (template) => template.includes('@settings') || template.includes('@package')
         ),
         index_patterns: [`${logsTemplateName}-testwithoutfinalpipeline`],
@@ -191,7 +191,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.data_streams.length).to.eql(2);
 
         body.data_streams.forEach((dataStream: any) => {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           const { index, size_in_bytes, size_in_bytes_formatted, last_activity_ms, ...coreFields } =
             dataStream;
           expect(expectedStreamsByDataset[coreFields.dataset]).not.to.eql(undefined);

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../helpers/common';
-
 export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
 
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
@@ -45,12 +43,6 @@ export const AUTO_SUGGEST_AGENT_NAME = `[data-test-subj="autocompleteSuggestion-
 
 export const AUTO_SUGGEST_HOST_NAME_VALUE = `[data-test-subj='autocompleteSuggestion-value-"siem-kibana"-']`;
 
-export const EDIT_AS_QUERY_DSL = getDataTestSubjectSelector('editQueryDSL');
-
-export const KIBANA_CODE_EDITOR = getDataTestSubjectSelector('kibanaCodeEditor');
-
 export const NAV_SEARCH_INPUT = '[data-test-subj="nav-search-input"]';
-
-export const NAV_SEARCH_RESULTS = '[aria-label="Filter options"]';
 
 export const NAV_SEARCH_NO_RESULTS = '[data-test-subj="nav-search-no-results"]';

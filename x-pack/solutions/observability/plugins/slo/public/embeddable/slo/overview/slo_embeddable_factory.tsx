@@ -21,9 +21,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -67,7 +65,7 @@ export const getOverviewEmbeddableFactory = ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
     const deps = { ...coreStart, ...pluginsStart };
-    const state = initialState.rawState;
+    const state = initialState;
 
     const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
@@ -83,15 +81,11 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-        dynamicActionsManager?.serializeState() ?? {};
+      const dynamicActionsState = dynamicActionsManager?.getLatestState() ?? {};
       return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...sloStateManager.getLatestState(),
-          ...dynamicActionsState,
-        },
-        references: dynamicActionsReferences ?? [],
+        ...titleManager.getLatestState(),
+        ...sloStateManager.getLatestState(),
+        ...dynamicActionsState,
       };
     }
 
@@ -115,9 +109,9 @@ export const getOverviewEmbeddableFactory = ({
         ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
       }),
       onReset: (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        titleManager.reinitializeState(lastSaved?.rawState);
-        sloStateManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        titleManager.reinitializeState(lastSaved);
+        sloStateManager.reinitializeState(lastSaved);
       },
     });
 
@@ -127,8 +121,8 @@ export const getOverviewEmbeddableFactory = ({
       ...(dynamicActionsManager?.api ?? {}),
       ...sloStateManager.api,
       defaultTitle$,
-      hideTitle$: titleManager.api.hidePanelTitles$,
-      setHideTitle: titleManager.api.setHidePanelTitles,
+      hideTitle$: titleManager.api.hideTitle$,
+      setHideTitle: titleManager.api.setHideTitle,
       supportedTriggers: () => [],
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -241,31 +235,36 @@ export const getOverviewEmbeddableFactory = ({
         };
 
         const queryClient = new QueryClient();
-
         return (
-          <Router history={createBrowserHistory()}>
-            <EuiThemeProvider darkMode={true}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    {showAllGroupByInstances ? (
-                      <SloCardChartList sloId={sloId!} />
-                    ) : (
-                      renderOverview()
-                    )}
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </EuiThemeProvider>
-          </Router>
+          <EuiThemeProvider darkMode={true}>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  {overviewMode === 'groups' ? (
+                    renderOverview()
+                  ) : showAllGroupByInstances ? (
+                    <div
+                      data-test-subj="sloSingleOverviewPanel"
+                      data-shared-item=""
+                      style={{ width: '100%' }}
+                    >
+                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
+                    </div>
+                  ) : (
+                    renderOverview()
+                  )}
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </EuiThemeProvider>
         );
       },
     };

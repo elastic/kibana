@@ -7,6 +7,7 @@
 
 import type { FocusEventHandler } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 
 export interface ESFieldSelectProps {
@@ -43,6 +44,9 @@ export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = ({
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       compressed
+      aria-label={i18n.translate('xpack.canvas.esFieldSelect.fieldComboBox.ariaLabel', {
+        defaultMessage: 'Field',
+      })}
     />
   );
 };

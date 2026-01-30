@@ -24,11 +24,15 @@ import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { buildInitRequestBodyValidation } from './validation';
-import { buildIndexPatterns } from '../utils';
+import { buildIndexPatternsByEngine } from '../utils';
+import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
+  telemetry: ITelemetryEventsSender,
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
@@ -60,8 +64,9 @@ export const initEntityEngineRoute = (
         const entityStoreClient = secSol.getEntityStoreDataClient();
 
         try {
-          const securitySolutionIndices = await buildIndexPatterns(
+          const securitySolutionIndices = await buildIndexPatternsByEngine(
             getSpaceId(),
+            EntityType[request.params.entityType],
             getAppClient(),
             getDataViewsService()
           );
@@ -82,6 +87,7 @@ export const initEntityEngineRoute = (
           }
 
           await checkAndInitAssetCriticalityResources(context, logger);
+          await checkAndInitPrivilegeMonitoringResources(context, logger);
 
           const body: InitEntityEngineResponse = await entityStoreClient.init(
             EntityType[request.params.entityType],
@@ -91,10 +97,17 @@ export const initEntityEngineRoute = (
             }
           );
 
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error initialising entity engine: ${error.message}`);
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: error.message,
+          });
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

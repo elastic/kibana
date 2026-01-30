@@ -9,13 +9,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
-import type {
-  AggBasedColumn,
-  CollapseFunction,
-  SchemaConfig,
-  SupportedAggregation,
-} from '../../common';
-import { isCollapseFunction } from '../../common';
+import type { CollapseFunction } from '@kbn/lens-common';
+import type { AnyMetricColumnWithSourceFieldWithMeta } from '../../common/convert_to_lens';
+import { isCollapseFunction } from '../../common/convert_to_lens';
+import type { AggBasedColumn, SchemaConfig, SupportedAggregation } from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
 import type { BucketColumn } from '../../common/convert_to_lens/lib';
@@ -69,29 +66,31 @@ export const getBucketColumns = (
   keys: Array<keyof Schemas>,
   dataView: DataView,
   isSplit: boolean,
-  metricColumns: AggBasedColumn[],
+  metricColumns: AnyMetricColumnWithSourceFieldWithMeta[],
   dropEmptyRowsInDateHistogram: boolean = false
 ) => {
   const columns: AggBasedColumn[] = [];
   for (const key of keys) {
     if (visSchemas[key] && visSchemas[key]?.length) {
-      const bucketColumns = visSchemas[key]?.flatMap((m) =>
-        convertBucketToColumns(
-          {
-            agg: m,
-            dataView,
-            visType,
-            metricColumns,
-            aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
-          },
-          isSplit,
-          dropEmptyRowsInDateHistogram
+      const bucketColumns = visSchemas[key]
+        ?.flatMap((m) =>
+          convertBucketToColumns(
+            {
+              agg: m,
+              dataView,
+              visType,
+              metricColumns,
+              aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
+            },
+            isSplit,
+            dropEmptyRowsInDateHistogram
+          )
         )
-      );
-      if (!bucketColumns || bucketColumns.includes(null)) {
+        ?.filter(<T>(v: T | null | undefined): v is NonNullable<T> => v != null);
+      if (!bucketColumns || bucketColumns.length === 0) {
         return null;
       }
-      columns.push(...(bucketColumns as AggBasedColumn[]));
+      columns.push(...bucketColumns);
     }
   }
   return columns;
@@ -162,7 +161,7 @@ export const getCustomBucketColumns = (
     customBucket: IAggConfig;
     metricIds: string[];
   }>,
-  metricColumns: AggBasedColumn[],
+  metricColumns: AnyMetricColumnWithSourceFieldWithMeta[],
   dataView: DataView,
   aggs: Array<SchemaConfig<METRIC_TYPES>>,
   dropEmptyRowsInDateHistogram?: boolean

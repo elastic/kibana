@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateLongId, generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
+import { generateLongId, generateShortId, log, timerange } from '@kbn/synthtrace-client';
 import moment from 'moment';
 
 enum LogLevel {
@@ -189,6 +189,43 @@ export function createDegradedFieldsRecord({
     });
 }
 
+export function createMalformedFieldRecord({
+  to,
+  count = 1,
+  dataset,
+  namespace = defaultNamespace,
+}: {
+  to: string;
+  count?: number;
+  dataset: string;
+  namespace?: string;
+}) {
+  return timerange(moment(to).subtract(count, 'minute'), moment(to))
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => {
+      return Array(count)
+        .fill(0)
+        .flatMap(() => [
+          log
+            .create()
+            .dataset(dataset)
+            .message('Log with malformed numeric field')
+            .logLevel('info')
+            .service(SERVICE_NAMES[0])
+            .namespace(namespace)
+            .defaults({
+              'trace.id': generateShortId(),
+              'agent.name': 'synth-agent',
+              // This will cause a malformed field error because num is mapped as 'long'
+              // but we're sending a non-numeric string value
+              numeric_field: 'not_a_number',
+            } as Record<string, unknown>)
+            .timestamp(timestamp),
+        ]);
+    });
+}
+
 export const datasetNames = ['synth.1', 'synth.2', 'synth.3'];
 export const defaultNamespace = 'default';
 export const productionNamespace = 'production';
@@ -220,4 +257,23 @@ export const ANOTHER_1024_CHARS =
 
 export const CONSISTENT_TAGS = [
   'this_is_here_to_remove_variance_introduced_by_the_geoip_processor',
+];
+
+export const processors = [
+  {
+    geoip: {
+      field: 'host.ip',
+      target_field: 'geoip',
+      database_file: 'GeoLite2-City.mmdb',
+      properties: ['country_name', 'region_name', 'city_name'],
+    },
+  },
+  {
+    geoip: {
+      field: 'cloud.provider',
+      target_field: 'cloud.geoip',
+      database_file: 'GeoLite2-Country.mmdb',
+      properties: ['country_name'],
+    },
+  },
 ];

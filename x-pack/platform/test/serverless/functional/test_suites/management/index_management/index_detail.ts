@@ -18,10 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the indices tab
-      await pageObjects.indexManagement.changeTabs('indicesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('indices');
     });
 
     it('renders the indices tab', async () => {
@@ -36,7 +33,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('can view index details', function () {
       it('index with no documents', async () => {
-        await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+        // Open the details page for the index created in this suite rather than relying on
+        // the first row in the indices table (which can vary depending on existing indices).
+        await pageObjects.indexManagement.manageIndex(testIndexName);
+        await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
         await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
         await pageObjects.indexManagement.indexDetailsPage.expectTabsExists();
       });

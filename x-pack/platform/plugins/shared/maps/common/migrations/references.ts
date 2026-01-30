@@ -9,7 +9,7 @@
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 import type { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
@@ -21,7 +21,7 @@ export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: MapAttributes;
+  attributes: StoredMapAttributes;
   references?: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {
@@ -108,20 +108,12 @@ export function extractReferences({
   };
 }
 
-function findReference(targetName: string, references: SavedObjectReference[]) {
-  const reference = references.find(({ name }) => name === targetName);
-  if (!reference) {
-    throw new Error(`Could not find reference "${targetName}"`);
-  }
-  return reference;
-}
-
 export function injectReferences({
   attributes,
-  references,
+  findReference,
 }: {
-  attributes: MapAttributes;
-  references: SavedObjectReference[];
+  attributes: StoredMapAttributes;
+  findReference: (name: string) => SavedObjectReference | undefined;
 }) {
   if (!attributes.layerListJSON) {
     return { attributes };
@@ -134,11 +126,19 @@ export function injectReferences({
     throw new Error('Unable to parse attribute layerListJSON');
   }
 
+  function findReferenceWithThrow(name: string) {
+    const reference = findReference(name);
+    if (!reference) {
+      throw new Error(`Could not find reference "${name}"`);
+    }
+    return reference;
+  }
+
   layerList.forEach((layer) => {
     // Inject index-pattern references into source descriptor
     if (layer.sourceDescriptor && 'indexPatternRefName' in layer.sourceDescriptor) {
       const sourceDescriptor = layer.sourceDescriptor as IndexPatternReferenceDescriptor;
-      const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
+      const reference = findReferenceWithThrow(sourceDescriptor.indexPatternRefName!);
       sourceDescriptor.indexPatternId = reference.id;
       delete sourceDescriptor.indexPatternRefName;
     }
@@ -150,7 +150,7 @@ export function injectReferences({
       joins.forEach((join) => {
         if (join.right && 'indexPatternRefName' in join.right) {
           const sourceDescriptor = join.right as IndexPatternReferenceDescriptor;
-          const reference = findReference(sourceDescriptor.indexPatternRefName!, references);
+          const reference = findReferenceWithThrow(sourceDescriptor.indexPatternRefName!);
           sourceDescriptor.indexPatternId = reference.id;
           delete sourceDescriptor.indexPatternRefName;
         }

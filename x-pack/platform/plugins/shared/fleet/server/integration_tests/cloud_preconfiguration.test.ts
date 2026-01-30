@@ -156,7 +156,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -214,9 +214,9 @@ describe('Fleet cloud preconfiguration', () => {
                 },
                 id: 'fleet-server-fleet_server-elastic-cloud-fleet-server',
                 meta: {
-                  package: {
+                  package: expect.objectContaining({
                     name: 'fleet_server',
-                  },
+                  }),
                 },
                 name: 'Fleet Server',
                 package_policy_id: 'elastic-cloud-fleet-server',
@@ -313,9 +313,9 @@ describe('Fleet cloud preconfiguration', () => {
                 },
                 id: 'elastic-cloud-apm',
                 meta: {
-                  package: {
+                  package: expect.objectContaining({
                     name: 'apm',
-                  },
+                  }),
                 },
                 name: 'Elastic APM',
                 package_policy_id: 'elastic-cloud-apm',
@@ -372,7 +372,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -402,6 +402,7 @@ describe('Fleet cloud preconfiguration', () => {
                 "unused_key": "not_used",
               },
               "enabled": true,
+              "id": "fleet-server-fleet_server-elastic-cloud-fleet-server",
               "keep_enabled": true,
               "policy_template": "fleet_server",
               "streams": Array [],
@@ -450,7 +451,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -479,7 +480,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -517,7 +518,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<AgentPolicySOAttributes>({
             type: agentPolicyType,
             perPage: 10000,
@@ -532,7 +533,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Create correct package policies and use the name of package policies instead of id', async () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<PackagePolicySOAttributes>({
             type: packagePolicyType,
             perPage: 10000,
@@ -591,7 +592,7 @@ describe('Fleet cloud preconfiguration', () => {
 
       it('Works and preconfigure correctly agent policies', async () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<OutputSOAttributes>({
             type: 'ingest-outputs',
             perPage: 10000,

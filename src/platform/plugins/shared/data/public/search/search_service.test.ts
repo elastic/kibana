@@ -61,7 +61,7 @@ describe('Search service', () => {
       } as unknown as SearchServiceSetupDependencies);
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
-        indexPatterns: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,
@@ -73,6 +73,7 @@ describe('Search service', () => {
       expect(data).toHaveProperty('aggs');
       expect(data).toHaveProperty('search');
       expect(data).toHaveProperty('showSearchSessionsFlyout');
+      expect(data).toHaveProperty('isBackgroundSearchEnabled');
       expect(data).toHaveProperty('showWarnings');
       expect(data).toHaveProperty('showError');
       expect(data).toHaveProperty('searchSource');

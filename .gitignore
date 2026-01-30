@@ -19,7 +19,11 @@ target
 /build
 .jruby
 .idea
+.claude
+.cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
+claude.md
 *.iml
 *.log
 types.eslint.config.js
@@ -37,21 +41,21 @@ __tmp__
 /src/platform/test/*/screenshots/session
 /src/platform/test/*/screenshots/visual_regression_gallery.html
 
-# Ignore the same artifacts in x-pack
-/x-pack/test/*/failure_debug
-/x-pack/test/*/screenshots/diff
-/x-pack/test/*/screenshots/failure
-/x-pack/test/*/screenshots/session
-/x-pack/test/*/screenshots/visual_regression_gallery.html
-/x-pack/test/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/platform and and x-pack/solutions/*/test
+/x-pack/**/test/*/failure_debug
+/x-pack/**/test/*/screenshots/diff
+/x-pack/**/test/*/screenshots/failure
+/x-pack/**/test/*/screenshots/session
+/x-pack/**/test/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/functional/apps/*/*/reporting/reports/failure
 
-# Ignore the same artifacts in x-pack/test_serverless
-/x-pack/test_serverless/*/failure_debug
-/x-pack/test_serverless/*/screenshots/diff
-/x-pack/test_serverless/*/screenshots/failure
-/x-pack/test_serverless/*/screenshots/session
-/x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
-/x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
+# Ignore the same artifacts in x-pack/platform/test/serverless and x-pack/solutions/*/test/serverless
+/x-pack/**/test/serverless/*/failure_debug
+/x-pack/**/test/serverless/*/screenshots/diff
+/x-pack/**/test/serverless/*/screenshots/failure
+/x-pack/**/test/serverless/*/screenshots/session
+/x-pack/**/test/serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/serverless/functional/test_suites/*/*/reporting/reports/failure
 
 /html_docs
 .eslintcache
@@ -64,7 +68,7 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
-!/config/serverless.chat.yml
+!/config/serverless.workplaceai.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -108,6 +112,10 @@ x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
@@ -149,6 +157,7 @@ src/platform/packages/**/package-map.json
 **/.journeys/
 **/.rca/
 x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/test
 
 # ignore FTR temp directory
 .ftr
@@ -167,15 +176,16 @@ oas_docs/output/kibana.serverless.tmp*.yaml
 oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
 
-# Security Solution Playwright
-x-pack/solutions/security/test/security_solution_playwright/test-results/
-x-pack/solutions/security/test/security_solution_playwright/playwright-report/
-x-pack/solutions/security/test/security_solution_playwright/blob-report/
-x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
-x-pack/solutions/security/test/security_solution_playwright/.auth/
-x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
 
+# Ignore the one-console translations build output folder
+src/platform/plugins/shared/console/packaging/react/translations
+
 .moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker

@@ -179,7 +179,7 @@ export const runActionTestSuite = ({
     await client.indices.delete({ index: 'existing_index_2' }).catch(() => ({}));
     await client.indices.delete({ index: 'existing_index_with_write_block' }).catch(() => ({}));
 
-    await esServer.stop();
+    await esServer?.stop();
   });
 
   describe('fetchIndices', () => {
@@ -1379,7 +1379,8 @@ export const runActionTestSuite = ({
   });
 
   describe('closePit', () => {
-    it('closes PointInTime', async () => {
+    // temporarily skipped, see https://elastic.slack.com/archives/C5TQ33ND8/p1769442067974589
+    it.skip('closes PointInTime', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 

@@ -18,6 +18,7 @@ import type {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
@@ -25,8 +26,10 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
+import type { VisParams } from '@kbn/visualizations-common';
+import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
-import type { Vis, VisParams, VisSavedObject } from '../types';
+import type { Vis, VisSavedObject } from '../types';
 import type { SerializedVis } from '../vis';
 
 export type ExtraSavedObjectProperties = Pick<
@@ -53,35 +56,18 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   vis?: Vis<VisParams> & { colors?: Record<string, string>; legendOpen?: boolean };
 };
 
-export type VisualizeSavedObjectInputState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    savedObjectId?: string;
-    timeRange?: TimeRange;
-    uiState?: any;
-  };
-
-export type VisualizeSavedVisInputState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    savedVis: SerializedVis<VisParams>;
-    timeRange?: TimeRange;
-  };
-
-export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
-export type VisualizeOutputState = VisualizeSavedVisInputState &
-  Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
-  ExtraSavedObjectProperties;
-
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  PublishesProjectRoutingOverrides &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesTimeRange &
   HasLibraryTransforms &
-  DefaultEmbeddableApi<VisualizeSerializedState> & {
+  DefaultEmbeddableApi<VisualizeEmbeddableState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
   };

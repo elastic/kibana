@@ -19,14 +19,14 @@ import type {
 } from '@elastic/charts';
 import { ColorVariant, ScaleType } from '@elastic/charts';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { RawValue } from '@kbn/data-plugin/common';
+import { MULTI_FIELD_KEY_SEPARATOR, type RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import type {
   CommonXYDataLayerConfig,
@@ -126,28 +126,22 @@ export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
 
 export type FormattedDatatables = Record<string, Datatable>;
 
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
 export const getFormattedRow = (
   row: Datatable['rows'][number],
   columns: Datatable['columns'],
   columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
-  splitColumnAccessor: string | undefined,
-  splitRowAccessor: string | undefined,
+  categoricalAccessors: string[],
   xScaleType: XScaleType,
   invertedRawValueMap: InvertedRawValueMap
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
+      // format only values used as categorical: ordinal X accessor or any other accessor used to split the data
       if (
-        record != null &&
-        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) ||
-          (id === xAccessor && xScaleType === 'ordinal') ||
-          id === splitColumnAccessor ||
-          id === splitRowAccessor)
+        (id === xAccessor && xScaleType === 'ordinal') ||
+        (id !== xAccessor && categoricalAccessors.includes(id))
       ) {
         const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
@@ -165,8 +159,6 @@ export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
   xAccessor: string | ExpressionValueVisDimension | undefined,
-  splitColumnAccessor: string | ExpressionValueVisDimension | undefined,
-  splitRowAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): DatatableWithFormatInfo => {
@@ -184,6 +176,8 @@ export const getFormattedTable = (
     {}
   );
 
+  // The InvertedRawValueMap is a link between a table columnId and a map
+  // with links between each row formatterValue and its original raw value
   const invertedRawValueMap: InvertedRawValueMap = new Map(
     table.columns.map((c) => [c.id, new Map<string, RawValue>()])
   );
@@ -200,8 +194,7 @@ export const getFormattedTable = (
       table.columns,
       columnsFormatters,
       xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-      splitColumnAccessor ? getAccessorByDimension(splitColumnAccessor, table.columns) : undefined,
-      splitRowAccessor ? getAccessorByDimension(splitRowAccessor, table.columns) : undefined,
+      accessors.map((a) => getAccessorByDimension(a, table.columns)),
       xScaleType,
       invertedRawValueMap
     );
@@ -226,18 +219,13 @@ export const getFormattedTablesByLayers = (
   splitRowAccessor?: string | ExpressionValueVisDimension
 ): DatatablesWithFormatInfo =>
   layers.reduce(
-    (
-      formattedDatatables,
-      { layerId, table, xAccessor, splitAccessors = [], accessors, xScaleType }
-    ) => ({
+    (formattedDatatables, { layerId, table, xAccessor, splitAccessors = [], xScaleType }) => ({
       ...formattedDatatables,
       [layerId]: getFormattedTable(
         table,
         formatFactory,
         xAccessor,
-        splitColumnAccessor,
-        splitRowAccessor,
-        [xAccessor, ...splitAccessors, ...accessors, splitColumnAccessor, splitRowAccessor].filter<
+        [xAccessor, ...splitAccessors, splitColumnAccessor, splitRowAccessor].filter<
           string | ExpressionValueVisDimension
         >((a): a is string | ExpressionValueVisDimension => a !== undefined),
         xScaleType
@@ -306,10 +294,12 @@ export const getSeriesName: GetSeriesNameFn = (
     if (splitValues.length === 0) {
       return yAccessorTitle;
     }
-    return `${splitValues.join(' - ')}${yAccessorTitle ? ' - ' + yAccessorTitle : ''}`;
+    return `${splitValues.join(MULTI_FIELD_KEY_SEPARATOR)}${
+      yAccessorTitle ? ' - ' + yAccessorTitle : ''
+    }`;
   }
 
-  return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+  return splitValues.length > 0 ? splitValues.join(MULTI_FIELD_KEY_SEPARATOR) : yAccessorTitle;
 };
 
 const getPointConfig: GetPointConfigFn = ({
@@ -319,7 +309,7 @@ const getPointConfig: GetPointConfigFn = ({
   pointsRadius,
 }) => {
   return {
-    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'never'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };
@@ -493,7 +483,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     return getSeriesName(
       d,
       {
-        splitAccessors: layer.splitAccessors || [],
+        splitAccessors: layer.splitAccessors ?? [],
         accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
@@ -515,9 +505,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           isDarkMode,
           {
             type: 'categories',
-            categories: getColorCategories(table.rows, splitColumnIds[0]),
+            categories: getColorCategories(table.rows, splitColumnIds),
           },
-          splitColumnIds[0]
+          splitColumnIds
         )
       : (series) =>
           getColor(

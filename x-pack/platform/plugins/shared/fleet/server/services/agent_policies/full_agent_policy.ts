@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
@@ -26,7 +24,6 @@ import type {
   FleetProxy,
   FleetServerHost,
   AgentPolicy,
-  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
@@ -34,16 +31,15 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
-  OTelCollectorConfig,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import {
   dataTypes,
-  DEFAULT_OUTPUT,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
@@ -56,6 +52,8 @@ import {
   getDownloadSourceSecretReferences,
 } from '../secrets';
 
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -63,6 +61,7 @@ import {
   DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
+import { generateOtelcolConfig } from './otel_collector';
 
 async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
   try {
@@ -78,7 +77,7 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -113,7 +112,7 @@ export async function getFullAgentPolicy(
     fleetServerHost,
     monitoringOutput,
     downloadSource,
-    downloadSourceProxyUri,
+    downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
   // Build up an in-memory object for looking up Package Info, so we don't have
@@ -156,12 +155,15 @@ export async function getFullAgentPolicy(
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace,
-    agentPolicy.global_data_tags
+    agentPolicy.global_data_tags,
+    options?.agentVersion,
+    soClient,
+    agentPolicy.has_agent_version_conditions
   );
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs);
+    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
   }
 
   const inputs = agentInputs
@@ -227,7 +229,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxyUri),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -321,6 +323,22 @@ export async function getFullAgentPolicy(
         Object.assign(permissions, dataPermissionsByOutputId[outputId]);
       }
 
+      // Add logs-* permissions for outputs with write_to_streams enabled
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+      if (originalOutput?.write_to_logs_streams) {
+        const streamsPermissions = {
+          _write_to_logs_streams: {
+            indices: [
+              {
+                names: ['logs', 'logs.*'],
+                privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+              },
+            ],
+          },
+        };
+        Object.assign(permissions, streamsPermissions);
+      }
+
       outputPermissions[outputId] = permissions;
     }
     return outputPermissions;
@@ -328,7 +346,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHost, proxies, outputs);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -394,46 +412,38 @@ export async function getFullAgentPolicy(
 }
 
 export function generateFleetConfig(
-  agentPolicy: AgentPolicy,
   fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[],
-  outputs: Output[]
+  proxies: FleetProxy[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
   };
 
   // generating the ssl configs for checking into Fleet
-  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
-  const output =
-    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
-      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
-      : outputs.find((o) => o.is_default);
-
+  // These correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
   if (
-    output &&
-    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    fleetServerHost.ssl?.agent_certificate_authorities ||
+    fleetServerHost.ssl?.agent_certificate ||
+    fleetServerHost.ssl?.agent_key
   ) {
-    if (output?.ssl) {
-      config.ssl = {
-        ...(output.ssl?.certificate_authorities && {
-          certificate_authorities: output.ssl.certificate_authorities,
+    config.ssl = {
+      ...(fleetServerHost.ssl.agent_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.agent_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl?.agent_certificate && {
+        certificate: fleetServerHost.ssl.agent_certificate,
+      }),
+      ...(fleetServerHost.ssl?.agent_key &&
+        !fleetServerHost.secrets?.ssl?.agent_key && {
+          key: fleetServerHost.ssl.agent_key,
         }),
-        ...(output.ssl?.certificate && {
-          certificate: output.ssl.certificate,
-        }),
-        ...(output.ssl?.key &&
-          !output?.secrets?.ssl?.key && {
-            key: output.ssl.key,
-          }),
-      };
-    }
-    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-    if (output?.secrets) {
-      config.secrets = {
-        ...output?.secrets,
-      };
-    }
+    };
+  }
+  // if both ssl.agent_key and secrets.ssl.agent_key are present, prefer the secrets'
+  if (fleetServerHost.secrets?.ssl?.agent_key) {
+    config.secrets = {
+      ssl: { key: fleetServerHost.secrets?.ssl?.agent_key },
+    };
   }
 
   const fleetServerHostproxy = fleetServerHost.proxy_id
@@ -568,7 +578,6 @@ export function transformOutputToFullPolicyOutput(
       }
     };
 
-    /* eslint-enable @typescript-eslint/naming-convention */
     kafkaData = {
       client_id,
       version,
@@ -591,7 +600,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       loadbalance,
       compression_level,
@@ -599,7 +607,6 @@ export function transformOutputToFullPolicyOutput(
       max_batch_bytes,
       mem_queue_events,
     } = shipper;
-    /* eslint-enable @typescript-eslint/naming-convention */
 
     generalShipperData = {
       loadbalance,
@@ -701,11 +708,9 @@ export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerH
     };
   }
   // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets) {
+  if (fleetServerHost?.secrets?.ssl?.es_key) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key && {
-        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-      }),
+      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
     };
   }
 
@@ -805,18 +810,6 @@ export function getFullMonitoringSettings(
   return monitoring;
 }
 
-/**
- * Get id used in full agent policy (sent to the agents)
- * we use "default" for the default policy to avoid breaking changes
- */
-function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
-  if (output.is_default && output.type === outputType.Elasticsearch) {
-    return DEFAULT_OUTPUT.name;
-  }
-  return output.id;
-}
-
-/* eslint-disable @typescript-eslint/naming-convention */
 function buildShipperQueueData(shipper: ShipperOutput) {
   const {
     disk_queue_enabled,
@@ -838,16 +831,15 @@ function buildShipperQueueData(shipper: ShipperOutput) {
     },
   };
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
-  downloadSourceProxyUri: string | null
+  downloadSourceProxy: FleetProxy | undefined
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
-    ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
   };
+
   if (downloadSource?.ssl) {
     config.ssl = {
       ...(downloadSource.ssl?.certificate_authorities && {
@@ -872,27 +864,27 @@ export function getBinarySourceSettings(
       },
     };
   }
-  return config;
-}
 
-// Generate OTel Collector policy
-export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]) {
-  const otelConfig = inputs.flatMap((input) => {
-    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
-        return {
-          ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
-          ...(inputStream?.service ? { service: inputStream.service } : {}),
-          ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
-          ...(inputStream?.processors ? { service: inputStream.processors } : {}),
-          ...(inputStream?.connectors ? { service: inputStream.connectors } : {}),
-          ...(inputStream?.exporters ? { service: inputStream.exporters } : {}),
-        };
-      });
-
-      return otelInputs;
+  if (downloadSourceProxy) {
+    if (downloadSourceProxy.url) {
+      config.proxy_url = downloadSourceProxy.url;
     }
-  });
+    if (downloadSourceProxy.proxy_headers) {
+      config.proxy_headers = downloadSourceProxy.proxy_headers;
+    }
+    // if the proxy is configured, get the ssl settings from it
+    config.ssl = {
+      ...(downloadSourceProxy?.certificate_authorities && {
+        certificate_authorities: [downloadSourceProxy.certificate_authorities],
+      }),
+      ...(downloadSourceProxy?.certificate && {
+        certificate: downloadSourceProxy.certificate,
+      }),
+      ...(downloadSourceProxy?.certificate_key && {
+        key: downloadSourceProxy?.certificate_key,
+      }),
+    };
+  }
 
-  return otelConfig.length > 0 ? otelConfig[0] : {};
+  return config;
 }

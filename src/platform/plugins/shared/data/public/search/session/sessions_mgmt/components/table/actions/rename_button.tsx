@@ -46,8 +46,8 @@ const RenameDialog = ({
 
   const modalTitleId = useGeneratedHtmlId();
 
-  const title = i18n.translate('data.mgmt.searchSessions.renameModal.title', {
-    defaultMessage: 'Edit search session name',
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.renameModal.backgroundSearchTitle', {
+    defaultMessage: 'Edit background search name',
   });
   const confirm = i18n.translate('data.mgmt.searchSessions.renameModal.renameButton', {
     defaultMessage: 'Save',
@@ -55,10 +55,12 @@ const RenameDialog = ({
   const cancel = i18n.translate('data.mgmt.searchSessions.renameModal.cancelButton', {
     defaultMessage: 'Cancel',
   });
-
-  const label = i18n.translate('data.mgmt.searchSessions.renameModal.searchSessionNameInputLabel', {
-    defaultMessage: 'Search session name',
-  });
+  const bgsLabel = i18n.translate(
+    'data.mgmt.searchSessions.renameModal.backgroundSearchNameInputLabel',
+    {
+      defaultMessage: 'Background search name',
+    }
+  );
 
   const isNewNameValid = newName && originalName !== newName;
 
@@ -69,13 +71,14 @@ const RenameDialog = ({
       initialFocus="[name=newName]"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{bgsTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow label={label}>
+          <EuiFormRow label={bgsLabel}>
             <EuiFieldText
+              data-test-subj="editNameInput"
               name="newName"
               placeholder={originalName}
               value={newName}
@@ -91,6 +94,7 @@ const RenameDialog = ({
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="confirmEditName"
           disabled={!isNewNameValid}
           onClick={async () => {
             if (!isNewNameValid) return;

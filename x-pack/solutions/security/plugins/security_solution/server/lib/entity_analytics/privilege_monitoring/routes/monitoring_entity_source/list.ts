@@ -12,24 +12,23 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  MONITORING_ENTITY_LIST_SOURCES_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import {
   ListEntitySourcesRequestQuery,
   type ListEntitySourcesResponse,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+} from '../../../../../../common/api/entity_analytics';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source/list',
+      path: MONITORING_ENTITY_LIST_SOURCES_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -45,28 +44,26 @@ export const listMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+          try {
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.list(request.query);
 
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
-
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing monitoring entity sources: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing monitoring entity sources: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

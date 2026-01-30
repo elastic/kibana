@@ -8,14 +8,10 @@
  */
 
 import React from 'react';
-import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
-import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
-import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import type { TopNavCustomization } from '../../../../customizations';
-import { onSaveSearch } from './on_save_search';
 import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
 
@@ -23,59 +19,17 @@ import { SolutionsViewBadge } from './solutions_view_badge';
  * Helper function to build the top nav badges
  */
 export const getTopNavBadges = ({
-  hasUnsavedChanges,
+  isMobile,
   stateContainer,
   services,
-  topNavCustomization,
 }: {
-  hasUnsavedChanges: boolean | undefined;
+  isMobile: boolean;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
-  topNavCustomization: TopNavCustomization | undefined;
-}): TopNavMenuBadgeProps[] => {
-  const saveSearch = (initialCopyOnSave?: boolean) =>
-    onSaveSearch({
-      initialCopyOnSave,
-      savedSearch: stateContainer.savedSearchState.getState(),
-      services,
-      state: stateContainer,
-    });
-
-  const defaultBadges = topNavCustomization?.defaultBadges;
-  const entries: TopNavMenuBadgeProps[] = [];
+}): ChromeBreadcrumbsBadge[] => {
+  const entries: ChromeBreadcrumbsBadge[] = [];
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
-
-  if (services.spaces) {
-    entries.push({
-      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
-        defaultMessage: 'Check out context-aware Discover',
-      }),
-      renderCustomBadge: ({ badgeText }) => <SolutionsViewBadge badgeText={badgeText} />,
-    });
-  }
-
-  if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
-    entries.push(
-      getTopNavUnsavedChangesBadge({
-        onRevert: async () => {
-          dismissFlyouts([DiscoverFlyouts.lensEdit]);
-          await stateContainer.actions.undoSavedSearchChanges();
-        },
-        onSave:
-          services.capabilities.discover_v2.save && !isManaged
-            ? async () => {
-                await saveSearch();
-              }
-            : undefined,
-        onSaveAs: services.capabilities.discover_v2.save
-          ? async () => {
-              await saveSearch(true);
-            }
-          : undefined,
-      })
-    );
-  }
 
   if (isManaged) {
     entries.push(
@@ -86,6 +40,17 @@ export const getTopNavBadges = ({
         })
       )
     );
+  }
+
+  if (services.spaces && !isMobile) {
+    entries.push({
+      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
+        defaultMessage: 'Check out context-aware Discover',
+      }),
+      renderCustomBadge: ({ badgeText }) => (
+        <SolutionsViewBadge badgeText={badgeText} services={services} />
+      ),
+    });
   }
 
   return entries;

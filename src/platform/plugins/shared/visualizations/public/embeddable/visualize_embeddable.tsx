@@ -23,6 +23,7 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
+  apiPublishesProjectRouting,
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
@@ -33,13 +34,15 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
-import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
@@ -48,14 +51,14 @@ import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
-import type { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
+import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
   embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => EmbeddableFactory<VisualizeSerializedState, VisualizeApi> = ({
+}) => EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> = ({
   embeddableStart,
   embeddableEnhancedStart,
 }) => ({
@@ -64,7 +67,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     // Runtime state may contain title loaded from saved object
     // Initialize titleManager with serialized state
     // to avoid tracking runtime state title as serialized state title
-    const titleManager = initializeTitleManager(initialState.rawState);
+    const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
@@ -86,6 +89,16 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const initialVisInstance = await createVisInstance(runtimeState.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
+    let initialProjectRoutingOverrides: ProjectRoutingOverrides;
+    if (initialVisInstance.type.getProjectRoutingOverrides) {
+      initialProjectRoutingOverrides = await initialVisInstance.type.getProjectRoutingOverrides(
+        initialVisInstance.params
+      );
+    }
+    const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+      initialProjectRoutingOverrides
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -98,6 +111,15 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const vis = await createVisInstance(serializedVis);
           vis.uiState.on('change', onUiStateChange);
           vis$.next(vis);
+
+          // Update project routing overrides when vis changes
+          if (vis.type.getProjectRoutingOverrides) {
+            const newOverrides = await vis.type.getProjectRoutingOverrides(vis.params);
+            if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
+              projectRoutingOverrides$.next(newOverrides);
+            }
+          }
+
           const { params, abortController } = await getExpressionParams();
           return { params, abortController };
         })
@@ -164,18 +186,17 @@ export const getVisualizeEmbeddableFactory: (deps: {
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        serializeDynamicActions: dynamicActionsManager?.serializeState,
+        getDynamicActionsState: dynamicActionsManager?.getLatestState,
         ...timeRangeManager.getLatestState(),
       });
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<VisualizeSerializedState>({
+    const unsavedChangesApi = initializeUnsavedChanges<VisualizeEmbeddableState>({
       uuid,
       parentApi,
       serializeState: () => {
         return serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary);
       },
-      checkRefEquality: true,
       anyStateChange$: merge(
         ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
         savedObjectId$,
@@ -216,9 +237,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (!lastSaved) return;
         const lastSavedRuntimeState = await deserializeState(lastSaved);
@@ -234,6 +255,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       defaultTitle$,
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      projectRoutingOverrides$,
       rendered$: hasRendered$,
       supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER],
       serializeState: () => {
@@ -291,17 +313,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
       // Library transforms
       saveToLibrary: (newTitle: string) => {
         titleManager.api.setTitle(newTitle);
-        const { rawState, references } = serializeState({
-          serializedVis: vis$.getValue().serialize(),
-          titles: {
-            ...titleManager.getLatestState(),
-            title: newTitle,
-          },
-        });
         return saveToLibrary({
+          description: titleManager.api.description$.value,
+          serializedVis: vis$.getValue().serialize(),
+          title: newTitle,
           uiState: vis$.getValue().uiState,
-          rawState: rawState as VisualizeOutputState,
-          references,
         });
       },
       canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
@@ -331,6 +347,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 filters: data.filters,
               }
             : {};
+          const projectRouting = apiPublishesProjectRouting(parentApi)
+            ? data.projectRouting
+            : undefined;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -366,6 +385,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           getExpressionParams = async () => {
             return await getExpressionRendererProps({
               unifiedSearch,
+              projectRouting,
               vis: vis$.getValue(),
               settings,
               disableTriggers,

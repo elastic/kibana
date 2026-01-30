@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
@@ -134,4 +134,8 @@ export const inlineSourceFormatter: FormatterFn = (fields, key) => {
 
   // Escape template literals to prevent unintended interpolation
   return escapeTemplateLiterals(value).trim();
+};
+
+export const handleMultilineStringFormatter = (value: string) => {
+  return value.replace(/(\n+)/g, '$1\n');
 };

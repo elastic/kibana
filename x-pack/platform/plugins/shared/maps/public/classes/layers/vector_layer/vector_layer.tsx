@@ -17,6 +17,7 @@ import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Writable } from '@kbn/utility-types';
+import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import { AbstractLayer } from '../layer';
 import type { IVectorStyle } from '../../styles/vector/vector_style';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -51,6 +52,7 @@ import type {
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
   JoinSourceDescriptor,
+  StylePropertyField,
 } from '../../../../common/descriptor_types';
 import type { IVectorSource } from '../../sources/vector_source';
 import { isESVectorTileSource } from '../../sources/es_source';
@@ -151,7 +153,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    const layerDescriptor = super.createDescriptor(options) as Writable<VectorLayerDescriptor>;
     layerDescriptor.type =
       layerDescriptor.type !== undefined ? layerDescriptor.type : LAYER_TYPE.GEOJSON_VECTOR;
 
@@ -183,7 +185,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._joins = joins;
     this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
-      this._descriptor.style,
+      this._descriptor.style ?? VectorStyle.createDescriptor(),
       source,
       this,
       customIcons,
@@ -227,16 +229,16 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
               rightSourceId: clonedJoinId,
             });
 
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
-              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+            Object.keys(clonedDescriptor.style?.properties ?? {}).forEach((key) => {
+              const styleProp = clonedDescriptor.style!.properties[key as VECTOR_STYLES];
+              if (styleProp && 'type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
                 const options = styleProp.options as DynamicStylePropertyOptions;
                 if (
                   options.field &&
                   options.field.origin === FIELD_ORIGIN.JOIN &&
                   options.field.name === originalJoinKey
                 ) {
-                  options.field.name = newJoinKey;
+                  (options.field as Writable<StylePropertyField>).name = newJoinKey;
                 }
               }
             });
@@ -396,6 +398,35 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     });
     return indexPatternIds;
+  }
+
+  async getProjectRoutingOverrides(): Promise<ProjectRoutingOverrides> {
+    const overrides: ProjectRoutingOverrides = [];
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getProjectRouting')) {
+      const projectRouting = source.getProjectRouting?.();
+      if (projectRouting) {
+        overrides.push({
+          name: await this.getDisplayName(),
+          value: projectRouting,
+        });
+      }
+    }
+
+    asyncForEach(this.getValidJoins(), async (join) => {
+      const joinSource = join.getRightJoinSource();
+      if (joinSource && hasESSourceMethod(joinSource, 'getProjectRouting')) {
+        const projectRouting = joinSource.getProjectRouting?.();
+        if (projectRouting) {
+          overrides.push({
+            name: await this.getDisplayName(),
+            value: projectRouting,
+          });
+        }
+      }
+    });
+
+    return overrides.length > 0 ? overrides : undefined;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {

@@ -44,14 +44,14 @@ export function openSaveModal({
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
-  const onSave = ({
+  const onSave = async ({
     newTitle,
     newDescription,
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
     dataConsent,
-  }: OnSaveGraphProps) => {
+  }: OnSaveGraphProps): Promise<SaveResult> => {
     workspace.title = newTitle;
     workspace.description = newDescription;
     workspace.copyOnSave = newCopyOnSave;
@@ -69,6 +69,7 @@ export function openSaveModal({
       return response;
     });
   };
+
   showSaveModal(
     <SaveModal
       savePolicy={savePolicy}

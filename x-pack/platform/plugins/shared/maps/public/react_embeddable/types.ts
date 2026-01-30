@@ -14,50 +14,30 @@ import type {
   HasType,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
-  SerializedTimeRange,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { Observable } from 'rxjs';
-import type { MapAttributes } from '../../common/content_management';
-import type {
-  LayerDescriptor,
-  MapCenterAndZoom,
-  MapExtent,
-  MapSettings,
-} from '../../common/descriptor_types';
+import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { ILayer } from '../classes/layers/layer';
 import type { EventHandlers } from '../reducers/non_serializable_instances';
+import type {
+  MapByReferenceState,
+  MapByValueState,
+  MapEmbeddableState,
+} from '../../common/embeddable/types';
 
-export type MapSerializedState = SerializedTimeRange &
-  SerializedTitles &
-  Partial<DynamicActionsSerializedState> & {
-    // by-value
-    attributes?: MapAttributes;
-    // by-reference
-    savedObjectId?: string;
-
-    isLayerTOCOpen?: boolean;
-    openTOCDetails?: string[];
-    mapCenter?: MapCenterAndZoom;
-    mapBuffer?: MapExtent;
-    mapSettings?: Partial<MapSettings>;
-    hiddenLayers?: string[];
-    filterByMapExtent?: boolean;
-    isMovementSynchronized?: boolean;
-  };
-
-export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
+export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesProjectRoutingOverrides &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
+  HasLibraryTransforms<MapByReferenceState, MapByValueState> & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;

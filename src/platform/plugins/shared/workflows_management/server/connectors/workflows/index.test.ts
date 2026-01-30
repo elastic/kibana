@@ -63,8 +63,23 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
-            alerts: [{ _id: 'alert-1', _index: 'test-index' }],
-            inputs: { test: 'data' },
+            spaceId: 'default',
+            summaryMode: true,
+            inputs: {
+              event: {
+                alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
+              },
+            },
           },
         },
         logger: mockLogger,
@@ -86,7 +101,22 @@ describe('Workflows Connector', () => {
 
       expect(mockWorkflowsService).toHaveBeenCalledWith(
         'test-workflow-id',
-        { test: 'data' },
+        'default',
+        {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: ['test'],
+              consumer: 'test-consumer',
+              producer: 'test-producer',
+              ruleTypeId: 'test-rule-type',
+            },
+            ruleUrl: 'https://example.com/rule',
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
     });
@@ -106,8 +136,23 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
-            alerts: [],
-            inputs: { test: 'data' },
+            spaceId: 'default',
+            summaryMode: true,
+            inputs: {
+              event: {
+                alerts: [],
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
+              },
+            },
           },
         },
         logger: mockLogger,
@@ -140,7 +185,8 @@ describe('Workflows Connector', () => {
           subAction: 'invalid-action' as any,
           subActionParams: {
             workflowId: 'test-workflow-id',
-            alerts: [],
+            spaceId: 'default',
+            summaryMode: true,
           },
         },
         logger: mockLogger,
@@ -169,8 +215,23 @@ describe('Workflows Connector', () => {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: 'test-workflow-id',
-            alerts: [{ _id: 'alert-1', _index: 'test-index' }],
-            inputs: { test: 'data' },
+            spaceId: 'default',
+            summaryMode: true,
+            inputs: {
+              event: {
+                alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+                rule: {
+                  id: 'rule-1',
+                  name: 'Test Rule',
+                  tags: ['test'],
+                  consumer: 'test-consumer',
+                  producer: 'test-producer',
+                  ruleTypeId: 'test-rule-type',
+                },
+                ruleUrl: 'https://example.com/rule',
+                spaceId: 'default',
+              },
+            },
           },
         },
         logger: mockLogger,
@@ -231,8 +292,8 @@ describe('Workflows Connector', () => {
 
       expect(result.subAction).toBe('run');
       expect(result.subActionParams.workflowId).toBe('test-workflow-id');
-      expect(result.subActionParams.alerts).toHaveLength(1);
       expect(result.subActionParams.inputs).toBeDefined();
+      expect(result.subActionParams.inputs?.event?.alerts).toHaveLength(1);
     });
 
     it('should handle missing workflowId gracefully', () => {
@@ -268,7 +329,7 @@ describe('Workflows Connector', () => {
       });
 
       expect(result.subActionParams.workflowId).toBe('unknown');
-      expect(result.subActionParams.alerts).toEqual([]);
+      expect(result.subActionParams.inputs).toBeUndefined();
     });
   });
 });

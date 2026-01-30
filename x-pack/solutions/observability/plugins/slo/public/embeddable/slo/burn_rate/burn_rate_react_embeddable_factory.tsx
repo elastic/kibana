@@ -15,9 +15,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserHistory } from 'history';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -45,24 +43,19 @@ export const getBurnRateEmbeddableFactory = ({
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const deps = { ...coreStart, ...pluginsStart };
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
-      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(
-        initialState.rawState,
-        {
-          sloId: '',
-          sloInstanceId: '',
-          duration: '',
-        }
-      );
+      const sloBurnRateManager = initializeStateManager<BurnRateCustomInput>(initialState, {
+        sloId: '',
+        sloInstanceId: '',
+        duration: '',
+      });
       const reload$ = new Subject<boolean>();
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...sloBurnRateManager.getLatestState(),
-          },
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
         };
       }
 
@@ -78,8 +71,8 @@ export const getBurnRateEmbeddableFactory = ({
           duration: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
-          sloBurnRateManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          sloBurnRateManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
         },
       });
 
@@ -114,28 +107,26 @@ export const getBurnRateEmbeddableFactory = ({
           const queryClient = new QueryClient();
 
           return (
-            <Router history={createBrowserHistory()}>
-              <KibanaContextProvider services={deps}>
-                <PluginContext.Provider
-                  value={{
-                    observabilityRuleTypeRegistry:
-                      pluginsStart.observability.observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate:
-                      pluginsStart.observabilityShared.navigation.PageTemplate,
-                    sloClient,
-                  }}
-                >
-                  <QueryClientProvider client={queryClient}>
-                    <BurnRate
-                      sloId={sloId}
-                      sloInstanceId={sloInstanceId}
-                      duration={duration}
-                      reloadSubject={reload$}
-                    />
-                  </QueryClientProvider>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </Router>
+            <KibanaContextProvider services={deps}>
+              <PluginContext.Provider
+                value={{
+                  observabilityRuleTypeRegistry:
+                    pluginsStart.observability.observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate:
+                    pluginsStart.observabilityShared.navigation.PageTemplate,
+                  sloClient,
+                }}
+              >
+                <QueryClientProvider client={queryClient}>
+                  <BurnRate
+                    sloId={sloId}
+                    sloInstanceId={sloInstanceId}
+                    duration={duration}
+                    reloadSubject={reload$}
+                  />
+                </QueryClientProvider>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
           );
         },
       };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useQuery, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
@@ -15,6 +15,7 @@ import { SearchPlaygroundQueryKeys } from '../../common';
 import { LLMs } from '../../common/types';
 import type { LLMModel } from '../types';
 import { MODELS } from '../../common/models';
+import { isElasticConnector } from '../utils/playground_connectors';
 import { useKibana } from './use_kibana';
 import { LoadConnectorsQuery } from './use_load_connectors';
 
@@ -145,6 +146,7 @@ export const LLMsQuery =
           disabled: !connector,
           connectorId: connector.id,
           promptTokenLimit,
+          isElasticConnector: isElasticConnector(connector),
         }))
         .forEach((model) => result.push(model));
 

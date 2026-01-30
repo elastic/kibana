@@ -22,6 +22,7 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from 'geojson';
+import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import type { LAYER_TYPE } from '../../../common/constants';
@@ -115,6 +116,10 @@ export interface ILayer {
    */
   getIndexPatternIds(): string[];
   /*
+   * ILayer.getProjectRoutingOverrides returns project routing overrides used to populate layer data.
+   */
+  getProjectRoutingOverrides?: () => Promise<ProjectRoutingOverrides>;
+  /*
    * ILayer.getQueryableIndexPatternIds returns ILayer.getIndexPatternIds or a subset of ILayer.getIndexPatternIds.
    * Data view ids are excluded when the global query is not applied to layer data.
    */
@@ -171,7 +176,7 @@ export class AbstractLayer implements ILayer {
       sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
       __dataRequests: _.get(options, '__dataRequests', []),
       id: _.get(options, 'id', uuidv4()),
-      label: options.label && options.label.length > 0 ? options.label : null,
+      label: options.label && options.label.length > 0 ? options.label : undefined,
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
@@ -179,7 +184,7 @@ export class AbstractLayer implements ILayer {
       style: _.get(options, 'style', null),
       includeInFitToBounds:
         typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
-    };
+    } as LayerDescriptor;
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {

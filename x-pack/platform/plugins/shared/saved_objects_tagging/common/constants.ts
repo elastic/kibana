@@ -29,4 +29,6 @@ export const taggableTypes = [
   'osquery-pack',
   'osquery-pack-asset',
   'osquery-saved-query',
+  'alerting_rule_template',
+  'slo_template',
 ];

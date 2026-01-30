@@ -49,6 +49,8 @@ import { defaultTimeColumnWidth } from '../constants';
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { dataViewsMock } from '../../__mocks__/data_views';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -355,7 +357,7 @@ describe('UnifiedDataTable', () => {
         // wait for async copy action to avoid act warning
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+          '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
         );
       },
       EXTENDED_JEST_TIMEOUT
@@ -376,6 +378,25 @@ describe('UnifiedDataTable', () => {
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
           '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    test(
+      'copying selected documents to clipboard as markdown',
+      async () => {
+        await toggleDocSelection(component, esHitsMock[2]);
+        await toggleDocSelection(component, esHitsMock[1]);
+        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
+        findTestSubject(component, 'unifiedDataTableCopyRowsAsMarkdown').simulate('click');
+        // wait for async copy action to avoid act warning
+        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+          `| @timestamp | _index | _score | bytesDisplayName | date | extension | message | name |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| - | i | 1 | - | 2020-20-01T12:12:12.124 | jpg | - | test2 |
+| - | i | 1 | 50 | 2020-20-01T12:12:12.124 | gif | - | test3 |`
         );
       },
       EXTENDED_JEST_TIMEOUT
@@ -430,6 +451,7 @@ describe('UnifiedDataTable', () => {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
+          disableCellActions: false,
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -456,6 +478,7 @@ describe('UnifiedDataTable', () => {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
+          disableCellActions: false,
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -877,10 +900,12 @@ describe('UnifiedDataTable', () => {
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
 
+      const setExpandedDocMock = jest.fn();
+
       const component = await getComponent({
         ...getProps(),
         expandedDoc,
-        setExpandedDoc: jest.fn(),
+        setExpandedDoc: setExpandedDocMock,
         columnsMeta: columnsMetaOverride,
         renderDocumentView: renderDocumentViewMock,
         externalControlColumns: [testLeadingControlColumn],
@@ -892,6 +917,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
+        setExpandedDocMock,
         columnsMetaOverride
       );
     },
@@ -1240,10 +1266,9 @@ describe('UnifiedDataTable', () => {
     it(
       'should render selected fields',
       async () => {
-        const columns = ['bytes', 'message'];
-        await renderDataTable({ enableComparisonMode: true, columns });
+        await renderDataTable({ enableComparisonMode: true, columns: ['bytes', 'message'] });
         await goToComparisonMode();
-        expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+        expect(getFieldColumns()).toEqual(['@timestamp', 'bytesDisplayName', 'message']);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1256,7 +1281,7 @@ describe('UnifiedDataTable', () => {
         expect(getFieldColumns()).toEqual([
           '@timestamp',
           '_index',
-          'bytes',
+          'bytesDisplayName',
           'extension',
           'message',
         ]);
@@ -1303,18 +1328,13 @@ describe('UnifiedDataTable', () => {
   describe('columns', () => {
     // Default column width in EUI is hardcoded to 100px for Jest envs
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
-    const getColumnHeader = (name: string) => screen.getByRole('columnheader', { name });
-    const queryColumnHeader = (name: string) => screen.queryByRole('columnheader', { name });
+    const getColumnHeader = (name: string) => screen.getByTestId(`dataGridHeaderCell-${name}`);
+    const queryColumnHeader = (name: string) => screen.queryByTestId(`dataGridHeaderCell-${name}`);
     const openColumnActions = async (name: string) => {
       const actionsButton = screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
       await userEvent.click(actionsButton);
       await waitForEuiPopoverOpen();
     };
-    const clickColumnAction = async (name: string) => {
-      const action = screen.getByRole('button', { name });
-      await userEvent.click(action);
-    };
-    const queryButton = (name: string) => screen.queryByRole('button', { name });
 
     it(
       'should reset the last column to auto width if only absolute width columns remain',
@@ -1332,7 +1352,7 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
         await openColumnActions('message');
-        await clickColumnAction('Remove column');
+        await userEvent.click(screen.getByTestId('unifiedDataTableRemoveColumn'));
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1357,7 +1377,7 @@ describe('UnifiedDataTable', () => {
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
         await openColumnActions('message');
-        await clickColumnAction('Remove column');
+        await userEvent.click(screen.getByTestId('unifiedDataTableRemoveColumn'));
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
@@ -1367,40 +1387,56 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
 
-    it(
-      'should show the reset width button only for absolute width columns, and allow resetting to default width',
-      async () => {
-        await renderDataTable({
-          columns: ['message', 'extension'],
-          settings: {
-            columns: {
-              '@timestamp': { width: 50 },
-              extension: { width: 50 },
+    describe('given a column with absolute width', () => {
+      describe('when it is the time column', () => {
+        it('should use default time column width when resetting', async () => {
+          await renderDataTable({
+            columns: [],
+            settings: {
+              columns: {
+                '@timestamp': { width: 50 },
+              },
             },
-          },
-        });
-        expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
-        await openColumnActions('@timestamp');
-        await clickColumnAction('Reset width');
-        await waitFor(() => {
+          });
+
+          expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+          await openColumnActions('@timestamp');
+          await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
           expect(getColumnHeader('@timestamp')).toHaveStyle({
             width: `${defaultTimeColumnWidth}px`,
           });
         });
+      });
+
+      describe('when it is not the time column', () => {
+        it('should use EUI default column width when resetting', async () => {
+          await renderDataTable({
+            columns: ['extension'],
+            settings: {
+              columns: {
+                extension: { width: 50 },
+              },
+            },
+          });
+
+          expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+          await openColumnActions('extension');
+          await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+          expect(getColumnHeader('extension')).toHaveStyle({
+            width: EUI_DEFAULT_COLUMN_WIDTH,
+          });
+        });
+      });
+    });
+
+    describe('given a column without absolute width', () => {
+      it('should not show the reset width button', async () => {
+        await renderDataTable({ columns: ['message'] });
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         await openColumnActions('message');
-        expect(queryButton('Reset width')).not.toBeInTheDocument();
-        await waitFor(() => {
-          expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
-        });
-        await openColumnActions('extension');
-        await clickColumnAction('Reset width');
-        await waitFor(() => {
-          expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
-        });
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
+        expect(screen.queryByTestId('unifiedDataTableResetColumnWidth')).not.toBeInTheDocument();
+      });
+    });
 
     it(
       'should have columnVisibility configuration',
@@ -1602,5 +1638,14 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+  });
+
+  describe('Refs', () => {
+    it('should expose the EuiDataGrid ref', async () => {
+      const ref = React.createRef<EuiDataGridRefProps & RestorableStateProviderApi>();
+      render(<UnifiedDataTable {...getProps()} ref={ref} />);
+
+      expect(ref.current?.setFocusedCell).toBeDefined();
+    });
   });
 });

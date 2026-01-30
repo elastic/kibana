@@ -18,6 +18,7 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { SessionsClient } from '../../sessions_client';
 import { userEvent } from '@testing-library/user-event';
+import { getSearchSessionEBTManagerMock } from '../../mocks';
 
 const setup = () => {
   const mockCoreSetup = coreMock.createSetup();
@@ -42,6 +43,7 @@ const setup = () => {
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   const onClose = jest.fn();
@@ -50,6 +52,7 @@ const setup = () => {
   render(
     <IntlProvider>
       <Flyout
+        flyoutId="test"
         onClose={onClose}
         api={api}
         config={mockConfig}
@@ -57,6 +60,8 @@ const setup = () => {
         kibanaVersion={kibanaVersion}
         locators={mockShareStart.url.locators}
         usageCollector={mockSearchUsageCollector}
+        ebtManager={getSearchSessionEBTManagerMock()}
+        trackingProps={{ openedFrom: 'test' }}
       />
     </IntlProvider>
   );
@@ -79,15 +84,6 @@ describe('<Flyout />', () => {
     setup();
     expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
-  });
-
-  describe('when the header close button is clicked', () => {
-    it('calls the onClose callback', async () => {
-      const { onClose, user } = setup();
-      const closeButton = screen.getByLabelText('Close this dialog');
-      await user.click(closeButton);
-      expect(onClose).toHaveBeenCalled();
-    });
   });
 
   describe('when the footer close button is clicked', () => {

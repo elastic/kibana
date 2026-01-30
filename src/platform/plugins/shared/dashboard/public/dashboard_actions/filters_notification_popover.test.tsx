@@ -19,6 +19,11 @@ import type { FiltersNotificationActionApi } from './filters_notification_action
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+// Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+}));
+
 const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
 
 const getMockPhraseFilter = (key: string, value: string): Filter => {

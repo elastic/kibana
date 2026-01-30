@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   withEuiTheme,
   type EuiThemeComputed,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import type { ReactNode } from 'react';
@@ -33,15 +34,14 @@ const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed
   <EuiFlexItem
     grow={false}
     css={{
-      padding: 12,
+      padding: 7,
       background: theme?.colors.backgroundBaseFormsPrepend,
-      fontSize: '0.75em',
-      fontWeight: 600,
-      color: theme?.colors.textHeading,
       borderRight: theme?.border.thin,
     }}
   >
-    {label}
+    <EuiText size="xs">
+      <strong>{label}</strong>
+    </EuiText>
   </EuiFlexItem>
 );
 
@@ -53,6 +53,7 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
       gutterSize="none"
       css={{
         border: theme?.euiTheme.border.thin,
+        borderRadius: theme?.euiTheme.border.radius.medium,
       }}
     >
       {showKubernetesInfo ? (

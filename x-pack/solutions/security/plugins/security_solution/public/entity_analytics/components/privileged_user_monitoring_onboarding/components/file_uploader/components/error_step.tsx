@@ -19,7 +19,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../../common/api/entity_analytics';
 import { buildAnnotationsFromError } from '../helpers';
 
 export const PrivilegedUserMonitoringErrorStep: React.FC<{
@@ -35,6 +35,7 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="danger"
           iconType="cross"
           title={

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type { AxesSettingsConfig } from '@kbn/lens-common';
 
 export type AxesSettingsConfigKeys = keyof AxesSettingsConfig;

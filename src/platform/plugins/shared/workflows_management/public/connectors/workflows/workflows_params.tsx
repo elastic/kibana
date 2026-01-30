@@ -10,24 +10,30 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSuperSelect,
-  EuiText,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { WorkflowListDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useState } from 'react';
-import * as i18n from './translations';
+import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
 
-interface WorkflowOption {
-  value: string;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
-}
+const RUN_PER_ALERT_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.label',
+  {
+    defaultMessage: 'Run per alert',
+  }
+);
+
+const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.helpText',
+  {
+    defaultMessage: 'If enabled, it will be separate workflow for each alert detected',
+  }
+);
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
@@ -35,11 +41,31 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   index,
   errors,
 }) => {
-  const { workflowId } = actionParams.subActionParams ?? {};
-  const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const { http, application } = useKibana().services;
+  const { workflowId, summaryMode = true } = actionParams.subActionParams ?? {};
+
+  const handleWorkflowChange = useCallback(
+    (newWorkflowId: string) => {
+      editAction(
+        'subActionParams',
+        { ...actionParams.subActionParams, workflowId: newWorkflowId },
+        index
+      );
+    },
+    [editAction, index, actionParams.subActionParams]
+  );
+
+  const handleRunPerAlertChange = useCallback(
+    (runPerAlert: boolean) => {
+      // When switch is ON (runPerAlert = true), summaryMode should be false (run per alert)
+      // When switch is OFF (runPerAlert = false), summaryMode should be true (summary mode)
+      editAction(
+        'subActionParams',
+        { ...actionParams.subActionParams, summaryMode: !runPerAlert },
+        index
+      );
+    },
+    [editAction, index, actionParams.subActionParams]
+  );
 
   // Ensure proper initialization of action parameters
   useEffect(() => {
@@ -47,123 +73,61 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       editAction('subAction', 'run', index);
     }
     if (!actionParams?.subActionParams) {
-      editAction('subActionParams', { workflowId: '' }, index);
+      editAction('subActionParams', { workflowId: '', summaryMode: true }, index);
+    } else if (actionParams.subActionParams.summaryMode === undefined) {
+      // Ensure summaryMode defaults to true for backward compatibility
+      editAction('subActionParams', { ...actionParams.subActionParams, summaryMode: true }, index);
     }
   }, [actionParams, editAction, index]);
 
-  const editSubActionParams = useCallback(
-    (key: string, value: unknown) => {
-      const oldParams = actionParams.subActionParams ?? {};
-      const updatedParams = { ...oldParams, [key]: value };
-      editAction('subActionParams', updatedParams, index);
-    },
-    [actionParams.subActionParams, editAction, index]
-  );
-
-  const onWorkflowIdChange = useCallback(
-    (selectedValue: string) => {
-      editSubActionParams('workflowId', selectedValue);
-    },
-    [editSubActionParams]
-  );
-
-  const handleCreateNewWorkflow = useCallback(() => {
-    const url = application?.getUrlForApp
-      ? application.getUrlForApp('workflows')
-      : '/app/workflows';
-    window.open(url, '_blank');
-  }, [application]);
-
-  // Fetch workflows from internal Kibana API
-  useEffect(() => {
-    const fetchWorkflows = async () => {
-      if (!http) {
-        return;
-      }
-
-      setIsLoading(true);
-      setLoadError(null);
-
-      try {
-        const response = await http.post('/api/workflows/search');
-        const workflowsMap = response as WorkflowListDto;
-
-        const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => ({
-          value: workflow.id,
-          inputDisplay: `${workflow.name} (${workflow.id})`,
-          dropdownDisplay: (
-            <div>
-              <strong>{workflow.name}</strong>
-              <br />
-              <EuiText size="s" color="subdued">
-                ID: {workflow.id}
-              </EuiText>
-            </div>
-          ),
-        }));
-
-        setWorkflows(workflowOptions);
-      } catch (error) {
-        setLoadError(i18n.FAILED_TO_LOAD_WORKFLOWS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchWorkflows();
-  }, [http]);
-
-  const workflowOptions =
-    workflows.length > 0
-      ? workflows
-      : [
-          {
-            value: '',
-            inputDisplay: i18n.NO_WORKFLOWS_AVAILABLE,
-            dropdownDisplay: i18n.NO_WORKFLOWS_AVAILABLE,
-          },
-        ];
-
   const errorMessages = errors['subActionParams.workflowId'];
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
-  const displayError = typeof errorMessage === 'string' ? errorMessage : undefined;
-  const helpText = loadError || (isLoading ? i18n.LOADING_WORKFLOWS : undefined);
+  const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
+
+  // When summaryMode is false, runPerAlert is true (switch ON)
+  // When summaryMode is true, runPerAlert is false (switch OFF)
+  const runPerAlert = !summaryMode;
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <span>{i18n.WORKFLOW_ID_LABEL}</span>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={handleCreateNewWorkflow} external>
-            {/* Todo: add real icon from figma, doesn't exist in eui? */}
-            {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {isLoading ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        <EuiSuperSelect
-          fullWidth
-          style={{ marginTop: '5px' }}
-          options={workflowOptions}
-          valueOfSelected={workflowId || ''}
-          onChange={onWorkflowIdChange}
-          data-test-subj="workflowIdSelect"
-          placeholder={i18n.SELECT_WORKFLOW_PLACEHOLDER}
-          isInvalid={displayError !== undefined}
-          disabled={workflows.length === 0}
+      <WorkflowSelectorWithProvider
+        selectedWorkflowId={workflowId}
+        onWorkflowChange={handleWorkflowChange}
+        config={{
+          sortFunction: (workflows) =>
+            workflows.sort((a, b) => {
+              const aHasAlert = a.definition?.triggers?.some((t) => t.type === 'alert');
+              const bHasAlert = b.definition?.triggers?.some((t) => t.type === 'alert');
+              if (aHasAlert && !bHasAlert) return -1;
+              if (!aHasAlert && bHasAlert) return 1;
+              return 0;
+            }),
+        }}
+        error={validationError}
+      />
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.stackConnectors.components.workflows.executionMode.label', {
+                defaultMessage: 'Action frequency',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={RUN_PER_ALERT_HELP_TEXT} position="right" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSwitch
+          label={RUN_PER_ALERT_LABEL}
+          checked={runPerAlert}
+          onChange={(e) => handleRunPerAlertChange(e.target.checked)}
+          data-test-subj="workflow-run-per-alert-switch"
         />
-      )}
-
-      {(displayError || helpText) && (
-        <EuiText size="s" color={displayError ? 'danger' : 'subdued'}>
-          {displayError || helpText}
-        </EuiText>
-      )}
+      </EuiFormRow>
     </>
   );
 };

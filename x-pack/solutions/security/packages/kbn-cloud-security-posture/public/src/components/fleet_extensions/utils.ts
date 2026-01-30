@@ -17,12 +17,9 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import {
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  AWS_SINGLE_ACCOUNT,
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
+  CLOUD_CONNECTOR_TYPE,
   GCP_CREDENTIALS_TYPE,
   AWS_PROVIDER,
   GCP_PROVIDER,
@@ -34,13 +31,33 @@ import {
 } from './constants';
 import type {
   AwsCredentialsType,
+  AzureCredentialsType,
   CloudProviders,
   GcpCredentialsType,
   GcpFields,
   GcpInputFields,
   GetAwsCredentialTypeConfigParams,
-  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
+
+export const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {
+  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
+  // Initial state when all inputs are disabled is to choose the default provider type
+  const selectedInput =
+    options.find((i) => i.enabled) || options.find((i) => i.type === defaultProviderType);
+
+  if (!selectedInput) {
+    throw new Error('Failed to determine selected input');
+  }
+  return selectedInput;
+};
+
+export const getInputByType = (options: NewPackagePolicyInput[], type: string) => {
+  const input = options.find((i) => i.type === type);
+  if (!input) {
+    throw new Error(`Failed to find input of type: ${type}`);
+  }
+  return input;
+};
 
 const buildPolicyInput = (
   input: NewPackagePolicyInput,
@@ -123,6 +140,10 @@ export const getDefaultAwsCredentialsType = (
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
 
+export const getAzureCredentialsType = (
+  input: NewPackagePolicyInput
+): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type'].value;
+
 export const getAwsCredentialsType = (
   input: NewPackagePolicyInput
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
@@ -149,7 +170,7 @@ export const getCloudFormationDefaultValue = (
   return cloudFormationTemplate;
 };
 
-const getCloudDefaultAwsCredentialConfig = ({
+export const getDefaultAwsCredentialConfig = ({
   isAgentless,
   showCloudConnectors,
   packageInfo,
@@ -181,12 +202,10 @@ const getCloudDefaultAwsCredentialConfig = ({
       value: credentialsType,
       type: 'text',
     },
-    ...(showCloudConnectors && {
-      'aws.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
+    'aws.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
   };
 
   return config;
@@ -208,7 +227,7 @@ export const getDefaultCloudCredentialsType = (
       };
     }
   > = {
-    aws: getCloudDefaultAwsCredentialConfig({
+    aws: getDefaultAwsCredentialConfig({
       isAgentless,
       showCloudConnectors,
       packageInfo,
@@ -222,14 +241,12 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    azure: {
-      'azure.credentials.type': {
-        value: isAgentless
-          ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-          : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-        type: 'text',
-      },
-    },
+    azure: getDefaultAzureCredentialsConfig(
+      packageInfo,
+      templateName,
+      isAgentless,
+      showCloudConnectors
+    ),
   };
 
   return credentialsTypes[provider];
@@ -238,20 +255,26 @@ export const getDefaultCloudCredentialsType = (
 export const gcpField: GcpInputFields = {
   fields: {
     'gcp.organization_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.organizationIdFieldLabel', {
-        defaultMessage: 'Organization ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationIdFieldLabel',
+        {
+          defaultMessage: 'Organization ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.project_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.projectidFieldLabel', {
-        defaultMessage: 'Project ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.projectidFieldLabel',
+        {
+          defaultMessage: 'Project ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.file': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialFileText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialFileText',
         {
           defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
         }
@@ -260,7 +283,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.json': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialJSONText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialJSONText',
         {
           defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
         }
@@ -270,7 +293,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.type': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialSelectBoxTitle',
         {
           defaultMessage: 'Credential',
         }
@@ -342,19 +365,19 @@ export const getInputHiddenVars = (
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (provider) {
     case AWS_PROVIDER:
-      return getCloudDefaultAwsCredentialConfig({
+      return getDefaultAwsCredentialConfig({
         isAgentless: setupTechnology === SetupTechnology.AGENTLESS,
         packageInfo,
         showCloudConnectors,
         templateName,
       });
     case AZURE_PROVIDER:
-      return {
-        'azure.credentials.type': {
-          value: getDefaultAzureCredentialsType(packageInfo, templateName, setupTechnology),
-          type: 'text',
-        },
-      };
+      return getDefaultAzureCredentialsConfig(
+        packageInfo,
+        templateName,
+        setupTechnology === SetupTechnology.AGENTLESS,
+        showCloudConnectors
+      );
     case GCP_PROVIDER:
       return getDefaultGcpHiddenVars(packageInfo, templateName, setupTechnology);
     default:
@@ -406,21 +429,46 @@ export const getArmTemplateUrlFromPackage = (
   return armTemplateUrl;
 };
 
-export const getDefaultAzureCredentialsType = (
+export const getDefaultAzureCredentialsConfig = (
   packageInfo: PackageInfo,
   templateName: string,
-  setupTechnology: SetupTechnology
-): string => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
-  }
-
+  isAgentless: boolean,
+  showCloudConnectors: boolean
+): {
+  [key: string]: {
+    value: string | boolean;
+    type: 'text' | 'bool';
+  };
+} => {
   const hasArmTemplateUrl = !!getArmTemplateUrlFromPackage(packageInfo, templateName);
-  if (hasArmTemplateUrl) {
-    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
+
+  let credentialType: AzureCredentialsType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
+
+  if (!showCloudConnectors && isAgentless) {
+    credentialType = AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
+  } else if (showCloudConnectors && isAgentless) {
+    credentialType = AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+  } else if (hasArmTemplateUrl) {
+    credentialType = AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
   }
 
-  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
+  const config: {
+    [key: string]: {
+      value: string | boolean;
+      type: 'text' | 'bool';
+    };
+  } = {
+    'azure.credentials.type': {
+      value: credentialType,
+      type: 'text',
+    },
+    'azure.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
+  };
+
+  return config;
 };
 
 /**
@@ -451,28 +499,6 @@ export const hasErrors = (validationResults: PackagePolicyValidationResults | un
   return errors.length;
 };
 
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
-const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
-  if (!url) return undefined;
-  const match = url.match(/\/deployments\/([^/?#]+)/);
-  return match?.[1];
-};
-
-const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
-  if (!cloudId) return undefined;
-
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
-
-  return kibanaComponentId || undefined;
-};
-
 export const getTemplateUrlFromPackageInfo = (
   packageInfo: PackageInfo | undefined,
   integrationType: string,
@@ -484,49 +510,13 @@ export const getTemplateUrlFromPackageInfo = (
   if (!policyTemplate) return undefined;
 
   if ('inputs' in policyTemplate) {
-    const cloudFormationTemplate = policyTemplate.inputs?.reduce((acc, input): string => {
+    const cloudTemplate = policyTemplate.inputs?.reduce((acc, input): string => {
       if (!input.vars) return acc;
       const template = input.vars.find((v) => v.name === templateUrlFieldName)?.default;
       return template ? String(template) : acc;
     }, '');
-    return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
+    return cloudTemplate !== '' ? cloudTemplate : undefined;
   }
-};
-
-export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
-  cloud,
-  packageInfo,
-  templateName,
-}: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-
-  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!provider || provider !== AWS_PROVIDER) return undefined;
-
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
-
-  if (!elasticResourceId) return undefined;
-
-  return getTemplateUrlFromPackageInfo(
-    packageInfo,
-    templateName,
-    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-  )
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 export const getCloudCredentialVarsConfig = ({
@@ -537,7 +527,7 @@ export const getCloudCredentialVarsConfig = ({
 }: GetAwsCredentialTypeConfigParams): Record<string, PackagePolicyConfigRecordEntry> => {
   const supportsCloudConnector =
     setupTechnology === SetupTechnology.AGENTLESS &&
-    optionId === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
+    optionId === CLOUD_CONNECTOR_TYPE &&
     showCloudConnectors;
 
   const credentialType = `${provider}.credentials.type`;

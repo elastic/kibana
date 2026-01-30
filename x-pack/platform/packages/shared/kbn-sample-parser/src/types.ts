@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export interface LoghubParser {
-  getTimestamp: (logLine: string) => number;
-  getFakeMetadata: (logLine: string) => Record<string, unknown>;
-  replaceTimestamp: (logLine: string, timestamp: number) => string;
+export interface StreamLogDocument extends Record<string, any> {
+  '@timestamp': number;
+}
+
+export interface StreamLogGenerator {
+  name: string;
+  next: (timestamp: number) => StreamLogDocument[];
 }

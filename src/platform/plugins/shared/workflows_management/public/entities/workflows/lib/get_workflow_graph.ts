@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: remove eslint exceptions once we have a better way to handle this
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { graphlib } from '@dagrejs/dagre';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -18,6 +20,7 @@ export type WorkflowGraphNodeType =
   | 'action'
   | 'foreach'
   | 'atomic'
+  | 'http'
   | 'trigger';
 
 export interface WorkflowGraphNodeLabel {
@@ -30,7 +33,7 @@ export interface WorkflowGraphNodeLabel {
 
 export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'merge', 'trigger'];
+export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
 function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],
@@ -156,7 +159,7 @@ function transformYamlToNodesAndEdges(
       edges.push(...atomicEdges);
 
       // Create edge from atomic step to first nested step
-      if ((step.steps as any[]).length > 0) {
+      if ((step.steps as unknown[]).length > 0) {
         const firstNestedId = (step.steps as any[])[0].name.toLowerCase().replace(/\s+/g, '-');
         edges.push({
           id: `${id}:${firstNestedId}`,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilterCondition, Condition } from '../../types/conditions';
+import type { FilterCondition, Condition, RangeCondition } from '../../types/conditions';
 import {
   isFilterCondition,
   isAndCondition,
@@ -51,6 +51,27 @@ function conditionToClause(condition: FilterCondition) {
       return { prefix: { [condition.field]: `${value}*` } };
     case 'endsWith':
       return { wildcard: { [condition.field]: `*${value}` } };
+    case 'range': {
+      const rangeValue = value as RangeCondition;
+      const rangeQuery: RangeCondition = {};
+
+      if (rangeValue.gte !== undefined) {
+        rangeQuery.gte = rangeValue.gte;
+      }
+      if (rangeValue.gt !== undefined) {
+        rangeQuery.gt = rangeValue.gt;
+      }
+      if (rangeValue.lte !== undefined) {
+        rangeQuery.lte = rangeValue.lte;
+      }
+      if (rangeValue.lt !== undefined) {
+        rangeQuery.lt = rangeValue.lt;
+      }
+
+      return { range: { [condition.field]: rangeQuery } };
+    }
+    case 'includes':
+      return { terms: { [condition.field]: [value] } };
     default:
       return { match_none: {} };
   }

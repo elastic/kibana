@@ -13,12 +13,13 @@ import type {
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import type { SlackConnectorType, SlackConnectorTypeExecutorOptions } from '.';
-import { getConnectorType, ConnectorTypeId } from '.';
+import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/slack';
 
 const sendSpy = jest.spyOn(IncomingWebhook.prototype, 'send');
 
@@ -44,7 +45,7 @@ beforeEach(() => {
 
 describe('connector registration', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(ConnectorTypeId);
+    expect(connectorType.id).toEqual(CONNECTOR_ID);
     expect(connectorType.name).toEqual('Slack');
   });
 });
@@ -62,13 +63,13 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: Field \\"message\\": Required"`
     );
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
+      `"error validating action params: Field \\"message\\": Expected string, received number"`
     );
   });
 });
@@ -88,19 +89,19 @@ describe('validateConnectorTypeSecrets()', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
+      `"error validating connector type secrets: Field \\"webhookUrl\\": Required"`
     );
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
+      `"error validating connector type secrets: Field \\"webhookUrl\\": Expected string, received number"`
     );
 
     expect(() => {
       validateSecrets(connectorType, { webhookUrl: 'fee-fi-fo-fum' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+      `"error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
     );
   });
 
@@ -138,7 +139,7 @@ describe('validateConnectorTypeSecrets()', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      `"error validating connector type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
     );
   });
 });

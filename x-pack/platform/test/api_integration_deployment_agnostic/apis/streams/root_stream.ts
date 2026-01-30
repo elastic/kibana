@@ -6,7 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -15,36 +17,18 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { dsl: {} },
-    processing: {
-      steps: [],
-    },
+    processing: { steps: [], updated_at: new Date().toISOString() },
+    settings: {},
     wired: {
       routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
         },
-        'scope.dropped_attributes_count': {
-          type: 'long',
-        },
-        dropped_attributes_count: {
-          type: 'long',
-        },
-        'resource.dropped_attributes_count': {
-          type: 'long',
-        },
-        'resource.schema_url': {
-          type: 'keyword',
-        },
         'scope.name': {
-          type: 'keyword',
-        },
-        'scope.schema_url': {
-          type: 'keyword',
-        },
-        'scope.version': {
           type: 'keyword',
         },
         trace_id: {
@@ -76,6 +60,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         },
       },
     },
+    failure_store: {
+      lifecycle: { enabled: { data_retention: '30d' } },
+    },
   },
 };
 
@@ -84,8 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/231900
-  describe.skip('Root stream', () => {
+  describe('Root stream', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -97,8 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow processing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
@@ -127,12 +112,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should not allow fields changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               fields: {
@@ -155,12 +140,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Should allow routing changes', async () => {
       const body: Streams.WiredStream.UpsertRequest = {
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
         stream: {
           description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
+            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
             wired: {
               ...rootStreamDefinition.ingest.wired,
               routing: [
@@ -170,6 +155,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     field: 'cloud.provider',
                     eq: 'gcp',
                   },
+                  status: 'enabled',
                 },
               ],
             },
@@ -185,14 +171,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '@timestamp': '2024-01-01T00:00:20.000Z',
         message: 'test',
       };
-      let threw = false;
-      try {
-        await indexDocument(esClient, 'logs.gcpcloud', doc);
-      } catch (e) {
-        threw = true;
-        expect(e.message).to.contain('stream.name is not set properly');
-      }
-      expect(threw).to.be(true);
+      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
+      expect(response.failure_store).to.be('used');
     });
   });
 }

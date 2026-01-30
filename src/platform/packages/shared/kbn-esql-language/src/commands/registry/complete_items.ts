@@ -1,0 +1,576 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { i18n } from '@kbn/i18n';
+import type { ISuggestionItem } from './types';
+import { esqlCommandRegistry } from '.';
+import { buildDocumentation } from '../definitions/utils/documentation';
+import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
+import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
+import { techPreviewLabel } from '../definitions/utils/shared';
+import { SuggestionCategory } from '../../shared/sorting/types';
+import {
+  ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_NAMED_PARAMS_TYPE,
+} from '../definitions/types';
+import { getPromqlParamDefinitions } from './promql/utils';
+
+function buildCharCompleteItem(
+  label: string,
+  detail: string,
+  {
+    sortText,
+    quoted,
+    advanceCursorAndOpenSuggestions,
+    category,
+  }: {
+    sortText?: string;
+    quoted: boolean;
+    advanceCursorAndOpenSuggestions?: boolean;
+    category?: SuggestionCategory;
+  } = {
+    quoted: false,
+  }
+): ISuggestionItem {
+  const suggestion: ISuggestionItem = {
+    label,
+    text: (quoted ? `"${label}"` : label) + (advanceCursorAndOpenSuggestions ? ' ' : ''),
+    kind: 'Keyword',
+    detail,
+    sortText,
+    ...(category && { category }),
+  };
+  return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
+}
+
+export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '|',
+  text: '| ',
+  kind: 'Keyword',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.pipeDoc', {
+    defaultMessage: 'Pipe (|)',
+  }),
+  sortText: 'C',
+  category: SuggestionCategory.PIPE,
+});
+
+export const allStarConstant: ISuggestionItem = {
+  label: i18n.translate('kbn-esql-language.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  text: '*',
+  kind: 'Constant',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  sortText: '1',
+  category: SuggestionCategory.CONSTANT_VALUE,
+};
+
+export function buildMapKeySuggestion(
+  paramName: string,
+  valueType: MapValueType = 'string',
+  description?: string,
+  options?: MapKeySuggestionOptions
+): ISuggestionItem {
+  const text = `"${paramName}": ${MAP_VALUE_SNIPPETS[valueType]}`;
+  const isSnippet = text.includes('$0');
+
+  return withAutoSuggest({
+    label: paramName,
+    text,
+    asSnippet: isSnippet,
+    kind: 'Constant',
+    detail: description || paramName,
+    ...(options?.filterText && { filterText: options.filterText }),
+    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+  });
+}
+
+export type ConstantPlaceholderType = 'value' | 'number' | 'config' | 'default';
+
+export const PLACEHOLDER_CONFIG: Record<
+  ConstantPlaceholderType,
+  { snippet: string; matchTypes: readonly string[] }
+> = {
+  config: {
+    snippet: '{ $0 }',
+    matchTypes: [ESQL_NAMED_PARAMS_TYPE],
+  },
+  value: {
+    snippet: '"${0:value}"',
+    matchTypes: [...ESQL_STRING_TYPES, 'ip', 'version'],
+  },
+  number: {
+    snippet: '${0:0}',
+    matchTypes: [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+  },
+  default: {
+    snippet: '"${0:default}"',
+    matchTypes: [],
+  },
+};
+
+export const valuePlaceholderConstant: ISuggestionItem = buildAddValuePlaceholder('value');
+export const defaultValuePlaceholderConstant: ISuggestionItem = buildAddValuePlaceholder('default');
+
+export function buildAddValuePlaceholder(
+  placeholderType: ConstantPlaceholderType,
+  options?: MapKeySuggestionOptions
+): ISuggestionItem {
+  const text = PLACEHOLDER_CONFIG[placeholderType].snippet;
+
+  return withAutoSuggest({
+    label: i18n.translate(
+      `kbn-esql-ast.esql.autocomplete.constantOnlyPlaceholder.${placeholderType}.label`,
+      {
+        defaultMessage: 'Insert {placeholderType} placeholder',
+        values: { placeholderType },
+      }
+    ),
+    text,
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valuePlaceholderDetail', {
+      defaultMessage: 'Insert a {placeholderType} to describe the condition',
+      values: { placeholderType },
+    }),
+    category: SuggestionCategory.VALUE,
+    filterText: text,
+    ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+  });
+}
+
+/** Finds the placeholder type that matches the given ES|QL types */
+export function findConstantPlaceholderType(
+  types: readonly string[]
+): ConstantPlaceholderType | undefined {
+  for (const placeholderType of Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[]) {
+    const { matchTypes } = PLACEHOLDER_CONFIG[placeholderType];
+
+    if (types.some((type) => matchTypes.includes(type))) {
+      return placeholderType;
+    }
+  }
+
+  return undefined;
+}
+
+export function buildMapValueCompleteItem(value: string): ISuggestionItem {
+  return {
+    label: value,
+    text: value,
+    kind: 'Constant',
+    detail: value,
+    category: SuggestionCategory.CONSTANT_VALUE,
+  };
+}
+
+export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
+  return getPromqlParamDefinitions().map(({ name, description }) =>
+    withAutoSuggest({
+      label: name,
+      text: `${name} = `,
+      kind: 'Value',
+      detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
+        defaultMessage: description,
+      }),
+      category: SuggestionCategory.VALUE,
+    })
+  );
+}
+
+export const commaCompleteItem = buildCharCompleteItem(
+  ',',
+  i18n.translate('kbn-esql-language.esql.autocomplete.commaDoc', {
+    defaultMessage: 'Comma (,)',
+  }),
+  { sortText: 'B', quoted: false, category: SuggestionCategory.COMMA }
+);
+
+export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
+  text: 'by ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+});
+
+export const byCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'BY',
+  text: 'BY ',
+  kind: 'Reference',
+  detail: 'By',
+  sortText: '1',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+});
+
+export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'WHERE',
+  text: 'WHERE ',
+  kind: 'Reference',
+  detail: 'Where',
+  sortText: '1',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+});
+
+export const onCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'ON',
+  text: 'ON ',
+  kind: 'Reference',
+  detail: 'On',
+  sortText: '1',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+});
+
+export const withCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'WITH',
+  text: 'WITH { $0 }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'With',
+  sortText: '1',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+});
+
+export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'inference_id',
+  text: '{ "inference_id": "$0" }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'Inference endpoint',
+  sortText: '1',
+});
+
+// ================================
+// Map Expression Builders
+// ================================
+
+export type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+
+export const MAP_VALUE_SNIPPETS: Record<MapValueType, string> = {
+  string: '"$0"',
+  number: '',
+  boolean: '',
+  map: '{ $0 }',
+};
+
+export interface MapKeySuggestionOptions {
+  filterText?: string;
+  rangeToReplace?: { start: number; end: number };
+}
+
+export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '(FROM ...)',
+  text: '(FROM $0)',
+  asSnippet: true,
+  kind: 'Method',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
+    defaultMessage: 'Adds a nested ES|QL query to your current query',
+  }),
+  sortText: '1',
+  category: SuggestionCategory.CUSTOM_ACTION,
+});
+
+export const minMaxValueCompleteItem: ISuggestionItem = {
+  label: 'minmax',
+  text: 'minmax',
+  kind: 'Value',
+  detail: 'minmax',
+  sortText: '1',
+  category: SuggestionCategory.VALUE,
+};
+
+export const noneValueCompleteItem: ISuggestionItem = {
+  label: 'none',
+  text: 'none',
+  kind: 'Value',
+  detail: 'none',
+  sortText: '1',
+  category: SuggestionCategory.VALUE,
+};
+
+export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
+  return withAutoSuggest({
+    label,
+    text: `${label} = `,
+    kind: 'Variable',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.newVarDoc', {
+      defaultMessage: 'Define a new column',
+    }),
+    sortText: '1',
+    category: SuggestionCategory.USER_DEFINED_COLUMN,
+  });
+};
+
+export const assignCompletionItem: ISuggestionItem = withAutoSuggest({
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.newVarDoc', {
+    defaultMessage: 'Define a new column',
+  }),
+  label: '=',
+  kind: 'Variable',
+  sortText: '1',
+  text: '= ',
+  category: SuggestionCategory.USER_DEFINED_COLUMN,
+});
+
+export const asCompletionItem: ISuggestionItem = {
+  detail: i18n.translate('kbn-esql-language.esql.definitions.asDoc', {
+    defaultMessage: 'As',
+  }),
+  kind: 'Reference',
+  label: 'AS',
+  sortText: '1',
+  text: 'AS ',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
+};
+
+export const colonCompleteItem = buildCharCompleteItem(
+  ':',
+  i18n.translate('kbn-esql-language.esql.autocomplete.colonDoc', {
+    defaultMessage: 'Colon (:)',
+  }),
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
+);
+
+export const semiColonCompleteItem = buildCharCompleteItem(
+  ';',
+  i18n.translate('kbn-esql-language.esql.autocomplete.semiColonDoc', {
+    defaultMessage: 'Semi colon (;)',
+  }),
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
+);
+
+export const listCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: '( ... )',
+  text: '($0)',
+  asSnippet: true,
+  kind: 'Operator',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.listDoc', {
+    defaultMessage: 'List of items ( ...)',
+  }),
+  sortText: 'A',
+});
+
+export const likePatternItems: ISuggestionItem[] = [
+  {
+    label: '*',
+    text: '"${0:*}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.likeAsteriskDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '?',
+    text: '"${0:?}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.likeQuestionMarkDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+];
+
+export const rlikePatternItems: ISuggestionItem[] = [
+  {
+    label: '.*',
+    text: '"${0:.*}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.rlikeAnyStringDoc', {
+      defaultMessage: 'Matches any sequence of zero or more characters',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '.',
+    text: '"${0:.}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.rlikeAnySingleCharDoc', {
+      defaultMessage: 'Matches any single character',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '^',
+    text: '"${0:^}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.rlikeStartAnchorDoc', {
+      defaultMessage: 'Match to the start of the string',
+    }),
+    sortText: '1',
+  },
+  {
+    label: '$',
+    text: '"${0:$}"',
+    asSnippet: true,
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.rlikeEndAnchorDoc', {
+      defaultMessage: 'Match to the end of the string',
+    }),
+    sortText: '1',
+  },
+];
+
+export const confidenceLevelValueItems: ISuggestionItem[] = [
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionLabel',
+      {
+        defaultMessage: 'High precision',
+      }
+    ),
+    text: '0.99',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionDetail',
+      {
+        defaultMessage: 'High precision (99%)',
+      }
+    ),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionLabel',
+      {
+        defaultMessage: 'Standard',
+      }
+    ),
+    text: '0.95',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionDetail',
+      {
+        defaultMessage: 'Standard (95%)',
+      }
+    ),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionLabel',
+      {
+        defaultMessage: 'Exploratory',
+      }
+    ),
+    text: '0.9',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionDetail',
+      {
+        defaultMessage: 'Exploratory (90%)',
+      }
+    ),
+  },
+];
+
+export const numOfRowsValueItems: ISuggestionItem[] = [
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KLabel', {
+      defaultMessage: '100K rows',
+    }),
+    text: '100000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KDetail', {
+      defaultMessage: 'Return up to 100,000 rows',
+    }),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KLabel', {
+      defaultMessage: '500K rows',
+    }),
+    text: '500000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KDetail', {
+      defaultMessage: 'Return up to 500,000 rows',
+    }),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MLabel', {
+      defaultMessage: '1M rows',
+    }),
+    text: '1000000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MDetail', {
+      defaultMessage: 'Return up to 1,000,000 rows',
+    }),
+  },
+];
+
+export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggestionItem[] => {
+  const suggestions: ISuggestionItem[] = [];
+
+  for (const command of commands) {
+    const commandDefinition = esqlCommandRegistry.getCommandByName(command);
+    if (commandDefinition?.metadata?.hidden || !commandDefinition) {
+      continue;
+    }
+
+    const label = commandDefinition.name.toUpperCase();
+    const text = `${commandDefinition.name.toUpperCase()} `;
+    const types = commandDefinition.metadata?.types ?? [
+      {
+        name: '',
+        description: '',
+      },
+    ];
+
+    for (const type of types) {
+      let detail = type.description || commandDefinition.metadata.description;
+      if (commandDefinition.metadata.preview) {
+        detail = `**[${techPreviewLabel}]** ${detail}`;
+      }
+      const suggestion: ISuggestionItem = withAutoSuggest({
+        label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
+        text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
+        kind: 'Method',
+        documentation: {
+          value: buildDocumentation(
+            detail,
+            commandDefinition.metadata.declaration,
+            commandDefinition.metadata.examples
+          ),
+        },
+        sortText: 'A-' + label + '-' + type.name,
+      });
+
+      suggestions.push(suggestion);
+    }
+  }
+
+  return suggestions;
+};
+
+export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem = (
+  histogramBarTarget: number = 50
+) =>
+  withAutoSuggest({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.addDateHistogram', {
+      defaultMessage: 'Add date histogram',
+    }),
+    text: `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
+    asSnippet: true,
+    kind: 'Issue',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.addDateHistogramDetail', {
+      defaultMessage: 'Add date histogram using bucket()',
+    }),
+    sortText: '1',
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });

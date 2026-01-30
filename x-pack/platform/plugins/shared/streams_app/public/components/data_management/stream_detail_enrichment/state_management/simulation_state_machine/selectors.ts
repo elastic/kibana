@@ -7,14 +7,17 @@
 
 import { createSelector } from 'reselect';
 
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
-import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import type { SimulationContext } from './types';
-import { getFilterSimulationDocumentsFn } from './utils';
+import {
+  collectActiveDocumentsForSelectedCondition,
+  getFilterSimulationDocumentsFn,
+} from './utils';
 
 /**
- * Selects the documents used for the data preview table.
+ * Selects the simulated documents with applied filtering by
+ * the selected condition and preview table filter (Parsed, Skipped, etc.).
  */
 export const selectPreviewRecords = createSelector(
   [
@@ -31,6 +34,10 @@ export const selectPreviewRecords = createSelector(
   }
 );
 
+/**
+ * Selects the original samples with applied filtering by
+ * the selected condition and preview table filter (Parsed, Skipped, etc.).
+ */
 export const selectOriginalPreviewRecords = createSelector(
   [
     (context: SimulationContext) => context.samples,
@@ -43,7 +50,46 @@ export const selectOriginalPreviewRecords = createSelector(
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     // return the samples where the filterFn matches the documents at the same index
-    return samples.filter((_, index) => filterFn(documents[index]));
+    return samples.filter((_, index) => {
+      const doc = documents[index];
+      return doc ? filterFn(doc) : false;
+    });
+  }
+);
+
+/**
+ * Selects an subset of samples be sent
+ * for a simulation taking into account the currently
+ * selected condition filter.
+ *
+ * If no condition is selected, all samples are returned.
+ *
+ * If a condition is selected, samples are filtered to include
+ * only those that correspond to documents processed by
+ * the processors which are direct descendants of the selected
+ * condition.
+ */
+export const selectSamplesForSimulation = createSelector(
+  [
+    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => context.baseSimulation?.documents,
+    (context: SimulationContext) => context.steps,
+    (context: SimulationContext) => context.selectedConditionId,
+  ],
+  (samples, baseSimulationDocuments = [], steps, selectedConditionId) => {
+    if (!selectedConditionId || baseSimulationDocuments.length === 0) {
+      return samples;
+    }
+
+    const docIndexes = collectActiveDocumentsForSelectedCondition(
+      baseSimulationDocuments,
+      steps,
+      selectedConditionId
+    ).map((doc) => baseSimulationDocuments.indexOf(doc));
+
+    return docIndexes
+      .filter((docIndex) => samples.at(docIndex) !== undefined)
+      .map((index) => samples[index]);
   }
 );
 
@@ -54,60 +100,14 @@ export const selectHasSimulatedRecords = createSelector(
   }
 );
 
-/**
- * Selects the set of dotted fields that are not supported by the current simulation.
- */
-export const selectUnsupportedDottedFields = createSelector(
+export const selectFieldsInSamples = createSelector(
   [(context: SimulationContext) => context.samples],
   (samples) => {
-    const properties = samples.flatMap((sample) => getDottedFieldPrefixes(sample.document));
-
-    return uniq(properties);
+    const fieldSet = new Set<string>();
+    samples.forEach((sample) => {
+      const flattened = flattenObjectNestedLast(sample.document);
+      Object.keys(flattened).forEach((key) => fieldSet.add(key));
+    });
+    return Array.from(fieldSet).sort();
   }
 );
-
-const isPlainObj = isPlainObject as (value: unknown) => value is Record<string, unknown>;
-
-/**
- * Returns a list of all dotted properties prefixes in the given object.
- */
-function getDottedFieldPrefixes(obj: SampleDocument): string[] {
-  const result: string[] = [];
-
-  function traverse(currentObj: SampleDocument, path: string[]): boolean {
-    let foundDot = false;
-
-    for (const key in currentObj) {
-      if (Object.hasOwn(currentObj, key)) {
-        const value = currentObj[key];
-        const newPath = [...path, key];
-
-        // Check if current key contains a dot
-        if (key.includes('.')) {
-          const newKey = newPath.join('.');
-          // For objects with dotted keys, add trailing dot
-          if (isPlainObj(value)) {
-            result.push(newKey.concat('.'));
-          } else {
-            result.push(newKey);
-          }
-          foundDot = true;
-          continue; // Skip further traversal for this key
-        }
-
-        // If it's an object, traverse deeper
-        if (isPlainObj(value) && traverse(value, newPath)) {
-          // If traversal found a dot, don't continue with siblings
-          foundDot = true;
-          continue;
-        }
-      }
-    }
-
-    return foundDot;
-  }
-
-  traverse(obj, []);
-
-  return result;
-}

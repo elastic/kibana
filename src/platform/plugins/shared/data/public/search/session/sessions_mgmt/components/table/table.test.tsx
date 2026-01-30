@@ -22,6 +22,7 @@ import { SearchSessionsMgmtTable } from './table';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 import type { UISession } from '../../types';
+import { getSearchSessionEBTManagerMock } from '../../../mocks';
 
 const setup = async ({
   mockSessionsFindResponse = {
@@ -61,6 +62,7 @@ const setup = async ({
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   let renderResult: RenderResult;
@@ -75,6 +77,8 @@ const setup = async ({
           kibanaVersion="8.0.0"
           locators={mockShareStart.url.locators}
           searchUsageCollector={mockSearchUsageCollector}
+          searchSessionEBTManager={getSearchSessionEBTManagerMock()}
+          trackingProps={{ renderedIn: 'test', openedFrom: 'test' }}
           {...props}
         />
       </LocaleWrapper>

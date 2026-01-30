@@ -12,6 +12,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { navigateToConnectorsManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -180,12 +181,14 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             initialConversationId={conversationId}
             knowledgeBase={knowledgeBase}
             showLinkToConversationsApp={false}
+            eisCalloutZIndex={0}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}
             setIsUpdatingConversationList={setIsUpdatingConversationList}
             refreshConversations={refreshConversations}
             updateDisplayedConversation={updateDisplayedConversation}
             onConversationDuplicate={handleConversationDuplicate}
+            navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
           />
 
           <div className={sidebarContainerClass}>

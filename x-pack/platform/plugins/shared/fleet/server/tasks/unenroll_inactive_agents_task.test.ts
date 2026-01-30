@@ -122,7 +122,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -144,16 +144,11 @@ describe('UnenrollInactiveAgentsTask', () => {
     it('Should unenroll eligible agents', async () => {
       mockedUnenrollBatch.mockResolvedValueOnce({ actionId: 'actionid-01' });
       await runTask();
-      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        agents,
-        {
-          force: true,
-          revoke: true,
-          actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
-        }
-      );
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(undefined, expect.anything(), agents, {
+        force: true,
+        revoke: true,
+        actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+      });
     });
 
     it('Should not run if task is outdated', async () => {
@@ -213,7 +208,7 @@ describe('UnenrollInactiveAgentsTask', () => {
 
       await runTask();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         secondAgentPoliciesBatchAgents,
         {

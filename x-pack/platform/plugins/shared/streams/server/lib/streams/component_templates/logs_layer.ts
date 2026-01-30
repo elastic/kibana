@@ -6,9 +6,12 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import type { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { namespacePrefixes } from '@kbn/streams-schema';
+import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 
 // This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
 export const otelEquivalentLookupMap = Object.fromEntries(
@@ -55,25 +58,7 @@ export const baseFields: FieldDefinition = {
   'stream.name': {
     type: 'system',
   },
-  'scope.dropped_attributes_count': {
-    type: 'long',
-  },
-  dropped_attributes_count: {
-    type: 'long',
-  },
-  'resource.dropped_attributes_count': {
-    type: 'long',
-  },
-  'resource.schema_url': {
-    type: 'keyword',
-  },
   'scope.name': {
-    type: 'keyword',
-  },
-  'scope.schema_url': {
-    type: 'keyword',
-  },
-  'scope.version': {
     type: 'keyword',
   },
   trace_id: {
@@ -102,42 +87,53 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-export const baseMappings: Record<string, MappingProperty> = {
+// Priorities match the order in NAMESPACE_PREFIXES (kbn-streamlang/src/validation/validate_streamlang.ts)
+export const NAMESPACE_PRIORITIES: Record<string, number> = {
+  'body.structured.': 10,
+  'attributes.': 20,
+  'scope.attributes.': 30,
+  'resource.attributes.': 40,
+};
+
+// Fields that MUST be present in every resource.attributes passthrough because they're used for index sorting.
+// When child streams override resource.attributes, these fields must be preserved.
+// Now that we pass an object (passthrough) instead of a flat key, ES replaces the whole thing when merging, so we need to always send it.
+export const REQUIRED_RESOURCE_ATTRIBUTES_FIELDS = {
+  'host.name': { type: 'keyword' as const },
+  'service.name': { type: 'keyword' as const },
+};
+
+export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {
       structured: {
-        type: 'object',
-        subobjects: false,
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['body.structured.'],
       },
     },
   },
   attributes: {
-    type: 'object',
-    subobjects: false,
-  },
-  resource: {
-    type: 'object',
-    properties: {
-      dropped_attributes_count: {
-        type: 'long',
-      },
-      schema_url: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
-      attributes: {
-        type: 'object',
-        subobjects: false,
-      },
-    },
+    type: 'passthrough',
+    priority: NAMESPACE_PRIORITIES['attributes.'],
   },
   scope: {
     type: 'object',
     properties: {
       attributes: {
-        type: 'object',
-        subobjects: false,
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['scope.attributes.'],
+      },
+    },
+  },
+  resource: {
+    type: 'object',
+    properties: {
+      attributes: {
+        type: 'passthrough',
+        priority: NAMESPACE_PRIORITIES['resource.attributes.'],
+        // Required fields for index sorting - must always be present
+        properties: REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
       },
     },
   },

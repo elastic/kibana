@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SECURITY_FEATURE_ID, AI_VALUE_PATH } from '../../common/constants';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  AI_VALUE_PATH,
+  ATTACK_DISCOVERY_FEATURE_ID,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+} from '../../common/constants';
 import { AI_VALUE_DASHBOARD } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -17,11 +23,22 @@ export const aiValueLinks: LinkItem = {
     defaultMessage: 'See ROI for Security AI features',
   }),
   path: AI_VALUE_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.external_detections`]],
+  licenseType: 'enterprise',
+  capabilities: [
+    [
+      SECURITY_UI_SHOW_PRIVILEGE,
+      `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`,
+      `${SECURITY_FEATURE_ID}.socManagement`,
+    ],
+  ],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.aiValue', {
       defaultMessage: 'AI Value',
     }),
+    i18n.translate('xpack.securitySolution.appLinks.valueReport', {
+      defaultMessage: 'Value report',
+    }),
   ],
-  globalNavPosition: 8,
+  globalNavPosition: 12,
+  hideTimeline: true,
 };

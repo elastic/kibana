@@ -39,15 +39,19 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>
-          <EuiTitle size="xxs" data-test-subj="connector-settings-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"
-                defaultMessage="Connector settings"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
+          {Boolean(actionTypeModel?.connectorForm?.hideSettingsTitle) ? null : (
+            <>
+              <EuiTitle size="xxs" data-test-subj="connector-settings-label">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"
+                    defaultMessage="Connector settings"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiErrorBoundary>
             <Suspense
               fallback={

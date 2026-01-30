@@ -9,6 +9,13 @@
 
 import { append } from '../pipeline/append';
 
+/**
+ * Appends a `KEEP` command to the ESQL composer pipeline.
+ *
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ * @param columns The columns to keep.
+ * @returns A `QueryPipeline` instance with the `KEEP` command appended.
+ */
 export function keep(...columns: Array<string | string[]>) {
   const command = `KEEP ${columns.flatMap((column) => column).join(', ')}`;
 

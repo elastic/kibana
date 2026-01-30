@@ -49,7 +49,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.limits.go_max_procs',
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',
@@ -73,12 +73,87 @@ describe('ConfiguredSettings', () => {
     );
   });
 
+  it('should render enum field', () => {
+    const result = render([
+      {
+        name: 'test',
+        title: 'TEST',
+        description: () => 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'test',
+        },
+        schema: z.enum(['test1', 'test2']).default('test2'),
+      },
+    ]);
+
+    const input = result.getByTestId('configuredSetting-test') as HTMLSelectElement;
+    const options = [...input.options].map((opt) => ({ label: opt.textContent, value: opt.value }));
+
+    expect(options).toEqual([
+      { label: 'test1', value: 'test1' },
+      { label: 'test2', value: 'test2' },
+    ]);
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'test1' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ test: 'test1' }),
+      })
+    );
+  });
+
+  it('should render enum field with custom options', () => {
+    const result = render([
+      {
+        name: 'test',
+        title: 'TEST',
+        description: () => 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'test',
+        },
+        schema: z.enum(['test1', 'test2']).default('test2'),
+        options: [
+          {
+            text: 'Test 1',
+            value: 'test1',
+          },
+          {
+            text: 'Test 2',
+            value: 'test2',
+          },
+        ],
+      },
+    ]);
+    const input = result.getByTestId('configuredSetting-test') as HTMLSelectElement;
+    const options = [...input.options].map((opt) => ({ label: opt.textContent, value: opt.value }));
+
+    expect(options).toEqual([
+      { label: 'Test 1', value: 'test1' },
+      { label: 'Test 2', value: 'test2' },
+    ]);
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'test1' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ test: 'test1' }),
+      })
+    );
+  });
+
   it('should render string field with time duration validation', () => {
     const result = render([
       {
         name: 'agent.download.timeout',
         title: 'Agent binary download timeout',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_download_timeout',
@@ -96,9 +171,7 @@ describe('ConfiguredSettings', () => {
     });
 
     expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(
-      result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d')
-    ).not.toBeNull();
+    expect(result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h')).not.toBeNull();
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 
@@ -107,7 +180,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.logging.to_files',
         title: 'Agent logging to files',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_logging_to_files',
@@ -137,7 +210,7 @@ describe('ConfiguredSettings', () => {
         name: 'agent.limits.go_max_procs',
         hidden: true,
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',
@@ -147,5 +220,45 @@ describe('ConfiguredSettings', () => {
     ]);
 
     expect(result.queryByText('GO_MAX_PROCS')).toBeNull();
+  });
+
+  it('should render learn more link with target="_blank"', () => {
+    const learnMoreUrl = 'https://www.elastic.co/guide/en/fleet';
+    const result = render([
+      {
+        name: 'agent.limits.go_max_procs',
+        title: 'GO_MAX_PROCS',
+        description: () => 'Description',
+        learnMoreLink: learnMoreUrl,
+        api_field: {
+          name: 'agent_limits_go_max_procs',
+        },
+        schema: z.number().int().min(0).default(0),
+      },
+    ]);
+
+    const learnMoreLink = result.getByText('Learn more.');
+    expect(learnMoreLink).not.toBeNull();
+    expect(learnMoreLink.closest('a')).toHaveAttribute('href', learnMoreUrl);
+    expect(learnMoreLink.closest('a')).toHaveAttribute('target', '_blank');
+  });
+
+  it('should render string field with yaml type', () => {
+    const result = render([
+      {
+        name: 'agent.internal',
+        title: 'Advanced Internal YAML Settings',
+        description: () => 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'agent_internal',
+        },
+        schema: z.string(),
+        type: 'yaml',
+      },
+    ]);
+
+    expect(result.getByText('Advanced Internal YAML Settings')).not.toBeNull();
+    expect(result.getByText('# Add YAML settings here')).not.toBeNull();
   });
 });

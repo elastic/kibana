@@ -39,7 +39,7 @@ export const PresentationPanelHoverActionsWrapper = (props: PresentationPanelHov
       props.api?.hasLockedHoverActions$,
       props.api?.overrideHoverActions$
     );
-  const containerStyles = useHoverActionStyles(true, props.showBorder);
+  const containerStyles = useHoverActionStyles(props.viewMode === 'edit', props.showBorder);
 
   let OverriddenHoverActionsComponent = null;
   if (canOverrideHoverActions(props.api) && overrideHoverActions) {

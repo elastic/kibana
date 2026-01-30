@@ -15,7 +15,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     before(async function () {
-      await browser.setWindowSize(1300, 800);
+      await browser.setWindowSize(1300, 1000);
     });
 
     after(async function unloadMakelogs() {

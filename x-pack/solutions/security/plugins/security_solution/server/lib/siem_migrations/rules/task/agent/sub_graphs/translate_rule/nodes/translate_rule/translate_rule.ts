@@ -5,63 +5,66 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
-import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
+import type { MigrationComments } from '../../../../../../../../../../common/siem_migrations/model/common.gen';
+import { getNLToESQLQuery } from '../../../../../../../common/task/agent/helpers/translate_nl_to_esql/translate_nl_to_esql';
+import {
+  getTranslateSplToEsql,
+  TASK_DESCRIPTION,
+  type GetTranslateSplToEsqlParams,
+} from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 import type { GraphNode } from '../../types';
-import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
 import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
 } from './severity';
 
-interface GetTranslateRuleNodeParams {
-  esqlKnowledgeBase: EsqlKnowledgeBase;
-  logger: Logger;
-}
-
-export const getTranslateRuleNode = ({
-  esqlKnowledgeBase,
-  logger,
-}: GetTranslateRuleNodeParams): GraphNode => {
+export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): GraphNode => {
+  const nlToESQLQuery = getNLToESQLQuery(params);
+  const translateSplToEsql = getTranslateSplToEsql(params);
   return async (state) => {
-    const indexPatterns =
-      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
-      'logs-*';
+    const vendor = state.original_rule.vendor;
 
-    const splunkRule = {
-      title: state.original_rule.title,
-      description: state.original_rule.description,
-      inline_query: state.inline_query,
-    };
+    const indexPatterns = state.integration?.data_streams
+      ?.map((dataStream) => dataStream.index_pattern)
+      .join(',');
 
-    const prompt = await ESQL_SYNTAX_TRANSLATION_PROMPT.format({
-      splunk_rule: JSON.stringify(splunkRule, null, 2),
-      indexPatterns,
-    });
-    const response = await esqlKnowledgeBase.translate(prompt);
+    let esqlQuery: string | undefined;
+    let comments: MigrationComments = [];
 
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
-    if (!esqlQuery) {
-      logger.warn('Failed to extract ESQL query from translation response');
-      const comment =
-        '## Translation Summary\n\nFailed to extract ESQL query from translation response';
-      return {
-        comments: [generateAssistantComment(comment)],
-      };
+    if (vendor === 'qradar') {
+      params.logger.debug(
+        `Translating rule "${state.original_rule.title}" using NL to ESQL for vendor: ${vendor}`
+      );
+      ({ esqlQuery, comments } = await nlToESQLQuery({
+        query: state.nl_query,
+        indexPattern: indexPatterns,
+      }));
+    } else {
+      params.logger.debug(
+        `Translating rule "${state.original_rule.title}" using SPL to ESQL for vendor: ${vendor}`
+      );
+      ({ esqlQuery, comments } = await translateSplToEsql({
+        title: state.original_rule.title,
+        taskDescription: TASK_DESCRIPTION.migrate_rule,
+        description: state.original_rule.description,
+        inlineQuery: state.inline_query,
+        indexPattern: indexPatterns,
+      }));
     }
 
-    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
+    if (!esqlQuery) {
+      return { comments };
+    }
 
     return {
-      comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
         query: esqlQuery,
         query_language: 'esql',
-        risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
-        severity: getElasticSeverityFromOriginalRule(state.original_rule),
+        risk_score: await getElasticRiskScoreFromOriginalRule(state.original_rule),
+        severity: await getElasticSeverityFromOriginalRule(state.original_rule),
         ...(state.integration?.id && { integration_ids: [state.integration.id] }),
       },
+      comments,
     };
   };
 };

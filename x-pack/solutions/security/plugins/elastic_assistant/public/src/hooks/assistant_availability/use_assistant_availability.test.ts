@@ -76,6 +76,8 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
+      hasAgentBuilderManagePrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -134,6 +136,8 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: true,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
+      hasAgentBuilderManagePrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
@@ -185,6 +189,8 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
+      hasAgentBuilderManagePrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
@@ -218,11 +224,6 @@ describe('useAssistantAvailability', () => {
               save: false,
               delete: false,
             },
-            management: {
-              ai: {
-                aiAssistantManagementSelection: false,
-              },
-            },
           },
         },
         featureFlags: {
@@ -236,11 +237,13 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
+      hasAgentBuilderPrivilege: false,
+      hasAgentBuilderManagePrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isAssistantManagementEnabled: false,
+      isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -257,7 +260,7 @@ describe('useAssistantAvailability', () => {
           capabilities: {},
         },
         featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
+          getBooleanValue: jest.fn().mockReturnValue(false),
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -267,6 +270,8 @@ describe('useAssistantAvailability', () => {
     expect(result.current).toEqual({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: false,
+      hasAgentBuilderPrivilege: false,
+      hasAgentBuilderManagePrivilege: false,
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,

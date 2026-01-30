@@ -14,6 +14,7 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
+import type { HttpStart } from '@kbn/data-view-editor-plugin/public/shared_imports';
 import type { BaseVisType } from './base_vis_type';
 import type { VisualizationSavedObject } from '../../common';
 
@@ -23,7 +24,7 @@ export interface VisualizationListItem {
   error?: string;
   icon: string;
   id: string;
-  stage: VisualizationStage;
+  stage?: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
@@ -31,7 +32,7 @@ export interface VisualizationListItem {
   typeTitle: string;
   image?: string;
   type?: BaseVisType | string;
-  editor:
+  editor?:
     | { editUrl: string; editApp?: string }
     | { onEdit: (savedObjectId: string) => Promise<void> };
 }
@@ -75,6 +76,17 @@ export interface VisualizationClient<
   ) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['SearchOut']>;
 }
 
+/**
+ * A slim visualization client used but the vis plugin to save basic attributes
+ *
+ * TODO cleanup the vis-type client code.
+ * All viz pass this client require type overrides to adopt VisualizationClient
+ */
+export type BasicVisualizationClient<
+  ContentType extends string = string,
+  Attr extends SerializableAttributes = SerializableAttributes
+> = Pick<VisualizationClient<ContentType, Attr>, 'get' | 'update' | 'delete'>;
+
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
@@ -83,7 +95,10 @@ export interface VisualizationsAppExtension {
     update?: { overwrite?: boolean; [otherOption: string]: unknown };
     create?: { [otherOption: string]: unknown };
   };
-  client: (contentManagement: ContentManagementPublicStart) => VisualizationClient;
+  client: (
+    contentManagement: ContentManagementPublicStart,
+    http: HttpStart
+  ) => BasicVisualizationClient;
   toListItem: (savedObject: VisualizationSavedObject) => VisualizationListItem;
 }
 

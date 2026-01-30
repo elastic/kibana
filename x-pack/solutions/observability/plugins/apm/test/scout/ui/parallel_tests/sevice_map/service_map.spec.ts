@@ -17,27 +17,24 @@ test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { serviceMapPage },
   }) => {
-    await serviceMapPage.gotoWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
+    await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
     expect(page.url()).toContain('/app/apm/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
-    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.clickZoomIn();
     await serviceMapPage.centerServiceMapBtn.click();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 
   test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
     await serviceMapPage.gotoDetailedServiceMapWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
+      testData.START_DATE,
+      testData.END_DATE
     );
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await serviceMapPage.waitForServiceMapToLoad();
-    await serviceMapPage.zoomOutBtn.click();
+    await serviceMapPage.clickZoomOut();
     await serviceMapPage.centerServiceMapBtn.click();
-    await serviceMapPage.zoomInBtn.click();
+    await serviceMapPage.clickZoomIn();
     await serviceMapPage.waitForServiceMapToLoad();
   });
 
@@ -45,10 +42,7 @@ test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { serviceMapPage },
   }) => {
-    await serviceMapPage.gotoWithDateSelected(
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
+    await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
     await serviceMapPage.typeInTheSearchBar('_id : foo');
     await serviceMapPage.waitForServiceMapToLoad();
     await expect(serviceMapPage.noServicesPlaceholder).toBeVisible();

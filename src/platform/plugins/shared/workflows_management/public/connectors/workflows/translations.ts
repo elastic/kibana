@@ -20,7 +20,7 @@ export const NO_CONFIGURATION_REQUIRED = i18n.translate(
 export const WORKFLOW_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.workflows.workflowIdTextFieldLabel',
   {
-    defaultMessage: 'Workflow ID',
+    defaultMessage: 'Select Workflow',
   }
 );
 
@@ -28,40 +28,5 @@ export const WORKFLOW_ID_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.workflows.error.requiredWorkflowIdText',
   {
     defaultMessage: 'Workflow ID is required.',
-  }
-);
-
-export const SELECT_WORKFLOW_PLACEHOLDER = i18n.translate(
-  'xpack.stackConnectors.components.workflows.selectWorkflowPlaceholder',
-  {
-    defaultMessage: 'Select a workflow',
-  }
-);
-
-export const LOADING_WORKFLOWS = i18n.translate(
-  'xpack.stackConnectors.components.workflows.loadingWorkflows',
-  {
-    defaultMessage: 'Loading workflows...',
-  }
-);
-
-export const NO_WORKFLOWS_AVAILABLE = i18n.translate(
-  'xpack.stackConnectors.components.workflows.noWorkflowsAvailable',
-  {
-    defaultMessage: 'No workflows available',
-  }
-);
-
-export const FAILED_TO_LOAD_WORKFLOWS = i18n.translate(
-  'xpack.stackConnectors.components.workflows.failedToLoadWorkflows',
-  {
-    defaultMessage: 'Failed to load workflows. Please check your connector configuration.',
-  }
-);
-
-export const CREATE_NEW_WORKFLOW = i18n.translate(
-  'xpack.stackConnectors.components.workflows.createNewWorkflow',
-  {
-    defaultMessage: 'Create new',
   }
 );

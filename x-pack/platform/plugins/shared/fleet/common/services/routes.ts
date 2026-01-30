@@ -26,6 +26,7 @@ import {
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
+  AGENTLESS_POLICIES_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -103,6 +104,22 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
+  getBulkRollbackPath: () => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_PATTERN;
+  },
+
+  getBulkRollbackInfoPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
+  getRollbackAvailableCheckPath: (pkgName: string) => {
+    return EPM_API_ROUTES.ROLLBACK_AVAILABLE_CHECK_PATTERN.replace('{pkgName}', pkgName);
+  },
+
+  getBulkRollbackAvailableCheckPath: () => {
+    return EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN;
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
@@ -117,6 +134,12 @@ export const epmRouteService = {
 
   getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+
+  getInstallRuleAssetsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_RULE_ASSETS_PATTERN.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)
       .replace(/\/$/, ''); // trim trailing slash
   },
@@ -188,6 +211,15 @@ export const packagePolicyRouteService = {
 
   getBulkGetPath: (): string => {
     return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
+};
+
+export const agentlessPolicyRouteService = {
+  getCreatePath: () => {
+    return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
+  },
+  getDeletePath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
   },
 };
 
@@ -267,6 +299,9 @@ export const dataStreamRouteService = {
   getListPath: () => {
     return DATA_STREAM_API_ROUTES.LIST_PATTERN;
   },
+  getDeprecatedILMCheckPath: () => {
+    return DATA_STREAM_API_ROUTES.DEPRECATED_ILM_CHECK_PATTERN;
+  },
 };
 
 export const fleetSetupRouteService = {
@@ -313,6 +348,12 @@ export const agentRouteService = {
   postMigrateSingleAgent: (agentId: string) =>
     AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
   postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+  postChangeAgentPrivilegeLevel: (agentId: string) =>
+    AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN.replace('{agentId}', agentId),
+  postBulkChangeAgentPrivilegeLevel: () => AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
+  postAgentRollback: (agentId: string) =>
+    AGENT_API_ROUTES.ROLLBACK_PATTERN.replace('{agentId}', agentId),
+  postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
 };
 
 export const outputRoutesService = {

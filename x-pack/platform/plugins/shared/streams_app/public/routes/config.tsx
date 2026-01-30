@@ -15,6 +15,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
+import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
  * The array of route definitions to be used when the application
@@ -38,6 +39,22 @@ const streamsAppRoutes = {
       '/': {
         element: <StreamListView />,
       },
+      '/_discovery': {
+        element: <Outlet />,
+        children: {
+          '/_discovery': {
+            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
+          },
+          '/_discovery/{tab}': {
+            element: <SignificantEventsDiscoveryPage />,
+            params: t.type({
+              path: t.type({
+                tab: t.string,
+              }),
+            }),
+          },
+        },
+      },
       '/{key}': {
         element: (
           <StreamDetailRoot>
@@ -52,11 +69,11 @@ const streamsAppRoutes = {
         children: {
           '/{key}': {
             element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
           },
           /**
-           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and lifecycle view
+           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and retention view
            */
           // '/{key}/{tab}': {
           //   element: <StreamDetailView />,
@@ -71,7 +88,7 @@ const streamsAppRoutes = {
            */
           '/{key}/{tab}': {
             element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
             ),
             params: t.type({
               path: t.type({
@@ -86,6 +103,16 @@ const streamsAppRoutes = {
                 tab: t.string,
               }),
             }),
+          },
+          /**
+           * This route is added as a catch-all route to redirect to the retention tab in case of a
+           * invalid subtab or a missing subtab.
+           * Works on more in-depth routes as well, e.g. /{key}/management/{tab}/{subtab}/random-path.
+           */
+          '/*': {
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />
+            ),
           },
         },
       },

@@ -6,10 +6,12 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
   IRouter,
   KibanaRequest,
+  Logger,
 } from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -47,11 +49,13 @@ import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
+import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getEndpointService: () => EndpointAppContextService;
@@ -65,6 +69,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
+  getLogger: () => Logger;
   getDataViewsService: () => DataViewsService;
   getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
@@ -73,6 +78,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
+  getEntityStoreCrudClient: () => EntityStoreCrudClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;

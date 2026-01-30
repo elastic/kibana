@@ -29,6 +29,8 @@ import {
   InstallAzureArmTemplateManagedAgentStep,
 } from '../../cloud_security_posture';
 
+import { getAgentPoliciesWithNonFipsIntegrations } from '../../../applications/fleet/hooks/use_agent_policies_with_fips';
+
 import {
   InstallationModeSelectionStep,
   AgentEnrollmentKeySelectionStep,
@@ -44,6 +46,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
+  selectedPolicyId,
   setSelectedPolicyId,
   refreshAgentPolicies,
   mode,
@@ -74,6 +77,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       ? [
           AgentPolicySelectionStep({
             selectedPolicy,
+            selectedPolicyId,
             agentPolicies,
             selectedApiKeyId,
             setSelectedAPIKeyId,
@@ -107,6 +111,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         cloudSecurityIntegration,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+        nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(selectedPolicy),
       })
     );
 
@@ -121,6 +126,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedAPIKeyId,
     setSelectedPolicyId,
+    selectedPolicyId,
     refreshAgentPolicies,
     selectionType,
     isK8s,
@@ -145,10 +151,12 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
+  selectedPolicyId,
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
   fleetServerHost,
+  fleetServerHostConfig,
   fleetProxy,
   downloadSource,
   downloadSourceProxy,
@@ -182,6 +190,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHost,
+    fleetServerHostConfig,
     fleetProxy,
     downloadSource,
     downloadSourceProxy,
@@ -197,6 +206,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       ? [
           AgentPolicySelectionStep({
             selectedPolicy,
+            selectedPolicyId,
             agentPolicies,
             selectedApiKeyId,
             setSelectedAPIKeyId,
@@ -259,6 +269,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+          nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(selectedPolicy),
         })
       );
     }
@@ -294,6 +305,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedAPIKeyId,
     setSelectedPolicyId,
+    selectedPolicyId,
     refreshAgentPolicies,
     selectionType,
     cloudSecurityIntegration,
@@ -301,15 +313,15 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     mode,
     setMode,
     enrollToken,
-    installManagedCommands,
-    isK8s,
     fleetServerHost,
+    installManagedCommands,
+    gcpProjectId,
+    isK8s,
     onClickViewAgents,
     link,
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
-    gcpProjectId,
   ]);
 
   if (!agentVersion) {

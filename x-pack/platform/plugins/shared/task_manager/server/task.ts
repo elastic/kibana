@@ -63,6 +63,7 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+  abortController: AbortController;
 }
 
 /**
@@ -261,7 +262,7 @@ export interface IntervalSchedule {
   rrule?: never;
 }
 
-export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily | RruleHourly;
 export interface RruleSchedule {
   rrule: Rrule;
   interval?: never;
@@ -292,6 +293,13 @@ interface RruleDaily extends RruleCommon {
   byhour?: number[];
   byminute?: number[];
   byweekday?: string[];
+  bymonthday?: never;
+}
+interface RruleHourly extends RruleCommon {
+  freq: Frequency.HOURLY;
+  byhour?: never;
+  byminute?: number[];
+  byweekday?: never;
   bymonthday?: never;
 }
 
@@ -563,6 +571,7 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  regenerateApiKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

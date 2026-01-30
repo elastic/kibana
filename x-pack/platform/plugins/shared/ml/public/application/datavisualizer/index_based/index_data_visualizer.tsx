@@ -9,15 +9,15 @@ import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  IndexDataVisualizerSpec,
-  ResultLink,
-  GetAdditionalLinks,
-  GetAdditionalLinksParams,
-} from '@kbn/data-visualizer-plugin/public';
+import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
+import type {
+  GetAdditionalLinksParams,
+  ResultLink,
+  GetAdditionalLinks,
+} from '@kbn/file-upload-common';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -28,6 +28,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
+import { PageTitle } from '../../components/page_title';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -196,9 +197,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         <>
           <MlPageHeader>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <FormattedMessage
-                id="xpack.ml.dataVisualizer.pageHeader"
-                defaultMessage="Data Visualizer"
+              <PageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.pageHeader"
+                    defaultMessage="Data Visualizer"
+                  />
+                }
               />
               {esql ? (
                 <>

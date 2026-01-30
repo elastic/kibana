@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('Endpoint permissions:', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/237335
+  describe.skip('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -32,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // ensure Security Solution is properly initialized
       await PageObjects.security.login('system_indices_superuser', 'changeme');
       await PageObjects.detections.navigateToAlerts();
-      await testSubjects.existOrFail('manage-alert-detection-rules');
+      await testSubjects.existOrFail('alerts-page-manage-alert-detection-rules');
 
       // logout again
       await PageObjects.security.forceLogout();

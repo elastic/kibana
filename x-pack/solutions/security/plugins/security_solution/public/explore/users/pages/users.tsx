@@ -14,7 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -107,13 +107,13 @@ const UsersComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
     ? experimentalDataView.hasMatchedIndices()
@@ -126,23 +126,23 @@ const UsersComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, globalFilters]
+    [uiSettings, oldSourcererDataViewSpec, experimentalDataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
+        dataViewSpec: oldSourcererDataViewSpec,
         dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [experimentalDataView, oldSourcererDataView, query, tabsFilters, uiSettings]
+    [experimentalDataView, oldSourcererDataViewSpec, query, tabsFilters, uiSettings]
   );
 
   useInvalidFilterQuery({
@@ -192,8 +192,9 @@ const UsersComponent = () => {
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              dataView={experimentalDataView}
               id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 

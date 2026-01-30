@@ -6,10 +6,13 @@
  */
 import expect from '@kbn/expect';
 import type * as http from 'http';
+import {
+  AWS_PROVIDER_TEST_SUBJ,
+  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
+  AWS_INPUT_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -25,15 +28,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
-    let testSubjectIds: typeof pageObjects.cisAddIntegration.testSubjectIds;
     let mockApiServer: http.Server;
 
     before(async () => {
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-      testSubjectIds = pageObjects.cisAddIntegration.testSubjectIds;
     });
 
     after(async () => {
@@ -50,8 +54,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
         await cisIntegration.inputIntegrationName(
           `cloud_security_posture-${new Date().toISOString()}`
@@ -72,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.selectAwsCredentials('direct');
@@ -90,14 +94,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await cisIntegration.editAgentlessIntegration(
-          testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
           'newDirectAccessKey'
         );
 
         // assert the form values are saved
         expect(
           await cisIntegration.getFieldAttributeValue(
-            testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+            AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID,
             'value'
           )
         ).to.be(newDirectAccessKeyId);

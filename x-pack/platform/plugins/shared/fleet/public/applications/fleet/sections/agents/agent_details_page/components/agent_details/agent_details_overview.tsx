@@ -22,8 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
+import { useAgentVersion } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -42,11 +44,9 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
 export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = memo(({ agent, agentPolicy, outputs }) => {
   const latestAgentVersion = useAgentVersion();
-
-  const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
-  const outputs = outputRes?.data?.item;
 
   return (
     <EuiPanel>
@@ -70,7 +70,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTitle"
                             defaultMessage="CPU"
@@ -92,7 +92,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                           />
                         }
                       >
-                        <span>
+                        <span tabIndex={0}>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.memoryTitle"
                             defaultMessage="Memory"
@@ -322,6 +322,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Tags',
               }),
               description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+            },
+            {
+              title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
+                defaultMessage: 'FIPS mode',
+              }),
+              description:
+                agent.local_metadata.elastic.agent.fips === true ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.fipsModeCompliantText"
+                    defaultMessage="Enabled"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.privilegeModePrivilegedText"
+                    defaultMessage="Not enabled"
+                  />
+                ),
             },
           ].map(({ title, description }) => {
             const tooltip =

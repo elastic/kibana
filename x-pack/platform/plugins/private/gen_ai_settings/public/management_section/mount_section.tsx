@@ -14,10 +14,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
 import type { GenAiSettingsConfigType } from '../../common/config';
 import { createCallGenAiSettingsAPI } from '../api/client';
+import { SettingsContextProvider } from '../contexts/settings_context';
 
 interface MountSectionParams {
   core: CoreSetup;
@@ -39,20 +42,24 @@ export const mountManagementSection = async ({
   );
 
   const genAiSettingsApi = createCallGenAiSettingsAPI(coreStart);
-
+  const queryClient = new QueryClient();
   const GenAiSettingsAppWithContext = () => (
-    <I18nProvider>
-      <KibanaContextProvider services={{ ...coreStart, ...startDeps, genAiSettingsApi }}>
-        <EnabledFeaturesContextProvider config={config}>
-          <Router history={history}>
-            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} />
-          </Router>
-        </EnabledFeaturesContextProvider>
-      </KibanaContextProvider>
-    </I18nProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ ...coreStart, ...startDeps, genAiSettingsApi }}>
+          <EnabledFeaturesContextProvider config={config}>
+            <SettingsContextProvider>
+              <Router history={history}>
+                <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} />
+              </Router>
+            </SettingsContextProvider>
+          </EnabledFeaturesContextProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
-  ReactDOM.render(<GenAiSettingsAppWithContext />, element);
+  ReactDOM.render(wrapWithTheme(<GenAiSettingsAppWithContext />, core.theme), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

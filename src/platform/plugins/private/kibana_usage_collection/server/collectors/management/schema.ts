@@ -38,6 +38,22 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:suppressionBehaviorOnAlertClosure': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportMinutes': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportRate': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:defaultValueReportTitle': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'xpackReporting:customPdfLogo': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -100,10 +116,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:timeDefaults': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enablePrivilegedUserMonitoring': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:defaultAnomalyScore': {
@@ -495,19 +507,19 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'onechat:mcp:enabled': {
+  'agentBuilder:dashboardTools': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'onechat:a2a:enabled': {
+  'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'onechat:ui:enabled': {
+  'agentBuilder:externalMcp': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'onechat:api:enabled': {
+  'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -615,6 +627,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -655,6 +671,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'aiAssistant:preferredChatExperience': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {
@@ -668,10 +688,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
-  'observability:enableStreamsUI': {
+  'cases:incrementalIdDisplay:enabled': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Streams UI.',
+      description: 'Display the incremental id of a case in the relevant pages',
     },
   },
   'observability:streamsEnableSignificantEvents': {
@@ -680,10 +700,46 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable significant events in streams.',
     },
   },
+  'observability:streamsEnableSignificantEventsDiscovery': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Significant events discovery in Streams.',
+    },
+  },
+  'observability:streamsEnableAttachments': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams attachments tab.',
+    },
+  },
+  'observability:streamsEnableContentPacks': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Content packs in Streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
       description: 'Enable diagnostic mode',
+    },
+  },
+  'genAiSettings:defaultAIConnector': {
+    type: 'keyword',
+    _meta: {
+      description: 'Default AI connector',
+    },
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    type: 'boolean',
+    _meta: {
+      description: 'Restrict to default AI connector only',
+    },
+  },
+  'securitySolution:entityStoreEnableV2': {
+    type: 'boolean',
+    _meta: {
+      description: 'Switches the Entity Store Engine to v2',
     },
   },
 };

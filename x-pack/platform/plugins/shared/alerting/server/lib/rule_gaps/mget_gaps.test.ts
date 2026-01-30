@@ -32,6 +32,9 @@ const createMockGapEvent = () => ({
       },
     },
   },
+  rule: {
+    id: 'rule-id',
+  },
 });
 
 describe('mgetGaps', () => {

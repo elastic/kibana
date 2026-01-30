@@ -30,6 +30,8 @@
           "<any>"
         ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               "<any>"
             ],
             "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_b/public/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

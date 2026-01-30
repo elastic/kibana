@@ -33,6 +33,7 @@ export {
   AGENT_POLICY_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
+  CLOUD_CONNECTOR_API_ROUTES,
 } from '../../common/constants';
 
 export * from './page_paths';
@@ -56,6 +57,7 @@ export const TOUR_STORAGE_KEYS = {
   GRANULAR_PRIVILEGES: 'fleet.granularPrivileges',
   AGENT_EXPORT_CSV: 'fleet.agentExportCSVTour',
   AUTO_UPGRADE_AGENTS: 'fleet.autoUpgradeAgentsTour',
+  EIS_COSTS: 'fleet.eisCostsTour',
 };
 
 export interface TourConfig {

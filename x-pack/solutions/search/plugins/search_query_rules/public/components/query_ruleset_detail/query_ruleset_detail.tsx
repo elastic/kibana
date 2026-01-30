@@ -83,6 +83,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const {
     queryRuleset,
     rules,
+    unfilteredRules,
     setNewRules,
     addNewRule,
     deleteRule,
@@ -90,6 +91,8 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     isInitialLoading,
     isError,
     error,
+    setSearchFilter,
+    searchFilter,
   } = useQueryRulesetDetailState({
     rulesetId,
     createMode,
@@ -253,7 +256,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             },
           ]}
           restrictWidth
-          color="primary"
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup
@@ -362,7 +364,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
                     onClick={handleSave}
-                    disabled={!isFormDirty || isInitialLoading || rules.length === 0}
+                    disabled={!isFormDirty || isInitialLoading || unfilteredRules.length === 0}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.queryRulesetDetail.saveButton"
@@ -379,7 +381,12 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                         data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
-                        aria-label="More"
+                        aria-label={i18n.translate(
+                          'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                          {
+                            defaultMessage: 'More',
+                          }
+                        )}
                         onClick={() => setPopoverActions(!isPopoverActionsOpen)}
                       />
                     }
@@ -406,9 +413,12 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               deleteRule={deleteRule}
               updateRule={updateRule}
               rules={rules}
+              unfilteredRules={unfilteredRules}
               tourInfo={tourStepsInfo[1]}
               setIsFormDirty={setIsFormDirty}
               createMode={createMode}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
             />
 
             {tourStepsInfo[1]?.tourTargetRef?.current !== null && (

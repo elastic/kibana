@@ -57,6 +57,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -72,6 +73,8 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
@@ -94,10 +97,15 @@ export class IndexMgmtUIPlugin
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
+      enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
+
+    const isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
     this.config = {
       isIndexManagementUiEnabled,
+      isServerless,
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
@@ -108,7 +116,8 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
-      enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enforceAdaptiveAllocations: isServerless,
+      enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }
 
@@ -116,7 +125,7 @@ export class IndexMgmtUIPlugin
     coreSetup: CoreSetup<StartDependencies>,
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
-    const { fleet, usageCollection, management, cloud } = plugins;
+    const { fleet, usageCollection, management, cloud, reindexService } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -143,6 +152,7 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
+              reindexService,
             });
           },
         });
@@ -155,8 +165,10 @@ export class IndexMgmtUIPlugin
       })
     );
 
+    this.apiService = new PublicApiService(coreSetup.http);
+
     return {
-      apiService: new PublicApiService(coreSetup.http),
+      apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
@@ -170,6 +182,7 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
+          reindexService,
         });
       },
       locator: this.locator,
@@ -181,7 +194,8 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing, reindexService } =
+      plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -206,6 +220,7 @@ export class IndexMgmtUIPlugin
         console,
         ml,
         licensing,
+        reindexService,
       },
       services: {
         extensionsService: this.extensionsService,
@@ -240,6 +255,7 @@ export class IndexMgmtUIPlugin
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
     });
     return {
+      apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexMappingProps) => {

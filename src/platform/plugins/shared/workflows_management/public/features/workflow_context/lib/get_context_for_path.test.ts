@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import type { Step, WorkflowYaml } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod/v4';
 import { getContextSchemaForPath } from './get_context_for_path';
-import { z } from '@kbn/zod';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod_utils';
-import { EventSchema } from '../../../../common/schema';
+
+jest.mock('./get_output_schema_for_step_type');
 
 describe('getContextSchemaForPath', () => {
   const definition = {
@@ -22,7 +24,6 @@ describe('getContextSchemaForPath', () => {
     triggers: [
       {
         type: 'manual' as const,
-        enabled: true,
       },
     ],
     steps: [
@@ -76,24 +77,19 @@ describe('getContextSchemaForPath', () => {
     },
   } as WorkflowYaml;
 
-  const workflowGraph = getWorkflowGraph(definition);
+  const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
   it('should return the root context for the first step', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
-    expect(Object.keys(context.shape).sort()).toEqual(
-      ['workflowRunId', 'now', 'event', 'steps', 'consts'].sort()
-    );
     expectZodSchemaEqual(
       context,
-      z.object({
-        workflowRunId: z.string(),
-        now: z.date(),
-        event: EventSchema,
-        steps: z.object({}),
+      DynamicStepContextSchema.extend({
+        inputs: z.object({}),
         consts: z.object({
-          test: z.string(),
+          test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
       })
     );
   });
@@ -108,18 +104,80 @@ describe('getContextSchemaForPath', () => {
 
     expectZodSchemaEqual(
       context,
-      z.object({
-        workflowRunId: z.string(),
-        now: z.date(),
-        event: EventSchema,
+      DynamicStepContextSchema.extend({
+        inputs: z.object({}),
         steps: z.object({
           'first-step': z.object({
-            output: z.string(),
+            output: z.string().optional(),
+            error: z.any().optional(),
           }),
         }),
         consts: z.object({
-          test: z.string(),
+          test: z.literal('test'),
         }),
+        variables: z.object({}).optional(),
+      })
+    );
+  });
+
+  it('should return foreach context for nested foreach step', () => {
+    const definitionWithForeach = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+        },
+      ],
+      consts: {
+        items: [
+          {
+            name: 'Robert',
+            surname: 'Carmack',
+          },
+          {
+            name: 'Jane',
+            surname: 'Doe',
+          },
+        ],
+      },
+      steps: [
+        {
+          name: 'foreach-step',
+          type: 'foreach',
+          foreach: '{{consts.items}}',
+          steps: [
+            {
+              name: 'foreach-step-1',
+              type: 'console',
+              with: {
+                message: 'Hello, {{foreach.item.name}} {{foreach.item.surname}}',
+              },
+            } as Step,
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithForeach = WorkflowGraph.fromWorkflowDefinition(definitionWithForeach);
+    const context = getContextSchemaForPath(definitionWithForeach, workflowGraphWithForeach, [
+      'steps',
+      0,
+      'steps',
+      0,
+      'with',
+      'message',
+    ]);
+    const itemSchema = z.object({
+      name: z.literal('Robert'),
+      surname: z.literal('Carmack'),
+    });
+    expect((context.shape as any).foreach).toBeDefined();
+    expectZodSchemaEqual(
+      (context.shape as any).foreach,
+      ForEachContextSchema.extend({
+        items: z.array(itemSchema),
+        item: itemSchema,
       })
     );
   });

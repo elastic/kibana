@@ -17,6 +17,7 @@ exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
     >
       <button
         aria-haspopup="listbox"
+        aria-label="Flow target"
         class="euiSuperSelectControl emotion-euiSuperSelect__control"
         type="button"
       >

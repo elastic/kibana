@@ -91,11 +91,50 @@ describe('validateRequiredVersions', () => {
       );
     });
 
-    it('should throw error if percentage is 0 or undefined', () => {
+    it('should throw error if percentage is 0', () => {
       expect(() => {
         validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 100 },
           { version: '9.1.0', percentage: 0 },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage must be greater than 0`
+        )
+      );
+    });
+
+    it('should throw error if percentage is less than 1', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0', percentage: 0.5 },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage must be greater than 0`
+        )
+      );
+    });
+
+    it('should throw error if percentage is undefined', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0', percentage: undefined as any },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage is required`
+        )
+      );
+    });
+
+    it('should throw error if percentage property is missing', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0' } as any,
         ]);
       }).toThrow(
         new AgentPolicyInvalidError(
@@ -113,6 +152,69 @@ describe('validateRequiredVersions', () => {
 
     it('should not throw error if required_versions undefined', () => {
       validateRequiredVersions('test policy');
+    });
+
+    it('should not throw error if there is no change between required_versions and isAuthorized is false', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        false
+      );
+    });
+
+    it('should throw error if required_versions changed and isAuthorized is false', () => {
+      expect(() => {
+        validateRequiredVersions(
+          'test policy',
+          [
+            { version: '9.0.0', percentage: 80 },
+            { version: '9.1.0', percentage: 20 },
+          ],
+          [
+            { version: '9.0.0', percentage: 90 },
+            { version: '9.1.0', percentage: 10 },
+          ],
+          false
+        );
+      }).toThrow(
+        new FleetUnauthorizedError(`updating 'required_versions' requires Agents 'All' privilege`)
+      );
+    });
+
+    it('should not throw error if required_versions changed and isAuthorized is true', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 80 },
+          { version: '9.1.0', percentage: 20 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ],
+        true
+      );
+    });
+
+    it('should not throw if required_versions changed and isAuthorized is undefined', () => {
+      validateRequiredVersions(
+        'test policy',
+        [
+          { version: '9.0.0', percentage: 80 },
+          { version: '9.1.0', percentage: 20 },
+        ],
+        [
+          { version: '9.0.0', percentage: 90 },
+          { version: '9.1.0', percentage: 10 },
+        ]
+      );
     });
   });
 });

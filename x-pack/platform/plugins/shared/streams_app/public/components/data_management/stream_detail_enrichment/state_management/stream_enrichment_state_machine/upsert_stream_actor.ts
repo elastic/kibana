@@ -5,59 +5,63 @@
  * 2.0.
  */
 
-import type { FieldDefinition } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
-import type { ErrorActorEvent } from 'xstate5';
-import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { getProcessorsCount } from '@kbn/streamlang';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { ConfigurationMode } from '../../../../../telemetry/types';
 import { getFormattedError } from '../../../../../util/errors';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { buildUpsertStreamRequestPayload } from '../../utils';
 import type { StreamEnrichmentServiceDependencies } from './types';
-import { processorConverter } from '../../utils';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
 export interface UpsertStreamInput {
   definition: Streams.ingest.all.GetResponse;
-  processors: StreamlangProcessorDefinition[];
+  streamlangDSL: StreamlangDSL;
   fields?: FieldDefinition;
+  configurationMode: ConfigurationMode;
 }
 
 export function createUpsertStreamActor({
   streamsRepositoryClient,
-}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
-  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
-      signal,
-      params: {
-        path: {
-          name: input.definition.stream.name,
+  telemetryClient,
+}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient' | 'telemetryClient'>) {
+  return fromPromise<UpsertStreamResponse, UpsertStreamInput>(async ({ input, signal }) => {
+    const body = buildUpsertStreamRequestPayload(
+      input.definition,
+      input.streamlangDSL,
+      input.fields
+    );
+
+    const response = await streamsRepositoryClient.fetch(
+      `PUT /api/streams/{name}/_ingest 2023-10-31`,
+      {
+        signal,
+        params: {
+          path: {
+            name: input.definition.stream.name,
+          },
+          body,
         },
-        body: Streams.WiredStream.GetResponse.is(input.definition)
-          ? {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-                ...(input.fields && {
-                  wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
-                }),
-              },
-            }
-          : {
-              ingest: {
-                ...input.definition.stream.ingest,
-                processing: {
-                  steps: input.processors.map(processorConverter.toAPIDefinition),
-                },
-              },
-            },
-      },
+      }
+    );
+
+    const processorsCount = getProcessorsCount(input.streamlangDSL);
+
+    telemetryClient.trackProcessingSaved({
+      processors_count: processorsCount,
+      stream_type: getStreamTypeFromDefinition(input.definition.stream),
+      configuration_mode: input.configurationMode,
     });
+
+    return response;
   });
 }
 

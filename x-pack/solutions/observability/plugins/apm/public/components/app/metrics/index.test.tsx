@@ -20,15 +20,17 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { Metrics } from '.';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 
 const KibanaReactContext = createKibanaReactContext({
   settings: { client: { get: () => {} } },
 } as unknown as Partial<CoreStart>);
 
 function MetricsWithWrapper() {
-  jest
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: { id: 'id-1', name: 'apm-data-view' } as DataView });
+  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+    dataView: { id: 'id-1', name: 'apm-data-view' } as DataView,
+    apmIndices: { metric: 'metrics*' } as APMIndices,
+  });
 
   const history = createMemoryHistory();
   history.replace({
@@ -62,6 +64,14 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -84,6 +94,14 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 
@@ -106,6 +124,14 @@ describe('Metrics', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
+          indexSettings: [
+            {
+              configurationName: 'span',
+              defaultValue: 'traces-*',
+              savedValue: 'traces-*, apm-*',
+            },
+          ],
+          indexSettingsStatus: FETCH_STATUS.SUCCESS,
         });
       });
 

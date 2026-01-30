@@ -20,6 +20,7 @@ export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
     return (
       <EuiFormRow>
         <EuiSwitch
+          data-test-subj="mlAnomalyAlertIncludeInterimSwitch"
           label={
             <FormattedMessage
               id="xpack.ml.interimResultsControl.label"

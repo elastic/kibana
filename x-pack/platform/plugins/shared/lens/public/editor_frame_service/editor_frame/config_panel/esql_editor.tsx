@@ -5,50 +5,55 @@
  * 2.0.
  */
 import { createPortal } from 'react-dom';
-import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useFetchContext } from '@kbn/presentation-publishing';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import type { Simplify } from '../../../types';
-import { onActiveDataChange, useLensDispatch, useLensSelector } from '../../../state_management';
+import {
+  onActiveDataChange,
+  useLensDispatch,
+  useLensSelector,
+  selectCanEditTextBasedQuery,
+} from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
-import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export type ESQLEditorProps = Simplify<
   {
     isTextBasedLanguage: boolean;
+    uiSettings: IUiSettingsClient;
+    http: CoreStart['http'];
   } & Pick<
     LayerPanelProps,
     | 'attributes'
     | 'framePublicAPI'
-    | 'datasourceMap'
     | 'lensAdapters'
     | 'parentApi'
     | 'layerId'
     | 'panelId'
     | 'closeFlyout'
     | 'data'
-    | 'canEditTextBasedQuery'
     | 'editorContainer'
-    | 'visualizationMap'
     | 'setCurrentAttributes'
     | 'updateSuggestion'
     | 'dataLoading$'
@@ -65,18 +70,17 @@ export type ESQLEditorProps = Simplify<
  */
 export function ESQLEditor({
   data,
+  http,
+  uiSettings,
   attributes,
   framePublicAPI,
   isTextBasedLanguage,
-  datasourceMap,
-  visualizationMap,
   lensAdapters,
   parentApi,
   panelId,
   layerId,
   closeFlyout,
   editorContainer,
-  canEditTextBasedQuery,
   dataLoading$,
   setCurrentAttributes,
   updateSuggestion,
@@ -85,7 +89,10 @@ export function ESQLEditor({
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
   );
+
+  const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
 
   const [errors, setErrors] = useState<Error[]>([]);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -99,8 +106,6 @@ export function ESQLEditor({
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
     initialAttributes: attributes,
-    datasourceMap,
-    visualizationMap,
   });
 
   const adHocDataViews =
@@ -110,11 +115,7 @@ export function ESQLEditor({
 
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
-  const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
-      ? parentApi?.esqlVariables$
-      : new BehaviorSubject(undefined)
-  );
+  const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
 
   const dispatch = useLensDispatch();
 
@@ -148,6 +149,8 @@ export function ESQLEditor({
       const attrs = await getSuggestions(
         q,
         data,
+        http,
+        uiSettings,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
@@ -167,14 +170,16 @@ export function ESQLEditor({
       setIsVisualizationLoading(false);
     },
     [
+      uiSettings,
       data,
+      http,
       datasourceMap,
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
-      currentAttributes,
     ]
   );
 
@@ -190,7 +195,7 @@ export function ESQLEditor({
     setIsInitialized,
   });
 
-  // Early exit if it's not in TextBased mode
+  // Early exit if it's not in TextBased mode or the editor should be hidden
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
     return null;
   }
@@ -274,6 +279,7 @@ function InnerESQLEditor({
   runQuery,
   esqlVariables,
 }: InnerEditorProps) {
+  const { euiTheme } = useEuiTheme();
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
@@ -281,42 +287,46 @@ function InnerESQLEditor({
     closeFlyout,
   });
 
-  const hideTimeFilterInfo = false;
   return (
     <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-      <ESQLLangEditor
-        query={query}
-        onTextLangQueryChange={setQuery}
-        detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-        hideTimeFilterInfo={hideTimeFilterInfo}
-        errors={errors}
-        warning={
-          suggestsLimitedColumns
-            ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                defaultMessage:
-                  'Displaying a limited portion of the available fields. Add more from the configuration panel.',
-              })
-            : undefined
-        }
-        editorIsInline
-        hideRunQueryText
-        onTextLangQuerySubmit={async (q, a) => {
-          // do not run the suggestions if the query is the same as the previous one
-          if (q && !isEqual(q, prevQuery.current)) {
-            setIsVisualizationLoading(true);
-            await runQuery(q, a);
+      <div
+        css={css`
+          border-top: ${euiTheme.border.thin};
+          background-color: ${euiTheme.colors.backgroundBaseHighlighted};
+        `}
+      >
+        <ESQLLangEditor
+          query={query}
+          onTextLangQueryChange={setQuery}
+          errors={errors}
+          warning={
+            suggestsLimitedColumns
+              ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                  defaultMessage:
+                    'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                })
+              : undefined
           }
-        }}
-        isDisabled={false}
-        allowQueryCancellation
-        isLoading={isVisualizationLoading}
-        controlsContext={{
-          supportsControls: parentApi !== undefined,
-          onSaveControl,
-          onCancelControl,
-        }}
-        esqlVariables={esqlVariables}
-      />
+          editorIsInline
+          hideRunQueryText
+          onTextLangQuerySubmit={async (q, a) => {
+            // do not run the suggestions if the query is the same as the previous one
+            if (q && !isEqual(q, prevQuery.current)) {
+              setIsVisualizationLoading(true);
+              await runQuery(q, a);
+            }
+          }}
+          isDisabled={false}
+          allowQueryCancellation
+          isLoading={isVisualizationLoading}
+          controlsContext={{
+            supportsControls: parentApi !== undefined,
+            onSaveControl,
+            onCancelControl,
+          }}
+          esqlVariables={esqlVariables}
+        />
+      </div>
     </EuiFlexItem>
   );
 }

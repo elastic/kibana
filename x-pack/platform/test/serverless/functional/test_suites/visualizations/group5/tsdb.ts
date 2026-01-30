@@ -72,6 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.indices.delete({ index: [tsdbIndex] });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/232416
+    // FLAKY: https://github.com/elastic/kibana/issues/232417
     describe('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
       before(async () => {
@@ -118,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('defaults to average for rolled up metric', async () => {
           await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
           await lens.waitForField('bytes_gauge');
           await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -155,6 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
       });
 
       // skip count for now as it's a special function and will
@@ -203,22 +207,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            // now check if the provided function has no incompatibility tooltip
             for (const supportedOp of supportedOperations) {
+              // now check if the provided function has no incompatibility tooltip
               expect(
                 testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
                   timeout: 500,
                 })
               ).to.eql(supportedOp[fieldType]);
-            }
-
-            for (const supportedOp of supportedOperations) {
               // try to change to the provided function and check all is ok
               await lens.selectOperation(supportedOp.name);
 
               expect(
                 await find.existsByCssSelector(
-                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+                  500
                 )
               ).to.be(false);
 
@@ -245,8 +247,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            // now check if the provided function has the incompatibility tooltip
             for (const unsupportedOp of unsupportedOperatons) {
+              // now check if the provided function has the incompatibility tooltip
               expect(
                 testSubjects.exists(
                   `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
@@ -255,14 +257,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   }
                 )
               ).to.eql(!unsupportedOp[fieldType]);
-            }
-
-            for (const unsupportedOp of unsupportedOperatons) {
               // try to change to the provided function and check if it's in an incompatibility state
               await lens.selectOperation(unsupportedOp.name, true);
 
               const fieldSelectErrorEl = await find.byCssSelector(
-                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+                500
               );
 
               expect(await fieldSelectErrorEl.getVisibleText()).to.be(

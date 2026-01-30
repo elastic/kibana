@@ -7,6 +7,7 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiComboBox,
   EuiFieldText,
   EuiForm,
@@ -22,10 +23,14 @@ import React, { useCallback, useMemo } from 'react';
 import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import { useIndexMappings } from './use_index_mappings';
+import { extractSearchableFields, extractAllFields } from './field_extraction_utils';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 
 interface Props {
+  http: HttpSetup;
   dataViews: DataViewsContract;
   entry?: IndexEntry;
   originalEntry?: IndexEntry;
@@ -35,7 +40,7 @@ interface Props {
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
-  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry, docLink }) => {
+  ({ http, dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry, docLink }) => {
     const privateUsers = useMemo(() => {
       const originalUsers = originalEntry?.users;
       if (originalEntry && !isGlobalEntry(originalEntry)) {
@@ -122,36 +127,31 @@ export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
       return !(await dataViews.getExistingIndices([entry.index])).length;
     }, [entry?.index]);
 
-    const indexFields = useAsync(
-      async () =>
-        dataViews.getFieldsForWildcard({
-          pattern: entry?.index ?? '',
-        }),
-      [entry?.index]
-    );
+    const { data: mappingData } = useIndexMappings({
+      http,
+      indexName: entry?.index ?? '',
+    });
 
     const fieldOptions = useMemo(
       () =>
-        Array.isArray(indexFields?.value)
-          ? indexFields.value
-              .filter((field) => field.esTypes?.includes('text'))
-              .map((field) => ({
-                'data-test-subj': field.name,
-                label: field.name,
-                value: field.name,
-              }))
-          : [],
-      [indexFields?.value]
+        extractSearchableFields(mappingData ?? {}).map((field) => ({
+          'data-test-subj': `field-option-${field.fullPath}`,
+          label: field.fullPath,
+          value: field.fullPath,
+          append: <EuiBadge color={'hollow'}>{field.type}</EuiBadge>,
+        })),
+      [mappingData]
     );
 
     const outputFieldOptions = useMemo(
       () =>
-        indexFields?.value?.map((field) => ({
-          'data-test-subj': field.name,
-          label: field.name,
-          value: field.name,
-        })) ?? [],
-      [indexFields?.value]
+        extractAllFields(mappingData ?? {}).map((field) => ({
+          'data-test-subj': `output-field-option-${field.fullPath}`,
+          label: field.fullPath,
+          value: field.fullPath,
+          append: <EuiBadge color={'hollow'}>{field.type}</EuiBadge>,
+        })),
+      [mappingData]
     );
 
     const onCreateIndexOption = (searchValue: string) => {

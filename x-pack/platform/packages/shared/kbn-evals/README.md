@@ -12,9 +12,10 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 2. `evaluate` – a [`@playwright/test`](https://playwright.dev/docs/test-intro) extension that boots:
 
    - an Inference Client that is pre-bound to a Kibana connector
-   - a (Kibana-flavored) Phoenix client to run experiments
+   - an executor client to run experiments (defaults to **in-Kibana**; can be switched to the Phoenix-backed executor)
 
-3. `scripts/generate_schema` – one-off script that (re)generates typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`. The artifacts are currently not in use because we only have a single query, but the script is useful if we add more queries.
+3. `scripts/generate_schema` – optional utility to (re)generate typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`.
+   This is not required to run evals and the generated artifacts are currently not used (we only have a single query), but it is useful if we add more queries.
 
 ## Writing an evaluation test
 
@@ -22,7 +23,7 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 // my_eval.test.ts
 import { evaluate } from '@kbn/evals';
 
-evaluate('the model should answer truthfully', async ({ inferenceClient, phoenixClient }) => {
+evaluate('the model should answer truthfully', async ({ inferenceClient, executorClient }) => {
   const dataset = {
     name: 'my-dataset',
     description: 'my-description',
@@ -38,50 +39,135 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
     ],
   };
 
-  await phoenixClient.runExperiment({
-    dataset,
-    evaluators: [
+  await executorClient.runExperiment(
+    {
+      dataset,
+      task: async ({ input }) => {
+        const result = await inferenceClient.output({
+          id: 'foo',
+          input: input.content as string,
+        });
+
+        return { content: result.content };
+      },
+    },
+    [
       {
         name: 'equals',
         kind: 'CODE',
-        evaluate: ({ input, output, expected }) => {
+        evaluate: async ({ output, expected }) => {
           return {
-            score: output === 'bar' ? 1 : 0,
+            score: output?.content === expected?.content ? 1 : 0,
+            metadata: { output: output?.content, expected: expected?.content },
           };
         },
       },
-    ],
-    task: async ({ input }) => {
-      return (
-        await inferenceClient.output({
-          id: 'foo',
-          input: input.content as string,
-        })
-      ).content;
-    },
-  });
+    ]
+  );
 });
 ```
 
+### Typing datasets (recommended)
+
+For strong typing of \(input\), \(expected\), and \(metadata\), define a suite-local `Example` type and use it consistently in your dataset, task, and evaluator selection:
+
+```ts
+import type { Example } from '@kbn/evals';
+
+type MyExample = Example<
+  { question: string },
+  { expectedAnswer: string },
+  { tags?: string[] } | null
+>;
+```
+
+Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your evaluator callback receives typed `expected`/`metadata`.
+
 ### Available fixtures
 
-| Fixture           | Description                                                       |
-| ----------------- | ----------------------------------------------------------------- |
-| `inferenceClient` | Bound to the connector declared by the active Playwright project. |
-| `phoenixClient`   | Client for the Phoenix API (to run experiments)                   |
+| Fixture                     | Description                                                                                                                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
+| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
+| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
+| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
+| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
+| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
 
 ## Running the suite
 
-Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
+### Evals CLI (recommended)
+
+Use the evals CLI to discover and run suites with consistent, shareable commands:
+
+```bash
+# List eval suites from cached metadata (fast)
+node scripts/evals list
+
+# Refresh suite discovery (slower, scans configs)
+node scripts/evals list --refresh
+
+# Run a suite (EVALUATION_CONNECTOR_ID is required)
+node scripts/evals run --suite obs-ai-assistant --evaluation-connector-id bedrock-claude
+
+# Check local prerequisites and common setup hints
+node scripts/evals doctor
+```
+
+The CLI uses suite metadata from:
+
+```
+x-pack/platform/packages/shared/kbn-evals/evals.suites.json
+```
+
+You can also render a CI label mapping (from suite metadata, useful for PR labels and automation):
+
+```bash
+node scripts/evals ci-map --json
+```
+
+To see all supported environment variables:
+
+```bash
+node scripts/evals env
+```
+
+#### Local flow (trace capture)
+
+If you want local traces available for trace-based evaluators, run EDOT locally and start Scout using the built-in tracing config:
+
+```bash
+node scripts/edot_collector.js
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
+```
+
+If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the HTTP exporter in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
-  phoenix:
-    base_url: 'https://<my-phoenix-host>'
-    public_url: 'https://<my-phoenix-host>'
-    project_name: '<my-name>'
-    api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
 ```
+
+If you want EDOT to store traces in a specific Elasticsearch cluster, override via env:
+
+```bash
+ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+```
+
+If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
+
+```yaml
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+```
+
+This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
 
 Create a Playwright config that delegates to the helper:
 
@@ -98,10 +184,251 @@ Start scout:
 node scripts/scout.js start-server --stateful
 ```
 
+If you want OTLP trace export enabled for evals, use the custom Scout config:
+
+```bash
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
+```
+
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
 
 ```bash
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+### Trace-Based Evaluators (Optional)
+
+Trace-based evaluators automatically collect non-functional metrics from OpenTelemetry traces stored in Elasticsearch:
+
+- **Token usage** (input, output, cached tokens)
+- **Latency** (request duration)
+- **Tool calls** (number of tool invocations)
+- You can build your own using `createTraceBasedEvaluator` factory.
+
+By default, these evaluators query traces from the same Elasticsearch cluster as your test environment (the Scout `esClient` cluster).
+
+#### Prerequisites
+
+To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
+You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
+
+```yaml
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+  - http:
+      url: 'http://localhost:4318/v1/traces'
+```
+
+#### Start EDOT Collector
+
+Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
+
+```bash
+# Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
+# You must update the tracing exporters with the right port in kibana.dev.yml
+ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+```
+
+The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
+
+#### Using a Separate Monitoring Cluster
+
+If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (e.g., a common monitoring cluster for your team), specify the trace cluster URL with the `TRACING_ES_URL` environment variable:
+
+```bash
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+```
+
+This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
+
+### RAG Evaluators
+
+RAG (Retrieval-Augmented Generation) evaluators measure the quality of document retrieval in your system. They calculate Precision@K, Recall@K, and F1@K metrics by comparing retrieved documents against a ground truth.
+
+#### Ground Truth Format
+
+Ground truth is defined per index, mapping document IDs to relevance scores:
+
+```typescript
+{
+  groundTruth: {
+    'my-index': {
+      'doc_id_1': 1,  // relevant
+      'doc_id_2': 2,  // highly relevant
+    },
+    'another-index': {
+      'doc_id_3': 1,
+    },
+  },
+}
+```
+
+#### Using RAG Evaluators
+
+```typescript
+import { createRagEvaluators, type RetrievedDoc } from '@kbn/evals';
+
+const ragEvaluators = createRagEvaluators({
+  k: 10,
+  relevanceThreshold: 1,
+  extractRetrievedDocs: (output): RetrievedDoc[] => {
+    // Extract { index, id } objects from your task output
+    return output.results.map((r) => ({ index: r.index, id: r.id }));
+  },
+  extractGroundTruth: (referenceOutput) => referenceOutput?.groundTruth ?? {},
+});
+```
+
+#### Index-Focused Evaluation
+
+By default, all retrieved documents are evaluated against the ground truth. To evaluate only documents from indices that appear in the ground truth, set the `INDEX_FOCUSED_RAG_EVAL` environment variable:
+
+```bash
+INDEX_FOCUSED_RAG_EVAL=true node scripts/playwright test --config ...
+```
+
+Alternatively, configure it per-evaluator:
+
+```typescript
+const ragEvaluators = createRagEvaluators({
+  k: 10,
+  filterByGroundTruthIndices: true,  // Only evaluate docs from ground truth indices
+  extractRetrievedDocs: ...,
+  extractGroundTruth: ...,
+});
+```
+
+#### Overriding K at Runtime
+
+The `k` parameter determines how many top results are evaluated for Precision@K, Recall@K, and F1@K metrics. To override the `k` value defined in the evaluator config at runtime, use the `RAG_EVAL_K` environment variable:
+
+```bash
+RAG_EVAL_K=5 node scripts/playwright test --config ...
+```
+
+The environment variable takes priority over the value passed to `createRagEvaluators()`.
+
+## Customizing Report Display
+
+By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
+
+```ts
+// my_eval.test.ts
+import {
+  evaluate as base,
+  type EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+} from '@kbn/evals';
+
+export const evaluate = base.extend({
+  reportModelScore: async ({}, use) => {
+    // Custom reporter implementation
+    await use(async (scoreRepository, runId, log) => {
+      // Query Elasticsearch for evaluation results
+      const docs = await scoreRepository.getScoresByRunId(runId);
+
+      if (docs.length === 0) {
+        log.error(`No results found for run: ${runId}`);
+        return;
+      }
+
+      // Build your custom report
+      log.info('=== CUSTOM REPORT ===');
+      log.info(`Model: ${docs[0].model.id}`);
+      log.info(`Run ID: ${runId}`);
+      log.info(`Total evaluations: ${docs.length}`);
+
+      // Group by dataset, calculate aggregates, write to file, etc.
+      const datasetResults = groupByDataset(docs);
+      writeToFile(`report-${runId}.json`, datasetResults);
+    });
+  },
+});
+
+evaluate('my test', async ({ executorClient }) => {
+  // Your test logic here
+});
+```
+
+**Note:** Elasticsearch export always happens first and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
+
+## Elasticsearch Export
+
+The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+
+### Exporting to a separate Elasticsearch cluster
+
+By default, exports go to the same Elasticsearch cluster used by the Scout test environment (`esClient` fixture).
+If you want to keep using an isolated Scout cluster for the eval run, but export results to a different Elasticsearch cluster (e.g. your local `localhost:9200`), set:
+
+```bash
+EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config ...
+```
+
+### Datastream Structure
+
+The evaluation data is stored with the following structure:
+
+- **Index Pattern**: `.kibana-evaluations*`
+- **Datastream**: `.kibana-evaluations`
+- **Document Structure**:
+
+  ```json
+  {
+    "@timestamp": "2025-08-28T14:21:35.886Z",
+    "run_id": "026c5060fbfc7dcb",
+    "model": {
+      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "family": "anthropic",
+      "provider": "bedrock"
+    },
+    "dataset": {
+      "id": "dataset_id",
+      "name": "my-dataset",
+      "examples_count": 10
+    },
+    "evaluator": {
+      "name": "Factuality",
+      "stats": {
+        "mean": 0.85,
+        "median": 1.0,
+        "std_dev": 0.37,
+        "min": 0.0,
+        "max": 1.0,
+        "count": 10,
+        "percentage": 85.0
+      },
+      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
+    },
+    "experiments": [{ "id": "experiment_id_1" }],
+    "environment": {
+      "hostname": "your-hostname"
+    }
+  }
+  ```
+
+### Querying Evaluation Data
+
+After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
+
+```kql
+environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
+```
+
+### Using the Evaluation Analysis Service
+
+The `evaluationAnalysisService` fixture provides methods to analyze and compare evaluation results:
+
+```ts
+evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
+  // The service automatically retrieves scores from Elasticsearch
+  // and provides statistical analysis capabilities
+  // Analysis happens automatically after experiments complete
+});
 ```
 
 ### LLM-as-a-judge
@@ -118,6 +445,62 @@ The helper will spin up one `local` project per available connector so results a
 
 ```bash
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
+```
+
+### Selecting specific evaluators
+
+To enable selective evaluator execution, wrap your evaluators with the `selectEvaluators` function:
+
+```ts
+import { selectEvaluators } from '@kbn/evals';
+
+await executorClient.runExperiment(
+  {
+    dataset,
+    task: myTask,
+  },
+  selectEvaluators([
+    ...createQuantitativeCorrectnessEvaluators(),
+    createQuantitativeGroundednessEvaluator(),
+  ])
+);
+```
+
+Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
+
+```bash
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+```
+
+If not specified, all evaluators will run by default.
+
+### Repeated evaluations
+
+For statistical analysis and reliability testing, you can run the same evaluation examples multiple times.
+
+**Note:** Each repetition creates a separate experiment in Phoenix with the same dataset name. This may change when Phoenix adds in-experiment repetitions in the future (see [issue](https://github.com/Arize-ai/phoenix/issues/3584)).
+
+#### Configuring repetitions in your Playwright config
+
+You can set a default number of repetitions for your entire test suite by adding the `repetitions` parameter to your Playwright configuration:
+
+```ts
+// playwright.config.ts
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
+
+export default createPlaywrightEvalsConfig({
+  testDir: __dirname,
+  repetitions: 3, // Run each example 3 times
+});
+```
+
+#### Overriding repetitions with environment variables
+
+To override the repetitions at runtime without modifying your configuration, use the `EVALUATION_REPETITIONS` environment variable:
+
+```bash
+# Run each example 3 times
+EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
 ### Running evaluations against your local/development Kibana instance
@@ -144,10 +527,46 @@ Then you can run the evaluations as normal. The Playwright tests will use the pr
 
 > **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
-## Regenerating Phoenix GraphQL types
+## Executor selection (Phoenix vs in-Kibana)
+
+By default, evals run using the **in-Kibana executor** (no Phoenix dataset/experiment API required).
+
+If you want to run using the **Phoenix-backed executor**, set:
 
 ```bash
-node x-pack/platform/packages/shared/kbn-evals/scripts/generate_schema
+KBN_EVALS_EXECUTOR=phoenix
 ```
 
-The script temporarily installs GraphQL-Codegen, fetches the Phoenix schema, emits the artefacts into `kibana_phoenix_client/__generated__`, lints them, and finally removes the transient dependencies.
+When using `KBN_EVALS_EXECUTOR=phoenix`, the eval runner (Playwright worker process) needs Phoenix API settings.
+The simplest way to provide them locally (e.g. when running `node scripts/phoenix`) is via environment variables:
+
+```bash
+PHOENIX_BASE_URL=http://localhost:6006 KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
+```
+
+If your Phoenix instance requires auth, also set:
+
+```bash
+PHOENIX_API_KEY=... PHOENIX_BASE_URL=... KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
+```
+
+#### Dataset upsert fallback (Phoenix-only)
+
+Some Phoenix environments intermittently fail the GraphQL dataset upsert used to keep datasets in sync. As a fallback, `@kbn/evals` can **delete and recreate** the dataset via Phoenix REST APIs.
+
+Because deleting a dataset **wipes all past experiments** on that dataset, this fallback is **disabled by default**. To explicitly allow it, set:
+
+```bash
+KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true
+```
+
+Alternatively, you can configure a Phoenix exporter in `kibana.dev.yml` so `@kbn/evals` can read Phoenix API settings via `getPhoenixConfig()`.
+
+```yaml
+telemetry.tracing.exporters:
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
+```

@@ -15,5 +15,6 @@ export function defaultQuery(): StreamQueryKql {
     kql: {
       query: '',
     },
+    feature: undefined,
   };
 }

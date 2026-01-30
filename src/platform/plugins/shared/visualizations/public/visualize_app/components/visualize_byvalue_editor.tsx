@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import type { VisualizeInput } from '../..';
 import {
   useChromeVisibility,
@@ -23,7 +24,7 @@ import {
 import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import type { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import { useProjectRouting } from '../utils/use/use_project_routing';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -76,13 +77,16 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     eventEmitter,
     byValueVisInstance
   );
+  // Initialize CPS project routing manager for Vega
+  const projectRoutingManager = useProjectRouting(services);
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
     byValueVisInstance,
-    visEditorController
+    visEditorController,
+    projectRoutingManager
   );
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);

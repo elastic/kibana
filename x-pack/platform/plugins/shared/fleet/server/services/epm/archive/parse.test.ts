@@ -475,6 +475,80 @@ owner:
       'Name input_only and version 0.2.0 do not match top-level directory input_only-0.1.0'
     );
   });
+
+  it('should parse package successfully with discovery field', async () => {
+    const packageInfo: ArchivePackage = await _generatePackageInfoFromPaths(
+      [
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0/docs/README.md',
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0/manifest.yml',
+      ],
+      'x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/good_content/0.1.0'
+    );
+
+    expect(packageInfo).toEqual(
+      expect.objectContaining({
+        discovery: {
+          fields: [
+            {
+              name: 'process.pid',
+            },
+          ],
+          datasets: [
+            {
+              name: 'good_content.dataset',
+            },
+          ],
+        },
+      })
+    );
+  });
+
+  it('should parse package with var_groups present', () => {
+    const manifest = `
+format_version: 1.0.0
+name: input_only
+title: Custom Logs
+description: Read lines from active log files with Elastic Agent.
+type: input
+version: 0.1.0
+license: basic
+categories: [custom]
+policy_templates:
+  - name: first_policy_template
+    type: logs
+    title: Custom log file
+    description: Collect your custom log files.
+    input: logfile
+    template_path: input.yml.hbs
+var_groups:
+  - name: auth_method
+    title: Auth method
+    selector_title: Select auth method
+    options:
+      - name: api_key
+        title: API key
+        vars: [api_key]
+owner:
+  github: elastic/integrations
+`;
+
+    const packageInfo = parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
+      'input_only-0.1.0/manifest.yml': Buffer.from(manifest, 'utf8'),
+    });
+
+    expect(packageInfo).toEqual(
+      expect.objectContaining({
+        var_groups: [
+          {
+            name: 'auth_method',
+            title: 'Auth method',
+            selector_title: 'Select auth method',
+            options: [{ name: 'api_key', title: 'API key', vars: ['api_key'] }],
+          },
+        ],
+      })
+    );
+  });
 });
 
 describe('parseAndVerifyDataStreams', () => {

@@ -76,6 +76,7 @@ export async function getDatasetInfo({
       savedObjectsClient,
       signal,
       chat,
+      logger: resources.logger,
     });
     return { indices, fields, stats };
   } catch (e) {

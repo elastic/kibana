@@ -10,10 +10,15 @@ import type { Plugin } from '@kbn/core/public';
 import { type CoreSetup, type CoreStart, type PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import type { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
+  licensing: LicensingPluginStart;
+  productDocBase: ProductDocBasePluginStart;
 }
 
 export interface GenAiSettingsSetupDeps {
@@ -41,13 +46,19 @@ export class GenAiSettingsPlugin
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
   ): Promise<GenAiSettingsPluginSetup> {
-    const [coreStart] = await core.getStartServices();
+    const [coreStart, { licensing }] = await core.getStartServices();
     const capabilities = coreStart.application.capabilities;
+
+    const hasEnterpriseLicense = licensing
+      ? (await firstValueFrom(licensing.license$)).hasAtLeast('enterprise')
+      : false;
+
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     if (
       // Connectors 'Read' privilege
       capabilities.actions?.show === true &&
-      capabilities.actions?.execute === true
+      capabilities.actions?.execute === true &&
+      hasEnterpriseLicense
     ) {
       management.sections.section.ai.registerApp({
         id: 'genAiSettings',

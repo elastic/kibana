@@ -12,6 +12,7 @@ import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -48,7 +49,7 @@ const buildQuerySubmittedPayload = (
   };
 
   if (preferredSchema) {
-    payload.preferred_schema = preferredSchema;
+    payload.schema_selected = preferredSchema;
   }
 
   return payload;
@@ -57,10 +58,11 @@ const buildQuerySubmittedPayload = (
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
-  const { metricsView } = useMetricsDataViewContext();
+  const { metricsView, refetch: refetchMetricsView } = useMetricsDataViewContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
+  const { inventoryPrefill } = useAlertPrefillContext();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const parsedDateRange = useTimeRange({
@@ -86,20 +88,25 @@ export const useUnifiedSearch = () => {
     [kibanaQuerySettings]
   );
 
+  const triggerDataRefresh = useCallback(() => {
+    updateReloadRequestTime();
+    refetchMetricsView();
+  }, [updateReloadRequestTime, refetchMetricsView]);
+
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onLimitChange = useCallback(
@@ -114,18 +121,20 @@ export const useUnifiedSearch = () => {
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
 
+      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? 'ecs' });
+
       updateTopbarMenuVisibilityBySchema(preferredSchema);
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime, updateTopbarMenuVisibilityBySchema]
+    [inventoryPrefill, setSearch, triggerDataRefresh, updateTopbarMenuVisibilityBySchema]
   );
 
   const onDateRangeChange = useCallback(
     (dateRange: StringDateRange) => {
       setSearch({ type: 'SET_DATE_RANGE', dateRange });
-      updateReloadRequestTime();
+      triggerDataRefresh();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, triggerDataRefresh]
   );
 
   const onQueryChange = useCallback(
@@ -134,12 +143,12 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
-        updateReloadRequestTime();
+        triggerDataRefresh();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch, updateReloadRequestTime]
+    [validateQuery, setSearch, triggerDataRefresh]
   );
 
   const onSubmit = useCallback(
@@ -182,6 +191,7 @@ export const useUnifiedSearch = () => {
   );
 
   useEffectOnce(() => {
+    inventoryPrefill.reset();
     // Sync filtersService from the URL state
     if (!deepEqual(filterManagerService.getFilters(), searchCriteria.filters)) {
       filterManagerService.setFilters(searchCriteria.filters);
@@ -191,6 +201,12 @@ export const useUnifiedSearch = () => {
       queryStringService.setQuery(searchCriteria.query);
     }
 
+    // Sync Inventory Alert Prefill state
+    inventoryPrefill.reset();
+    inventoryPrefill.setPrefillState({
+      nodeType: 'host',
+      schema: searchCriteria.preferredSchema ?? 'ecs',
+    });
     updateTopbarMenuVisibilityBySchema(searchCriteria.preferredSchema);
 
     try {
@@ -205,8 +221,6 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const subscription = new Subscription();
-
-    queryStringService.clearQuery();
 
     subscription.add(
       filterManagerService
@@ -250,7 +264,7 @@ export const useUnifiedSearch = () => {
     onDateRangeChange,
   ]);
 
-  // Track telemetry event on query/filter/date changes
+  // Track telemetry event on query/filter/date/schema changes
   useEffect(() => {
     const dateRangeInTimestamp = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(

@@ -12,10 +12,7 @@ import type { DragDropIdentifier, DropType, DroppableProps } from '@kbn/dom-drag
 import { useDragDropContext, DropTargetSwapDuplicateCombine, Droppable } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { isDraggedField } from '../../../../utils';
-import { generateId } from '../../../../id_generator';
-
+import { useEuiTheme } from '@elastic/eui';
 import type {
   Datasource,
   VisualizationDimensionGroupConfig,
@@ -23,8 +20,11 @@ import type {
   IndexPatternMap,
   DragDropOperation,
   Visualization,
-} from '../../../../types';
-import { isOperation } from '../../../../types';
+} from '@kbn/lens-common';
+import { isDraggedField } from '../../../../utils';
+import { generateId } from '../../../../id_generator';
+
+import { isOperation } from '../../../../types_guards';
 
 interface EmptyButtonProps {
   isInlineEditing: boolean;
@@ -126,6 +126,7 @@ export function EmptyDimensionButton({
   };
   isInlineEditing: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [{ dragging }] = useDragDropContext();
 
   let getDropProps;
@@ -203,7 +204,7 @@ export function EmptyDimensionButton({
       >
         <div
           css={css`
-            border-radius: ${euiThemeVars.euiBorderRadius};
+            border-radius: ${euiTheme.border.radius.medium};
           `}
         >
           {typeof group.suggestedValue?.() === 'number' ? (

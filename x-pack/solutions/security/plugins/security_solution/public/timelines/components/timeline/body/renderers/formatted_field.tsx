@@ -239,7 +239,9 @@ const FormattedFieldValueComponent: React.FC<{
             </EuiFlexGroup>
           }
         >
-          <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
+          <span tabIndex={0} data-test-subj={`formatted-field-${fieldName}`}>
+            {value}
+          </span>
         </EuiToolTip>
       </TruncatableText>
     ) : (

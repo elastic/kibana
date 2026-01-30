@@ -96,7 +96,7 @@ export class State {
               throw error;
             }
             throw new FailedToChangeStateError(
-              `Failed to change state: ${error.message}. The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`,
+              `Failed to change state: ${error.message}. The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`,
               error.statusCode ?? 500
             );
           }
@@ -129,9 +129,9 @@ export class State {
         track_total_hits: false,
       });
 
-      const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
-        streamFromDefinition(definition, dependencies)
-      );
+      const streams = streamsSearchResponse.hits.hits
+        .filter(({ _source: definition }) => !('group' in definition)) // Filter out old Group streams
+        .map(({ _source: definition }) => streamFromDefinition(definition, dependencies));
 
       return new State(streams, dependencies);
     } catch (error) {

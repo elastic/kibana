@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 
 export const DETAILS_HEADER = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.detailsHeader',
@@ -18,7 +19,7 @@ export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.detailsHeaderDescription',
   {
     defaultMessage:
-      'Add a trusted device to improve performance or alleviate compatibility issues.',
+      'Allow a specific external device to connect to your endpoints, even when Device Control is enabled.',
   }
 );
 
@@ -55,6 +56,13 @@ export const SELECT_OS_LABEL = i18n.translate(
   }
 );
 
+export const OS_OPTIONS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.osOptionsPlaceholder',
+  {
+    defaultMessage: 'Select an operating system',
+  }
+);
+
 export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.policySelectDescription',
   {
@@ -62,20 +70,73 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   }
 );
 
+export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: string } = {
+  [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.username',
+    {
+      defaultMessage: 'Username',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.HOST]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.host',
+    {
+      defaultMessage: 'Host',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.deviceId',
+    {
+      defaultMessage: 'Device ID',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.manufacturer',
+    {
+      defaultMessage: 'Manufacturer',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.productId',
+    {
+      defaultMessage: 'Product ID',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.PRODUCT_NAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.productName',
+    {
+      defaultMessage: 'Product Name',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.deviceType',
+    {
+      defaultMessage: 'Device Type',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.manufacturerId',
+    {
+      defaultMessage: 'Manufacturer ID',
+    }
+  ),
+};
+
+export const OPERATOR_TITLES = {
+  is: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.is', {
+    defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.matches', {
+    defaultMessage: 'matches',
+  }),
+};
+
 export const INPUT_ERRORS = {
-  name: (itemName: string) =>
-    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
-      defaultMessage: '{itemName} name is required',
-      values: { itemName },
-    }),
+  name: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
+    defaultMessage: 'Trusted device name is required',
+  }),
   entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
     defaultMessage: 'At least one condition is required',
   }),
-  entriesDuplicateFields: (duplicateFields: string[]) =>
-    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesDuplicateFields', {
-      defaultMessage: 'Duplicate field(s): {duplicateFields}',
-      values: { duplicateFields: duplicateFields.join(', ') },
-    }),
   invalidHash: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
@@ -85,4 +146,38 @@ export const INPUT_ERRORS = {
   invalidField: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidField', {
     defaultMessage: 'Field entry must have a value',
   }),
+  // Backend schema-aligned validation messages
+  nameMaxLength: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameMaxLength', {
+    defaultMessage: 'Name cannot exceed 256 characters',
+  }),
+  descriptionMaxLength: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.descriptionMaxLength',
+    {
+      defaultMessage: 'Description cannot exceed 256 characters',
+    }
+  ),
+  osRequired: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.osRequired', {
+    defaultMessage: 'Operating system selection is required',
+  }),
+  entryValueEmpty: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.entryValueEmpty',
+    {
+      defaultMessage: 'Condition value cannot be empty',
+    }
+  ),
+  entriesAtLeastOne: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.entriesAtLeastOne',
+    {
+      defaultMessage: 'At least one condition must be specified',
+    }
+  ),
+};
+
+export const VALIDATION_WARNINGS = {
+  performanceWildcard: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.warnings.performanceWildcard',
+    {
+      defaultMessage: 'Double wildcards (**) may cause performance issues',
+    }
+  ),
 };

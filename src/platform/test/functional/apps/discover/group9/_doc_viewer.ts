@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        hideAnnouncements: true,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -193,6 +192,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
 
+        // Clear any unexpected active type filters
+        const filterToggle = await testSubjects.find(
+          'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
+        );
+        if ((await filterToggle.getVisibleText()) !== '0') {
+          await discover.openFilterByFieldTypeInDocViewer();
+          await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+          await discover.closeFilterByFieldTypeInDocViewer();
+        }
+
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const numberFieldsCount = 6;
 
@@ -280,7 +289,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
       });
 
@@ -309,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
 
         expect(
-          fieldNames.join(',').startsWith('@message,@tags,@timestamp,agent,bytes,clientip')
+          fieldNames.join(',').startsWith('@message,@message.raw,@tags,@tags.raw,@timestamp,agent')
         ).to.be(true);
 
         await showOnlySelectedFieldsSwitch.click();
@@ -333,7 +342,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching from showing only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',').startsWith('agent,@message,@tags');
+          return fieldNames.join(',').startsWith('agent,@message,@message.raw');
         });
       });
     });

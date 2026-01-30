@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import type { Response as SupertestResponse } from 'supertest';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const actionTypeIdsFromSpecs = new Set(
+  Object.values(connectorsSpecs).map(({ metadata }) => `actions:${metadata.id}`)
+);
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -39,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
+    'sampleLongRunningRecurringTask',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
@@ -46,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('check_registered_task_types', () => {
     it('should check changes on all registered task types', async () => {
       const types = (await getRegisteredTypes())
-        .filter((t: string) => !TEST_TYPES.includes(t))
+        .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
       expect(types).to.eql([
         'Fleet-Metrics-Task',
@@ -54,11 +60,14 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Usage-Sender',
         'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
+        'ProductDocBase:EnsureSecurityLabsUpToDate',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
+        'SampleDataIngest:InstallSampleData',
         'Synthetics:Clean-Up-Package-Policies',
+        'Synthetics:Sync-Global-Params-Private-Locations',
         'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
         'actions:.bedrock',
@@ -72,6 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.index',
         'actions:.inference',
         'actions:.jira',
+        'actions:.jira-service-management',
+        'actions:.mcp',
         'actions:.microsoft_defender_endpoint',
         'actions:.observability-ai-assistant',
         'actions:.opsgenie',
@@ -90,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
+        'actions:.workflows',
         'actions:.xmatters',
         'actions:.xsoar',
         'actions:connector_usage_reporting',
@@ -149,8 +161,10 @@ export default function ({ getService }: FtrProviderContext) {
         'apm-source-map-migration-task',
         'apm-telemetry-task',
         'cai:cases_analytics_index_backfill',
+        'cai:cases_analytics_index_scheduler',
         'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
+        'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:complete-external-response-actions',
@@ -159,16 +173,30 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'entity_store:health',
+        'entity_store:snapshot',
+        'entity_store:v2:extract_entity_task:generic',
+        'entity_store:v2:extract_entity_task:host',
+        'entity_store:v2:extract_entity_task:service',
+        'entity_store:v2:extract_entity_task:user',
         'fleet:agent-status-change-task',
+        'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
         'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
+        'fleet:migrate_action:retry',
         'fleet:packages-bulk-operations',
+        'fleet:policy-revisions-cleanup-task',
+        'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
+        'fleet:reassign_agents_to_version_specific_policies',
+        'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
+        'fleet:rollback_action:retry',
+        'fleet:setup',
         'fleet:setup:upgrade_managed_package_policies',
         'fleet:sync-integrations-task',
         'fleet:unenroll-inactive-agents-task',
@@ -176,13 +204,14 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:update_agent_tags:retry',
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
-        'logs-data-telemetry',
+        'gap-auto-fill-scheduler-task',
         'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
         'report:execute-scheduled',
+        'reporting_telemetry',
         'risk_engine:risk_scoring',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
@@ -199,12 +228,23 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-response-actions-rules',
         'security:telemetry-timelines',
+        'security:trial-companion-milestone',
         'session_cleanup',
         'slo:bulk-delete-task',
+        'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',
+        'streams_description_generation',
+        'streams_features_identification',
+        'streams_insights_discovery',
+        'streams_significant_events_queries_generation',
+        'streams_systems_identification',
         'task_manager:delete_inactive_background_task_nodes',
+        'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
+        'workflow:resume',
+        'workflow:run',
+        'workflow:scheduled',
       ]);
     });
   });

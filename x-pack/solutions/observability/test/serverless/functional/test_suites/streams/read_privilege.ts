@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
 import {
@@ -21,15 +21,12 @@ import {
 
 const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
-  dashboards: [],
-  queries: [],
   stream: {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: {
-        steps: [],
-      },
+      processing: { steps: [] },
+      settings: {},
       wired: {
         routing: [],
         fields: {
@@ -38,8 +35,10 @@ const request: Streams.WiredStream.UpsertRequest = {
           },
         },
       },
+      failure_store: { inherit: {} },
     },
   },
+  ...emptyAssets,
 };
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

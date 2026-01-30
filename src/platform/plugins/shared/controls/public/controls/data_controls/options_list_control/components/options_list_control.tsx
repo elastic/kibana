@@ -10,7 +10,7 @@
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { css } from '@emotion/react';
+
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -22,15 +22,16 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import type { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
-import { OptionsListPopover } from './options_list_popover';
 import { OptionsListStrings } from '../options_list_strings';
+import { OptionsListPopover } from './options_list_popover';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
@@ -42,12 +43,12 @@ const optionListControlStyles = {
     }),
   validOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.text,
-      fontWeight: euiTheme.font.weight.medium,
+      color: euiTheme.colors.textParagraph,
+      fontWeight: euiTheme.font.weight.regular,
     }),
   invalidOption: ({ euiTheme }: UseEuiTheme) =>
     css({
-      color: euiTheme.colors.warningText,
+      color: euiTheme.colors.textWarning,
       fontWeight: euiTheme.font.weight.medium,
     }),
   optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
@@ -58,31 +59,35 @@ const optionListControlStyles = {
   filterButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
-      color: `${euiTheme.colors.subduedText} !important`,
+      color: `${euiTheme.colors.textSubdued} !important`,
+      padding: `0 ${euiTheme.size.s}`,
       '&:hover::before': {
-        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
+        background: `${euiTheme.colors.backgroundBasePlain} !important`,
       },
+      blockSize: '100% !important',
     }),
   filterButtonText: css({
     flexGrow: 1,
     textAlign: 'left',
   }),
   inputButtonOverride: css({
-    maxInlineSize: '100% !important',
-    '.euiButtonEmpty': {
-      borderEndStartRadius: '0 !important',
-      borderStartStartRadius: '0 !important',
-    },
+    width: '100%',
+    height: '100%',
+    maxInlineSize: '100%',
   }),
   /* additional custom overrides due to unexpected component usage;
     open issue: https://github.com/elastic/eui-private/issues/270 */
   filterGroup: css`
+    height: 100%;
+    width: 100%;
+
     /* prevents duplicate border due to nested filterGroup */
     &::after {
       display: none;
     }
 
     .euiFilterButton__wrapper {
+      height: 100%;
       padding: 0;
 
       &::before,
@@ -94,12 +99,12 @@ const optionListControlStyles = {
 };
 
 export const OptionsListControl = ({
-  controlPanelClassName,
+  disableMultiValueEmptySelection = false,
 }: {
-  controlPanelClassName: string;
+  disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const { componentApi, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings, customStrings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
@@ -152,9 +157,7 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value)}${
-                          i + 1 === length ? '' : delimiter
-                        } `;
+                        const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
                         const isInvalid = invalidSelections?.has(value);
                         return (
                           <span
@@ -174,9 +177,10 @@ export const OptionsListControl = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                  invalidSelections.size
-                )}
+                content={
+                  customStrings?.invalidSelectionsLabel ??
+                  OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
+                }
                 delay="long"
               >
                 <EuiToken
@@ -186,9 +190,12 @@ export const OptionsListControl = ({
                   color="euiColorVis9"
                   shape="square"
                   fill="dark"
-                  title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                    invalidSelections.size
-                  )}
+                  title={
+                    customStrings?.invalidSelectionsLabel ??
+                    OptionsListStrings.control.getInvalidSelectionWarningLabel(
+                      invalidSelections.size
+                    )
+                  }
                   data-test-subj={`optionsList__invalidSelectionsToken-${componentApi.uuid}`}
                   css={styles.invalidSelectionsToken} // Align with the notification badge
                 />
@@ -207,12 +214,14 @@ export const OptionsListControl = ({
     invalidSelections,
     componentApi.uuid,
     styles,
+    customStrings,
   ]);
 
   const button = (
     <EuiFilterButton
       badgeColor="success"
-      iconType={loading ? 'empty' : 'arrowDown'}
+      isLoading={loading}
+      iconType={'arrowDown'}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -233,16 +242,17 @@ export const OptionsListControl = ({
 
   return (
     <EuiFilterGroup
+      className={'kbnGridLayout--hideDragHandle'}
       fullWidth
       compressed={isCompressed(componentApi)}
-      className={controlPanelClassName}
       css={optionListControlStyles.filterGroup}
+      data-control-id={componentApi.uuid}
+      data-shared-item
     >
       <EuiInputPopover
         id={popoverId}
         ownFocus
         input={button}
-        hasArrow={false}
         repositionOnScroll
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
@@ -257,7 +267,7 @@ export const OptionsListControl = ({
           'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
         }}
       >
-        <OptionsListPopover />
+        <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
       </EuiInputPopover>
     </EuiFilterGroup>
   );

@@ -19,8 +19,24 @@ describe('FilterActivity ', () => {
 
   const userActionsStats: CaseUserActionsStats = {
     total: 20,
+    totalDeletions: 0,
     totalComments: 11,
+    totalCommentCreations: 2,
+    totalCommentDeletions: 0,
+    totalHiddenCommentUpdates: 0,
     totalOtherActions: 9,
+    totalOtherActionDeletions: 0,
+  };
+
+  const userActionsStatsWithDeletions: CaseUserActionsStats = {
+    total: 20,
+    totalDeletions: 2,
+    totalComments: 11,
+    totalCommentDeletions: 3,
+    totalCommentCreations: 5,
+    totalHiddenCommentUpdates: 1,
+    totalOtherActions: 9,
+    totalOtherActionDeletions: 4,
   };
 
   it('renders filters correctly', () => {
@@ -32,6 +48,24 @@ describe('FilterActivity ', () => {
     expect(screen.getByTestId('user-actions-filter-activity-button-all')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-activity-button-history')).toBeInTheDocument();
+  });
+
+  it('renders filters correctly with deletions', () => {
+    renderWithTestingProviders(
+      <FilterActivity
+        type="all"
+        onFilterChange={onFilterActivityChange}
+        userActionsStats={userActionsStatsWithDeletions}
+      />
+    );
+
+    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('17');
+    expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
+      '2'
+    );
+    expect(screen.getByTestId('user-actions-filter-activity-button-history')).toHaveTextContent(
+      '5'
+    );
   });
 
   it('renders loading state correctly', () => {
@@ -80,7 +114,11 @@ describe('FilterActivity ', () => {
 
     expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
+      screen.getByLabelText(
+        `${
+          userActionsStats.totalCommentCreations - userActionsStats.totalCommentDeletions
+        } available filters`
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)

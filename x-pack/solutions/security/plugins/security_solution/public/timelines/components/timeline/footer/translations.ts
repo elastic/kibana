@@ -22,24 +22,3 @@ export const ROWS = i18n.translate('xpack.securitySolution.footer.rows', {
 export const LOADING = i18n.translate('xpack.securitySolution.footer.loadingLabel', {
   defaultMessage: 'Loading',
 });
-
-export const TOTAL_COUNT_OF_EVENTS = i18n.translate(
-  'xpack.securitySolution.footer.totalCountOfEvents',
-  {
-    defaultMessage: 'events',
-  }
-);
-
-export const AUTO_REFRESH_ACTIVE = i18n.translate(
-  'xpack.securitySolution.footer.autoRefreshActiveDescription',
-  {
-    defaultMessage: 'Auto-Refresh Active',
-  }
-);
-
-export const LOADING_EVENTS = i18n.translate(
-  'xpack.securitySolution.footer.loadingEventsDataLabel',
-  {
-    defaultMessage: 'Loading Events',
-  }
-);

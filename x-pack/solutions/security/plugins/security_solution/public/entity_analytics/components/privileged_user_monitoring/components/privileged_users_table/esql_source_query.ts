@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { getPrivilegedMonitorUsersJoin } from '../../queries/helpers';
 
 export const getPrivilegedUsersQuery = (namespace: string, limit: number) => {

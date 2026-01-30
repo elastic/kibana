@@ -41,7 +41,7 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
       <EuiToolTip content={moment(notAfter).format('L LT')}>
-        <EuiText size="s">
+        <EuiText size="s" tabIndex={0}>
           <EuiIcon color={color} type="lock" size="s" />
           {boldStyle ? (
             <H4Text>

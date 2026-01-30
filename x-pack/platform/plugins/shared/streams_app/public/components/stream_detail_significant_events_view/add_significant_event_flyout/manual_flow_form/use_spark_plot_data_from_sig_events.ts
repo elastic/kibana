@@ -15,11 +15,11 @@ import { getAnnotationFromFormattedChangePoint } from '../../utils/get_annotatio
 
 export function useSparkplotDataFromSigEvents({
   previewFetch,
-  queryValues,
+  query,
   xFormatter,
 }: {
   previewFetch: AbortableAsyncState<Promise<SignificantEventsPreviewResponse>>;
-  queryValues: Partial<StreamQueryKql> & { id: string };
+  query: StreamQueryKql;
   xFormatter: TickFormatter;
 }) {
   const theme = useEuiTheme().euiTheme;
@@ -36,18 +36,12 @@ export function useSparkplotDataFromSigEvents({
         };
       }) ?? [];
 
-    const { id, kql, title } = queryValues;
-
     const change =
-      changePoints && occurrences && id && kql && title
+      changePoints && occurrences
         ? formatChangePoint({
+            query,
             change_points: changePoints,
             occurrences: timeseries,
-            query: {
-              id,
-              kql,
-              title,
-            },
           })
         : undefined;
 
@@ -56,15 +50,13 @@ export function useSparkplotDataFromSigEvents({
       annotations: change
         ? [
             getAnnotationFromFormattedChangePoint({
-              query: {
-                id,
-              },
-              change,
+              time: change.time,
+              changes: [change],
               theme,
               xFormatter,
             }),
           ]
         : [],
     };
-  }, [previewFetch, xFormatter, queryValues, theme]);
+  }, [previewFetch, xFormatter, query, theme]);
 }

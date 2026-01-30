@@ -222,6 +222,12 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
       await testSubjects.pressEnter('comboBoxSearchInput');
 
       if (rename) {
+        // Click away from the combo box to ensure any dropdown closes and doesnt block the elements we intend to click later
+        await testSubjects.click('snapshotRestoreApp');
+
+        // Wait a moment for the UI to settle
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         await testSubjects.click('restoreRenameToggle');
         await testSubjects.setValue('capturePattern', `${indexName}(.*)`);
         await testSubjects.setValue('replacementPattern', `restored_${indexName}$1`);

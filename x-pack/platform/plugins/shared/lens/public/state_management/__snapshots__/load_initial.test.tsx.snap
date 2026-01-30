@@ -20,6 +20,7 @@ Object {
       },
     },
     "filters": Array [],
+    "hideTextBasedEditor": undefined,
     "isFullscreenDatasource": false,
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
@@ -62,6 +63,7 @@ Object {
             "visualization": Object {},
           },
           "title": "An extremely cool default document!",
+          "version": 2,
           "visualizationType": "testVis",
         },
         "sharingSavedObjectProps": Object {
@@ -90,6 +92,7 @@ Object {
       "type": "lens",
       "visualizationType": "testVis",
     },
+    "projectRouting": undefined,
     "query": Object {
       "language": "lucene",
       "query": "",
@@ -105,6 +108,7 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
+      "selectedLayerId": null,
       "state": "testVis initial state",
     },
   },

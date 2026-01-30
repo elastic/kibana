@@ -24,10 +24,9 @@ import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { HostHeaderTitle } from '../header/host_header_title';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
-  const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { entity, schema } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
   const {
@@ -59,6 +58,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
         assetType: entity.type,
         tabId: activeTabId,
+        schema_selected: schema || 'ecs',
       };
 
       telemetry.reportAssetDetailsPageViewed(
@@ -71,7 +71,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry, schema]);
 
   return (
     <InfraPageTemplate
@@ -91,6 +91,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={entity.type}
+      data-schema-selected={schema}
     >
       <Content />
     </InfraPageTemplate>

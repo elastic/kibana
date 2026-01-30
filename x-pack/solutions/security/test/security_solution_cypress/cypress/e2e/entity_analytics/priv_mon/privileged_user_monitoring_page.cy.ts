@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
+import { ONBOARDING_PANEL } from '../../../screens/privileged_user_monitoring';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
@@ -16,30 +16,23 @@ describe(
   },
   () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'all_users' });
+      cy.task('esArchiverLoad', { archiveName: 'linux_process' });
     });
 
     beforeEach(() => {
       login();
-
-      togglePrivilegedUserMonitoring();
     });
 
-    afterEach(() => {
-      togglePrivilegedUserMonitoring();
-    });
+    afterEach(() => {});
 
     after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'all_users' });
+      cy.task('esArchiverUnload', { archiveName: 'linux_process' });
     });
 
     it('renders page as expected', () => {
       visit(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
 
-      cy.get('[data-test-subj="privilegedUserMonitoringOnboardingPanel"]').should(
-        'contain.text',
-        'Privileged user monitoring'
-      );
+      cy.get(ONBOARDING_PANEL).should('contain.text', 'Privileged user monitoring');
     });
   }
 );

@@ -139,6 +139,11 @@ Array [
     "validationName": "string",
   },
   Object {
+    "key": "infer_spans",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "log_ecs_reformatting",
     "options": Array [
       Object {
@@ -242,6 +247,17 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "opamp_polling_interval",
+    "min": "1s",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
     "key": "profiling_inferred_spans_enabled",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
@@ -283,6 +299,11 @@ Array [
     "key": "recording",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "sampling_rate",
+    "type": "float",
+    "validationName": "floatFourDecimalPlacesRt",
   },
   Object {
     "key": "sanitize_field_names",

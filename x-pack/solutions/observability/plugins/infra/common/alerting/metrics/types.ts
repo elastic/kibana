@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  DataSchemaFormat,
+  InventoryItemType,
+  SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 import type { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
@@ -35,6 +39,8 @@ export enum AlertStates {
   ERROR,
 }
 
+export type NoDataBehavior = 'recover' | 'remainActive' | 'alertOnNoData';
+
 // Types for the executor
 
 export interface InventoryMetricConditions {
@@ -54,6 +60,7 @@ export interface InventoryMetricThresholdParams {
   filterQuery?: string;
   filterQueryText?: string;
   nodeType: InventoryItemType;
+  schema?: DataSchemaFormat;
   sourceId?: string;
   alertOnNoData?: boolean;
 }
@@ -65,6 +72,7 @@ export interface MetricThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  noDataBehavior?: NoDataBehavior;
 }
 
 interface BaseMetricExpressionParams {

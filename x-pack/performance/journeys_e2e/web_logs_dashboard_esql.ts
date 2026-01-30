@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { Journey } from '@kbn/journeys';
-import { subj } from '@kbn/test-subj-selector';
+import { createDashboardJourney } from './utils/dashboard_journey';
 
-export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_logs'],
+export const journey = createDashboardJourney({
+  esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
   kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_esql'],
-})
-
-  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await kibanaPage.waitForListViewTable();
-  })
-
-  .step('Go to Web Logs Dashboard', async ({ page, kibanaPage }) => {
-    await page.click(subj('dashboardListingTitleLink-Logs-dashboard-with-ES|QL'));
-    await kibanaPage.waitForVisualizations({ count: 11 });
-  });
+  dashboardName: 'Web Logs Dashboard',
+  dashboardLinkSubj: 'dashboardListingTitleLink-Logs-dashboard-with-ES|QL',
+  visualizationCount: 11,
+});

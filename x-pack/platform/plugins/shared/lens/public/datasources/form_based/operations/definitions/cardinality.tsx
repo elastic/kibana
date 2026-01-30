@@ -7,13 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { snakeCase } from 'lodash';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
+import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
 import {
   getFormatFromPreviousColumn,
@@ -57,14 +58,6 @@ function ofName(name: string, timeShift: string | undefined, reducedTimeRange: s
     undefined,
     reducedTimeRange
   );
-}
-
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof CARDINALITY_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
 }
 
 export const cardinalityOperation: OperationDefinition<
@@ -145,7 +138,8 @@ export const cardinalityOperation: OperationDefinition<
     columnId,
     currentColumn,
     paramEditorUpdater,
-  }: ParamEditorProps<CardinalityIndexPatternColumn>) => {
+    euiTheme,
+  }: ParamEditorProps<CardinalityIndexPatternColumn> & { euiTheme: EuiThemeComputed }) => {
     return [
       {
         dataTestSubj: 'hide-zero-values',
@@ -160,7 +154,7 @@ export const cardinalityOperation: OperationDefinition<
             }
             labelProps={{
               style: {
-                fontWeight: euiThemeVars.euiFontWeightMedium,
+                fontWeight: euiTheme.font.weight.medium,
               },
             }}
             checked={Boolean(currentColumn.params?.emptyAsNull)}
@@ -182,7 +176,12 @@ export const cardinalityOperation: OperationDefinition<
   },
   toESQL: (column, columnId) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
-    return `COUNT_DISTINCT(${column.sourceField})`;
+    // Use columnId to make param name unique
+    const paramKey = `field_${snakeCase(columnId)}`;
+    return {
+      template: `COUNT_DISTINCT(??${paramKey})`,
+      params: { [paramKey]: column.sourceField },
+    };
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

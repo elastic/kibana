@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
-import type { ErrorActorEvent } from 'xstate5';
-import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
+import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import type { RoutingDefinition, RoutingStatus, Streams } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
+import { buildRoutingForkRequestPayload, buildRoutingSaveRequestPayload } from '../../utils';
 import type { StreamRoutingServiceDependencies } from './types';
 
 /**
@@ -30,21 +32,15 @@ export function createUpsertStreamActor({
   streamsRepositoryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
+    const body = buildRoutingSaveRequestPayload(input.definition, input.routing);
+
     return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
       signal,
       params: {
         path: {
           name: input.definition.stream.name,
         },
-        body: {
-          ingest: {
-            ...input.definition.stream.ingest,
-            wired: {
-              ...input.definition.stream.ingest.wired,
-              routing: input.routing,
-            },
-          },
-        },
+        body,
       },
     });
   });
@@ -58,15 +54,24 @@ export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
   where: Condition;
+  status: RoutingStatus;
   destination: string;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
   forkSuccessNofitier,
+  telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
   forkSuccessNofitier: (streamName: string) => void;
+  telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
+    const body = buildRoutingForkRequestPayload({
+      where: input.where,
+      status: input.status,
+      destination: input.destination,
+    });
+
     const response = await streamsRepositoryClient.fetch(
       'POST /api/streams/{name}/_fork 2023-10-31',
       {
@@ -75,17 +80,15 @@ export function createForkStreamActor({
           path: {
             name: input.definition.stream.name,
           },
-          body: {
-            where: input.where,
-            stream: {
-              name: input.destination,
-            },
-          },
+          body,
         },
       }
     );
 
     forkSuccessNofitier(input.destination);
+    telemetryClient.trackChildStreamCreated({
+      name: input.destination,
+    });
 
     return response;
   });

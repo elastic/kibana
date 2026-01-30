@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { i18n } from '@kbn/i18n';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, useGeneratedHtmlId } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
@@ -32,28 +30,31 @@ export const Flyout = ({
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: entity.type,
-      tabId: activeTabId,
-    });
-  });
+  useEffect(() => {
+    if (!loading) {
+      telemetry.reportAssetDetailsFlyoutViewed({
+        componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+        assetType: entity.type,
+        tabId: activeTabId,
+        schema_selected: schema || 'ecs',
+      });
+    }
+  }, [schema, entity.type, activeTabId, telemetry, loading]);
 
   const handleOnClose = useCallback(() => {
     setUrlState(null);
     closeFlyout();
   }, [closeFlyout, setUrlState]);
 
+  const headingId = useGeneratedHtmlId({ prefix: 'assetDetailsFlyoutTitle' });
+
   return (
     <EuiFlyout
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={entity.type}
-      aria-labelledby={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
-        defaultMessage: '{name} details',
-        values: { name: entity.name },
-      })}
+      data-schema-selected={schema}
+      aria-labelledby={headingId}
     >
       <>
         <EuiFlyoutHeader hasBorder>
@@ -64,6 +65,7 @@ export const Flyout = ({
             entityType={entity.type}
             loading={loading}
             schema={schema}
+            headingId={headingId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

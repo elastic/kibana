@@ -1,0 +1,170 @@
+{
+  "10.6.0": [
+    {
+      "name": "Test rule",
+      "enabled": true,
+      "consumer": "test-consumer",
+      "tags": [],
+      "alertTypeId": ".test",
+      "apiKeyOwner": null,
+      "apiKey": null,
+      "apiKeyCreatedByUser": null,
+      "createdBy": null,
+      "updatedBy": null,
+      "updatedAt": "2025-11-21T12:00:00Z",
+      "createdAt": "2025-11-20T12:00:00Z",
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "throttle": null,
+      "revision": 1,
+      "running": null,
+      "legacyId": null,
+      "scheduledTaskId": null,
+      "isSnoozedUntil": null,
+      "snoozeSchedule": [],
+      "actions": [],
+      "notifyWhen": "onActionGroupChange",
+      "lastRun": null,
+      "nextRun": null,
+      "params": {},
+      "typeVersion": 1,
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "schedule": {
+        "interval": "1m"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "9.3.0"
+      },
+      "executionStatus": {
+        "status": "active",
+        "lastExecutionDate": "2025-11-21T12:00:00Z",
+        "lastDuration": 1000,
+        "error": null,
+        "warning": null
+      },
+      "mapped_params": {
+        "risk_score": 70,
+        "severity": "high"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "artifacts": {
+        "dashboards": [],
+        "investigation_guide": {
+          "blob": "# test investigation guide"
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": [],
+          "calculated_metrics": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1,
+            "success_ratio": 1
+          },
+          "last_run": {
+            "timestamp": "2025-11-21T12:00:00Z",
+            "metrics": {
+              "duration": 1000,
+              "total_search_duration_ms": null,
+              "total_indexing_duration_ms": null,
+              "total_alerts_detected": null,
+              "total_alerts_created": null,
+              "gap_duration_s": null,
+              "gap_range": null
+            }
+          }
+        }
+      }
+    }
+  ],
+  "10.7.0": [
+    {
+      "name": "Test rule",
+      "enabled": true,
+      "consumer": "test-consumer",
+      "tags": [],
+      "alertTypeId": ".test",
+      "apiKeyOwner": null,
+      "apiKey": null,
+      "apiKeyCreatedByUser": null,
+      "createdBy": null,
+      "updatedBy": null,
+      "updatedAt": "2025-11-21T12:00:00Z",
+      "createdAt": "2025-11-20T12:00:00Z",
+      "muteAll": false,
+      "mutedInstanceIds": [],
+      "throttle": null,
+      "revision": 1,
+      "running": null,
+      "legacyId": null,
+      "scheduledTaskId": null,
+      "isSnoozedUntil": null,
+      "snoozeSchedule": [],
+      "actions": [],
+      "notifyWhen": "onActionGroupChange",
+      "lastRun": null,
+      "nextRun": null,
+      "params": {},
+      "typeVersion": 1,
+      "flapping": {
+        "lookBackWindow": 20,
+        "statusChangeThreshold": 4
+      },
+      "schedule": {
+        "interval": "1m"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "9.3.0"
+      },
+      "executionStatus": {
+        "status": "active",
+        "lastExecutionDate": "2025-11-21T12:00:00Z",
+        "lastDuration": 1000,
+        "error": null,
+        "warning": null
+      },
+      "mapped_params": {
+        "risk_score": 70,
+        "severity": "high"
+      },
+      "alertDelay": {
+        "active": 1
+      },
+      "artifacts": {
+        "dashboards": [],
+        "investigation_guide": {
+          "blob": "# test investigation guide"
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": [],
+          "calculated_metrics": {
+            "p50": 1,
+            "p95": 1,
+            "p99": 1,
+            "success_ratio": 1
+          },
+          "last_run": {
+            "timestamp": "2025-11-21T12:00:00Z",
+            "metrics": {
+              "duration": 1000,
+              "total_search_duration_ms": null,
+              "total_indexing_duration_ms": null,
+              "total_alerts_detected": null,
+              "total_alerts_created": null,
+              "gap_duration_s": null,
+              "gap_range": null
+            }
+          }
+        }
+      }
+    }
+  ]
+}

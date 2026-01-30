@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
       await kibanaServer.savedObjects.cleanStandardList();
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern'
@@ -45,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      // TODO: Loading this from `es_archives` in `test_serverless`
+      // TODO: Loading this from `es_archives` in `test/serverless`
       // instead since minor modifications were required
 
       await esArchiver.unload(
@@ -63,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('without creating index pattern', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickAddNewIndexPatternButton();
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await testSubjects.find('createDataViewButton');
       });
     });
@@ -99,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         // verify an error is displayed
         await find.byClassName('euiFormErrorText');
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
       });
     });
 
@@ -258,7 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete data view';
+        const expectedAlertText = 'Delete Data View';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });

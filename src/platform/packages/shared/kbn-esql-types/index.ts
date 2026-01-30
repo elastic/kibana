@@ -18,23 +18,50 @@ export {
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
+  controlHasVariableName,
 } from './src/variables_types';
 
 export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
+  type ResolveIndexResponse,
   type ESQLSourceResult,
 } from './src/sources_autocomplete_types';
 
-export {
-  type RecommendedQuery,
-  type RecommendedField,
-  type ResolveIndexResponse,
-} from './src/extensions_autocomplete_types';
+export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
 
 export {
   type InferenceEndpointsAutocompleteResult,
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
 
-export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
+export {
+  REGISTRY_EXTENSIONS_ROUTE,
+  SOURCES_AUTOCOMPLETE_ROUTE,
+  TIMEFIELD_ROUTE,
+  SOURCES_TYPES,
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
+} from './src/constants';
+
+export {
+  type ESQLTelemetryCallbacks,
+  ControlTriggerSource,
+  QuerySource,
+  TelemetryControlCancelledReason,
+  type TelemetryQuerySubmittedProps,
+  type TelemetryLatencyProps,
+} from './src/esql_telemetry_types';
+
+export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
+export {
+  type ESQLCallbacks,
+  type PartialFieldsMetadataClient,
+  type ESQLFieldWithMetadata,
+  type EsqlFieldType,
+  esqlFieldTypes,
+  KQL_TYPE_TO_KIND_MAP,
+} from './src/editor_types';

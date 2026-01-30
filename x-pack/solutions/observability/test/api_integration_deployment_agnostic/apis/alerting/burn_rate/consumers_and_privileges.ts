@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
-    let dependencyRuleId: string;
+    let dependencyRuleId: string | undefined;
     let editorRoleAuthc: RoleCredentials;
     let adminRoleAuthc: RoleCredentials;
     let currentRoleAuthc: RoleCredentials;

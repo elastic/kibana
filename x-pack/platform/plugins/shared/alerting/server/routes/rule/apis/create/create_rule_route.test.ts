@@ -267,7 +267,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": undefined,
           },
@@ -387,7 +386,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -508,7 +506,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -629,7 +626,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -809,7 +805,6 @@ describe('createRuleRoute', () => {
               ],
               "throttle": "30s",
             },
-            "isFlappingEnabled": true,
             "options": Object {
               "id": undefined,
             },
@@ -948,14 +943,9 @@ describe('createRuleRoute', () => {
         ['ok']
       );
 
-      await handler(context, req, res);
-
-      expect(res.badRequest).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Cannot create rule of type "test.internal-rule-type" because it is internally managed.',
-        },
-      });
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
     });
   });
 });

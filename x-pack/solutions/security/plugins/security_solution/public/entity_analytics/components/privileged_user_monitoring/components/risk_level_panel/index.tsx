@@ -26,7 +26,7 @@ import { EnableRiskScore } from '../../../enable_risk_score';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.title',
-  { defaultMessage: 'Risk levels of privileged users' }
+  { defaultMessage: 'Privileged user risk levels' }
 );
 
 export const DONUT_CHART_HEIGHT = 160;
@@ -92,13 +92,14 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
           inspectTitle={TITLE}
           title={TITLE}
-          titleSize="s"
+          titleSize="m"
           outerDirection={'column'}
         />
         {toggleStatus &&
           (isError ? (
             <div>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.errorLoadingData',
                   {
@@ -119,6 +120,12 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                   items={severityTableData}
                   loading={isLoading}
                   id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableCaption',
+                    {
+                      defaultMessage: 'Privileged user risk level distribution',
+                    }
+                  )}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>

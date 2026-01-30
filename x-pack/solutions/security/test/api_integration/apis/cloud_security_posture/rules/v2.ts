@@ -10,8 +10,8 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -34,6 +34,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({ types: savedObjects });
+
+      await supertest
+        .post(`/api/fleet/setup`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)

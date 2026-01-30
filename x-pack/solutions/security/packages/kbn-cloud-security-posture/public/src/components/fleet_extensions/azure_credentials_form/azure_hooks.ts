@@ -122,16 +122,20 @@ export const useAzureCredentialsForm = ({
 
   const setupFormat = getSetupFormatFromInput(input, hasArmTemplateUrl);
 
-  const group = options[azureCredentialsType];
+  const group =
+    options[azureCredentialsType as keyof typeof options] ||
+    options[AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY];
+
   const fields = getInputVarsFields(input, group.fields);
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-    if (isInvalid !== isValid) {
+    const isInvalidArmTemplateSelection =
+      setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
+    if (isInvalidArmTemplateSelection && isValid) {
       updatePolicy({
-        isValid: !isInvalid,
+        isValid: false,
         updatedPolicy: newPolicy,
       });
     }
