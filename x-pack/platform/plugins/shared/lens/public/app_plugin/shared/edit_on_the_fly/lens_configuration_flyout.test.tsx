@@ -98,7 +98,7 @@ const lensAttributes = {
   visualizationType: 'testVis',
   state: {
     datasourceStates: {
-      testDatasource: {},
+      formBased: {},
     },
     visualization: {},
     filters: [],
@@ -171,12 +171,12 @@ describe('LensEditConfigurationFlyout', () => {
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           query: query as Query,
           visualization: {
             state: {},
@@ -273,7 +273,7 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { testDatasource: 'state' },
+        datasourceStates: { formBased: 'state' },
         visualization: {},
         filters: [],
         query: { esql: 'from index1 | limit 10' },
@@ -350,9 +350,7 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
-    // @ts-ignore
-    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    newProps.attributes.state.datasourceStates.formBased = 'state';
     await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
@@ -367,8 +365,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       datasourceMap: {
         ...datasourceMap,
-        testDatasource: {
-          ...datasourceMap.testDatasource,
+        formBased: {
+          ...datasourceMap.formBased,
           toExpression: jest.fn(() => null),
         },
       },

@@ -153,6 +153,8 @@ describe('suggestion helpers', () => {
     );
   });
 
+  // Tests iteration over multiple datasources. Production only supports 2 (formBased, textBased),
+  // but the algorithm handles N datasources generically.
   it('should call getDatasourceSuggestionsForField from all datasources with a state', () => {
     const multiDatasourceStates = {
       mock: {
@@ -226,6 +228,8 @@ describe('suggestion helpers', () => {
     );
   });
 
+  // Tests iteration over multiple datasources. Production only supports 2 (formBased, textBased),
+  // but the algorithm handles N datasources generically.
   it('should call getDatasourceSuggestionsForVisualizeField from all datasources with a state', () => {
     const multiDatasourceStates = {
       mock: {
@@ -592,7 +596,7 @@ describe('suggestion helpers', () => {
           },
         },
         { activeId: 'testVis', state: {}, selectedLayerId: null },
-        { testDatasource: { state: mockDatasourceState, isLoading: false } },
+        { a: { state: mockDatasourceState, isLoading: false } },
         { testVis: mockVisualization1 },
         datasourceMap.mock,
         { id: 'myfield', humanData: { label: 'myfieldLabel' } },
