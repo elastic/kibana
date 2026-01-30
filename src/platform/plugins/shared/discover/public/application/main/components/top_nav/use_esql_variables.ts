@@ -11,7 +11,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   extractEsqlVariables,
   internalStateActions,
@@ -30,7 +29,6 @@ import {
  * @param options.isEsqlMode - Indicates if the current application mode is ESQL.
  * @param options.controlGroupApi - The ControlGroupRendererApi instance for interacting with control panels.
  * @param options.currentEsqlVariables - The currently active ESQL variables from the application state.
- * @param options.stateContainer - The DiscoverStateContainer instance for data fetching.
  * @param options.onUpdateESQLQuery - Callback function to update the ESQL query.
  *
  * @returns An object containing handler functions for saving and canceling control changes,
@@ -41,19 +39,18 @@ export const useESQLVariables = ({
   isEsqlMode,
   controlGroupApi,
   currentEsqlVariables,
-  stateContainer,
   onUpdateESQLQuery,
 }: {
   isEsqlMode: boolean;
   controlGroupApi?: ControlGroupRendererApi;
   currentEsqlVariables?: ESQLControlVariable[];
-  stateContainer: DiscoverStateContainer;
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
+  const fetchData = useCurrentTabAction(internalStateActions.fetchData);
   const setAttributeControlGroupJson = useCurrentTabAction(
     internalStateActions.setAttributeControlGroupJson
   );
@@ -113,7 +110,7 @@ export const useESQLVariables = ({
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
         dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-        stateContainer.dataState.fetch();
+        dispatch(fetchData({}));
       }
     });
 
@@ -129,8 +126,7 @@ export const useESQLVariables = ({
     setAttributeControlGroupJson,
     setControlGroupState,
     setEsqlVariables,
-    stateContainer.dataState,
-    stateContainer.savedSearchState,
+    fetchData,
   ]);
 
   const onSaveControl = useCallback(

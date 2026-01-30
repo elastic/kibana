@@ -128,7 +128,6 @@ export const DiscoverTopNav = ({
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
-    stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
     onUpdateESQLQuery,
