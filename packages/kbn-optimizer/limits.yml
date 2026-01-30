@@ -26,14 +26,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 559233
+  core: 558848
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12159
   dashboardMarkdown: 4994
-  data: 454500
+  data: 500179
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -75,7 +75,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 187942
+  fleet: 209495
   genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986

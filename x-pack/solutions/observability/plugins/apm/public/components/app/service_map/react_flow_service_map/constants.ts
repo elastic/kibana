@@ -29,3 +29,15 @@ export const FIT_VIEW_PADDING = 0.2;
 
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
+
+/** Size of the default marker */
+export const DEFAULT_MARKER_SIZE = 12;
+
+/** Size of the highlighted marker */
+export const HIGHLIGHTED_MARKER_SIZE = 14;
+
+/** Width of the default stroke */
+export const DEFAULT_STROKE_WIDTH = 1;
+
+/** Width of the highlighted stroke */
+export const HIGHLIGHTED_STROKE_WIDTH = 2;
