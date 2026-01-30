@@ -55,11 +55,11 @@ const mappings: estypes.MappingTypeMapping = {
 
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
 const alertEventTypeSchema = z.enum(['signal', 'alert']);
-const episodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
+const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
 
 export const alertEventStatus = alertEventStatusSchema.enum;
 export const alertEventType = alertEventTypeSchema.enum;
-export const episodeStatus = episodeStatusSchema.enum;
+export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
@@ -76,7 +76,7 @@ export const alertEventSchema = z.object({
   episode: z
     .object({
       id: z.string(),
-      status: episodeStatusSchema,
+      status: alertEpisodeStatusSchema,
     })
     .optional(),
 });
@@ -84,7 +84,7 @@ export const alertEventSchema = z.object({
 export type AlertEvent = z.infer<typeof alertEventSchema>;
 export type AlertEventStatus = z.infer<typeof alertEventStatusSchema>;
 export type AlertEventType = z.infer<typeof alertEventTypeSchema>;
-export type EpisodeStatus = z.infer<typeof episodeStatusSchema>;
+export type AlertEpisodeStatus = z.infer<typeof alertEpisodeStatusSchema>;
 
 export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_EVENTS_DATA_STREAM}`,

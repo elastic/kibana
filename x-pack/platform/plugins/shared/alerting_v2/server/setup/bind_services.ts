@@ -30,6 +30,8 @@ import {
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DirectorService } from '../lib/director/director';
+import { TransitionStrategyResolver } from '../lib/director/strategies/strategy_resolver';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -96,4 +98,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
+  bind(TransitionStrategyResolver).toSelf().inSingletonScope();
+  bind(BasicTransitionStrategy).toSelf().inSingletonScope();
 }

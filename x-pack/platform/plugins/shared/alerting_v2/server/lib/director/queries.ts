@@ -6,7 +6,7 @@
  */
 
 import { esql, type ComposerQuery } from '@kbn/esql-language';
-import type { AlertEventStatus, EpisodeStatus } from '../../resources/alert_events';
+import type { AlertEventStatus, AlertEpisodeStatus } from '../../resources/alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 
 interface GetLatestAlertEventStateQueryParams {
@@ -17,7 +17,7 @@ interface GetLatestAlertEventStateQueryParams {
 export interface LatestAlertEventState extends Record<string, unknown> {
   last_status: AlertEventStatus;
   last_episode_id: string | null;
-  last_episode_status: EpisodeStatus | null;
+  last_episode_status: AlertEpisodeStatus | null;
   group_hash: string;
 }
 
