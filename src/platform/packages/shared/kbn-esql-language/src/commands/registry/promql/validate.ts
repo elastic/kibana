@@ -25,8 +25,6 @@ import {
   IDENTIFIER_PATTERN,
   isPromqlParamName,
   looksLikePromqlParamAssignment,
-  PROMQL_KEYWORD,
-  PROMQL_PARAM_NAMES,
   PROMQL_REQUIRED_PARAMS,
 } from './utils';
 
@@ -36,8 +34,6 @@ const FORMAT_DATE_LITERAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3
 const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
 // Catches split step values like "step= 1 m" which the parser drops from params.
 const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
-// Strips the leading PROMQL keyword from the raw command text.
-const PROMQL_LEADING_KEYWORD_REGEX = new RegExp(`^\\s*${PROMQL_KEYWORD}\\s*`, 'i');
 // Extracts "param = value" from the query field when the last param is mis-parsed.
 const PROMQL_QUERY_PARAM_VALUE_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(\\S*)`);
 
@@ -67,18 +63,6 @@ export const validate = (
     );
   }
 
-  for (const param of PROMQL_PARAM_NAMES) {
-    if (!paramValues.has(param) && hasEmptyParamAssignment(command.text, param)) {
-      messages.push({
-        ...getMessageFromId({
-          messageId: 'promqlMissingParamValue',
-          values: { param },
-          locations: command.location,
-        }),
-      });
-    }
-  }
-
   for (const param of requiredParams) {
     if (usedParams.has(param)) {
       continue;
@@ -106,22 +90,13 @@ export const validate = (
     });
   }
 
-  const indexParam = paramValues.get('index');
-  if (indexParam && _context?.timeSeriesSources) {
-    const indexValue = stripQuotes(indexParam.value);
-    const hasWildcard = indexValue.includes('*');
-
-    if (!hasWildcard && indexValue !== '') {
-      const sourcesSet = new Set(_context.timeSeriesSources.map((source) => source.name));
-
-      if (!sourceExists(indexValue, sourcesSet)) {
-        messages.push(errors.byId('unknownIndex', indexParam.location, { name: indexValue }));
-      }
-    }
+  if (_context?.timeSeriesSources) {
+    const sourcesSet = new Set(_context.timeSeriesSources.map((src) => src.name));
+    validateIndexSources(command, sourcesSet, messages);
   }
 
   // Basic value checks: presence, and minimal format for start/end.
-  for (const [param, { value, location, entryLocation }] of paramValues) {
+  for (const [param, { value, location, entryLocation, keyLocation }] of paramValues) {
     if (value === '') {
       messages.push({
         ...getMessageFromId({
@@ -156,28 +131,19 @@ export const validate = (
           ...getMessageFromId({
             messageId: 'promqlInvalidStepParam',
             values: {},
-            locations: location,
+            locations: keyLocation ?? location,
           }),
         });
       }
     }
   }
 
-  const trimmedQueryText = queryText.trim();
-  const tailQueryText = getPromqlQueryTail(command);
-  const hasQuery = [trimmedQueryText, tailQueryText].some(
-    (text) => text !== '' && !looksLikePromqlParamAssignment(text)
-  );
-
-  if (!hasQuery) {
-    const queryLocation = looksLikePromqlParamAssignment(trimmedQueryText)
-      ? command.location
-      : command.query?.location ?? command.location;
+  if (!hasValidQuery(command)) {
     messages.push({
       ...getMessageFromId({
         messageId: 'promqlMissingQuery',
         values: {},
-        locations: queryLocation,
+        locations: command.location,
       }),
     });
   }
@@ -201,18 +167,93 @@ function stripQuotes(value: string): string {
   return value;
 }
 
+/**
+ * Checks if the command has a valid PromQL query using AST structure.
+ * Returns true if query exists and is not a misplaced param assignment.
+ */
+function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
+  const query = command.query;
+
+  if (!query) {
+    return false;
+  }
+
+  if (query.type === 'parens' || query.type === 'function') {
+    return true;
+  }
+
+  // unknown type - check if it's actually a param assignment mistakenly placed here
+  if (query.type === 'unknown') {
+    const text = query.text?.trim() ?? '';
+
+    return text !== '' && !looksLikePromqlParamAssignment(text);
+  }
+
+  return false;
+}
+
+/** Validates index sources with precise locations for each source in the list.*/
+function validateIndexSources(
+  command: ESQLAstPromqlCommand,
+  sourcesSet: Set<string>,
+  messages: ESQLMessage[]
+): void {
+  const params = command.params;
+
+  if (!params) {
+    return;
+  }
+
+  const indexEntry = params.entries.find(
+    (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
+  );
+
+  if (!indexEntry) {
+    return;
+  }
+
+  const indexValue = indexEntry.value;
+  const sources = isList(indexValue)
+    ? indexValue.values.filter(isSource)
+    : isSource(indexValue)
+    ? [indexValue]
+    : [];
+
+  for (const source of sources) {
+    const indexName = source.name;
+
+    if (indexName && !indexName.includes('*') && !sourceExists(indexName, sourcesSet)) {
+      messages.push(errors.byId('unknownIndex', source.location, { name: indexName }));
+    }
+  }
+}
+
 /* Collects param values from AST and from the query tail when the parser misplaces the last param. */
 function collectPromqlParamValues(
   command: ESQLAstPromqlCommand,
   queryText: string
-): Map<string, { value: string; location: ESQLLocation; entryLocation?: ESQLLocation }> {
+): Map<
+  string,
+  {
+    value: string;
+    location: ESQLLocation;
+    entryLocation?: ESQLLocation;
+    keyLocation?: ESQLLocation;
+  }
+> {
   const values = new Map<
     string,
-    { value: string; location: ESQLLocation; entryLocation?: ESQLLocation }
+    {
+      value: string;
+      location: ESQLLocation;
+      entryLocation?: ESQLLocation;
+      keyLocation?: ESQLLocation;
+    }
   >();
 
-  const params = getPromqlParamsMap(command);
-  if (params && params.type === 'map') {
+  const params = command.params;
+
+  if (params) {
     for (const entry of params.entries) {
       const key = isIdentifier(entry.key) ? entry.key.name.toLowerCase() : entry.key.text;
 
@@ -228,6 +269,8 @@ function collectPromqlParamValues(
         location: entry.value.location ?? entry.location ?? command.location,
         // Keep the full entry location so empty values can highlight the param assignment, not the next token.
         entryLocation: entry.location ?? entry.key.location ?? command.location,
+        // Keep the key location for errors that should only highlight the param name.
+        keyLocation: entry.key.location ?? command.location,
       });
     }
   }
@@ -264,92 +307,29 @@ function getPromqlParamValueText(value: ESQLAstExpression | undefined): string {
 
   return '';
 }
-/*
- * Extracts the PromQL query text from the AST.
- *
- * Examples of what this function returns:
- *   PROMQL (rate(x[5m]))           → "rate(x[5m])"
- *   PROMQL rate(x[5m])             → "rate(x[5m])"
- *   PROMQL col0=(rate(x[5m]))      → "" (assignment case, use getPromqlQueryTail instead)
+/**
+ * Extracts the PromQL query text from AST.
+ * Used to detect misplaced params in query field via extractTrailingParamFromQuery.
  */
 function getPromqlQueryText(command: ESQLAstPromqlCommand): string {
-  if (command.query?.text) {
-    return command.query.text;
-  }
+  const query = command.query;
 
-  const queryNode = command.query as { type?: string; child?: { text?: string } } | undefined;
-
-  if (queryNode?.type === 'parens' && queryNode.child?.text) {
-    return queryNode.child.text;
-  }
-
-  const args = (command as { args?: Array<{ type?: string; text?: string }> }).args;
-  if (!args || args.length === 0) {
+  if (!query) {
     return '';
   }
 
-  if (args.length === 2) {
-    return args[1]?.text ?? '';
+  if (query.text) {
+    return query.text;
   }
 
-  if (args.length === 1 && args[0]?.type !== 'map') {
-    return args[0]?.text ?? '';
+  // For parens nodes, get the child text
+  const parensNode = query as { type?: string; child?: { text?: string } };
+
+  if (parensNode.type === 'parens' && parensNode.child?.text) {
+    return parensNode.child.text;
   }
 
   return '';
-}
-
-/* Pulls the params map from the command args when present. */
-function getPromqlParamsMap(command: ESQLAstPromqlCommand) {
-  return command.args && command.args.length > 0 && !Array.isArray(command.args[0])
-    ? command.args[0]
-    : undefined;
-}
-
-/*
- * Text-based extraction of the query portion from command.text.
- * Strips the PROMQL keyword and known params, returning whatever remains.
- * Needed when getPromqlQueryText can't extract from AST (e.g. assignment case).
- *
- * Example: "PROMQL step=5m col0=(rate(x[5m]))" → "col0=(rate(x[5m]))"
- */
-function getPromqlQueryTail(command: ESQLAstPromqlCommand): string {
-  let rest = command.text.replace(PROMQL_LEADING_KEYWORD_REGEX, '');
-  const params = getPromqlParamsMap(command);
-
-  if (params && params.type === 'map') {
-    for (const entry of params.entries) {
-      // Consume whitespace and an optional comma separator before the next param.
-      rest = rest.trimStart();
-
-      if (rest.startsWith(',')) {
-        rest = rest.slice(1).trimStart();
-      }
-
-      const key = isIdentifier(entry.key) ? entry.key.name : entry.key.text;
-      const normalizedKey = key.toLowerCase();
-
-      if (!isPromqlParamName(normalizedKey)) {
-        continue;
-      }
-
-      const rawValue = getPromqlParamValueText(entry.value);
-      const keyPrefix = `${key}=`;
-      const valuePrefix = `${keyPrefix}${rawValue}`;
-      const lowerRest = rest.toLowerCase();
-
-      if (lowerRest.startsWith(valuePrefix.toLowerCase())) {
-        rest = rest.slice(valuePrefix.length);
-        continue;
-      }
-
-      if (lowerRest.startsWith(keyPrefix.toLowerCase())) {
-        rest = rest.slice(keyPrefix.length);
-      }
-    }
-  }
-
-  return rest.trim();
 }
 
 /* Extracts the last param assignment when it is incorrectly placed in the query field. */
@@ -367,22 +347,4 @@ function extractTrailingParamFromQuery(
   }
 
   return { param, value: match[2] ?? '' };
-}
-
-/* Detects empty "<param>=" assignments in a loose, text-only way. */
-function hasEmptyParamAssignment(text: string, param: string): boolean {
-  const compact = text.toLowerCase().replace(/\s+/g, '');
-  const needle = `${param.toLowerCase()}=`;
-  const indexPos = compact.indexOf(needle);
-
-  if (indexPos === -1) {
-    return false;
-  }
-
-  const after = compact.slice(indexPos + needle.length);
-  if (after === '') {
-    return true;
-  }
-
-  return PROMQL_PARAM_NAMES.some((name) => after.startsWith(`${name}=`));
 }

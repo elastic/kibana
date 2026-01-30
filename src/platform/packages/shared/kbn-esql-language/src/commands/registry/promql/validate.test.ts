@@ -83,4 +83,41 @@ describe('PROMQL Validation', () => {
       promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend col0=(rate(x[5m]))', []);
     });
   });
+
+  describe('index validation', () => {
+    test('valid index', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index step=5m start=?_tstart end=?_tend (rate(x[5m]))',
+        []
+      );
+    });
+
+    test('unknown index', () => {
+      promqlExpectErrors(
+        'PROMQL index=unknown_xyz step=5m start=?_tstart end=?_tend (rate(x[5m]))',
+        ['Unknown index "unknown_xyz"']
+      );
+    });
+
+    test('multiple indexes - all valid', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index,time_series_index step=5m start=?_tstart end=?_tend (rate(x[5m]))',
+        []
+      );
+    });
+
+    test('multiple indexes - one invalid', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_index,unknown_xyz step=5m start=?_tstart end=?_tend (rate(x[5m]))',
+        ['Unknown index "unknown_xyz"']
+      );
+    });
+
+    test('wildcard index', () => {
+      promqlExpectErrors(
+        'PROMQL index=timeseries_* step=5m start=?_tstart end=?_tend (rate(x[5m]))',
+        []
+      );
+    });
+  });
 });
