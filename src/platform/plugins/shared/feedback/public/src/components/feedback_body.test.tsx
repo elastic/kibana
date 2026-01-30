@@ -17,7 +17,14 @@ const coreStartMock = coreMock.createStart();
 
 const propsMock = {
   handleChangeFeedbackText: jest.fn(),
-  feedbackText: '',
+  handleChangeCsatOptionId: jest.fn(),
+  handleChangeExperienceFeedbackText: jest.fn(),
+  handleChangeGeneralFeedbackText: jest.fn(),
+  handleChangeAllowEmailContact: jest.fn(),
+  allowEmailContact: false,
+  selectedCsatOptionId: '',
+  experienceFeedbackText: '',
+  generalFeedbackText: '',
   core: coreStartMock,
 };
 
@@ -38,7 +45,7 @@ describe('FeedbackBody', () => {
 
   it('should render feedback text inside textarea', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} feedbackText="Test feedback" />);
+      renderWithI18n(<FeedbackBody {...propsMock} experienceFeedbackText="Test feedback" />);
     });
 
     const body = screen.getByTestId('feedbackFormBody');

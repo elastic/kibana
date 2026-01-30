@@ -8,7 +8,7 @@
  */
 
 import React, { type ChangeEvent, useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,16 +18,33 @@ import { FeedbackFooter } from './feedback_footer';
 
 interface Props {
   core: CoreStart;
+  feedbackFormRef: OverlayRef | null;
 }
 
-export const FeedbackForm = ({ core }: Props) => {
+export const FeedbackForm = ({ core, feedbackFormRef }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [feedbackText, setFeedbackText] = useState('');
+  const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
+  const [generalFeedbackText, setGeneralFeedbackText] = useState('');
+  const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
+  const [allowEmailContact, setAllowEmailContact] = useState(false);
 
-  const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
+  const isSendFeedbackButtonDisabled =
+    !experienceFeedbackText.trim().length || !selectedCsatOptionId;
 
-  const handleChangeFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setFeedbackText(e.target.value);
+  const handleChangeCsatOptionId = (optionId: string) => {
+    setSelectedCsatOptionId(optionId);
+  };
+
+  const handleChangeExperienceFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setExperienceFeedbackText(e.target.value);
+  };
+
+  const handleChangeGeneralFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setGeneralFeedbackText(e.target.value);
+  };
+
+  const handleChangeAllowEmailContact = (e: ChangeEvent<HTMLInputElement>) => {
+    setAllowEmailContact(e.target.checked);
   };
 
   const submitFeedback = () => {
@@ -44,8 +61,14 @@ export const FeedbackForm = ({ core }: Props) => {
       <FeedbackHeader />
       <FeedbackBody
         core={core}
-        feedbackText={feedbackText}
-        handleChangeFeedbackText={handleChangeFeedbackText}
+        experienceFeedbackText={experienceFeedbackText}
+        generalFeedbackText={generalFeedbackText}
+        selectedCsatOptionId={selectedCsatOptionId}
+        allowEmailContact={allowEmailContact}
+        handleChangeCsatOptionId={handleChangeCsatOptionId}
+        handleChangeExperienceFeedbackText={handleChangeExperienceFeedbackText}
+        handleChangeGeneralFeedbackText={handleChangeGeneralFeedbackText}
+        handleChangeAllowEmailContact={handleChangeAllowEmailContact}
       />
       <EuiSpacer size="s" />
       <EuiFlexItem>
@@ -66,6 +89,7 @@ export const FeedbackForm = ({ core }: Props) => {
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
+        feedbackFormRef={feedbackFormRef}
       />
     </EuiFlexGroup>
   );

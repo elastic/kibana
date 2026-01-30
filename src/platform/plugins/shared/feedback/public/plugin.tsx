@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, OverlayRef, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { filter, firstValueFrom } from 'rxjs';
-import { FeedbackButton } from './src';
+import { FeedbackButton, FeedbackForm } from './src';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface FeedbackPluginSetup {}
@@ -25,6 +25,8 @@ export interface FeedbackPluginStartDependencies {
 interface FeedbackPluginStart {}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
+  private feedbackFormRef: OverlayRef | null = null;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(): FeedbackPluginSetup {
@@ -35,13 +37,27 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
     core: CoreStart,
     { licensing }: FeedbackPluginStartDependencies
   ): FeedbackPluginStart {
+    const handleShowFeedbackForm = () => {
+      const ref = core.overlays.openModal(
+        toMountPoint(
+          <FeedbackForm core={core} feedbackFormRef={this.feedbackFormRef} />,
+          core.rendering
+        )
+      );
+
+      this.feedbackFormRef = ref;
+    };
+
     firstValueFrom(
       core.analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
     ).then((isNotAdblocked) => {
       if (isNotAdblocked) {
         core.chrome.navControls.registerRight({
           order: 1002,
-          mount: toMountPoint(<FeedbackButton core={core} />, core.rendering),
+          mount: toMountPoint(
+            <FeedbackButton handleShowFeedbackForm={handleShowFeedbackForm} />,
+            core.rendering
+          ),
         });
       }
     });

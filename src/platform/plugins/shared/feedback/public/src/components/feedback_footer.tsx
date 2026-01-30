@@ -10,6 +10,7 @@
 import React from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -18,14 +19,24 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { OverlayRef } from '@kbn/core/public';
 
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
+  feedbackFormRef: OverlayRef | null;
   submitFeedback: () => void;
 }
 
-export const FeedbackFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
+export const FeedbackFooter = ({
+  isSendFeedbackButtonDisabled,
+  feedbackFormRef,
+  submitFeedback,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
+
+  const handleCancel = () => {
+    feedbackFormRef?.close();
+  };
 
   const footerCss = css`
     padding-top: ${euiTheme.size.m};
@@ -34,7 +45,7 @@ export const FeedbackFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }:
   return (
     <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
@@ -62,8 +73,14 @@ export const FeedbackFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }:
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiButtonEmpty data-test-subj="feedbackCancelFeedbackButton" onClick={handleCancel}>
+            <FormattedMessage id="feedback.footer.cancelButton" defaultMessage="Cancel" />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            color="primary"
             data-test-subj="feedbackSendFeedbackButton"
             disabled={isSendFeedbackButtonDisabled}
             onClick={submitFeedback}

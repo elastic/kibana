@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ChangeEvent } from 'react';
+import React, { type ChangeEvent } from 'react';
 import {
   EuiCheckbox,
   EuiFlexItem,
@@ -26,17 +26,27 @@ import { CsatButtons } from './csat_buttons';
 
 interface Props {
   core: CoreStart;
-  feedbackText: string;
-  handleChangeFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  selectedCsatOptionId: string;
+  experienceFeedbackText: string;
+  generalFeedbackText: string;
+  allowEmailContact: boolean;
+  handleChangeCsatOptionId: (optionId: string) => void;
+  handleChangeExperienceFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleChangeGeneralFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  handleChangeAllowEmailContact: (e: ChangeEvent<HTMLInputElement>) => void;
 }
-export const FeedbackBody = ({ core, feedbackText, handleChangeFeedbackText }: Props) => {
-  const [allowEmailContact, setAllowEmailContact] = useState(false);
-  const [generalFeedbackText, setGeneralFeedbackText] = useState('');
+export const FeedbackBody = ({
+  core,
+  selectedCsatOptionId,
+  experienceFeedbackText,
+  generalFeedbackText,
+  allowEmailContact,
+  handleChangeCsatOptionId,
+  handleChangeExperienceFeedbackText,
+  handleChangeGeneralFeedbackText,
+  handleChangeAllowEmailContact,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
-
-  const handleChangeAllowEmailContact = (e: ChangeEvent<HTMLInputElement>) => {
-    setAllowEmailContact(e.target.checked);
-  };
 
   const bodyCss = css`
     padding-top: ${euiTheme.size.m};
@@ -49,18 +59,22 @@ export const FeedbackBody = ({ core, feedbackText, handleChangeFeedbackText }: P
   return (
     <EuiFlexItem css={bodyCss} data-test-subj="feedbackFormBody">
       <EuiForm component="form" css={formCss}>
-        <CsatButtons core={core} />
+        <CsatButtons
+          core={core}
+          selectedOptionId={selectedCsatOptionId}
+          handleChangeCsatOptionId={handleChangeCsatOptionId}
+        />
         <EuiSpacer size="m" />
         <EuiFormRow fullWidth>
           <EuiTextArea
             fullWidth
             rows={4}
             data-test-subj="feedbackFormTextArea"
-            value={feedbackText}
+            value={experienceFeedbackText}
             aria-label={i18n.translate('feedback.form.body.experienceFeedbackTextArea.ariaLabel', {
               defaultMessage: 'Describe your experience',
             })}
-            onChange={handleChangeFeedbackText}
+            onChange={handleChangeExperienceFeedbackText}
             placeholder={i18n.translate(
               'feedback.form.body.experienceFeedbackTextArea.placeholder',
               {
@@ -69,6 +83,7 @@ export const FeedbackBody = ({ core, feedbackText, handleChangeFeedbackText }: P
             )}
           />
         </EuiFormRow>
+        <EuiSpacer size="l" />
         <EuiFormRow
           fullWidth
           label={
@@ -88,7 +103,7 @@ export const FeedbackBody = ({ core, feedbackText, handleChangeFeedbackText }: P
             aria-label={i18n.translate('feedback.form.body.additionalFeedback.ariaLabel', {
               defaultMessage: 'Additional feedback about Elastic',
             })}
-            onChange={(e) => setGeneralFeedbackText(e.target.value)}
+            onChange={handleChangeGeneralFeedbackText}
           />
         </EuiFormRow>
         <EuiFormRow>

@@ -12,13 +12,17 @@ import { screen, fireEvent } from '@testing-library/react';
 import { FeedbackFooter } from './feedback_footer';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
+const mockProps = {
+  isSendFeedbackButtonDisabled: false,
+  submitFeedback: jest.fn(),
+  feedbackFormRef: null,
+};
+
 describe('FeedbackFooter', () => {
   const submitFeedback = jest.fn();
 
   it('should render feedback footer', () => {
-    renderWithI18n(
-      <FeedbackFooter isSendFeedbackButtonDisabled={false} submitFeedback={submitFeedback} />
-    );
+    renderWithI18n(<FeedbackFooter {...mockProps} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
     const sendButton = screen.getByTestId('feedbackSendFeedbackButton');
@@ -27,9 +31,7 @@ describe('FeedbackFooter', () => {
   });
 
   it('should render disabled send button when isSendFeedbackButtonDisabled is true', () => {
-    renderWithI18n(
-      <FeedbackFooter isSendFeedbackButtonDisabled={true} submitFeedback={submitFeedback} />
-    );
+    renderWithI18n(<FeedbackFooter {...mockProps} isSendFeedbackButtonDisabled={true} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
     const sendButton = screen.getByTestId('feedbackSendFeedbackButton');
@@ -38,9 +40,7 @@ describe('FeedbackFooter', () => {
   });
 
   it('should call submitFeedback when send button is clicked', () => {
-    renderWithI18n(
-      <FeedbackFooter isSendFeedbackButtonDisabled={false} submitFeedback={submitFeedback} />
-    );
+    renderWithI18n(<FeedbackFooter {...mockProps} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
     const sendButton = screen.getByTestId('feedbackSendFeedbackButton');

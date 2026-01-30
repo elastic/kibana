@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -50,21 +50,17 @@ const options = ({ htmlId }: { htmlId: string }) => [
 
 interface Props {
   core: CoreStart;
+  selectedOptionId: string;
+  handleChangeCsatOptionId: (optionId: string) => void;
 }
 
-export const CsatButtons = ({ core }: Props) => {
+export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }: Props) => {
   const { euiTheme } = useEuiTheme();
   const basicButtonGroupPrefix = useGeneratedHtmlId({
     prefix: 'csat',
   });
 
-  const [selectedOptionId, setSelectedOptionId] = useState('');
-
   const appTitle = getCurrentAppTitle(core.application);
-
-  const handleChange = (optionId: string) => {
-    setSelectedOptionId(optionId);
-  };
 
   const labelsCss = css`
     color: ${euiTheme.colors.textSubdued};
@@ -100,7 +96,7 @@ export const CsatButtons = ({ core }: Props) => {
             defaultMessage: 'Customer satisfaction rating',
           })}
           type="single"
-          onChange={handleChange}
+          onChange={handleChangeCsatOptionId}
           idSelected={selectedOptionId}
           isFullWidth={true}
           buttonSize="compressed"

@@ -8,31 +8,22 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FeedbackForm } from './feedback_form';
 
 interface Props {
-  core: CoreStart;
+  handleShowFeedbackForm: () => void;
 }
 
-export const FeedbackButton = ({ core }: Props) => {
-  const openModal = () => {
-    core.overlays.openModal(toMountPoint(<FeedbackForm core={core} />, core.rendering));
-  };
-
-  return (
-    <EuiHeaderSectionItemButton
-      data-test-subj="feedbackButton"
-      aria-haspopup={true}
-      aria-label={i18n.translate('feedback.button.ariaLabel', {
-        defaultMessage: 'Give feedback',
-      })}
-      onClick={openModal}
-    >
-      <EuiIcon type="comment" size="m" />
-    </EuiHeaderSectionItemButton>
-  );
-};
+export const FeedbackButton = ({ handleShowFeedbackForm }: Props) => (
+  <EuiHeaderSectionItemButton
+    data-test-subj="feedbackButton"
+    aria-haspopup="dialog"
+    aria-label={i18n.translate('feedback.button.ariaLabel', {
+      defaultMessage: 'Give feedback',
+    })}
+    onClick={handleShowFeedbackForm}
+  >
+    <EuiIcon type="comment" size="m" />
+  </EuiHeaderSectionItemButton>
+);

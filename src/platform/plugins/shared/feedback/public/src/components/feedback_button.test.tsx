@@ -8,34 +8,19 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { FeedbackButton } from './feedback_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { coreMock } from '@kbn/core/public/mocks';
-
-const coreStartMock = coreMock.createStart();
 
 const propsMock = {
-  core: coreStartMock,
+  handleShowFeedbackForm: jest.fn(),
 };
 
 describe('FeedbackButton', () => {
-  it('renders feedback button', () => {
+  it('should render feedback button', () => {
     renderWithI18n(<FeedbackButton {...propsMock} />);
 
     const feedbackButton = screen.getByTestId('feedbackButton');
     expect(feedbackButton).toBeInTheDocument();
-  });
-
-  it('calls openFeedbackFlyout when feedback button is clicked in non-serverless mode', () => {
-    renderWithI18n(<FeedbackButton {...propsMock} />);
-
-    const feedbackButton = screen.getByTestId('feedbackButton');
-
-    expect(feedbackButton).toBeInTheDocument();
-
-    fireEvent.click(feedbackButton);
-
-    expect(coreStartMock.overlays.openFlyout).toHaveBeenCalledTimes(1);
   });
 });
