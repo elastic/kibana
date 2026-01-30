@@ -14,4 +14,6 @@ export {
   mockMappedField,
   mockUnmappedField,
   mockInheritedField,
+  createMockDiskUsage,
+  createMockSystemField,
 } from './stream_definitions';

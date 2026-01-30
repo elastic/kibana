@@ -19,10 +19,15 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiCheckbox,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { useBoolean } from '@kbn/react-hooks';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import type { TableColumnName } from './constants';
 import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
@@ -33,6 +38,119 @@ import { FieldResultBadge } from './field_result';
 import type { TControls } from './hooks/use_controls';
 import type { SchemaField, SchemaEditorField } from './types';
 import { FieldType } from './field_type';
+import type { FieldDiskUsage } from './types';
+
+/**
+ * Formats bytes into a human-readable string (B, KB, MB, GB, TB).
+ */
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const base = 1024;
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(base)), units.length - 1);
+  const value = bytes / Math.pow(base, exponent);
+  // Use 2 decimal places for larger units, 0 for bytes
+  const decimals = exponent === 0 ? 0 : 2;
+  return `${value.toFixed(decimals)} ${units[exponent]}`;
+}
+
+/**
+ * Component that displays disk usage with a popover showing detailed breakdown.
+ */
+function DiskUsageCell({ diskUsage }: { diskUsage: FieldDiskUsage }) {
+  const popoverId = useGeneratedHtmlId({ prefix: 'diskUsagePopover' });
+  const [isOpen, { off: closePopover, toggle }] = useBoolean(false);
+
+  const breakdownItems = useMemo(
+    () =>
+      [
+        {
+          key: 'inverted_index',
+          title: i18n.translate('xpack.streams.diskUsage.invertedIndex', {
+            defaultMessage: 'Inverted index',
+          }),
+          value: diskUsage.inverted_index_in_bytes,
+        },
+        {
+          key: 'stored_fields',
+          title: i18n.translate('xpack.streams.diskUsage.storedFields', {
+            defaultMessage: 'Stored fields',
+          }),
+          value: diskUsage.stored_fields_in_bytes,
+        },
+        {
+          key: 'doc_values',
+          title: i18n.translate('xpack.streams.diskUsage.docValues', {
+            defaultMessage: 'Doc values',
+          }),
+          value: diskUsage.doc_values_in_bytes,
+        },
+        {
+          key: 'points',
+          title: i18n.translate('xpack.streams.diskUsage.points', {
+            defaultMessage: 'Points',
+          }),
+          value: diskUsage.points_in_bytes,
+        },
+        {
+          key: 'norms',
+          title: i18n.translate('xpack.streams.diskUsage.norms', {
+            defaultMessage: 'Norms',
+          }),
+          value: diskUsage.norms_in_bytes,
+        },
+        {
+          key: 'term_vectors',
+          title: i18n.translate('xpack.streams.diskUsage.termVectors', {
+            defaultMessage: 'Term vectors',
+          }),
+          value: diskUsage.term_vectors_in_bytes,
+        },
+        {
+          key: 'knn_vectors',
+          title: i18n.translate('xpack.streams.diskUsage.knnVectors', {
+            defaultMessage: 'KNN vectors',
+          }),
+          value: diskUsage.knn_vectors_in_bytes,
+        },
+      ].filter((item) => item.value > 0),
+    [diskUsage]
+  );
+
+  // If there's no breakdown to show, just display the total
+  if (breakdownItems.length === 0) {
+    return <>{formatBytes(diskUsage.total_in_bytes)}</>;
+  }
+
+  return (
+    <EuiPopover
+      id={popoverId}
+      button={
+        <EuiButtonEmpty
+          size="xs"
+          onClick={toggle}
+          data-test-subj="streamsAppDiskUsageButton"
+          flush="left"
+        >
+          {formatBytes(diskUsage.total_in_bytes)}
+        </EuiButtonEmpty>
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="s"
+      anchorPosition="downLeft"
+    >
+      <EuiDescriptionList
+        type="column"
+        compressed
+        listItems={breakdownItems.map((item) => ({
+          title: item.title,
+          description: formatBytes(item.value),
+        }))}
+      />
+    </EuiPopover>
+  );
+}
 
 export function FieldsTable({
   isLoading,
@@ -190,6 +308,13 @@ const createCellRenderer =
       const editorField = field as SchemaEditorField;
       if (editorField.result) {
         return <FieldResultBadge result={editorField.result} />;
+      }
+      return EMPTY_CONTENT;
+    }
+
+    if (columnId === 'diskUsage') {
+      if (field.diskUsage) {
+        return <DiskUsageCell diskUsage={field.diskUsage} />;
       }
       return EMPTY_CONTENT;
     }

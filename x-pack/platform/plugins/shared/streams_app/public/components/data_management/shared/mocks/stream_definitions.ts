@@ -6,7 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import type { SchemaField } from '../../schema_editor/types';
+import type { SchemaField, FieldDiskUsage } from '../../schema_editor/types';
 
 // Mock stream definitions for reuse in tests
 export const createMockClassicStreamDefinition = (
@@ -137,3 +137,28 @@ export const createMockInheritedField = (
 export const mockMappedField: SchemaField = createMockMappedField();
 export const mockUnmappedField: SchemaField = createMockUnmappedField();
 export const mockInheritedField: SchemaField = createMockInheritedField();
+
+// Factory function for creating mock disk usage
+export const createMockDiskUsage = (overrides: Partial<FieldDiskUsage> = {}): FieldDiskUsage => ({
+  total_in_bytes: 1024,
+  inverted_index_in_bytes: 300,
+  stored_fields_in_bytes: 200,
+  doc_values_in_bytes: 300,
+  points_in_bytes: 100,
+  norms_in_bytes: 50,
+  term_vectors_in_bytes: 0,
+  knn_vectors_in_bytes: 74,
+  ...overrides,
+});
+
+// Factory function for creating mock system field
+export const createMockSystemField = (
+  overrides: Partial<Omit<SchemaField, 'status' | 'type'>> = {}
+): SchemaField => ({
+  name: '_source',
+  parent: 'logs.test',
+  ...overrides,
+  status: 'system',
+  type: 'system',
+  isSystemField: true,
+});

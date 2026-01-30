@@ -114,6 +114,16 @@ export const FIELD_STATUS_MAP = {
       defaultMessage: 'This field has uncommitted changes.',
     }),
   },
+  system: {
+    color: 'hollow',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorSystemStatusLabel', {
+      defaultMessage: 'System',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorSystemStatusTooltip', {
+      defaultMessage:
+        'This is a system field managed by Elasticsearch. It cannot be modified or removed.',
+    }),
+  },
 };
 
 export type FieldStatus = keyof typeof FIELD_STATUS_MAP;
@@ -144,6 +154,11 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Mapping status',
     }),
   },
+  diskUsage: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDiskUsageHeader', {
+      defaultMessage: 'Disk usage',
+    }),
+  },
   source: {
     display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablesourceHeader', {
       defaultMessage: 'Source',
@@ -164,6 +179,7 @@ export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
   'format',
   'parent',
   'status',
+  'diskUsage',
 ];
 
 export const SUPPORTED_TABLE_COLUMN_NAMES = Object.keys(TABLE_COLUMNS) as TableColumnName[];

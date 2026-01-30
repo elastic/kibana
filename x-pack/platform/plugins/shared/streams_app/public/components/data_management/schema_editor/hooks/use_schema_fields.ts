@@ -14,8 +14,36 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { getFormattedError } from '../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
-import type { SchemaEditorField, SchemaField } from '../types';
+import type { SchemaEditorField, SchemaField, FieldDiskUsage } from '../types';
 import { buildSchemaSavePayload, isFieldUncommitted } from '../utils';
+
+/** System fields that are managed by Elasticsearch and should be shown as non-editable */
+const SYSTEM_FIELDS = new Set([
+  '_source',
+  '_id',
+  '_routing',
+  '_seq_no',
+  '_primary_term',
+  '_version',
+]);
+
+interface AggregatedFieldStats {
+  name: string;
+  total_in_bytes: number;
+  inverted_index_in_bytes: number;
+  stored_fields_in_bytes: number;
+  doc_values_in_bytes: number;
+  points_in_bytes: number;
+  norms_in_bytes: number;
+  term_vectors_in_bytes: number;
+  knn_vectors_in_bytes: number;
+}
+
+interface FieldStatisticsResponse {
+  isSupported: boolean;
+  fields: AggregatedFieldStats[];
+  totalFields: number;
+}
 
 export const useSchemaFields = ({
   definition,
@@ -72,7 +100,52 @@ export const useSchemaFields = ({
     [dataViews, definition.stream.name]
   );
 
+  // Fetch field statistics for disk usage
+  const {
+    value: fieldStatisticsValue,
+    loading: isLoadingFieldStatistics,
+    refresh: refreshFieldStatistics,
+  } = useStreamsAppFetch(
+    async ({ signal }) => {
+      const response = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/{name}/field_statistics',
+        {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+          },
+        }
+      );
+      return response as FieldStatisticsResponse;
+    },
+    [streamsRepositoryClient, definition.stream.name],
+    {
+      withTimeRange: false,
+      withRefresh: false,
+    }
+  );
+
   const [fields, setFields] = useState<SchemaField[]>([]);
+
+  // Create a map of field name to disk usage data
+  const diskUsageMap = useMemo(() => {
+    const map = new Map<string, FieldDiskUsage>();
+    if (fieldStatisticsValue?.fields) {
+      for (const field of fieldStatisticsValue.fields) {
+        map.set(field.name, {
+          total_in_bytes: field.total_in_bytes,
+          inverted_index_in_bytes: field.inverted_index_in_bytes,
+          stored_fields_in_bytes: field.stored_fields_in_bytes,
+          doc_values_in_bytes: field.doc_values_in_bytes,
+          points_in_bytes: field.points_in_bytes,
+          norms_in_bytes: field.norms_in_bytes,
+          term_vectors_in_bytes: field.term_vectors_in_bytes,
+          knn_vectors_in_bytes: field.knn_vectors_in_bytes,
+        });
+      }
+    }
+    return map;
+  }, [fieldStatisticsValue?.fields]);
 
   const storedFields = useMemo(() => {
     const definitionFields = getDefinitionFields(definition);
@@ -106,8 +179,29 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    return [...definitionFields, ...unmanagedFields, ...unmappedFields];
-  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
+    // Add system fields that have disk usage data
+    const systemFields: SchemaField[] = [];
+    for (const fieldName of SYSTEM_FIELDS) {
+      if (diskUsageMap.has(fieldName) && !allFoundFieldsSet.has(fieldName)) {
+        systemFields.push({
+          name: fieldName,
+          parent: definition.stream.name,
+          status: 'system',
+          type: 'system',
+          isSystemField: true,
+        });
+      }
+    }
+
+    // Merge all fields and add disk usage data
+    const allFields = [...definitionFields, ...unmanagedFields, ...unmappedFields, ...systemFields];
+
+    // Add disk usage to all fields
+    return allFields.map((field) => ({
+      ...field,
+      diskUsage: diskUsageMap.get(field.name),
+    }));
+  }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields, diskUsageMap]);
 
   useEffect(() => setFields(storedFields), [storedFields]);
 
@@ -115,7 +209,8 @@ export const useSchemaFields = ({
     refreshDefinition();
     refreshUnmappedFields();
     refreshDataViewFields();
-  }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields]);
+    refreshFieldStatistics();
+  }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields, refreshFieldStatistics]);
 
   const addField = useCallback(
     (field: SchemaField) => {
@@ -214,6 +309,8 @@ export const useSchemaFields = ({
     fields: fieldsWithUncommittedStatus,
     storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
+    isLoadingDiskUsage: isLoadingFieldStatistics,
+    isDiskUsageSupported: fieldStatisticsValue?.isSupported ?? false,
     refreshFields,
     addField,
     updateField,

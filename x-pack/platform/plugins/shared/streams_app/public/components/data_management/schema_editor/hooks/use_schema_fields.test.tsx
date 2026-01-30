@@ -59,13 +59,35 @@ jest.mock('@kbn/react-hooks', () => ({
 }));
 
 // Mock useStreamsAppFetch
+const mockFieldStatisticsRefresh = jest.fn();
+const mockUnmappedFieldsRefresh = jest.fn();
+
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: jest.fn(() => ({
-    value: null,
-    loading: false,
-    refresh: jest.fn(),
-  })),
+  useStreamsAppFetch: jest.fn((fetchFn, deps) => {
+    // Determine which endpoint is being called by examining the deps
+    // The field_statistics endpoint is the third fetch call
+    const depsString = JSON.stringify(deps);
+
+    if (depsString.includes('field_statistics') || deps.length === 2) {
+      // This is likely the field statistics fetch (has different deps pattern)
+      return {
+        value: null,
+        loading: false,
+        refresh: mockFieldStatisticsRefresh,
+      };
+    }
+
+    // Default for unmapped_fields
+    return {
+      value: null,
+      loading: false,
+      refresh: mockUnmappedFieldsRefresh,
+    };
+  }),
 }));
+
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+const mockUseStreamsAppFetch = useStreamsAppFetch as jest.MockedFunction<typeof useStreamsAppFetch>;
 
 const renderUseSchemaFields = (definition: Streams.ingest.all.GetResponse) =>
   renderHook(() =>
@@ -91,12 +113,38 @@ import {
   createMockUnmappedField,
 } from '../../shared/mocks';
 
+// Helper to create mock field statistics response
+const createMockFieldStatistics = (fields: Array<{ name: string; total_in_bytes: number }>) => ({
+  isSupported: true,
+  fields: fields.map((f) => ({
+    name: f.name,
+    total_in_bytes: f.total_in_bytes,
+    inverted_index_in_bytes: Math.floor(f.total_in_bytes * 0.3),
+    stored_fields_in_bytes: Math.floor(f.total_in_bytes * 0.2),
+    doc_values_in_bytes: Math.floor(f.total_in_bytes * 0.3),
+    points_in_bytes: Math.floor(f.total_in_bytes * 0.1),
+    norms_in_bytes: Math.floor(f.total_in_bytes * 0.05),
+    term_vectors_in_bytes: 0,
+    knn_vectors_in_bytes: Math.floor(f.total_in_bytes * 0.05),
+  })),
+  totalFields: fields.length,
+});
+
 describe('useSchemaFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRefreshDefinition.mockReset();
     mockStreamsRepositoryClient.fetch.mockReset();
     mockDataViews.getFieldsForWildcard.mockResolvedValue([]);
+    mockFieldStatisticsRefresh.mockReset();
+    mockUnmappedFieldsRefresh.mockReset();
+
+    // Reset useStreamsAppFetch to default behavior
+    mockUseStreamsAppFetch.mockImplementation(() => ({
+      value: null,
+      loading: false,
+      refresh: jest.fn(),
+    }));
   });
 
   describe('Field state management', () => {
@@ -415,6 +463,156 @@ describe('useSchemaFields', () => {
       const fields = getDefinitionFields(definition);
 
       expect(fields).toEqual([]);
+    });
+  });
+
+  describe('Disk usage integration', () => {
+    it('merges disk usage data into fields', async () => {
+      const mockFieldStats = createMockFieldStatistics([
+        { name: 'attributes.test_field', total_in_bytes: 1024 },
+      ]);
+
+      // Setup mock to return field statistics
+      let callCount = 0;
+      mockUseStreamsAppFetch.mockImplementation(() => {
+        callCount++;
+        // Second call is for field statistics
+        if (callCount === 2) {
+          return {
+            value: mockFieldStats,
+            loading: false,
+            refresh: mockFieldStatisticsRefresh,
+          };
+        }
+        // First call is for unmapped fields
+        return {
+          value: { unmappedFields: [] },
+          loading: false,
+          refresh: mockUnmappedFieldsRefresh,
+        };
+      });
+
+      const definition = createMockClassicStreamDefinition();
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      // Find the field with disk usage
+      const fieldWithDiskUsage = result.current.fields.find(
+        (f) => f.name === 'attributes.test_field'
+      );
+
+      expect(fieldWithDiskUsage).toBeDefined();
+      expect(fieldWithDiskUsage?.diskUsage).toBeDefined();
+      expect(fieldWithDiskUsage?.diskUsage?.total_in_bytes).toBe(1024);
+    });
+
+    it('adds system fields when they have disk usage', async () => {
+      const mockFieldStats = createMockFieldStatistics([
+        { name: '_source', total_in_bytes: 5000 },
+        { name: '_id', total_in_bytes: 1000 },
+      ]);
+
+      // Setup mock to return field statistics with system fields
+      let callCount = 0;
+      mockUseStreamsAppFetch.mockImplementation(() => {
+        callCount++;
+        if (callCount === 2) {
+          return {
+            value: mockFieldStats,
+            loading: false,
+            refresh: mockFieldStatisticsRefresh,
+          };
+        }
+        return {
+          value: { unmappedFields: [] },
+          loading: false,
+          refresh: mockUnmappedFieldsRefresh,
+        };
+      });
+
+      const definition = createMockClassicStreamDefinition();
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      // Check that system fields are added
+      const sourceField = result.current.fields.find((f) => f.name === '_source');
+      const idField = result.current.fields.find((f) => f.name === '_id');
+
+      expect(sourceField).toBeDefined();
+      expect(sourceField?.status).toBe('system');
+      expect(sourceField?.type).toBe('system');
+      expect(sourceField?.isSystemField).toBe(true);
+      expect(sourceField?.diskUsage?.total_in_bytes).toBe(5000);
+
+      expect(idField).toBeDefined();
+      expect(idField?.status).toBe('system');
+      expect(idField?.diskUsage?.total_in_bytes).toBe(1000);
+    });
+
+    it('does not add system fields without disk usage', async () => {
+      // Setup mock with no field statistics
+      mockUseStreamsAppFetch.mockImplementation(() => ({
+        value: null,
+        loading: false,
+        refresh: jest.fn(),
+      }));
+
+      const definition = createMockClassicStreamDefinition();
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      // System fields should not be present
+      const sourceField = result.current.fields.find((f) => f.name === '_source');
+      expect(sourceField).toBeUndefined();
+    });
+
+    it('returns isDiskUsageSupported based on API response', async () => {
+      const mockFieldStats = {
+        isSupported: false,
+        fields: [],
+        totalFields: 0,
+      };
+
+      let callCount = 0;
+      mockUseStreamsAppFetch.mockImplementation(() => {
+        callCount++;
+        if (callCount === 2) {
+          return {
+            value: mockFieldStats,
+            loading: false,
+            refresh: mockFieldStatisticsRefresh,
+          };
+        }
+        return {
+          value: { unmappedFields: [] },
+          loading: false,
+          refresh: mockUnmappedFieldsRefresh,
+        };
+      });
+
+      const definition = createMockClassicStreamDefinition();
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      expect(result.current.isDiskUsageSupported).toBe(false);
+    });
+
+    it('refreshFields also refreshes field statistics', async () => {
+      mockUseStreamsAppFetch.mockImplementation(() => ({
+        value: null,
+        loading: false,
+        refresh: mockFieldStatisticsRefresh,
+      }));
+
+      const definition = createMockClassicStreamDefinition();
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      act(() => {
+        result.current.refreshFields();
+      });
+
+      expect(mockRefreshDefinition).toHaveBeenCalled();
     });
   });
 });
