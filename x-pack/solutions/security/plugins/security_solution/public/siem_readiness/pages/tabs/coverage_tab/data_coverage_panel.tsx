@@ -26,10 +26,8 @@ import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
-import {
-  CategoryConfigurationPanel,
-  type CategoryOption,
-} from '../../components/configuration_panel';
+import type { CategoryOption } from '../../components/configuration_panel';
+import { CategoryConfigurationPanel } from '../../components/configuration_panel';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
@@ -79,11 +77,7 @@ export const DataCoveragePanel: React.FC = () => {
 
   // State for category filtering
   const [selectedCategories, setSelectedCategories] = useState<CategoryOption[]>([
-    'Endpoint',
-    'Identity',
-    'Network',
-    'Cloud',
-    'Application/SaaS',
+    ...CATEGORY_ORDER,
   ]);
 
   // State for showing configuration modal
@@ -123,15 +117,16 @@ export const DataCoveragePanel: React.FC = () => {
 
   // Transform raw data into table rows, filtered by selected categories
   const coverageData = useMemo<CategoryCoverageData[]>(() => {
-    if (!getReadinessCategories.data?.mainCategoriesMap) {
+    const mainCategoriesMap = getReadinessCategories.data?.mainCategoriesMap;
+    if (!mainCategoriesMap) {
       return [];
     }
 
-    const mainCategoriesMap = getReadinessCategories.data.mainCategoriesMap;
+    const categoryDataMap = new Map(mainCategoriesMap.map((item) => [item.category, item]));
 
     return CATEGORY_ORDER.filter((category) => selectedCategories.includes(category)).map(
       (category) => {
-        const categoryData = mainCategoriesMap.find((item) => item.category === category);
+        const categoryData = categoryDataMap.get(category);
         const totalDocs = categoryData?.indices.reduce((sum, index) => sum + index.docs, 0) || 0;
 
         return {
@@ -230,136 +225,133 @@ export const DataCoveragePanel: React.FC = () => {
   ];
 
   return (
-    <>
-      <EuiPanel hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {/* Header Section */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiPanel hasBorder>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {/* Header Section */}
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>
+                      {i18n.translate(
+                        'xpack.securitySolution.siemReadiness.coverage.dataCoverage.title',
+                        {
+                          defaultMessage: 'Data coverage',
+                        }
+                      )}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {hasMissingData && (
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3>
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataCoverage.title',
-                          {
-                            defaultMessage: 'Data coverage',
-                          }
-                        )}
-                      </h3>
-                    </EuiTitle>
+                    <EuiBadge color="warning" iconType="warning" />
                   </EuiFlexItem>
-                  {hasMissingData && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="warning" iconType="warning" />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconSide="right"
-                  size="s"
-                  iconType="gear"
-                  onClick={() => setIsConfigModalVisible(true)}
-                  data-test-subj="configurationsButton"
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.siemReadiness.coverage.dataCoverage.configurations',
-                    {
-                      defaultMessage: 'Configurations',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconSide="right"
-                  size="s"
-                  iconType="plusInCircle"
-                  onClick={handleCreateCase}
-                  data-test-subj="createNewCaseButton"
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.siemReadiness.coverage.dataCoverage.createCase',
-                    {
-                      defaultMessage: 'Create new case',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          {/* Warning Callout */}
-          {hasMissingData && (
-            <EuiFlexItem>
-              <EuiCallOut
-                announceOnMount
-                title={i18n.translate(
-                  'xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningTitle',
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="gear"
+                onClick={() => setIsConfigModalVisible(true)}
+                data-test-subj="configurationsButton"
+              >
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.coverage.dataCoverage.configurations',
                   {
-                    defaultMessage: 'Some log categories are missing required integrations.',
+                    defaultMessage: 'Configurations',
                   }
                 )}
-                color="warning"
-                iconType="warning"
-                size="s"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningDescription"
-                    defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. Create a case to install the missing integrations for {count, plural, one {# category} other {# categories}} or view missing integrations to restore full visibility. Learn more about installing integrations in our {docs}."
-                    values={{
-                      count: missingCategoriesCount,
-                      docs: (
-                        <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
-                          {i18n.translate(
-                            'xpack.securitySolution.siemReadiness.coverage.dataCoverage.docsLink',
-                            {
-                              defaultMessage: 'docs',
-                            }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiCallOut>
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="right"
+                size="s"
+                iconType="plusInCircle"
+                onClick={handleCreateCase}
+                data-test-subj="createNewCaseButton"
+              >
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.coverage.dataCoverage.createCase',
+                  {
+                    defaultMessage: 'Create new case',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-          {/* Description */}
+        {/* Warning Callout */}
+        {hasMissingData && (
           <EuiFlexItem>
-            <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.securitySolution.siemReadiness.coverage.dataCoverage.description',
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningTitle',
                 {
-                  defaultMessage:
-                    'View the coverage status for each log category below to ensure you have incoming data.',
+                  defaultMessage: 'Some log categories are missing required integrations.',
                 }
               )}
-            </EuiText>
+              color="warning"
+              iconType="warning"
+              size="s"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.siemReadiness.coverage.dataCoverage.warningDescription"
+                  defaultMessage="Some log categories are missing integrations, limiting your visibility and detection coverage. Create a case to install the missing integrations for {count, plural, one {# category} other {# categories}} or view missing integrations to restore full visibility. Learn more about installing integrations in our {docs}."
+                  values={{
+                    count: missingCategoriesCount,
+                    docs: (
+                      <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataCoverage.docsLink',
+                          {
+                            defaultMessage: 'docs',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
           </EuiFlexItem>
+        )}
 
-          {/* Coverage Table */}
-          <EuiFlexItem>
-            <EuiBasicTable
-              items={coverageData}
-              columns={columns}
-              data-test-subj="dataCoverageTable"
-              tableCaption={i18n.translate(
-                'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.caption',
-                {
-                  defaultMessage: 'Data coverage by log category',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+        {/* Description */}
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.description',
+              {
+                defaultMessage:
+                  'View the coverage status for each log category below to ensure you have incoming data.',
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
 
+        {/* Coverage Table */}
+        <EuiFlexItem>
+          <EuiBasicTable
+            items={coverageData}
+            columns={columns}
+            data-test-subj="dataCoverageTable"
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.siemReadiness.coverage.dataCoverage.table.caption',
+              {
+                defaultMessage: 'Data coverage by log category',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {/* Configuration Modal */}
       <CategoryConfigurationPanel
         isVisible={isConfigModalVisible}
@@ -367,6 +359,6 @@ export const DataCoveragePanel: React.FC = () => {
         selectedCategories={selectedCategories}
         onSelectionChange={setSelectedCategories}
       />
-    </>
+    </EuiPanel>
   );
 };
