@@ -46,6 +46,9 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
     const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
 
     return {
