@@ -25,6 +25,9 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
     >(
       state: StoredStateType
     ): TimeSliderControlState => {
+      /**
+       * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+       */
       const {
         is_anchored,
         timeslice_start_as_percentage_of_time_range,
