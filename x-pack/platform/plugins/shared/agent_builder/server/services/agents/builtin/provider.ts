@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { AgentType, createAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { BuiltInAgentDefinition, AgentConfigContext } from '@kbn/agent-builder-server/agents';
 import type { BuiltinAgentRegistry } from './registry';
 import type { AgentProviderFn, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';
@@ -19,20 +19,24 @@ export const createBuiltinProviderFn = ({
   registry: BuiltinAgentRegistry;
 }): AgentProviderFn<true> => {
   const availabilityCache = new AgentAvailabilityCache();
-  return ({ request }) => {
-    return registryToProvider({ registry, request, availabilityCache });
+  return ({ request, space }) => {
+    return registryToProvider({ registry, request, space, availabilityCache });
   };
 };
 
 const registryToProvider = ({
   registry,
   request,
+  space,
   availabilityCache,
 }: {
   registry: BuiltinAgentRegistry;
   request: KibanaRequest;
+  space: string;
   availabilityCache: AgentAvailabilityCache;
 }): ReadonlyAgentProvider => {
+  const configContext: AgentConfigContext = { request, spaceId: space };
+
   return {
     id: 'builtin',
     readonly: true,
@@ -44,12 +48,14 @@ const registryToProvider = ({
       if (!definition) {
         throw createAgentNotFoundError({ agentId });
       }
-      return toInternalDefinition({ definition, availabilityCache });
+      return toInternalDefinition({ definition, availabilityCache, configContext });
     },
     list: (opts) => {
       const definitions = registry.list();
       return Promise.all(
-        definitions.map((definition) => toInternalDefinition({ definition, availabilityCache }))
+        definitions.map((definition) =>
+          toInternalDefinition({ definition, availabilityCache, configContext })
+        )
       );
     },
   };
@@ -58,12 +64,20 @@ const registryToProvider = ({
 export const toInternalDefinition = async ({
   definition,
   availabilityCache,
+  configContext,
 }: {
   definition: BuiltInAgentDefinition;
   availabilityCache: AgentAvailabilityCache;
+  configContext: AgentConfigContext;
 }): Promise<InternalAgentDefinition> => {
+  const configuration =
+    typeof definition.configuration === 'function'
+      ? await definition.configuration(configContext)
+      : definition.configuration;
+
   return {
     ...definition,
+    configuration,
     type: AgentType.chat,
     readonly: true,
     isAvailable: async (ctx) => {
