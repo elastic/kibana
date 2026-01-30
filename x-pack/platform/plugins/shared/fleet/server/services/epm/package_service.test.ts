@@ -187,8 +187,8 @@ function getTest(
             force: true,
             // Undefined es references
             esReferences: undefined,
-            // Undefined secondary authorization
-            authorizationHeader: undefined,
+            // Undefined request
+            request: undefined,
           },
         ],
         spyResponse: {
