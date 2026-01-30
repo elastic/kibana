@@ -36,4 +36,5 @@ export interface TaskContext {
   };
   test: boolean; // whether the script is running with TEST data
   fix: boolean;
+  fallbackToTestMode?: boolean; // whether we're using test data as fallback (no real SO types updated)
 }

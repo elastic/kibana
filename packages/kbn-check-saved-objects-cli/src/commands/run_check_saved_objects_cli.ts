@@ -14,6 +14,7 @@ import type { TaskContext } from './types';
 import {
   automatedRollbackTests,
   checkRemovedTypes,
+  fallbackToTestMode,
   getSnapshots,
   validateNewTypes,
   validateUpdatedTypes,
@@ -125,6 +126,21 @@ export function runCheckSavedObjectsCli() {
             title: 'Validate existing SO types',
             task: validateUpdatedTypes,
             enabled: !server,
+          },
+          /**
+           * ==================================================================
+           * Fallback to test mode when no real SO types have been updated.
+           *
+           * This provides a smoke test for the migration logic on every PR,
+           * ensuring no regressions in the migration code even when no SO
+           * type definitions have changed.
+           * ==================================================================
+           */
+          {
+            title: 'Fallback to test mode (no updated types detected)',
+            task: fallbackToTestMode,
+            enabled: !server && !test,
+            skip: (ctx) => ctx.updatedTypes.length > 0 || globalTask.errors.length > 0,
           },
           {
             title: 'Automated rollback tests',
