@@ -12,5 +12,6 @@ if is_pr && ! is_auto_commit_disabled; then
 elif is_pr; then
   node scripts/telemetry_check --baseline "${GITHUB_PR_MERGE_BASE:-}"
 else
-  node scripts/telemetry_check
+  # assume on-merge pipeline
+  node scripts/telemetry_check --baseline "${BUILDKITE_BRANCH:-main}"
 fi
