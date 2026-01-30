@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ColorMappingType, StaticColorType } from '../color';
+import { groupIsNotCollapsed } from '../../utils';
 
 export const legendVisibleSchema = schema.maybe(
   schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
@@ -51,12 +52,6 @@ export type PartitionMetric =
 export interface PartitionGroupBy {
   collapse_by?: string;
   color?: ColorMappingType;
-}
-
-export function groupIsNotCollapsed(def: {
-  collapse_by?: string;
-}): def is { collapse_by: undefined } {
-  return def.collapse_by == null;
 }
 
 export function validateColoringAssignments({

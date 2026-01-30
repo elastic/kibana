@@ -19,17 +19,13 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import {
-  groupIsNotCollapsed,
-  legendNestedSchema,
-  legendVisibleSchema,
-  valueDisplaySchema,
-} from './partition_shared';
+import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
   legend: schema.maybe(

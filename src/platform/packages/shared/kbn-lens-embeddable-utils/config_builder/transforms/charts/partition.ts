@@ -39,7 +39,7 @@ import {
   getSharedChartLensStateToAPI,
   stripUndefined,
 } from './utils';
-import { addLayerColumn, isEsqlTableTypeDataset } from '../../utils';
+import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -47,15 +47,14 @@ import type { PieState } from '../../schema/charts/pie';
 import type { WaffleState } from '../../schema/charts/waffle';
 import type { MosaicState } from '../../schema/charts/mosaic';
 import type { TreemapState } from '../../schema/charts/treemap';
+import type { StaticColorType } from '../../schema/color';
+import type { CollapseBySchema } from '../../schema/shared';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import {
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
 } from '../coloring';
-import type { StaticColorType } from '../../schema/color';
-import type { CollapseBySchema } from '../../schema/shared';
-import { groupIsNotCollapsed } from '../../schema/charts/partition_shared';
 
 type PartitionLens = Extract<
   TypedLensSerializedState['attributes'],

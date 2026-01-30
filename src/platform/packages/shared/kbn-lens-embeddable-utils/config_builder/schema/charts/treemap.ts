@@ -22,7 +22,6 @@ import {
 } from '../shared';
 import type { PartitionMetric } from './partition_shared';
 import {
-  groupIsNotCollapsed,
   legendNestedSchema,
   legendVisibleSchema,
   validateColoringAssignments,
@@ -33,6 +32,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedStateSchema = {
   legend: schema.maybe(

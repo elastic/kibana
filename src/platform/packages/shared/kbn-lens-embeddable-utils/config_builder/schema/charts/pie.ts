@@ -26,12 +26,12 @@ import {
 } from './shared';
 import type { PartitionMetric } from './partition_shared';
 import {
-  groupIsNotCollapsed,
   legendNestedSchema,
   legendVisibleSchema,
   validateColoringAssignments,
   valueDisplaySchema,
 } from './partition_shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 /**
  * Shared visualization options for pie/donut charts including legend, value display, and label positioning
