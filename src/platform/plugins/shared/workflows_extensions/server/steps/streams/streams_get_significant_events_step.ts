@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsGetSignificantEventsStepCommonDefinition } from '../../../common/steps/streams';
 import { createServerStepDefinition } from '../../step_registry/types';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 
 interface SignificantEventsResponse {
   significant_events: Array<Record<string, unknown>>;

@@ -69,6 +69,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '7c3e0c9433fdc63e07ae285045f8c0b83b3024ee13ee3213a125e1235cb00027',
   },
   {
+    id: 'streams.listFeatures',
+    handlerHash: '4bdeb66bc0051ea23bc717521f422490a46027ebb4677bba60eab32364da5c6b',
+  },
+  {
     id: 'streams.listStreams',
     handlerHash: '28302d5cb8ec8fea12b080c418baf1791f06a11d8387d13e5b5b1f2920583327',
   },

@@ -17,9 +17,10 @@ import {
   dataRegexReplaceStepDefinition,
 } from './data';
 import {
-  streamsListStreamsStepDefinition,
-  streamsGetStreamStepDefinition,
   streamsGetSignificantEventsStepDefinition,
+  streamsGetStreamStepDefinition,
+  streamsListFeaturesStepDefinition,
+  streamsListStreamsStepDefinition,
 } from './streams';
 import type { PublicStepRegistry } from '../step_registry';
 
@@ -34,4 +35,5 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(streamsListStreamsStepDefinition);
   stepRegistry.register(streamsGetStreamStepDefinition);
   stepRegistry.register(streamsGetSignificantEventsStepDefinition);
+  stepRegistry.register(streamsListFeaturesStepDefinition);
 };

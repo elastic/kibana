@@ -25,3 +25,9 @@ export {
   type StreamsGetSignificantEventsStepInputSchema,
   type StreamsGetSignificantEventsStepOutputSchema,
 } from './streams_get_significant_events_step';
+export {
+  StreamsListFeaturesStepTypeId,
+  streamsListFeaturesStepCommonDefinition,
+  type StreamsListFeaturesStepInputSchema,
+  type StreamsListFeaturesStepOutputSchema,
+} from './streams_list_features_step';

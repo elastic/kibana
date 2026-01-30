@@ -10,3 +10,4 @@
 export { streamsListStreamsStepDefinition } from './streams_list_streams_step';
 export { streamsGetStreamStepDefinition } from './streams_get_stream_step';
 export { streamsGetSignificantEventsStepDefinition } from './streams_get_significant_events_step';
+export { streamsListFeaturesStepDefinition } from './streams_list_features_step';

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { makeKibanaRequest } from './utils/make_kibana_request';
 import { streamsListStreamsStepCommonDefinition } from '../../../common/steps/streams';
 import { createServerStepDefinition } from '../../step_registry/types';
-import { makeKibanaRequest } from './utils/make_kibana_request';
 
 interface ListStreamsResponse {
   streams: Array<Record<string, unknown>>;
