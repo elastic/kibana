@@ -12,21 +12,11 @@ import { screen, fireEvent } from '@testing-library/react';
 import { FeedbackButton } from './feedback_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const coreStartMock = coreMock.createStart();
-const license = licensingMock.createLicense({
-  license: {
-    type: 'platinum',
-  },
-});
-
-const getLicense = jest.fn().mockResolvedValue(license);
 
 const propsMock = {
-  isServerless: false,
   core: coreStartMock,
-  getLicense,
 };
 
 describe('FeedbackButton', () => {

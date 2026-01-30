@@ -7,48 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FeedbackHeader } from './feedback_header';
 import { FeedbackBody } from './feedback_body';
 import { FeedbackFooter } from './feedback_footer';
 
 interface Props {
   core: CoreStart;
-  getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackForm = ({ core, getLicense }: Props) => {
+export const FeedbackForm = ({ core }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackText, setFeedbackText] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
 
-  const getEmail = useCallback(async () => {
-    try {
-      const user = await core.security.authc.getCurrentUser();
-      if (user?.email) {
-        setUserEmail(user.email);
-      }
-    } catch (_) {
-      setUserEmail('');
-    }
-  }, [core.security.authc]);
-
-  useEffect(() => {
-    getEmail();
-  }, [getEmail]);
-
   const handleChangeFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setFeedbackText(e.target.value);
-  };
-
-  const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
-    setUserEmail(e.target.value);
   };
 
   const submitFeedback = () => {
@@ -57,6 +36,7 @@ export const FeedbackForm = ({ core, getLicense }: Props) => {
 
   const formCss = css`
     padding: ${euiTheme.size.l};
+    width: 648px;
   `;
 
   return (
@@ -65,11 +45,24 @@ export const FeedbackForm = ({ core, getLicense }: Props) => {
       <FeedbackBody
         core={core}
         feedbackText={feedbackText}
-        userEmail={userEmail}
         handleChangeFeedbackText={handleChangeFeedbackText}
-        handleChangeEmail={handleChangeEmail}
-        getLicense={getLicense}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <EuiText size="s" color="subdued" data-test-subj="feedbackFormSessionInfo">
+          <FormattedMessage
+            id="feedback.form.sessionInfo.description"
+            defaultMessage="Your session information is included along with your input and email. If you need assistance, <supportLink>submit a support request</supportLink> instead."
+            values={{
+              supportLink: (linkText) => (
+                <EuiLink href="https://support.elastic.co/home" target="_blank">
+                  {linkText}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </EuiFlexItem>
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}

@@ -14,4 +14,3 @@ export { FeedbackForm } from './feedback_form';
 export { FeedbackBody } from './feedback_body';
 export { FeedbackFooter } from './feedback_footer';
 export { FeedbackHeader } from './feedback_header';
-export { BenefitsCallout } from './benefits_callout';

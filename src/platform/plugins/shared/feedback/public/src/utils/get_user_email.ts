@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './components';
-export { FeedbackForm } from './components';
-export { FeedbackBody } from './components';
-export { FeedbackFooter } from './components';
-export { FeedbackHeader } from './components';
+import type { SecurityServiceStart } from '@kbn/core/public';
 
-export { getUserEmail } from './utils';
-export { getCurrentAppTitle } from './utils';
+export const getUserEmail = async (security: SecurityServiceStart) => {
+  const user = await security.authc.getCurrentUser();
+  return user?.email;
+};

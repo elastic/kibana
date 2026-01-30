@@ -41,10 +41,7 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
       if (isNotAdblocked) {
         core.chrome.navControls.registerRight({
           order: 1002,
-          mount: toMountPoint(
-            <FeedbackButton core={core} getLicense={licensing.getLicense} />,
-            core.rendering
-          ),
+          mount: toMountPoint(<FeedbackButton core={core} />, core.rendering),
         });
       }
     });

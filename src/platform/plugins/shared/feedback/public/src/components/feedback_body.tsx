@@ -7,63 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect, type ChangeEvent } from 'react';
+import React, { useState, type ChangeEvent } from 'react';
 import {
-  EuiFieldText,
+  EuiCheckbox,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ILicense } from '@kbn/licensing-types';
 import type { CoreStart } from '@kbn/core/public';
 import { FormLabel } from './form_label';
 import { CsatButtons } from './csat_buttons';
-import { BenefitsCallout } from './benefits_callout';
 
 interface Props {
   core: CoreStart;
   feedbackText: string;
-  userEmail: string;
   handleChangeFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
-  getLicense: LicensingPluginStart['getLicense'];
 }
-export const FeedbackBody = ({
-  core,
-  feedbackText,
-  userEmail,
-  getLicense,
-  handleChangeFeedbackText,
-  handleChangeEmail,
-}: Props) => {
-  const [license, setLicense] = useState<ILicense | undefined>(undefined);
+export const FeedbackBody = ({ core, feedbackText, handleChangeFeedbackText }: Props) => {
+  const [allowEmailContact, setAllowEmailContact] = useState(false);
+  const [generalFeedbackText, setGeneralFeedbackText] = useState('');
   const { euiTheme } = useEuiTheme();
 
-  const getLicenseInfo = useCallback(async () => {
-    try {
-      const licenseInfo = await getLicense();
-      setLicense(licenseInfo);
-    } catch (_) {
-      setLicense(undefined);
-    }
-  }, [getLicense]);
-
-  useEffect(() => {
-    getLicenseInfo();
-  }, [getLicenseInfo]);
-
-  const licenseType = license?.type;
-
-  const showBenefitsCallout =
-    license?.hasAtLeast('platinum') && licenseType !== 'trial' && licenseType !== undefined;
+  const handleChangeAllowEmailContact = (e: ChangeEvent<HTMLInputElement>) => {
+    setAllowEmailContact(e.target.checked);
+  };
 
   const bodyCss = css`
     padding-top: ${euiTheme.size.m};
@@ -78,19 +51,22 @@ export const FeedbackBody = ({
       <EuiForm component="form" css={formCss}>
         <CsatButtons core={core} />
         <EuiSpacer size="m" />
-        {showBenefitsCallout && <BenefitsCallout licenseType={licenseType} />}
         <EuiFormRow fullWidth>
           <EuiTextArea
             fullWidth
+            rows={4}
             data-test-subj="feedbackFormTextArea"
             value={feedbackText}
-            aria-label={i18n.translate('feedback.form.body.textArea.ariaLabel', {
+            aria-label={i18n.translate('feedback.form.body.experienceFeedbackTextArea.ariaLabel', {
               defaultMessage: 'Describe your experience',
             })}
             onChange={handleChangeFeedbackText}
-            placeholder={i18n.translate('feedback.form.body.textArea.placeholder', {
-              defaultMessage: 'Describe your experience',
-            })}
+            placeholder={i18n.translate(
+              'feedback.form.body.experienceFeedbackTextArea.placeholder',
+              {
+                defaultMessage: 'Describe your experience',
+              }
+            )}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -106,42 +82,23 @@ export const FeedbackBody = ({
         >
           <EuiTextArea
             fullWidth
-            data-test-subj="feedbackFormTextArea"
-            value={feedbackText}
-            aria-label={i18n.translate('feedback.form.body.textArea.ariaLabel', {
-              defaultMessage: 'Describe your experience',
+            rows={4}
+            data-test-subj="feedbackFormAdditionalFeedbackTextArea"
+            value={generalFeedbackText}
+            aria-label={i18n.translate('feedback.form.body.additionalFeedback.ariaLabel', {
+              defaultMessage: 'Additional feedback about Elastic',
             })}
-            onChange={handleChangeFeedbackText}
+            onChange={(e) => setGeneralFeedbackText(e.target.value)}
           />
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormLabel>
-              <FormattedMessage
-                id="feedback.form.body.emailInput.label"
-                defaultMessage="Your email"
-              />
-            </FormLabel>
-          }
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="feedback.form.body.emailInput.optionalText"
-                defaultMessage="Optional"
-              />
-            </EuiText>
-          }
-        >
-          <EuiFieldText
-            fullWidth
-            data-test-subj="feedbackFormEmailInput"
-            value={userEmail}
-            aria-label={i18n.translate('feedback.form.body.emailInput.ariaLabel', {
-              defaultMessage: 'Enter your email here',
+        <EuiFormRow>
+          <EuiCheckbox
+            id="feedbackFormCheckbox"
+            label={i18n.translate('feedback.form.body.checkbox.consentLabel', {
+              defaultMessage: "I'm open to being contacted via email.",
             })}
-            type="email"
-            onChange={handleChangeEmail}
+            checked={allowEmailContact}
+            onChange={handleChangeAllowEmailContact}
           />
         </EuiFormRow>
       </EuiForm>

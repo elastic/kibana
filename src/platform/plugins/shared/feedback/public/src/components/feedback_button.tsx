@@ -12,19 +12,15 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FeedbackForm } from './feedback_form';
 
 interface Props {
   core: CoreStart;
-  getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackButton = ({ core, getLicense }: Props) => {
+export const FeedbackButton = ({ core }: Props) => {
   const openModal = () => {
-    core.overlays.openModal(
-      toMountPoint(<FeedbackForm getLicense={getLicense} core={core} />, core.rendering)
-    );
+    core.overlays.openModal(toMountPoint(<FeedbackForm core={core} />, core.rendering));
   };
 
   return (

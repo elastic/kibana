@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ELASTIC_SUPPORT_URL = 'https://support.elastic.co/home';
+export { getUserEmail } from './get_user_email';
+export { getCurrentAppTitle } from './get_current_app_title';
