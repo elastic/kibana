@@ -88,6 +88,10 @@ export async function getCorrelatedLogsForLogEntry({
     end,
     logId,
     errorLogsOnly: false,
+    correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+    logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
+    maxSequences: DEFAULT_MAX_SEQUENCES,
+    maxLogsPerSequence: DEFAULT_MAX_LOGS_PER_SEQUENCE,
   });
 }
 

@@ -24,14 +24,10 @@ export interface LogDocument {
   message?: string;
   'log.level'?: string;
   'service.name'?: string;
-  'service.environment'?: string;
-  'host.name'?: string;
-  'container.id'?: string;
   'trace.id'?: string;
   'span.id'?: string;
-  'error.message'?: string;
-  'error.exception.message'?: string;
   'http.response.status_code'?: number;
+  'error.exception.message'?: string;
 }
 
 export const getLogDocumentById = async ({
