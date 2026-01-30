@@ -24,27 +24,52 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 jest.mock('../../../../hooks/use_streams_privileges');
 
 // Mock hooks used by StreamDescription
-jest.mock('../../../stream_detail_features/stream_description/use_stream_description_api', () => ({
+jest.mock('../../../stream_detail_systems/stream_description/use_stream_description_api', () => ({
   useStreamDescriptionApi: () => ({
-    isGenerating: false,
     description: '',
+    setDescription: jest.fn(),
     isUpdating: false,
     isEditing: false,
-    setDescription: jest.fn(),
     onCancelEdit: jest.fn(),
-    onGenerateDescription: jest.fn(),
-    onSaveDescription: jest.fn(),
     onStartEditing: jest.fn(),
+    onSaveDescription: jest.fn(),
+    isTaskLoading: false,
+    task: undefined,
+    taskError: null,
+    refreshTask: jest.fn(),
+    getDescriptionGenerationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
+    scheduleDescriptionGenerationTask: jest.fn(),
+    cancelDescriptionGenerationTask: jest.fn(),
+    acknowledgeDescriptionGenerationTask: jest.fn(),
     areButtonsDisabled: false,
   }),
 }));
 
-// Mock hooks used by StreamFeatureConfiguration
-jest.mock('../../../stream_detail_features/stream_features/hooks/use_stream_features', () => ({
+// Mock hooks used by StreamDiscoveryConfiguration
+jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
+  useStreamSystems: () => ({
+    systems: [],
+    refreshSystems: jest.fn(),
+    systemsLoading: false,
+  }),
+}));
+
+jest.mock('../../../../hooks/use_stream_features', () => ({
   useStreamFeatures: () => ({
     features: [],
-    refreshFeatures: jest.fn(),
     featuresLoading: false,
+    refreshFeatures: jest.fn(),
+    error: null,
+  }),
+}));
+
+jest.mock('../../../../hooks/use_stream_features_api', () => ({
+  useStreamFeaturesApi: () => ({
+    getFeaturesIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
+    scheduleFeaturesIdentificationTask: jest.fn(),
+    cancelFeaturesIdentificationTask: jest.fn(),
+    deleteFeature: jest.fn(),
+    deleteFeaturesInBulk: jest.fn(),
   }),
 }));
 
@@ -54,10 +79,10 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/use_stream_features_api', () => ({
-  useStreamFeaturesApi: () => ({
-    identifyFeatures: jest.fn(),
-    getSystemIdentificationTask: jest.fn().mockResolvedValue({ status: 'idle' }),
+jest.mock('../../../../hooks/use_stream_systems_api', () => ({
+  useStreamSystemsApi: () => ({
+    identifySystems: jest.fn(),
+    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
     scheduleSystemIdentificationTask: jest.fn(),
     cancelSystemIdentificationTask: jest.fn(),
     acknowledgeSystemIdentificationTask: jest.fn(),
@@ -206,7 +231,7 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Stream description')).toBeInTheDocument();
     });
 
-    it('should render Feature identification panel when significantEvents feature is enabled', () => {
+    it('should render Stream discovery panel when significantEvents feature is enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: { enabled: true },
@@ -220,8 +245,8 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Check the Feature identification panel title is rendered
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
+      // Check the Stream discovery panel title is rendered
+      expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
@@ -239,7 +264,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('Feature identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is undefined', () => {
@@ -257,7 +282,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('Feature identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
   });
 
@@ -418,8 +443,8 @@ describe('ClassicAdvancedView', () => {
 
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
-      // Feature identification
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
+      // Stream discovery (contains Features and Systems)
+      expect(screen.getByText('Stream discovery')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Elasticsearch assets

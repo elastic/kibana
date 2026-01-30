@@ -30,6 +30,8 @@
           "({ onClose, onCreate, onCreateTemplate, templates, isLoadingTemplates, hasErrorLoadingTemplates, onRetryLoadTemplates, onValidate, getIlmPolicy, getSimulatedTemplate, }: CreateClassicStreamFlyoutProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+        "lineNumber": 94,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "CreateClassicStreamFlyoutProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+            "lineNumber": 94,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

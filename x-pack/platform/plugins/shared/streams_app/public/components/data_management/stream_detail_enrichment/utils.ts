@@ -8,8 +8,10 @@
 import { htmlIdGenerator } from '@elastic/eui';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConcatProcessor,
   ConvertProcessor,
   GrokProcessor,
+  JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
@@ -42,6 +44,7 @@ import type {
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
+  ConcatFormState,
   ConditionBlockFormState,
   ConvertFormState,
   DateFormState,
@@ -49,6 +52,7 @@ import type {
   DropFormState,
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
+  JoinFormState,
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
@@ -74,6 +78,8 @@ export const SPECIALISED_TYPES = [
   'uppercase',
   'lowercase',
   'trim',
+  'join',
+  'concat',
 ];
 
 interface FormStateDependencies {
@@ -247,12 +253,31 @@ const defaultTrimProcessorFormState = (): TrimFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultJoinProcessorFormState = (): JoinFormState => ({
+  action: 'join' as const,
+  from: [],
+  to: '',
+  delimiter: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
   to: '',
   ignore_failure: true,
   ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultConcatProcessorFormState = (): ConcatFormState => ({
+  action: 'concat' as const,
+  from: [],
+  to: '',
+  ignore_failure: true,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
 });
 
@@ -279,6 +304,8 @@ const defaultProcessorFormStateByType: Record<
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
+  join: defaultJoinProcessorFormState,
+  concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -321,7 +348,9 @@ export const getFormStateFromActionStep = (
     step.action === 'math' ||
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
-    step.action === 'trim'
+    step.action === 'trim' ||
+    step.action === 'join' ||
+    step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -369,7 +398,7 @@ export const convertFormStateToProcessor = (
 
   if ('action' in formState) {
     if (formState.action === 'grok') {
-      const { patterns, from, ignore_failure, ignore_missing } = formState;
+      const { patterns, pattern_definitions, from, ignore_failure, ignore_missing } = formState;
 
       return {
         processorDefinition: {
@@ -379,6 +408,7 @@ export const convertFormStateToProcessor = (
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
+          pattern_definitions,
           from,
           ignore_failure,
           ignore_missing,
@@ -571,6 +601,35 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as TrimProcessor,
+      };
+    }
+
+    if (formState.action === 'join') {
+      const { from, to, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'join',
+          from,
+          to,
+          ignore_failure,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JoinProcessor,
+      };
+    }
+
+    if (formState.action === 'concat') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'concat',
+          from,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConcatProcessor,
       };
     }
 

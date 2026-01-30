@@ -38,6 +38,8 @@
           "[] | undefined) => (value: T) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,53 +61,14 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ai-assistant-common",
-        "id": "def-common.getIsAiAgentsEnabled",
-        "type": "Function",
-        "tags": [],
-        "label": "getIsAiAgentsEnabled",
-        "description": [
-          "\nChecks if the AI Agents feature is enabled via feature flag."
-        ],
-        "signature": [
-          "(featureFlags: ",
-          "FeatureFlagsStart",
-          ") => boolean"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/get_is_ai_agents_enabled.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ai-assistant-common",
-            "id": "def-common.getIsAiAgentsEnabled.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "featureFlags",
-            "description": [
-              "- Feature flags service"
-            ],
-            "signature": [
-              "FeatureFlagsStart"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/get_is_ai_agents_enabled.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Boolean indicating if AI Agents are enabled"
-        ],
         "initialIsOpen": false
       }
     ],
@@ -119,44 +82,14 @@
         "label": "AIChatExperience",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/ai-assistant-common",
-        "id": "def-common.AI_AGENTS_FEATURE_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "AI_AGENTS_FEATURE_FLAG",
-        "description": [
-          "\nFeature flag for enabling AI Agent functionality across AI Assistant plugins.\nWhen disabled, hides:\n- AI Agent card in the selection modal\n- Chat Experience setting in GenAI Settings"
-        ],
-        "signature": [
-          "\"aiAssistant.aiAgents.enabled\""
-        ],
-        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/feature_flags.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ai-assistant-common",
-        "id": "def-common.AI_AGENTS_FEATURE_FLAG_DEFAULT",
-        "type": "boolean",
-        "tags": [],
-        "label": "AI_AGENTS_FEATURE_FLAG_DEFAULT",
-        "description": [],
-        "signature": [
-          "false"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/feature_flags.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/ai-assistant-common",
         "id": "def-common.AssistantScope",
@@ -168,6 +101,8 @@
           "\"search\" | \"all\" | \"observability\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

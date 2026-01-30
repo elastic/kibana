@@ -26,6 +26,8 @@
         "EmailServiceStart"
       ],
       "path": "x-pack/platform/plugins/shared/notifications/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -49,6 +51,8 @@
           "\"notifications\""
         ],
         "path": "x-pack/platform/plugins/shared/notifications/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

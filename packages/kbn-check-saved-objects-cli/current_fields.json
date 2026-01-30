@@ -392,6 +392,28 @@
   "entity-discovery-api-key": [
     "apiKey"
   ],
+  "entity-engine-descriptor-v2": [
+    "error",
+    "error.action",
+    "error.message",
+    "logExtractionState",
+    "logExtractionState.additionalIndexPattern",
+    "logExtractionState.delay",
+    "logExtractionState.docsLimit",
+    "logExtractionState.fieldHistoryLength",
+    "logExtractionState.filter",
+    "logExtractionState.frequency",
+    "logExtractionState.lastExecutionTimestamp",
+    "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationTimestamp",
+    "logExtractionState.timeout",
+    "status",
+    "type",
+    "versionState",
+    "versionState.isMigratedFromV1",
+    "versionState.state",
+    "versionState.version"
+  ],
   "entity-engine-status": [
     "fieldHistoryLength",
     "filter",
@@ -565,6 +587,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -702,6 +725,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -1062,7 +1086,11 @@
     "provider"
   ],
   "security-rule": [
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [
@@ -1308,6 +1336,10 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
+  "trial-companion-nba-milestone": [
+    "dismiss",
+    "openTODOs"
+  ],
   "ui-metric": [
     "count"
   ],

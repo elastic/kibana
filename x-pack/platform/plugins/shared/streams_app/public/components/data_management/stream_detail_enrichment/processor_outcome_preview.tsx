@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
@@ -174,48 +175,78 @@ const PreviewDocumentsGroupBy = () => {
             { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
           )}
         >
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_all.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_all.id}
           >
-            {previewDocsFilterOptions.outcome_filter_all.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-            badgeColor="success"
-            numActiveFilters={simulationParsedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+            >
+              {previewDocsFilterOptions.outcome_filter_all.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_parsed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_parsed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(
-              previewDocsFilterOptions.outcome_filter_partially_parsed.id
-            )}
-            badgeColor="accent"
-            numActiveFilters={simulationPartiallyParsedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+              badgeColor="success"
+              numActiveFilters={simulationParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_partially_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_partially_parsed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationSkippedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(
+                previewDocsFilterOptions.outcome_filter_partially_parsed.id
+              )}
+              badgeColor="accent"
+              numActiveFilters={simulationPartiallyParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_skipped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_skipped.id}
           >
-            {previewDocsFilterOptions.outcome_filter_skipped.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationFailedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationSkippedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_skipped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_failed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_failed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_failed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationDroppedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationFailedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_failed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_dropped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_dropped.id}
           >
-            {previewDocsFilterOptions.outcome_filter_dropped.label}
-          </EuiFilterButton>
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationDroppedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_dropped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
         </EuiFilterGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

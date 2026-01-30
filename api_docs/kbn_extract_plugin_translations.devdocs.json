@@ -30,6 +30,8 @@
           "() => void"
         ],
         "path": "packages/kbn-extract-plugin-translations/src/cli.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
