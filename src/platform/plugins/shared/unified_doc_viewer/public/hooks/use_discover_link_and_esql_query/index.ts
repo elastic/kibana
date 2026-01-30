@@ -20,9 +20,11 @@ export function useDiscoverLinkAndEsqlQuery({
   whereClause,
 }: UseDiscoverLinkAndEsqlQueryParams) {
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern });
+
   if (!indexPattern || !whereClause) {
     return { discoverUrl: undefined, esqlQueryString: undefined };
   }
+
   const esqlQueryString = from(indexPattern).pipe(whereClause).toString();
   const discoverUrl = generateDiscoverLink(whereClause);
 

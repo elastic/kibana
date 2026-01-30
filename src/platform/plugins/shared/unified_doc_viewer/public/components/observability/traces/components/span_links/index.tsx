@@ -36,8 +36,7 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
-import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
-import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
@@ -121,7 +120,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
-    whereClause,
+    whereClause, // TODO FIX THIS
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

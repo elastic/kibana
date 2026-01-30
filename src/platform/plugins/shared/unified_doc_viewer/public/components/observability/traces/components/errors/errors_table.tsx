@@ -30,8 +30,7 @@ import {
   ScrollableSectionWrapper,
   type ScrollableSectionWrapperApi,
 } from '../../../../doc_viewer_logs_overview/scrollable_section_wrapper';
-import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
-import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',

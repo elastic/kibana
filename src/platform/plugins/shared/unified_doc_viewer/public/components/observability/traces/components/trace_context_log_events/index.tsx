@@ -14,8 +14,7 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useLogsQuery } from '../../hooks/use_logs_query';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
-import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
-import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',

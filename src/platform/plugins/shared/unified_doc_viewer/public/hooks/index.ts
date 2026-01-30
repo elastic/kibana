@@ -8,3 +8,7 @@
  */
 
 export * from './use_es_doc_search';
+export * from './use_doc_viewer_extension_actions';
+export * from './use_generate_discover_link';
+export * from './use_discover_link_and_esql_query';
+export * from './use_open_in_discover_section_action';
