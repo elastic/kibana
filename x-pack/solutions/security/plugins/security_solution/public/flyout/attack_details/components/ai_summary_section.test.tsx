@@ -50,7 +50,7 @@ jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_for
 const mockedUseOverviewTabData = jest.mocked(useOverviewTabData);
 const mockedUseExpandSection = jest.mocked(useExpandSection);
 
-const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-AIsummary`;
+const KEY = `aisummary`;
 
 describe('AISummarySection', () => {
   beforeEach(() => {
@@ -69,7 +69,7 @@ describe('AISummarySection', () => {
   it('renders the section title, switch label, and background title', () => {
     render(<AISummarySection />);
 
-    expect(screen.getByText('AI Summary')).toBeInTheDocument();
+    expect(screen.getByText('Attack Summary')).toBeInTheDocument();
     expect(screen.getByText('Show anonymized values')).toBeInTheDocument();
     expect(screen.getByText('Background')).toBeInTheDocument();
 
