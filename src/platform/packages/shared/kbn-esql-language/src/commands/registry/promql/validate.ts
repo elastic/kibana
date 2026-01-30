@@ -222,7 +222,7 @@ function validateIndexSources(
   for (const source of sources) {
     const indexName = source.name;
 
-    if (indexName && !indexName.includes('*') && !sourceExists(indexName, sourcesSet)) {
+    if (indexName && !sourceExists(indexName, sourcesSet)) {
       messages.push(errors.byId('unknownIndex', source.location, { name: indexName }));
     }
   }

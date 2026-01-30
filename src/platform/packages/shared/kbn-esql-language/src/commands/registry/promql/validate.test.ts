@@ -119,5 +119,11 @@ describe('PROMQL Validation', () => {
         []
       );
     });
+
+    test('invalid wildcard index', () => {
+      promqlExpectErrors('PROMQL index=unknown_* step=5m start=?_tstart end=?_tend (rate(x[5m]))', [
+        'Unknown index "unknown_*"',
+      ]);
+    });
   });
 });
