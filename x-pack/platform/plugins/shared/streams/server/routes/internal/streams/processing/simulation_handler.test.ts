@@ -52,6 +52,40 @@ describe('computeSimulationDocDiff', () => {
       );
     });
 
+    it('should return empty detected_fields when a field is set and immediately removed (regression test for PR comment)', () => {
+      // Regression test for: https://github.com/elastic/kibana/pull/250754#issuecomment-3823748090
+      // Scenario: Processor 1 sets 'http.response.bytes', Processor 2 removes it
+      // The overall detected_fields should be empty since no new fields remain in final output
+      const base = {
+        'data_stream.type': 'logs',
+        'data_stream.dataset': 'synth',
+        'data_stream.namespace': 'default',
+        message: 'Fatal error: cannot recover application state',
+      };
+      const docResult: SuccessfulPipelineSimulateDocumentResult = {
+        processor_results: [
+          createMockProcessorResult('set_processor', {
+            ...base,
+            'http.response.bytes': '123',
+          }),
+          createMockProcessorResult('remove_processor', {
+            ...base,
+            // http.response.bytes removed
+          }),
+        ],
+      };
+
+      const result = computeSimulationDocDiff(base, docResult, true, []);
+
+      // detected_fields should be EMPTY - no new fields in final output vs input
+      expect(result.detected_fields).toHaveLength(0);
+      // per_processor_fields should still track the temporary field for debugging
+      expect(result.per_processor_fields.map((f) => f.name)).toContain('http.response.bytes');
+      expect(
+        result.per_processor_fields.find((f) => f.name === 'http.response.bytes')?.processor_id
+      ).toBe('set_processor');
+    });
+
     it('should include a field that is created and kept in detected_fields', () => {
       // Scenario: Processor 1 adds 'new_field', Processor 2 doesn't touch it
       const base = { existing: 'value' };
