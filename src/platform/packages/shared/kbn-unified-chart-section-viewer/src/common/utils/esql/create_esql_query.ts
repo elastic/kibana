@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
+import { stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricField } from '../../../types';
-import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 interface CreateESQLQueryParams {
@@ -18,8 +17,6 @@ interface CreateESQLQueryParams {
   splitAccessors?: string[];
   whereStatements?: string[];
 }
-
-const separator = '\u203A'.normalize('NFC');
 
 /**
  * Creates a complete ESQL query string for metrics visualizations.
@@ -58,17 +55,7 @@ export function createESQLQuery({
       {
         metricField,
       }
-    ),
-    ...(splitAccessors.length > 1
-      ? [
-          evaluate(
-            `${DIMENSIONS_COLUMN} = CONCAT(${splitAccessors
-              .map((field) => sanitazeESQLInput(field))
-              .join(`, " ${separator} ", `)})`
-          ),
-          drop(`${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`),
-        ]
-      : [])
+    )
   );
 
   return queryPipeline.toString();

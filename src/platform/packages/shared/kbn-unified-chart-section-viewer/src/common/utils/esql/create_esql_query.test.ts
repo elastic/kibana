@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MetricField } from '../../../types';
-import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -66,7 +65,7 @@ TS metrics-*
     );
   });
 
-  it('should handle multiple dimensions with CONCAT', () => {
+  it('should handle multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockMetric,
       splitAccessors: ['host.name', 'container.id'],
@@ -75,8 +74,6 @@ TS metrics-*
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.name\`, " › ", \`container.id\`)
-  | DROP \`host.name\`, \`container.id\`
 `.trim()
     );
   });
@@ -90,8 +87,6 @@ TS metrics-*
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`, " › ", \`host.name\`)
-  | DROP \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
@@ -105,8 +100,6 @@ TS metrics-*
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`cpu.cores\`, " › ", \`host.name\`)
-  | DROP \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
@@ -120,8 +113,6 @@ TS metrics-*
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`, " › ", \`host.name\`, " › ", \`cpu.cores\`)
-  | DROP \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
@@ -217,8 +208,6 @@ TS metrics-*
         `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service-name\`, " › ", \`container-id\`)
-  | DROP \`service-name\`, \`container-id\`
 `.trim()
       );
     });
@@ -232,8 +221,6 @@ TS metrics-*
         `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host-ip\`, " › ", \`service-name\`)
-  | DROP \`host-ip\`, \`service-name\`
 `.trim()
       );
     });
