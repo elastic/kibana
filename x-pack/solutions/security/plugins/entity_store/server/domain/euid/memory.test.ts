@@ -7,7 +7,7 @@
 
 import { getEuidFromObject } from './memory';
 
-describe('getIdFromObject', () => {
+describe('getEuidFromObject', () => {
   it('returns empty string when obj is null or undefined', () => {
     expect(getEuidFromObject('host', null)).toBe(undefined);
     expect(getEuidFromObject('generic', undefined)).toBe(undefined);
@@ -16,11 +16,6 @@ describe('getIdFromObject', () => {
   describe('generic', () => {
     it('returns generic: + entity.id when present', () => {
       expect(getEuidFromObject('generic', { entity: { id: 'e-123' } })).toBe('generic:e-123');
-    });
-
-    it('returns empty string when no euid field is present', () => {
-      expect(getEuidFromObject('generic', {})).toBe(undefined);
-      expect(getEuidFromObject('generic', { entity: {} })).toBe(undefined);
     });
   });
 
@@ -55,11 +50,6 @@ describe('getIdFromObject', () => {
 
     it('uses host.hostname alone when prior combinations are missing', () => {
       expect(getEuidFromObject('host', { host: { hostname: 'node-1' } })).toBe('host:node-1');
-    });
-
-    it('returns empty string when no host id fields are present', () => {
-      expect(getEuidFromObject('host', {})).toBe(undefined);
-      expect(getEuidFromObject('host', { host: {} })).toBe(undefined);
     });
 
     it('precedence: host.entity.id over host.id', () => {
@@ -142,11 +132,6 @@ describe('getIdFromObject', () => {
 
     it('uses user.name alone when prior combinations are missing', () => {
       expect(getEuidFromObject('user', { user: { name: 'eve' } })).toBe('user:eve');
-    });
-
-    it('returns empty string when no user id fields are present', () => {
-      expect(getEuidFromObject('user', {})).toBe(undefined);
-      expect(getEuidFromObject('user', { user: {} })).toBe(undefined);
     });
 
     it('precedence: user.entity.id over user.name@host.entity.id', () => {

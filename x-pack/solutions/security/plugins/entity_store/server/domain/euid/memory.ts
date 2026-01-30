@@ -8,15 +8,13 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 
-export function getEuidFromObject(entityType: EntityType, obj: any) {
-  if (!obj) {
+export function getEuidFromObject(entityType: EntityType, doc: any) {
+  if (!doc) {
     return undefined;
   }
 
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-
-  const composedId = getComposedFieldValues(obj, identityField.euidFields);
-
+  const composedId = getComposedFieldValues(doc, identityField.euidFields);
   if (composedId.length === 0) {
     return undefined;
   }
@@ -24,11 +22,11 @@ export function getEuidFromObject(entityType: EntityType, obj: any) {
   return `${entityType}:${composedId.join('')}`;
 }
 
-function getComposedFieldValues(obj: any, euidFields: EuidAttribute[][]): string[] {
+function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {
   for (const composedFields of euidFields) {
     const composedFieldValues = composedFields.map((attr) => {
       if (attr.field !== undefined) {
-        return getFieldValue(obj, attr.field);
+        return getFieldValue(doc, attr.field);
       }
       return attr.separator;
     });
@@ -40,10 +38,10 @@ function getComposedFieldValues(obj: any, euidFields: EuidAttribute[][]): string
   return [];
 }
 
-export function getFieldValue(obj: any, field: string) {
+export function getFieldValue(doc: any, field: string) {
   const brokenFields = field.split('.');
 
-  let fieldInObject = obj;
+  let fieldInObject = doc;
   for (const brokenField of brokenFields) {
     fieldInObject = fieldInObject[brokenField];
     if (!fieldInObject) {

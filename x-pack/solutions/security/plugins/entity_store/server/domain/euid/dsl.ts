@@ -17,30 +17,29 @@ interface FieldValue {
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
-): QueryDslQueryContainer {
+): QueryDslQueryContainer | undefined {
   if (!doc) {
     return undefined;
   }
 
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
-
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }
 
   const dsl: QueryDslQueryContainer = {
-    query: {
-      bool: {
-        filter: fieldsToBeFilteredOn.values.map((field) => ({ term: field })),
-      },
+    bool: {
+      filter: fieldsToBeFilteredOn.values.map((field) => ({ term: field })),
     },
   };
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
   if (toBeFilteredOut.length > 0) {
-    dsl.query.bool.must_not = toBeFilteredOut.map((field) => ({ exists: { field } }));
+    dsl.bool = {
+      ...dsl.bool,
+      must_not: toBeFilteredOut.map((field) => ({ exists: { field } })),
+    };
   }
 
   return dsl;

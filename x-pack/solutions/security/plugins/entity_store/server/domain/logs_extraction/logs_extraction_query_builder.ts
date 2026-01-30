@@ -10,7 +10,7 @@ import {
   type EntityField,
   type EntityType,
 } from '../definitions/entity_schema';
-import { getEuidEsqlEvaluation, getEuidEsqlFilter } from '../euid/esql';
+import { getEuidEsqlEvaluation, getEuidEsqlDocumentsContainsIdFilter } from '../euid/esql';
 
 export const HASHED_ID = 'entity.hashedId';
 const HASH_ALG = 'MD5';
@@ -58,7 +58,7 @@ export const buildLogsExtractionEsqlQuery = ({
   
   FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE (${getEuidEsqlFilter(type)})
+  | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
       AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
   | SORT ${TIMESTAMP_FIELD} ASC
@@ -121,7 +121,6 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
       }
     })
     .filter(Boolean)
-    .concat([`${MAIN_ENTITY_ID} = ${idFieldName}`])
     .join(',\n ');
 }
 

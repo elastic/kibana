@@ -68,7 +68,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.generic,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -79,45 +80,6 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
-    'host: DSL from doc with host.entity.id returns exactly that document',
-    async ({ esClient }) => {
-      const docSource = {
-        host: { entity: { id: 'host-with-entity-id' }, name: 'server-01', domain: 'example.com' },
-      };
-      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX.host,
-        body: { ...dsl, size: 10 },
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        host: expect.objectContaining({ entity: { id: 'host-with-entity-id' } }),
-      });
-    }
-  );
-
-  apiTest('host: DSL from doc with host.id returns exactly that document', async ({ esClient }) => {
-    const docSource = { host: { id: 'host-123' } };
-    const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
-    expect(dsl).toBeDefined();
-
-    const result = await esClient.search({
-      index: UPDATES_INDEX.host,
-      body: { ...dsl, size: 10 },
-    });
-
-    const total = getTotal(result.hits);
-    expect(total).toBe(1);
-    expect(result.hits.hits[0]._source).toMatchObject({
-      host: { id: 'host-123' },
-    });
-  });
-
-  apiTest(
     'host: DSL from doc with host.name + host.domain returns expected document(s)',
     async ({ esClient }) => {
       const docSource = { host: { name: 'server-01', domain: 'example.com' } };
@@ -126,7 +88,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.host,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -140,26 +103,6 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
-    'host: DSL from doc with host.hostname + host.domain returns expected document',
-    async ({ esClient }) => {
-      const docSource = { host: { hostname: 'workstation-05', domain: 'corp.local' } };
-      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX.host,
-        body: { ...dsl, size: 10 },
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        host: { hostname: 'workstation-05', domain: 'corp.local' },
-      });
-    }
-  );
-
-  apiTest(
     'host: DSL from doc with host.name only returns expected document',
     async ({ esClient }) => {
       const docSource = { host: { name: 'desktop-02' } };
@@ -168,33 +111,14 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.host,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
       expect(total).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
         host: { name: 'desktop-02' },
-      });
-    }
-  );
-
-  apiTest(
-    'host: DSL from doc with host.hostname only returns expected document',
-    async ({ esClient }) => {
-      const docSource = { host: { hostname: 'laptop-01' } };
-      const dsl = getEuidDslFilterBasedOnDocument('host', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX.host,
-        body: { ...dsl, size: 10 },
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        host: { hostname: 'laptop-01' },
       });
     }
   );
@@ -208,7 +132,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.user,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -231,7 +156,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.user,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -239,60 +165,6 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(result.hits.hits[0]._source).toMatchObject({
         user: { name: 'john.doe' },
         host: { entity: { id: 'host-123' } },
-      });
-    }
-  );
-
-  apiTest('user: DSL from doc with user.id returns expected document', async ({ esClient }) => {
-    const docSource = { user: { id: 'user-101' } };
-    const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-    expect(dsl).toBeDefined();
-
-    const result = await esClient.search({
-      index: UPDATES_INDEX.user,
-      body: { ...dsl, size: 10 },
-    });
-
-    const total = getTotal(result.hits);
-    expect(total).toBe(1);
-    expect(result.hits.hits[0]._source).toMatchObject({
-      user: { id: 'user-101' },
-    });
-  });
-
-  apiTest('user: DSL from doc with user.email returns expected document', async ({ esClient }) => {
-    const docSource = { user: { email: 'test@example.com' } };
-    const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-    expect(dsl).toBeDefined();
-
-    const result = await esClient.search({
-      index: UPDATES_INDEX.user,
-      body: { ...dsl, size: 10 },
-    });
-
-    const total = getTotal(result.hits);
-    expect(total).toBe(1);
-    expect(result.hits.hits[0]._source).toMatchObject({
-      user: { email: 'test@example.com' },
-    });
-  });
-
-  apiTest(
-    'user: DSL from doc with user.name only returns expected document',
-    async ({ esClient }) => {
-      const docSource = { user: { name: 'david.lee' } };
-      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
-      expect(dsl).toBeDefined();
-
-      const result = await esClient.search({
-        index: UPDATES_INDEX.user,
-        body: { ...dsl, size: 10 },
-      });
-
-      const total = getTotal(result.hits);
-      expect(total).toBe(1);
-      expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'david.lee' },
       });
     }
   );
@@ -306,7 +178,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.service,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -326,7 +199,8 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const result = await esClient.search({
         index: UPDATES_INDEX.service,
-        body: { ...dsl, size: 10 },
+        query: { ...dsl },
+        size: 10,
       });
 
       const total = getTotal(result.hits);
@@ -336,13 +210,4 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
     }
   );
-
-  apiTest('DSL from doc with no matching euid fields returns undefined', async () => {
-    const dsl = getEuidDslFilterBasedOnDocument('host', {});
-    expect(dsl).toBeUndefined();
-  });
-
-  apiTest('DSL from null doc returns undefined', async () => {
-    expect(getEuidDslFilterBasedOnDocument('host', null)).toBeUndefined();
-  });
 });

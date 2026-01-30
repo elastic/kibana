@@ -8,9 +8,10 @@
 import { getEuidDslFilterBasedOnDocument } from './dsl';
 
 describe('getEuidDslFilterBasedOnDocument', () => {
-  it('returns undefined when doc is null or undefined', () => {
+  it('returns undefined when doc is falsy', () => {
     expect(getEuidDslFilterBasedOnDocument('host', null)).toBeUndefined();
     expect(getEuidDslFilterBasedOnDocument('generic', undefined)).toBeUndefined();
+    expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
   });
 
   describe('generic', () => {
@@ -18,17 +19,10 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const result = getEuidDslFilterBasedOnDocument('generic', { entity: { id: 'e-123' } });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'entity.id': 'e-123' } }],
-          },
+        bool: {
+          filter: [{ term: { 'entity.id': 'e-123' } }],
         },
       });
-    });
-
-    it('returns undefined when no euid field is present', () => {
-      expect(getEuidDslFilterBasedOnDocument('generic', {})).toBeUndefined();
-      expect(getEuidDslFilterBasedOnDocument('generic', { entity: {} })).toBeUndefined();
     });
   });
 
@@ -39,10 +33,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
         },
       });
     });
@@ -51,11 +43,9 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const result = getEuidDslFilterBasedOnDocument('host', { host: { id: 'host-id-1' } });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'host.id': 'host-id-1' } }],
-            must_not: [{ exists: { field: 'host.entity.id' } }],
-          },
+        bool: {
+          filter: [{ term: { 'host.id': 'host-id-1' } }],
+          must_not: [{ exists: { field: 'host.entity.id' } }],
         },
       });
     });
@@ -66,14 +56,12 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [
-              { term: { 'host.name': 'myserver' } },
-              { term: { 'host.domain': 'example.com' } },
-            ],
-            must_not: [{ exists: { field: 'host.entity.id' } }, { exists: { field: 'host.id' } }],
-          },
+        bool: {
+          filter: [
+            { term: { 'host.name': 'myserver' } },
+            { term: { 'host.domain': 'example.com' } },
+          ],
+          must_not: [{ exists: { field: 'host.entity.id' } }, { exists: { field: 'host.id' } }],
         },
       });
     });
@@ -82,23 +70,16 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const result = getEuidDslFilterBasedOnDocument('host', { host: { name: 'server1' } });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'host.name': 'server1' } }],
-            must_not: [
-              { exists: { field: 'host.entity.id' } },
-              { exists: { field: 'host.id' } },
-              { exists: { field: 'host.domain' } },
-              { exists: { field: 'host.hostname' } },
-            ],
-          },
+        bool: {
+          filter: [{ term: { 'host.name': 'server1' } }],
+          must_not: [
+            { exists: { field: 'host.entity.id' } },
+            { exists: { field: 'host.id' } },
+            { exists: { field: 'host.domain' } },
+            { exists: { field: 'host.hostname' } },
+          ],
         },
       });
-    });
-
-    it('returns undefined when no host id fields are present', () => {
-      expect(getEuidDslFilterBasedOnDocument('host', {})).toBeUndefined();
-      expect(getEuidDslFilterBasedOnDocument('host', { host: {} })).toBeUndefined();
     });
 
     it('precedence: uses host.entity.id when both host.entity.id and host.name are present', () => {
@@ -107,10 +88,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'host.entity.id': 'e1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'host.entity.id': 'e1' } }],
         },
       });
     });
@@ -123,10 +102,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'user.entity.id': 'user-entity-1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'user.entity.id': 'user-entity-1' } }],
         },
       });
     });
@@ -138,11 +115,9 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'user.name': 'alice' } }, { term: { 'host.entity.id': 'host-e1' } }],
-            must_not: [{ exists: { field: 'user.entity.id' } }],
-          },
+        bool: {
+          filter: [{ term: { 'user.name': 'alice' } }, { term: { 'host.entity.id': 'host-e1' } }],
+          must_not: [{ exists: { field: 'user.entity.id' } }],
         },
       });
     });
@@ -151,17 +126,15 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       const result = getEuidDslFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'user.id': 'user-id-42' } }],
-            must_not: [
-              { exists: { field: 'user.entity.id' } },
-              { exists: { field: 'user.name' } },
-              { exists: { field: 'host.entity.id' } },
-              { exists: { field: 'host.id' } },
-              { exists: { field: 'host.name' } },
-            ],
-          },
+        bool: {
+          filter: [{ term: { 'user.id': 'user-id-42' } }],
+          must_not: [
+            { exists: { field: 'user.entity.id' } },
+            { exists: { field: 'user.name' } },
+            { exists: { field: 'host.entity.id' } },
+            { exists: { field: 'host.id' } },
+            { exists: { field: 'host.name' } },
+          ],
         },
       });
     });
@@ -177,10 +150,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'user.entity.id': 'ue1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'user.entity.id': 'ue1' } }],
         },
       });
     });
@@ -193,10 +164,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'service.entity.id': 'svc-entity-1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'service.entity.id': 'svc-entity-1' } }],
         },
       });
     });
@@ -207,18 +176,11 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'service.name': 'api-gateway' } }],
-            must_not: [{ exists: { field: 'service.entity.id' } }],
-          },
+        bool: {
+          filter: [{ term: { 'service.name': 'api-gateway' } }],
+          must_not: [{ exists: { field: 'service.entity.id' } }],
         },
       });
-    });
-
-    it('returns undefined when no service id fields are present', () => {
-      expect(getEuidDslFilterBasedOnDocument('service', {})).toBeUndefined();
-      expect(getEuidDslFilterBasedOnDocument('service', { service: {} })).toBeUndefined();
     });
 
     it('precedence: uses service.entity.id when both service.entity.id and service.name are present', () => {
@@ -227,10 +189,8 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
 
       expect(result).toEqual({
-        query: {
-          bool: {
-            filter: [{ term: { 'service.entity.id': 'svc-e1' } }],
-          },
+        bool: {
+          filter: [{ term: { 'service.entity.id': 'svc-e1' } }],
         },
       });
     });

@@ -9,7 +9,7 @@ import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty } from '../esql/strings';
 
-export function getEuidEsqlFilter(entityType: EntityType) {
+export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
   return identityField.requiresOneOfFields
     .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEuidEsqlEvaluation, getEuidEsqlFilter } from './esql';
+import { getEuidEsqlEvaluation, getEuidEsqlDocumentsContainsIdFilter } from './esql';
 
 const normalize = (s: string) =>
   s
@@ -14,16 +14,16 @@ const normalize = (s: string) =>
     .filter((line) => line.length > 0)
     .join('\n');
 
-describe('getEuidEsqlFilter', () => {
+describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns single field condition for generic (one required field)', () => {
-    const result = getEuidEsqlFilter('generic');
+    const result = getEuidEsqlDocumentsContainsIdFilter('generic');
 
     const expected = '(entity.id IS NOT NULL AND entity.id != "")';
     expect(result).toBe(expected);
   });
 
   it('returns OR of required fields for host', () => {
-    const result = getEuidEsqlFilter('host');
+    const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
       '(host.entity.id IS NOT NULL AND host.entity.id != "") OR (host.id IS NOT NULL AND host.id != "") OR (host.name IS NOT NULL AND host.name != "") OR (host.hostname IS NOT NULL AND host.hostname != "")';

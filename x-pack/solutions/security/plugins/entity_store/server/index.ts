@@ -26,7 +26,7 @@ export const euid = {
   getEuidFromObject: euidModule.getEuidFromObject,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
-  getEuidEsqlFilter: euidModule.getEuidEsqlFilter,
+  getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
 };
 
