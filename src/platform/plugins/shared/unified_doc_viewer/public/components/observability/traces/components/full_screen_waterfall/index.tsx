@@ -84,43 +84,6 @@ export const FullScreenWaterfall = ({
     }
   }, []);
 
-  const getParentApi = useCallback(() => {
-    return {
-      getSerializedStateForChild: () => ({
-        traceId,
-        rangeFrom,
-        rangeTo,
-        serviceName,
-        scrollElement,
-        onErrorClick: (params: {
-          traceId: string;
-          docId: string;
-          errorCount: number;
-          errorDocId?: string;
-          docIndex?: string;
-        }) => {
-          if (params.errorCount > 1) {
-            setActiveFlyoutType(spanFlyoutId);
-            setActiveSection('errors-table');
-            setDocId(params.docId);
-            setDocIndex(undefined);
-          } else if (params.errorDocId) {
-            setActiveFlyoutType(logsFlyoutId);
-            setDocId(params.errorDocId);
-            setDocIndex(params.docIndex);
-          }
-        },
-        onNodeClick: (nodeSpanId: string) => {
-          setActiveSection(undefined);
-          setDocId(nodeSpanId);
-          setDocIndex(undefined);
-          setActiveFlyoutType(spanFlyoutId);
-        },
-        mode: 'full',
-      }),
-    };
-  }, [traceId, rangeFrom, rangeTo, serviceName, scrollElement]);
-
   function handleCloseFlyout() {
     setActiveFlyoutType(null);
     setActiveSection(undefined);
