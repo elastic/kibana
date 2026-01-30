@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/timelines'],
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/timelines'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/timelines',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/timelines',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/timelines/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/timelines/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

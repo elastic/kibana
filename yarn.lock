@@ -9313,7 +9313,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timelines-plugin@link:x-pack/platform/plugins/shared/timelines":
+"@kbn/timelines-plugin@link:x-pack/solutions/security/plugins/timelines":
   version "0.0.0"
   uid ""
 
