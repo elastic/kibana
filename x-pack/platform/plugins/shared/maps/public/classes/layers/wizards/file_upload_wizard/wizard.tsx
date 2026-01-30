@@ -155,7 +155,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
           onUploadComplete={this._onUploadComplete}
           onUploadError={this._onUploadError}
           analytics={analytics}
-          location="maps-file-upload"
+          location="maps"
         />
       </EuiPanel>
     );
