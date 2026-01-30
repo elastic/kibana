@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, keys } from '@elastic/eui';
 import React, { useCallback, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
@@ -28,8 +28,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     const onKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // keyCode 13 is needed in case of IME input
-        if (event.keyCode === 13 && !event.shiftKey) {
+        if (event.key === keys.ENTER && !event.shiftKey) {
           event.preventDefault();
 
           if (value.trim().length) {
