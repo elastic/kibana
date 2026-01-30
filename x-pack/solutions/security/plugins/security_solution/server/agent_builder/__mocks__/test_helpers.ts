@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { ToolHandlerContext, ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
