@@ -130,6 +130,13 @@ export class GenerateSystemReportRequestHandler<
 
   public async handleRequest(params: RequestParams) {
     const { exportTypeId } = params;
+
+    const unsupportedErrorResponse = this.checkSupportedExportType(exportTypeId);
+
+    if (unsupportedErrorResponse) {
+      return unsupportedErrorResponse;
+    }
+
     const checkErrorResponse = await this.checkLicense(exportTypeId);
 
     if (checkErrorResponse) {
@@ -138,7 +145,6 @@ export class GenerateSystemReportRequestHandler<
 
     try {
       const report = await this.enqueueJob(params);
-
       const { basePath } = this.opts.reporting.getServerInfo();
       const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
 
@@ -149,6 +155,15 @@ export class GenerateSystemReportRequestHandler<
     } catch (err) {
       return this.handleResponse(null, err);
     }
+  }
+
+  private checkSupportedExportType(exportTypeId: string): IKibanaResponse | null {
+    if (exportTypeId !== 'csv_searchsource') {
+      return this.opts.res.badRequest({
+        body: `Unsupported export-type of ${exportTypeId} for system report`,
+      });
+    }
+    return null;
   }
 }
 
