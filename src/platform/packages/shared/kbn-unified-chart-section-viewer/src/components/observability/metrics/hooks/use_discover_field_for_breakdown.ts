@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
-import type { Dimension } from '../../../types';
+import type { Dimension } from '../../../../types';
 
 export function useDiscoverFieldForBreakdown(
   breakdownField: string | undefined,

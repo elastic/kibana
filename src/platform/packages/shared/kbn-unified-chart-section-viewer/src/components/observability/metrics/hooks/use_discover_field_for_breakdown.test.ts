@@ -10,7 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useDiscoverFieldForBreakdown } from './use_discover_field_for_breakdown';
-import type { Dimension } from '../types';
+import type { Dimension } from '../../../../types';
 
 describe('useDiscoverFieldForBreakdown', () => {
   const mockOnDimensionsChange = jest.fn();
