@@ -11,10 +11,13 @@ import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogDocumentById } from './get_log_document_by_id';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import type { AiInsightResult, ContextEvent } from './types';
 
 export interface GetLogAiInsightsParams {
+  core: ObservabilityAgentBuilderCoreSetup;
   index: string;
   id: string;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
@@ -25,6 +28,7 @@ export interface GetLogAiInsightsParams {
 }
 
 export async function getLogAiInsights({
+  core,
   index,
   id,
   request,
@@ -35,7 +39,10 @@ export async function getLogAiInsights({
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.`);
+    Using the provided data produce a concise, action-oriented response.
+
+    ${getEntityLinkingInstructions({ urlPrefix: core.http.basePath.get(request) })}
+  `);
 
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,

@@ -233,11 +233,17 @@ export function TableGrid({
       const { columnId, children, cellActions, rowIndex } = props;
       const row = rows[rowIndex];
 
+      const params = {
+        row,
+        onFilter: filter,
+        hideFilteringOnComputedColumns,
+      };
+
       let warningMessage: string | undefined;
       if (columnId === GRID_COLUMN_FIELD_VALUE) {
-        warningMessage = getFilterInOutPairDisabledWarning(row, filter);
+        warningMessage = getFilterInOutPairDisabledWarning(params);
       } else if (columnId === GRID_COLUMN_FIELD_NAME) {
-        warningMessage = getFilterExistsDisabledWarning(row, filter);
+        warningMessage = getFilterExistsDisabledWarning(params);
       }
 
       return (
@@ -253,7 +259,7 @@ export function TableGrid({
         </>
       );
     },
-    [rows, filter]
+    [rows, filter, hideFilteringOnComputedColumns]
   );
 
   const leadingControlColumns = useMemo(() => {
