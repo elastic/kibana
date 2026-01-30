@@ -8,16 +8,16 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
-import { useKibana } from '../../../hooks/use_kibana';
-import { render } from '../../../utils/test_helper';
-import { buildSlo } from '../../../data/slo/slo';
+import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { render } from '../../../../utils/test_helper';
+import { buildSlo } from '../../../../data/slo/slo';
 import { HistoricalDataCharts } from './historical_data_charts';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
-jest.mock('../../../hooks/use_fetch_historical_summary');
-jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../../hooks/use_fetch_historical_summary');
+jest.mock('../../../../hooks/use_kibana');
 
 const useKibanaMock = useKibana as jest.Mock;
 

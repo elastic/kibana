@@ -7,9 +7,9 @@
 import { EuiFlexItem } from '@elastic/eui';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import type { TimeBounds } from '../types';
+import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
+import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import type { TimeBounds } from '../../types';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { SliChartPanel } from './sli_chart_panel';
 
@@ -19,6 +19,7 @@ export interface Props {
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
   hideHeaderDurationLabel?: boolean;
+  isFlyout?: boolean;
 }
 
 export function HistoricalDataCharts({
@@ -27,6 +28,7 @@ export function HistoricalDataCharts({
   isAutoRefreshing,
   onBrushed,
   hideHeaderDurationLabel = false,
+  isFlyout,
 }: Props) {
   const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
     sloList: [slo],
@@ -54,6 +56,7 @@ export function HistoricalDataCharts({
           slo={slo}
           onBrushed={onBrushed}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
+          isFlyout={isFlyout}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -63,6 +66,7 @@ export function HistoricalDataCharts({
           slo={slo}
           onBrushed={onBrushed}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
+          isFlyout={isFlyout}
         />
       </EuiFlexItem>
     </>
