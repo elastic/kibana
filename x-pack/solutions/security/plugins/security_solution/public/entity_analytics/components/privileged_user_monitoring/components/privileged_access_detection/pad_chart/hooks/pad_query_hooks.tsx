@@ -9,7 +9,6 @@ import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
@@ -42,9 +41,6 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
   anomalyBands: AnomalyBand[];
 }) => {
   const search = useKibana().services.data.search.search;
-  const core = useKibana().services.core;
-  const uiSettings = core.uiSettings;
-  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
@@ -63,7 +59,6 @@ const usePrivilegedAccessDetectionTopUsersQuery = (params: {
             search,
             signal,
             filter: filterQuery,
-            timezone,
           })
         )?.response
       );
@@ -82,9 +77,6 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
   anomalyBands: AnomalyBand[];
 }) => {
   const search = useKibana().services.data.search.search;
-  const core = useKibana().services.core;
-  const uiSettings = core.uiSettings;
-  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
   const filterQuery = useEsqlGlobalFilterQuery();
 
   const {
@@ -117,7 +109,6 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
             search,
             signal,
             filter: filterQuery,
-            timezone,
           })
         ).response
       ).map((eachRawRecord) => ({

@@ -13,7 +13,6 @@ import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
@@ -32,10 +31,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
   skip: boolean;
   spaceId: string;
 }) => {
-  const {
-    data,
-    core: { uiSettings },
-  } = useKibana().services;
+  const { data } = useKibana().services;
 
   const index = useGetDefaultRiskIndex(true); // only latest
   const filterQuery = useEsqlGlobalFilterQuery();
@@ -66,7 +62,6 @@ export const useRiskLevelsPrivilegedUserQuery = ({
       getESQLResults({
         esqlQuery: query,
         search: data.search.search,
-        timezone: uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ),
         signal,
         filter: filterQuery,
       }),

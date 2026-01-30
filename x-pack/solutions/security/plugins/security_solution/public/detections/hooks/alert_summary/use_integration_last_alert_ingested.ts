@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { esqlResponseToRecords } from '../../../common/utils/esql';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -43,10 +42,7 @@ export interface UseIntegrationsLastAlertIngestedResult {
 export const useIntegrationLastAlertIngested = ({
   integrationName,
 }: UseIntegrationsLastAlertIngestedParams): UseIntegrationsLastAlertIngestedResult => {
-  const {
-    data,
-    core: { uiSettings },
-  } = useKibana().services;
+  const { data } = useKibana().services;
 
   // ESQL query to get the last alert ingested in the index
   // We only keep the event.ingested field as it contains the time we want to display on the Integration card.
@@ -59,8 +55,6 @@ export const useIntegrationLastAlertIngested = ({
     [integrationName]
   );
 
-  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-
   const {
     isLoading,
     data: result,
@@ -72,7 +66,6 @@ export const useIntegrationLastAlertIngested = ({
         esqlQuery: query,
         search: data.search.search,
         signal,
-        timezone,
       }),
     {
       refetchOnWindowFocus: false,

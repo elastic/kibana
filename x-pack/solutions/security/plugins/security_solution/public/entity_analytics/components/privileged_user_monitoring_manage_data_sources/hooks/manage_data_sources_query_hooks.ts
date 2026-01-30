@@ -7,7 +7,6 @@
 
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -22,9 +21,6 @@ const GET_LATEST_CSV_UPLOAD_QUERY_ID = 'getPrivilegedUserMonitoringLatestCsvQuer
 
 export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
   const search = useKibana().services.data.search.search;
-  const core = useKibana().services.core;
-  const uiSettings = core.uiSettings;
-  const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
 
   const { isLoading, data, isError, refetch } = useQuery(
     [GET_LATEST_CSV_UPLOAD_QUERY_ID],
@@ -33,7 +29,6 @@ export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
         (
           await getESQLResults({
             esqlQuery: getLatestCSVPrivilegedUserUploadQuery(namespace),
-            timezone,
             search,
             signal,
           })

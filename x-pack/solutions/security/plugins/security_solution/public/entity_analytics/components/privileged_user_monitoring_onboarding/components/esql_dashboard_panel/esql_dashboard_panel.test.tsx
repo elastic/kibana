@@ -36,11 +36,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
             search: jest.fn(),
           },
         },
-        core: {
-          uiSettings: {
-            get: jest.fn(),
-          },
-        },
       },
     })),
   };

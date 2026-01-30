@@ -165,9 +165,6 @@ export const createStartServicesMock = (
     navigation,
     discover,
     dataViews: dataViewServiceMock,
-    core: {
-      uiSettings: core.uiSettings,
-    },
     data: {
       ...data,
       dataViews: dataViewServiceMock,
