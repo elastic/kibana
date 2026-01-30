@@ -134,17 +134,11 @@ export function Wrapper({
             justifyContent="spaceBetween"
             wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
               {streamId}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton
-                        definition={definition}
-                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
-                      />
-                    )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
@@ -163,7 +157,22 @@ export function Wrapper({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <FeedbackButton />
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton
+                      definition={definition}
+                      isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
+                      spellOut
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FeedbackButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
