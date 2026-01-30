@@ -6294,6 +6294,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-views-types@link:src/platform/packages/shared/kbn-data-views-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-visualizer-plugin@link:x-pack/platform/plugins/private/data_visualizer":
   version "0.0.0"
   uid ""

@@ -515,6 +515,7 @@
     "@kbn/data-view-utils": "link:src/platform/packages/shared/kbn-data-view-utils",
     "@kbn/data-view-validation": "link:src/platform/packages/shared/kbn-data-view-validation",
     "@kbn/data-views-plugin": "link:src/platform/plugins/shared/data_views",
+    "@kbn/data-views-types": "link:src/platform/packages/shared/kbn-data-views-types",
     "@kbn/data-visualizer-plugin": "link:x-pack/platform/plugins/private/data_visualizer",
     "@kbn/dataset-quality-plugin": "link:x-pack/platform/plugins/shared/dataset_quality",
     "@kbn/datemath": "link:src/platform/packages/shared/kbn-datemath",

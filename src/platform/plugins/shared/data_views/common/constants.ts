@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * All runtime field types.
- * @public
- */
-export const RUNTIME_FIELD_TYPES = [
-  'keyword',
-  'long',
-  'double',
-  'date',
-  'ip',
-  'boolean',
-  'geo_point',
-  'composite',
-] as const;
+// Re-export from @kbn/data-views-types for backward compatibility
+export {
+  RUNTIME_FIELD_TYPES,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+} from '@kbn/data-views-types';
 
 /**
  * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources
@@ -36,27 +29,10 @@ export const DEFAULT_ASSETS_TO_IGNORE = {
 };
 
 /**
- * UiSettings key for metaFields list.
- * @public
- */
-export const META_FIELDS = 'metaFields';
-
-/**
- * Data view saved object type.
- * @public
- */
-export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
-
-/**
  * Data views plugin name.
  * @public
  */
 export const PLUGIN_NAME = 'DataViews';
-
-/**
- * Max length for the custom field description
- */
-export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
 
 /**
  * Fields for wildcard path.
