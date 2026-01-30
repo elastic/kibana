@@ -7,15 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
@@ -27,13 +19,12 @@ import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
 
 export const SearchHomepagePage = () => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { console: consolePlugin, history, searchNavigation, cloud },
   } = useKibana();
 
   const { isTrial } = useGetLicenseInfo();
-  const { user, isAdmin } = useAuthenticatedUser();
+  const { user } = useAuthenticatedUser();
 
   useEffect(() => {
     if (searchNavigation) {
@@ -50,15 +41,6 @@ export const SearchHomepagePage = () => {
     [consolePlugin]
   );
 
-  const projectManagementUrl = useMemo(() => {
-    if (cloud && cloud.isServerlessEnabled) {
-      const baseUrl = cloud.projectsUrl ?? 'https://cloud.elastic.co/projects/';
-      const dirPath = cloud.serverless.projectId
-        ? `elasticsearch/${cloud.serverless.projectId}`
-        : '';
-      return `${baseUrl}${dirPath}`;
-    }
-  }, [cloud]);
   return (
     <KibanaPageTemplate
       offset={0}
@@ -77,7 +59,7 @@ export const SearchHomepagePage = () => {
               data-test-subj="searchHomepageHeaderLeftsideGroup"
             >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
+                <EuiTitle size="s">
                   <h3>
                     {user?.full_name
                       ? i18n.translate('xpack.searchHomepage.welcome.title', {
@@ -95,27 +77,9 @@ export const SearchHomepagePage = () => {
                   <LicenseBadge />
                 </EuiFlexItem>
               )}
-              {isAdmin && (
-                <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
-                    external
-                    href={projectManagementUrl}
-                    color="text"
-                    css={css({
-                      padding: euiTheme.size.s,
-                    })}
-                  >
-                    {i18n.translate(
-                      'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
-                      { defaultMessage: 'Manage' }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <ConnectToElasticsearch />
