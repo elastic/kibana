@@ -10,11 +10,8 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import { hostname } from 'os';
-import {
-  EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-  type ModelInfo,
-} from './score_repository';
+import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import type { Model } from '@kbn/inference-common';
 import { getGitMetadata } from './git_metadata';
 import { getCurrentTraceId } from './tracing';
 import type { RanExperiment } from '../types';
@@ -36,8 +33,8 @@ export async function buildFlattenedScoreDocuments({
   totalRepetitions,
 }: {
   experiments: RanExperiment[];
-  taskModel: ModelInfo;
-  evaluatorModel: ModelInfo | null;
+  taskModel: Model;
+  evaluatorModel: Model;
   runId: string;
   totalRepetitions: number;
 }): Promise<EvaluationScoreDocument[]> {

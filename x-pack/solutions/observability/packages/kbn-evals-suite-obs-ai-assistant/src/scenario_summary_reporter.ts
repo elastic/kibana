@@ -86,7 +86,7 @@ async function buildScenarioReport(
   datasetScoresWithStats: DatasetScoreWithStats[];
   totalRepetitions: number;
   taskModel: { id: string; family: string; provider: string };
-  evaluatorModel: { id: string; family: string; provider: string } | null;
+  evaluatorModel: { id: string; family: string; provider: string };
 }> {
   log.info(`Building scenario report for run ID: ${runId}`);
 
@@ -134,7 +134,7 @@ export function createScenarioSummaryReporter(
       log.info(
         `Run: ${chalk.cyan(runId)} - Model: ${chalk.yellow(
           report.taskModel.id || 'Unknown'
-        )} - Evaluator: ${chalk.yellow(report.evaluatorModel?.id || 'Unknown')}`
+        )} - Evaluator: ${chalk.yellow(report.evaluatorModel.id || 'Unknown')}`
       );
       if (report.totalRepetitions > 1) {
         log.info(`Repetitions: ${chalk.cyan(report.totalRepetitions.toString())}`);

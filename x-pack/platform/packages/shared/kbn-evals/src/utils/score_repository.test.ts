@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import {
-  EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-  type ModelInfo,
-} from './score_repository';
+import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import type { Model } from '@kbn/inference-common';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 
-const baseTaskModel: ModelInfo = {
+const baseTaskModel: Model = {
   id: 'gpt-4',
   family: ModelFamily.GPT,
   provider: ModelProvider.OpenAI,
 };
 
-const baseEvaluatorModel: ModelInfo = {
+const baseEvaluatorModel: Model = {
   id: 'claude-3',
   family: ModelFamily.Claude,
   provider: ModelProvider.Anthropic,

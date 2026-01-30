@@ -7,12 +7,7 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-
-export interface ModelInfo {
-  id: string;
-  family: string;
-  provider: string;
-}
+import type { Model } from '@kbn/inference-common';
 
 export interface EvaluationScoreDocument {
   '@timestamp': string;
@@ -32,7 +27,7 @@ export interface EvaluationScoreDocument {
   task: {
     trace_id: string | null;
     repetition_index: number;
-    model: ModelInfo;
+    model: Model;
   };
 
   evaluator: {
@@ -42,7 +37,7 @@ export interface EvaluationScoreDocument {
     explanation: string | null;
     metadata: Record<string, unknown> | null;
     trace_id: string | null;
-    model: ModelInfo | null;
+    model: Model;
   };
 
   run_metadata: {
@@ -77,8 +72,8 @@ export interface DatasetEvaluatorStats {
 
 export interface RunStats {
   stats: DatasetEvaluatorStats[];
-  taskModel: ModelInfo;
-  evaluatorModel: ModelInfo | null;
+  taskModel: Model;
+  evaluatorModel: Model;
   totalRepetitions: number;
 }
 

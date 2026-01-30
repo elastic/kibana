@@ -48,9 +48,8 @@ export type {
 export { createTable } from './src/utils/reporting/report_table';
 export {
   EvaluationScoreRepository,
-  type DatasetEvaluatorStats,
   type EvaluationScoreDocument,
-  type ModelInfo,
+  type DatasetEvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
 

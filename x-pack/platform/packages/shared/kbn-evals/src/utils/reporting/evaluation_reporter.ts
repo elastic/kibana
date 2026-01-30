@@ -7,7 +7,8 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import type { EvaluationScoreRepository, ModelInfo } from '../score_repository';
+import type { Model } from '@kbn/inference-common';
+import type { EvaluationScoreRepository } from '../score_repository';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
 import { convertAggregationToDatasetScores } from '../evaluation_stats';
@@ -17,13 +18,11 @@ export type EvaluationReporter = (
   log: SomeDevLog
 ) => Promise<void>;
 
-function buildReportHeader(taskModel: ModelInfo, evaluatorModel: ModelInfo | null): string[] {
+function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
   const lines = [`Model: ${taskModel.id} (${taskModel.family}/${taskModel.provider})`];
-  if (evaluatorModel) {
-    lines.push(
-      `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
-    );
-  }
+  lines.push(
+    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
+  );
   return lines;
 }
 
