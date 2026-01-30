@@ -111,6 +111,7 @@ export function getConnectorType(
         to: new Array<string>(),
         cc: new Array<string>(),
         bcc: new Array<string>(),
+        replyTo: new Array<string>(),
         message: new Array<string>(),
         subject: new Array<string>(),
       };
@@ -126,6 +127,7 @@ export function getConnectorType(
       const toEmails = getToFields(actionParams);
       const ccEmails = getCcFields(actionParams);
       const bccEmails = getBccFields(actionParams);
+      const replyTo = getReplyToFields(actionParams);
 
       if (toEmails.length === 0 && ccEmails.length === 0 && bccEmails.length === 0) {
         const errorText = translations.TO_CC_REQUIRED;
@@ -134,7 +136,7 @@ export function getConnectorType(
         errors.bcc.push(errorText);
       }
 
-      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails));
+      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails)).concat(replyTo);
       const validatedEmails = services.validateEmailAddresses(allEmails, {
         treatMustacheTemplatesAsValid: true,
       });
@@ -142,6 +144,7 @@ export function getConnectorType(
       const toEmailSet = new Set(toEmails);
       const ccEmailSet = new Set(ccEmails);
       const bccEmailSet = new Set(bccEmails);
+      const replyToSet = new Set(replyTo);
 
       for (const validated of validatedEmails) {
         if (!validated.valid) {
@@ -154,6 +157,7 @@ export function getConnectorType(
           if (toEmailSet.has(email)) errors.to.push(message);
           if (ccEmailSet.has(email)) errors.cc.push(message);
           if (bccEmailSet.has(email)) errors.bcc.push(message);
+          if (replyToSet.has(email)) errors.bcc.push(message);
         }
       }
 
@@ -177,4 +181,9 @@ function getCcFields(actionParams: EmailActionParams): string[] {
 function getBccFields(actionParams: EmailActionParams): string[] {
   if (!(actionParams.bcc instanceof Array)) return [];
   return actionParams.bcc;
+}
+
+function getReplyToFields(actionParams: EmailActionParams): string[] {
+  if (!(actionParams.replyTo instanceof Array)) return [];
+  return actionParams.replyTo;
 }

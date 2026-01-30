@@ -178,7 +178,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
+  const { to, cc, bcc, replyTo } = params;
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
@@ -189,6 +189,10 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
     emailSchema.parse(to);
     emailSchema.parse(cc);
     emailSchema.parse(bcc);
+
+    if (replyTo) {
+      emailSchema.parse(replyTo);
+    }
   } catch (error) {
     throw new Error(`Invalid email addresses: ${error}`);
   }
@@ -400,6 +404,7 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
+      replyTo: params.replyTo ?? [config.from],
     },
     content: {
       subject: params.subject,
