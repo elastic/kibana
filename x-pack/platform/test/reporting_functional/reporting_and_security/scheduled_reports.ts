@@ -85,11 +85,11 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       if (await testSubjects.exists('exportDerivativeFlyout-scheduledReports')) {
         await testSubjects.click('euiFlyoutCloseButton');
       }
-      await toasts.dismissAll();
+      await toasts.dismissIfExists();
     });
 
     it('validates required fields', async () => {
-      await reportingFunctional.loginReportingManager();
+      await retry.try(() => reportingFunctional.loginReportingManager());
       await openFlyout();
 
       // Verify the title field is pre-filled with the dashboard name
@@ -232,7 +232,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     it('without reporting management privileges disables and hides the email recipient fields', async () => {
-      await reportingFunctional.loginReportingUser();
+      await retry.try(() => reportingFunctional.loginReportingUser());
       await openFlyout();
 
       // Enable email
