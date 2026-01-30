@@ -30,6 +30,7 @@ export class SampleDataIngestPlugin
     return {
       getStatus: () => installationService.getInstallationStatus(),
       install: () => installationService.install(),
+      getSampleDataSet: () => installationService.getSampleDataSet(),
       isSampleIndex,
       minimumLicenseType: MINIMUM_LICENSE_TYPE,
     };

@@ -21,5 +21,6 @@
     "@kbn/licensing-types",
     "@kbn/task-manager-plugin",
     "@kbn/fs",
+    "@kbn/home-sample-data-types",
   ]
 }

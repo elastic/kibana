@@ -8,7 +8,7 @@
  */
 
 import pRetry from 'p-retry';
-import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import type { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 
 /**
  * Options for polling sample data status after installation or removal.
@@ -120,4 +120,95 @@ export async function pollForRemoval(
   options: PollOptions = {}
 ): Promise<void> {
   return pollSampleDataStatus(id, 'removal', fetchSampleDataSets, options);
+}
+
+/**
+ * Poll using a custom status check function until the dataset shows as installed.
+ */
+export async function pollForCustomInstallation(
+  customStatusCheck: () => Promise<InstalledStatus>,
+  options: PollOptions = {}
+): Promise<void> {
+  const {
+    maxAttempts = 60,
+    initialDelayMs = 2000,
+    minTimeout = 2000,
+    factor = 1.2,
+    onFailedAttempt,
+  } = options;
+
+  await new Promise((resolve) => setTimeout(resolve, initialDelayMs));
+
+  await pRetry(
+    async () => {
+      const status = await customStatusCheck();
+
+      if (status === 'installed') {
+        return;
+      }
+
+      // Continue polling for 'installing' or 'not_installed' status
+      throw new Error(`Sample data set not yet installed (status: ${status})`);
+    },
+    {
+      retries: maxAttempts,
+      minTimeout,
+      factor,
+      onFailedAttempt: (error) => {
+        if (onFailedAttempt) {
+          onFailedAttempt(error, error.attemptNumber);
+        }
+        // eslint-disable-next-line no-console
+        console.debug(
+          `Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`,
+          error.message
+        );
+      },
+    }
+  );
+}
+
+/**
+ * Poll using a custom status check function until the dataset shows as uninstalled.
+ */
+export async function pollForCustomRemoval(
+  customStatusCheck: () => Promise<InstalledStatus>,
+  options: PollOptions = {}
+): Promise<void> {
+  const {
+    maxAttempts = 20,
+    initialDelayMs = 500,
+    minTimeout = 500,
+    factor = 1.5,
+    onFailedAttempt,
+  } = options;
+
+  await new Promise((resolve) => setTimeout(resolve, initialDelayMs));
+
+  await pRetry(
+    async () => {
+      const status = await customStatusCheck();
+
+      if (status === 'not_installed') {
+        return;
+      }
+
+      throw new Error(`Sample data set still installed (status: ${status})`);
+    },
+    {
+      retries: maxAttempts,
+      minTimeout,
+      factor,
+      onFailedAttempt: (error) => {
+        if (onFailedAttempt) {
+          onFailedAttempt(error, error.attemptNumber);
+        }
+        // eslint-disable-next-line no-console
+        console.debug(
+          `Custom poll attempt ${error.attemptNumber}/${maxAttempts}:`,
+          error.message
+        );
+      },
+    }
+  );
 }

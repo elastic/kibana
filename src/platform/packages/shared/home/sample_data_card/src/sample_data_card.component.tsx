@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 import type { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS } from './constants';
@@ -40,13 +40,13 @@ export const SampleDataCard = ({
     sampleDataSet.status === INSTALLED_STATUS ? { label: INSTALLED_STATUS } : undefined;
 
   const footer = <Footer {...{ sampleDataSet, onAction }} />;
-  console.log('image', image);
   return (
     <EuiCard
       textAlign="left"
       paddingSize="m"
+      icon={<EuiIcon type={image} size="xxl" />}
       data-test-subj={`sampleDataSetCard${id}`}
-      {...{ image, title, description, betaBadgeProps, footer }}
+      {...{ title, description, betaBadgeProps, footer }}
     />
   );
 };

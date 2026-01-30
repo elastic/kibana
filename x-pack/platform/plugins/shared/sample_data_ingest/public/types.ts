@@ -12,7 +12,7 @@ import type { InstallationAPI } from './services/installation';
 export interface SampleDataIngestPluginSetup {}
 
 export interface SampleDataIngestPluginStart
-  extends Pick<InstallationAPI, 'install' | 'getStatus'> {
+  extends Pick<InstallationAPI, 'install' | 'getStatus' | 'getSampleDataSet'> {
   isSampleIndex: (indexName: string) => boolean;
   minimumLicenseType: LicenseType;
 }

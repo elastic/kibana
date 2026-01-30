@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import type { InstalledResponse, InstallingResponse, StatusResponse } from '../../../common';
 
 export interface InstallationAPI {
   getStatus(): Promise<StatusResponse>;
   install(): Promise<InstallingResponse | InstalledResponse>;
+  getSampleDataSet(): Promise<SampleDataSet | null>;
 }
