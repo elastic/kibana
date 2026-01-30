@@ -39,6 +39,9 @@ Time window
 Template name
 :   Select a specific case template to apply when the Cases action is triggered (optional).
 
+Maximum amount of cases to open {applies_to}`stack: ga 9.4+` 
+:   Set the maximum limit for cases to be created when the rule generates alerts (optional). 
+
 Reopen when the case is closed
 :   If this option is enabled, closed cases are re-opened when an alert occurs.
 
