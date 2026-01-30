@@ -31,7 +31,7 @@ Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to lea
 
 ## Pricing
 
-Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details.
+Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic [pricing page](https://www.elastic.co/pricing) that correspond to your Elastic setup for details.
 
 ## Available models
 
