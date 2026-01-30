@@ -100,7 +100,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/home-plugin",
-    "@kbn/use-observable",
     "@kbn/data-plugin"
   ]
 }
