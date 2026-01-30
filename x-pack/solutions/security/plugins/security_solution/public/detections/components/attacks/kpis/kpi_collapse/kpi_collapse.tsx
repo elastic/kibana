@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import type { KpiViewSelection } from '../kpi_view_select/helpers';
 import * as i18n from '../kpi_view_select/translations';
 
@@ -34,11 +34,9 @@ const getViewLabel = (view: KpiViewSelection): string => {
  */
 export const KpiCollapse = memo(({ kpiViewSelection }: KpiCollapseProps) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <EuiText size="s" data-test-subj="kpi-collapse-view-label">
-        {getViewLabel(kpiViewSelection)}
-      </EuiText>
-    </EuiFlexGroup>
+    <EuiText size="relative" data-test-subj="kpi-collapse-view-label">
+      {getViewLabel(kpiViewSelection)}
+    </EuiText>
   );
 });
 
