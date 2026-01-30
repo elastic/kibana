@@ -51,13 +51,14 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
       ...space,
       projectRouting: newRouting,
     });
+
+    // Update the CPS manager's default project routing when the space setting changes to inform the navigation cps picker
+    cps?.cpsManager?.updateDefaultProjectRouting(newRouting);
   };
 
-  const canEdit = (): boolean => {
-    return application?.capabilities?.project_routing?.manage_space_default === true;
-  };
-
+  const canEdit = () => application?.capabilities?.project_routing?.manage_space_default === true;
   const [settingsIsOpen, setSettingsIsOpen] = useState(false);
+
   const closePopover = () => setSettingsIsOpen(false);
 
   const settingsButton = () => {

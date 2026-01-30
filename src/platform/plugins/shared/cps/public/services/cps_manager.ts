@@ -11,34 +11,24 @@ import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
 import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
-import {
-  type ICPSManager,
-  type ProjectsData,
-  PROJECT_ROUTING,
-  ProjectRoutingAccess,
-} from '@kbn/cps-utils';
+import { type ICPSManager, type ProjectsData, ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { ProjectFetcher } from './project_fetcher';
-
-/**
- * This should be configured on spaces level.
- * Common values: PROJECT_ROUTING.ALL (all projects, will be parsed to undefined on request level), '_alias:_origin' (origin project only)
- */
-export const DEFAULT_PROJECT_ROUTING: ProjectRouting = PROJECT_ROUTING.ALL;
 
 /**
  * Central service for managing project routing and project data.
  *
  * - Fetches project data from ES via `/internal/cps/projects_tags` endpoint (with caching and retry logic)
  * - Manages current project routing state using observables
- * - projectRouting$ represents temporary UI state; apps should reset to their saved value or DEFAULT_PROJECT_ROUTING on navigation
+ * - projectRouting$ represents temporary UI state; apps should reset to their saved value or spaces project routing on navigation
  */
 export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
   private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
+  private defaultProjectRouting: ProjectRouting = undefined;
   private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
-    DEFAULT_PROJECT_ROUTING
+    this.defaultProjectRouting
   );
   private readonly projectPickerAccess$ = new BehaviorSubject<ProjectRoutingAccess>(
     ProjectRoutingAccess.EDITABLE
@@ -48,6 +38,9 @@ export class CPSManager implements ICPSManager {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
     this.application = deps.application;
+
+    // Initialize the default project routing from the active space
+    this.initializeDefaultProjectRouting();
 
     combineLatest([this.application.currentAppId$, this.application.currentLocation$])
       .pipe(
@@ -62,7 +55,7 @@ export class CPSManager implements ICPSManager {
         this.projectPickerAccess$.next(access);
         // Reset project routing to default when access is disabled
         if (access === ProjectRoutingAccess.DISABLED) {
-          this.projectRouting$.next(DEFAULT_PROJECT_ROUTING);
+          this.projectRouting$.next(this.defaultProjectRouting);
         }
       });
   }
@@ -96,7 +89,34 @@ export class CPSManager implements ICPSManager {
    * This is the fallback value used when no app-specific or saved value exists.
    */
   public getDefaultProjectRouting(): ProjectRouting {
-    return DEFAULT_PROJECT_ROUTING;
+    return this.defaultProjectRouting;
+  }
+
+  /**
+   * Initialize the default project routing from the active space.
+   * Fetches the active space and sets the defaultProjectRouting field.
+   */
+  private async initializeDefaultProjectRouting() {
+    try {
+      const activeSpace = await this.http.get<{ projectRouting?: ProjectRouting }>(
+        '/internal/spaces/_active_space'
+      );
+      this.updateDefaultProjectRouting(activeSpace.projectRouting);
+    } catch (error) {
+      this.logger.warn('Failed to fetch active space for default project routing', error);
+    }
+  }
+
+  /**
+   * Update the default project routing value.
+   * This method can be called externally (e.g., by the spaces plugin) when the space settings change.
+   * Also updates the current project routing if it's still set to the old default.
+   */
+  public updateDefaultProjectRouting(projectRouting?: ProjectRouting) {
+    if (projectRouting !== undefined && projectRouting !== this.getDefaultProjectRouting()) {
+      this.projectRouting$.next(projectRouting);
+      this.defaultProjectRouting = projectRouting;
+    }
   }
 
   /**
