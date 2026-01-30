@@ -68,10 +68,10 @@ export function EditLifecycleModal({
   const initialSelectedAction: LifecycleEditAction = isIlmLifecycle(definition.effective_lifecycle)
     ? 'ilm'
     : (isDslLifecycle(definition.effective_lifecycle) &&
-      !definition.effective_lifecycle.dsl.data_retention) ||
+        !definition.effective_lifecycle.dsl.data_retention) ||
       isDisabledLifecycle(definition.effective_lifecycle)
-      ? 'indefinite'
-      : 'custom';
+    ? 'indefinite'
+    : 'custom';
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
@@ -161,17 +161,17 @@ export function EditLifecycleModal({
                 <h5 data-test-subj="inheritRetentionHeading">
                   {isWired
                     ? i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
-                      {
-                        defaultMessage: 'Inherit retention',
-                      }
-                    )
+                        'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
+                        {
+                          defaultMessage: 'Inherit retention',
+                        }
+                      )
                     : i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.classicInheritSwitchLabel',
-                      {
-                        defaultMessage: 'Inherit from index template',
-                      }
-                    )}
+                        'xpack.streams.streamDetailLifecycle.classicInheritSwitchLabel',
+                        {
+                          defaultMessage: 'Inherit from index template',
+                        }
+                      )}
                 </h5>
               </EuiText>
               <EuiSpacer size="s" />
@@ -179,17 +179,17 @@ export function EditLifecycleModal({
                 label={
                   isWired
                     ? i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
-                      {
-                        defaultMessage: 'Use the parent stream’s retention configuration',
-                      }
-                    )
+                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                        {
+                          defaultMessage: 'Use the parent stream’s retention configuration',
+                        }
+                      )
                     : i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
-                      {
-                        defaultMessage: 'Use the stream’s index template retention configuration',
-                      }
-                    )
+                        'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
+                        {
+                          defaultMessage: 'Use the stream’s index template retention configuration',
+                        }
+                      )
                 }
                 checked={isInheritToggleOn}
                 onChange={(event) => {
