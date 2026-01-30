@@ -38,21 +38,18 @@ export async function getAppTarget(
   // an ad hoc data view to ensure the data view spec gets encoded in the URL
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
 
-  const locationWithoutState = await discoverServices.locator.getLocation({});
+  const urlWithoutLocationState = await discoverServices.locator.getUrl({});
 
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
     : await discoverServices.locator.getUrl(locatorParams);
 
-  const editPath = (await discoverServices.locator.getLocation(locatorParams)).path;
-  const editApp = useRedirect ? 'r' : 'discover';
+  const editPath = discoverServices.core.http.basePath.remove(editUrl);
 
   return {
-    path: editPath,
-    app: editApp,
+    editPath,
     editUrl,
-    urlWithoutLocationState: locationWithoutState.path,
-    locationWithoutState,
+    urlWithoutLocationState,
   };
 }
 
@@ -91,7 +88,6 @@ export function initializeEditApi<
         defaultMessage: 'Discover session',
       }),
     onEdit: async () => {
-      const appTarget = await getAppTarget(partialApi, discoverServices);
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
       const valueInput = isByReference
@@ -112,10 +108,11 @@ export function initializeEditApi<
       let path: string | undefined;
 
       if (isByReference) {
-        ({ app, path } = appTarget);
+        ({ app, path } = await discoverServices.locator.getLocation(
+          getDiscoverLocatorParams(partialApi)
+        ));
       } else {
-        app = 'discover';
-        path = appTarget.urlWithoutLocationState;
+        ({ app, path } = await discoverServices.locator.getLocation({}));
       }
 
       await stateTransfer.navigateToEditor(app, {
@@ -131,7 +128,7 @@ export function initializeEditApi<
     },
     isEditingEnabled: isEditable,
     getEditHref: async () => {
-      return (await getAppTarget(partialApi, discoverServices))?.path;
+      return (await getAppTarget(partialApi, discoverServices))?.editPath;
     },
   } as ReturnType;
 }
