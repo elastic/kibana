@@ -22,13 +22,20 @@ describe('findPlugins', () => {
     expect(core!.isPlugin).toBe(false);
   });
 
-  it('filters plugins when pluginOrPackageFilter is provided', () => {
-    const result = findPlugins(['data']);
+  it('filters plugins when pluginFilter is provided', () => {
+    const result = findPlugins({ pluginFilter: ['data'] });
     expect(Array.isArray(result)).toBe(true);
     // All returned plugins should have 'data' in their ID.
     result.forEach((plugin) => {
       expect(plugin.id.toLowerCase()).toContain('data');
     });
+  });
+
+  it('filters packages when packageFilter is provided', () => {
+    const result = findPlugins({ packageFilter: ['@kbn/core'] });
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every((p) => !p.isPlugin)).toBe(true);
   });
 
   it('includes packages in the result', () => {
