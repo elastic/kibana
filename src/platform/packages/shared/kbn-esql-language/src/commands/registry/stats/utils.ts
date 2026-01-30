@@ -70,11 +70,7 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     return 'expression_after_assignment';
   }
 
-  if (
-    isFunctionExpression(lastCommandArg) &&
-    lastCommandArg.name === 'where' &&
-    !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)
-  ) {
+  if (isWhereExpression(lastCommandArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
     return 'after_where';
   }
 
