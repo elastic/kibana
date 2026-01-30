@@ -21,10 +21,9 @@ import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState } from '@kbn/esql-types';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import { isControlGroupRendererApi, type ControlPanelsState } from '@kbn/control-group-renderer';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { apiPublishesControlsLayout } from '@kbn/controls-renderer';
 import { omit } from 'lodash';
 import { type PublishesSavedSearch } from '../types';
 import type { DiscoverAppLocatorParams } from '../../../common';
@@ -70,8 +69,8 @@ function getEsqlControls(
   if (!isOfAggregateQueryType(query)) return;
 
   const usedVariables = getESQLQueryVariables(query.esql);
-  const controlsLayout = apiPublishesControlsLayout(presentationContainer)
-    ? presentationContainer.layout$.getValue().controls
+  const controlsLayout = isControlGroupRendererApi(presentationContainer)
+    ? presentationContainer.getControls()
     : {};
 
   const esqlControlState = Object.values(presentationContainer.children$.getValue()).reduce(
