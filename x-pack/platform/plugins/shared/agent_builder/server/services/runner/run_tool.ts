@@ -138,7 +138,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     );
 
     resultsWithIds.forEach((result) => {
-      resultStore.add(result);
+      resultStore.add({
+        tool_id: tool.id,
+        tool_call_id: toolCallId,
+        result,
+      });
     });
 
     return {
@@ -170,6 +174,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     logger,
     promptManager,
     stateManager,
+    filestore,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   return {
@@ -192,6 +197,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     attachments: attachmentStateManager,
+    filestore,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

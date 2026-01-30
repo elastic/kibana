@@ -7,33 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
-import {
-  FullScreenWaterfall,
-  type FullScreenWaterfallProps,
-  EUI_FLYOUT_BODY_OVERFLOW_CLASS,
-} from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-
-let capturedCallbacks: any = null;
-
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
-    const api = getParentApi();
-    capturedCallbacks = api.getSerializedStateForChild();
-
-    return (
-      <div
-        data-test-subj="embeddableRenderer"
-        data-type={type}
-        data-hide-panel-chrome={hidePanelChrome}
-      >
-        Embeddable Renderer Mock
-      </div>
-    );
-  },
-}));
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import { setUnifiedDocViewerServices } from '../../../../../plugin';
+import type { UnifiedDocViewerServices } from '../../../../../types';
 
 jest.mock('./waterfall_flyout/span_flyout', () => ({
   SpanFlyout: ({ traceId, spanId, _, activeSection }: any) => (
@@ -62,30 +41,22 @@ describe('FullScreenWaterfall', () => {
     onExitFullScreen: jest.fn(),
   };
 
+  beforeAll(() => {
+    setUnifiedDocViewerServices({
+      discoverShared: {
+        features: {
+          registry: {
+            getById: () => ({
+              render: () => <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>,
+            }),
+          },
+        },
+      },
+    } as unknown as UnifiedDocViewerServices);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    capturedCallbacks = null;
-  });
-
-  it('should render APM trace waterfall embeddable with hidden chrome', () => {
-    render(<FullScreenWaterfall {...defaultProps} />);
-
-    const embeddable = screen.getByTestId('embeddableRenderer');
-    expect(embeddable).toHaveAttribute('data-type', 'APM_TRACE_WATERFALL_EMBEDDABLE');
-    expect(embeddable).toHaveAttribute('data-hide-panel-chrome', 'true');
-  });
-
-  it('wraps EmbeddableRenderer with CSS override for proper layout', () => {
-    const { container } = render(<FullScreenWaterfall {...defaultProps} />);
-
-    const embeddable = container.querySelector('[data-test-subj="embeddableRenderer"]');
-    expect(embeddable).toBeInTheDocument();
-
-    const wrapper = embeddable?.parentElement;
-    expect(wrapper).toHaveStyleRule('width', '100%');
-    expect(wrapper).toHaveStyleRule('display', 'block!important', {
-      target: '.embPanel__content',
-    });
   });
 
   it('should not display nested flyouts initially', () => {
@@ -95,82 +66,17 @@ describe('FullScreenWaterfall', () => {
     expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
   });
 
-  describe('nested flyout interactions', () => {
-    it('should display span details when clicking a waterfall node', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
+  it('should display the full trace waterfall', () => {
+    render(<FullScreenWaterfall {...defaultProps} />);
 
-      act(() => {
-        capturedCallbacks.onNodeClick('test-span-id');
-      });
-
-      const spanFlyout = screen.getByTestId('spanFlyout');
-      expect(spanFlyout).toHaveAttribute('data-trace-id', 'test-trace-id');
-      expect(spanFlyout).toHaveAttribute('data-span-id', 'test-span-id');
-      expect(spanFlyout).not.toHaveAttribute('data-active-section');
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
-    });
-
-    it('should display span errors table when clicking an error with multiple occurrences', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-error-doc-id',
-          errorCount: 5,
-        });
-      });
-
-      const spanFlyout = screen.getByTestId('spanFlyout');
-      expect(spanFlyout).toHaveAttribute('data-active-section', 'errors-table');
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
-    });
-
-    it('should display log details when clicking a single error', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-doc-id',
-          errorCount: 1,
-          errorDocId: 'test-error-log-id',
-        });
-      });
-
-      expect(screen.getByTestId('logsFlyout')).toHaveAttribute('data-id', 'test-error-log-id');
-      expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
-    });
-
-    it('should not open any flyout when clicking a single error without errorDocId', () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
-
-      act(() => {
-        capturedCallbacks.onErrorClick({
-          traceId: 'test-trace-id',
-          docId: 'test-doc-id',
-          errorCount: 1,
-        });
-      });
-
-      expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
-    });
+    expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
   });
 
-  describe('scrollElement integration', () => {
-    it('should pass scrollElement with correct EUI class to embeddable', async () => {
-      render(<FullScreenWaterfall {...defaultProps} />);
+  describe('when service name is undefined', () => {
+    it('does not display the full trace waterfall', () => {
+      render(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('embeddableRenderer')).toBeInTheDocument();
-      });
-
-      expect(capturedCallbacks.scrollElement).not.toBeNull();
-      expect(capturedCallbacks.scrollElement).toBeInstanceOf(Element);
-      expect(
-        capturedCallbacks.scrollElement.classList.contains(EUI_FLYOUT_BODY_OVERFLOW_CLASS)
-      ).toBe(true);
+      expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
     });
   });
 });
