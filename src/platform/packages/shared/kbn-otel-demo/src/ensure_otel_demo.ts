@@ -25,6 +25,7 @@ import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
+import { resolveKibanaUrl } from './util/resolve_kibana_url';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -142,7 +143,12 @@ export async function ensureOtelDemo({
   const elasticsearchUsername = elasticsearchConfig.username;
   const elasticsearchPassword = elasticsearchConfig.password;
 
-  const kibanaUrl = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
+  // Build the base Kibana URL from config
+  const kibanaHostname = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
+
+  // Resolve the actual Kibana URL by detecting any dev mode base path
+  // When running `yarn start` without `--no-base-path`, Kibana uses a random 3-letter prefix
+  const kibanaUrl = await resolveKibanaUrl(kibanaHostname, log);
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);
