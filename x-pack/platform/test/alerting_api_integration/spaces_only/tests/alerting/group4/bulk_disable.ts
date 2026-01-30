@@ -7,18 +7,35 @@
 
 import expect from '@kbn/expect';
 import { ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
+import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  createDataStream,
+  deleteDataStream,
+  createEsDocumentsWithGroups,
+} from '../create_test_data';
 
-const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
+const alertsAsDataIndex = `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`;
+const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
+const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
+
+const RULE_INTERVALS_TO_WRITE = 5;
+const RULE_INTERVAL_SECONDS = 3;
+const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
+  const esTestIndexToolAAD = new ESTestIndexTool(es, retry, alertsAsDataIndex);
 
   describe('bulkDisable', () => {
+    let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async () => {
@@ -27,15 +44,22 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            rule_type_id: 'test.patternFiringAad',
+            rule_type_id: '.es-query',
             schedule: { interval: '1d' },
             throttle: null,
             notify_when: null,
+            consumer: 'alerts',
             params: {
-              pattern: {
-                alertA: [true],
-                alertB: [true],
+              threshold: [0],
+              thresholdComparator: '>',
+              timeField: 'date',
+              esqlQuery: {
+                esql: 'from kibana-alerting-test-data | stats c = count(date) by group | where c > 0',
               },
+              searchType: 'esqlQuery',
+              timeWindowSize: 1,
+              timeWindowUnit: 'h',
+              size: 100,
             },
             actions: [],
           })
@@ -98,19 +122,41 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       return alerts;
     };
 
-    afterEach(async () => {
-      await es.deleteByQuery({
-        index: alertsAsDataIndex,
-        query: {
-          match_all: {},
-        },
-        conflicts: 'proceed',
-        ignore_unavailable: true,
+    async function createEsDocumentsInGroups() {
+      await createEsDocumentsWithGroups({
+        es,
+        esTestIndexTool,
+        endDate,
+        intervals: RULE_INTERVALS_TO_WRITE,
+        intervalMillis: RULE_INTERVAL_MILLIS,
+        groups: 3,
+        indexName: ES_TEST_INDEX_NAME,
       });
+    }
+
+    beforeEach(async () => {
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
+
+      await esTestIndexToolOutput.destroy();
+      await esTestIndexToolOutput.setup();
+
+      const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
+      endDate = new Date(endDateMillis).toISOString();
+
+      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
+    });
+
+    afterEach(async () => {
       await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
+      await esTestIndexToolOutput.destroy();
+      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
+      await esTestIndexToolAAD.removeAll();
     });
 
     it('should bulk disable and untrack', async () => {
+      await createEsDocumentsInGroups();
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
@@ -118,7 +164,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await retry.try(async () => {
         const alerts = await getAlerts([createdRule1, createdRule2]);
 
-        expect(alerts.length).eql(4);
+        expect(alerts.length).eql(2);
         alerts.forEach((activeAlert: any) => {
           expect(activeAlert._source[ALERT_STATUS]).eql('active');
           alertIds.push(activeAlert._source[ALERT_UUID]);
@@ -137,7 +183,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await retry.try(async () => {
         const alerts = await getAlertsById(alertIds);
 
-        expect(alerts.length).eql(4);
+        expect(alerts.length).eql(2);
         alerts.forEach((untrackedAlert: any) => {
           expect(untrackedAlert._source[ALERT_STATUS]).eql('untracked');
         });
@@ -145,6 +191,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     });
 
     it('should bulk disable and not untrack if untrack is false', async () => {
+      await createEsDocumentsInGroups();
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
@@ -152,7 +199,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await retry.try(async () => {
         const alerts = await getAlerts([createdRule1, createdRule2]);
 
-        expect(alerts.length).eql(4);
+        expect(alerts.length).eql(2);
         alerts.forEach((activeAlert: any) => {
           expect(activeAlert._source[ALERT_STATUS]).eql('active');
           alertIds.push(activeAlert._source[ALERT_UUID]);
@@ -170,7 +217,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       const alerts = await getAlertsById(alertIds);
 
-      expect(alerts.length).eql(4);
+      expect(alerts.length).eql(2);
       alerts.forEach((activeAlert: any) => {
         expect(activeAlert._source[ALERT_STATUS]).eql('active');
       });
