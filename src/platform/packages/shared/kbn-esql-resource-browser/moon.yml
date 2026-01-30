@@ -35,6 +35,8 @@ tags:
   - shared
 fileGroups:
   src:
+    - .storybook/**/*.ts
+    - .storybook/**/*.tsx
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
