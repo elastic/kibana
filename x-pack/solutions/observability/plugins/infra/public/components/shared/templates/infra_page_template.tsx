@@ -104,7 +104,7 @@ export const InfraPageTemplate = ({
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -132,7 +132,7 @@ export const InfraPageTemplate = ({
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, hasData, source]);
 

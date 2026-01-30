@@ -39,7 +39,7 @@ export function useDefaultScreenContextForApm({
   }
 
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -60,7 +60,7 @@ export function useDefaultScreenContextForApm({
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, hasApmData, hasApmIntegrations, noDataConfig, screenDescription]);
 }

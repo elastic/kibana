@@ -283,7 +283,7 @@ export function ServiceInventory() {
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -318,7 +318,7 @@ export function ServiceInventory() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, mainStatisticsStatus, mainStatisticsData.items]);
 

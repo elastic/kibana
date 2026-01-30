@@ -102,7 +102,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -128,7 +128,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, ruleTypesWithDescriptions]);
 

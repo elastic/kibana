@@ -178,7 +178,7 @@ function InternalAlertsPage() {
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -204,7 +204,7 @@ function InternalAlertsPage() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, tableCount, ruleTypesWithDescriptions]);
 

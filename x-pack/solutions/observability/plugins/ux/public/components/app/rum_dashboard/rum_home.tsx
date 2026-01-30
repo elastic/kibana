@@ -87,7 +87,7 @@ export function RumHome() {
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
       return;
     }
 
@@ -108,7 +108,7 @@ export function RumHome() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, screenDescription]);
 

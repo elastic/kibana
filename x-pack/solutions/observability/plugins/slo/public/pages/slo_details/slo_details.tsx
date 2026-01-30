@@ -103,7 +103,7 @@ export function SloDetailsPage() {
 
   // Configure agent builder global flyout with screen context
   useEffect(() => {
-    if (!agentBuilder || !slo) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig || !slo) {
       return;
     }
 
@@ -137,7 +137,7 @@ export function SloDetailsPage() {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig?.();
     };
   }, [agentBuilder, slo]);
 
