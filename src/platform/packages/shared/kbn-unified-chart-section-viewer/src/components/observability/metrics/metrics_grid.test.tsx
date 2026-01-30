@@ -50,13 +50,13 @@ describe('MetricsGrid', () => {
       name: 'system.cpu.utilization',
       dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
-      type: 'long',
+      type: ES_FIELD_TYPES.LONG,
     },
     {
       name: 'system.memory.utilization',
       dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       index: 'metrics-*',
-      type: 'long',
+      type: ES_FIELD_TYPES.LONG,
     },
   ];
 
@@ -198,13 +198,13 @@ describe('MetricsGrid', () => {
           name: 'system.disk.utilization',
           dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
-          type: 'long',
+          type: ES_FIELD_TYPES.LONG,
         },
         {
           name: 'system.network.utilization',
           dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
           index: 'metrics-*',
-          type: 'long',
+          type: ES_FIELD_TYPES.LONG,
         },
       ];
 

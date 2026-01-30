@@ -66,7 +66,9 @@ describe('useMetricFields', () => {
     it('returns empty arrays when sampleRowByMetric is empty', () => {
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
-        metricFields: [{ name: 'cpu.usage', index: 'metrics-*', type: 'long', dimensions: [] }],
+        metricFields: [
+          { name: 'cpu.usage', index: 'metrics-*', type: ES_FIELD_TYPES.LONG, dimensions: [] },
+        ],
       });
 
       const { result } = renderHook(() => useMetricFields());
@@ -92,8 +94,8 @@ describe('useMetricFields', () => {
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
         metricFields: [
-          { name: 'cpu.usage', index: 'metrics-*', type: 'double', dimensions: [] },
-          { name: 'memory.used', index: 'metrics-*', type: 'long', dimensions: [] },
+          { name: 'cpu.usage', index: 'metrics-*', type: ES_FIELD_TYPES.DOUBLE, dimensions: [] },
+          { name: 'memory.used', index: 'metrics-*', type: ES_FIELD_TYPES.LONG, dimensions: [] },
         ],
         dimensions: baseDimensions,
         getSampleRow: (name: string) => sampleRows.get(name),
@@ -124,8 +126,8 @@ describe('useMetricFields', () => {
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
         metricFields: [
-          { name: 'cpu.usage', index: 'metrics-*', type: 'double', dimensions: [] },
-          { name: 'latency', index: 'metrics-*', type: 'long', dimensions: [] },
+          { name: 'cpu.usage', index: 'metrics-*', type: ES_FIELD_TYPES.DOUBLE, dimensions: [] },
+          { name: 'latency', index: 'metrics-*', type: ES_FIELD_TYPES.LONG, dimensions: [] },
         ],
         dimensions: [],
         getSampleRow: (name: string) => sampleRows.get(name),
@@ -149,7 +151,9 @@ describe('useMetricFields', () => {
 
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
-        metricFields: [{ name: 'cpu.usage', index: 'metrics-*', type: 'double', dimensions: [] }],
+        metricFields: [
+          { name: 'cpu.usage', index: 'metrics-*', type: ES_FIELD_TYPES.DOUBLE, dimensions: [] },
+        ],
         dimensions: baseDimensions,
         getSampleRow: (name: string) => sampleRows.get(name),
       });
@@ -158,6 +162,39 @@ describe('useMetricFields', () => {
 
       const cpuField = result.current.allMetricFields[0];
       expect(cpuField?.dimensions).toEqual([{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]);
+    });
+
+    it('filters out legacy histogram metric types', () => {
+      const sampleRows = new Map([
+        ['cpu.usage', { 'cpu.usage': 0.75 }],
+        ['http.request.duration', { 'http.request.duration': 150 }],
+        ['memory.used', { 'memory.used': 1024 }],
+      ]);
+
+      useMetricsExperienceFieldsContextMock.mockReturnValue({
+        ...defaultFieldsContext,
+        metricFields: [
+          { name: 'cpu.usage', index: 'metrics-*', type: ES_FIELD_TYPES.DOUBLE, dimensions: [] },
+          {
+            name: 'http.request.duration',
+            index: 'metrics-*',
+            type: ES_FIELD_TYPES.HISTOGRAM,
+            dimensions: [],
+          },
+          { name: 'memory.used', index: 'metrics-*', type: ES_FIELD_TYPES.LONG, dimensions: [] },
+        ],
+        dimensions: [],
+        getSampleRow: (name: string) => sampleRows.get(name),
+      });
+
+      const { result } = renderHook(() => useMetricFields());
+
+      expect(result.current.allMetricFields).toHaveLength(2);
+      expect(
+        result.current.allMetricFields.find((f) => f.name === 'http.request.duration')
+      ).toBeUndefined();
+      expect(result.current.allMetricFields.find((f) => f.name === 'cpu.usage')).toBeDefined();
+      expect(result.current.allMetricFields.find((f) => f.name === 'memory.used')).toBeDefined();
     });
   });
 
@@ -183,8 +220,18 @@ describe('useMetricFields', () => {
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
         metricFields: [
-          { name: 'system.cpu.utilization', index: 'metrics-*', type: 'double', dimensions: [] },
-          { name: 'system.memory.utilization', index: 'metrics-*', type: 'long', dimensions: [] },
+          {
+            name: 'system.cpu.utilization',
+            index: 'metrics-*',
+            type: ES_FIELD_TYPES.DOUBLE,
+            dimensions: [],
+          },
+          {
+            name: 'system.memory.utilization',
+            index: 'metrics-*',
+            type: ES_FIELD_TYPES.LONG,
+            dimensions: [],
+          },
         ],
         dimensions,
         getSampleRow: (name: string) => sampleRows.get(name),
@@ -207,7 +254,12 @@ describe('useMetricFields', () => {
       useMetricsExperienceFieldsContextMock.mockReturnValue({
         ...defaultFieldsContext,
         metricFields: [
-          { name: 'system.cpu.utilization', index: 'metrics-*', type: 'double', dimensions: [] },
+          {
+            name: 'system.cpu.utilization',
+            index: 'metrics-*',
+            type: ES_FIELD_TYPES.DOUBLE,
+            dimensions: [],
+          },
         ],
         dimensions,
         getSampleRow: (name: string) => sampleRows.get(name),

@@ -29,7 +29,7 @@ describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<MetricField> = {}): MetricField => ({
     name: 'test.metric',
     index: 'test-index',
-    type: 'double',
+    type: ES_FIELD_TYPES.DOUBLE,
     unit: 'ms',
     dimensions: [],
     ...overrides,
@@ -49,7 +49,7 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('renders main description list', () => {
-      const metric = createMockMetric({ index: 'my-data-stream', type: 'long' });
+      const metric = createMockMetric({ index: 'my-data-stream', type: ES_FIELD_TYPES.LONG });
       const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
