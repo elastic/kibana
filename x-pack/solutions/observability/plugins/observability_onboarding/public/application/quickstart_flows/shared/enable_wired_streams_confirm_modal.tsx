@@ -93,38 +93,26 @@ export function EnableWiredStreamsConfirmModal({
           <EuiText size="s">
             <ul>
               <li>
-                {i18n.translate(
-                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet1',
-                  {
-                    defaultMessage: 'A root "logs" stream is created for your {envType}',
-                    values: { envType },
-                  }
-                )}
+                {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet1', {
+                  defaultMessage: 'A root "logs" stream is created for your {envType}',
+                  values: { envType },
+                })}
               </li>
               <li>
-                {i18n.translate(
-                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet2',
-                  {
-                    defaultMessage:
-                      'Logs from this setup will route to Wired Streams (e.g., logs.system.auth)',
-                  }
-                )}
+                {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet2', {
+                  defaultMessage:
+                    'Logs from this setup will route to Wired Streams (e.g., logs.system.auth)',
+                })}
               </li>
               <li>
-                {i18n.translate(
-                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet3',
-                  {
-                    defaultMessage: 'Metrics and traces continue through standard data streams',
-                  }
-                )}
+                {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet3', {
+                  defaultMessage: 'Metrics and traces continue through standard data streams',
+                })}
               </li>
               <li>
-                {i18n.translate(
-                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet4',
-                  {
-                    defaultMessage: 'Your existing data is not affected',
-                  }
-                )}
+                {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.bullet4', {
+                  defaultMessage: 'Your existing data is not affected',
+                })}
               </li>
             </ul>
           </EuiText>
@@ -133,12 +121,9 @@ export function EnableWiredStreamsConfirmModal({
         <EuiSpacer size="m" />
 
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.observability_onboarding.enableWiredStreamsModal.reversibleNote',
-            {
-              defaultMessage: 'This can be changed later in Streams settings.',
-            }
-          )}
+          {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.reversibleNote', {
+            defaultMessage: 'This can be changed later in Streams settings.',
+          })}
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
