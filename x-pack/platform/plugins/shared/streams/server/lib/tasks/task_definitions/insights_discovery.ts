@@ -13,6 +13,7 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { withRateLimitRetry, RateLimitTimeoutError } from '../rate_limit_retry';
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
@@ -47,14 +48,21 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
               try {
-                const result = await generateInsights({
-                  streamsClient,
-                  queryClient,
-                  esClient: scopedClusterClient.asCurrentUser,
-                  inferenceClient: boundInferenceClient,
-                  signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_discovery'),
-                });
+                const result = await withRateLimitRetry(
+                  () =>
+                    generateInsights({
+                      streamsClient,
+                      queryClient,
+                      esClient: scopedClusterClient.asCurrentUser,
+                      inferenceClient: boundInferenceClient,
+                      signal: runContext.abortController.signal,
+                      logger: taskContext.logger.get('insights_discovery'),
+                    }),
+                  {
+                    signal: runContext.abortController.signal,
+                    logger: taskContext.logger,
+                  }
+                );
 
                 taskContext.telemetry.trackInsightsGenerated({
                   input_tokens_used: result.tokensUsed?.prompt ?? 0,
@@ -68,6 +76,26 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   result
                 );
               } catch (error) {
+                // Handle rate limit timeout by rescheduling or failing
+                if (error instanceof RateLimitTimeoutError) {
+                  taskContext.logger.warn(
+                    `Task ${runContext.taskInstance.id} hit rate limit timeout, attempting reschedule`
+                  );
+                  const rescheduled = await taskClient.reschedule(
+                    _task,
+                    { connectorId },
+                    runContext.fakeRequest!
+                  );
+                  if (!rescheduled) {
+                    await taskClient.fail<InsightsDiscoveryTaskParams>(
+                      _task,
+                      { connectorId },
+                      'Rate limit exceeded: max reschedule retries reached'
+                    );
+                  }
+                  return;
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 

@@ -15,6 +15,7 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { getFeatureId, MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { withRateLimitRetry, RateLimitTimeoutError } from '../rate_limit_retry';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -70,16 +71,23 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { features: baseFeatures } = await identifyFeatures({
-                  start,
-                  end,
-                  esClient,
-                  inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('features_identification'),
-                  stream,
-                  signal: runContext.abortController.signal,
-                  systemPrompt: featurePromptOverride,
-                });
+                const { features: baseFeatures } = await withRateLimitRetry(
+                  () =>
+                    identifyFeatures({
+                      start,
+                      end,
+                      esClient,
+                      inferenceClient: boundInferenceClient,
+                      logger: taskContext.logger.get('features_identification'),
+                      stream,
+                      signal: runContext.abortController.signal,
+                      systemPrompt: featurePromptOverride,
+                    }),
+                  {
+                    signal: runContext.abortController.signal,
+                    logger: taskContext.logger,
+                  }
+                );
 
                 const now = Date.now();
                 const features = baseFeatures.map((feature) => ({
@@ -101,6 +109,26 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   { features }
                 );
               } catch (error) {
+                // Handle rate limit timeout by rescheduling or failing
+                if (error instanceof RateLimitTimeoutError) {
+                  taskContext.logger.warn(
+                    `Task ${runContext.taskInstance.id} hit rate limit timeout, attempting reschedule`
+                  );
+                  const rescheduled = await taskClient.reschedule(
+                    _task,
+                    { connectorId, start, end, streamName },
+                    runContext.fakeRequest!
+                  );
+                  if (!rescheduled) {
+                    await taskClient.fail<FeaturesIdentificationTaskParams>(
+                      _task,
+                      { connectorId, start, end, streamName },
+                      'Rate limit exceeded: max reschedule retries reached'
+                    );
+                  }
+                  return;
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 

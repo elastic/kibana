@@ -14,6 +14,7 @@ import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
+import { withRateLimitRetry, RateLimitTimeoutError } from '../rate_limit_retry';
 
 export const DESCRIPTION_GENERATION_TASK_TYPE = 'streams_description_generation';
 
@@ -60,16 +61,23 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                 const { descriptionPromptOverride } = await promptsConfigService.getPrompt();
                 const stream = await streamsClient.getStream(streamName);
 
-                const { description, tokensUsed } = await generateStreamDescription({
-                  stream,
-                  esClient: scopedClusterClient.asCurrentUser,
-                  inferenceClient: inferenceClient.bindTo({ connectorId }),
-                  start,
-                  end,
-                  signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('stream_description'),
-                  systemPrompt: descriptionPromptOverride,
-                });
+                const { description, tokensUsed } = await withRateLimitRetry(
+                  () =>
+                    generateStreamDescription({
+                      stream,
+                      esClient: scopedClusterClient.asCurrentUser,
+                      inferenceClient: inferenceClient.bindTo({ connectorId }),
+                      start,
+                      end,
+                      signal: runContext.abortController.signal,
+                      logger: taskContext.logger.get('stream_description'),
+                      systemPrompt: descriptionPromptOverride,
+                    }),
+                  {
+                    signal: runContext.abortController.signal,
+                    logger: taskContext.logger,
+                  }
+                );
 
                 taskContext.telemetry.trackDescriptionGenerated({
                   stream_name: stream.name,
@@ -83,6 +91,26 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   GenerateDescriptionResult
                 >(_task, { connectorId, start, end, streamName }, { description });
               } catch (error) {
+                // Handle rate limit timeout by rescheduling or failing
+                if (error instanceof RateLimitTimeoutError) {
+                  taskContext.logger.warn(
+                    `Task ${runContext.taskInstance.id} hit rate limit timeout, attempting reschedule`
+                  );
+                  const rescheduled = await taskClient.reschedule(
+                    _task,
+                    { connectorId, start, end, streamName },
+                    runContext.fakeRequest!
+                  );
+                  if (!rescheduled) {
+                    await taskClient.fail<DescriptionGenerationTaskParams>(
+                      _task,
+                      { connectorId, start, end, streamName },
+                      'Rate limit exceeded: max reschedule retries reached'
+                    );
+                  }
+                  return;
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
