@@ -18,7 +18,6 @@ const LOG_DOCUMENT_FIELDS = [
   'error.exception.message',
 ];
 
-
 export interface LogDocument {
   '@timestamp'?: string;
   message?: string;
