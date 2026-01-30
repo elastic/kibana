@@ -404,7 +404,7 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
-      replyTo: params.replyTo ?? [config.from],
+      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
       subject: params.subject,
