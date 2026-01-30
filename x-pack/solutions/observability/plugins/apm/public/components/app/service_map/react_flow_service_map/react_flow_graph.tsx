@@ -84,10 +84,8 @@ function ReactFlowGraphInner({
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
 
-  // Use the edge highlighting hook
   const { applyEdgeHighlighting } = useEdgeHighlighting();
 
-  // Apply layout to nodes
   const layoutedNodes = useMemo(
     () => applyDagreLayout(initialNodes, initialEdges),
     [initialNodes, initialEdges]
@@ -96,41 +94,31 @@ function ReactFlowGraphInner({
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
-  // Update nodes and edges when props change
   useEffect(() => {
     setNodes(layoutedNodes);
-    // Apply edge highlighting preserving selection state
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
-    // Fit view after nodes are updated
     if (layoutedNodes.length > 0) {
       setTimeout(() => fitView(fitViewOptions), 50);
     }
   }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView, applyEdgeHighlighting]);
 
-  // Handle node click - update node selection, edge highlighting, and popover
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
-      // Set the selected node for the popover and clear any selected edge
       setSelectedNodeForPopover(newSelectedId ? node : null);
       setSelectedEdgeForPopover(null);
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
-
-  // Handle edge click - show edge popover and highlight the edge
   const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
     (_, edge) => {
-      // Clear node selection
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
-      // Toggle edge selection
       const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
       setSelectedEdgeForPopover(newSelectedEdge);
-      // Apply edge highlighting for the selected edge
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, { selectedEdgeId: newSelectedEdge?.id ?? null })
       );
@@ -138,7 +126,6 @@ function ReactFlowGraphInner({
     [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
   );
 
-  // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
@@ -152,7 +139,6 @@ function ReactFlowGraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  // Handle popover close
   const handlePopoverClose = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);

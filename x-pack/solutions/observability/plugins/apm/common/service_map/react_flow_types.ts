@@ -165,6 +165,22 @@ export function isGroupedNode(node: ServiceMapNode): node is Node<GroupedNodeDat
 }
 
 /**
+ * Type guard to check if node data is service node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isServiceNodeData(data: ServiceMapNodeData): data is ServiceNodeData {
+  return data.isService === true;
+}
+
+/**
+ * Type guard to check if node data is grouped node data.
+ * Use this when you have the data object directly (e.g., after accessing node.data).
+ */
+export function isGroupedNodeData(data: ServiceMapNodeData): data is GroupedNodeData {
+  return 'isGrouped' in data && data.isGrouped === true;
+}
+
+/**
  * Type guard to check if node data is dependency/external node data.
  * Use this when you have the data object directly (e.g., after accessing node.data).
  */

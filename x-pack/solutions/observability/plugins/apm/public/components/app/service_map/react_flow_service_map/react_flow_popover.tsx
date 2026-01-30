@@ -18,11 +18,10 @@ import {
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
 import { PopoverContent, type ElementData } from '../popover/popover_content';
+import { isServiceNodeData, isGroupedNodeData } from '../../../../../common/service_map';
 import type {
   ServiceMapNode,
   ServiceMapNodeData,
-  ServiceNodeData,
-  GroupedNodeData,
   ServiceMapEdge,
 } from '../../../../../common/service_map';
 
@@ -37,31 +36,30 @@ function transformNodeDataForPopover(nodeData: ServiceMapNodeData): ElementData 
     label: nodeData.label,
   };
 
-  if (nodeData.isService) {
-    const serviceData = nodeData as ServiceNodeData;
+  if (isServiceNodeData(nodeData)) {
     return {
       ...baseData,
       isService: true,
       [SERVICE_NAME]: nodeData.id,
-      serviceAnomalyStats: serviceData.serviceAnomalyStats,
-      agentName: serviceData.agentName,
+      serviceAnomalyStats: nodeData.serviceAnomalyStats,
+      agentName: nodeData.agentName,
     };
   }
 
-  if ('isGrouped' in nodeData && nodeData.isGrouped) {
-    const groupedData = nodeData as GroupedNodeData;
+  if (isGroupedNodeData(nodeData)) {
     return {
       ...baseData,
-      groupedConnections: groupedData.groupedConnections,
-      [SPAN_TYPE]: groupedData.spanType,
-      spanType: groupedData.spanType,
+      groupedConnections: nodeData.groupedConnections,
+      [SPAN_TYPE]: nodeData.spanType,
+      spanType: nodeData.spanType,
     };
   }
 
+  const spanType = 'spanType' in nodeData ? nodeData.spanType : undefined;
   return {
     ...baseData,
-    [SPAN_TYPE]: 'spanType' in nodeData ? nodeData.spanType : undefined,
-    spanType: 'spanType' in nodeData ? nodeData.spanType : undefined,
+    [SPAN_TYPE]: spanType,
+    spanType,
   };
 }
 
@@ -214,7 +212,7 @@ export function ReactFlowPopover({
     ? `${selectedEdge.source} → ${selectedEdge.target}`
     : selectedNodeId ?? '';
 
-  const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} />;
+  const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} aria-hidden="true" />;
 
   return (
     <div style={popoverStyle} role="presentation">

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { MouseEvent, ComponentType } from 'react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
@@ -97,7 +97,8 @@ export function PopoverContent({
 
   const ContentsComponent = getContentsComponent(elementData, isDiagnosticModeEnabled);
 
-  const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
+  const handleDiagnoseClick = useCallback(() => setIsDiagnosticFlyoutOpen(true), []);
+  const handleCloseDiagnosticFlyout = useCallback(() => setIsDiagnosticFlyoutOpen(false), []);
 
   if (!ContentsComponent) {
     return null;
@@ -143,7 +144,7 @@ export function PopoverContent({
         <DiagnosticFlyout
           selectedNode={elementData}
           isOpen={isDiagnosticFlyoutOpen}
-          onClose={() => setIsDiagnosticFlyoutOpen(false)}
+          onClose={handleCloseDiagnosticFlyout}
         />
       )}
     </>

@@ -114,6 +114,7 @@ export function useEdgeHighlighting(): UseEdgeHighlightingResult {
         return {
           ...edge,
           style: {
+            ...edge.style,
             stroke: isHighlighted ? primaryColor : defaultEdgeColor,
             strokeWidth: isHighlighted ? HIGHLIGHTED_STROKE_WIDTH : DEFAULT_STROKE_WIDTH,
           },
