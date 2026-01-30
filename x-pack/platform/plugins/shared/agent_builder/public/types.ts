@@ -11,6 +11,7 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -58,6 +59,7 @@ export interface AgentBuilderStartDependencies {
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
