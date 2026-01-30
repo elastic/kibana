@@ -263,7 +263,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
       box-shadow: ${theme.euiTheme.shadows.l.down} !important;
-      z-index: 100;
+      z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
@@ -317,7 +317,7 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
       // Suggestions must be rendered above flyouts
-      z-index: 1100 !important;
+      z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
     .suggest-details-container {
