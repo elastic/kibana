@@ -107,6 +107,12 @@
       "lifecycle": "install",
       "required": false,
       "reason": "Builds from source if npm_config_build_from_source=true.  Prebuilds are sufficient."
+    },
+    {
+      "path": "@opentelemetry/exporter-logs-otlp-http/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Not required."
     }
   ]
 }
