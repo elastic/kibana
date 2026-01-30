@@ -17,6 +17,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -49,10 +50,10 @@ import {
 } from './url/search_sessions_integration';
 import {
   extractDashboardState,
-  loadAndRemoveAttachmentIdFromURL,
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
+import { DASHBOARD_ATTACHMENT_ID_PARAM } from '../../common/page_bundle_constants';
 import type { DashboardInternalApi } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
@@ -120,10 +121,11 @@ export function DashboardApp({
     dashboardApi,
   });
 
-  // Extract attachmentId from URL query parameter and remove it from URL.
+  // Extract attachmentId from URL query parameter.
   // The attachment ID is passed when navigating from the agent to a dashboard.
+  // TODO: Remove this param from URL after attachment ID is stored in the DashboardAttachmentService
   const urlAttachmentId = useMemo(
-    () => loadAndRemoveAttachmentIdFromURL(history, kbnUrlStateStorage),
+    () => getQueryParams(history.location)[DASHBOARD_ATTACHMENT_ID_PARAM] as string | undefined,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
