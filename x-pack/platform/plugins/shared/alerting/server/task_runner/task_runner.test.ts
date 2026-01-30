@@ -1827,7 +1827,7 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
     expect(AlertingEventLogger).toHaveBeenCalled();
-    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
 
     await taskRunner.run();
