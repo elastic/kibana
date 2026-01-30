@@ -229,6 +229,9 @@ describe('Cases Plugin', () => {
             "stack": Object {
               "enabled": true,
             },
+            "templates": Object {
+              "enabled": true,
+            },
           },
           "getCasesClientWithRequest": [Function],
           "getExternalReferenceAttachmentTypeRegistry": [Function],
