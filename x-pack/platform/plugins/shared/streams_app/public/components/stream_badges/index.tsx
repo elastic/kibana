@@ -15,7 +15,7 @@ import {
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
-  getIndexPatternsForStream,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -176,11 +176,11 @@ export function LifecycleBadge({
 }
 
 export function DiscoverBadgeButton({
-  stream,
+  definition,
   isWiredStream = false,
   hasDataStream = false,
 }: {
-  stream: Streams.all.Definition;
+  definition: Streams.all.GetResponse;
   hasDataStream?: boolean;
   isWiredStream?: boolean;
 }) {
@@ -189,7 +189,11 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
-  const esqlQuery = getESQLQuery(stream, hasDataStream, isWiredStream);
+  const esqlQuery = getDiscoverEsqlQuery({
+    definition: definition.stream,
+    indexMode: definition.index_mode,
+    includeMetadata: isWiredStream,
+  });
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -202,7 +206,7 @@ export function DiscoverBadgeButton({
     [esqlQuery]
   );
 
-  if (!discoverLink || !esqlQuery) {
+  if (!discoverLink || !hasDataStream || !esqlQuery) {
     return null;
   }
 
@@ -219,23 +223,3 @@ export function DiscoverBadgeButton({
     />
   );
 }
-
-const getESQLQuery = (
-  stream: Streams.all.Definition,
-  hasDataStream: boolean,
-  isWiredStream: boolean
-) => {
-  if (Streams.WiredStream.Definition.is(stream) || hasDataStream) {
-    const indexPatterns = getIndexPatternsForStream(stream);
-    return indexPatterns
-      ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
-      : undefined;
-  }
-
-  if (Streams.QueryStream.Definition.is(stream)) {
-    // Use the ES|QL view name as the query source
-    return `FROM ${stream.query.view}`;
-  }
-
-  return undefined;
-};
