@@ -12,7 +12,7 @@ Elastic provides built-in LLMs through AI connectors vetted for GenAI product fe
 ## Prerequisites
 
 * Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
-* {applies_to}`self: ga 9.3+` Elastic Managed LLMs are available through [EIS with Cloud-Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md)
+* {applies_to}`ece:` {applies_to}`eck:` {applies_to}`self:` For on-premises installations ({{ece}}, {{eck}}, or self managed clusters), Elastic Managed LLMs are only available through [EIS with Cloud Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md). Your {{stack}} version must be 9.3 or later.
 
 ## Region and hosting
 
