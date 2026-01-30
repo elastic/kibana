@@ -37,6 +37,7 @@ export const PresentationPanelInternal = <
   showNotifications,
   getActions,
   actionPredicate,
+  titleHighlight,
 
   Component,
   componentProps,
@@ -143,6 +144,7 @@ export const PresentationPanelInternal = <
             showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
+            titleHighlight={titleHighlight}
           />
         )}
         {blockingError && api && (
