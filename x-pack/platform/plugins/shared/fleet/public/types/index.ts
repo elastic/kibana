@@ -157,6 +157,7 @@ export type {
   CreateCloudConnectorRequest,
   CloudConnectorVars,
   CloudProvider,
+  AccountType,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
