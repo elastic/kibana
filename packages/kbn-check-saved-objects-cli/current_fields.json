@@ -1,4 +1,9 @@
 {
+  "DASHBOARD_MARKDOWN": [
+    "description",
+    "links",
+    "title"
+  ],
   "action": [
     "actionTypeId",
     "name"

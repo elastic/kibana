@@ -1,4 +1,19 @@
 {
+  "DASHBOARD_MARKDOWN": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "action": {
     "dynamic": false,
     "properties": {
