@@ -55,8 +55,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
     await this.storageService.bulkIndexDocs({
       index: targetDataStream,
-      docs: alertEvents.map(({ doc }) => doc),
-      getId: (_doc, i) => alertEvents[i].id,
+      docs: alertEvents,
     });
 
     this.logger.debug({

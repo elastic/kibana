@@ -14,10 +14,6 @@ import { LoggerServiceToken } from '../logger_service/logger_service';
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: TDocument[];
-  /**
-   * Optional deterministic id factory.
-   */
-  getId?: (doc: TDocument, index: number) => string;
 }
 
 export interface StorageServiceContract {
@@ -36,14 +32,15 @@ export class StorageService implements StorageServiceContract {
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
     index,
     docs,
-    getId,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
     }
 
-    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc, i) => [
-      { create: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
+      {
+        create: { _index: index },
+      },
       doc,
     ]);
 
