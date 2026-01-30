@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/scout_test_file_naming
 import { globalSetupHook } from '@kbn/scout-oblt';
 
 globalSetupHook('Ingest data to Elasticsearch', { tag: ['@ess', '@svlOblt'] }, async ({}) => {
