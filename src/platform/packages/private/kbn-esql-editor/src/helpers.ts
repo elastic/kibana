@@ -32,7 +32,7 @@ export const useDebounceWithOptions = (
   deps?: React.DependencyList | undefined
 ) => {
   const isFirstRender = useRef(true);
-  const newDeps = [...(deps || []), isFirstRender];
+  const newDeps = deps || [];
 
   return useDebounce(
     () => {
@@ -62,50 +62,45 @@ const maxWarningLength = 1000;
 export const parseWarning = (warning: string): MonacoMessage[] => {
   // we limit the length to reduce ReDoS risks
   const truncatedWarning = warning.substring(0, maxWarningLength);
-  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
-    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
-    if (matches) {
-      return matches.map((message) => {
-        // replaces the quotes only if they are not escaped,
-        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
-        let startColumn = 1;
-        let startLineNumber = 1;
-        // initialize the length to 10 in case no error word found
-        let errorLength = 10;
-        // if there's line number encoded in the message use it as new positioning
-        // and replace the actual message without it
-        if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
-            warningMessage.split(':');
-          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
-          warningMessage = additionalInfoMessage ?? innerMessage;
-          if (!Number.isNaN(Number(encodedColumn))) {
-            startColumn = Number(encodedColumn);
-            startLineNumber = Number(encodedLine.replace('Line ', ''));
-          }
-          const openingSquareBracketIndex = warningMessage.indexOf('[');
-          if (openingSquareBracketIndex !== -1) {
-            const closingSquareBracketIndex = warningMessage.indexOf(
-              ']',
-              openingSquareBracketIndex
-            );
-            if (closingSquareBracketIndex !== -1) {
-              errorLength = warningMessage.length - openingSquareBracketIndex - 1;
-            }
+  const matches = truncatedWarning.match(quotedWarningMessageRegexp);
+  if (matches) {
+    return matches.map((message) => {
+      // replaces the quotes only if they are not escaped,
+      let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
+      let startColumn = 1;
+      let startLineNumber = 1;
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      // if there's line number encoded in the message use it as new positioning
+      // and replace the actual message without it
+      if (/Line (\d+):(\d+):/.test(warningMessage)) {
+        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+          warningMessage.split(':');
+        // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+        warningMessage = additionalInfoMessage ?? innerMessage;
+        if (!Number.isNaN(Number(encodedColumn))) {
+          startColumn = Number(encodedColumn);
+          startLineNumber = Number(encodedLine.replace('Line ', ''));
+        }
+        const openingSquareBracketIndex = warningMessage.indexOf('[');
+        if (openingSquareBracketIndex !== -1) {
+          const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
+          if (closingSquareBracketIndex !== -1) {
+            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
           }
         }
+      }
 
-        return {
-          message: warningMessage.trimStart(),
-          startColumn,
-          startLineNumber,
-          endColumn: startColumn + errorLength - 1,
-          endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Warning,
-          code: 'warningFromES',
-        };
-      });
-    }
+      return {
+        message: warningMessage.trimStart(),
+        startColumn,
+        startLineNumber,
+        endColumn: startColumn + errorLength - 1,
+        endLineNumber: startLineNumber,
+        severity: monaco.MarkerSeverity.Warning,
+        code: 'warningFromES',
+      };
+    });
   }
   // unknown warning message
   return [
