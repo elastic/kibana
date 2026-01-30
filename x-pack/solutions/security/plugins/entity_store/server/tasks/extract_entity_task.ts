@@ -64,12 +64,14 @@ async function runTask({
     });
 
     const extractionStart = Date.now();
-    const extractionResult = await logsExtractionClient.extractLogs(entityType);
+    const extractionResult = await logsExtractionClient.extractLogs(entityType, {
+      abortController,
+    });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     if (!extractionResult.success) {
       logger.error(
-        `Logs extraction failed for ${entityType}: ${extractionResult.error?.message}, took ${extractionDuration}ms`
+        `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
       );
     } else {
       logger.info(
@@ -82,7 +84,6 @@ async function runTask({
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
-      lastExtractionCount: extractionResult.count,
       lastExtractionSuccess: extractionResult.success,
     };
 

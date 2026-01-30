@@ -10,7 +10,7 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { getEntityDefinition } from './definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
@@ -24,7 +24,11 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from './assets/external_indices_contants';
-import type { EngineDescriptorClient, LogExtractionState } from './definitions/saved_objects';
+import type {
+  EngineDescriptor,
+  EngineDescriptorClient,
+  LogExtractionState,
+} from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
 import { parseDurationToMs } from '../infra/time';
 
@@ -33,14 +37,21 @@ interface LogsExtractionOptions {
     fromDateISO: string;
     toDateISO: string;
   };
+  abortController?: AbortController;
 }
 
-interface ExtractedLogsSummary {
-  success: boolean;
-  count?: number;
-  scannedIndices?: string[];
-  error?: Error;
+interface ExtractedLogsSummarySuccess {
+  success: true;
+  count: number;
+  scannedIndices: string[];
 }
+
+interface ExtractedLogsSummaryError {
+  success: false;
+  error: Error;
+}
+
+type ExtractedLogsSummary = ExtractedLogsSummarySuccess | ExtractedLogsSummaryError;
 
 export class LogsExtractionClient {
   constructor(
@@ -61,46 +72,25 @@ export class LogsExtractionClient {
       const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
 
       if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
-        return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
+        return {
+          success: false,
+          error: new Error(
+            `Entity store is not started for type ${type}, status: ${engineDescriptor.status}`
+          ),
+        };
       }
 
+      const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-
-      const maxPageSearchSize = engineDescriptor.logExtractionState.docsLimit;
-      const indexPatterns = await this.getIndexPatterns(
-        type,
-        engineDescriptor.logExtractionState.additionalIndexPattern
-      );
-      const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
-
-      const { fromDateISO, toDateISO } = this.getExtractionWindow(
-        engineDescriptor.logExtractionState,
-        opts
-      );
-
-      const query = buildLogsExtractionEsqlQuery({
-        indexPatterns,
-        latestIndex,
+      const { esqlResponse, indexPatterns } = await this.runQueryAndIngestDocs({
+        engineDescriptor,
+        opts,
+        delayMs,
         entityDefinition,
-        maxPageSearchSize,
-        fromDateISO,
-        toDateISO,
-      });
-
-      this.logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
-      const esqlResponse = await executeEsqlQuery({ esClient: this.esClient, query });
-
-      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-      await ingestEntities({
-        esClient: this.esClient,
-        esqlResponse,
-        esIdField: HASHED_ID,
-        targetIndex: latestIndex,
-        logger: this.logger,
       });
 
       const operationResult = {
-        success: true,
+        success: true as const,
         count: esqlResponse.values.length,
         scannedIndices: indexPatterns,
       };
@@ -110,8 +100,7 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      const paginationTimestamp = this.extractLastSeenTimestamp(esqlResponse);
-
+      const paginationTimestamp = this.extractLastSeenTimestamp(esqlResponse, delayMs);
       await this.engineDescriptorClient.update(type, {
         logExtractionState: {
           ...engineDescriptor.logExtractionState,
@@ -122,14 +111,77 @@ export class LogsExtractionClient {
 
       return operationResult;
     } catch (error) {
-      return this.handleError(error, type);
+      return await this.handleError(error, type);
     }
   }
 
-  private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse): string {
+  private async runQueryAndIngestDocs({
+    engineDescriptor,
+    opts,
+    delayMs,
+    entityDefinition,
+  }: {
+    engineDescriptor: EngineDescriptor;
+    opts?: LogsExtractionOptions;
+    delayMs: number;
+    entityDefinition: ManagedEntityDefinition;
+  }) {
+    const { docsLimit } = engineDescriptor.logExtractionState;
+    const indexPatterns = await this.getIndexPatterns(
+      engineDescriptor.type,
+      engineDescriptor.logExtractionState.additionalIndexPattern
+    );
+    const latestIndex = getLatestEntitiesIndexName(engineDescriptor.type, this.namespace);
+
+    const { fromDateISO, toDateISO } =
+      opts?.specificWindow ||
+      this.getExtractionWindow(engineDescriptor.logExtractionState, delayMs);
+
+    // This is a sanity check to ensure the extraction window is valid
+    // Ideally we have this validation on the API only and we trust
+    // that our internal logic is correct. For the time being, we validate it here
+    // too, so we have a few runs and understand it.
+    this.validateExtractionWindow(fromDateISO, toDateISO);
+
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns,
+      latestIndex,
+      entityDefinition,
+      docsLimit,
+      fromDateISO,
+      toDateISO,
+    });
+
+    this.logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
+    const esqlResponse = await executeEsqlQuery({
+      esClient: this.esClient,
+      query,
+      abortController: opts?.abortController,
+    });
+
+    this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+    await ingestEntities({
+      esClient: this.esClient,
+      esqlResponse,
+      esIdField: HASHED_ID,
+      targetIndex: latestIndex,
+      logger: this.logger,
+      abortController: opts?.abortController,
+    });
+
+    return { esqlResponse, indexPatterns };
+  }
+
+  private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
+    if (moment(fromDateISO).isAfter(moment(toDateISO))) {
+      throw new Error('From date is after to date');
+    }
+  }
+
+  private extractLastSeenTimestamp(esqlResponse: ESQLSearchResponse, delayMs: number): string {
     if (esqlResponse.values.length === 0) {
       // if no logs are found, we use the current time as the last seenTimestamp
-      return moment().utc().toISOString();
+      return moment().utc().subtract(delayMs, 'millisecond').toISOString();
     }
 
     const timestampIndex = esqlResponse.columns.findIndex((column) => column.name === '@timestamp');
@@ -141,23 +193,16 @@ export class LogsExtractionClient {
   }
 
   // Window scenarios:
-  // 1. specificWindow has been provided, early return
-  // 2. Fresh entity store, no paginationTimestamp or lastExecutionTimestamp:
+  // 1. Fresh entity store, no paginationTimestamp or lastExecutionTimestamp:
   //    fromDate = now - lookbackPeriod | toDate = now - delay
-  // 3. PaginationTimestamp is present:
+  // 2. PaginationTimestamp is present:
   //    fromDate = paginationTimestamp | toDate = now - delay
-  // 4. LastExecutionTimestamp is present:
+  // 3. LastExecutionTimestamp is present:
   //    fromDate = lastExecutionTimestamp | toDate = now - delay
   private getExtractionWindow(
     logExtractionState: LogExtractionState,
-    opts?: LogsExtractionOptions
+    delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
-    if (opts?.specificWindow) {
-      return opts.specificWindow;
-    }
-
-    const delayMs = parseDurationToMs(logExtractionState.delay);
-
     const fromDateISO =
       logExtractionState.paginationTimestamp ||
       logExtractionState.lastExecutionTimestamp ||
@@ -173,16 +218,14 @@ export class LogsExtractionClient {
     return moment().utc().subtract(lookbackPeriodMs, 'millisecond').toISOString();
   }
 
-  private handleError(error: any, type: EntityType): ExtractedLogsSummary {
+  private async handleError(error: any, type: EntityType): Promise<ExtractedLogsSummary> {
     this.logger.error(error);
 
-    if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-      if (error.message.includes('Entity store is not started for type')) {
-        return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
-      }
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return { success: false, error: new Error(`Entity store is not started for type ${type}`) };
     }
 
-    this.engineDescriptorClient.update(type, {
+    await this.engineDescriptorClient.update(type, {
       error: { message: error.message, action: 'extractLogs' },
     });
     return { success: false, error };

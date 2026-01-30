@@ -14,9 +14,8 @@ import moment from 'moment';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
 import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
-import type { EngineDescriptorClient } from './definitions/saved_objects';
+import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
-import { LogExtractionState } from './definitions/saved_objects/constants';
 import type { EntityType } from './definitions/entity_schema';
 
 jest.mock('../infra/elasticsearch/esql');
@@ -109,11 +108,15 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      expect(result.count).toBe(2);
-      expect(result.scannedIndices).toContain('logs-*');
-      expect(result.scannedIndices).toContain('filebeat-*');
-      expect(result.scannedIndices).toContain('.entities.v2.updates.security_user_default');
-      expect(result.scannedIndices).not.toContain('.alerts-security.alerts-default');
+      expect(result.success && result.count).toBe(2);
+      expect(result.success && result.scannedIndices).toContain('logs-*');
+      expect(result.success && result.scannedIndices).toContain('filebeat-*');
+      expect(result.success && result.scannedIndices).toContain(
+        '.entities.v2.updates.security_user_default'
+      );
+      expect(result.success && result.scannedIndices).not.toContain(
+        '.alerts-security.alerts-default'
+      );
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
@@ -165,7 +168,7 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      expect(result.count).toBe(0);
+      expect(result.success && result.count).toBe(0);
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
@@ -263,6 +266,61 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
+    it('should return error when specificWindow has from date after to date', async () => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue({
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      } as any);
+
+      const fromDate = '2024-01-02T12:00:00.000Z';
+      const toDate = '2024-01-01T00:00:00.000Z';
+
+      const result = await client.extractLogs('user', {
+        specificWindow: { fromDateISO: fromDate, toDateISO: toDate },
+      });
+
+      expect(result.success).toBe(false);
+      expect(!result.success && result.error.message).toBe('From date is after to date');
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+        error: { message: 'From date is after to date', action: 'extractLogs' },
+      });
+    });
+
+    it('should return error when computed extraction window has from date after to date', async () => {
+      const fixedNow = new Date('2025-01-15T11:00:00.000Z');
+      jest.useFakeTimers({ now: fixedNow.getTime() });
+
+      const paginationTimestamp = '2025-01-15T12:00:00.000Z'; // after fixedNow
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user', {
+          lookbackPeriod: '3h',
+          delay: '1m',
+          paginationTimestamp,
+        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+      );
+      mockDataViewsService.get.mockResolvedValue({
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      } as any);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(false);
+      expect(!result.success && result.error.message).toBe('From date is after to date');
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+        error: { message: 'From date is after to date', action: 'extractLogs' },
+      });
+
+      jest.useRealTimers();
+    });
+
     it('should use custom date range when provided', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
@@ -336,7 +394,7 @@ describe('LogsExtractionClient', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.count).toBe(2);
+      expect(result.success && result.count).toBe(2);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
@@ -359,7 +417,7 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe(testError);
+      expect(!result.success && result.error).toBe(testError);
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         error: { message: testError.message, action: 'extractLogs' },
@@ -392,7 +450,7 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe(testError);
+      expect(!result.success && result.error).toBe(testError);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
         error: { message: testError.message, action: 'extractLogs' },
       });
@@ -420,8 +478,8 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      expect(result.scannedIndices).toContain('logs-*');
-      expect(result.error).toBeUndefined();
+      expect(result.success && result.scannedIndices).toContain('logs-*');
+      expect(!result.success && result.error).toBeFalsy();
     });
 
     it('should work with different entity types', async () => {
@@ -475,7 +533,9 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(false);
-      expect(result.error?.message).toContain('Entity store is not started for type user');
+      expect(!result.success && result.error.message).toContain(
+        'Entity store is not started for type user'
+      );
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
