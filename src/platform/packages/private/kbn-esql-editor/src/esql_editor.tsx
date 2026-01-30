@@ -202,7 +202,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
-  const [abortController, setAbortController] = useState(new AbortController());
+  const abortControllerRef = useRef(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
   const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
     VISOR_AUTO_OPEN_DISMISSED_KEY,
@@ -290,12 +290,12 @@ const ESQLEditorInternal = function ESQLEditor({
   const onQuerySubmit = useCallback(
     (source: TelemetryQuerySubmittedProps['source']) => {
       if (isQueryLoading && isLoading && allowQueryCancellation) {
-        abortController?.abort();
+        abortControllerRef.current.abort();
         setIsQueryLoading(false);
       } else {
         setIsQueryLoading(true);
         const abc = new AbortController();
-        setAbortController(abc);
+        abortControllerRef.current = abc;
 
         const currentValue = editorRef.current?.getValue();
         if (currentValue != null) {
@@ -311,14 +311,7 @@ const ESQLEditorInternal = function ESQLEditor({
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [
-      isQueryLoading,
-      isLoading,
-      allowQueryCancellation,
-      abortController,
-      onTextLangQuerySubmit,
-      telemetryService,
-    ]
+    [isQueryLoading, isLoading, allowQueryCancellation, onTextLangQuerySubmit, telemetryService]
   );
 
   const onUpdateAndSubmitQuery = useCallback(
@@ -674,7 +667,7 @@ const ESQLEditorInternal = function ESQLEditor({
               esqlQuery: queryToExecute,
               search: data.search.search,
               timeRange,
-              signal: abortController.signal,
+              signal: abortControllerRef.current.signal,
               variables: variablesService?.esqlVariables,
               dropNullColumns: true,
             }).result) || []
@@ -777,7 +770,6 @@ const ESQLEditorInternal = function ESQLEditor({
     data.search.search,
     data.dataViews,
     memoizedFieldsFromESQL,
-    abortController.signal,
     variablesService?.esqlVariables,
     variablesService?.isCreateControlSuggestionEnabled,
     histogramBarTarget,
