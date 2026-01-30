@@ -22,19 +22,19 @@ describe('useMetricFieldsFilter', () => {
     {
       name: 'system.cpu.utilization',
       index: 'metrics-*',
-      type: 'percent',
+      type: ES_FIELD_TYPES.DOUBLE,
       dimensions: [baseDimensions[0], baseDimensions[1]],
     },
     {
       name: 'system.memory.utilization',
       index: 'metrics-*',
-      type: 'percent',
+      type: ES_FIELD_TYPES.DOUBLE,
       dimensions: [baseDimensions[0]],
     },
     {
       name: 'system.disk.io',
       index: 'metrics-*',
-      type: 'counter_long',
+      type: ES_FIELD_TYPES.LONG,
       dimensions: [baseDimensions[1]],
     },
   ];
