@@ -230,7 +230,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                     },
                     []
                   );
-                } 
+                }
                 if (isNewPanel$.getValue()) {
                   isNewPanel$.next(false);
                 }
