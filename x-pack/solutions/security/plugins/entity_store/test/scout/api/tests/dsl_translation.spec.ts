@@ -8,7 +8,8 @@
 // ignoring linter about api calls because we are testing DSL and esql only.
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
-import { apiTest, expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '@kbn/scout-security';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -93,7 +94,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
 
       const total = getTotal(result.hits);
-      expect(total).toBeGreaterThanOrEqual(1);
+      expect(total).toBe(1);
       const hasExpected = result.hits.hits.some((h) => {
         const src = h._source as { host?: { name?: string; domain?: string } } | undefined;
         return src?.host?.name === 'server-01' && src?.host?.domain === 'example.com';

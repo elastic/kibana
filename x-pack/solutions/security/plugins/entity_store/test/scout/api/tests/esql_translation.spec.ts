@@ -8,7 +8,8 @@
 // ignoring linter about api calls because we are testing ESQL only.
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
-import { apiTest, expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '@kbn/scout-security';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -69,7 +70,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'entity.id');
-      expect(entityIdIdx).toBeGreaterThanOrEqual(0);
+      expect(entityIdIdx).toBeGreaterThan(-1);
       expect(values[0][entityIdIdx]).toBe('generic-id');
     }
   );
@@ -91,8 +92,8 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(values).toHaveLength(1);
       const nameIdx = columns.findIndex((c) => c.name === 'host.name');
       const domainIdx = columns.findIndex((c) => c.name === 'host.domain');
-      expect(nameIdx).toBeGreaterThanOrEqual(0);
-      expect(domainIdx).toBeGreaterThanOrEqual(0);
+      expect(nameIdx).toBeGreaterThan(-1);
+      expect(domainIdx).toBeGreaterThan(-1);
       expect(values[0][nameIdx]).toBe('server-01');
       expect(values[0][domainIdx]).toBe('example.com');
     }
@@ -114,7 +115,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const nameIdx = columns.findIndex((c) => c.name === 'host.name');
-      expect(nameIdx).toBeGreaterThanOrEqual(0);
+      expect(nameIdx).toBeGreaterThan(-1);
       expect(values[0][nameIdx]).toBe('desktop-02');
     }
   );
@@ -135,7 +136,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'user.entity.id');
-      expect(entityIdIdx).toBeGreaterThanOrEqual(0);
+      expect(entityIdIdx).toBeGreaterThan(-1);
       expect(values[0][entityIdIdx]).toBe('non-generated-user');
     }
   );
@@ -159,10 +160,10 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const userNameIdx = columns.findIndex((c) => c.name === 'user.name');
-      expect(userNameIdx).toBeGreaterThanOrEqual(0);
+      expect(userNameIdx).toBeGreaterThan(-1);
       expect(values[0][userNameIdx]).toBe('john.doe');
       const hostEntityIdIdx = columns.findIndex((c) => c.name === 'host.entity.id');
-      expect(hostEntityIdIdx).toBeGreaterThanOrEqual(0);
+      expect(hostEntityIdIdx).toBeGreaterThan(-1);
       expect(values[0][hostEntityIdIdx]).toBe('host-123');
     }
   );
@@ -183,7 +184,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'service.entity.id');
-      expect(entityIdIdx).toBeGreaterThanOrEqual(0);
+      expect(entityIdIdx).toBeGreaterThan(-1);
       expect(values[0][entityIdIdx]).toBe('non-generated-service-id');
     }
   );
@@ -204,7 +205,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const { values, columns } = result;
       expect(values).toHaveLength(1);
       const nameIdx = columns.findIndex((c) => c.name === 'service.name');
-      expect(nameIdx).toBeGreaterThanOrEqual(0);
+      expect(nameIdx).toBeGreaterThan(-1);
       expect(values[0][nameIdx]).toBe('service-name');
     }
   );

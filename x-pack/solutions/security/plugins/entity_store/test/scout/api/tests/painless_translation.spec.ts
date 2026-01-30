@@ -7,7 +7,8 @@
 
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
-import { apiTest, expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '@kbn/scout-security';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
