@@ -43,6 +43,11 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   const contentType = res.headers['content-type'];
   const data = res.data;
 
+  // If status is 204 and there is no data, we just return
+  if (res.status === 204 && isEmpty(data)) {
+    return;
+  }
+
   /**
    * Check that the content-type of the response is application/json.
    * Then includes is added because the header can be application/json;charset=UTF-8.

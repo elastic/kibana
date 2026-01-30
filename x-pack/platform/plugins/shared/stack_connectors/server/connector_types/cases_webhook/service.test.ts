@@ -1397,6 +1397,37 @@ describe('Cases webhook service', () => {
         '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
+
+    it('it should throw if the request status is a 204 and has data', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: 'some data',
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    it('it should NOT throw if the request status is a 204 and is empty', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: undefined,
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      await expect(service.updateIncident(incident)).resolves.toEqual({
+        id: '1',
+        title: undefined,
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/undefined',
+      });
+    });
   });
 
   describe('createComment', () => {
