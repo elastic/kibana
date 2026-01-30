@@ -18,4 +18,5 @@ module.exports = {
     '!<rootDir>/packages/kbn-docs-utils/src/**/*.test.ts',
     '!<rootDir>/packages/kbn-docs-utils/src/**/__fixtures__/**',
   ],
+  coveragePathIgnorePatterns: ['<rootDir>/packages/kbn-docs-utils/src/integration_tests/'],
 };

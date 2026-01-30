@@ -23,14 +23,9 @@ export const esqlEditorStyles = (
   editorHeight: number,
   hasErrors: boolean,
   hasWarning: boolean,
-  isCodeEditorExpandedFocused: boolean,
   editorIsInline: boolean,
   hasOutline: boolean
 ) => {
-  const bottomContainerBorderColor = hasErrors
-    ? euiTheme.colors.danger
-    : euiTheme.colors.lightestShade;
-
   return {
     editorContainer: {
       position: 'relative' as const,
@@ -62,12 +57,6 @@ export const esqlEditorStyles = (
       transform: 'translate(0, -50%)',
     },
     bottomContainer: {
-      borderTop: !isCodeEditorExpandedFocused
-        ? hasErrors
-          ? `2px solid ${euiTheme.colors.danger}`
-          : `2px solid ${euiTheme.colors.lightestShade}`
-        : `2px solid ${bottomContainerBorderColor}`,
-      backgroundColor: euiTheme.colors.body,
       paddingLeft: euiTheme.size.xs,
       paddingRight: euiTheme.size.xs,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
@@ -77,7 +66,6 @@ export const esqlEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      border: hasOutline ? euiTheme.border.thin : 'none',
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
     },

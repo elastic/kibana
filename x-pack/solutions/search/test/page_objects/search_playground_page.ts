@@ -90,6 +90,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       const selectedModeText = await testSubjects.getAttribute('page-mode-select', 'value');
       expect(selectedModeText?.toLowerCase()).to.be(mode);
     },
+    async expectDeprecationNoticeToExist() {
+      await testSubjects.existOrFail('playgroundDeprecationNotice');
+    },
     PlaygroundListPage: {
       async expectPlaygroundListPageComponentsToExist() {
         await testSubjects.existOrFail('playgroundsListPage');
