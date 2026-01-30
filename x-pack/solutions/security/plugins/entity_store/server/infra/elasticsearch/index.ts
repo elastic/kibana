@@ -13,8 +13,19 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export const createIndex = (esClient: EsClient, index: IndexName) =>
-  esClient.indices.create({ index });
+export const createIndex = (
+  esClient: EsClient,
+  index: IndexName,
+  if_not_exists: boolean = false
+) => {
+  esClient.indices.create(
+    { index },
+    {
+      ignore: if_not_exists ? [409] : [],
+      meta: false,
+    }
+  );
+};
 
 export const deleteIndex = (esClient: EsClient, index: IndexName) =>
   esClient.indices.delete({ index }, { ignore: [404] });
@@ -33,8 +44,22 @@ export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTe
 export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
   esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
 
-export const createDataStream = (esClient: EsClient, name: IndexName) =>
-  esClient.indices.createDataStream({ name });
+export const createDataStream = (
+  esClient: EsClient,
+  name: IndexName,
+  if_not_exists: boolean = false
+) => esClient.indices.createDataStream({ name });
 
-export const deleteDataStream = (esClient: EsClient, name: IndexName) =>
-  esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+export const deleteDataStream = (
+  esClient: EsClient,
+  name: IndexName,
+  if_not_exists: boolean = false
+) => {
+  esClient.indices.deleteDataStream(
+    { name },
+    {
+      ignore: if_not_exists ? [409] : [],
+      meta: false,
+    }
+  );
+};
