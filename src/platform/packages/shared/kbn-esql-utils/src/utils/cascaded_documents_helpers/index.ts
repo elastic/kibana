@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AggregateQuery, getDataViewFieldSubtypeMulti } from '@kbn/es-query';
+import { type AggregateQuery } from '@kbn/es-query';
 import {
   BasicPrettyPrinter,
   Builder,
@@ -29,17 +29,29 @@ import type {
   ESQLBinaryExpression,
   ESQLUnaryExpression,
   ESQLPostfixUnaryExpression,
-  ESQLLiteral,
 } from '@kbn/esql-language/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
-import type { Terminal } from './esql_fields_utils';
-import { getUsedFields } from './esql_fields_utils';
-import { getFieldTerminals } from './esql_fields_utils';
-import { extractCategorizeTokens } from './extract_categorize_tokens';
-import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
-import { getQuerySummaryPerCommandType, getSummaryPerCommand } from './get_query_summary';
+import { getUsedFields, getFieldTerminals } from '../esql_fields_utils';
+import { extractCategorizeTokens } from '../extract_categorize_tokens';
+import { getOperator } from '../append_to_query/utils';
+import {
+  isSupportedStatsFunction,
+  type SupportedFieldTypes,
+  type FieldValue,
+  type StatsCommandSummary,
+  getESQLQueryDataSourceCommand,
+  getStatsCommandToOperateOn,
+  getStatsCommandRuntimeFields,
+  getStatsCommandAtIndexSummary,
+  getFieldParamDefinition,
+  getStatsGroupFieldType,
+  removeBackticks,
+  isSupportedFieldType,
+  requiresMatchPhrase,
+  isCategorizeFunctionWithFunctionArgument,
+} from './utils';
 
 type NodeType = 'group' | 'leaf';
 
@@ -53,178 +65,10 @@ export interface ESQLStatsQueryMeta {
   appliedFunctions: AppliedStatsFunction[];
 }
 
-// list of stats functions we support for grouping in the cascade experience
-const SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS = ['categorize' as const];
-
-export type SupportedStatsFunction = (typeof SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS)[number];
-
-const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunction =>
-  SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS.includes(fnName as SupportedStatsFunction);
-
-export type SupportedFieldTypes = Exclude<
-  keyof typeof Builder.expression.literal,
-  'nil' | 'numeric' | 'timespan'
->;
-
-export type FieldValue<T extends SupportedFieldTypes> =
-  | Parameters<(typeof Builder.expression.literal)[T]>[0]
-  | unknown;
-
-export interface StatsCommandSummary {
-  command: ESQLCommand;
-  aggregates: Record<string, FieldSummary>;
-  grouping: Record<string, FieldSummary>;
-}
-
-// helper for removing backticks from field names of function names
-const removeBackticks = (str: string) => str.replace(/`/g, '');
-
-/**
- * constrains the field value type to be one of the supported field value types, else we process as a string literal when building the expression
- */
-export const isSupportedFieldType = (fieldType: unknown): fieldType is SupportedFieldTypes => {
-  return (
-    PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING.includes(fieldType as SupportedFieldTypes) &&
-    Object.keys(Builder.expression.literal).includes(fieldType as SupportedFieldTypes)
-  );
-};
-
-// if value is a text or keyword field and it's not "aggregatable", we opt to use match phrase for the where command
-const requiresMatchPhrase = (fieldName: string, dataViewFields: DataView['fields']) => {
-  let dataViewField = dataViewFields.getByName(fieldName);
-
-  const multiSubtype = dataViewField && getDataViewFieldSubtypeMulti(dataViewField);
-
-  if (multiSubtype) {
-    // if the field is a subtype, we want to use the parent field to determine wether to use the match phrase
-    dataViewField = dataViewFields.getByName(multiSubtype.multi.parent);
-  }
-
-  return (
-    !dataViewField?.aggregatable &&
-    (dataViewField?.esTypes?.includes('text') || dataViewField?.esTypes?.includes('keyword'))
-  );
-};
-
-export function getStatsCommandToOperateOn(
-  esqlQuery: EsqlQuery
-): (StatsCommandSummary & { index: number }) | null {
-  if (esqlQuery.errors.length) {
-    return null;
-  }
-
-  const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
-
-  if (statsCommands.length === 0) {
-    return null;
-  }
-
-  // accounting for the possibility of multiple stats commands in the query,
-  // we always want to operate on the last stats command
-  const lastStatsCommandIndex = statsCommands.length - 1;
-
-  const summarizedStatsCommand = getStatsCommandAtIndexSummary(esqlQuery, lastStatsCommandIndex);
-  if (!summarizedStatsCommand) {
-    return null;
-  }
-
-  return {
-    ...summarizedStatsCommand,
-    index: lastStatsCommandIndex,
-  };
-}
-
-function getESQLQueryDataSourceCommand(
-  esqlQuery: EsqlQuery
-): ESQLCommand<'from' | 'ts'> | undefined {
-  return mutate.generic.commands.find(
-    esqlQuery.ast,
-    (cmd) => cmd.name === 'from' || cmd.name === 'ts'
-  ) as ESQLCommand<'from' | 'ts'> | undefined;
-}
-
-/**
- * Returns runtime fields that are created within the query by the STATS command in the query
- */
-function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
-  const querySummary = getQuerySummaryPerCommandType(esqlQuery.print(), 'stats');
-  return querySummary.map((command) => command.newColumns);
-}
-
-/**
- * Returns the summary of the stats command at the given command index in the esql query
- */
-function getStatsCommandAtIndexSummary(
-  esqlQuery: EsqlQuery,
-  commandIndex: number
-): StatsCommandSummary | null {
-  const declarationCommand = mutate.commands.stats.byIndex(esqlQuery.ast, commandIndex);
-
-  if (!declarationCommand) {
-    return null;
-  }
-
-  const summarizedStatsCommand = getSummaryPerCommand(esqlQuery.src, declarationCommand);
-
-  // Transform to map format for easy access
-  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce((acc, grouping) => {
-    acc[grouping.field] = grouping;
-    return acc;
-  }, {} as Record<string, FieldSummary>);
-
-  const agregatesMap = Array.from(summarizedStatsCommand.aggregates ?? []).reduce(
-    (acc, aggregate) => {
-      acc[aggregate.field] = aggregate;
-      return acc;
-    },
-    {} as Record<string, FieldSummary>
-  );
-
-  return {
-    command: declarationCommand,
-    grouping: groupingsMap,
-    aggregates: agregatesMap,
-  };
-}
-
-export function getFieldParamDefinition(
-  fieldName: string,
-  fieldTerminals: Array<Terminal>,
-  esqlVariables: ESQLControlVariable[] | undefined
-) {
-  const fieldParamDef = fieldTerminals.find(
-    (arg) => arg.text === fieldName && arg.type === 'literal' && arg.literalType === 'param'
-  ) as ESQLLiteral | undefined;
-
-  if (fieldParamDef) {
-    const controlVariable = esqlVariables?.find((variable) => variable.key === fieldParamDef.value);
-
-    if (!controlVariable) {
-      throw new Error(`The control variable for the "${fieldName}" column was not found`);
-    }
-
-    return controlVariable.value;
-  }
-}
-
-export function getStatsGroupFieldType<
-  T extends FieldSummary | undefined,
-  R = T extends FieldSummary ? string : undefined
->(groupByFields: T): R {
-  if (!groupByFields) {
-    return undefined as R;
-  }
-
-  return (
-    groupByFields.definition.type === 'function'
-      ? groupByFields.definition.name
-      : groupByFields.definition.type
-  ) as R;
-}
-
 /**
  * This method is used to get the metadata on STATS command to drive the cascade experience from an ESQL query,
  * if a valid STATS command is found information about the group by fields and applied functions is returned.
+ * This method will exclude queries contain commands that are not valid for the cascade experience,
  */
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
@@ -295,8 +139,20 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       }
     }
 
+    if (
+      isFunctionExpression(groupFieldNode.definition) &&
+      (!isSupportedStatsFunction(groupFieldNode.definition.name) ||
+        isCategorizeFunctionWithFunctionArgument(groupFieldNode.definition))
+    ) {
+      // if the group field has a grouping function that is not supported,
+      // this nullifies the entire query to count as a valid query for the cascade experience
+      groupByFields.splice(0, groupByFields.length);
+      break;
+    }
+
     // given that keep commands strip fields from the resulting records,
-    // we need to ascertain that if a keep command exists after the operating stats command, it specifies the current group field
+    // we need to ascertain that if a keep command exists after the operating stats command,
+    // it specifies the current group field
     const offendingKeepCommand = esqlQuery.ast.commands
       .slice(groupDeclarationStatsCommandIndex)
       .reduce((acc, cmd) => {
@@ -309,7 +165,8 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
         Walker.walk(cmd, {
           visitColumn: (node) => {
             // if we don't find a node that targets the current group field,
-            // then we know the keep command is invalidating the possibility of grouping by the current group field
+            // then we know the keep command is invalidating
+            // the possibility of grouping by the current group field
             offending = node.name !== groupFieldName;
           },
         });
@@ -367,17 +224,14 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       break;
     }
 
-    if (
-      isFunctionExpression(groupFieldNode.definition) &&
-      !isSupportedStatsFunction(groupFieldNode.definition.name)
-    ) {
-      continue;
-    }
-
     groupByFields.push({
       field: groupFieldName,
       type: getStatsGroupFieldType(groupFieldNode),
     });
+  }
+
+  if (groupByFields.length === 0) {
+    return { groupByFields, appliedFunctions };
   }
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
@@ -655,10 +509,11 @@ function handleStatsByCategorizeLeafOperation(
 
   let categorizedFieldName: string;
 
-  if (isFunctionExpression(categorizedField)) {
-    // this assumes that the function invoked accepts a column as its first argument and is not in itself another function invocation
-    categorizedFieldName = ((categorizedField as ESQLFunction).args[0] as ESQLColumn).text;
-  } else {
+  // We only support categorizing columns for now,
+  // it gets more complex attempting to support categorizing functions
+  // that specifies a function as its arguments
+  // without INLINE STATS supporting the categorize function
+  if (isColumn(categorizedField)) {
     categorizedFieldName = (categorizedField as ESQLColumn).name;
 
     let categorizedFieldNameParamValue;
@@ -675,6 +530,8 @@ function handleStatsByCategorizeLeafOperation(
         categorizedFieldName = categorizedFieldNameParamValue;
       }
     }
+  } else {
+    throw new Error('Categorizing functions with function arguments are not supported');
   }
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
@@ -685,7 +542,9 @@ function handleStatsByCategorizeLeafOperation(
     args: [
       Builder.expression.func.call('match', [
         // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
-        Builder.identifier({ name: categorizedFieldName.replace(/\.keyword\b/i, '') }),
+        Builder.identifier({
+          name: categorizedFieldName.replace(/\.keyword\b/i, ''),
+        }),
         Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
         Builder.expression.map({
           entries: [
