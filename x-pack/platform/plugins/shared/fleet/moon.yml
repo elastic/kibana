@@ -102,7 +102,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
-  - '@kbn/core-http-server-utils'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
   - '@kbn/lock-manager'
