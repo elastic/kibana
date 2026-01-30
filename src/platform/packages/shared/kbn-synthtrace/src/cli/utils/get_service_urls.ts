@@ -295,19 +295,12 @@ export async function getServiceUrls({
     logger,
   });
 
-  // Re-add auth to kibanaUrl (KibanaClient will extract credentials from URL)
-  const kibanaUrlWithAuth = apiKey
-    ? kibanaUrl
-    : format({
-        ...parse(kibanaUrl),
-        auth,
-      });
-
   logCertificateWarningsIfNeeded(parsedTarget, parsedKibanaUrl, logger);
 
   return {
-    kibanaUrl: kibanaUrlWithAuth,
+    kibanaUrl,
     esUrl: formattedEsUrl,
+    kibanaHeaders,
     esHeaders,
     username,
     password,
