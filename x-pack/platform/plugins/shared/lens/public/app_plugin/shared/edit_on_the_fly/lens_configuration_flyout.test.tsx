@@ -93,12 +93,17 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
+// Shared state object for reference equality in isEqual comparisons
+const mockFormBasedState = { layers: {} };
+// Different state to simulate changes detected
+const mockFormBasedStateChanged = { layers: { layer1: {} } };
+
 const lensAttributes = {
   title: 'test',
   visualizationType: 'testVis',
   state: {
     datasourceStates: {
-      formBased: {},
+      formBased: mockFormBasedStateChanged,
     },
     visualization: {},
     filters: [],
@@ -173,7 +178,7 @@ describe('LensEditConfigurationFlyout', () => {
           datasourceStates: {
             formBased: {
               isLoading: false,
-              state: 'state',
+              state: mockFormBasedState,
             },
           },
           activeDatasourceId: 'formBased',
@@ -273,7 +278,7 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { formBased: 'state' },
+        datasourceStates: { formBased: mockFormBasedState },
         visualization: {},
         filters: [],
         query: { esql: 'from index1 | limit 10' },
@@ -350,7 +355,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    newProps.attributes.state.datasourceStates.formBased = 'state';
+    // Set formBased to match the preloaded Redux state so no changes are detected
+    newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
