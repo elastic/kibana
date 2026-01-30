@@ -47,3 +47,40 @@ If changes affect editor integrations or extension registry behavior, coordinate
 - `src/platform/plugins/shared/esql/README.md`
 - `src/platform/plugins/shared/esql/server/README.md`
 - `src/platform/plugins/shared/esql/ADD_COMMAND_GUIDE.md`
+- `src/platform/packages/shared/kbn-esql-language/README.md`
+- `src/platform/packages/shared/kbn-esql-language/src/parser/README.md`
+- `src/platform/packages/shared/kbn-esql-language/src/language/README.md`
+- `src/platform/packages/shared/kbn-esql-language/src/commands/README.md`
+- `src/platform/packages/shared/kbn-esql-language/src/composer/README.md`
+
+## kbn-esql-language package guide
+Package location: `src/platform/packages/shared/kbn-esql-language`
+
+This package owns ES|QL parsing, AST utilities, and editor-facing language features
+used by the ES|QL plugin and other consumers.
+
+### What lives here
+- Parser (ANTLR-based) → CST/AST + syntax validation, highlighting metadata.
+- AST utilities: builder, walker, mutation, and pretty-printing.
+- Language features: validation, autocomplete, hover, signature help.
+- Commands: definitions and registry for ES|QL commands.
+- Composer API: safe, parameterized ES|QL builder for app code.
+
+### Key behavior
+- Parser produces partial AST even with invalid queries; `withFormatting` attaches
+  comments/whitespace to nodes for editor features.
+- Validation can degrade gracefully when callbacks (sources/fields) are missing;
+  keep this in mind when wiring UI services.
+- Autocomplete works best-effort on invalid queries and may return empty results
+  when correction fails.
+- Composer prefers tagged templates with parameter holes to avoid injection.
+
+### Local demos
+- ES|QL AST Inspector: `yarn storybook esql_ast_inspector`
+- Kibana examples: `yarn start --run-examples` (navigate to ES|QL AST Inspector)
+
+### Testing
+- Whole package: `yarn test:jest src/platform/packages/shared/kbn-esql-language/`
+- Targeted: `yarn jest:tests src/platform/packages/shared/kbn-esql-language/path/to/test/file`
+- Validation tests update `src/validation/esql_validation_meta_tests.json` and should
+  be re-run when they change.
