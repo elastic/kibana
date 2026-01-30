@@ -365,6 +365,7 @@
     "filter",
     "integrationName",
     "managed",
+    "managedVersion",
     "matchers",
     "name",
     "type"

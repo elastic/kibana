@@ -1218,6 +1218,9 @@
       "managed": {
         "type": "boolean"
       },
+      "managedVersion": {
+        "type": "integer"
+      },
       "matchers": {
         "dynamic": false,
         "type": "object"
