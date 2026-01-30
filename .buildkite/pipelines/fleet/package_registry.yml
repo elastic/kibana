@@ -54,7 +54,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
     key: build_scout_tests
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     depends_on:
       - build
     env:
@@ -72,7 +72,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+      diskSizeGb: 105
+    timeout_in_minutes: 75
     parallelism: 20
     key: defend-workflows-stateful
     depends_on: build
@@ -89,7 +90,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+      diskSizeGb: 105
+    timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
     depends_on: build

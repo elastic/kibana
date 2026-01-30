@@ -9328,6 +9328,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/yarn-install-scripts@link:packages/kbn-yarn-install-scripts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/yarn-lock-validator@link:packages/kbn-yarn-lock-validator":
   version "0.0.0"
   uid ""
