@@ -72,7 +72,10 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
     [detailsMarkdown, replacements]
   );
 
-  const tacticMetadata = useMemo(() => getTacticMetadata(attackDiscovery), [attackDiscovery]);
+  const tacticMetadata = useMemo(
+    () => getTacticMetadata(attackDiscovery.mitreAttackTactics),
+    [attackDiscovery]
+  );
 
   const originalAlertIds = useMemo(
     () => attackDiscovery.alertIds.map((id) => replacements?.[id] ?? id),
@@ -120,7 +123,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AttackChain attackDiscovery={attackDiscovery} />
+          <AttackChain attackTactics={attackDiscovery.mitreAttackTactics} />
           <EuiSpacer size="l" />
         </>
       )}
