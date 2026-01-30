@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const privmonUtils = PrivMonUtils(getService);
 
-  describe.only('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     beforeEach(async () => {
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
       await privmonUtils.initPrivMonEngine();
