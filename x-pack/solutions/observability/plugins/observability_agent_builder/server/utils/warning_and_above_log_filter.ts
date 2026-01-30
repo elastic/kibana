@@ -69,7 +69,7 @@ export function isWarningOrAbove(logDocument: LogDocumentForSeverityCheck): bool
     return true;
   }
 
-  if (logDocument['exception.message'] || logDocument['error.message']) {
+  if (logDocument['error.exception.message']) {
     return true;
   }
 
