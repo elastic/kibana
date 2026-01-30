@@ -175,8 +175,11 @@ export class SearchCursorPit extends SearchCursor {
 
   public async closeCursor() {
     if (this.cursorId) {
+      const esClient = this.useInternalUser
+        ? this.clients.es.asInternalUser
+        : this.clients.es.asCurrentUser;
       this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
-      await this.clients.es.asCurrentUser.closePointInTime({ id: this.cursorId });
+      await esClient.closePointInTime({ id: this.cursorId });
     } else {
       this.logger.warn(`No PIT Id to clear!`);
     }

@@ -331,7 +331,8 @@ export class CsvGenerator {
         settings,
         this.clients,
         abortController,
-        this.logger
+        this.logger,
+        this.useInternalUser
       );
       logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
