@@ -11,6 +11,7 @@ import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -49,7 +50,7 @@ function canStartNewSession(request: KibanaRequest) {
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
-export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
+export class BasicAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -93,9 +94,9 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs request authentication using Basic HTTP Authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -105,11 +106,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    if (state) {
-      return await this.authenticateViaState(request, state);
+    if (session) {
+      return await this.authenticateViaState(request, session);
     }
 
-    // If state isn't present let's redirect user to the login page.
+    // If session isn't present let's redirect user to the login page.
     if (canStartNewSession(request)) {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
@@ -152,19 +153,19 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session value previously created by the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { authorization }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
-    if (!authorization) {
+    if (!session.state.authorization) {
       this.logger.debug('Authorization header is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
     try {
-      const authHeaders = { authorization };
-      const user = await this.getUser(request, authHeaders);
+      const authHeaders = { authorization: session.state.authorization };
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

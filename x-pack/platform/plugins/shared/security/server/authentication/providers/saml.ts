@@ -21,6 +21,7 @@ import {
 } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -101,7 +102,7 @@ const samlRequestIdLimit = 50;
 /**
  * Provider that supports SAML request authentication.
  */
-export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
+export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -234,9 +235,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs SAML request authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
     );
@@ -248,27 +249,27 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
     // we should clear such session and log user out.
-    if (state && this.realm && state.realm !== this.realm) {
-      const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
+    if (session && this.realm && session.state.realm !== this.realm) {
+      const message = `State based on realm "${session.state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.unauthorized(message));
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (state) {
-      authenticationResult = await this.authenticateViaState(request, state);
+    if (session) {
+      authenticationResult = await this.authenticateViaState(request, session);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
       ) {
-        authenticationResult = await this.authenticateViaRefreshToken(request, state);
+        authenticationResult = await this.authenticateViaRefreshToken(request, session);
       }
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to capture user URL and
     // initiate SAML handshake, otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? this.initiateAuthenticationHandshake(request, state)
+      ? this.initiateAuthenticationHandshake(request, session)
       : authenticationResult;
   }
 
@@ -616,21 +617,28 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session object associated with the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
-    if (!accessToken) {
+    if (!session.state.accessToken) {
       this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    const authHeaders: Record<string, string> | undefined = this.isUiamToken(accessToken)
-      ? this.options.uiam.getAuthenticationHeaders(accessToken)
-      : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
+    const authHeaders: Record<string, string> | undefined = this.isUiamToken(
+      session.state.accessToken
+    )
+      ? this.options.uiam.getAuthenticationHeaders(session.state.accessToken)
+      : {
+          authorization: new HTTPAuthorizationHeader(
+            'Bearer',
+            session.state.accessToken
+          ).toString(),
+        };
 
     try {
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
@@ -647,12 +655,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
    * authenticate user with it.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session object associated with the provider.
    */
-  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
+  private async authenticateViaRefreshToken(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>
+  ) {
     this.logger.debug('Trying to refresh access token.');
 
-    if (!state.refreshToken) {
+    if (!session.state.refreshToken) {
       this.logger.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
@@ -660,16 +671,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     let refreshTokenResult: RefreshTokenResult;
 
     try {
-      if (this.isUiamToken(state.refreshToken)) {
+      if (this.isUiamToken(session.state.refreshToken)) {
         this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
 
         const { accessToken, refreshToken } = await this.options.uiam.refreshSessionTokens(
-          state.refreshToken
+          session.state.refreshToken
         );
 
         const uiamAuthenticatedUser = await this.getUser(
           request,
-          this.options.uiam.getAuthenticationHeaders(accessToken)!
+          this.options.uiam.getAuthenticationHeaders(accessToken)!,
+          session
         );
 
         this.logger.debug('SAML provider successfully refreshed tokens via UIAM service.');
@@ -680,7 +692,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           authenticationInfo: uiamAuthenticatedUser,
         };
       } else {
-        refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+        refreshTokenResult = await this.options.tokens.refresh(session.state.refreshToken);
       }
     } catch (err) {
       // When user has neither valid access nor refresh token, the only way to resolve this issue is to get new
@@ -718,7 +730,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
             clientAuthentication: this.options.uiam.getClientAuthentication(),
           },
         }),
-        state: { accessToken, refreshToken, realm: this.realm || state.realm },
+        state: { accessToken, refreshToken, realm: this.realm || session.state.realm },
       }
     );
   }
@@ -727,12 +739,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to start SAML handshake and eventually receive a token.
    * @param request Request instance.
    * @param redirectURL URL to redirect user to after successful SAML handshake.
-   * @param state Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
   private async authenticateViaHandshake(
     request: KibanaRequest,
     redirectURL: string,
-    state?: ProviderState | null
+    session?: SessionValue<ProviderState> | null
   ) {
     this.logger.debug('Trying to initiate SAML handshake.');
 
@@ -761,7 +773,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
       return AuthenticationResult.redirectTo(redirect, {
         state: {
-          requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
+          requestIdMap: this.updateRequestIdMap(
+            requestId,
+            redirectURL,
+            session?.state.requestIdMap
+          ),
           realm,
         },
         stateCookieOptions: { sameSite: 'None', isSecure: true },
@@ -874,14 +890,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state Optional state object associated with the provider.
    */
-  private initiateAuthenticationHandshake(request: KibanaRequest, state?: ProviderState | null) {
+  private initiateAuthenticationHandshake(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null
+  ) {
     const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
 
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
         `${this.options.getRequestOriginalURL(request)}${originalURLHash}`,
-        state
+        session
       );
     }
 

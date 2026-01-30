@@ -14,6 +14,7 @@ import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage, getErrorStatusCode, InvalidGrantError } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -44,7 +45,7 @@ function canStartNewSession(request: KibanaRequest) {
 /**
  * Provider that supports Kerberos request authentication.
  */
-export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
+export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -67,9 +68,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -81,13 +82,13 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (state) {
-      authenticationResult = await this.authenticateViaState(request, state);
+    if (session) {
+      authenticationResult = await this.authenticateViaState(request, session);
       if (
         authenticationResult.failed() &&
         Tokens.isAccessTokenExpiredError(authenticationResult.error)
       ) {
-        authenticationResult = await this.authenticateViaRefreshToken(request, state);
+        authenticationResult = await this.authenticateViaRefreshToken(request, session);
       }
     }
 
@@ -99,7 +100,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     // mechanism negotiation stage, otherwise check with Elasticsearch if we can start it.
     return authorizationHeader
       ? await this.authenticateWithNegotiateScheme(request)
-      : await this.authenticateViaSPNEGO(request, state);
+      : await this.authenticateViaSPNEGO(request, session);
   }
 
   /**
@@ -233,21 +234,21 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session object associated with the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { accessToken }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
-    if (!accessToken) {
+    if (!session.state.accessToken) {
       this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
     try {
       const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
       };
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
@@ -264,21 +265,24 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
    * authenticate user with it.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session object associated with the provider.
    */
-  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
+  private async authenticateViaRefreshToken(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>
+  ) {
     this.logger.debug('Trying to refresh access token.');
 
     let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(session.state.refreshToken);
     } catch (err) {
       // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
       // allow this because expired underlying token is an implementation detail and Kibana user
       // facing session is still valid.
       if (err instanceof InvalidGrantError) {
         this.logger.warn('Both access and refresh tokens are expired. Re-authenticating…');
-        return this.authenticateViaSPNEGO(request, state);
+        return this.authenticateViaSPNEGO(request, session);
       }
 
       this.logger.error(`Failed to refresh access token: ${getDetailedErrorMessage(err)}`);
@@ -301,9 +305,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Tries to query Elasticsearch and see if we can rely on SPNEGO to authenticate user.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  private async authenticateViaSPNEGO(request: KibanaRequest, state?: ProviderState | null) {
+  private async authenticateViaSPNEGO(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null
+  ) {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
@@ -312,7 +319,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
         // into authentication chain and adds a `WWW-Authenticate: Negotiate` header to the error
-        // response. Otherwise it may not be even consulted if request can be authenticated by other
+        // response. Otherwise, it may not be even consulted if request can be authenticated by other
         // means (e.g. when anonymous access is enabled in Elasticsearch).
         authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}`,
       });
@@ -337,8 +344,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     // If we failed to do SPNEGO and have a session with expired token that belongs to Kerberos
     // authentication provider then it means Elasticsearch isn't configured to use Kerberos anymore.
     // In this case we should reply with the `401` error and allow Authenticator to clear the cookie.
-    // Otherwise give a chance to the next authentication provider to authenticate request.
-    return state
+    // Otherwise, give a chance to the next authentication provider to authenticate request.
+    return session
       ? AuthenticationResult.failed(Boom.unauthorized())
       : AuthenticationResult.notHandled();
   }
