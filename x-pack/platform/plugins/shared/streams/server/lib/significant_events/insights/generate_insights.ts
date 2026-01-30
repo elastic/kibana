@@ -12,8 +12,8 @@ import type { Streams } from '@kbn/streams-schema';
 import type { InsightsResult } from '@kbn/streams-schema';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
-import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
-import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
+import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
 export async function generateInsights({
@@ -23,6 +23,8 @@ export async function generateInsights({
   inferenceClient,
   signal,
   logger,
+  summarizeQueriesPromptOverride,
+  summarizeStreamsPromptOverride,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -30,6 +32,8 @@ export async function generateInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  summarizeQueriesPromptOverride: string;
+  summarizeStreamsPromptOverride: string;
 }): Promise<InsightsResult> {
   const streams = await streamsClient.listStreams();
   const streamInsightsResults = await Promise.all(
@@ -41,6 +45,7 @@ export async function generateInsights({
         inferenceClient,
         signal,
         logger,
+        summarizeQueriesPromptOverride,
       });
       return {
         streamName: stream.name,
@@ -69,7 +74,7 @@ export async function generateInsights({
 
   try {
     const response = await inferenceClient.prompt({
-      prompt: SummarizeStreamsPrompt,
+      prompt: createSummarizeStreamsPrompt({ systemPrompt: summarizeStreamsPromptOverride }),
       input: {
         streamInsights: JSON.stringify(streamInsightsWithData),
       },
@@ -105,6 +110,7 @@ async function generateStreamInsights({
   inferenceClient,
   signal,
   logger,
+  summarizeQueriesPromptOverride,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -112,6 +118,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  summarizeQueriesPromptOverride: string;
 }): Promise<InsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
@@ -136,7 +143,7 @@ async function generateStreamInsights({
 
   try {
     const response = await inferenceClient.prompt({
-      prompt: SummarizeQueriesPrompt,
+      prompt: createSummarizeQueriesPrompt({ systemPrompt: summarizeQueriesPromptOverride }),
       input: {
         streamName: stream.name,
         queries: JSON.stringify(queryDataList),

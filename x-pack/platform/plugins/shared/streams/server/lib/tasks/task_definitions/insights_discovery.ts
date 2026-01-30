@@ -13,6 +13,7 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
@@ -40,11 +41,19 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 streamsClient,
                 inferenceClient,
                 queryClient,
+                soClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+
+              const promptsConfigService = new PromptsConfigService({
+                soClient,
+                logger: taskContext.logger.get('insights_discovery'),
+              });
+              const { summarizeQueriesPromptOverride, summarizeStreamsPromptOverride } =
+                await promptsConfigService.getPrompt();
 
               try {
                 const result = await generateInsights({
@@ -54,6 +63,8 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
                   logger: taskContext.logger.get('insights_discovery'),
+                  summarizeQueriesPromptOverride,
+                  summarizeStreamsPromptOverride,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
