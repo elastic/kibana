@@ -100,6 +100,7 @@ packages/kbn-tsconfig/base @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
+packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
@@ -664,16 +665,6 @@ src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
-src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
-src/platform/packages/shared/response-ops/form-generator @elastic/response-ops
-src/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
-src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
-src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
-src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-presentation-team
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
@@ -997,7 +988,17 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -2337,6 +2338,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
