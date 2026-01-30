@@ -58,7 +58,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     const processors = buildSimulationProcessorsWithConditionNoops(dsl);
 
-    expect(processors).toHaveLength(4);
+    expect(processors).toHaveLength(3);
     expect((processors[0] as any).set.tag).toBe('cond-1');
     expect((processors[1] as any).remove.field).toBe('_streams_condition_noop');
     expect((processors[2] as any).set.tag).toBe('proc-1');
@@ -97,7 +97,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     const processors = buildSimulationProcessorsWithConditionNoops(dsl);
 
-    expect(processors).toHaveLength(7);
+    expect(processors).toHaveLength(5);
     expect((processors[0] as any).set.tag).toBe('cond-parent');
     expect((processors[1] as any).remove.field).toBe('_streams_condition_noop');
     expect((processors[2] as any).set.tag).toBe('cond-child');

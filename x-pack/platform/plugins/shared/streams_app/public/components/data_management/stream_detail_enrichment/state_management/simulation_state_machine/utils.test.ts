@@ -80,16 +80,18 @@ describe('Simulation utils', () => {
   });
 
   describe('collectActiveDocumentsForSelectedCondition', () => {
+    // Note: Documents now include condition IDs directly in processed_by,
+    // as the simulation backend injects condition-noop processors tagged with condition IDs.
     const documents = [
       { processed_by: ['p1'], status: 'parsed', value: {}, errors: [], metrics: {} },
-      { processed_by: ['p3'], status: 'parsed', value: {}, errors: [], metrics: {} },
+      { processed_by: ['c1', 'p3'], status: 'parsed', value: {}, errors: [], metrics: {} },
     ] as unknown as Simulation['documents'];
 
     it('returns all documents when no condition is selected', () => {
       expect(collectActiveDocumentsForSelectedCondition(documents, undefined)).toEqual(documents);
     });
 
-    it('returns only documents touched by processors in the selected condition', () => {
+    it('returns only documents touched by the selected condition noop processor', () => {
       const filtered = collectActiveDocumentsForSelectedCondition(documents, 'c1');
       expect(filtered).toEqual([documents[1]]);
     });
