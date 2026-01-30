@@ -13,7 +13,7 @@ import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/serv
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
-import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
+import { getCorrelatedLogsForLogEntry } from '../../tools/get_correlated_logs/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import { createAiInsightResult, type AiInsightResult } from './types';
@@ -106,7 +106,7 @@ async function fetchLogContext({
 
   let correlatedLogsResult;
   try {
-    const { sequences } = await getCorrelatedLogs({
+    const { sequences } = await getCorrelatedLogsForLogEntry({
       core,
       logger,
       esClient,
@@ -114,7 +114,6 @@ async function fetchLogContext({
       start: windowStart,
       end: windowEnd,
       logId: id,
-      errorLogsOnly: false,
     });
     correlatedLogsResult = sequences[0];
   } catch (error) {
@@ -157,7 +156,7 @@ function generateLogSummary({
 
   const systemPrompt = isErrorOrWarning
     ? dedent(`
-        You are an expert SRE assistant analyzing an ${log['log.level']} log entry. Provide a thorough investigation:
+        You are an expert SRE assistant analyzing an ${logEntry['log.level']} log entry. Provide a thorough investigation:
 
         - **What happened**: Summarize the error in plain language
         - **Where it originated**: Identify the service, component, or code path
@@ -170,7 +169,7 @@ function generateLogSummary({
         ${entityLinkingInstructions}
       `)
     : dedent(`
-        You are an expert SRE assistant analyzing an info, debug, or trace log entry. Keep it concise:
+        You are an expert SRE assistant analyzing an ${logEntry['log.level']} log entry. Keep it concise:
 
         - Explain what the log message means in context
         - Identify the source (service, host, container)
@@ -182,9 +181,7 @@ function generateLogSummary({
       `);
 
   const userPrompt = dedent(`
-    <LogContext>
     ${context}
-    </LogContext>
     Analyze this log entry and generate a summary explaining what it means.
     Ensure the analysis is grounded in the provided context, and concise.
   `);

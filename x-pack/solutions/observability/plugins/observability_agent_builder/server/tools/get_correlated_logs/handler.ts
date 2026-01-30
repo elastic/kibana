@@ -62,6 +62,35 @@ export function getNoResultsMessage({
     .join(', ')}.`;
 }
 
+export async function getCorrelatedLogsForLogEntry({
+  core,
+  logger,
+  esClient,
+  index,
+  start,
+  end,
+  logId,
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  index: string;
+  start: string;
+  end: string;
+  logId: string;
+}) {
+  return getToolHandler({
+    core,
+    logger,
+    esClient,
+    index,
+    start,
+    end,
+    logId,
+    errorLogsOnly: false,
+  });
+}
+
 export async function getToolHandler({
   core,
   logger,
@@ -83,13 +112,13 @@ export async function getToolHandler({
   start: string;
   end: string;
   kqlFilter?: string;
-  errorLogsOnly?: boolean;
+  errorLogsOnly: boolean;
   index?: string;
-  correlationFields?: string[];
+  correlationFields: string[];
   logId?: string;
-  logSourceFields?: string[];
-  maxSequences?: number;
-  maxLogsPerSequence?: number;
+  logSourceFields: string[];
+  maxSequences: number;
+  maxLogsPerSequence: number;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const startTime = parseDatemath(start);
