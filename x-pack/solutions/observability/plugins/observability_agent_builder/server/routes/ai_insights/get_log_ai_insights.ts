@@ -11,15 +11,21 @@ import type { ChatCompletionEvent, InferenceClient } from '@kbn/inference-common
 import { MessageRole } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
 import { getToolHandler as getCorrelatedLogs } from '../../tools/get_correlated_logs/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import { createAiInsightResult, type AiInsightResult } from './types';
+import { fetchDistributedTrace } from './apm_error/fetch_distributed_trace';
+import { getApmIndices } from '../../utils/get_apm_indices';
 
 export interface GetLogAiInsightsParams {
   core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   index: string;
   id: string;
   inferenceClient: InferenceClient;
@@ -31,6 +37,7 @@ export interface GetLogAiInsightsParams {
 
 export async function getLogAiInsights({
   core,
+  plugins,
   index,
   id,
   esClient,
@@ -51,6 +58,7 @@ export async function getLogAiInsights({
 
   const context = await fetchLogContext({
     core,
+    plugins,
     logger,
     esClient,
     index,
@@ -72,6 +80,7 @@ export async function getLogAiInsights({
 
 async function fetchLogContext({
   core,
+  plugins,
   logger,
   esClient,
   index,
@@ -79,6 +88,7 @@ async function fetchLogContext({
   logEntry,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
   esClient: IScopedClusterClient;
   index: string;
@@ -104,31 +114,90 @@ async function fetchLogContext({
     </LogEntryFields>
   `);
 
-  try {
-    const { sequences } = await getCorrelatedLogs({
-      core,
-      logger,
-      esClient,
-      index,
-      start: windowStart,
-      end: windowEnd,
-      logId: id,
-      errorLogsOnly: false,
-    });
+  const traceId = logEntry['trace.id'] as string | undefined;
+  const isErrorOrWarning = isWarningOrAbove(logEntry);
 
-    const correlatedSequence = sequences[0];
-    if (correlatedSequence?.logs?.length) {
-      context += dedent(`
-        <CorrelatedLogSequence>
-        Time window: ${windowStart} to ${windowEnd}
-        \`\`\`json
-        ${JSON.stringify(correlatedSequence, null, 2)}
-        \`\`\`
-        </CorrelatedLogSequence>
-      `);
-    }
-  } catch (error) {
-    logger.debug(`Failed to fetch correlated logs: ${error.message}`);
+  const [correlatedLogsResult, distributedTraceResult] = await Promise.all([
+
+    (async () => {
+      try {
+        const { sequences } = await getCorrelatedLogs({
+          core,
+          logger,
+          esClient,
+          index,
+          start: windowStart,
+          end: windowEnd,
+          logId: id,
+          errorLogsOnly: false,
+        });
+        return sequences[0];
+      } catch (error) {
+        logger.debug(`Failed to fetch correlated logs: ${error.message}`);
+        return undefined;
+      }
+    })(),
+
+    (async () => {
+      if (!traceId || !isErrorOrWarning) {
+        return undefined;
+      }
+
+      try {
+        const apmIndices = await getApmIndices({ core, plugins, logger });
+        const trace = await fetchDistributedTrace({
+          esClient,
+          apmIndices,
+          traceId,
+          start: new Date(windowStart).getTime(),
+          end: new Date(windowEnd).getTime(),
+          logger,
+        });
+
+        if (trace.traceDocuments.length > 0) {
+          return trace;
+        }
+        return undefined;
+      } catch (error) {
+        logger.debug(`Failed to fetch distributed trace for trace.id=${traceId}: ${error.message}`);
+        return undefined;
+      }
+    })(),
+  ]);
+
+  if (correlatedLogsResult?.logs?.length) {
+    context += dedent(`
+      <CorrelatedLogSequence>
+      Time window: ${windowStart} to ${windowEnd}
+      \`\`\`json
+      ${JSON.stringify(correlatedLogsResult, null, 2)}
+      \`\`\`
+      </CorrelatedLogSequence>
+    `);
+  }
+
+  if (distributedTraceResult) {
+    const partialTraceNote = distributedTraceResult.isPartialTrace
+      ? 'Note: This is a partial trace.'
+      : '';
+
+    context += dedent(`
+      <DistributedTrace>
+      Trace ID: ${traceId}
+      Time window: ${windowStart} to ${windowEnd}
+      ${partialTraceNote}
+
+      Services involved (sorted by activity, with error counts):
+      \`\`\`json
+      ${JSON.stringify(distributedTraceResult.services, null, 2)}
+      \`\`\`
+
+      Trace documents (spans, transactions, errors) - use parent.id to understand call hierarchy:
+      \`\`\`json
+      ${JSON.stringify(distributedTraceResult.traceDocuments, null, 2)}
+      \`\`\`
+      </DistributedTrace>
+    `);
   }
 
   return context;
@@ -159,8 +228,8 @@ function generateLogSummary({
         You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
 
         - **What happened**: Summarize the error in plain language
-        - **Where it originated**: Identify the service, component, or code path
-        - **Root cause**: Analyze using CorrelatedLogSequence to understand what happened before and after the error
+        - **Where it originated**: Identify the service, component, or code path that is the ROOT CAUSE
+        - **Root cause analysis**: If DistributedTrace is available, use the parent.id relationships to trace the call hierarchy and identify which service CAUSED the error vs which services were AFFECTED by it
         - **Impact**: Note any affected downstream services or dependencies
         - **Next steps**: Suggest specific actions for investigation or remediation
 
