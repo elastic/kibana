@@ -15,7 +15,11 @@ export const LENS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
 export function findLensReference(references?: Reference[]) {
   return references
-    ? references.find((ref) => ref.type === DOC_TYPE && ref.name === LENS_SAVED_OBJECT_REF_NAME)
+    ? references.find(
+        (ref) =>
+          ref.type === DOC_TYPE &&
+          (ref.name === LENS_SAVED_OBJECT_REF_NAME || ref.name.startsWith('panel_'))
+      )
     : undefined;
 }
 
