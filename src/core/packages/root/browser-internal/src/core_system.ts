@@ -457,7 +457,7 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, http, overlays, featureFlags },
+        { chrome, application, overlays, featureFlags },
         coreUiTargetDomElement
       );
 
