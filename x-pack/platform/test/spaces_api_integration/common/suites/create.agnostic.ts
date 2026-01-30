@@ -88,6 +88,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'infrastructure',
         'logs',
         'observabilityCasesV3',
+        'observabilityOverview',
         'securitySolutionAssistant',
         'securitySolutionAttackDiscovery',
         'securitySolutionCasesV3',
