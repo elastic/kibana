@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '../../../../../../../common';
+import type { PackagePolicy } from '..';
 
 import { copyPackagePolicy } from './copy_package_policy_utils';
 

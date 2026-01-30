@@ -21,8 +21,7 @@ import type { EditPackagePolicyFrom } from '../create_package_policy_page/types'
 import { CreatePackagePolicySinglePage } from '../create_package_policy_page/single_page_layout';
 import { useBreadcrumbs, useGetOneAgentPolicy } from '../../../hooks';
 import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
-
-import { copyPackagePolicy } from './services/copy_package_policy_utils';
+import { copyPackagePolicy } from '../../../../../../common/services/copy_package_policy_utils';
 
 const ContentWrapper = styled(EuiFlexGroup)`
   height: 100%;
