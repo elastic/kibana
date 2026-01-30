@@ -14,6 +14,12 @@ export class ReactFlowServiceMapPage {
   public reactFlowZoomInBtn: Locator;
   public reactFlowZoomOutBtn: Locator;
   public reactFlowFitViewBtn: Locator;
+  public serviceMapPopover: Locator;
+  public serviceMapPopoverTitle: Locator;
+  public serviceMapServiceDetailsButton: Locator;
+  public serviceMapFocusMapButton: Locator;
+  public serviceMapDependencyDetailsButton: Locator;
+  public serviceMapPopoverContent: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.reactFlowServiceMap = page.testSubj.locator('reactFlowServiceMap');
@@ -21,6 +27,16 @@ export class ReactFlowServiceMapPage {
     this.reactFlowZoomInBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom In' });
     this.reactFlowZoomOutBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom Out' });
     this.reactFlowFitViewBtn = this.reactFlowControls.getByRole('button', { name: 'Fit View' });
+    this.serviceMapPopover = page.testSubj.locator('serviceMapPopover');
+    this.serviceMapPopoverContent = page.testSubj.locator('serviceMapPopoverContent');
+    this.serviceMapPopoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
+    this.serviceMapServiceDetailsButton = page.testSubj.locator(
+      'apmServiceContentsServiceDetailsButton'
+    );
+    this.serviceMapFocusMapButton = page.testSubj.locator('apmServiceContentsFocusMapButton');
+    this.serviceMapDependencyDetailsButton = page.testSubj.locator(
+      'apmDependencyContentsDependencyDetailsButton'
+    );
   }
 
   async gotoWithDateSelected(start: string, end: string) {
@@ -72,5 +88,32 @@ export class ReactFlowServiceMapPage {
 
   async isEdgeVisible(edgeId: string) {
     return this.getEdgeById(edgeId).isVisible();
+  }
+
+  /* Popovers */
+  async clickNode(nodeId: string) {
+    const node = this.getNodeById(nodeId);
+    await node.click();
+  }
+
+  async clickEdge(edgeId: string) {
+    const edge = this.getEdgeById(edgeId);
+    await edge.click();
+  }
+
+  async waitForPopoverToBeVisible() {
+    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async waitForPopoverToBeHidden() {
+    await this.serviceMapPopoverContent.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+  }
+
+  async isPopoverVisible() {
+    return this.serviceMapPopover.isVisible();
+  }
+
+  async getPopoverTitle() {
+    return this.serviceMapPopoverTitle.textContent();
   }
 }

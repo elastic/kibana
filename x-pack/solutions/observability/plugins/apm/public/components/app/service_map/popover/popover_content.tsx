@@ -134,7 +134,7 @@ export function PopoverContent({
       >
         <EuiFlexItem>
           <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }}>
+            <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
               {elementData.label ?? elementId}
               {kuery && (
                 <EuiIconTip
