@@ -13,12 +13,13 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
+  const { common, discover, timePicker, header, unifiedFieldList, unifiedTabs } = getPageObjects([
     'common',
     'discover',
     'timePicker',
     'header',
     'unifiedFieldList',
+    'unifiedTabs',
   ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -471,6 +472,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await restoreScreenWidth();
+      });
+
+      describe('restorable state', function () {
+        beforeEach(async () => {
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
+        });
+
+        it('should restore search term when switching tabs and scope it to a tab', async () => {
+          await discover.findFieldByNameOrValueInDocViewer('geo');
+          await retry.waitFor('first tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+          });
+
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await discover.findFieldByNameOrValueInDocViewer('.sr');
+          await retry.waitFor('second tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          });
+
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
+          expect(await searchInput.getAttribute('value')).to.be('geo');
+          expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
+
+          // clean up for next tests
+          const fieldSearchTab1 = await testSubjects.find('clearSearchButton');
+          await fieldSearchTab1.click();
+          await unifiedTabs.selectTab(1);
+          await discover.waitUntilTabIsLoaded();
+          const fieldSearchTab2 = await testSubjects.find('clearSearchButton');
+          await fieldSearchTab2.click();
+        });
+
+        it('should restore pinned fields when switching tabs and scope it to a tab', async () => {
+          await dataGrid.togglePinActionInFlyout('agent');
+          expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
+
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await dataGrid.togglePinActionInFlyout('bytes');
+          expect(await dataGrid.isFieldPinnedInFlyout('bytes')).to.be(true);
+
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
+        });
       });
 
       describe('keyboard navigation', () => {
