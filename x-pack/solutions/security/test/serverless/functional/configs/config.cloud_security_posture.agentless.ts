@@ -43,4 +43,5 @@ export default createTestConfig({
   ],
   // load tests in the index file
   testFiles: [require.resolve('../test_suites/ftr/cloud_security_posture/agentless')],
+  enableFleetDockerRegistry: false,
 });
