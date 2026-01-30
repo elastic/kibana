@@ -51,7 +51,7 @@ import type {
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
   /**
-   * Process a user request that to generate a report
+   * Process a user request to generate a report
    * that requires accessing system indices as an internal user.
    * Plugins should encapsulate the use of this function with their own authorization checks.
    */
