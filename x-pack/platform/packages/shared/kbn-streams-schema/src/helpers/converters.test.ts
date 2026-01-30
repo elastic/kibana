@@ -173,7 +173,6 @@ describe('Converter Helpers', () => {
           },
         },
         inherited_fields: {},
-        sub_query_streams: [],
         ...emptyAssets,
       };
 

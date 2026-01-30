@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { from, takeUntil } from 'rxjs';
 import type {
   GlobalSearchProviderResult,
@@ -13,9 +13,7 @@ import type {
 } from '@kbn/global-search-plugin/server';
 import { Streams } from '@kbn/streams-schema';
 import type { SearchHit } from '@kbn/es-types';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import {
   createStreamsStorageClient,
   type StreamsStorageClient,
@@ -25,6 +23,7 @@ import { checkAccessBulk } from './stream_crud';
 const streamTypes = ['classic stream', 'wired stream', 'stream'];
 
 export function createStreamsGlobalSearchResultProvider(
+  core: CoreSetup,
   logger: Logger
 ): GlobalSearchResultProvider {
   return {
@@ -37,7 +36,7 @@ export function createStreamsGlobalSearchResultProvider(
 
       const storageClient = createStreamsStorageClient(client.asInternalUser, logger);
 
-      return from(findStreams({ term, types, maxResults, storageClient, client })).pipe(
+      return from(findStreams({ term, types, maxResults, storageClient, client, core })).pipe(
         takeUntil(aborted$)
       );
     },
@@ -50,12 +49,14 @@ async function findStreams({
   maxResults,
   storageClient,
   client,
+  core,
 }: {
   term: string;
   types: string[];
   maxResults: number;
   storageClient: StreamsStorageClient;
   client: IScopedClusterClient;
+  core: CoreSetup;
 }) {
   const [coreStart] = await core.getStartServices();
   const soClient = coreStart.savedObjects.getUnsafeInternalClient();

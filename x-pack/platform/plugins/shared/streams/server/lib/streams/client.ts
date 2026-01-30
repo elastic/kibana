@@ -724,10 +724,7 @@ export class StreamsClient {
 
     const privileges = await checkAccessBulk({
       names: streams
-        .filter(
-          (stream) =>
-            !Streams.QueryStream.Definition.is(stream)
-        )
+        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       scopedClusterClient,
     });

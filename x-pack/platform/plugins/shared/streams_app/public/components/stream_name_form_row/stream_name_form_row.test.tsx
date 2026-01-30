@@ -9,12 +9,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, renderHook, screen } from '@testing-library/react';
 import React from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import {
-  StreamNameFormRow,
-  getErrorMessage,
-  getHelpText,
-  useChildStreamInput,
-} from '.';
+import { StreamNameFormRow, getErrorMessage, getHelpText, useChildStreamInput } from '.';
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);

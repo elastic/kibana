@@ -32,7 +32,6 @@ import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
-import { AssetImage } from '../asset_image';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 
 export function StreamListView() {

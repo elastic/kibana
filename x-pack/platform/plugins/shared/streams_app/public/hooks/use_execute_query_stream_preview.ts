@@ -77,15 +77,13 @@ export function useExecuteQueryStreamPreview(): UseExecuteQueryStreamPreviewResu
 
       try {
         const result = await executeEsqlQuery({
-          esqlQuery,
-          data,
-          timeRange: {
-            from: timeState.start,
-            to: timeState.end,
-          },
+          query: esqlQuery,
+          search: data.search.search,
+          start: timeState.start,
+          end: timeState.end,
         });
 
-        const plainObjects = esqlResultToPlainObjects(result);
+        const plainObjects = esqlResultToPlainObjects<SampleDocument>(result);
         setDocuments(plainObjects);
       } catch (err) {
         setError(err instanceof Error ? err : new Error(String(err)));
@@ -94,7 +92,7 @@ export function useExecuteQueryStreamPreview(): UseExecuteQueryStreamPreviewResu
         setIsLoading(false);
       }
     },
-    [data, timeState.start, timeState.end]
+    [data.search.search, timeState.start, timeState.end]
   );
 
   const clearError = useCallback(() => {

@@ -125,7 +125,7 @@ export function InlineQueryStreamForm({
   }, []);
 
   const handleQuerySubmit = useCallback(
-    (newQuery: AggregateQuery | undefined) => {
+    async (newQuery: AggregateQuery | undefined, _abortController?: AbortController) => {
       if (newQuery && 'esql' in newQuery) {
         handleQueryChange(newQuery);
       }

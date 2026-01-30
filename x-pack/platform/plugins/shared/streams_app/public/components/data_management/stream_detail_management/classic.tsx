@@ -106,7 +106,7 @@ export function ClassicStreamDetailManagement({
 
   const tabs: ManagementTabs = {};
 
-  if (definition.data_stream_exists && processing) {
+  if (definition.data_stream_exists) {
     tabs.retention = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />

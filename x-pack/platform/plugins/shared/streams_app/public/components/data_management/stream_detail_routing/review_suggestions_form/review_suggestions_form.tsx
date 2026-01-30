@@ -66,7 +66,8 @@ export function ReviewSuggestionsForm({
 
   const isEditingOrReorderingStreams = useStreamsRoutingSelector(
     (snapshot) =>
-      snapshot.matches({ ready: 'editingRule' }) || snapshot.matches({ ready: 'reorderingRules' })
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   );
 
   // For the confirmation modal, use edited suggestion if available, otherwise find by name
