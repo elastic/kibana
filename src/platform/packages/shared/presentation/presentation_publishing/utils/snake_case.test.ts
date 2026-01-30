@@ -23,6 +23,7 @@ describe('snake case', () => {
 
   test('deeply nested object', () => {
     const deeplyNestedCamelCasedObject = {
+      theseAreFruits: true,
       fruitColours: {
         someApples: 'red',
         banana: 'yellow',
@@ -34,6 +35,7 @@ describe('snake case', () => {
       },
     };
     expect(convertCamelCasedKeysToSnakeCase(deeplyNestedCamelCasedObject)).toEqual({
+      these_are_fruits: true,
       fruit_colours: {
         some_apples: 'red',
         banana: 'yellow',

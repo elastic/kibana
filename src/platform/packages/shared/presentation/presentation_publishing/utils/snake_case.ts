@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick, snakeCase } from 'lodash';
+import { get, snakeCase } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { SnakeCasedKeys } from './types';
 
 /**
@@ -18,25 +19,29 @@ import type { SnakeCasedKeys } from './types';
 export const convertCamelCasedKeysToSnakeCase = <StateType extends object = object>(
   input: Partial<StateType> & SnakeCasedKeys<Partial<StateType>>
 ): SnakeCasedKeys<StateType> => {
-  const convertSubObject = (
-    camelCasedSubObject: object,
-    snakeCased: { [key: string]: any } = {}
-  ): object => {
-    const snakeCasedKeys = Object.keys(camelCasedSubObject).map(snakeCase);
+  const snakeCased = {};
 
-    for (const [key, value] of Object.entries(camelCasedSubObject)) {
-      const snakeCasedKey = snakeCase(key);
-      if (snakeCasedKey in snakeCased) {
-        continue; // ignore keys that are already snake cased
-      }
+  const convertSubObject = (subObject: object, path: string = '') => {
+    for (const [key, value] of Object.entries(subObject)) {
+      const currentPath = `${path}${path.length ? '.' : ''}${snakeCase(key)}`;
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        snakeCased[snakeCase(key)] = convertSubObject(value);
+        convertSubObject(value, currentPath);
       } else {
-        snakeCased[snakeCase(key)] = value;
+        /**
+         * The values for keys that are already snake cased should be prioritized. For example,
+         * if you have an object with both the snake cased **and** camel cased version of the same
+         * key, then the value should always come from the snake cased key
+         */
+        const existingSnakeCasedValue = get(input, currentPath);
+        if (existingSnakeCasedValue) {
+          set(snakeCased, currentPath, existingSnakeCasedValue);
+        } else {
+          set(snakeCased, currentPath, value);
+        }
       }
     }
-    // prioritize keys that are already snake cased
-    return { ...snakeCased, ...pick(camelCasedSubObject, snakeCasedKeys) };
   };
-  return convertSubObject(input) as SnakeCasedKeys<StateType>;
+
+  convertSubObject(input); // kick off recursion
+  return snakeCased as SnakeCasedKeys<StateType>;
 };
