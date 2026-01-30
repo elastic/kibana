@@ -32,31 +32,31 @@ Extensions registry:
 ```mermaid
 flowchart LR
   subgraph Consumers["Consumers"]
-    App[Apps: Discover / Lens / Maps / ML / Alerts]
+    App[Apps: Discover, Lens, Maps, ML, Alerts]
   end
 
   subgraph Public["kbn/esql public plugin"]
     ESQLLangEditor[ESQLLangEditor]
-    ESQLEditor[ESQLEditor - kbn esql editor]
-    KibanaServices[Kibana services: core data uiActions kql fieldsMetadata usageCollection]
-    VariablesService[EsqlVariablesService]
+    ESQLEditor[ESQLEditor]
+    KibanaServices[Kibana services: core, data, uiActions, kql, fieldsMetadata, usageCollection]
+    VariablesService[Variables service]
     Triggers[UI Actions triggers]
-    UpdateAction[UpdateESQLQueryAction]
-    ControlAction[CreateESQLControlAction]
-    ControlFlyout[ESQL control flyout]
-    ChooseColumn[ChooseColumnPopover]
-    IdentifierForm[IdentifierControlForm]
-    ValueForm[ValueControlForm]
+    UpdateAction[Update query action]
+    ControlAction[Create control action]
+    ControlFlyout[Control flyout]
+    ChooseColumn[Choose column popover]
+    IdentifierForm[Identifier control form]
+    ValueForm[Value control form]
   end
 
   subgraph Server["kbn/esql server plugin"]
     Routes[HTTP routes: autocomplete, extensions, lookup, timefield]
-    EsqlService[EsqlService]
-    ExtensionsRegistry[ESQLExtensionsRegistry]
+    EsqlService[ESQL service]
+    ExtensionsRegistry[Extensions registry]
   end
 
   subgraph Elasticsearch["Elasticsearch"]
-    ES[indices.resolveIndex and inference endpoints]
+    ES[indices resolveIndex and inference endpoints]
   end
 
   App --> ESQLLangEditor --> ESQLEditor
