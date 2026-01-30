@@ -23,7 +23,10 @@ export class CreateIntegrationLandingPage {
   }
 
   async waitForPageToLoad() {
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page
+      .getByTestId('kbnAppWrapper visibleChrome')
+      .getByTestId('kbnRedirectAppLink')
+      .waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   getLicensePaywallCard() {

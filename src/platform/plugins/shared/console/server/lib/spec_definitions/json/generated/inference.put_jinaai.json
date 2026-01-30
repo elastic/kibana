@@ -13,6 +13,7 @@
     },
     "url_components": {
       "task_type": [
+        "embedding",
         "rerank",
         "text_embedding"
       ]

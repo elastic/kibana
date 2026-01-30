@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import type { SearchUsageCollector } from '../../../collectors';
@@ -20,6 +21,8 @@ import { Flyout } from './flyout';
 import type { BackgroundSearchOpenedHandler } from '../types';
 import { FLYOUT_WIDTH } from './constants';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
+
+const flyoutIdGenerator = htmlIdGenerator('searchSessionsFlyout');
 
 export function openSearchSessionsFlyout({
   coreStart,
@@ -42,6 +45,7 @@ export function openSearchSessionsFlyout({
     appId: string;
     trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+    onClose?: () => void;
   }) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
@@ -51,15 +55,22 @@ export function openSearchSessionsFlyout({
     });
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
+    const flyoutId = flyoutIdGenerator();
+    const closeFlyout = async () => {
+      await flyout.close();
+      attrs.onClose?.();
+    };
+
     const flyout = coreStart.overlays.openFlyout(
       toMountPoint(
         coreStart.rendering.addContext(
           <KibanaReactContextProvider>
             <Flyout
-              onClose={() => flyout.close()}
+              flyoutId={flyoutId}
+              onClose={closeFlyout}
               onBackgroundSearchOpened={(params) => {
                 attrs.onBackgroundSearchOpened?.(params);
-                flyout.close();
+                closeFlyout();
               }}
               appId={attrs.appId}
               api={api}
@@ -76,8 +87,9 @@ export function openSearchSessionsFlyout({
         coreStart
       ),
       {
-        hideCloseButton: true,
         size: FLYOUT_WIDTH,
+        ['aria-labelledby']: flyoutId,
+        onClose: closeFlyout,
       }
     );
 

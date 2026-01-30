@@ -27,6 +27,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   children,
   getVirtualizer,
   onCascadeLeafNodeExpanded,
+  onCascadeLeafNodeCollapsed,
   row,
   size,
 }: CascadeRowCellPrimitiveProps<G, L>) {
@@ -97,6 +98,17 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     }
   }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
 
+  useEffect(
+    () => () => {
+      onCascadeLeafNodeCollapsed?.({
+        row: row.original,
+        nodePath,
+        nodePathMap,
+      });
+    },
+    [onCascadeLeafNodeCollapsed, nodePath, nodePathMap, row]
+  );
+
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
   const virtualRow = useMemo(
     () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
@@ -131,11 +143,20 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       data: leafData,
       cellId: leafCacheKey,
       key: leafCacheKey,
+      nodePath,
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
     });
-  }, [children, leafData, leafCacheKey, getScrollElement, getScrollOffset, getScrollMargin]);
+  }, [
+    children,
+    leafData,
+    leafCacheKey,
+    nodePath,
+    getScrollElement,
+    getScrollOffset,
+    getScrollMargin,
+  ]);
 
   return (
     <EuiFlexGroup>

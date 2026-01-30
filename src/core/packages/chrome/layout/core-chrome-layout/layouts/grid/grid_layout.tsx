@@ -78,8 +78,8 @@ export class GridLayout implements LayoutService {
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
-    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
+    const classicChromeHeader = chrome.getClassicHeaderComponent();
+    const projectChromeHeader = chrome.getProjectHeaderComponent();
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -91,7 +91,7 @@ export class GridLayout implements LayoutService {
       map(([menu, appMenu]) => !!menu || !!appMenu)
     );
 
-    const projectSideNavigation = chrome.getProjectSideNavComponentForGridLayout();
+    const projectSideNavigation = chrome.getProjectSideNavComponent();
 
     const footer$ = chrome.getGlobalFooter$();
 
