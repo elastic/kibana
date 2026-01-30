@@ -98,6 +98,9 @@ npm-debug.log*
 .vagrant
 .envrc
 
+# @kbn/evals vault config (local-only; never commit real secrets)
+/x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
 ## Snyk
 .dccache
 

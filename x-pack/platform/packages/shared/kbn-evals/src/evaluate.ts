@@ -305,10 +305,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   traceEsClient: [
     async ({ esClient }, use) => {
       const esUrl = process.env.TRACING_ES_URL;
+      const apiKey = process.env.TRACING_ES_API_KEY;
       const traceEsClient = esUrl
         ? createEsClientForTesting({
             esUrl,
             isCloud: isElasticCloudEsUrl(esUrl),
+            ...(apiKey ? { auth: { apiKey } } : {}),
           })
         : esClient;
       await use(traceEsClient);
@@ -318,10 +320,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   evaluationsEsClient: [
     async ({ esClient }, use) => {
       const esUrl = process.env.EVALUATIONS_ES_URL;
+      const apiKey = process.env.EVALUATIONS_ES_API_KEY;
       const evaluationsEsClient = esUrl
         ? createEsClientForTesting({
             esUrl,
             isCloud: isElasticCloudEsUrl(esUrl),
+            ...(apiKey ? { auth: { apiKey } } : {}),
           })
         : esClient;
       await use(evaluationsEsClient);

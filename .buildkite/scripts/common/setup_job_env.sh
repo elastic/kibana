@@ -151,26 +151,41 @@ EOF
 # Set up Kibana Evals secrets
 {
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
-    echo "KBN_EVALS was set - exposing LLM connectors, Phoenix config, and ES cluster URLs"
+    echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
 
-    # Extract connectors object for @kbn/evals
-    # The vault value is base64-encoded JSON (see x-pack/solutions/security/test/security_solution_api_integration/scripts/genai/vault/manage_secrets.ts)
-    #
-    # NOTE: `@kbn/gen-ai-functional-testing` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
+    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+
+    # EVAL connectors
+    # NOTE: `@kbn/evals` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
+    LITELLM_BASE_URL="$(jq -r '.litellm.baseUrl // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_API_KEY="$(jq -r '.litellm.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Eval suites require this for the LLM-as-a-judge connector selection
+    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+
+    # Build connector configs for CI from a checked-in template and inject LiteLLM secrets at runtime.
+    # This keeps Vault scoped to a single key+URL while allowing the model list to evolve in git.
+    LITELLM_CHAT_URL="${LITELLM_BASE_URL%/}/v1/chat/completions"
     export KIBANA_TESTING_AI_CONNECTORS="$(
-      vault_get security-gen-ai config | base64 -d | jq -r '(.connectors | @json | @base64)'
+      jq -c \
+        --arg apiUrl "$LITELLM_CHAT_URL" \
+        --arg apiKey "$LITELLM_API_KEY" \
+        'with_entries(
+          .value.actionTypeId = ".gen-ai"
+          | .value.config.apiProvider = "Other"
+          | .value.config.apiUrl = $apiUrl
+          | .value.secrets.apiKey = $apiKey
+        ) | @base64' \
+        x-pack/platform/packages/shared/kbn-evals/scripts/ci/litellm_connectors.template.json
     )"
 
-    # Phoenix config
-    export PHOENIX_BASE_URL="https://oblt-apps.elastic.dev/phoenix-ai/"
-    export PHOENIX_PUBLIC_URL="https://oblt-apps.elastic.dev/phoenix-ai/"
-    export PHOENIX_PROJECT_NAME="kbn-evals-ci-pipeline"
-    export PHOENIX_API_KEY="$(vault_get security-gen-ai config | base64 -d | jq -r '.phoenixKey // empty')"
+    # Elasticsearch cluster for evaluation results export
+    export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
 
-    # Elasticsearch cluster URL for trace-based evaluators and evaluation results
-    ES_URL="$(vault_get security-gen-ai config | base64 -d | jq -r '.esURL // empty')"
-    export TRACING_ES_URL="$ES_URL"
-    export EVALUATIONS_ES_URL="$ES_URL"
+    # Optional: separate cluster for trace-based evaluators
+    export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    export TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
   fi
 }
 

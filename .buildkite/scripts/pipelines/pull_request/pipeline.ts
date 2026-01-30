@@ -15,6 +15,8 @@
             }
         ] */
 
+import Fs from 'fs';
+import Path from 'path';
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
@@ -37,6 +39,71 @@ if (!prConfig) {
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
+
+const EVALS_SUITES_METADATA_RELATIVE_PATH =
+  'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+
+interface EvalsSuiteMetadataEntry {
+  id: string;
+  name?: string;
+  ciLabels?: string[];
+}
+
+function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
+  try {
+    const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
+    const raw = Fs.readFileSync(filePath, 'utf-8');
+    const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
+    return Array.isArray(parsed.suites) ? parsed.suites : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeBuildkiteKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
+  const suiteSteps = selectedSuites
+    .map((suite) => {
+      const key = `kbn-evals-${normalizeBuildkiteKey(suite.id)}`;
+      const label = suite.name ? `Evals: ${suite.name}` : `Evals: ${suite.id}`;
+      return [
+        `      - label: '${label}'`,
+        `        key: ${key}`,
+        `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
+        `        env:`,
+        `          KBN_EVALS: '1'`,
+        `          EVAL_SUITE_ID: '${suite.id}'`,
+        `        timeout_in_minutes: 60`,
+        `        agents:`,
+        `          machineType: n2-standard-8`,
+        `          preemptible: true`,
+        `        retry:`,
+        `          automatic:`,
+        `            - exit_status: '-1'`,
+        `              limit: 3`,
+        `            - exit_status: '*'`,
+        `              limit: 1`,
+      ].join('\n');
+    })
+    .join('\n');
+
+  return [
+    `steps:`,
+    `  - group: Kibana Evals`,
+    `    key: kibana-evals`,
+    `    depends_on:`,
+    `      - build`,
+    `    steps:`,
+    suiteSteps,
+  ].join('\n');
+}
 
 (async () => {
   const pipeline: string[] = [];
@@ -497,6 +564,20 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (GITHUB_PR_LABELS.includes('ci:kbn-evals-esql')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/evals/esql_evals.yml'));
+    }
+
+    // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
+    const evalSuites = readEvalsSuiteMetadata();
+    const runAllEvals = GITHUB_PR_LABELS.includes('ci:kbn-evals-all');
+    const selectedEvalSuites = runAllEvals
+      ? evalSuites
+      : evalSuites.filter((suite) => {
+          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+          return labels.some((label) => GITHUB_PR_LABELS.includes(label));
+        });
+
+    if (selectedEvalSuites.length > 0) {
+      pipeline.push(buildEvalsYaml(selectedEvalSuites));
     }
 
     if (

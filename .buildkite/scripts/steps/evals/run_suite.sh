@@ -2,6 +2,12 @@
 
 set -euo pipefail
 
+EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
+if [[ -z "$EVAL_SUITE_ID" ]]; then
+  echo "EVAL_SUITE_ID is required"
+  exit 1
+fi
+
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
@@ -53,15 +59,6 @@ for _ in {1..180}; do
   sleep 5
 done
 
-# Run ES|QL evaluations
-EVALUATION_REPETITIONS="${EVALUATION_REPETITIONS:-1}" \
-EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-}" \
-TRACING_ES_URL="${TRACING_ES_URL:-}" \
-TRACING_ES_API_KEY="${TRACING_ES_API_KEY:-}" \
-EVALUATIONS_ES_URL="${EVALUATIONS_ES_URL:-}" \
-EVALUATIONS_ES_API_KEY="${EVALUATIONS_ES_API_KEY:-}" \
-node scripts/evals run \
-  --suite agent-builder \
-  x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/esql/esql.spec.ts
-
+# Run eval suite via @kbn/evals CLI (internal executor by default)
+node scripts/evals run --suite "$EVAL_SUITE_ID"
 
