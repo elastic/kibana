@@ -162,7 +162,7 @@ export class SyntheticsPrivateLocation {
         if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
           newPolicy.name = `${config.id}-${locName}`;
         } else {
-          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
+          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}`;
         }
       }
       const configNamespace = config[ConfigKey.NAMESPACE];
