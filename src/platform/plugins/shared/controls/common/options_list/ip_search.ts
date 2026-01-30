@@ -28,24 +28,33 @@ export const getIsCidrNotation = (searchString: string): boolean => {
   return /^[A-Fa-f0-9.:]+\/\d+$/.test(searchString);
 };
 
+/**
+ * Validates a CIDR notation string and determines the IP type (IPv4 or IPv6).
+ */
 export const getValidCidrRange = (searchString: string): { isValid: boolean; ipType?: IpType } => {
   try {
+    // CIDR notation must contain a slash separating the IP part and the prefix length
+    // Valid examples: "192.168.0.0/24", "2001:db8::/64"
     const slashIndex = searchString.lastIndexOf('/');
     if (slashIndex === -1) {
       return { isValid: false };
     }
+    // Validate only the IP part before the slash
     const ipPart = searchString.substring(0, slashIndex);
     if (!getIsValidFullIp(ipPart)) {
       return { isValid: false };
     }
+    // Let ipaddr.js handle CIDR parsing and normalization
     const [ip, prefixLength] = ipaddr.parseCIDR(searchString);
     const ipType = ip.kind() as IpType;
+    // IPv4 allows prefixes up to /32, IPv6 up to /128
     const maxPrefixLength = ipType === 'ipv4' ? 32 : 128;
     if (prefixLength < 0 || prefixLength > maxPrefixLength) {
       return { isValid: false };
     }
     return { isValid: true, ipType };
   } catch {
+    // Any parsing error means the CIDR notation is invalid
     return { isValid: false };
   }
 };
