@@ -323,13 +323,77 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
+/** Rewrites `#/definitions/...` refs to `#/components/schemas/...` for OpenAPI 3.0 compatibility. */
+const rewriteRefs = (obj: unknown): unknown => {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(rewriteRefs);
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '$ref' && typeof value === 'string') {
+      // Rewrite #/definitions/X or #/$defs/X to #/components/schemas/X
+      result[key] = value
+        .replace(/^#\/definitions\//, '#/components/schemas/')
+        .replace(/^#\/\$defs\//, '#/components/schemas/');
+    } else {
+      result[key] = rewriteRefs(value);
+    }
+  }
+  return result;
+};
+
+/**
+ * Extracts `definitions` from JSON Schema and returns them as `shared` for OpenAPI's components.schemas.
+ * Same pattern as kbn_config_schema converter (see parse.ts).
+ */
+const extractDefinitionsToShared = (
+  jsonSchema: Record<string, unknown>
+): { schema: OpenAPIV3.SchemaObject; shared: Record<string, OpenAPIV3.SchemaObject> } => {
+  const { definitions, $defs, ...schemaWithoutDefs } = jsonSchema;
+
+  // Merge definitions and $defs (JSON Schema draft-07 uses definitions, draft-2020-12 uses $defs)
+  const allDefs = {
+    ...(definitions as Record<string, unknown> | undefined),
+    ...($defs as Record<string, unknown> | undefined),
+  };
+
+  // If no definitions, just rewrite any refs in the schema and return
+  if (Object.keys(allDefs).length === 0) {
+    return {
+      schema: rewriteRefs(schemaWithoutDefs) as OpenAPIV3.SchemaObject,
+      shared: {},
+    };
+  }
+
+  // Extract definitions to shared, rewriting refs in each definition
+  const shared: Record<string, OpenAPIV3.SchemaObject> = {};
+  for (const [id, def] of Object.entries(allDefs)) {
+    shared[id] = rewriteRefs(def) as OpenAPIV3.SchemaObject;
+  }
+
+  // Rewrite refs in the main schema
+  const rewrittenSchema = rewriteRefs(schemaWithoutDefs) as OpenAPIV3.SchemaObject;
+
+  return { schema: rewrittenSchema, shared };
+};
+
 export const convert = (schema: z.ZodType<any>) => {
+  const jsonSchema = toJSONSchema(schema, {
+    target: 'openapi-3.0',
+    unrepresentable: 'any',
+  }) as Record<string, unknown>;
+
+  // Transform JSON Schema definitions to OpenAPI components.schemas format
+  const { schema: oasSchema, shared } = extractDefinitionsToShared(jsonSchema);
+
   return {
-    shared: {},
-    schema: toJSONSchema(schema, {
-      target: 'openapi-3.0',
-      unrepresentable: 'any',
-    }) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: oasSchema,
   };
 };
 

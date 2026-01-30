@@ -105,6 +105,76 @@ describe('zod', () => {
         shared: {},
       });
     });
+
+    // Validates that JSON Schema definitions get extracted to shared and refs are rewritten for OpenAPI
+    describe('definitions extraction (recursive/shared schemas)', () => {
+      test('extracts definitions to shared and rewrites refs to OpenAPI format', () => {
+        interface TreeNode {
+          value: string;
+          children?: TreeNode[];
+        }
+        const TreeNodeSchema: z.ZodType<TreeNode> = z.lazy(() =>
+          z.object({
+            value: z.string(),
+            children: z.array(TreeNodeSchema).optional(),
+          })
+        );
+
+        const result = convert(TreeNodeSchema);
+
+        expect(JSON.stringify(result.schema)).not.toContain('#/definitions/');
+        expect(JSON.stringify(result.schema)).not.toContain('#/$defs/');
+
+        if (Object.keys(result.shared).length > 0) {
+          expect(JSON.stringify(result.shared)).not.toContain('#/definitions/');
+          expect(JSON.stringify(result.shared)).not.toContain('#/$defs/');
+        }
+      });
+
+      test('handles schema with multiple recursive references', () => {
+        interface Person {
+          name: string;
+          friends?: Person[];
+          bestFriend?: Person;
+        }
+        const PersonSchema: z.ZodType<Person> = z.lazy(() =>
+          z.object({
+            name: z.string(),
+            friends: z.array(PersonSchema).optional(),
+            bestFriend: PersonSchema.optional(),
+          })
+        );
+
+        const result = convert(PersonSchema);
+
+        const schemaStr = JSON.stringify(result.schema);
+        const sharedStr = JSON.stringify(result.shared);
+        expect(schemaStr).not.toContain('#/definitions/');
+        expect(schemaStr).not.toContain('#/$defs/');
+        expect(sharedStr).not.toContain('#/definitions/');
+        expect(sharedStr).not.toContain('#/$defs/');
+      });
+
+      test('non-recursive schemas return empty shared', () => {
+        const simpleSchema = z.object({
+          name: z.string(),
+          age: z.number(),
+        });
+
+        const result = convert(simpleSchema);
+
+        expect(result.shared).toEqual({});
+        expect(result.schema).toEqual({
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            age: { type: 'number' },
+          },
+          required: ['name', 'age'],
+          additionalProperties: false,
+        });
+      });
+    });
   });
 
   describe('convertPathParameters', () => {
