@@ -94,6 +94,7 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
     <>
       <AiInsight
         title={explainLogMessageButtonLabel}
+        insightType="log"
         createStream={createStream}
         buildAttachments={buildAttachments}
       />
