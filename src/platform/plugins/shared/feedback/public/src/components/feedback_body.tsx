@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  type PropsWithChildren,
-  type ChangeEvent,
-} from 'react';
+import React, { useState, useCallback, useEffect, type ChangeEvent } from 'react';
 import {
   EuiFieldText,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiLink,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -31,79 +23,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ILicense } from '@kbn/licensing-types';
+import { FormLabel } from './form_label';
+import { CsatButtons } from './csat_buttons';
 import { BenefitsCallout } from './benefits_callout';
-import { ELASTIC_SUPPORT_URL, FEEDBACK_TYPE } from '../constants';
-
-const feedbackTypes = [
-  {
-    value: FEEDBACK_TYPE.FEATURE_REQUEST,
-    text: (
-      <FormattedMessage
-        id="feedback.form.select.options.featureRequest"
-        defaultMessage="Request a feature"
-      />
-    ),
-  },
-  {
-    value: FEEDBACK_TYPE.ISSUE_REPORT,
-    text: (
-      <FormattedMessage
-        id="feedback.form.select.options.issueReport"
-        defaultMessage="Report an issue"
-      />
-    ),
-  },
-  {
-    value: FEEDBACK_TYPE.OTHER_FEEDBACK,
-    text: (
-      <FormattedMessage
-        id="feedback.form.select.options.otherFeedback"
-        defaultMessage="Other feedback"
-      />
-    ),
-  },
-];
-
-const getTextAreaLabel = (feedbackType: FEEDBACK_TYPE) => {
-  if (feedbackType === FEEDBACK_TYPE.FEATURE_REQUEST) {
-    return (
-      <FormattedMessage
-        id="feedback.form.textArea.featureRequestLabel"
-        defaultMessage="Describe your idea"
-      />
-    );
-  }
-  if (feedbackType === FEEDBACK_TYPE.ISSUE_REPORT) {
-    return (
-      <FormattedMessage
-        id="feedback.form.textArea.issueReportLabel"
-        defaultMessage="Describe your issue"
-      />
-    );
-  }
-  return (
-    <FormattedMessage
-      id="feedback.form.textArea.otherFeedbackLabel"
-      defaultMessage="Share your feedback"
-    />
-  );
-};
 
 interface Props {
-  feedbackType: FEEDBACK_TYPE;
   feedbackText: string;
   userEmail: string;
-  handleChangeFeedbackType: (e: ChangeEvent<HTMLSelectElement>) => void;
+  currentAppId?: string;
   handleChangeFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
   getLicense: LicensingPluginStart['getLicense'];
 }
 export const FeedbackBody = ({
-  feedbackType,
   feedbackText,
   userEmail,
+  currentAppId,
   getLicense,
-  handleChangeFeedbackType,
   handleChangeFeedbackText,
   handleChangeEmail,
 }: Props) => {
@@ -126,68 +62,32 @@ export const FeedbackBody = ({
   const licenseType = license?.type;
 
   const showBenefitsCallout =
-    license?.hasAtLeast('platinum') &&
-    licenseType !== 'trial' &&
-    licenseType !== undefined &&
-    feedbackType !== FEEDBACK_TYPE.OTHER_FEEDBACK;
-
-  const showSelectHelpText = !showBenefitsCallout && feedbackType === FEEDBACK_TYPE.ISSUE_REPORT;
-
-  const semiBoldTextCss = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
+    license?.hasAtLeast('platinum') && licenseType !== 'trial' && licenseType !== undefined;
 
   const bodyCss = css`
     padding-top: ${euiTheme.size.m};
   `;
 
-  const Label = ({ children }: PropsWithChildren) => (
-    <EuiText size="xs" css={semiBoldTextCss}>
-      {children}
-    </EuiText>
-  );
+  const formCss = css`
+    width: 600px;
+  `;
 
   return (
     <EuiFlexItem css={bodyCss} data-test-subj="feedbackFormBody">
-      <EuiForm component="form">
-        <EuiFormRow
-          helpText={
-            showSelectHelpText && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="feedback.form.body.select.issueReport.helpText.text"
-                    defaultMessage="This form helps us collect general feedback about our products. If you need assistance, {supportLink} instead."
-                    values={{
-                      supportLink: (
-                        <EuiLink href={ELASTIC_SUPPORT_URL} target="_blank" external={true}>
-                          <FormattedMessage
-                            id="feedback.form.body.select.issueReport.helpText.supportLink"
-                            defaultMessage="submit a support request"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </>
-            )
-          }
-        >
-          <EuiSelect
-            data-test-subj="feedbackFormTypeSelect"
-            options={feedbackTypes}
-            value={feedbackType}
-            aria-label={i18n.translate('feedback.form.body.select.ariaLabel', {
-              defaultMessage: 'Select feedback type',
-            })}
-            onChange={handleChangeFeedbackType}
-          />
-        </EuiFormRow>
+      <EuiForm component="form" css={formCss}>
+        <CsatButtons appId={currentAppId} />
+        <EuiSpacer size="m" />
         {showBenefitsCallout && <BenefitsCallout licenseType={licenseType} />}
         <EuiFormRow
-          label={<Label>{getTextAreaLabel(feedbackType)}</Label>}
+          fullWidth
+          label={
+            <FormLabel>
+              <FormattedMessage
+                id="feedback.form.textArea.featureRequestLabel"
+                defaultMessage="Describe your idea"
+              />
+            </FormLabel>
+          }
           helpText={
             <>
               <EuiSpacer size="s" />
@@ -201,6 +101,7 @@ export const FeedbackBody = ({
           }
         >
           <EuiTextArea
+            fullWidth
             data-test-subj="feedbackFormTextArea"
             value={feedbackText}
             aria-label={i18n.translate('feedback.form.body.textArea.ariaLabel', {
@@ -210,13 +111,14 @@ export const FeedbackBody = ({
           />
         </EuiFormRow>
         <EuiFormRow
+          fullWidth
           label={
-            <Label>
+            <FormLabel>
               <FormattedMessage
                 id="feedback.form.body.emailInput.label"
                 defaultMessage="Your email"
               />
-            </Label>
+            </FormLabel>
           }
           labelAppend={
             <EuiText size="xs" color="subdued">
@@ -228,6 +130,7 @@ export const FeedbackBody = ({
           }
         >
           <EuiFieldText
+            fullWidth
             data-test-subj="feedbackFormEmailInput"
             value={userEmail}
             aria-label={i18n.translate('feedback.form.body.emailInput.ariaLabel', {

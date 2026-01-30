@@ -27,6 +27,7 @@ export const FeedbackButton = ({ core, getLicense }: Props) => {
         <FeedbackForm
           getCurrentUser={core.security.authc.getCurrentUser}
           getLicense={getLicense}
+          currentAppId$={core.application.currentAppId$}
         />,
         core.rendering
       )

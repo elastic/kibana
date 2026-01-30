@@ -8,25 +8,25 @@
  */
 
 import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
-import type { CoreAuthenticationService } from '@kbn/core/public';
+import type { ApplicationStart, CoreAuthenticationService } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FeedbackHeader } from './feedback_header';
 import { FeedbackBody } from './feedback_body';
 import { FeedbackFooter } from './feedback_footer';
-import { FEEDBACK_TYPE } from '../constants';
 
 interface Props {
   getCurrentUser: CoreAuthenticationService['getCurrentUser'];
   getLicense: LicensingPluginStart['getLicense'];
+  currentAppId$: ApplicationStart['currentAppId$'];
 }
 
-export const FeedbackForm = ({ getCurrentUser, getLicense }: Props) => {
+export const FeedbackForm = ({ getCurrentUser, getLicense, currentAppId$ }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [feedbackType, setFeedbackType] = useState(FEEDBACK_TYPE.FEATURE_REQUEST);
   const [feedbackText, setFeedbackText] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [currentAppId, setCurrentAppId] = useState<string | undefined>('');
 
   const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
 
@@ -45,12 +45,18 @@ export const FeedbackForm = ({ getCurrentUser, getLicense }: Props) => {
     getEmail();
   }, [getEmail]);
 
+  useEffect(() => {
+    const subscription = currentAppId$.subscribe((id) => {
+      setCurrentAppId(id);
+    });
+    return () => {
+      setCurrentAppId(undefined);
+      subscription.unsubscribe();
+    };
+  }, [currentAppId$]);
+
   const handleChangeFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setFeedbackText(e.target.value);
-  };
-
-  const handleChangeFeedbackType = (e: ChangeEvent<HTMLSelectElement>) => {
-    setFeedbackType(e.target.value as FEEDBACK_TYPE);
   };
 
   const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
@@ -61,32 +67,21 @@ export const FeedbackForm = ({ getCurrentUser, getLicense }: Props) => {
     // TODO
   };
 
-  const flyoutCss = css`
+  const formCss = css`
     padding: ${euiTheme.size.l};
   `;
 
-  const dividerCss = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-    margin-left: -${euiTheme.size.l};
-    margin-right: -${euiTheme.size.l};
-  `;
-
-  const Divider = () => <span css={dividerCss} aria-hidden="true" />;
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackForm" css={flyoutCss}>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackForm" css={formCss}>
       <FeedbackHeader />
-      <Divider />
       <FeedbackBody
-        feedbackType={feedbackType}
         feedbackText={feedbackText}
         userEmail={userEmail}
-        handleChangeFeedbackType={handleChangeFeedbackType}
+        currentAppId={currentAppId}
         handleChangeFeedbackText={handleChangeFeedbackText}
         handleChangeEmail={handleChangeEmail}
         getLicense={getLicense}
       />
-      <Divider />
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}

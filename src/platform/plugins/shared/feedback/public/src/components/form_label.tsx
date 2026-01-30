@@ -7,4 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ELASTIC_SUPPORT_URL = 'https://support.elastic.co/home';
+import React from 'react';
+import type { PropsWithChildren } from 'react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
+export const FormLabel = ({ children }: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+
+  const semiBoldTextCss = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
+  return (
+    <EuiText size="xs" css={semiBoldTextCss}>
+      {children}
+    </EuiText>
+  );
+};

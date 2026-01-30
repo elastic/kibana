@@ -8,6 +8,8 @@
  */
 
 export { FeedbackButton } from './feedback_button';
+export { CsatButtons } from './csat_buttons';
+export { FormLabel } from './form_label';
 export { FeedbackForm } from './feedback_form';
 export { FeedbackBody } from './feedback_body';
 export { FeedbackFooter } from './feedback_footer';
