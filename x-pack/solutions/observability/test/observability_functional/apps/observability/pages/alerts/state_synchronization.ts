@@ -79,10 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'overview'
       );
       await setTimeRangeToXDaysAgo(10);
-      await pageObjects.observability.clickSolutionNavigationEntry(
-        'observability',
-        'alerts'
-      );
+      await pageObjects.observability.clickSolutionNavigationEntry('observability', 'alerts');
 
       expect(await observability.alerts.common.getTimeRange()).to.be('Last 10 days');
     });
