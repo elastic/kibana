@@ -41,7 +41,7 @@ export default function ESQLToDataViewTransitionModal({
     setDismissModalChecked(e.target.checked);
   }, []);
   const { notifications } = useDiscoverServices();
-  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
   const modalTitleId = useGeneratedHtmlId({
     prefix: 'discover-esql-to-dataview-modal-title',
   });
