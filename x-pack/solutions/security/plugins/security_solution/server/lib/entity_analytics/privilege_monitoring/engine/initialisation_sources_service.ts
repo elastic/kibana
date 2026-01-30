@@ -22,7 +22,7 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../data_sources';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
-import { monitoringEntitySourceTypeName } from '../saved_objects';
+import { MANAGED_SOURCES_VERSION, monitoringEntitySourceTypeName } from '../saved_objects';
 import { createPrivMonAuditLogger } from '../audit_logger';
 import { createPrivMonLogger } from '../logger';
 
