@@ -81,7 +81,7 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
     : undefined;
 
   // order doesn't matter
-  detectors.push(installedPackagesM1(detectorsLogger, packageService));
+  detectors.push(installedPackagesM1(detectorsLogger, packageService, esClient));
   if (usageCollectorDeps) {
     detectors.push(
       savedDiscoverySessionsM2(usageCollectorDeps),
