@@ -79,6 +79,7 @@ async function setupSynthtraceData(synthtrace: ReturnType<typeof SynthtraceProvi
       range,
       logsEsClient,
       serviceName: SERVICE_NAME,
+      serviceEnvironment: 'production',
     });
 
   await logCategoriesClient.index(logCategoriesGenerator);

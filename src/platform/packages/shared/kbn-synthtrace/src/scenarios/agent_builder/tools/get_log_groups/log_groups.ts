@@ -78,10 +78,12 @@ export function generateLogCategoriesData({
   range,
   logsEsClient,
   serviceName,
+  serviceEnvironment = 'production',
 }: {
   range: Timerange;
   logsEsClient: LogsSynthtraceEsClient;
   serviceName: string;
+  serviceEnvironment?: string;
 }): ScenarioReturnType<LogDocument> {
   // Create multiple log patterns for categorization
   const paymentProcessingLogs = range
@@ -94,8 +96,7 @@ export function generateLogCategoriesData({
         .logLevel('info')
         .service(serviceName)
         .defaults({
-          'service.name': serviceName,
-          'log.level': 'info',
+          'service.environment': serviceEnvironment,
         })
         .timestamp(timestamp)
     );
@@ -110,8 +111,7 @@ export function generateLogCategoriesData({
         .logLevel('info')
         .service(serviceName)
         .defaults({
-          'service.name': serviceName,
-          'log.level': 'info',
+          'service.environment': serviceEnvironment,
         })
         .timestamp(timestamp)
     );
@@ -126,8 +126,7 @@ export function generateLogCategoriesData({
         .logLevel('error')
         .service(serviceName)
         .defaults({
-          'service.name': serviceName,
-          'log.level': 'error',
+          'service.environment': serviceEnvironment,
         })
         .timestamp(timestamp)
     );
@@ -142,8 +141,7 @@ export function generateLogCategoriesData({
         .logLevel('warn')
         .service(serviceName)
         .defaults({
-          'service.name': serviceName,
-          'log.level': 'warn',
+          'service.environment': serviceEnvironment,
         })
         .timestamp(timestamp)
     );
@@ -160,8 +158,7 @@ export function generateLogCategoriesData({
         .logLevel('debug')
         .service(serviceName)
         .defaults({
-          'service.name': serviceName,
-          'log.level': 'debug',
+          'service.environment': serviceEnvironment,
         })
         .timestamp(timestamp)
     );
@@ -500,7 +497,6 @@ export function generateLogExceptionGroupsData({
             .logLevel('error')
             .service(serviceConfig.name)
             .defaults({
-              'service.name': serviceConfig.name,
               'service.environment': serviceConfig.environment,
 
               // OTel exception fields (per OTel semantic conventions)
