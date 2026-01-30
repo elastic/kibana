@@ -8,7 +8,7 @@
  */
 
 import { prefixReferencesFromPanel } from '../../../../common';
-import { getPanelReferences } from './get_panel_references';
+import { getPanelReferences, transformPanelReferencesOut } from './get_panel_references';
 import type { SavedDashboardPanel } from '../../../dashboard_saved_object';
 
 const storedPanel: SavedDashboardPanel = {
@@ -23,6 +23,27 @@ const ref = {
   id: '1234',
   type: 'index-pattern',
 };
+
+describe('transformPanelReferencesOut', () => {
+  test('Should transform panelRefName reference name', () => {
+    const containerReferences = [
+      {
+        name: 'panel_0',
+        id: '1234',
+        type: 'links',
+      },
+    ];
+    expect(transformPanelReferencesOut(containerReferences, 'panel_0')).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1234",
+          "name": "savedObjectRef",
+          "type": "links",
+        },
+      ]
+    `);
+  });
+});
 
 describe('getPanelReferences', () => {
   describe('>= 7.13', () => {
