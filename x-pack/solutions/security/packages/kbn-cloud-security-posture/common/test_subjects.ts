@@ -87,7 +87,7 @@ export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
 
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FLYOUT: 'cloudConnectorPoliciesFlyout',
-  CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  CLOSE_BUTTON: 'cloudConnectorPoliciesFlyoutCloseButton',
   TITLE: 'cloudConnectorPoliciesFlyoutTitle',
   IDENTIFIER_TEXT: 'cloudConnectorIdentifierText',
   COPY_IDENTIFIER_BUTTON: 'cloudConnectorCopyIdentifier',
@@ -98,4 +98,8 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   POLICY_LINK: 'cloudConnectorPolicyLink',
   EMPTY_STATE: 'cloudConnectorPoliciesEmptyState',
   ERROR_STATE: 'cloudConnectorPoliciesErrorState',
+  DELETE_CONNECTOR_BUTTON: 'cloudConnectorDeleteConnectorButton',
+  FOOTER_SAVE_BUTTON: 'cloudConnectorFooterSaveButton',
+  DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
+  DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
 };
