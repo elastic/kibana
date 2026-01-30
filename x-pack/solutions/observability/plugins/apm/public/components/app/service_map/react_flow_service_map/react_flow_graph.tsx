@@ -30,6 +30,8 @@ import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
+import { ReactFlowPopover } from './react_flow_popover';
+import type { Environment } from '../../../../../common/environment_rt';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
@@ -51,16 +53,32 @@ interface ReactFlowGraphProps {
   height: number;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
+  /** Currently focused service name (for service-specific map) */
+  serviceName?: string;
+  /** Environment filter */
+  environment: Environment;
+  /** KQL filter */
+  kuery: string;
+  /** Start time */
+  start: string;
+  /** End time */
+  end: string;
 }
 
 function ReactFlowGraphInner({
   height,
   nodes: initialNodes,
   edges: initialEdges,
+  serviceName,
+  environment,
+  kuery,
+  start,
+  end,
 }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -90,12 +108,14 @@ function ReactFlowGraphInner({
     }
   }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView, applyEdgeHighlighting]);
 
-  // Handle node click - update node selection and edge highlighting
+  // Handle node click - update node selection, edge highlighting, and popover
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
+      // Set the selected node for the popover
+      setSelectedNodeForPopover(newSelectedId ? node : null);
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
@@ -103,6 +123,20 @@ function ReactFlowGraphInner({
   // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => ({
+        ...n,
+        selected: false,
+      }))
+    );
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+  }, [setNodes, setEdges, applyEdgeHighlighting]);
+
+  // Handle popover close
+  const handlePopoverClose = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -198,6 +232,15 @@ function ReactFlowGraphInner({
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
+      <ReactFlowPopover
+        selectedNode={selectedNodeForPopover}
+        focusedServiceName={serviceName}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        onClose={handlePopoverClose}
+      />
     </div>
   );
 }
