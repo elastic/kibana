@@ -676,7 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (f: { name: string }) => f.name === 'attributes.permanent_field'
         );
         expect(permanentFieldDetected).to.not.be(undefined);
-        expect(permanentFieldDetected.processor_id).to.be('set-permanent-field');
+        expect(permanentFieldDetected!.processor_id).to.be('set-permanent-field');
 
         // The final document should have the permanent_field
         expect(value).to.have.property('attributes.permanent_field', 'permanent_value');
@@ -754,8 +754,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const setProcessorMetrics = processorsMetrics['set-temp-field'];
 
         expect(setProcessorMetrics).to.not.be(undefined);
-        expect(setProcessorMetrics.detected_fields).to.contain('attributes.temp_field');
-        expect(setProcessorMetrics.parsed_rate).to.be(1);
+        expect(setProcessorMetrics!.detected_fields).to.contain('attributes.temp_field');
+        expect(setProcessorMetrics!.parsed_rate).to.be(1);
       });
 
       it('should handle mixed temporary and permanent fields correctly', async () => {
