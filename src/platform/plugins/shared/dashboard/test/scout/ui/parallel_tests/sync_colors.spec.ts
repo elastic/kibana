@@ -161,6 +161,8 @@ spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
         await pageObjects.dashboard.openSettingsFlyout();
         await pageObjects.dashboard.toggleSyncColors(true);
         await pageObjects.dashboard.applyDashboardSettings();
+        await page.testSubj.click('querySubmitButton');
+        await pageObjects.dashboard.waitForRenderComplete();
 
         const colorMappings1 = Object.entries(getColorMapping(await getChartDebugState(page, 0)));
         const colorMappings2 = Object.entries(getColorMapping(await getChartDebugState(page, 1)));
