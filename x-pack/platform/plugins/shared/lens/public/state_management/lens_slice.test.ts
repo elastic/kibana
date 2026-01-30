@@ -643,6 +643,7 @@ describe('lensSlice', () => {
       it('removeLayer: should remove all layers from visualization that were removed by datasource', () => {
         const removedLayerId = 'other-removed-layer';
 
+        // formBased3 is an artificial test datasource. Production only supports formBased and textBased.
         const formBased3 = formBased('formBased3');
         formBased3.removeLayer = (layerIds: unknown, layerId: string) => ({
           newState: (layerIds as string[]).filter((id: string) => id !== layerId),
