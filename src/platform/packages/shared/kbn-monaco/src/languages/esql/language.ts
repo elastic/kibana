@@ -223,7 +223,10 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         // Extract stream name from the FROM clause to fetch stream-specific field descriptions
         const streamName = extractSourceFromQuery(lastQueryText);
 
-        // Try to fetch stream-specific field metadata first (if querying from a stream)
+        let streamDescription: string | undefined;
+        let ecsDescription: string | undefined;
+
+        // Try to fetch stream-specific field metadata (if querying from a stream)
         if (streamName) {
           const streamMetadata = await fieldsMetadataClient.find({
             fieldNames: [strippedFieldName],
@@ -233,16 +236,11 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
           const streamFieldMetadata = streamMetadata.fields[strippedFieldName];
           if (streamFieldMetadata && streamFieldMetadata.description) {
-            return {
-              ...item,
-              documentation: {
-                value: streamFieldMetadata.description,
-              },
-            };
+            streamDescription = streamFieldMetadata.description;
           }
         }
 
-        // Fall back to ECS metadata if no stream-specific description found
+        // Also fetch ECS/OTel metadata
         const fullEcsMetadataList = await fieldsMetadataClient.find({
           attributes: ['type'],
         });
@@ -255,13 +253,32 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
           const fieldMetadata = ecsMetadata.fields[strippedFieldName];
           if (fieldMetadata && fieldMetadata.description) {
-            return {
-              ...item,
-              documentation: {
-                value: fieldMetadata.description,
-              },
-            };
+            ecsDescription = fieldMetadata.description;
           }
+        }
+
+        // Merge descriptions if both exist, otherwise use whichever is available
+        if (streamDescription && ecsDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: `**Stream description:**\n${streamDescription}\n\n**ECS/OTel description:**\n${ecsDescription}`,
+            },
+          };
+        } else if (streamDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: streamDescription,
+            },
+          };
+        } else if (ecsDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: ecsDescription,
+            },
+          };
         }
 
         return item;

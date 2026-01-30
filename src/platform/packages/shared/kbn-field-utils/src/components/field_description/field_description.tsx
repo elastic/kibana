@@ -73,25 +73,54 @@ const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
 > = ({ fieldsMetadataService, streamName, ...props }) => {
   const fieldName = removeKeywordSuffix(props.field.name);
-  const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
-    attributes: ['description', 'type'],
-    fieldNames: [fieldName],
-    streamName,
-  });
 
-  const fieldDescription = fieldsMetadata?.[fieldName]?.description;
-  const fieldType = fieldsMetadata?.[fieldName]?.type;
+  // Fetch stream-specific description (if streamName is provided)
+  const { fieldsMetadata: streamMetadata, loading: streamLoading } =
+    fieldsMetadataService.useFieldsMetadata(
+      streamName
+        ? {
+            attributes: ['description', 'type'],
+            fieldNames: [fieldName],
+            streamName,
+          }
+        : { attributes: [], fieldNames: [] }
+    );
+
+  // Fetch ECS/OTel description (without streamName)
+  const { fieldsMetadata: ecsMetadata, loading: ecsLoading } =
+    fieldsMetadataService.useFieldsMetadata({
+      attributes: ['description', 'type'],
+      fieldNames: [fieldName],
+    });
+
+  const loading = (streamName ? streamLoading : false) || ecsLoading;
+
+  const streamDescription = streamMetadata?.[fieldName]?.description;
+  const streamFieldType = streamMetadata?.[fieldName]?.type;
+  const ecsDescription = ecsMetadata?.[fieldName]?.description;
+  const ecsFieldType = ecsMetadata?.[fieldName]?.type;
+
+  // Check type compatibility for each source
+  const isStreamTypeMatch =
+    streamFieldType && esFieldTypeToKibanaFieldType(streamFieldType) === props.field.type;
+  const isEcsTypeMatch =
+    ecsFieldType && esFieldTypeToKibanaFieldType(ecsFieldType) === props.field.type;
+
+  // Merge descriptions if both exist and types match
+  let mergedDescription: string | undefined;
+
+  const validStreamDesc = isStreamTypeMatch ? streamDescription : undefined;
+  const validEcsDesc = isEcsTypeMatch ? ecsDescription : undefined;
+
+  if (validStreamDesc && validEcsDesc && validStreamDesc !== validEcsDesc) {
+    mergedDescription = `**Stream description:**\n${validStreamDesc}\n\n**ECS/OTel description:**\n${validEcsDesc}`;
+  } else {
+    mergedDescription = validStreamDesc || validEcsDesc;
+  }
 
   return (
     <EuiSkeletonText isLoading={loading} size="s">
-      <FieldDescriptionContent
-        {...props}
-        ecsFieldDescription={
-          fieldType && esFieldTypeToKibanaFieldType(fieldType) === props.field.type
-            ? fieldDescription
-            : undefined
-        }
-      />
+      <FieldDescriptionContent {...props} ecsFieldDescription={mergedDescription} />
     </EuiSkeletonText>
   );
 };

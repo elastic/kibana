@@ -179,7 +179,7 @@ describe('ESQLLang', () => {
         expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
       });
 
-      it('should resolve field descriptions from stream when streamName is in FROM clause', async () => {
+      it('should resolve field descriptions from stream when streamName is in FROM clause (stream only)', async () => {
         const mockFind = jest.fn().mockImplementation(async (params) => {
           // Return stream-specific description when streamName is provided
           if (params.streamName === 'logs.nginx') {
@@ -193,7 +193,7 @@ describe('ESQLLang', () => {
               },
             };
           }
-          // Return empty for ECS list check
+          // Return empty for ECS list check (field not in ECS)
           return { fields: {} };
         });
 
@@ -239,11 +239,88 @@ describe('ESQLLang', () => {
           })
         );
 
-        // Should have the stream-specific description
+        // Should have the stream-specific description (no ECS exists)
         expect(resolvedItem).toEqual({
           ...fieldItem,
           documentation: {
             value: 'Stream-specific message description',
+          },
+        });
+      });
+
+      it('should merge stream and ECS descriptions when both exist', async () => {
+        const mockFind = jest.fn().mockImplementation(async (params) => {
+          // Return stream-specific description when streamName is provided
+          if (params.streamName === 'logs.nginx') {
+            return {
+              fields: {
+                message: {
+                  type: 'keyword',
+                  source: 'streams',
+                  description: 'Stream-specific message description',
+                },
+              },
+            };
+          }
+          // ECS list check - return the field
+          if (params.attributes?.includes('type') && !params.fieldNames) {
+            return {
+              fields: {
+                message: { type: 'keyword', source: 'ecs' },
+              },
+            };
+          }
+          // ECS description lookup
+          if (params.fieldNames?.includes('message') && !params.streamName) {
+            return {
+              fields: {
+                message: {
+                  type: 'keyword',
+                  source: 'ecs',
+                  description: 'ECS message description',
+                },
+              },
+            };
+          }
+          return { fields: {} };
+        });
+
+        const mockGetFieldsMetadata: Promise<PartialFieldsMetadataClient> = Promise.resolve({
+          find: mockFind,
+        });
+
+        const mockSuggest = suggest as jest.MockedFunction<typeof suggest>;
+        mockSuggest.mockResolvedValue([]);
+
+        const suggestionProvider = ESQLLang.getSuggestionProvider({
+          getFieldsMetadata: mockGetFieldsMetadata,
+        });
+
+        const mockModel = {
+          getValue: jest.fn().mockReturnValue('FROM logs.nginx | WHERE message = "test"'),
+        } as unknown as monaco.editor.ITextModel;
+        await suggestionProvider.provideCompletionItems(
+          mockModel,
+          new monaco.Position(1, 40),
+          {} as monaco.languages.CompletionContext,
+          {} as monaco.CancellationToken
+        );
+
+        const fieldItem: monaco.languages.CompletionItem = {
+          label: 'message',
+          kind: 4,
+          insertText: 'message',
+          range: new monaco.Range(0, 0, 0, 0),
+        };
+
+        const resolvedItem = await suggestionProvider.resolveCompletionItem!(fieldItem, {} as any);
+
+        // Should have both descriptions merged
+        expect(resolvedItem).toEqual({
+          ...fieldItem,
+          documentation: {
+            value:
+              '**Stream description:**\nStream-specific message description\n\n**ECS/OTel description:**\nECS message description',
           },
         });
       });
