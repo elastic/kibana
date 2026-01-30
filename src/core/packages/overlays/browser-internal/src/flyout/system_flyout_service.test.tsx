@@ -77,15 +77,48 @@ describe('SystemFlyoutService', () => {
       expect(container.querySelector('[data-eui="EuiFlyout"]')).toBeTruthy();
     });
 
-    it('renders with custom title in flyoutMenuProps', () => {
+    it('renders with custom title at the top level', () => {
       systemFlyouts.open(<div>System flyout content</div>, {
-        title: 'Custom Title',
+        title: 'Top Level Title',
       });
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
-      // Verify render was called
-      const [renderedElement] = mockReactDomRender.mock.calls[0];
-      expect(renderedElement).toBeDefined();
+      // Verify the title was passed through
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Top Level Title');
+    });
+
+    it('renders flyoutMenuProps with custom properties', () => {
+      const expectedFlyoutMenuProps = {
+        title: 'Visible Title',
+        'data-test-subj': 'test-menu',
+        hideTitle: false,
+      };
+
+      systemFlyouts.open(<div>System flyout content</div>, {
+        flyoutMenuProps: expectedFlyoutMenuProps,
+      });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Navigate to the actual EuiFlyout component to check its props
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      // The structure is: KibanaRenderContextProvider > EuiFlyout
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps).toEqual(expectedFlyoutMenuProps);
+    });
+
+    it('gives precedence to flyoutMenuProps.title over top-level title', () => {
+      systemFlyouts.open(<div>System flyout content</div>, {
+        title: 'Top Level Title',
+        flyoutMenuProps: { title: 'Menu Title', 'data-test-subj': 'test-menu' },
+      });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Verify that flyoutMenuProps.title takes precedence
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Menu Title');
     });
 
     it('applies additional EuiFlyout options', () => {

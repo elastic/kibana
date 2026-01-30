@@ -84,7 +84,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
     ...(layer.x ? { xAccessor: getAccessorNameForXY(layer, X_ACCESSOR) } : {}),
     ...(meaningFulYConfig.length ? { yConfig: meaningFulYConfig } : {}),
     ...(layer.breakdown_by
-      ? { splitAccessor: getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR) }
+      ? { splitAccessors: [getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR)] }
       : {}),
     ...(layer.breakdown_by && 'collapse_by' in layer.breakdown_by
       ? { collapseFn: layer.breakdown_by.collapse_by }

@@ -19,11 +19,18 @@ import { traverseObject } from './traverse_object';
 export function findRefs(obj: unknown): string[] {
   const refs: string[] = [];
 
-  traverseObject(obj, (element) => {
-    if (hasRef(element)) {
-      refs.push(element.$ref);
+  traverseObject(
+    obj,
+    (element) => {
+      if (hasRef(element)) {
+        refs.push(element.$ref);
+      }
+    },
+    {
+      // We don't require example references in code generation
+      skipKeys: ['examples'],
     }
-  });
+  );
 
   return refs;
 }

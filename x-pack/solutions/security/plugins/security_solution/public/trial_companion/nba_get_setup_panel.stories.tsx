@@ -17,7 +17,6 @@ const meta: Meta<typeof YourTrialCompanion> = {
   title: 'Security Solution/Trial Companion/Your Trial Companion',
   args: {
     open: [Milestone.M1, Milestone.M2, Milestone.M3],
-    onDismiss: () => {},
     todoItems: NBA_TODO_LIST,
   },
   argTypes: {
@@ -39,7 +38,6 @@ export const Milestone1Completed: StoryObj<YourTrialCompanionProps> = {
   render: Template,
   args: {
     open: [Milestone.M1, Milestone.M5, Milestone.M6],
-    onDismiss: () => {},
     todoItems: NBA_TODO_LIST,
   },
 };

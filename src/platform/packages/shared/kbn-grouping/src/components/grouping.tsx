@@ -57,7 +57,11 @@ export interface GroupingProps<T> {
   renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
+  takeActionItems?: (
+    groupFilters: Filter[],
+    groupNumber: number,
+    groupBucket: GroupingBucket<T>
+  ) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -141,6 +145,15 @@ const GroupingComponent = <T,>({
         const nullGroupMessage = isNullGroup
           ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
           : undefined;
+        const groupFilters = isNullGroup
+          ? getNullGroupFilter(selectedGroup)
+          : createGroupFilter(
+              selectedGroup,
+              Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+              multiValueFields
+            );
+
+        const actionItems = takeActionItems?.(groupFilters, groupNumber, groupBucket);
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
@@ -151,18 +164,8 @@ const GroupingComponent = <T,>({
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  groupFilter={
-                    isNullGroup
-                      ? getNullGroupFilter(selectedGroup)
-                      : createGroupFilter(
-                          selectedGroup,
-                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
-                          multiValueFields
-                        )
-                  }
-                  groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
-                  takeActionItems={takeActionItems}
+                  actionItems={actionItems}
                   additionalActionButtons={
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
@@ -233,13 +236,16 @@ const GroupingComponent = <T,>({
   }, [emptyGroupingComponent]);
 
   return (
-    <>
+    <div css={() => ({ padding: `0 8px` })}>
       {groupingLevel > 0 ? null : (
         <EuiFlexGroup
           data-test-subj="grouping-table"
           justifyContent="spaceBetween"
           alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
+          css={() => ({
+            paddingBottom: 20,
+            paddingTop: 20,
+          })}
         >
           <EuiFlexItem grow={false}>
             {groupCount > 0 && unitCount > 0 ? (
@@ -309,7 +315,7 @@ const GroupingComponent = <T,>({
           emptyComponent
         )}
       </div>
-    </>
+    </div>
   );
 };
 
