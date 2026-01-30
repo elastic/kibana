@@ -312,8 +312,6 @@ describe('Assistant', () => {
         category: welcomeConvo.category,
         messages: welcomeConvo.messages,
         replacements: welcomeConvo.replacements,
-        createdBy: welcomeConvo.createdBy,
-        users: welcomeConvo.users,
         createdAt: welcomeConvo.createdAt,
         apiConfig: { ...welcomeConvo.apiConfig, connectorId: '' },
         isConversationOwner: true,
