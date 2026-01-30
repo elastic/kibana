@@ -10,3 +10,11 @@
 export const getApiKeyHeader = (apiKey?: string) => {
   return apiKey ? { Authorization: `ApiKey ${apiKey}` } : undefined;
 };
+
+export const getBasicAuthHeader = (username?: string, password?: string) => {
+  return username || password
+    ? {
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      }
+    : {};
+};

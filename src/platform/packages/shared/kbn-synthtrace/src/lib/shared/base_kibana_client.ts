@@ -12,6 +12,7 @@
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
+import { getBasicAuthHeader } from '../../cli/utils/get_auth_header';
 
 export type KibanaClientFetchOptions = RequestInit & { ignore?: number[]; timeout?: number };
 type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[]; timeout?: number };
@@ -48,23 +49,20 @@ export class KibanaClient {
   fetch(pathname: string, options: KibanaClientFetchOptionsWithIgnore) {
     const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
     const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
+    const { username, password } = url;
+    url.username = '';
+    url.password = '';
 
     // Extract credentials from URL and add them to headers (native fetch doesn't support credentials in URLs)
-    const authHeaders: Record<string, string> = {};
-    if (url.username || url.password) {
-      const credentials = `${url.username}:${url.password}`;
-      authHeaders.Authorization = `Basic ${Buffer.from(credentials).toString('base64')}`;
-      url.username = '';
-      url.password = '';
-    }
+    const authHeaders = getBasicAuthHeader(username, password);
 
     const { timeout, ...fetchOptions } = options;
     const normalizedUrl = normalizeUrl(url.toString());
     return fetch(normalizedUrl, {
       ...fetchOptions,
       headers: {
-        ...authHeaders,
         ...this.headers,
+        ...authHeaders,
         ...fetchOptions.headers,
       },
       dispatcher: getFetchAgent(normalizedUrl),
