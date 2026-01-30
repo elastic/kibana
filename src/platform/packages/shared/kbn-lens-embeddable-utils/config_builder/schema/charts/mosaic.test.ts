@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MosaicState, MosaicStateNoESQL } from './mosaic';
+import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './mosaic';
 import { mosaicStateSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
@@ -507,6 +507,58 @@ describe('Mosaic Schema', () => {
         );
       });
 
+      it('throws when no grouping dimension are defined', () => {
+        const input: MosaicState = {
+          ...baseMosaicConfig,
+          metrics: [
+            {
+              operation: 'count',
+              empty_as_null: true,
+            },
+          ],
+        };
+
+        expect(() => mosaicStateSchema.validate(input)).toThrow(
+          /Either a group_by or a group_breakdown_by dimension must be specified/i
+        );
+      });
+
+      it('allows only the group_breakdown_by definition without group_by', () => {
+        const input: MosaicState = {
+          ...baseMosaicConfig,
+          metrics: [
+            {
+              operation: 'count',
+              empty_as_null: true,
+            },
+          ],
+          group_breakdown_by: [
+            {
+              operation: 'date_histogram',
+              field: 'date_field',
+              collapse_by: 'sum',
+              suggested_interval: 'auto',
+              use_original_time_range: false,
+              include_empty_rows: true,
+            },
+            {
+              operation: 'histogram',
+              field: 'price_field',
+              granularity: 'auto',
+              include_empty_rows: false,
+              collapse_by: 'sum',
+            },
+            {
+              operation: 'terms',
+              size: 5,
+              fields: ['brand'],
+            },
+          ],
+        };
+
+        expect(() => mosaicStateSchema.validate(input)).not.toThrow();
+      });
+
       it('allows valid combination with both outer and inner having multiple collapsed dimensions', () => {
         const input: MosaicState = {
           ...baseMosaicConfig,
@@ -566,23 +618,68 @@ describe('Mosaic Schema', () => {
   });
 
   describe('ES|QL Schema', () => {
-    it('should throw if no grouping is defined', () => {
-      const input = {
-        ...baseMosaicConfig,
+    const baseESQLMosaicConfig: Pick<
+      MosaicStateESQL,
+      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+    > = {
+      type: 'mosaic',
+      dataset: {
+        type: 'esql',
+        query: 'FROM blah | KEEP foo, bar',
+      },
+      ignore_global_filters: false,
+      sampling: 0,
+    };
+
+    it('throws when no grouping dimension are defined', () => {
+      const input: MosaicState = {
+        ...baseESQLMosaicConfig,
         metrics: [
           {
             operation: 'value',
-            column: 'sales',
+            column: 'foo',
           },
         ],
       };
 
-      expect(() => mosaicStateSchema.validate(input)).toThrow();
+      expect(() => mosaicStateSchema.validate(input)).toThrow(
+        /Either a group_by or a group_breakdown_by dimension must be specified/i
+      );
+    });
+
+    it('allows only the group_breakdown_by definition without group_by', () => {
+      const input: MosaicState = {
+        ...baseESQLMosaicConfig,
+        metrics: [
+          {
+            operation: 'value',
+            column: 'foo',
+          },
+        ],
+        group_breakdown_by: [
+          {
+            operation: 'value',
+            column: 'bar',
+            collapse_by: 'sum',
+          },
+          {
+            operation: 'value',
+            column: 'bar',
+            collapse_by: 'sum',
+          },
+          {
+            operation: 'value',
+            column: 'bar',
+          },
+        ],
+      };
+
+      expect(() => mosaicStateSchema.validate(input)).not.toThrow();
     });
 
     it('should throw if multiple metrics are defined', () => {
       const input = {
-        ...baseMosaicConfig,
+        ...baseESQLMosaicConfig,
         metrics: [
           {
             operation: 'value',

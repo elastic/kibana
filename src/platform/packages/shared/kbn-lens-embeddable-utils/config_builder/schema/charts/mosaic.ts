@@ -19,7 +19,12 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
+import {
+  groupIsNotCollapsed,
+  legendNestedSchema,
+  legendVisibleSchema,
+  valueDisplaySchema,
+} from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
@@ -67,6 +72,28 @@ const partitionStateBreakdownByOptionsSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
+function validateMosaicGroupings({
+  group_by,
+  group_breakdown_by,
+}: {
+  group_by?: Array<{ collapse_by?: string }>;
+  group_breakdown_by?: Array<{ collapse_by?: string }>;
+}): string | void {
+  if (
+    (!group_by || group_by.length === 0) &&
+    (!group_breakdown_by || group_breakdown_by.length === 0)
+  ) {
+    return 'Either a group_by or a group_breakdown_by dimension must be specified';
+  }
+  if (group_by && group_by?.filter(groupIsNotCollapsed).length > 1) {
+    return 'Only a single non-collapsed dimension is allowed for group_by';
+  }
+  if (group_breakdown_by && group_breakdown_by?.filter(groupIsNotCollapsed).length > 1) {
+    return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
+  }
+  return;
+}
+
 export const mosaicStateSchemaNoESQL = schema.object(
   {
     type: schema.literal('mosaic'),
@@ -89,13 +116,15 @@ export const mosaicStateSchemaNoESQL = schema.object(
         meta: { description: 'Array of metric configurations (only 1 allowed)' },
       }
     ),
-    group_by: schema.arrayOf(
-      mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
-      {
-        minSize: 1,
-        maxSize: 100,
-        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
-      }
+    group_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
+      )
     ),
     /**
      * Unfortunately due to the collapsed feature, it is necessary to distinct between primary and secondary groups
@@ -119,24 +148,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
-    validate: ({
-      group_by,
-      group_breakdown_by,
-    }: {
-      group_by: Array<{ collapse_by?: string }>;
-      group_breakdown_by?: Array<{ collapse_by?: string }>;
-    }) => {
-      if (group_by.filter((def) => def.collapse_by == null).length > 1) {
-        return 'Only a single non-collapsed dimension is allowed for group_by';
-      }
-      if (
-        group_breakdown_by &&
-        group_breakdown_by.filter((def) => def.collapse_by == null).length > 1
-      ) {
-        return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
-      }
-      return;
-    },
+    validate: validateMosaicGroupings,
   }
 );
 
@@ -169,11 +181,13 @@ const mosaicStateSchemaESQL = schema.object(
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
-    group_by: schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
-      minSize: 1,
-      maxSize: 100,
-      meta: { description: 'Array of breakdown dimensions (minimum 1)' },
-    }),
+    group_by: schema.maybe(
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      })
+    ),
     group_breakdown_by: schema.maybe(
       schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
@@ -188,24 +202,7 @@ const mosaicStateSchemaESQL = schema.object(
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
-    validate: ({
-      group_by,
-      group_breakdown_by,
-    }: {
-      group_by?: Array<{ collapse_by?: string }>;
-      group_breakdown_by?: Array<{ collapse_by?: string }>;
-    }) => {
-      if (group_by && group_by?.filter((def) => def.collapse_by != null).length > 1) {
-        return 'Only a single non-collapsed dimension is allowed for group_by';
-      }
-      if (
-        group_breakdown_by &&
-        group_breakdown_by?.filter((def) => def.collapse_by != null).length > 1
-      ) {
-        return 'Only a single non-collapsed dimension is allowed for group_breakdown_by';
-      }
-      return;
-    },
+    validate: validateMosaicGroupings,
   }
 );
 

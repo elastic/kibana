@@ -55,6 +55,7 @@ import {
 } from '../coloring';
 import type { StaticColorType } from '../../schema/color';
 import type { CollapseBySchema } from '../../schema/shared';
+import { groupIsNotCollapsed } from '../../schema/charts/partition_shared';
 
 type PartitionLens = Extract<
   TypedLensSerializedState['attributes'],
@@ -280,8 +281,8 @@ function hasStaticColorAssignment<T extends PartitionState['metrics'][number]>(
 function shouldAllowMultipleMetrics(config: PartitionState): boolean {
   return (
     config.metrics.length > 1 ||
-    config.metrics.some(hasStaticColorAssignment) ||
-    (config.group_by?.filter(({ collapse_by }) => collapse_by == null).length ?? 0) > 1
+    (config.metrics.some(hasStaticColorAssignment) &&
+      (config.group_by?.filter(groupIsNotCollapsed).length ?? 0) > 1)
   );
 }
 
@@ -491,12 +492,17 @@ function fromLensStateToAPIMetrics(
   );
 }
 
+// Some integration SOs can have duplicates due to incorrect manual tweaks
+function getUniqueIds(array: string[]): string[] {
+  return Array.from(new Set(array));
+}
+
 // Helper function to overcome the failure of partition chart migrations (found in integration dataset)
 function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('groups' in vizLayer && Array.isArray(vizLayer.groups)) {
-    return vizLayer.groups;
+    return getUniqueIds(vizLayer.groups);
   }
-  return vizLayer.primaryGroups ?? [];
+  return getUniqueIds(vizLayer.primaryGroups ?? []);
 }
 
 // Helper function to overcome the failure of partition chart migrations (found in integration dataset)
@@ -504,7 +510,7 @@ function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): str
   if ('metric' in vizLayer && typeof vizLayer.metric === 'string') {
     return [vizLayer.metric];
   }
-  return vizLayer.metrics;
+  return getUniqueIds(vizLayer.metrics);
 }
 
 function convertLensStateToAPIGrouping(
@@ -567,7 +573,9 @@ function fromLensStateToAPISecondaryGroups(
   }
   const vizLayer = visualization.layers[0];
 
-  const groupByAccessors = vizLayer.secondaryGroups;
+  const groupByAccessors = vizLayer.secondaryGroups
+    ? getUniqueIds(vizLayer.secondaryGroups)
+    : undefined;
 
   return groupByAccessors?.length
     ? { group_breakdown_by: convertLensStateToAPIGrouping(vizLayer, layer, groupByAccessors, -1) }
