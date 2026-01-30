@@ -32,7 +32,7 @@ const yaml = require('js-yaml');
 const getopts = require('getopts');
 const { Client } = require('@elastic/elasticsearch');
 
-const REQUEST_TIMEOUT_MS = 30_000;
+const requestTimeoutMs = 30_000;
 const BASE_QUERY = {
   bool: {
     must: [
@@ -128,10 +128,7 @@ function parseConfig(log = () => {}) {
     opts['source-api-key']?.trim() || process.env.SOURCE_ELASTICSEARCH_API_KEY?.trim() || undefined;
   const rawTargetIndex =
     opts['target-index']?.trim() || process.env.SYNC_TARGET_INDEX?.trim() || undefined;
-  const targetIndex =
-    rawTargetIndex === undefined || rawTargetIndex === null
-      ? 'logs-generic-default'
-      : String(rawTargetIndex).trim() || null;
+  const targetIndex = rawTargetIndex ?? 'logs-generic-default';
   const randomSeed =
     opts['random-seed']?.trim() || process.env.SYNC_RANDOM_SEED?.trim() || undefined;
 
@@ -153,7 +150,7 @@ function parseConfig(log = () => {}) {
     size: parseInt(opts.size, 10),
     intervalSeconds: parseFloat(opts.interval),
     sampleMode: opts['sample-mode'],
-    randomSeed: randomSeed !== undefined && randomSeed !== '' ? parseInt(String(randomSeed), 10) : null,
+    randomSeed: randomSeed !== undefined && randomSeed !== '' ? parseInt(randomSeed, 10) : null,
     targetIndex,
     batchSize: parseInt(opts['batch-size'], 10),
     noVerifyCerts: opts['no-verify-certs'] ?? false,
@@ -191,7 +188,7 @@ function createSourceClient(config, log) {
   const client = new Client({
     node,
     auth: { apiKey: config.sourceApiKey },
-    requestTimeout: REQUEST_TIMEOUT_MS,
+    requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
   });
   return client;
@@ -202,7 +199,7 @@ function createDestClient(config, log) {
   const client = new Client({
     node,
     auth: { username: config.destUsername, password: config.destPassword },
-    requestTimeout: REQUEST_TIMEOUT_MS,
+    requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
   });
   return client;
@@ -264,7 +261,7 @@ function search(sourceClient, config, cycleNumber, log) {
     });
 }
 
-// This cleanup is needed in the scenario were multiple data streams are being synced to the same index.
+// This cleanup is needed in the scenario where multiple data streams are being synced to the same index.
 // As these fields are constant keywords in the data stream naming scheme, it would mean only documents
 // with the same data stream fields would be accepted.
 function stripDataStreamFields(doc) {
@@ -345,7 +342,7 @@ async function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, ba
           const create = item.create;
           if (create?.error) {
             log(
-              `Bulk create error [${create._index}] ${create._id}: ${create.error.reason ?? JSON.stringify(create.error)}`
+              `Bulk create error [${create._index}] (ES _id: ${create._id ?? 'auto-generated'}): ${create.error.reason ?? JSON.stringify(create.error)}`
             );
           } else if (create) {
             totalUploaded += 1;
