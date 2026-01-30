@@ -292,6 +292,10 @@
           "label": "Core Rendering Service"
         },
         {
+          "id": "kibDevDocsChromeLayout",
+          "label": "Chrome Layout"
+        },
+        {
           "id": "kibDevDocsChromeRecentlyAccessed",
           "label": "Recently Viewed"
         },

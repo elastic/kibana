@@ -16,6 +16,7 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  filestoreTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
