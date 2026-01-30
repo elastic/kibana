@@ -11,8 +11,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { DASHBOARD_AGENT_ID } from '@kbn/dashboard-agent-common';
 import { dashboardTools } from '../common';
 
-export { DASHBOARD_AGENT_ID };
-
 export function registerDashboardAgent(agentBuilder: AgentBuilderPluginSetup) {
   agentBuilder.agents.register({
     id: DASHBOARD_AGENT_ID,
