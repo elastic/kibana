@@ -243,8 +243,8 @@ export const DimensionsSelector = ({
         <EuiFlexItem>
           <EuiButtonEmpty size="xs" flush="left" onClick={handleClearAll}>
             <FormattedMessage
-              id="metricsExperience.dimensionsSelector.clearAll"
-              defaultMessage="Clear all"
+              id="metricsExperience.dimensionsSelector.clearSelection"
+              defaultMessage="Clear selection"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
