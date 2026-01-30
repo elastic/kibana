@@ -28,6 +28,7 @@ export interface LogDocument {
   'span.id'?: string;
   'http.response.status_code'?: number;
   'error.exception.message'?: string;
+  [key: string]: unknown;
 }
 
 export const getLogDocumentById = async ({
