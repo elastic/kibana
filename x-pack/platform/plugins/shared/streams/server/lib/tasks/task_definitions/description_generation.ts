@@ -76,6 +76,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: tokensUsed?.prompt ?? 0,
                   output_tokens_used: tokensUsed?.completion ?? 0,
+                  cached_tokens_used: tokensUsed?.cached ?? 0,
                 });
 
                 await taskClient.complete<

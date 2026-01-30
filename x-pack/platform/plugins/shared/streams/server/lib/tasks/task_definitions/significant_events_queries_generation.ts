@@ -106,12 +106,17 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 );
 
                 // Combine results from all parallel generations in a single pass
+                // Track cached tokens separately since the typed result only includes prompt/completion
+                let cachedTokensUsed = 0;
                 const combinedResults =
                   resultsArray.reduce<SignificantEventsQueriesGenerationResult>(
                     (acc, result) => {
                       acc.queries.push(...result.queries);
                       acc.tokensUsed.prompt += result.tokensUsed.prompt;
                       acc.tokensUsed.completion += result.tokensUsed.completion;
+                      // The underlying function returns full ChatCompletionTokenCount including cached
+                      cachedTokensUsed +=
+                        (result.tokensUsed as { cached?: number }).cached ?? 0;
                       return acc;
                     },
                     { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
@@ -124,6 +129,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: combinedResults.tokensUsed.prompt,
                   output_tokens_used: combinedResults.tokensUsed.completion,
+                  cached_tokens_used: cachedTokensUsed,
                 });
 
                 await taskClient.complete<

@@ -7,7 +7,7 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { BaseFeature } from '@kbn/streams-schema';
+import { getStreamTypeFromDefinition, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
@@ -70,7 +70,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { features: baseFeatures } = await identifyFeatures({
+                const { features: baseFeatures, tokensUsed } = await identifyFeatures({
                   start,
                   end,
                   esClient,
@@ -79,6 +79,15 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   stream,
                   signal: runContext.abortController.signal,
                   systemPrompt: featurePromptOverride,
+                });
+
+                taskContext.telemetry.trackFeaturesIdentified({
+                  count: baseFeatures.length,
+                  stream_name: stream.name,
+                  stream_type: getStreamTypeFromDefinition(stream),
+                  input_tokens_used: tokensUsed.prompt,
+                  output_tokens_used: tokensUsed.completion,
+                  cached_tokens_used: tokensUsed.cached ?? 0,
                 });
 
                 const now = Date.now();

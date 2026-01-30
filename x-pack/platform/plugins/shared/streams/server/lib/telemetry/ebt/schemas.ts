@@ -13,6 +13,7 @@ import type {
   StreamsSignificantEventsQueriesGeneratedProps,
   StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
+  StreamsFeaturesIdentifiedProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -88,6 +89,13 @@ const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdent
         description: 'The number of output tokens used for the generation request',
       },
     },
+    cached_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of cached tokens used for the generation request',
+        optional: true,
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -113,6 +121,13 @@ const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedP
     type: 'long',
     _meta: {
       description: 'The number of output tokens used for the generation request',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of cached tokens used for the generation request',
+      optional: true,
     },
   },
   stream_type: {
@@ -155,6 +170,13 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The number of output tokens used for the generation request',
       },
     },
+    cached_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of cached tokens used for the generation request',
+        optional: true,
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -191,6 +213,46 @@ const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> 
   },
 };
 
+const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
+  count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of features identified',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+  cached_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of cached tokens used for the generation request',
+      optional: true,
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -198,4 +260,5 @@ export {
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
   streamsInsightsGeneratedSchema,
+  streamsFeaturesIdentifiedSchema,
 };
