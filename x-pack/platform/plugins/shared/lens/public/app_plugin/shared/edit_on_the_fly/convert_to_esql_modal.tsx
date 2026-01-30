@@ -242,7 +242,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
-          defaultMessage: 'Once query mode is activated you cannot switch back to visual mode.',
+          defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
         })}
       />
 
