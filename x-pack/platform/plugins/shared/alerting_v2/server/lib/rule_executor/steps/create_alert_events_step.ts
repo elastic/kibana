@@ -8,35 +8,33 @@
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
 import { buildAlertEventsFromEsqlResponse } from '../build_alert_events';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { StateWithEsqlResponse, StateWithRule } from '../type_guards';
-import { hasRuleAndEsqlResponse } from '../type_guards';
+import { hasState, type StateWith } from '../type_guards';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'create_alert_events';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
-  ) {}
+  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   private isStepReady(
     state: Readonly<RulePipelineState>
-  ): state is StateWithRule & StateWithEsqlResponse {
-    return hasRuleAndEsqlResponse(state);
+  ): state is StateWith<'rule' | 'esqlResponse'> {
+    return hasState(state, ['rule', 'esqlResponse']);
   }
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
     const { input } = state;
 
+    this.logger.debug({
+      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+    });
+
     if (!this.isStepReady(state)) {
+      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
       return { type: 'halt', reason: 'state_not_ready' };
     }
 
@@ -51,17 +49,10 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
       ruleVersion: 1,
     });
 
-    const targetDataStream = ALERT_EVENTS_DATA_STREAM;
-
-    await this.storageService.bulkIndexDocs({
-      index: targetDataStream,
-      docs: alertEvents,
-    });
-
     this.logger.debug({
-      message: `alerting_v2:esql run: ruleId=${input.ruleId} spaceId=${input.spaceId} alertsDataStream=${targetDataStream}`,
+      message: `[${this.name}] Created ${alertEvents.length} alert events for rule ${input.ruleId}`,
     });
 
-    return { type: 'continue' };
+    return { type: 'continue', data: { alertEvents } };
   }
 }

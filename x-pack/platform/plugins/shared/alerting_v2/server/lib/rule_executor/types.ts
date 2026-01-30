@@ -27,7 +27,7 @@ export interface RulePipelineState {
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
   readonly esqlResponse?: EsqlQueryResponse;
-  readonly alertEvents?: Array<{ id: string; doc: AlertEvent }>;
+  readonly alertEvents?: AlertEvent[];
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

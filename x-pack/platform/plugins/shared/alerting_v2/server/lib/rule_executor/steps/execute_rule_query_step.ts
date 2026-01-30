@@ -14,8 +14,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
-import type { StateWithRule } from '../type_guards';
-import { hasRule } from '../type_guards';
+import { hasState, type StateWith } from '../type_guards';
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
@@ -26,14 +25,19 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  private isStepReady(state: Readonly<RulePipelineState>): state is StateWithRule {
-    return hasRule(state);
+  private isStepReady(state: Readonly<RulePipelineState>): state is StateWith<'rule'> {
+    return hasState(state, ['rule']);
   }
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
     const { input } = state;
 
+    this.logger.debug({
+      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+    });
+
     if (!this.isStepReady(state)) {
+      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
       return { type: 'halt', reason: 'state_not_ready' };
     }
 
@@ -47,7 +51,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     this.logger.debug({
       message: () =>
-        `build ES|QL query for rule ${input.ruleId} in space ${input.spaceId} - ${JSON.stringify({
+        `[${this.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
           query: rule.query,
           filter: queryPayload.filter,
           params: queryPayload.params,
@@ -70,6 +74,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
       throw error;
     }
+
+    const rowCount = Array.isArray(esqlResponse.values) ? esqlResponse.values.length : 0;
+    this.logger.debug({
+      message: `[${this.name}] Query returned ${rowCount} rows for rule ${input.ruleId}`,
+    });
 
     return { type: 'continue', data: { queryPayload, esqlResponse } };
   }

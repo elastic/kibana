@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
 
 describe('buildAlertEventsFromEsqlResponse', () => {
@@ -35,7 +35,7 @@ describe('buildAlertEventsFromEsqlResponse', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    const esqlResponse: ESQLSearchResponse = {
+    const esqlResponse: EsqlEsqlResult = {
       columns: [
         { name: 'host.name', type: 'keyword' },
         { name: 'region', type: 'keyword' },
@@ -57,12 +57,9 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     });
 
     expect(docs).toHaveLength(2);
-    expect(docs[0].id).toEqual(expect.any(String));
-    expect(docs[1].id).toEqual(expect.any(String));
-    expect(docs[0].id).not.toEqual(docs[1].id);
 
-    const doc1 = docs[0].doc;
-    const doc2 = docs[1].doc;
+    const doc1 = docs[0];
+    const doc2 = docs[1];
 
     expect(doc1['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
     expect(doc1.scheduled_timestamp).toBe('2024-12-31T23:59:00.000Z');

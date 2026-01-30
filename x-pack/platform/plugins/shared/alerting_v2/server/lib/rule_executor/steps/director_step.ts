@@ -14,8 +14,8 @@ import {
 import { DirectorService } from '../../director/director';
 
 @injectable()
-export class FetchRuleStep implements RuleExecutionStep {
-  public readonly name = 'fetch_rule';
+export class DirectorStep implements RuleExecutionStep {
+  public readonly name = 'director_step';
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
@@ -23,11 +23,24 @@ export class FetchRuleStep implements RuleExecutionStep {
   ) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
+    const { input, alertEvents = [] } = state;
+
+    this.logger.debug({
+      message: `[${this.name}] Starting step for rule ${input.ruleId} with ${alertEvents.length} alert events`,
+    });
+
     try {
-      await this.director.run();
+      await this.director.run({ ruleId: input.ruleId, alertEvents });
+
+      this.logger.debug({
+        message: `[${this.name}] Director completed for rule ${input.ruleId}`,
+      });
 
       return { type: 'continue' };
     } catch (error) {
+      this.logger.debug({
+        message: `[${this.name}] Director failed for rule ${input.ruleId}`,
+      });
       throw error;
     }
   }

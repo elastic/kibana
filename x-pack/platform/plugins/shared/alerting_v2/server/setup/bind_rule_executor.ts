@@ -19,6 +19,8 @@ import {
   CreateAlertEventsStep,
 } from '../lib/rule_executor/steps';
 import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
+import { DirectorStep } from '../lib/rule_executor/steps/director_step';
+import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events.ts';
 
 export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
   /**
@@ -44,6 +46,8 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(ValidateRuleStep).toSelf().inSingletonScope();
   bind(ExecuteRuleQueryStep).toSelf().inRequestScope();
   bind(CreateAlertEventsStep).toSelf().inSingletonScope();
+  bind(DirectorStep).toSelf().inSingletonScope();
+  bind(StoreAlertEventsStep).toSelf().inSingletonScope();
 
   /**
    * Bind steps array (order defines execution order)
@@ -58,6 +62,8 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
       get(ValidateRuleStep),
       get(ExecuteRuleQueryStep),
       get(CreateAlertEventsStep),
+      get(DirectorStep),
+      get(StoreAlertEventsStep),
     ])
     .inRequestScope();
 
