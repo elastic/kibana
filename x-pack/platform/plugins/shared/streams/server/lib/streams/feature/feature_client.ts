@@ -163,6 +163,53 @@ export class FeatureClient {
       })),
     });
   }
+
+  async getAllFeatures(filters?: {
+    streams?: string[];
+    type?: string[];
+  }): Promise<{ hits: FeatureWithStream[]; total: number }> {
+    const filterClauses: QueryDslQueryContainer[] = [
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+
+    if (filters?.streams?.length) {
+      filterClauses.push({
+        terms: { [STREAM_NAME]: filters.streams },
+      });
+    }
+
+    if (filters?.type?.length) {
+      filterClauses.push({
+        bool: {
+          should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    const featuresResponse = await this.clients.storageClient.search({
+      size: 10_000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+    });
+
+    return {
+      hits: featuresResponse.hits.hits.map((hit) => fromStorageWithStream(hit._source)),
+      total: featuresResponse.hits.total.value,
+    };
+  }
 }
 
 function toStorage(stream: string, feature: Feature): StoredFeature {
@@ -199,6 +246,17 @@ function fromStorage(feature: StoredFeature): Feature {
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     title: feature[FEATURE_TITLE],
+  };
+}
+
+export interface FeatureWithStream extends Feature {
+  stream_name: string;
+}
+
+function fromStorageWithStream(feature: StoredFeature): FeatureWithStream {
+  return {
+    ...fromStorage(feature),
+    stream_name: feature[STREAM_NAME],
   };
 }
 

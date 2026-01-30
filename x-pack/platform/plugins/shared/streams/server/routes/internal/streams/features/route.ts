@@ -11,7 +11,10 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
+import {
+  getFeatureId,
+  type FeatureWithStream,
+} from '../../../../lib/streams/feature/feature_client';
 import {
   type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
@@ -138,6 +141,52 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
+    });
+
+    return {
+      features,
+    };
+  },
+});
+
+export const listAllFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features across streams',
+    description: 'Fetches all features, optionally filtered by stream names',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      streamNames: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(z.string()).optional()
+        )
+        .describe('Stream names to filter features'),
+      type: z.string().optional().describe('Feature type to filter'),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ features: FeatureWithStream[] }> => {
+    const { featureClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { hits: features } = await featureClient.getAllFeatures({
+      streams: params.query.streamNames,
+      type: params.query.type ? [params.query.type] : [],
     });
 
     return {
@@ -334,6 +383,7 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
+  ...listAllFeaturesRoute,
   ...bulkFeaturesRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
