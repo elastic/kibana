@@ -41,7 +41,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
         label: 'Availability',
-        formula: "defaults(1 - (count(kql='summary.down > 0') / count()), 1)",
+        formula: "1- (count(kql='summary.down > 0') / count())",
         metricStateOptions: {
           colorMode: 'Labels',
           palette: {
