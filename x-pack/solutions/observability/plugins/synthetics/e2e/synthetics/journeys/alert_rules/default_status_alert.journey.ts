@@ -117,7 +117,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('verified that it generates an alert', async () => {
-    await page.click(byTestId('observability-nav-observability-overview-alerts'));
+    await page.click(byTestId('observability-nav-observability-alerts'));
 
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',

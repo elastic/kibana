@@ -113,7 +113,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
   });
 
   step('Verify alert creation', async () => {
-    await page.getByTestId('observability-nav-observability-overview-alerts').click();
+    await page.getByTestId('observability-nav-observability-alerts').click();
 
     await retry.tryForTime(5 * 1000, async () => {
       await page.getByTestId('querySubmitButton').click();

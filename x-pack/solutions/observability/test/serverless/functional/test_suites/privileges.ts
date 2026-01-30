@@ -60,11 +60,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Applications\nAll\nRead\nNone',
         'Agent Builder\nAll\nRead\nNone',
         'Synthetics\nAll\nRead\nNone',
-        'Observability Overview\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
+        'Observability Overview\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
       ]);
     });
