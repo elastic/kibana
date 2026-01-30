@@ -22,14 +22,11 @@ import type {
   BaseAuthenticationProvider,
 } from './providers';
 import {
-  AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
   HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,
   OIDCAuthenticationProvider,
-  PKIAuthenticationProvider,
   SAMLAuthenticationProvider,
-  TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -122,15 +119,15 @@ const providerMap = new Map<
   new (
     options: AuthenticationProviderOptions,
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
-  ) => BaseAuthenticationProvider
+  ) => BaseAuthenticationProvider<any>
 >([
   [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
   [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
   [SAMLAuthenticationProvider.type, SAMLAuthenticationProvider],
-  [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
-  [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
-  [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
-  [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
+  // [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
+  // [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
+  // [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
+  // [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
 ]);
 
 /**
@@ -439,7 +436,7 @@ export class Authenticator {
 
       let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSession.value!.state : null
+        ownsSession ? existingSession.value! : null
       );
 
       if (!authenticationResult.notHandled()) {

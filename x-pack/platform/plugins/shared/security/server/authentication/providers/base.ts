@@ -17,6 +17,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
@@ -58,18 +59,16 @@ export const ELASTIC_CLOUD_SSO_REALM_NAME = 'cloud-saml-kibana';
  * when accessed.
  */
 const USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE = new Set([
-  'username',
   'elastic_cloud_user',
   'authentication_realm',
   'lookup_realm',
   'authentication_type',
-  'roles',
 ]);
 
 /**
  * Base class that all authentication providers should extend.
  */
-export abstract class BaseAuthenticationProvider {
+export abstract class BaseAuthenticationProvider<TState = unknown> {
   /**
    * Type of the provider.
    */
@@ -85,12 +84,6 @@ export abstract class BaseAuthenticationProvider {
    * Logger instance bound to a specific provider context.
    */
   protected readonly logger: Logger;
-
-  /**
-   * A proxy for the user object returned in minimally authenticated mode. We cache proxy for each
-   * provider to avoid creating them for every request, as they are stateless and can be reused.
-   */
-  private minAuthenticationUserProxy?: AuthenticatedUser;
 
   /**
    * Instantiates AuthenticationProvider.
@@ -131,9 +124,12 @@ export abstract class BaseAuthenticationProvider {
    * Performs request authentication based on the session created during login or other information
    * associated with the request (e.g. `Authorization` HTTP header).
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  abstract authenticate(request: KibanaRequest, state?: unknown): Promise<AuthenticationResult>;
+  abstract authenticate(
+    request: KibanaRequest,
+    session: SessionValue<TState> | null
+  ): Promise<AuthenticationResult>;
 
   /**
    * Invalidates user session associated with the request.
@@ -154,14 +150,23 @@ export abstract class BaseAuthenticationProvider {
    * information of authenticated user.
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
+   * @param [session] Optional session object associated with the provider.
    */
-  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+  protected async getUser(
+    request: KibanaRequest,
+    authHeaders: Headers = {},
+    session?: SessionValue<TState>
+  ) {
     // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
     // return a static user proxy. The caveat here is that we don't validate credentials, but it
     // will be done by the Elasticsearch itself.
-    if (request.route.options.security?.authc?.enabled === 'minimal') {
+    if (
+      session &&
+      session.username &&
+      request.route.options.security?.authc?.enabled === 'minimal'
+    ) {
       this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
-      return this.getMinAuthenticationUserProxy();
+      return this.getMinAuthenticationUserProxy(session);
     }
 
     return this.authenticationInfoToAuthenticatedUser(
@@ -187,40 +192,35 @@ export abstract class BaseAuthenticationProvider {
     } as AuthenticatedUser);
   }
 
-  private getMinAuthenticationUserProxy() {
-    if (this.minAuthenticationUserProxy) {
-      return this.minAuthenticationUserProxy;
-    }
-
-    // We can retrieve `username` and `elastic_cloud_user` from the session, if there is a need in the future.
-    // As for `authentication_realm`, `lookup_realm`, `authentication_type` and `roles`, we're considering to
-    // remove them in the future to make the `AuthenticatedUser` interface lighter.
+  private getMinAuthenticationUserProxy(session: SessionValue) {
+    // We can retrieve only a portion of user properties from the session, and these are relatively safe to use without
+    // re-validation. However, `elastic_cloud_user`, `authentication_realm`, `lookup_realm`, `authentication_type`,
+    // and `roles` are not available in this mode, accessing them should throw an error. Currently, audit logs rely on
+    // `roles` property being present on the user object. We should probably refactor audit logs to avoid using `roles`
+    // property for minimally authenticated users and then remove this property altogether and throw for its access.
     const minUserStub: Partial<AuthenticatedUser> = {
       enabled: true,
-      authentication_provider: { type: this.type, name: this.options.name },
+      username: session.username,
+      authentication_provider: session.provider,
+      profile_uid: session.userProfileId,
+      // TODO: Currently audit logs rely on `roles` property being present on the user object.
+      // We should probably refactor audit logs to avoid using `roles` property for minimally
+      // authenticated users and then remove this property altogether and throw for its access.
+      roles: [],
     };
 
-    this.minAuthenticationUserProxy = deepFreeze(
+    return deepFreeze(
       new Proxy(minUserStub as AuthenticatedUser, {
         get: (target, prop, receiver) => {
           const value = Reflect.get(target, prop, receiver);
           if (USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE.has(prop.toString())) {
-            this.logger.warn(
-              `Property "${String(prop)}" is not available for minimally authenticated users: ${
-                new Error().stack
-              }`
+            throw new Error(
+              `Property "${String(prop)}" is not available for minimally authenticated users.`
             );
-
-            // throw new Error(
-            //   `Property "${String(prop)}" is not available for minimally authenticated users.`
-            // );
           }
-
           return value;
         },
       })
     );
-
-    return this.minAuthenticationUserProxy;
   }
 }
