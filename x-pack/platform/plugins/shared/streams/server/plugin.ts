@@ -47,6 +47,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
+import { StaleTasksCleanupTask } from './lib/tasks/stale_tasks_cleanup';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -74,6 +75,7 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private staleTasksCleanupTask?: StaleTasksCleanupTask;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -183,6 +185,13 @@ export class StreamsPlugin
       telemetry: telemetryClient,
     });
 
+    // Register stale tasks cleanup recurring task
+    this.staleTasksCleanupTask = new StaleTasksCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    });
+
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
       name: i18n.translate('xpack.streams.featureRegistry.streamsFeatureName', {
@@ -268,6 +277,13 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    // Schedule stale tasks cleanup recurring task
+    if (this.staleTasksCleanupTask) {
+      this.staleTasksCleanupTask.start({ taskManager: plugins.taskManager }).catch((error) => {
+        this.logger.error(`Failed to start stale tasks cleanup task: ${error.message}`);
+      });
+    }
 
     return {};
   }

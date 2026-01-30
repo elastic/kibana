@@ -268,6 +268,69 @@ export class TaskClient<TaskType extends string> {
   }
 
   /**
+   * Activity timestamps returned by listWithActivity.
+   */
+  public static getLastActivity(task: {
+    created_at: string;
+    last_completed_at?: string;
+    last_acknowledged_at?: string;
+    last_canceled_at?: string;
+    last_failed_at?: string;
+  }): Date {
+    const timestamps = [
+      task.created_at,
+      task.last_completed_at,
+      task.last_acknowledged_at,
+      task.last_canceled_at,
+      task.last_failed_at,
+    ]
+      .filter((ts): ts is string => ts !== undefined)
+      .map((ts) => new Date(ts).getTime());
+
+    return new Date(Math.max(...timestamps));
+  }
+
+  /**
+   * Lists all tasks from the task index with activity timestamps.
+   * Returns up to 10,000 tasks with id, created_at, and last activity timestamps.
+   * Use TaskClient.getLastActivity() to compute the most recent activity date.
+   */
+  public async listWithActivity(): Promise<
+    Array<{
+      id: string;
+      created_at: string;
+      last_completed_at?: string;
+      last_acknowledged_at?: string;
+      last_canceled_at?: string;
+      last_failed_at?: string;
+    }>
+  > {
+    this.logger.debug('Listing all tasks with activity');
+
+    const response = await this.storageClient.search({
+      query: { match_all: {} },
+      size: 10000,
+      track_total_hits: false,
+      _source: [
+        'created_at',
+        'last_completed_at',
+        'last_acknowledged_at',
+        'last_canceled_at',
+        'last_failed_at',
+      ],
+    });
+
+    return response.hits.hits.map((hit) => ({
+      id: hit._id!,
+      created_at: hit._source.created_at,
+      last_completed_at: hit._source.last_completed_at,
+      last_acknowledged_at: hit._source.last_acknowledged_at,
+      last_canceled_at: hit._source.last_canceled_at,
+      last_failed_at: hit._source.last_failed_at,
+    }));
+  }
+
+  /**
    * Deletes a single task by ID.
    * @throws TaskNotFoundError if the task does not exist
    */
