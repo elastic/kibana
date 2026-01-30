@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import type { Url } from 'url';
 import { format, parse } from 'url';
 import { readKibanaConfig } from './read_kibana_config';
@@ -19,9 +18,9 @@ import { getApiKeyHeader } from './get_api_key_header';
 async function getFetchStatus(url: string, apiKey?: string) {
   try {
     const response = await fetch(url, {
-      agent: getFetchAgent(url),
+      dispatcher: getFetchAgent(url),
       headers: getApiKeyHeader(apiKey),
-    });
+    } as RequestInit);
     return response.status;
   } catch (error) {
     return 0;
@@ -83,14 +82,22 @@ async function getKibanaUrl({
       };
     }
 
-    const targetAuth = parse(targetKibanaUrl).auth;
+    const url = new URL(targetKibanaUrl);
+    const authHeaders: Record<string, string> = {};
+    if (url.username || url.password) {
+      const credentials = `${url.username}:${url.password}`;
+      authHeaders.Authorization = `Basic ${Buffer.from(credentials).toString('base64')}`;
+      url.username = '';
+      url.password = '';
+    }
+    targetKibanaUrl = url.toString();
 
     const unredirectedResponse = await fetch(targetKibanaUrl, {
       method: 'HEAD',
-      follow: 1,
       redirect: 'manual',
-      agent: getFetchAgent(targetKibanaUrl),
-    });
+      headers: authHeaders,
+      dispatcher: getFetchAgent(targetKibanaUrl),
+    } as RequestInit);
 
     const discoveredKibanaUrl =
       unredirectedResponse.headers
@@ -98,28 +105,25 @@ async function getKibanaUrl({
         ?.replace('/spaces/enter', '')
         ?.replace('spaces/space_selector', '') || targetKibanaUrl;
 
-    const discoveredKibanaUrlWithAuth = format({
-      ...parse(discoveredKibanaUrl),
-      auth: targetAuth,
-    });
-
-    const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
+    const redirectedResponse = await fetch(discoveredKibanaUrl, {
       method: 'HEAD',
-      agent: getFetchAgent(discoveredKibanaUrlWithAuth),
-    });
+      headers: authHeaders,
+      dispatcher: getFetchAgent(discoveredKibanaUrl),
+    } as RequestInit);
 
     if (redirectedResponse.status !== 200) {
       throw new Error(
-        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}, got ${
+        `Expected HTTP 200 from ${stripAuthIfCi(discoveredKibanaUrl)}, got ${
           redirectedResponse.status
         }`
       );
     }
 
-    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrlWithAuth)}`);
+    logger.debug(`Discovered kibana running at: ${stripAuthIfCi(discoveredKibanaUrl)}`);
 
     return {
-      kibanaUrl: discoveredKibanaUrlWithAuth.replace(/\/$/, ''),
+      kibanaUrl: discoveredKibanaUrl.replace(/\/$/, ''),
+      kibanaHeaders: authHeaders,
     };
   } catch (error) {
     throw new Error(
