@@ -56,4 +56,5 @@ export const SCRIPT_LIBRARY_SORTABLE_FIELDS = Object.freeze([
   'createdBy',
   'updatedAt',
   'updatedBy',
+  'fileSize',
 ]);
