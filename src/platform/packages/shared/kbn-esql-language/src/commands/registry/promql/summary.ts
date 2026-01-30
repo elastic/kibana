@@ -9,7 +9,6 @@
 
 import type { ESQLCommandSummary } from '../..';
 import type { ESQLAstPromqlCommand, ESQLCommand } from '../../../types';
-import { Walker } from '../../../ast/walker';
 import { PromqlParamName } from './utils';
 import { isBinaryExpression, isIdentifier } from '../../../ast';
 
@@ -18,11 +17,8 @@ const hasParam = (command: ESQLAstPromqlCommand, paramName: PromqlParamName): bo
   if (!command.params) {
     return false;
   }
-  return Boolean(
-    Walker.match(command.params, {
-      type: 'identifier',
-      name: paramName,
-    })
+  return command.params.entries.some(
+    (param) => isIdentifier(param.key) && param.key.name === paramName
   );
 };
 
