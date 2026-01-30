@@ -4,8 +4,8 @@
   "owner": [
     "@elastic/security-threat-hunting-investigations"
   ],
-  "group": "platform",
-  "visibility": "shared",
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "timelines",
     "browser": true,
