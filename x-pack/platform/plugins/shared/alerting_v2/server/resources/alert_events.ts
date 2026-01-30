@@ -44,11 +44,12 @@ const mappings: estypes.MappingTypeMapping = {
     status: { type: 'keyword' }, // breached | recovered | no_data
     source: { type: 'keyword' },
     type: { type: 'keyword' }, // signal | alert
-
-    // Alert specific fields (not applicable for signal type)
-    episode_id: { type: 'keyword' },
-    episode_status: { type: 'keyword' }, // inactive | pending | active | recovering
-    episode_status_count: { type: 'long' }, // Only set for pending and recovering episode_status
+    episode: {
+      properties: {
+        id: { type: 'keyword' },
+        status: { type: 'keyword' }, // inactive | pending | active | recovering
+      },
+    },
   },
 };
 
@@ -72,11 +73,12 @@ export const alertEventSchema = z.object({
   status: alertEventStatusSchema,
   source: z.string(),
   type: alertEventTypeSchema,
-
-  // Alert specific fields (not applicable for signal type)
-  episode_id: z.string().optional(),
-  episode_status: episodeStatusSchema.optional(),
-  episode_status_count: z.number().optional(),
+  episode: z
+    .object({
+      id: z.string(),
+      status: episodeStatusSchema,
+    })
+    .optional(),
 });
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
