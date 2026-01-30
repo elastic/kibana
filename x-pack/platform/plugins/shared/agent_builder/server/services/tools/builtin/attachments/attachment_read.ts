@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -27,7 +28,8 @@ const attachmentReadSchema = z.object({
  */
 export const createAttachmentReadTool = ({
   attachmentManager,
-  getTypeDefinition,
+  attachmentsService,
+  formatContext,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
   id: platformCoreTools.attachmentRead,
   type: ToolType.builtin,
@@ -52,7 +54,49 @@ export const createAttachmentReadTool = ({
       };
     }
 
+    const versionData = version
+      ? attachmentManager.readVersion(attachmentId, version, ATTACHMENT_REF_ACTOR.agent)
+      : attachmentManager.readLatest(attachmentId, ATTACHMENT_REF_ACTOR.agent);
+
+    if (!versionData) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Version ${version} not found for attachment '${attachmentId}'`,
+            metadata: { attachment_id: attachmentId, version },
+          }),
+        ],
+      };
+    }
     const { data, type } = attachment;
+
+    let data = versionData.data;
+    if (attachmentsService && formatContext) {
+      const definition = attachmentsService.getTypeDefinition(attachment.type);
+      const typeReadonly = definition?.isReadonly ?? true;
+      const isReadonly = typeReadonly || attachment.readonly === true;
+      if (definition && isReadonly) {
+        try {
+          const formatted = await definition.format(
+            {
+              id: attachment.id,
+              type: attachment.type,
+              data: versionData.data,
+            },
+            formatContext
+          );
+          if (formatted.getRepresentation) {
+            const representation = await formatted.getRepresentation();
+            data =
+              representation.type === 'text'
+                ? representation.value
+                : JSON.stringify(representation);
+          }
+        } catch {
+          data = versionData.data;
+        }
+      }
+    }
 
     return {
       results: [

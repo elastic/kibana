@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentFormatContext,
+  AttachmentStateManager,
+} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 
 /**
  * Options for creating attachment tools with a specific state manager.
@@ -14,5 +17,8 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 export interface AttachmentToolsOptions {
   /** The attachment state manager to operate on */
   attachmentManager: AttachmentStateManager;
-  getTypeDefinition?: (type: string) => AttachmentTypeDefinition | undefined;
+  /** Attachment type definitions for formatting (optional) */
+  attachmentsService?: AttachmentsService;
+  /** Context used when formatting attachments */
+  formatContext?: AttachmentFormatContext;
 }

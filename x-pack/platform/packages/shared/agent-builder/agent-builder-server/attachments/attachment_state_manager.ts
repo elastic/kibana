@@ -13,6 +13,12 @@ import type {
   AttachmentDiff,
   VersionedAttachmentInput,
   AttachmentType,
+  AttachmentRefActor,
+  AttachmentRefOperation,
+} from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_OPERATION,
+  ATTACHMENT_REF_ACTOR,
 } from '@kbn/agent-builder-common/attachments';
 import {
   hashContent,
@@ -33,6 +39,8 @@ export interface AttachmentUpdateInput {
   description?: string;
   /** New hidden status */
   hidden?: boolean;
+  /** New readonly status */
+  readonly?: boolean;
 }
 
 /**
@@ -53,13 +61,15 @@ export interface ResolvedAttachmentRef {
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
-export type ResolvableAttachment = VersionedAttachment & { resolved?: unknown };
-
 export interface AttachmentStateManager {
   /** Get an attachment by ID. Optionally resolve by-reference data when context is provided. */
   get(
     id: string,
-    options: { context: AttachmentResolveContext; version?: number }
+    options: {
+      context: AttachmentResolveContext;
+      actor?: AttachmentRefActor;
+      version?: number;
+    }
   ): Promise<
     | {
         id: string;
@@ -80,18 +90,28 @@ export interface AttachmentStateManager {
 
   /** Add a new attachment */
   add<TType extends string>(
-    input: VersionedAttachmentInput<TType>
+    input: VersionedAttachmentInput<TType>,
+    actor?: AttachmentRefActor
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
-  update(id: string, input: AttachmentUpdateInput): Promise<VersionedAttachment | undefined>;
+  update(
+    id: string,
+    input: AttachmentUpdateInput,
+    actor?: AttachmentRefActor
+  ): Promise<VersionedAttachment | undefined>;
   /** Soft delete an attachment (sets active=false) */
-  delete(id: string): boolean;
+  delete(id: string, actor?: AttachmentRefActor): boolean;
   /** Restore a deleted attachment (sets active=true) */
-  restore(id: string): boolean;
+  restore(id: string, actor?: AttachmentRefActor): boolean;
   /** Permanently remove an attachment */
   permanentDelete(id: string): boolean;
   /** Update description without creating new version */
-  rename(id: string, description: string): boolean;
+  rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
+
+  /** Get all attachment version refs that were accessed during this round */
+  getAccessedRefs(): AttachmentVersionRef[];
+  /** Clear the accessed refs tracking (call at start of new round) */
+  clearAccessTracking(): void;
 
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
@@ -126,6 +146,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   private attachments: Map<string, VersionedAttachment>;
   private dirty: boolean = false;
   private readonly options: CreateAttachmentStateManagerOptions;
+  private accessedRefs: Map<string, AttachmentVersionRef> = new Map();
 
   constructor(
     initialAttachments: VersionedAttachment[] = [],
@@ -135,8 +156,17 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     this.attachments = new Map();
     this.options = options;
     for (const attachment of initialAttachments) {
-      this.attachments.set(attachment.id, structuredClone(attachment));
+      const next = structuredClone(attachment);
+      if (next.readonly === undefined) {
+        next.readonly = this.getDefaultReadonly(next.type);
+      }
+      this.attachments.set(next.id, next);
     }
+  }
+
+  private getDefaultReadonly(type: string): boolean {
+    const definition = this.options.getTypeDefinition(type);
+    return definition?.isReadonly ?? true;
   }
 
   private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
@@ -160,6 +190,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     id: string,
     options: {
       version?: number;
+      actor?: AttachmentRefActor;
       context: AttachmentResolveContext;
     }
   ) {
@@ -178,6 +209,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       context: options.context,
       version,
     });
+
+    if (options.actor) {
+      this.recordAccess(id, version, ATTACHMENT_REF_OPERATION.read, options.actor);
+    }
 
     return {
       id,
@@ -247,13 +282,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   }
 
   async add<TType extends string>(
-    input: VersionedAttachmentInput<TType>
+    input: VersionedAttachmentInput<TType>,
+    actor?: AttachmentRefActor
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
-
-    if (this.attachments.has(id)) {
-      throw new Error(`Attachment with ID "${id}" already exists`);
-    }
     const now = new Date().toISOString();
     const validatedData = await this.validateAttachmentData(input.type, input.data);
     const contentHash = hashContent(validatedData);
@@ -275,15 +307,21 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       active: true,
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
+      readonly: input.readonly ?? this.getDefaultReadonly(input.type),
     };
 
     this.attachments.set(id, attachment);
     this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.created, actor);
 
     return attachment as VersionedAttachment<TType>;
   }
 
-  async update(id: string, input: AttachmentUpdateInput): Promise<VersionedAttachment | undefined> {
+  async update(
+    id: string,
+    input: AttachmentUpdateInput,
+    actor?: AttachmentRefActor
+  ): Promise<VersionedAttachment | undefined> {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return undefined;
@@ -299,6 +337,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
     if (input.hidden !== undefined) {
       attachment.hidden = input.hidden;
+      this.dirty = true;
+    }
+    if (input.readonly !== undefined) {
+      attachment.readonly = input.readonly;
       this.dirty = true;
     }
 
@@ -327,10 +369,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       }
     }
 
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return attachment;
   }
 
-  delete(id: string): boolean {
+  delete(id: string, actor?: AttachmentRefActor): boolean {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return false;
@@ -346,10 +389,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.active = false;
     this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.deleted, actor);
     return true;
   }
 
-  restore(id: string): boolean {
+  restore(id: string, actor?: AttachmentRefActor): boolean {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return false;
@@ -361,6 +405,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.active = true;
     this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.restored, actor);
     return true;
   }
 
@@ -379,7 +424,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return true;
   }
 
-  rename(id: string, description: string): boolean {
+  rename(id: string, description: string, actor?: AttachmentRefActor): boolean {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return false;
@@ -387,7 +432,16 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
     attachment.description = description;
     this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;
+  }
+
+  getAccessedRefs(): AttachmentVersionRef[] {
+    return Array.from(this.accessedRefs.values());
+  }
+
+  clearAccessTracking(): void {
+    this.accessedRefs.clear();
   }
 
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[] {
@@ -459,6 +513,44 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   markClean(): void {
     this.dirty = false;
+  }
+
+  private recordAccess(
+    attachmentId: string,
+    version: number,
+    operation: AttachmentRefOperation,
+    actor: AttachmentRefActor = ATTACHMENT_REF_ACTOR.system
+  ): void {
+    const key = `${attachmentId}:${version}:${actor}`;
+    const existing = this.accessedRefs.get(key);
+    if (!existing) {
+      this.accessedRefs.set(key, { attachment_id: attachmentId, version, operation, actor });
+      return;
+    }
+
+    if (existing.operation === ATTACHMENT_REF_OPERATION.created) {
+      return;
+    }
+
+    if (operation === ATTACHMENT_REF_OPERATION.created) {
+      this.accessedRefs.set(key, { attachment_id: attachmentId, version, operation, actor });
+      return;
+    }
+
+    if (
+      existing.operation === ATTACHMENT_REF_OPERATION.read &&
+      operation !== ATTACHMENT_REF_OPERATION.read
+    ) {
+      this.accessedRefs.set(key, { attachment_id: attachmentId, version, operation, actor });
+      return;
+    }
+
+    if (
+      existing.operation === ATTACHMENT_REF_OPERATION.deleted &&
+      operation === ATTACHMENT_REF_OPERATION.restored
+    ) {
+      this.accessedRefs.set(key, { attachment_id: attachmentId, version, operation, actor });
+    }
   }
 }
 

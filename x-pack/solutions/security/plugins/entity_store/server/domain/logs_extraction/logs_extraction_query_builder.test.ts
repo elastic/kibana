@@ -16,7 +16,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
         entityDefinition: getEntityDefinition(type, 'default'),
-        maxPageSearchSize: 10000,
+        docsLimit: 10000,
         fromDateISO: '2022-01-01T00:00:00.000Z',
         toDateISO: '2022-01-01T23:59:59.999Z',
       });
