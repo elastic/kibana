@@ -120,6 +120,7 @@ export function getDiscoverStateContainer({
   const savedSearchContainer = getSavedSearchContainer({
     services,
     getCurrentTab,
+    runtimeStateManager,
   });
 
   const dataStateContainer = getDataStateContainer({
@@ -127,7 +128,6 @@ export function getDiscoverStateContainer({
     searchSessionManager,
     internalState,
     runtimeStateManager,
-    savedSearchContainer,
     injectCurrentTab,
     getCurrentTab,
   });

@@ -21,10 +21,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
-import {
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
 
@@ -71,35 +68,27 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+        const searchSource = tabRuntimeState.searchSource$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
-        let updatedTab: DiscoverSessionTab;
+        const updatedTab: DiscoverSessionTab = cloneDeep(
+          fromTabStateToSavedObjectTab({
+            tab,
+            searchSource,
+            overrideTimeRestore: newTimeRestore,
+            services,
+          })
+        );
 
-        if (tabStateContainer) {
-          updatedTab = cloneDeep({
-            ...fromSavedSearchToSavedObjectTab({
-              tab,
-              savedSearch: tabStateContainer.savedSearchState.getState(),
-              services,
-            }),
-            timeRestore: newTimeRestore,
-            timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
-            refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
-          });
-        } else {
-          updatedTab = cloneDeep(
-            fromTabStateToSavedObjectTab({
-              tab,
-              timeRestore: newTimeRestore,
-              services,
-            })
-          );
-          if (newTimeRestore && !updatedTab.timeRange && selectedTab?.globalState.timeRange) {
-            // assign the current time range of the selected tab if time restore is enabled and no time range was set yet for this tab
-            updatedTab.timeRange = selectedTab.globalState.timeRange;
-            updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
-          }
+        if (
+          !searchSource &&
+          newTimeRestore &&
+          !updatedTab.timeRange &&
+          selectedTab?.globalState.timeRange
+        ) {
+          // assign the current time range of the selected tab if time restore is enabled and no time range was set yet for this tab
+          updatedTab.timeRange = selectedTab.globalState.timeRange;
+          updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
         }
 
         if (newCopyOnSave) {

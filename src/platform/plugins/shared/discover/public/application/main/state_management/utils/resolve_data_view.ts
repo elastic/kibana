@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { InternalStateStore, RuntimeStateManager } from '../redux';
 
@@ -123,17 +123,17 @@ export async function loadDataView({
  */
 function resolveDataView({
   dataViewData,
-  savedSearch,
+  searchSource,
   toastNotifications,
   isEsqlMode,
 }: {
   dataViewData: DataViewData;
-  savedSearch: SavedSearch | undefined;
+  searchSource: ISearchSource | undefined;
   toastNotifications: ToastsStart;
   isEsqlMode?: boolean;
 }) {
   const { loadedDataView, requestedDataViewId, requestedDataViewFound } = dataViewData;
-  const ownDataView = savedSearch?.searchSource.getField('index');
+  const ownDataView = searchSource?.getField('index');
 
   if (ownDataView && !requestedDataViewId) {
     // the given saved search has its own data view, and no data view was specified in the URL
@@ -187,7 +187,7 @@ export const loadAndResolveDataView = async ({
   dataViewId,
   locationDataViewSpec,
   initialAdHocDataViewSpec,
-  savedSearch,
+  searchSource,
   isEsqlMode,
   internalState,
   runtimeStateManager,
@@ -196,7 +196,7 @@ export const loadAndResolveDataView = async ({
   dataViewId?: string;
   locationDataViewSpec?: DataViewSpec;
   initialAdHocDataViewSpec?: DataViewSpec;
-  savedSearch?: SavedSearch;
+  searchSource?: ISearchSource;
   isEsqlMode?: boolean;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
@@ -226,7 +226,7 @@ export const loadAndResolveDataView = async ({
     fallback = !dataViewData.requestedDataViewFound;
     dataView = resolveDataView({
       dataViewData,
-      savedSearch,
+      searchSource,
       toastNotifications,
       isEsqlMode,
     });

@@ -21,7 +21,7 @@ import { createCustomizationService } from './customization_service';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import type { DiscoverServices } from '../build_services';
 import {
-  fromSavedSearchToSavedObjectTab,
+  fromTabStateToSavedObjectTab,
   internalStateActions,
 } from '../application/main/state_management/redux';
 
@@ -52,9 +52,9 @@ export const getExtendedDiscoverStateContainer = (
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
     return getInitialAppState({
       initialUrlState: undefined,
-      persistedTab: fromSavedSearchToSavedObjectTab({
+      persistedTab: fromTabStateToSavedObjectTab({
         tab: stateContainer.getCurrentTab(),
-        savedSearch: newSavedSearch,
+        searchSource: newSavedSearch.searchSource,
         services,
       }),
       dataView: newSavedSearch.searchSource.getField('index'),

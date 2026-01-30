@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
@@ -68,59 +69,36 @@ export const fromSavedObjectTabToTabState = ({
       ...DEFAULT_TAB_STATE.attributes,
       visContext: tab.visContext,
       controlGroupJson: tab.controlGroupJson,
+      timeRestore: tab.timeRestore ?? false,
     },
   };
 };
 
-export const fromSavedObjectTabToSavedSearch = async ({
+export const fromSavedObjectTabToSearchSource = async ({
   tab,
-  discoverSession,
   services,
 }: {
-  discoverSession: DiscoverSession;
   tab: DiscoverSessionTab;
   services: DiscoverServices;
-}): Promise<SavedSearch> => ({
-  id: discoverSession.id,
-  title: discoverSession.title,
-  description: discoverSession.description,
-  tags: discoverSession.tags,
-  managed: discoverSession.managed,
-  references: discoverSession.references,
-  sharingSavedObjectProps: discoverSession.sharingSavedObjectProps,
-  sort: tab.sort,
-  columns: tab.columns,
-  grid: tab.grid,
-  hideChart: tab.hideChart,
-  isTextBasedQuery: tab.isTextBasedQuery,
-  usesAdHocDataView: tab.usesAdHocDataView,
-  searchSource: await services.data.search.searchSource.create(tab.serializedSearchSource),
-  viewMode: tab.viewMode,
-  hideAggregatedPreview: tab.hideAggregatedPreview,
-  rowHeight: tab.rowHeight,
-  headerRowHeight: tab.headerRowHeight,
-  timeRestore: tab.timeRestore,
-  timeRange: tab.timeRange,
-  refreshInterval: tab.refreshInterval,
-  rowsPerPage: tab.rowsPerPage,
-  sampleSize: tab.sampleSize,
-  breakdownField: tab.breakdownField,
-  chartInterval: tab.chartInterval,
-  density: tab.density,
-  visContext: undefined, // managed via Redux state now
-  controlGroupJson: undefined, // managed via Redux state now
-});
+}): Promise<ISearchSource> => {
+  return services.data.search.searchSource.create(tab.serializedSearchSource);
+};
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
-  timeRestore,
+  searchSource,
+  overrideTimeRestore,
   services,
 }: {
   tab: TabState;
-  timeRestore: boolean;
+  searchSource: SavedSearch['searchSource'] | undefined;
+  overrideTimeRestore?: boolean;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
+  const serializedSearchSource =
+    searchSource?.getSerializedFields() ?? tab.initialInternalState?.serializedSearchSource;
+  const timeRestore = overrideTimeRestore ?? tab.attributes.timeRestore ?? false;
 
   return {
     id: tab.id,
@@ -130,10 +108,10 @@ export const fromTabStateToSavedObjectTab = ({
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
     isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
-    usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
-    serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},
+    usesAdHocDataView: isObject(serializedSearchSource?.index),
+    serializedSearchSource: serializedSearchSource ?? {},
     viewMode: tab.appState.viewMode,
-    hideAggregatedPreview: tab.appState.hideAggregatedPreview,
+    hideAggregatedPreview: tab.appState.hideAggregatedPreview ?? false,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
     timeRestore,
@@ -144,53 +122,10 @@ export const fromTabStateToSavedObjectTab = ({
       tab.appState.sampleSize && tab.appState.sampleSize === allowedSampleSize
         ? tab.appState.sampleSize
         : undefined,
-    breakdownField: tab.appState.breakdownField,
-    chartInterval: tab.appState.interval,
+    breakdownField: tab.appState.breakdownField || '', // TODO: check saving Discover Session with undefined
+    chartInterval: tab.appState.interval || 'auto',
     density: tab.appState.density,
-    visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.attributes?.controlGroupJson,
-  };
-};
-
-export const fromSavedSearchToSavedObjectTab = ({
-  tab,
-  savedSearch,
-  services,
-}: {
-  tab: Pick<TabState, 'id' | 'label'> & {
-    attributes?: TabState['attributes'];
-  };
-  savedSearch: SavedSearch;
-  services: DiscoverServices;
-}): DiscoverSessionTab => {
-  const allowedSampleSize = getAllowedSampleSize(savedSearch.sampleSize, services.uiSettings);
-
-  return {
-    id: tab.id,
-    label: tab.label,
-    sort: savedSearch.sort ?? [],
-    columns: savedSearch.columns ?? [],
-    grid: savedSearch.grid ?? {},
-    hideChart: savedSearch.hideChart ?? false,
-    isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-    usesAdHocDataView: savedSearch.usesAdHocDataView,
-    serializedSearchSource: savedSearch.searchSource.getSerializedFields() ?? {},
-    viewMode: savedSearch.viewMode,
-    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-    rowHeight: savedSearch.rowHeight,
-    headerRowHeight: savedSearch.headerRowHeight,
-    timeRestore: savedSearch.timeRestore,
-    timeRange: savedSearch.timeRange,
-    refreshInterval: savedSearch.refreshInterval,
-    rowsPerPage: savedSearch.rowsPerPage,
-    sampleSize:
-      savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
-        ? savedSearch.sampleSize
-        : undefined,
-    breakdownField: savedSearch.breakdownField,
-    chartInterval: savedSearch.chartInterval,
-    density: savedSearch.density,
-    visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.attributes?.controlGroupJson,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupJson,
   };
 };

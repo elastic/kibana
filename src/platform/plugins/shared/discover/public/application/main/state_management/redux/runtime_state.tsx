@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
@@ -33,6 +34,7 @@ export interface UnifiedHistogramConfig {
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
+  searchSource?: ISearchSource;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
@@ -97,6 +99,7 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    searchSource$: new BehaviorSubject<ISearchSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
@@ -121,16 +124,16 @@ export const selectTabRuntimeInternalState = (
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
-  const savedSearch = stateContainer?.savedSearchState.getState();
+  const searchSource = tabRuntimeState?.searchSource$.getValue();
 
-  if (!stateContainer || !savedSearch) {
+  if (!searchSource || !stateContainer) {
     return undefined;
   }
 
   const { dataRequestParams } = selectTab(stateContainer.internalState.getState(), tabId);
 
   return {
-    serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+    serializedSearchSource: searchSource.getSerializedFields(),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

@@ -41,7 +41,6 @@ import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -153,7 +152,6 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
-  savedSearchContainer,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -161,7 +159,6 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  savedSearchContainer: DiscoverSavedSearchContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -224,7 +221,8 @@ export function getDataStateContainer({
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
   // Make sure to clean up the ES|QL state when the saved search changes
-  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+  tabRuntimeState.searchSource$.subscribe(cleanupEsql);
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -266,7 +264,7 @@ export function getDataStateContainer({
           }
 
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
-          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$, searchSource$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
@@ -289,7 +287,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            savedSearch: savedSearchContainer.getState(),
+            searchSource: searchSource$.getValue()!,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,

@@ -10,11 +10,12 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { updateSavedSearch } from './utils/update_saved_search';
+import { updateSearchSource } from './utils/update_search_source';
 import { addLog } from '../../../utils/add_log';
-import type { DiscoverAppState } from './redux';
+import type { DiscoverAppState, RuntimeStateManager } from './redux';
 import type { DiscoverServices } from '../../../build_services';
 import type { TabState } from './redux';
+import { selectTabRuntimeState } from './redux';
 
 export interface UpdateParams {
   /**
@@ -77,9 +78,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   getCurrentTab,
+  runtimeStateManager,
 }: {
   services: DiscoverServices;
   getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -106,8 +109,8 @@ export function getSavedSearchContainer({
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
 
-    const nextSavedSearch = updateSavedSearch({
-      savedSearch: { ...previousSavedSearch },
+    updateSearchSource({
+      searchSource: previousSavedSearch.searchSource,
       dataView,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
@@ -115,10 +118,23 @@ export function getSavedSearchContainer({
       useFilterAndQueryServices,
     });
 
-    assignNextSavedSearch({ nextSavedSearch });
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+    const tabSearchSource = tabRuntimeState.searchSource$.getValue();
+    if (tabSearchSource) {
+      updateSearchSource({
+        searchSource: tabSearchSource,
+        dataView,
+        appState: nextState || {},
+        globalState: getCurrentTab().globalState,
+        services,
+        useFilterAndQueryServices,
+      });
+    }
 
-    addLog('[savedSearch] update done', nextSavedSearch);
-    return nextSavedSearch;
+    assignNextSavedSearch({ nextSavedSearch: previousSavedSearch });
+
+    addLog('[savedSearch] update done', previousSavedSearch);
+    return previousSavedSearch;
   };
 
   const updateTimeRange = () => {

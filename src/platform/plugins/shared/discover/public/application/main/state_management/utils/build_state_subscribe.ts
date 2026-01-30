@@ -52,7 +52,7 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const savedSearch = savedSearchState.getState();
+    const savedSearch = savedSearchState.getState(); // TODO: refactor!!!
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
 
@@ -101,7 +101,7 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        savedSearch,
+        searchSource: savedSearch.searchSource, // TODO: refactor
         isEsqlMode,
         internalState,
         runtimeStateManager,
