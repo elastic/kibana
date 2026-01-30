@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { NewPackagePolicy, CloudProvider } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy, CloudProvider, AccountType } from '@kbn/fleet-plugin/public';
 import { AWSReusableConnectorForm } from '../aws_cloud_connector/aws_reusable_connector_form';
 import { AzureReusableConnectorForm } from '../azure_cloud_connector/azure_reusable_connector_form';
 import type { CloudConnectorCredentials } from '../types';
@@ -18,7 +18,8 @@ export const ReusableCloudConnectorForm: React.FC<{
   newPolicy: NewPackagePolicy;
   cloudProvider?: CloudProvider;
   isEditPage: boolean;
-}> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage }) => {
+  accountType?: AccountType;
+}> = ({ credentials, setCredentials, cloudProvider, newPolicy, isEditPage, accountType }) => {
   const provider = cloudProvider || AWS_PROVIDER;
 
   switch (provider) {
@@ -29,6 +30,7 @@ export const ReusableCloudConnectorForm: React.FC<{
           credentials={credentials}
           cloudConnectorId={newPolicy.cloud_connector_id || undefined}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case AZURE_PROVIDER:
@@ -38,6 +40,7 @@ export const ReusableCloudConnectorForm: React.FC<{
           credentials={credentials}
           cloudConnectorId={newPolicy.cloud_connector_id || undefined}
           setCredentials={setCredentials}
+          accountType={accountType}
         />
       );
     case 'gcp':

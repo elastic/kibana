@@ -357,7 +357,7 @@ describe('UnifiedDataTable', () => {
         // wait for async copy action to avoid act warning
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '"\'@timestamp"\t"_index"\t"_score"\tbytes\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+          '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
         );
       },
       EXTENDED_JEST_TIMEOUT
@@ -393,7 +393,7 @@ describe('UnifiedDataTable', () => {
         // wait for async copy action to avoid act warning
         await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          `| @timestamp | _index | _score | bytes | date | extension | message | name |
+          `| @timestamp | _index | _score | bytesDisplayName | date | extension | message | name |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | - | i | 1 | - | 2020-20-01T12:12:12.124 | jpg | - | test2 |
 | - | i | 1 | 50 | 2020-20-01T12:12:12.124 | gif | - | test3 |`
@@ -1266,10 +1266,9 @@ describe('UnifiedDataTable', () => {
     it(
       'should render selected fields',
       async () => {
-        const columns = ['bytes', 'message'];
-        await renderDataTable({ enableComparisonMode: true, columns });
+        await renderDataTable({ enableComparisonMode: true, columns: ['bytes', 'message'] });
         await goToComparisonMode();
-        expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+        expect(getFieldColumns()).toEqual(['@timestamp', 'bytesDisplayName', 'message']);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1282,7 +1281,7 @@ describe('UnifiedDataTable', () => {
         expect(getFieldColumns()).toEqual([
           '@timestamp',
           '_index',
-          'bytes',
+          'bytesDisplayName',
           'extension',
           'message',
         ]);

@@ -8,10 +8,8 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
-import { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 
 import { getInstallation, getInstallationObject } from '../../packages';
 import type { Installation } from '../../../../types';
@@ -38,10 +36,7 @@ describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
-  const authorizationHeader = new HTTPAuthorizationHeader(
-    'Basic',
-    'bW9uaXRvcmluZ191c2VyOm1scWFfYWRtaW4='
-  );
+  const mockRequest = httpServerMock.createKibanaRequest();
   const getYamlTestData = (
     autoStart: boolean | undefined = undefined,
     transformVersion: string = '0.1.0'
@@ -1140,7 +1135,7 @@ _meta:
       savedObjectsClient,
       logger: loggerMock.create(),
       esReferences: previousInstallation.installed_es,
-      authorizationHeader,
+      request: mockRequest,
     });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([

@@ -11,7 +11,6 @@ import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
   isSource,
-  mutate,
   synth,
   TRANSFORMATIONAL_COMMANDS,
   Walker,
@@ -22,11 +21,12 @@ import {
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstQueryExpression } from '../types';
+import type { ESQLAstJoinCommand } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
+import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -43,13 +43,9 @@ async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
 
 function createGetJoinFields(fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>) {
   return (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
-    const joinSummary = mutate.commands.join.summarize({
-      type: 'query',
-      commands: [command],
-    } as ESQLAstQueryExpression);
-    const joinIndices = joinSummary.map(({ target: { index } }) => index);
-    if (joinIndices.length > 0) {
-      const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
+    const joinTarget = getLookupJoinSource(command as ESQLAstJoinCommand);
+    if (joinTarget) {
+      const joinFieldQuery = synth.cmd`FROM ${joinTarget}`.toString();
       return fetchFields(joinFieldQuery);
     }
     return Promise.resolve([]);

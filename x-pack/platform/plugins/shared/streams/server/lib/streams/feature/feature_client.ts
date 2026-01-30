@@ -20,6 +20,7 @@ import {
   FEATURE_DESCRIPTION,
   FEATURE_TYPE,
   FEATURE_NAME,
+  FEATURE_TITLE,
   FEATURE_VALUE,
   FEATURE_TAGS,
   FEATURE_META,
@@ -179,6 +180,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
+    [FEATURE_TITLE]: feature.title,
   };
 }
 
@@ -196,6 +198,7 @@ function fromStorage(feature: StoredFeature): Feature {
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
+    title: feature[FEATURE_TITLE],
   };
 }
 

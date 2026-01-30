@@ -21,7 +21,8 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlsRenderer, type PublishesControlsLayout } from '@kbn/controls-renderer';
+import { ControlsRenderer } from '@kbn/controls-renderer';
+import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -33,9 +34,9 @@ import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/publ
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { BehaviorSubject } from 'rxjs';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -59,8 +60,6 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { arePinnedPanelLayoutsEqual } from '../dashboard_api/layout_manager/are_layouts_equal';
-import type { DashboardLayout } from '../dashboard_api/layout_manager';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -370,41 +369,27 @@ export function InternalDashboardTopNav({
     []
   );
 
-  /**
-   * `ControlsRenderer` expects `controls` rather than `pinnedPanels` when rendering its layout; so,
-   * we should map this to the expected key and keep them in sync
-   */
-  const dashboardWithControlsApi = useMemo(() => {
-    const controlLayout: PublishesControlsLayout['layout$'] = new BehaviorSubject({
-      controls: dashboardApi.layout$.getValue().pinnedPanels, // only controls can be pinned at the moment, so no need to filter
-    });
-    return { ...dashboardApi, layout$: controlLayout };
-  }, [dashboardApi]);
+  const onControlsLayoutChanged = useCallback(
+    ({ controls }: ControlsLayout) => {
+      dashboardApi.layout$.next({
+        ...dashboardApi.layout$.getValue(),
+        pinnedPanels: controls,
+      });
+    },
+    [dashboardApi.layout$]
+  );
 
+  const [controls, setControls] = useState<{ controls: DashboardLayout['pinnedPanels'] }>({
+    controls: dashboardApi.layout$.getValue().pinnedPanels,
+  });
   useEffect(() => {
-    const syncControlsWithPinnedPanels = dashboardWithControlsApi.layout$.subscribe(
-      ({ controls }) => {
-        const currentLayout = dashboardApi.layout$.getValue();
-        if (
-          !arePinnedPanelLayoutsEqual({ pinnedPanels: controls } as DashboardLayout, currentLayout)
-        ) {
-          dashboardApi.layout$.next({ ...currentLayout, pinnedPanels: controls });
-        }
-      }
-    );
-    const syncPinnedPanelsWithControls = dashboardApi.layout$.subscribe((layout) => {
-      const { controls: currentControls } = dashboardWithControlsApi.layout$.getValue();
-      if (!deepEqual(currentControls, layout.pinnedPanels)) {
-        dashboardWithControlsApi.layout$.next({
-          controls: layout.pinnedPanels,
-        });
-      }
+    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
+      setControls({ controls: pinnedPanels });
     });
     return () => {
-      syncControlsWithPinnedPanels.unsubscribe();
-      syncPinnedPanelsWithControls.unsubscribe();
+      controlLayoutChangedSubscription.unsubscribe();
     };
-  }, [dashboardWithControlsApi, dashboardApi.layout$]);
+  }, [dashboardApi.layout$]);
 
   return (
     <div css={styles.container}>
@@ -456,7 +441,13 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? <ControlsRenderer parentApi={dashboardWithControlsApi} /> : null}
+      {viewMode !== 'print' ? (
+        <ControlsRenderer
+          parentApi={dashboardApi}
+          controls={controls} // only controls can currently be pinned
+          onControlsChanged={onControlsLayoutChanged}
+        />
+      ) : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

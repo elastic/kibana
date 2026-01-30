@@ -46,7 +46,7 @@ import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -229,6 +229,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Request statistics to be displayed in the ES|QL editor UI
+   */
+  esqlQueryStats?: ESQLQueryStats;
   /**
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab
    */
@@ -935,11 +939,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderTextLangEditor() {
-      const adHocDataview = props.indexPatterns?.[0];
-      let detectedTimestamp;
-      if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectedTimestamp = adHocDataview?.timeFieldName;
-      }
       return (
         isQueryLangSelected &&
         props.query &&
@@ -949,7 +948,6 @@ export const QueryBarTopRow = React.memo(
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectedTimestamp={detectedTimestamp}
             expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({
@@ -974,6 +972,7 @@ export const QueryBarTopRow = React.memo(
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
+            queryStats={props.esqlQueryStats}
             openVisorOnSourceCommands
           />
         )

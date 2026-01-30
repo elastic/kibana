@@ -18,6 +18,7 @@ import type {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
@@ -59,6 +60,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  PublishesProjectRoutingOverrides &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

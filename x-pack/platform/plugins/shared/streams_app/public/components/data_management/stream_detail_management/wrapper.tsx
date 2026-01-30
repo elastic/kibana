@@ -16,6 +16,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { FeedbackButton } from '../../feedback_button';
 import {
@@ -48,6 +49,7 @@ export function Wrapper({
   const { definition } = useStreamDetail();
   const { services } = useKibana();
   const { getStepPropsByStepId } = useStreamsTour();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const lastTrackedRef = useRef<string | null>(null);
 
@@ -82,6 +84,7 @@ export function Wrapper({
         {
           href: router.link('/{key}/management/{tab}', {
             path: { key: streamId, tab: tabName },
+            query: { rangeFrom, rangeTo },
           }),
           label: currentTab.label,
           content: currentTab.content,
@@ -134,17 +137,11 @@ export function Wrapper({
             justifyContent="spaceBetween"
             wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
               {streamId}
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton
-                        definition={definition}
-                        isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
-                      />
-                    )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
@@ -163,7 +160,22 @@ export function Wrapper({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexGroup>
-            <FeedbackButton />
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {Streams.ingest.all.GetResponse.is(definition) && (
+                    <DiscoverBadgeButton
+                      definition={definition}
+                      isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
+                      spellOut
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FeedbackButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {

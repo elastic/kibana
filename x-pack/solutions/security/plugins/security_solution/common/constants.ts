@@ -12,8 +12,9 @@ import * as i18n from './translations';
 
 export {
   SecurityPageName,
-  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
 } from '@kbn/security-solution-navigation';
+
 /**
  * as const
  *

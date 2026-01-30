@@ -15,13 +15,12 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
-import { act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
-import { screen } from '@testing-library/react';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
 jest.mock('@kbn/monaco', () => ({
@@ -117,34 +116,6 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
   });
 
-  it('should  render the date info with no @timestamp found', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
-  });
-
-  it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
-    const newProps = {
-      ...props,
-      hideTimeFilterInfo: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).not.toBeInTheDocument();
-  });
-
-  it('should render the date info with @timestamp found if detectedTimestamp is given', async () => {
-    const newProps = {
-      ...props,
-      detectedTimestamp: '@timestamp',
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp found');
-  });
-
-  it('should  render the limit information', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-limit-info')).toHaveTextContent('LIMIT 1000 rows');
-  });
-
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
     const newProps = {
       ...props,
@@ -170,7 +141,6 @@ describe('ESQLEditor', () => {
   it('should render the footer for the expanded code editor mode', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
-    expect(queryByTestId('ESQLEditor-footer-lines')).toHaveTextContent('1 line');
   });
 
   it('should render the run query text', async () => {

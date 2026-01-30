@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
@@ -28,9 +28,9 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
       },
     });
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeTruthy();
-    expect(adminStatus.has_data).toBeTruthy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
+    expect(adminStatus.has_setup).toBe(true);
+    expect(adminStatus.has_data).toBe(true);
+    expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
   apiTest('Viewer user', async ({ apiClient }) => {
@@ -43,9 +43,9 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
     });
 
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeTruthy();
-    expect(readStatus.has_data).toBeTruthy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
+    expect(readStatus.has_setup).toBe(true);
+    expect(readStatus.has_data).toBe(true);
+    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.has_required_role).toBe(false);
   });
 });

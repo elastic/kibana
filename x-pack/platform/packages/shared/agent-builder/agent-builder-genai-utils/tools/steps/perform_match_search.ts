@@ -51,6 +51,10 @@ export const performMatchSearch = async ({
     },
     highlight: {
       number_of_fragments: 5,
+      fragment_size: 500,
+      pre_tags: [''],
+      post_tags: [''],
+      order: 'score',
       fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
     },
   };

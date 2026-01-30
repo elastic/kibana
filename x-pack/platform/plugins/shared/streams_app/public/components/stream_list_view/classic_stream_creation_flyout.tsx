@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 interface ClassicStreamCreationFlyoutProps {
   onClose: () => void;
@@ -37,6 +38,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
   } = useKibana();
 
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
   const isIlmAvailable = !!indexLifecycleManagement?.apiService;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
@@ -108,7 +110,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         router.push('/{key}/management/{tab}', {
           path: { key: streamName, tab: 'retention' },
-          query: {},
+          query: { rangeFrom, rangeTo },
         });
 
         onClose();
@@ -124,7 +126,15 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
       }
     },
-    [streamsRepositoryClient, signal, core.notifications.toasts, router, onClose]
+    [
+      streamsRepositoryClient,
+      signal,
+      core.notifications.toasts,
+      router,
+      onClose,
+      rangeFrom,
+      rangeTo,
+    ]
   );
 
   const handleValidate = useCallback(

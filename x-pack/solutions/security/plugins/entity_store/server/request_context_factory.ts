@@ -43,6 +43,12 @@ export async function createRequestHandlerContext({
     request
   );
 
+  const engineDescriptorClient = new EngineDescriptorClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
+
   return {
     core,
     logger,
@@ -50,11 +56,7 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,
-      engineDescriptorClient: new EngineDescriptorClient(
-        core.savedObjects.client,
-        namespace,
-        logger
-      ),
+      engineDescriptorClient,
       namespace,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
@@ -62,7 +64,8 @@ export async function createRequestHandlerContext({
       logger,
       namespace,
       core.elasticsearch.client.asCurrentUser,
-      dataViewsService
+      dataViewsService,
+      engineDescriptorClient
     ),
   };
 }

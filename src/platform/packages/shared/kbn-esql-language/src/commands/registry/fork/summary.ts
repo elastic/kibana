@@ -9,7 +9,7 @@
 
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLCommand, ESQLAstForkCommand } from '../../../types';
-import type { ESQLCommandSummary } from '../types';
+import type { ESQLCommandSummary, FieldSummary } from '../types';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const forkCommand = command as ESQLAstForkCommand;
@@ -18,6 +18,8 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const allNewColumns = new Set<string>(['_fork']); // FORK always adds _fork column
   const allRenamedColumnsPairs = new Set<[string, string]>();
   const allMetadataColumns = new Set<string>();
+  const allAggregates = new Set<FieldSummary>();
+  const allGroupings = new Set<FieldSummary>();
 
   for (const branch of branches) {
     for (const branchCommand of branch.commands) {
@@ -37,6 +39,14 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
         if (branchSummary.metadataColumns) {
           branchSummary.metadataColumns.forEach((col) => allMetadataColumns.add(col));
         }
+
+        if (branchSummary.aggregates) {
+          branchSummary.aggregates.forEach((aggregate) => allAggregates.add(aggregate));
+        }
+
+        if (branchSummary.grouping) {
+          branchSummary.grouping.forEach((group) => allGroupings.add(group));
+        }
       }
     }
   }
@@ -45,5 +55,7 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
     newColumns: allNewColumns,
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,
+    aggregates: allAggregates,
+    grouping: allGroupings,
   };
 };

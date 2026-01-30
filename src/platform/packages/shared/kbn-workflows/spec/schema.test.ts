@@ -182,7 +182,6 @@ describe('ConcurrencySettingsSchema', () => {
 
   describe('strategy', () => {
     it('should accept valid strategy values', () => {
-      // 'cancel-in-progress' and 'drop' are implemented; 'queue' is TBD
       const strategies = ['cancel-in-progress', 'drop'] as const;
       strategies.forEach((strategy) => {
         const result = ConcurrencySettingsSchema.safeParse({
@@ -331,7 +330,6 @@ describe('WorkflowSettingsSchema', () => {
 
   describe('CollisionStrategySchema', () => {
     it('should accept all valid strategy values', () => {
-      // 'cancel-in-progress' and 'drop' are implemented; 'queue' is TBD
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);
       expect(CollisionStrategySchema.safeParse('drop').success).toBe(true);
       expect(CollisionStrategySchema.safeParse('queue').success).toBe(false);
@@ -345,7 +343,7 @@ describe('WorkflowSettingsSchema', () => {
 
     it('should export CollisionStrategy type that matches valid values', () => {
       // Verify the type can be used and matches the schema values
-      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop']; // 'queue' TBD
+      const validStrategies: CollisionStrategy[] = ['cancel-in-progress', 'drop'];
       validStrategies.forEach((strategy) => {
         const result = CollisionStrategySchema.safeParse(strategy);
         expect(result.success).toBe(true);

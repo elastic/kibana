@@ -42,6 +42,7 @@ export const useChartLayers = ({
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const metricField = createMetricAggregation({
+      type: metric.type,
       instrument: metric.instrument,
       metricName: metric.name,
       customFunction,
@@ -72,5 +73,14 @@ export const useChartLayers = ({
           : undefined,
       },
     ];
-  }, [color, customFunction, dimensions, metric.instrument, metric.name, metric.unit, seriesType]);
+  }, [
+    color,
+    customFunction,
+    dimensions,
+    metric.type,
+    metric.instrument,
+    metric.name,
+    metric.unit,
+    seriesType,
+  ]);
 };

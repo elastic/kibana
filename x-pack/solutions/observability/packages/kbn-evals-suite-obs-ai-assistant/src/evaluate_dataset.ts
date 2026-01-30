@@ -10,9 +10,9 @@ import {
   createQuantitativeGroundednessEvaluator,
   type DefaultEvaluators,
   type EvaluationDataset,
-  type KibanaPhoenixClient,
+  type EvalsExecutorClient,
+  type Example,
 } from '@kbn/evals';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ChatClient } from './clients/chat';
 
@@ -42,7 +42,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
   chatClient,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  phoenixClient: EvalsExecutorClient;
   chatClient: ChatClient;
 }): EvaluateObservabilityAIAssistantDataset {
   return async function evaluateObservabilityAIAssistantDataset({

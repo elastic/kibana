@@ -17,6 +17,8 @@ import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
@@ -34,7 +36,9 @@ interface Props {
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const { timeState, setTime, refresh } = useTimefilter();
+  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
   const {
     dependencies: {
       start: { unifiedSearch },
@@ -44,8 +48,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
+    return niceTimeFormatter([startMs, endMs]);
+  }, [startMs, endMs]);
 
   const { systems, refreshSystems, systemsLoading } = useStreamSystems(definition.stream.name);
   const [query, setQuery] = useState<string>('');
@@ -60,7 +64,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
-  const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
+  const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -158,8 +162,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
                   if (isEqual(queryN.dateRange, dateRange)) {
                     refresh();
-                  } else {
-                    setTime(queryN.dateRange);
+                  } else if (queryN.dateRange) {
+                    updateTimeRange(queryN.dateRange);
                     setDateRange(queryN.dateRange);
                   }
                 }}

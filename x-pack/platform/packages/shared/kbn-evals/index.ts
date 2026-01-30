@@ -4,11 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// CLI tools
+export * as cli from './src/cli';
+
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';
 export type { EvaluationCriterion } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
-export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
+export type {
+  Example,
+  TaskOutput,
+  ExperimentTask,
+  Evaluator,
+  EvaluationResult,
+  RanExperiment,
+  EvalsExecutorClient,
+} from './src/types';
+export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
+export { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';

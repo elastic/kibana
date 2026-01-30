@@ -90,9 +90,9 @@ describe('getFilteredLinks', () => {
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
   });
 
-  describe('`securitySolution.attacksAlertsAlignment` feature flag', () => {
-    it('includes correct base links in the result when feature flag is disabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(false);
+  describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {
+    it('includes correct base links in the result when setting is disabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(false);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
       const result = await getFilteredLinks(mockCore, mockPlugins);
@@ -110,8 +110,8 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('ai_value'); // AI Value is now included statically
     });
 
-    it('includes all base links in the result when feature flag is enabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(true);
+    it('includes all base links in the result when setting is enabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(true);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
       const result = await getFilteredLinks(mockCore, mockPlugins);

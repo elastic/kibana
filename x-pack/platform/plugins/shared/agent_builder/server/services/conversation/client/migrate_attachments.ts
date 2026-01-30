@@ -12,7 +12,12 @@ import type {
   VersionedAttachment,
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
-import { hashContent, estimateTokens } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_OPERATION,
+  ATTACHMENT_REF_ACTOR,
+  hashContent,
+  estimateTokens,
+} from '@kbn/agent-builder-common/attachments';
 
 /**
  * Checks if a conversation needs migration from legacy round-level attachments
@@ -168,6 +173,8 @@ export const createAttachmentRefs = (
         refs.push({
           attachment_id: versionedAttachment.id,
           version: 1, // All migrated attachments start at version 1
+          operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.user,
         });
       }
     }
@@ -178,6 +185,62 @@ export const createAttachmentRefs = (
   });
 
   return roundRefs;
+};
+
+/**
+ * Merge attachment refs by attachment id + version + actor to avoid duplicates.
+ */
+export const mergeAttachmentRefs = (
+  previous?: AttachmentVersionRef[],
+  next?: AttachmentVersionRef[]
+): AttachmentVersionRef[] | undefined => {
+  if (!previous?.length && !next?.length) {
+    return undefined;
+  }
+
+  const merged = new Map<string, AttachmentVersionRef>();
+  for (const ref of previous ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  for (const ref of next ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+
+  return Array.from(merged.values());
+};
+
+/**
+ * Apply refs to rounds, merging with any existing refs on the round input.
+ */
+export const applyAttachmentRefsToRounds = (
+  rounds: ConversationRound[],
+  refsByRound: Map<number, AttachmentVersionRef[]>
+): ConversationRound[] => {
+  if (refsByRound.size === 0) {
+    return rounds;
+  }
+
+  return rounds.map((round, index) => {
+    const refs = refsByRound.get(index);
+    if (!refs?.length) {
+      return round;
+    }
+
+    const mergedRefs = mergeAttachmentRefs(round.input.attachment_refs, refs);
+    return {
+      ...round,
+      input: {
+        ...round.input,
+        ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
+      },
+    };
+  });
 };
 
 /**

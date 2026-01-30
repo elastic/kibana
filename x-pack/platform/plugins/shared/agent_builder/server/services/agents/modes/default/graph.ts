@@ -21,7 +21,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
-import { getAnswerAgentPrompt, getResearchAgentPrompt } from './prompts';
+import type { PromptFactory } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 import { steps, tags } from './constants';
 import type { StateType } from './state';
@@ -57,6 +57,7 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
+  promptFactory,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -67,6 +68,7 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
+  promptFactory: PromptFactory;
 }) => {
   const init = async () => {
     return {};
@@ -82,16 +84,9 @@ export const createAgentGraph = ({
     }
     try {
       const response = await researcherModel.invoke(
-        getResearchAgentPrompt({
-          customInstructions: configuration.research.instructions,
-          clearSystemMessage: configuration.research.replace_default_instructions,
-          capabilities,
+        await promptFactory.getMainPrompt({
           initialMessages: state.initialMessages,
-          conversationTimestamp: state.conversationTimestamp,
           actions: state.mainActions,
-          attachmentTypes: processedConversation.attachmentTypes,
-          versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
-          outputSchema,
         })
       );
 
@@ -199,16 +194,10 @@ export const createAgentGraph = ({
     }
     try {
       const response = await answeringModel.invoke(
-        getAnswerAgentPrompt({
-          customInstructions: configuration.answer.instructions,
-          clearSystemMessage: configuration.answer.replace_default_instructions,
-          capabilities,
+        await promptFactory.getAnswerPrompt({
           initialMessages: state.initialMessages,
-          conversationTimestamp: state.conversationTimestamp,
           actions: state.mainActions,
           answerActions: state.answerActions,
-          attachmentTypes: processedConversation.attachmentTypes,
-          versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
         })
       );
 
@@ -233,12 +222,9 @@ export const createAgentGraph = ({
 
   const answerAgentStructured = createAnswerAgentStructured({
     chatModel,
-    configuration,
-    capabilities,
+    promptFactory,
     events,
     outputSchema,
-    attachmentTypes: processedConversation.attachmentTypes,
-    versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
     logger,
   });
 

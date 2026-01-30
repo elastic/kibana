@@ -15,7 +15,11 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
+import {
+  ATTACK_DISCOVERY_PATH,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SECURITY_FEATURE_ID,
+} from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -315,9 +319,14 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('`attacksAlertsAlignmentEnabled` feature', () => {
+  describe('`enableAlertsAndAttacksAlignment` feature', () => {
     it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
+        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
+          return true;
+        }
+        return false;
+      });
 
       render(
         <TestProviders>
@@ -333,7 +342,12 @@ describe('AttackDiscovery', () => {
     });
 
     it('does not render callout about new Attacks page when feature is disabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
+        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
+          return false;
+        }
+        return false;
+      });
 
       render(
         <TestProviders>

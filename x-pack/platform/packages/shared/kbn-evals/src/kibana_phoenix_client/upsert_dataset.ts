@@ -6,8 +6,7 @@
  */
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type { ExampleWithId } from '../types';
+import type { Example, ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
 
 const UPSERT_DATASET = /* GraphQL */ `
@@ -42,8 +41,15 @@ async function graphQLRequest<T>(
     },
     body: JSON.stringify({ query, variables }),
   });
-  const body = await res.json();
-  if (body.errors?.length) throw new Error(body.errors[0].message);
+  const body = await res.json().catch(() => undefined);
+  if (!res.ok) {
+    throw new Error(
+      `Phoenix GraphQL request failed (${res.status} ${res.statusText}): ${JSON.stringify(body)}`
+    );
+  }
+  if (body?.errors?.length) {
+    throw new Error(`Phoenix GraphQL error: ${JSON.stringify(body.errors[0])}`);
+  }
   return body.data as T;
 }
 

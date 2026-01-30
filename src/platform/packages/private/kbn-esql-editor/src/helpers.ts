@@ -264,11 +264,11 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     }
 
     .monaco-hover {
-      display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.medium} !important;
       box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      z-index: 100;
     }
 
     // Fixes inline suggestions hover styles and only

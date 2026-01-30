@@ -9,6 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { PublishingSubject } from '../publishing_subject';
+import type { SnakeToCamelCase } from '../utils/types';
 
 export type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
 
@@ -18,13 +19,6 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
   lastState?: Partial<StateType>,
   currentState?: Partial<StateType>
 ) => boolean;
-
-/**
- * A type that converts a single key from snake case to camel case.
- */
-type SnakeToCamelCase<S extends string> = S extends `${infer P1}_${infer P2}${infer P3}`
-  ? `${P1}${Uppercase<P2>}${SnakeToCamelCase<P3>}`
-  : S;
 
 /**
  * A type that maps each key in a state type to a definition of how it should be compared. If a custom

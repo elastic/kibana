@@ -10,11 +10,17 @@ import type {
   CloudConnector,
   CloudConnectorListOptions,
   CloudProvider,
+  AccountType,
 } from '@kbn/fleet-plugin/public';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+
+export interface CloudConnectorQueryFilterOptions {
+  cloudProvider?: CloudProvider;
+  accountType?: AccountType;
+}
 
 const fetchCloudConnectors = async (
   http: HttpStart,
@@ -41,17 +47,22 @@ const fetchCloudConnectors = async (
     .then((res: { items: CloudConnector[] }) => res.items);
 };
 
-export const useGetCloudConnectors = (cloudProvider?: CloudProvider) => {
+export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterOptions) => {
   const CLOUD_CONNECTOR_QUERY_KEY = 'get-cloud-connectors';
   const { http } = useKibana<CoreStart>().services;
 
-  // Construct KQL query if cloudProvider is specified
-  const kuery = cloudProvider
-    ? `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.cloudProvider: "${cloudProvider}"`
+  // Construct KQL query from filter options
+  const kuery = filterOptions
+    ? Object.entries(filterOptions)
+        .map(([key, value]) =>
+          value ? `${CLOUD_CONNECTOR_SAVED_OBJECT_TYPE}.attributes.${key}: "${value}"` : null
+        )
+        .filter(Boolean)
+        .join(' AND ')
     : undefined;
 
   return useQuery(
-    [CLOUD_CONNECTOR_QUERY_KEY, cloudProvider],
+    [CLOUD_CONNECTOR_QUERY_KEY, filterOptions?.cloudProvider, filterOptions?.accountType],
     () => fetchCloudConnectors(http, { kuery }),
     {
       enabled: true,

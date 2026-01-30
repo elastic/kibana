@@ -6,10 +6,14 @@
  */
 
 import type {
-  VersionedAttachment,
   AttachmentVersionRef,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { hashContent } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -603,6 +607,73 @@ describe('AttachmentStateManager', () => {
       manager.markClean();
 
       expect(manager.hasChanges()).toBe(false);
+    });
+  });
+
+  describe('access tracking', () => {
+    it('records created when adding', async () => {
+      const attachment = await manager.add({
+        id: 'att-1',
+        type: 'text',
+        data: { content: 'test' },
+      });
+
+      expect(manager.getAccessedRefs()).toEqual([
+        {
+          attachment_id: attachment.id,
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+      ]);
+    });
+
+    it('records updated on update and does not override created', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      await manager.update('att-1', { data: { content: 'v2' } });
+
+      expect(manager.getAccessedRefs()).toEqual([
+        {
+          attachment_id: 'att-1',
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+        {
+          attachment_id: 'att-1',
+          version: 2,
+          operation: ATTACHMENT_REF_OPERATION.updated,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+      ]);
+    });
+
+    it('records read via readLatest/readVersion', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      manager.clearAccessTracking();
+
+      const latest = manager.readLatest('att-1');
+      const v1 = manager.readVersion('att-1', 1);
+
+      expect(latest?.version).toBe(1);
+      expect(v1?.version).toBe(1);
+      expect(manager.getAccessedRefs()).toEqual([
+        {
+          attachment_id: 'att-1',
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.read,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+      ]);
+    });
+
+    it('clears access tracking', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      expect(manager.getAccessedRefs()).toHaveLength(1);
+
+      manager.clearAccessTracking();
+
+      expect(manager.getAccessedRefs()).toHaveLength(0);
     });
   });
 

@@ -10,6 +10,7 @@
 import { toHaveHeaders } from './to_have_headers';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
+import { wrapMatcher } from './utils';
 import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 import type { ResponseMatchers } from './types';
 
@@ -19,8 +20,10 @@ import type { ResponseMatchers } from './types';
  */
 export function createResponseMatchers(obj: unknown): ResponseMatchers {
   return {
-    toHaveStatusCode: (code: number | ToHaveStatusCodeOptions) => toHaveStatusCode(obj, code),
-    toHaveStatusText: (text: string) => toHaveStatusText(obj, text),
-    toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(obj, headers),
+    toHaveStatusCode: wrapMatcher((code: number | ToHaveStatusCodeOptions) =>
+      toHaveStatusCode(obj, code)
+    ),
+    toHaveStatusText: wrapMatcher((text: string) => toHaveStatusText(obj, text)),
+    toHaveHeaders: wrapMatcher((headers: Record<string, string>) => toHaveHeaders(obj, headers)),
   };
 }

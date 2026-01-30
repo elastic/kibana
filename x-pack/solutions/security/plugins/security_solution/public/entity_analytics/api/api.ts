@@ -262,7 +262,6 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify({
-          type: 'index',
           name: ENTITY_SOURCE_NAME,
           indexPattern,
         }),

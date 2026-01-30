@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-  
-  FROM test-index-*
+"FROM test-index-*
     METADATA _index
   | WHERE (entity.id IS NOT NULL AND entity.id != \\"\\")
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
@@ -276,9 +274,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-  
-  FROM test-index-*
+"FROM test-index-*
     METADATA _index
   | WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
@@ -462,9 +458,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-  
-  FROM test-index-*
+"FROM test-index-*
     METADATA _index
   | WHERE ((service.entity.id IS NOT NULL AND service.entity.id != \\"\\") OR (service.name IS NOT NULL AND service.name != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
@@ -632,9 +626,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
 `;
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-  
-  FROM test-index-*
+"FROM test-index-*
     METADATA _index
   | WHERE ((user.entity.id IS NOT NULL AND user.entity.id != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (user.email IS NOT NULL AND user.email != \\"\\"))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")

@@ -102,5 +102,5 @@ export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizab
 
 const dscPageBodyContentsCss = css`
   overflow: hidden;
-  height: inherit;
+  height: 100%;
 `;

@@ -58,6 +58,7 @@ import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
+import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -76,7 +77,8 @@ export const initRoutes = (
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
-  trialCompanionDeps: TrialCompanionRoutesDeps
+  trialCompanionDeps: TrialCompanionRoutesDeps,
+  enableDataGeneratorRoutes: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -154,4 +156,8 @@ export const initRoutes = (
   registerSiemReadinessRoutes({ router, logger });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
+
+  if (enableDataGeneratorRoutes) {
+    registerDataGeneratorRoutes(router, getStartServices);
+  }
 };

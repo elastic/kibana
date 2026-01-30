@@ -24,6 +24,7 @@ export type {
 export type {
   BuiltInAgentDefinition,
   BuiltInAgentConfiguration,
+  AgentConfigContext,
   AgentAvailabilityContext,
   AgentAvailabilityHandler,
   AgentAvailabilityResult,

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
@@ -33,7 +34,7 @@ const LatencyChartContent = ({
       unit,
       index: indexes,
       dimensions: [],
-      type: 'metric',
+      type: ES_FIELD_TYPES.DOUBLE,
     },
     color,
     seriesType,

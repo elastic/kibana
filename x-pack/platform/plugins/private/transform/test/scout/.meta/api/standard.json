@@ -1,0 +1,693 @@
+{
+  "lastModified": "2026-01-30T09:08:05.605Z",
+  "sha1": "a60c695e4332c62e80396a5f69dfad45e788cbcc",
+  "tests": [
+    {
+      "id": "240c93906b590cc-8ac2f2b8727a7d1",
+      "title": "Setup environment for Transform API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "13bfddf995a8fd5-7f70c1dbf9c8d83",
+      "title": "bulk delete should delete multiple transforms by transformIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_delete_transforms.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    },
+    {
+      "id": "13bfddf995a8fd5-72342dbc2e23d07",
+      "title": "bulk delete should delete multiple transforms by transformIds, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_delete_transforms.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "ba709eca62ae466-d70e478df25cf87",
+      "title": "/internal/transform/reauthorize_transforms bulk should reauthorize multiple transforms for transform manager, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reauthorize_transforms.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6db3984525b9e5-f3ca569c763dd49",
+      "title": "bulk reset should reset multiple transforms by transformIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reset_transforms.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6db3984525b9e5-06c05ad5382aee3",
+      "title": "bulk reset should reset multiple transforms by transformIds, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reset_transforms.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "28b1f52e4a791a0-3dac62ce05219f2",
+      "title": "bulk schedule_now_transforms should schedule multiple transforms by transformIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_schedule_now_transforms.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "28b1f52e4a791a0-36c59f9a747c7ff",
+      "title": "bulk schedule_now_transforms should schedule multiple transforms by transformIds, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_schedule_now_transforms.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "a6394bb83b3f64e-8359654312346bf",
+      "title": "/internal/transform/start_transforms should start multiple transforms by transformIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_start_transforms.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "a6394bb83b3f64e-2527c01ba66298c",
+      "title": "/internal/transform/start_transforms should start multiple transforms by transformIds, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_start_transforms.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b5283b040c2198-9d21536c5a85a4c",
+      "title": "/internal/transform/stop_transforms should stop multiple transforms by transformIds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_stop_transforms.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b5283b040c2198-025461ce03fc23c",
+      "title": "/internal/transform/stop_transforms should stop multiple transforms by transformIds, even if one of the transformIds is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_stop_transforms.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "be7a4e8c24eebb3-50b2132551b0448",
+      "title": "/internal/transform/delete_transforms should delete transform by transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "be7a4e8c24eebb3-db50d0f2e2c181d",
+      "title": "/internal/transform/delete_transforms should return 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
+        "line": 65,
+        "column": 10
+      }
+    },
+    {
+      "id": "be7a4e8c24eebb3-7936c24c8cc7b83",
+      "title": "/internal/transform/delete_transforms should return 200 with error in response if invalid transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "be7a4e8c24eebb3-ca7f7eeab2626fc",
+      "title": "/internal/transform/delete_transforms should delete transform and destination index with deleteDestIndex setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "5ce71f206cb3a24-5e8132646aee8f3",
+      "title": "/internal/transform/reauthorize_transforms should not reauthorize transform created by transform viewer for transform unauthorized",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "5ce71f206cb3a24-0796aa8a3c459ce",
+      "title": "/internal/transform/reauthorize_transforms should not reauthorize transform created by transform viewer for transform viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
+        "line": 87,
+        "column": 10
+      }
+    },
+    {
+      "id": "5ce71f206cb3a24-7a72f15c94c718b",
+      "title": "/internal/transform/reauthorize_transforms should reauthorize transform created by transform viewer with new api key of transform manager and start the transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "5ce71f206cb3a24-167c1334034c2a1",
+      "title": "/internal/transform/reauthorize_transforms should return 200 with error in response if invalid transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "57bf96aa7805fa3-a5651a6a8a9d270",
+      "title": "/internal/transform/reset_transforms should reset transform by transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "57bf96aa7805fa3-75a497a0db5a70c",
+      "title": "/internal/transform/reset_transforms should return 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "57bf96aa7805fa3-6cf470f388d8d10",
+      "title": "/internal/transform/reset_transforms should return 200 with error in response if invalid transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "c80e1874557ddcc-3f09ec23a215d5a",
+      "title": "/internal/transform/schedule_now_transforms should schedule the transform by transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "c80e1874557ddcc-f82b7aad31ff3e3",
+      "title": "/internal/transform/schedule_now_transforms should return 200 with success:false for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "c80e1874557ddcc-cd44a73daf36afb",
+      "title": "/internal/transform/schedule_now_transforms should return 200 with error in response if invalid transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
+      "id": "e41ee1574093c85-af886ce6960b2e9",
+      "title": "/internal/transform/start_transforms should start the transform by transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "e41ee1574093c85-20cc34e8d7d6798",
+      "title": "/internal/transform/start_transforms should return 200 with success:false for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "e41ee1574093c85-60d9bd61c8e4f70",
+      "title": "/internal/transform/start_transforms should return 200 with error in response if invalid transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "1940a6e9fe347cf-77d67dcc8f36cd7",
+      "title": "/internal/transform/stop_transforms should stop the transform by transformId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/stop_transforms.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "1940a6e9fe347cf-677830bbee28573",
+      "title": "/internal/transform/stop_transforms should return 200 with success:false for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/stop_transforms.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-d04913af945ec54",
+      "title": "/internal/transform/transforms/{transformId} create should create a transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-f1aee95ef74031d",
+      "title": "/internal/transform/transforms/{transformId} create should create a transform with data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-66e0907ce34a89c",
+      "title": "/internal/transform/transforms/{transformId} create should create a transform with data view and time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 101,
+        "column": 12
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-e4d36f39e154b36",
+      "title": "/internal/transform/transforms/{transformId} create should not allow pivot and latest configs in same transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-1863661ebbbe58b",
+      "title": "/internal/transform/transforms/{transformId} create should ensure if pivot or latest is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "2a0fd117c8a07ba-8e1dc817332fd49",
+      "title": "/internal/transform/transforms/_nodes should return the number of available transform nodes for a transform manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
+        "line": 14,
+        "column": 10
+      }
+    },
+    {
+      "id": "2a0fd117c8a07ba-01d76953c6420a9",
+      "title": "/internal/transform/transforms/_nodes should return the number of available transform nodes for a viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "2a0fd117c8a07ba-ba1d23b4857ea1e",
+      "title": "/internal/transform/transforms/_nodes should not return the number of available transform nodes for an unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "be248b48eba855e-d283214176be967",
+      "title": "/internal/transform/transforms/_preview should return a transform preview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "be248b48eba855e-a9698e4eca2e5c7",
+      "title": "/internal/transform/transforms/_preview should return a correct error for transform preview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "be248b48eba855e-6c5e58c6022e7d2",
+      "title": "/internal/transform/transforms/_preview should return 403 for transform viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "238e831d48f31a0-5788dab2f230443",
+      "title": "/internal/transform/transforms/_stats should return a list of transforms statistics for transform manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "238e831d48f31a0-37d7779557a5360",
+      "title": "/internal/transform/transforms/_stats should return statistics for a single transform for transform manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
+        "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "238e831d48f31a0-f8ac3317d83cb2b",
+      "title": "/internal/transform/transforms/_stats should return a list of transforms statistics for transform viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
+        "line": 98,
+        "column": 10
+      }
+    },
+    {
+      "id": "238e831d48f31a0-0e7d325c6db342c",
+      "title": "/internal/transform/transforms/_stats should return statistics for a single transform for transform viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "9385a9e2869fc3c-0a2521cc24f0efd",
+      "title": "/internal/transform/transforms/{transformId}/_update should update a transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_update.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "9385a9e2869fc3c-8ee1889c36ce3b3",
+      "title": "/internal/transform/transforms/{transformId}/_update should return 403 for transform view-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_update.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "e989d08f4b0e216-a0199c2bd17a5c2",
+      "title": "/internal/transform/transforms should return a list of transforms for transform manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
+        "line": 30,
+        "column": 10
+      }
+    },
+    {
+      "id": "e989d08f4b0e216-5ad04586efb6a75",
+      "title": "/internal/transform/transforms should return a list of transforms for transform viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "e989d08f4b0e216-d914a8d0b631c1e",
+      "title": "/internal/transform/transforms should return a specific transform configuration for transform manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "e989d08f4b0e216-9b69623f6e097bc",
+      "title": "/internal/transform/transforms should return a specific transform configuration for transform viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
+        "line": 124,
+        "column": 10
+      }
+    },
+    {
+      "id": "e989d08f4b0e216-82a86ae6fdeed5e",
+      "title": "/internal/transform/transforms should report 404 for a non-existing transform",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    }
+  ]
+}

@@ -142,7 +142,7 @@ describe('SummaryTab', () => {
     expect(screen.getByTestId(ATTACK_CHAIN_TITLE_TEST_ID)).toBeInTheDocument();
     expect(AttackChain).toHaveBeenCalledWith(
       expect.objectContaining({
-        attackDiscovery: mockAttack,
+        attackTactics: mockAttack.mitreAttackTactics,
       }),
       {}
     );
