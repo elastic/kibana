@@ -26,6 +26,7 @@ interface StreamsSystemIdentificationIdentifiedProps {
   count: number;
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -33,6 +34,7 @@ interface StreamsSystemIdentificationIdentifiedProps {
 interface StreamsDescriptionGeneratedProps {
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -41,6 +43,7 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   systems_count: number;
   input_tokens_used: number;
   output_tokens_used: number;
+  cached_tokens_used?: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -51,6 +54,15 @@ interface StreamsInsightsGeneratedProps {
   cached_tokens_used?: number;
 }
 
+interface StreamsFeaturesIdentifiedProps {
+  count: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
+  cached_tokens_used?: number;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -58,4 +70,5 @@ export {
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
   type StreamsInsightsGeneratedProps,
+  type StreamsFeaturesIdentifiedProps,
 };

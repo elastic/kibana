@@ -91,6 +91,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: tokensUsed.prompt,
                   output_tokens_used: tokensUsed.completion,
+                  cached_tokens_used: tokensUsed.cached ?? 0,
                 });
 
                 await taskClient.complete<
