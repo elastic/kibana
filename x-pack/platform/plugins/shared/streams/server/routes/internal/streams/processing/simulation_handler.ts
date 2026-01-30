@@ -787,8 +787,9 @@ export const computeSimulationDocDiff = (
 
   // Filter per-processor fields to only include fields that exist in the final output,
   // keeping processor attribution for fields that do exist
-  diffResult.detected_fields = diffResult.per_processor_fields
-    .filter(({ name }) => overallDetectedFieldNames.has(name));
+  diffResult.detected_fields = diffResult.per_processor_fields.filter(({ name }) =>
+    overallDetectedFieldNames.has(name)
+  );
 
   return diffResult;
 };

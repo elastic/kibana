@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  computeSimulationDocDiff,
-  SuccessfulPipelineSimulateDocumentResult,
-} from './simulation_handler';
+import type { SuccessfulPipelineSimulateDocumentResult } from './simulation_handler';
+import { computeSimulationDocDiff } from './simulation_handler';
 
 /**
  * Creates a mock processor result for testing
