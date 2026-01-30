@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useObservable } from '@kbn/use-observable';
+import useObservable from 'react-use/lib/useObservable';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
