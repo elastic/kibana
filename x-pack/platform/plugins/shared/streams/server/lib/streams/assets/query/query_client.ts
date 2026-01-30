@@ -344,6 +344,51 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
+  /**
+   * Returns the count of all query links across streams that do not have a backing Kibana rule.
+   */
+  async getUnbackedQueriesCount(): Promise<number> {
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+    ];
+
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    });
+
+    const total = assetsResponse.hits.total;
+    return typeof total === 'number' ? total : total?.value ?? 0;
+  }
+
+  /**
+   * Returns all query links across streams that do not have a backing Kibana rule.
+   */
+  async getAllUnbackedQueries(): Promise<QueryLink[]> {
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+    ];
+
+    const assetsResponse = await this.dependencies.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    });
+
+    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+  }
+
   async bulkGetByIds(name: string, ids: string[]) {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,

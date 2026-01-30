@@ -13,6 +13,7 @@ import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumb
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -38,6 +39,7 @@ export function SignificantEventsDiscoveryPage() {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
+  const { count: unbackedQueriesCount } = useUnbackedQueriesCount();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -74,9 +76,15 @@ export function SignificantEventsDiscoveryPage() {
     },
     {
       id: 'queries',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-        defaultMessage: 'Queries',
-      }),
+      label:
+        unbackedQueriesCount > 0
+          ? i18n.translate('xpack.streams.significantEventsDiscovery.queriesTabWithCount', {
+              defaultMessage: 'Queries ({count})',
+              values: { count: unbackedQueriesCount },
+            })
+          : i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+              defaultMessage: 'Queries',
+            }),
       href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
       isSelected: tab === 'queries',
     },

@@ -8,7 +8,9 @@
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -20,11 +22,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
 } from '../../../hooks/use_fetch_significant_events';
+import {
+  UNBACKED_QUERIES_COUNT_QUERY_KEY,
+  useUnbackedQueriesCount,
+} from '../../../hooks/use_unbacked_queries_count';
 import { SeverityBadge } from './severity_badge';
 import { LoadingPanel } from '../../loading_panel';
 import { SparkPlot } from '../../spark_plot';
@@ -33,10 +40,52 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
-  const { unifiedSearch } = useKibana().dependencies.start;
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+        unifiedSearch,
+      },
+    },
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPromoting, setIsPromoting] = useState(false);
   const { data, isLoading: loading } = useFetchSignificantEvents({ query: searchQuery });
+  const { count: unbackedCount } = useUnbackedQueriesCount();
+  const queryClient = useQueryClient();
   const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
+
+  const onPromoteAll = async () => {
+    setIsPromoting(true);
+    try {
+      const { promoted } = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/queries/_promote_all',
+        { signal: null }
+      );
+      toasts.addSuccess(
+        i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
+          defaultMessage: 'Promoted {count} {count, plural, one {query} other {queries}}',
+          values: { count: promoted },
+        })
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['significantEvents'] }),
+        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
+      ]);
+    } catch (error) {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',
+          { defaultMessage: 'Failed to promote queries' }
+        ),
+      });
+    } finally {
+      setIsPromoting(false);
+    }
+  };
 
   if (loading && !data) {
     return <LoadingPanel size="l" />;
@@ -154,6 +203,44 @@ export function QueriesTable() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      {unbackedCount > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle',
+              {
+                defaultMessage:
+                  '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
+                values: { count: unbackedCount },
+              }
+            )}
+            iconType="iInCircle"
+            data-test-subj="queriesPromoteAllCallout"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
+                {
+                  defaultMessage:
+                    'Create Kibana rules for these queries so they run on a schedule and generate alerts.',
+                }
+              )}
+            </p>
+            <EuiButton
+              fill
+              onClick={onPromoteAll}
+              isLoading={isPromoting}
+              data-test-subj="queriesPromoteAllButton"
+            >
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllButton',
+                { defaultMessage: 'Promote all' }
+              )}
+            </EuiButton>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
