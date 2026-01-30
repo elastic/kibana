@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, dockerRegistryPort, type FtrConfigProviderContext } from '@kbn/test';
+import { dockerRegistryPort, type FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
