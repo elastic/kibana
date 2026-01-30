@@ -5,9 +5,70 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect, type EsClient } from '@kbn/scout';
 import { test } from '../../../fixtures';
-import { generateLogsData } from '../../../fixtures/generators';
+
+const TEST_STREAM_NAME = 'logs-fetchmore-test';
+
+/**
+ * Creates controlled test data with a known distribution.
+ * We create 200 documents total:
+ * - 190 with log.level='info' (95%)
+ * - 10 with log.level='warn' (5%)
+ *
+ * This ensures that when 50 samples are initially loaded:
+ * - Only ~2-3 will be 'warn' (~5% of 50)
+ * - This is well below the 20% threshold, so the "Load more" button will appear
+ *
+ * The 'warn' documents have older timestamps to ensure they won't be in
+ * the initial sample (which fetches the most recent documents).
+ */
+async function indexControlledTestData(esClient: EsClient) {
+  const now = Date.now();
+  const documents = [];
+
+  // Create 190 'info' logs with recent timestamps (these will be in the initial sample)
+  for (let i = 0; i < 190; i++) {
+    documents.push({ create: {} });
+    documents.push({
+      '@timestamp': new Date(now - i * 60000).toISOString(), // Each 1 minute apart
+      message: `Test log message ${i}`,
+      'log.level': 'info',
+      'host.name': 'test-host',
+      'service.name': 'test-service',
+    });
+  }
+
+  // Create 10 'warn' logs with older timestamps (these won't be in the initial sample)
+  // These are placed at timestamps older than all 'info' logs
+  for (let i = 0; i < 10; i++) {
+    documents.push({ create: {} });
+    documents.push({
+      '@timestamp': new Date(now - (200 + i) * 60000).toISOString(), // Older than all 'info' logs
+      message: `Warning log message ${i}`,
+      'log.level': 'warn',
+      'host.name': 'test-host',
+      'service.name': 'test-service',
+    });
+  }
+
+  await esClient.bulk({
+    index: TEST_STREAM_NAME,
+    operations: documents,
+    refresh: true,
+  });
+}
+
+/**
+ * Cleanup function to delete the test data stream
+ */
+async function cleanupTestData(esClient: EsClient) {
+  try {
+    await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
+  } catch {
+    // Ignore errors if data stream doesn't exist
+  }
+}
 
 /**
  * Tests for the "Load more matching samples" feature on the processing page.
@@ -15,51 +76,38 @@ import { generateLogsData } from '../../../fixtures/generators';
  * 1. A condition is selected
  * 2. The matching samples are below 20% of total samples
  * 3. There are samples available
+ *
+ * This test uses controlled data ingestion (not synthtrace) to ensure
+ * deterministic behavior and avoid conditional test logic.
  */
 test.describe(
   'Stream data processing - Load more matching samples',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    // Generate sparse data: 90% 'info', 10% 'warn'
-    // This ensures the 'warn' condition will match < 20% of samples
-    let warnLogCounter = 0;
-    const getSparseLogLevel = () => {
-      warnLogCounter++;
-      // Every 10th log is 'warn', rest are 'info'
-      return warnLogCounter % 10 === 0 ? 'warn' : 'info';
-    };
-
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
-      // Reset counter before generating
-      warnLogCounter = 0;
-      // Generate logs with 90% 'info' and 10% 'warn'
-      // This creates sparse data where 'warn' condition matches < 20%
-      await generateLogsData(logsSynthtraceEsClient)({
-        index: 'logs-generic-default',
-        docsPerMinute: 20,
-        logLevel: getSparseLogLevel,
-      });
+    test.beforeAll(async ({ esClient }) => {
+      await indexControlledTestData(esClient);
     });
 
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
-      await apiServices.streams.clearStreamProcessors('logs-generic-default');
+      await apiServices.streams.clearStreamProcessors(TEST_STREAM_NAME);
 
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      await pageObjects.streams.gotoProcessingTab(TEST_STREAM_NAME);
       await pageObjects.streams.switchToColumnsView();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.clearStreamProcessors('logs-generic-default');
-      await logsSynthtraceEsClient.clean();
+    test.afterAll(async ({ esClient, apiServices }) => {
+      await apiServices.streams.clearStreamProcessors(TEST_STREAM_NAME);
+      await cleanupTestData(esClient);
     });
 
     test('should show "Load more matching samples" button when condition matches sparse data', async ({
       page,
       pageObjects,
     }) => {
-      // Create a condition that matches the sparse 'warn' logs (10% of data)
+      // Create a condition that matches the sparse 'warn' logs (5% of data)
+      // Since all 'warn' logs have older timestamps, they won't be in the initial sample
       await pageObjects.streams.clickAddCondition();
       await pageObjects.streams.fillCondition('log.level', 'equals', 'warn');
       await pageObjects.streams.clickSaveCondition();
@@ -87,7 +135,8 @@ test.describe(
       // Wait for the condition filter button to appear (indicates condition is selected)
       await pageObjects.streams.expectConditionFilterButtonVisible();
 
-      // The button should appear because 'warn' logs are ~10% of the sample (< 20%)
+      // The button should appear because 'warn' logs are 0% of the initial sample
+      // (they all have older timestamps and won't be in the first 50 docs)
       await pageObjects.streams.expectFetchMoreMatchingSamplesButtonVisible();
     });
 
@@ -122,17 +171,19 @@ test.describe(
       await pageObjects.streams.expectFetchMoreMatchingSamplesButtonVisible();
 
       // Get the initial badge showing the percentage of matching samples
+      // With our controlled data, initial sample should have 0% 'warn' logs
       const badge = pageObjects.streams.getConditionFilterSelectedBadge();
-      const initialPercentage = await badge.textContent();
+      const initialPercentageText = await badge.textContent();
+      const initialPercentage = parseInt(initialPercentageText || '0', 10);
+
+      // Initial percentage should be 0% because all 'warn' logs are older
+      expect(initialPercentage).toBe(0);
 
       // Click the button to fetch more matching samples
       const button = pageObjects.streams.getFetchMoreMatchingSamplesButton();
       await expect(button).toBeEnabled();
       await button.click();
 
-      // The button should show loading state briefly, then either:
-      // 1. Disappear (if enough samples were fetched to exceed 20%)
-      // 2. Show updated percentage with more samples
       // Wait for the action to complete (loading to finish)
       await page.waitForFunction(
         () => {
@@ -144,28 +195,13 @@ test.describe(
         { timeout: 10000 }
       );
 
-      // After fetching, either:
-      // - The percentage increased (more matching samples found)
-      // - Or the button is hidden (exceeded 20% threshold)
-      // - Or the percentage stayed the same (no new samples found in the additional search)
-      // We verify the action completed without error by checking the button doesn't show error state
-      const buttonAfterFetch = pageObjects.streams.getFetchMoreMatchingSamplesButton();
-      const isButtonVisible = await buttonAfterFetch.isVisible();
+      // After fetching, the percentage should have increased because
+      // the "load more" query (without time range limitation) found the 'warn' logs
+      const newPercentageText = await badge.textContent();
+      const newPercentage = parseInt(newPercentageText || '0', 10);
 
-      if (isButtonVisible) {
-        // Button is still visible - check it's not in error state
-        // Error state would show warning icon
-        const hasWarningIcon = await buttonAfterFetch.locator('.euiIcon--warning').isVisible();
-        if (!hasWarningIcon) {
-          // Success - either more samples were fetched or search completed with no additional matches
-          const newPercentage = await badge.textContent();
-          // The percentage should be >= initial (more matching samples or same)
-          expect(parseInt(newPercentage || '0')).toBeGreaterThanOrEqual(
-            parseInt(initialPercentage || '0')
-          );
-        }
-      }
-      // If button is not visible, it means we exceeded the 20% threshold - that's also success
+      // The new percentage should be greater than the initial (0%)
+      expect(newPercentage).toBeGreaterThan(initialPercentage);
     });
 
     test('should not show "Load more matching samples" button when no condition is selected', async ({

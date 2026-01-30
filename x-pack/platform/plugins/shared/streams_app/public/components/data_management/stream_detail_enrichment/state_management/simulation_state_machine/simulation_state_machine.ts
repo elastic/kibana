@@ -469,8 +469,6 @@ async function fetchMoreMatchingDocuments({
     return [];
   }
 
-  const { start, end } = getAbsoluteTimestamps(data);
-
   // Step 1: Build and execute ESQL query to get matching document IDs
   const esqlQuery = buildFetchMoreEsqlQuery(streamName, condition);
 
@@ -478,8 +476,6 @@ async function fetchMoreMatchingDocuments({
     query: esqlQuery,
     search: data.search.search.bind(data.search),
     signal,
-    start,
-    end,
   });
 
   // Extract document IDs from the ESQL response
@@ -514,18 +510,6 @@ async function fetchMoreMatchingDocuments({
       dataSourceId: 'fetch-more',
       document: doc,
     }));
-}
-
-/**
- * Gets absolute timestamps from the data plugin's timefilter.
- */
-function getAbsoluteTimestamps(data: SimulationMachineDeps['data']) {
-  const time = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  return {
-    start: new Date(time.from).getTime(),
-    end: new Date(time.to).getTime(),
-  };
 }
 
 /**
