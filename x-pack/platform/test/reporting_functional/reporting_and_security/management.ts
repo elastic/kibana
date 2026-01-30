@@ -73,8 +73,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    // TODO: see https://github.com/elastic/kibana/pull/243499
-    describe.skip('Schedules', () => {
+    describe('Schedules', () => {
       const dashboardTitle = 'Ecom Dashboard';
       it('does allow user with reporting privileges to navigate to the Schedules tab', async () => {
         await retry.try(async () => {
