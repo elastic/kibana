@@ -6,7 +6,8 @@
  */
 
 import { type ReadStream, createReadStream } from 'fs';
-import fetch from 'node-fetch';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
 import { resolveLocalArtifactsPath } from './local_artifacts';
@@ -27,7 +28,10 @@ export const downloadToDisk = async (
   } else {
     const res = await fetch(fileUrl);
 
-    readStream = res.body as ReadStream;
+    if (!res.body) {
+      throw new Error('Response body is null');
+    }
+    readStream = Readable.fromWeb(res.body as WebReadableStream) as unknown as ReadStream;
   }
 
   await pipeline(readStream, writeStream);
