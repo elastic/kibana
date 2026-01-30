@@ -13,6 +13,8 @@ import { coreServices } from '../../../../services/kibana_services';
 const userProfilesCache = new Map<string, UserProfileWithAvatar | null>();
 const inFlight = new Set<string>();
 
+const SECURITY_SOLUTION_SUGGEST_USERS_PATH = '/internal/detection_engine/users/_find';
+
 /**
  * Returns a cached user profile for `uid`.
  * - `undefined`: not loaded yet
@@ -54,4 +56,21 @@ export const bulkGetUserProfilesWithAvatar = async (uids: string[]): Promise<voi
   } finally {
     toFetch.forEach((uid) => inFlight.delete(uid));
   }
+};
+
+export const suggestUserProfilesWithAvatar = async (
+  name: string
+): Promise<UserProfileWithAvatar[]> => {
+  const trimmed = name.trim();
+  if (!trimmed) return [];
+  const profiles = await coreServices.http.fetch<UserProfileWithAvatar[]>(
+    SECURITY_SOLUTION_SUGGEST_USERS_PATH,
+    {
+      method: 'GET',
+      version: '1',
+      query: { searchTerm: trimmed },
+    }
+  );
+  profiles.forEach((profile) => userProfilesCache.set(profile.uid, profile));
+  return profiles;
 };

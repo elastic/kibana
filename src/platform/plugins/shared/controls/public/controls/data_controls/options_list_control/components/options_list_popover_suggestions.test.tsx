@@ -15,12 +15,15 @@ import { EuiThemeProvider } from '@elastic/eui';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
 let httpPostMock: jest.Mock;
+let httpFetchMock: jest.Mock;
 jest.mock('../../../../services/kibana_services', () => {
   httpPostMock = jest.fn();
+  httpFetchMock = jest.fn();
   return {
     coreServices: {
       http: {
         post: (...args: unknown[]) => httpPostMock(...args),
+        fetch: (...args: unknown[]) => httpFetchMock(...args),
       },
     },
   };
@@ -125,20 +128,129 @@ describe('Options list popover', () => {
     contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
     contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
 
-    httpPostMock.mockResolvedValueOnce([
-      {
-        uid: 'uid-1',
-        enabled: true,
-        user: { username: 'user1', full_name: 'User One' },
-        data: { avatar: {} },
-      },
-    ]);
+    httpPostMock.mockImplementation(async (path: string) => {
+      if (path === '/internal/security/user_profile/_bulk_get') {
+        return [
+          {
+            uid: 'uid-1',
+            enabled: true,
+            user: { username: 'user1', full_name: 'User One' },
+            data: { avatar: {} },
+          },
+        ];
+      }
+      return [];
+    });
 
     const suggestionsComponent = mountComponent(contextMock);
 
     await waitFor(() => {
       expect(httpPostMock).toHaveBeenCalled();
       expect(suggestionsComponent.getByText('User One')).toBeInTheDocument();
+    });
+  });
+
+  test('assignee popover renders a search input and filters options as you type', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setAvailableOptions([
+      { value: 'uid-1', docCount: 1 },
+      { value: 'uid-2', docCount: 1 },
+    ]);
+
+    httpPostMock.mockImplementation(async (path: string) => {
+      if (path === '/internal/security/user_profile/_bulk_get') {
+        return [
+          {
+            uid: 'uid-1',
+            enabled: true,
+            user: { username: 'user1', full_name: 'User One' },
+            data: { avatar: {} },
+          },
+          {
+            uid: 'uid-2',
+            enabled: true,
+            user: { username: 'user2', full_name: 'User Two' },
+            data: { avatar: {} },
+          },
+        ];
+      }
+      return [];
+    });
+    httpFetchMock.mockRejectedValueOnce(new Error('suggest unavailable'));
+
+    const suggestionsComponent = mountComponent(contextMock);
+
+    await waitFor(() => {
+      expect(suggestionsComponent.getByText('User One')).toBeInTheDocument();
+      expect(suggestionsComponent.getByText('User Two')).toBeInTheDocument();
+    });
+
+    const input = suggestionsComponent.getByTestId('optionsList-assignee-search-input');
+    fireEvent.change(input, { target: { value: 'Two' } });
+
+    await waitFor(() => {
+      expect(suggestionsComponent.queryByText('User One')).not.toBeInTheDocument();
+      expect(suggestionsComponent.getByText('User Two')).toBeInTheDocument();
+    });
+  });
+
+  test('assignee search uses user profile suggest to render results', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setSearchString('user');
+
+    httpFetchMock.mockImplementation(async (path: string) => {
+      if (path === '/internal/detection_engine/users/_find') {
+        return [
+          {
+            uid: 'uid-9',
+            enabled: true,
+            user: { username: 'user9', full_name: 'User Nine' },
+            data: { avatar: {} },
+          },
+        ];
+      }
+      return [];
+    });
+    httpPostMock.mockImplementation(async (path: string) => {
+      if (path === '/internal/security/user_profile/_bulk_get') {
+        return [
+          {
+            uid: 'uid-9',
+            enabled: true,
+            user: { username: 'user9', full_name: 'User Nine' },
+            data: { avatar: {} },
+          },
+        ];
+      }
+      return [];
+    });
+
+    const suggestionsComponent = mountComponent(contextMock);
+
+    await waitFor(() => {
+      expect(httpFetchMock).toHaveBeenCalledWith('/internal/detection_engine/users/_find', expect.anything());
+      expect(suggestionsComponent.getByText('User Nine')).toBeInTheDocument();
+    });
+  });
+
+  test('assignee search falls back to default suggestions when user search fails', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
+    contextMock.componentApi.setSearchString('user');
+
+    httpFetchMock.mockRejectedValueOnce(new Error('forbidden'));
+    httpPostMock.mockImplementation(async (path: string) => {
+      if (path === '/internal/security/user_profile/_bulk_get') return [];
+      return [];
+    });
+
+    const suggestionsComponent = mountComponent(contextMock);
+
+    await waitFor(() => {
+      expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
     });
   });
 
@@ -175,6 +287,7 @@ describe('Options list popover', () => {
     });
 
     expect(httpPostMock).not.toHaveBeenCalled();
+    expect(httpFetchMock).not.toHaveBeenCalled();
     // Default behavior: raw value is displayed.
     expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
   });

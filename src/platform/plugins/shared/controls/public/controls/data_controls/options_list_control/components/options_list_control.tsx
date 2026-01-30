@@ -292,7 +292,6 @@ export const OptionsListControl = ({
     styles,
     customStrings,
     isAssigneeField,
-    assigneeProfilesVersion,
   ]);
 
   const button = (
