@@ -12,7 +12,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleCreationAnnotation } from '../state';
-import { getPrebuiltRulesAssets } from '../../utils/get_prebuilt_rules_assets';
+import { getPrebuiltRulesTags } from '../../utils/get_prebuilt_rules_tags';
 import { getCustomRulesTags } from '../../utils/get_custom_rules_tags';
 import { TAGS_SELECTION_PROMPT } from './prompts';
 
@@ -37,24 +37,12 @@ export const getTagsNode = ({
     events?.reportProgress('Fetching available tags and selecting relevant ones...');
 
     try {
-      const tagsSet = new Set<string>();
-
-      const [prebuiltRulesAssetsMap, customTags] = await Promise.all([
-        getPrebuiltRulesAssets({ savedObjectsClient, rulesClient }),
+      const [prebuiltTags, customTags] = await Promise.all([
+        getPrebuiltRulesTags({ savedObjectsClient }),
         getCustomRulesTags({ rulesClient }),
       ]);
 
-      prebuiltRulesAssetsMap.forEach((ruleVersions) => {
-        const targetTags = ruleVersions.target?.tags;
-        if (Array.isArray(targetTags)) {
-          targetTags.forEach((tag) => tagsSet.add(tag));
-        }
-      });
-
-      customTags.forEach((tag) => {
-        tagsSet.add(tag);
-      });
-
+      const tagsSet = new Set<string>([...prebuiltTags, ...customTags]);
       const availableTags = Array.from(tagsSet);
 
       events?.reportProgress(`Analyzing ${availableTags.length} available tags...`);
