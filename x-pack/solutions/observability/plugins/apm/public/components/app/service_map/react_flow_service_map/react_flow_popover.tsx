@@ -8,6 +8,7 @@
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import { useReactFlow } from '@xyflow/react';
 import {
   DEFAULT_NODE_SIZE,
@@ -24,6 +25,91 @@ import type {
   ServiceMapNodeData,
   ServiceMapEdge,
 } from '../../../../../common/service_map';
+
+interface PopoverPosition {
+  position: 'absolute';
+  left: number;
+  top: number;
+}
+
+const OFFSCREEN_STYLE: PopoverPosition = {
+  position: 'absolute',
+  left: OFFSCREEN_POSITION,
+  top: OFFSCREEN_POSITION,
+};
+
+/**
+ * Calculates the popover position for an edge (at the midpoint between source and target nodes).
+ * Returns offscreen position if source or target nodes cannot be found.
+ */
+function getEdgePopoverPosition(
+  edge: ServiceMapEdge,
+  reactFlowInstance: ReactFlowInstance,
+  viewport: Viewport
+): PopoverPosition {
+  const sourceNode = reactFlowInstance.getNode(edge.source);
+  const targetNode = reactFlowInstance.getNode(edge.target);
+
+  if (!sourceNode?.position || !targetNode?.position) {
+    return OFFSCREEN_STYLE;
+  }
+
+  const zoom = viewport.zoom;
+
+  const sourceWidth = sourceNode.measured?.width ?? sourceNode.width ?? DEFAULT_NODE_SIZE;
+  const sourceHeight = sourceNode.measured?.height ?? sourceNode.height ?? DEFAULT_NODE_SIZE;
+  const targetWidth = targetNode.measured?.width ?? targetNode.width ?? DEFAULT_NODE_SIZE;
+  const targetHeight = targetNode.measured?.height ?? targetNode.height ?? DEFAULT_NODE_SIZE;
+
+  const sourceCenterX = sourceNode.position.x + sourceWidth / 2;
+  const sourceCenterY = sourceNode.position.y + sourceHeight / 2;
+  const targetCenterX = targetNode.position.x + targetWidth / 2;
+  const targetCenterY = targetNode.position.y + targetHeight / 2;
+
+  const midX = (sourceCenterX + targetCenterX) / 2;
+  const midY = (sourceCenterY + targetCenterY) / 2;
+
+  const x = midX * zoom + viewport.x;
+  const avgHeight = (sourceHeight + targetHeight) / 2;
+  const offsetY = ((zoom + 1) * avgHeight) / EDGE_OFFSET_DIVISOR;
+  const y = midY * zoom + viewport.y - offsetY;
+
+  return {
+    position: 'absolute',
+    left: x,
+    top: y,
+  };
+}
+
+/**
+ * Calculates the popover position for a node (centered horizontally, positioned at top of node).
+ * Returns offscreen position if node position is not available.
+ */
+function getNodePopoverPosition(
+  node: ServiceMapNode,
+  reactFlowInstance: ReactFlowInstance,
+  viewport: Viewport
+): PopoverPosition {
+  if (!node.position) {
+    return OFFSCREEN_STYLE;
+  }
+
+  const zoom = viewport.zoom;
+  const fullNode = reactFlowInstance.getNode(node.id);
+  const nodeWidth = fullNode?.measured?.width ?? fullNode?.width ?? DEFAULT_NODE_SIZE;
+
+  const centerX = node.position.x + nodeWidth / 2;
+  const x = centerX * zoom + viewport.x;
+
+  const topY = node.position.y;
+  const y = topY * zoom + viewport.y;
+
+  return {
+    position: 'absolute',
+    left: x,
+    top: y,
+  };
+}
 
 /**
  * Transforms React Flow node data to the unified ElementData format
@@ -118,67 +204,19 @@ export function ReactFlowPopover({
     return null;
   }, [nodeData, selectedEdge]);
 
-  // Calculate popover position - handles both nodes and edges
-  // Uses similar positioning logic to Cytoscape: offset upward so the node/edge is visible
+  // Calculate popover position using dedicated helper functions
   const popoverStyle = useMemo(() => {
     const viewport = reactFlowInstance.getViewport();
-    const zoom = viewport.zoom;
 
     if (selectedEdge) {
-      const sourceNode = reactFlowInstance.getNode(selectedEdge.source);
-      const targetNode = reactFlowInstance.getNode(selectedEdge.target);
-
-      if (sourceNode?.position && targetNode?.position) {
-        const sourceWidth = sourceNode.measured?.width ?? sourceNode.width ?? DEFAULT_NODE_SIZE;
-        const sourceHeight = sourceNode.measured?.height ?? sourceNode.height ?? DEFAULT_NODE_SIZE;
-        const targetWidth = targetNode.measured?.width ?? targetNode.width ?? DEFAULT_NODE_SIZE;
-        const targetHeight = targetNode.measured?.height ?? targetNode.height ?? DEFAULT_NODE_SIZE;
-
-        const sourceCenterX = sourceNode.position.x + sourceWidth / 2;
-        const sourceCenterY = sourceNode.position.y + sourceHeight / 2;
-        const targetCenterX = targetNode.position.x + targetWidth / 2;
-        const targetCenterY = targetNode.position.y + targetHeight / 2;
-
-        const midX = (sourceCenterX + targetCenterX) / 2;
-        const midY = (sourceCenterY + targetCenterY) / 2;
-
-        // Convert to screen coordinates with upward offset (like Cytoscape)
-        const x = midX * zoom + viewport.x;
-        const avgHeight = (sourceHeight + targetHeight) / 2;
-        const offsetY = ((zoom + 1) * avgHeight) / EDGE_OFFSET_DIVISOR;
-        const y = midY * zoom + viewport.y - offsetY;
-
-        return {
-          position: 'absolute' as const,
-          left: x,
-          top: y,
-        };
-      }
+      return getEdgePopoverPosition(selectedEdge, reactFlowInstance, viewport);
     }
 
-    if (selectedNode?.position) {
-      const fullNode = reactFlowInstance.getNode(selectedNode.id);
-      const nodeWidth = fullNode?.measured?.width ?? fullNode?.width ?? DEFAULT_NODE_SIZE;
-
-      const centerX = selectedNode.position.x + nodeWidth / 2;
-
-      const x = centerX * zoom + viewport.x;
-      // Position popover so node icon is partially visible (like Cytoscape)
-      const topY = selectedNode.position.y;
-      const y = topY * zoom + viewport.y;
-
-      return {
-        position: 'absolute' as const,
-        left: x,
-        top: y,
-      };
+    if (selectedNode) {
+      return getNodePopoverPosition(selectedNode, reactFlowInstance, viewport);
     }
 
-    return {
-      position: 'absolute' as const,
-      left: OFFSCREEN_POSITION,
-      top: OFFSCREEN_POSITION,
-    };
+    return OFFSCREEN_STYLE;
   }, [selectedNode, selectedEdge, reactFlowInstance]);
 
   useEffect(() => {
