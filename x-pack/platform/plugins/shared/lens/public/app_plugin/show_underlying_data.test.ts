@@ -340,7 +340,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'kuery', query: 'myfield: *' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: { enabled: { kuery: [], lucene: [] }, disabled: { kuery: [], lucene: [] } },
         },
@@ -356,7 +356,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'kuery', query: 'myfield: *' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
@@ -378,7 +378,7 @@ describe('combineQueryAndFilters', () => {
         undefined,
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: { kuery: [[{ language: 'kuery', query: 'otherField: *' }]], lucene: [] },
@@ -398,7 +398,7 @@ describe('combineQueryAndFilters', () => {
         undefined,
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -436,7 +436,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'lucene', query: 'myField' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -478,7 +478,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Lens context (kuery)',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -518,14 +518,14 @@ describe('combineQueryAndFilters', () => {
             meta: {
               alias: 'Existing kuery filters',
               disabled: false,
-              index: 'formBased',
+              index: 'testDatasource',
               negate: false,
               type: 'custom',
             },
           } as Filter,
         ],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -566,7 +566,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Existing kuery filters',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -590,7 +590,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Lens context (lucene)',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -609,7 +609,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'lucene', query: 'myField' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -650,7 +650,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Lens context (kuery)',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -672,7 +672,7 @@ describe('combineQueryAndFilters', () => {
       ],
       [],
       {
-        id: 'formBased',
+        id: 'testDatasource',
         columns: [],
         filters: {
           enabled: {
@@ -736,7 +736,7 @@ describe('combineQueryAndFilters', () => {
         meta: {
           alias: 'Lens context (kuery)',
           disabled: false,
-          index: 'formBased',
+          index: 'testDatasource',
           negate: false,
           type: 'custom',
         },
@@ -758,7 +758,7 @@ describe('combineQueryAndFilters', () => {
         [{ language: 'lucene', query: '' }],
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -778,7 +778,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'lucene', query: '' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -798,7 +798,7 @@ describe('combineQueryAndFilters', () => {
         undefined,
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -850,14 +850,14 @@ describe('combineQueryAndFilters', () => {
             meta: {
               alias: 'Existing kuery filters',
               disabled: false,
-              index: 'formBased',
+              index: 'testDatasource',
               negate: false,
               type: 'custom',
             },
           } as Filter,
         ],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             enabled: {
@@ -912,7 +912,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Existing kuery filters',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -937,7 +937,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'Lens context (lucene)',
             disabled: false,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -957,7 +957,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'lucene', query: 'myField' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             disabled: {
@@ -991,7 +991,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'anotherField (lucene)',
             disabled: true,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -1022,7 +1022,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'myfield: *',
             disabled: true,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -1041,7 +1041,7 @@ describe('combineQueryAndFilters', () => {
         undefined,
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             disabled: {
@@ -1085,7 +1085,7 @@ describe('combineQueryAndFilters', () => {
           meta: {
             alias: 'myfield: *abc*',
             disabled: true,
-            index: 'formBased',
+            index: 'testDatasource',
             negate: false,
             type: 'custom',
           },
@@ -1104,7 +1104,7 @@ describe('combineQueryAndFilters', () => {
         { language: 'lucene', query: 'myField' },
         [],
         {
-          id: 'formBased',
+          id: 'testDatasource',
           columns: [],
           filters: {
             disabled: {
@@ -1143,7 +1143,7 @@ describe('combineQueryAndFilters', () => {
             must_not: [],
           },
           meta: {
-            index: 'formBased',
+            index: 'testDatasource',
             type: 'custom',
             disabled: false,
             negate: false,
@@ -1167,7 +1167,7 @@ describe('combineQueryAndFilters', () => {
             must_not: [],
           },
           meta: {
-            index: 'formBased',
+            index: 'testDatasource',
             type: 'custom',
             disabled: true,
             negate: false,
@@ -1198,7 +1198,7 @@ describe('combineQueryAndFilters', () => {
             must_not: [],
           },
           meta: {
-            index: 'formBased',
+            index: 'testDatasource',
             type: 'custom',
             disabled: true,
             negate: false,
