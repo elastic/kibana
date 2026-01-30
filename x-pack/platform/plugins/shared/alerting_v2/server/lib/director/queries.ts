@@ -6,33 +6,39 @@
  */
 
 import { esql, type ComposerQuery } from '@kbn/esql-language';
+import type { AlertEventStatus, EpisodeStatus } from '../../resources/alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
 
-interface GetLatestEventStateParams {
+interface GetLatestAlertEventStateQueryParams {
   ruleId: string;
+  groupHashes: string[];
 }
 
-export const getLatestEventState = ({ ruleId }: GetLatestEventStateParams): ComposerQuery => {
+export interface LatestAlertEventState extends Record<string, unknown> {
+  last_status: AlertEventStatus;
+  last_episode_id: string | null;
+  last_episode_status: EpisodeStatus | null;
+  group_hash: string;
+}
+
+export const getLatestAlertEventStateQuery = ({
+  ruleId,
+  groupHashes,
+}: GetLatestAlertEventStateQueryParams): ComposerQuery => {
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
-  query = query.where`rule_id == ${{ ruleId }}`;
+  query = query.where`rule.id == ${{ ruleId }}`;
 
-  query = query.pipe`STATS last_status = LAST(status, @timestamp), last_episode_id = LAST(episode_id, @timestamp) BY group_hash`;
+  const groupHashList = groupHashes.map((hash) => `"${hash}"`).join(', ');
+  query = query.pipe(`WHERE rule.id == ${ruleId} AND group_hash IN (${groupHashList})`);
 
-  query = query.pipe`EVAL next_state = CASE(
-      current_state == "inactive" AND last_signal_status == "breach", "pending",
-      current_state == "pending" AND last_signal_status == "breach", "active",
-      (current_state == "active" OR current_state == "pending") AND (last_signal_status == "recover" OR is_stale), "inactive",
-     "inactive"
-  )`;
+  query = query.pipe`STATS 
+      last_status = LAST(status, @timestamp), 
+      last_episode_id = LAST(episode.id, @timestamp), 
+      last_episode_status = LAST(episode.status, @timestamp) 
+    BY group_hash`;
 
-  query = query.pipe`EVAL 
-      event.kind = "state_change",
-      state.prev = current_state,
-      state.curr = next_state,
-      state.episode_id = IF(current_state == "inactive", TO_STRING(UUID()), current_episode_id)`;
-
-  query = query.keep('rule_id', 'group_hash');
+  query = query.keep('last_status', 'last_episode_id', 'last_episode_status', 'group_hash');
 
   return query;
 };
