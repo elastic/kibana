@@ -3,10 +3,10 @@
 # A failure in this pipeline build will prevent further progression to the subsequent stage.
 
 steps:
-  - label: ":kibana: SLO check (60 minutes)"
-    trigger: "serverless-quality-gates" # https://buildkite.com/elastic/serverless-quality-gates
+  - label: ':kibana: SLO check (60 minutes)'
+    trigger: 'serverless-quality-gates' # https://buildkite.com/elastic/serverless-quality-gates
     build:
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
       env:
         TARGET_ENV: production
         CHECK_SLO: true
@@ -16,20 +16,20 @@ steps:
         DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
     soft_fail: true
 
-  - label: ":rocket: Run serverless synthetics check"
+  - label: ':rocket: Run serverless synthetics check'
     if: build.env("ENVIRONMENT") == "production-canary"
-    trigger: "serverless-quality-gates"
+    trigger: 'serverless-quality-gates'
     build:
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)"
+      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
       env:
         TARGET_ENV: production
         SERVICE: kibana
         CHECK_SYNTHETICS: true
         CHECK_SYNTHETICS_TAG: serverless-platform-core-validation
 
-  - label: ":cookie: 20h bake time before continuing promotion"
+  - label: ':cookie: 20h bake time before continuing promotion'
     if: build.env("ENVIRONMENT") == "production-canary"
-    command: "sleep 72000"
+    command: 'sleep 72000'
     soft_fail:
       # A manual cancel of that step produces return code 255.
       # We're treating this case as a soft fail to allow manual bake time skipping.
