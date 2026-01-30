@@ -22,9 +22,11 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { css } from '@emotion/react';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
@@ -37,6 +39,25 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+
+export const useOverviewPageCustomCss = () => {
+  const {
+    euiTheme: { colors, size },
+  } = useEuiTheme();
+
+  return useMemo(
+    () => css`
+      .euiEmptyPrompt__content {
+        padding-top: ${size.xxs};
+        padding-bottom: ${size.xxs};
+      }
+      .euiText {
+        color: ${colors.textHeading};
+      }
+    `,
+    [colors?.textHeading, size?.xxs]
+  );
+};
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -109,6 +130,7 @@ export const OverviewPage: FC = () => {
     'overview'
   );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
+  console.log('--- GETTING UI SETTINGS ---', uiSettings.get('theme:darkMode')); // remove
 
   return (
     <>

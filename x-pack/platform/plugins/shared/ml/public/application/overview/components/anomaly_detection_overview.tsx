@@ -18,6 +18,7 @@ import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
+import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
   const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
@@ -28,6 +29,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
+  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const loadJobs = useCallback(async () => {
     setIsLoading(true);
@@ -111,9 +113,10 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   ]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} />
   ) : (
     <MLEmptyPromptCard
+      customCss={overviewPageCardCustomCss}
       layout="horizontal"
       hasBorder={true}
       hasShadow={false}

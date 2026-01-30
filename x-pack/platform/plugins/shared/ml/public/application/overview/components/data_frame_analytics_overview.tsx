@@ -17,6 +17,8 @@ import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/k
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
+import { useOverviewPageCustomCss } from '../overview_ml_page';
+
 export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
@@ -28,6 +30,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       'canStartStopDataFrameAnalytics',
       'canGetDataFrameAnalytics',
     ]);
+  const overviewPageCardCustomCss = useOverviewPageCustomCss();
 
   const disabled =
     !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
@@ -103,9 +106,10 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} />
   ) : (
     <MLEmptyPromptCard
+      customCss={overviewPageCardCustomCss}
       iconSrc={dfaImage}
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
