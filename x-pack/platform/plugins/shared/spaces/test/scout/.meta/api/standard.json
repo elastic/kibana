@@ -1,0 +1,136 @@
+{
+  "lastModified": "2026-01-30T09:08:11.822Z",
+  "sha1": "aa0eb69636bdf19082590c8edb678d26f246ca70",
+  "tests": [
+    {
+      "id": "9ed5a2598c1c91a-911908fadbaff38",
+      "title": "_import API with multiple spaces should import and export saved objects across different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_multiple_spaces.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "9ed5a2598c1c91a-b877bba4beee84a",
+      "title": "_import API with multiple spaces should import a dashboard object in space_1 and import the same object into space_2 but with a new destination ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_multiple_spaces.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-9de722094247341",
+      "title": "_import API within the Default space should return 409 when trying to create dashboard that already exists when overwrite=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-62095193f7de394",
+      "title": "_import API within the Default space should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-251fbc0688ef07a",
+      "title": "_import API within the Default space should return 200 and create a copy of the imported saved object (with a new ID) when createNewCopies=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 189,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-ba032797761572e",
+      "title": "_import API within the Default space should return 400 when creating hidden type object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-9df6f207584aae6",
+      "title": "_import API within the Space 1 space should return 409 when trying to create dashboard that already exists when overwrite=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-a1fcf2509373f53",
+      "title": "_import API within the Space 1 space should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-0f1f1e9269fad32",
+      "title": "_import API within the Space 1 space should return 200 and create a copy of the imported saved object (with a new ID) when createNewCopies=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 189,
+        "column": 12
+      }
+    },
+    {
+      "id": "2b7f297d446c8d4-173dc72e4425cf5",
+      "title": "_import API within the Space 1 space should return 400 when creating hidden type object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/api/tests/spaces_only/import_in_single_space.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    }
+  ]
+}
