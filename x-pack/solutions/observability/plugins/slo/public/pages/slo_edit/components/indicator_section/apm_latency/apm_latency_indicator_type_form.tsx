@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -22,7 +29,13 @@ import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
-export function ApmLatencyIndicatorTypeForm() {
+interface ApmLatencyIndicatorTypeFormProps {
+  isFlyout?: boolean;
+}
+
+export function ApmLatencyIndicatorTypeForm({
+  isFlyout = false,
+}: ApmLatencyIndicatorTypeFormProps) {
   const { control, watch, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
   const { data: apmIndex } = useFetchApmIndex();
@@ -57,13 +70,17 @@ export function ApmLatencyIndicatorTypeForm() {
     dataViewId,
   });
 
+  // In flyout mode, fields are stacked vertically (column). In full page, they're side by side (row).
+  const fieldDirection = isFlyout ? 'column' : 'row';
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction={fieldDirection} gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName', {
             defaultMessage: 'Service name',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceName.placeholder', {
             defaultMessage: 'Select the APM service',
           })}
@@ -83,6 +100,7 @@ export function ApmLatencyIndicatorTypeForm() {
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.serviceEnvironment', {
             defaultMessage: 'Service environment',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate(
             'xpack.slo.sloEdit.apmLatency.serviceEnvironment.placeholder',
             {
@@ -95,11 +113,12 @@ export function ApmLatencyIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction={fieldDirection} gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionType', {
             defaultMessage: 'Transaction type',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionType.placeholder', {
             defaultMessage: 'Select the transaction type',
           })}
@@ -111,6 +130,7 @@ export function ApmLatencyIndicatorTypeForm() {
           label={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionName', {
             defaultMessage: 'Transaction name',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.transactionName.placeholder', {
             defaultMessage: 'Select the transaction name',
           })}
@@ -121,6 +141,7 @@ export function ApmLatencyIndicatorTypeForm() {
       </EuiFlexGroup>
 
       <EuiFormRow
+        fullWidth={isFlyout}
         label={
           <span>
             {i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.placeholder', {
@@ -148,6 +169,7 @@ export function ApmLatencyIndicatorTypeForm() {
           render={({ field: { ref, ...field }, fieldState }) => (
             <EuiFieldNumber
               {...field}
+              fullWidth={isFlyout}
               required
               isInvalid={fieldState.invalid}
               value={String(field.value)}
@@ -159,28 +181,73 @@ export function ApmLatencyIndicatorTypeForm() {
         />
       </EuiFormRow>
 
-      <QueryBuilder
-        dataTestSubj="apmLatencyFilterInput"
-        dataView={dataView}
-        label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
-          defaultMessage: 'Query filter',
-        })}
-        name="indicator.params.filter"
-        placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
-          defaultMessage: 'Custom filter to apply on the index',
-        })}
-        tooltip={
-          <EuiIconTip
-            content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
-              defaultMessage:
-                'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+      {isFlyout ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiAccordion
+            id="apmLatencyAdvancedSettings"
+            buttonContent={i18n.translate('xpack.slo.sloEdit.apmLatency.advancedSettings', {
+              defaultMessage: 'Advanced settings',
             })}
-            position="top"
-          />
-        }
-      />
+          >
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <QueryBuilder
+                dataTestSubj="apmLatencyFilterInput"
+                dataView={dataView}
+                label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
+                  defaultMessage: 'Query filter',
+                })}
+                name="indicator.params.filter"
+                placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
+                  defaultMessage: 'Custom filter to apply on the index',
+                })}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
+                      defaultMessage:
+                        'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                    })}
+                    position="top"
+                  />
+                }
+              />
 
-      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
+              <GroupByField
+                dataView={dataView}
+                isLoading={isIndexFieldsLoading}
+                filters={allFilters}
+              />
+            </EuiFlexGroup>
+          </EuiAccordion>
+          <EuiSpacer size="xs" />
+        </>
+      ) : (
+        <>
+          <QueryBuilder
+            dataTestSubj="apmLatencyFilterInput"
+            dataView={dataView}
+            label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
+              defaultMessage: 'Query filter',
+            })}
+            name="indicator.params.filter"
+            placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
+              defaultMessage: 'Custom filter to apply on the index',
+            })}
+            tooltip={
+              <EuiIconTip
+                content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
+                  defaultMessage:
+                    'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                })}
+                position="top"
+              />
+            }
+          />
+
+          <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
+        </>
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>

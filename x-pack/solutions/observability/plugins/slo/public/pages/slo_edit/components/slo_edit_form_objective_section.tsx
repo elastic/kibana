@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiSelect,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,13 +29,19 @@ import {
   ROLLING_TIMEWINDOW_OPTIONS,
   TIMEWINDOW_TYPE_OPTIONS,
 } from '../constants';
-import type { CreateSLOForm } from '../types';
+import type { CreateSLOForm, FormSettings } from '../types';
 import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { DataPreviewChart } from './common/data_preview_chart';
 
-export function SloEditFormObjectiveSection() {
+interface SloEditFormObjectiveSectionProps {
+  formSettings?: FormSettings;
+}
+
+export function SloEditFormObjectiveSection({ formSettings }: SloEditFormObjectiveSectionProps) {
+  const isFlyout = formSettings?.isFlyout ?? false;
   const {
     control,
     watch,
@@ -88,6 +95,246 @@ export function SloEditFormObjectiveSection() {
     }
   }, [timeWindowType, setValue, defaultValues, timeWindowTypeState]);
 
+  // In flyout mode, use column layout. In full page, use grid layout.
+  const FieldContainer = isFlyout ? EuiFlexGroup : EuiFlexGrid;
+  const fieldContainerProps = isFlyout
+    ? { direction: 'column' as const, gutterSize: 'm' as const }
+    : { columns: 3 as const, gutterSize: 'm' as const };
+
+  const content = (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {isServerless && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut announceOnMount>
+            {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
+              defaultMessage: 'Initial data backfill is limited to the past 7 days',
+            })}
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+
+      <FieldContainer {...fieldContainerProps}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            fullWidth={isFlyout}
+            label={
+              <span>
+                {i18n.translate('xpack.slo.sloEdit.timeWindowType.label', {
+                  defaultMessage: 'Time window',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.slo.sloEdit.timeWindowType.tooltip', {
+                    defaultMessage: 'Choose between a rolling or a calendar aligned window.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.type"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  fullWidth={isFlyout}
+                  required
+                  id={timeWindowTypeSelect}
+                  data-test-subj="sloFormTimeWindowTypeSelect"
+                  options={TIMEWINDOW_TYPE_OPTIONS}
+                  value={field.value}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            fullWidth={isFlyout}
+            label={
+              <span>
+                {i18n.translate('xpack.slo.sloEdit.timeWindowDuration.label', {
+                  defaultMessage: 'Duration',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.tooltip', {
+                    defaultMessage: 'The time window duration used to compute the SLO over.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="timeWindow.duration"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  fullWidth={isFlyout}
+                  required
+                  id={timeWindowSelect}
+                  data-test-subj="sloFormTimeWindowDurationSelect"
+                  options={
+                    timeWindowType === 'calendarAligned'
+                      ? CALENDARALIGNED_TIMEWINDOW_OPTIONS
+                      : ROLLING_TIMEWINDOW_OPTIONS
+                  }
+                  value={field.value}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </FieldContainer>
+
+      {indicator === 'sli.metric.timeslice' && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut announceOnMount color="warning">
+            <p>
+              <FormattedMessage
+                id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
+                defaultMessage="The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations. The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+
+      {indicator === 'sli.synthetics.availability' && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut announceOnMount color="warning">
+            <p>
+              <FormattedMessage
+                id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
+                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
+              />
+            </p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+
+      <FieldContainer {...fieldContainerProps}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            fullWidth={isFlyout}
+            label={
+              <span>
+                {i18n.translate('xpack.slo.sloEdit.budgetingMethod.label', {
+                  defaultMessage: 'Budgeting method',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.slo.sloEdit.budgetingMethod.tooltip', {
+                    defaultMessage:
+                      'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="budgetingMethod"
+              control={control}
+              rules={{ required: true }}
+              render={({ field: { ref, ...field } }) => (
+                <EuiSelect
+                  {...field}
+                  fullWidth={isFlyout}
+                  disabled={
+                    indicator === 'sli.metric.timeslice' ||
+                    indicator === 'sli.synthetics.availability'
+                  }
+                  required
+                  id={budgetingSelect}
+                  data-test-subj="sloFormBudgetingMethodSelect"
+                  options={BUDGETING_METHOD_OPTIONS}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        {watch('budgetingMethod') === 'timeslices' ? (
+          <SloEditFormObjectiveSectionTimeslices isFlyout={isFlyout} />
+        ) : null}
+      </FieldContainer>
+
+      <FieldContainer {...fieldContainerProps}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            fullWidth={isFlyout}
+            isInvalid={getFieldState('objective.target').invalid}
+            label={
+              <span>
+                {i18n.translate('xpack.slo.sloEdit.targetSlo.label', {
+                  defaultMessage: 'Target / SLO (%)',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate('xpack.slo.sloEdit.targetSlo.tooltip', {
+                    defaultMessage: 'The target objective in percentage for the SLO.',
+                  })}
+                  position="top"
+                />
+              </span>
+            }
+          >
+            <Controller
+              name="objective.target"
+              control={control}
+              rules={{
+                required: true,
+                min: 0.001,
+                max: 99.999,
+              }}
+              render={({ field: { ref, onChange, ...field }, fieldState }) => (
+                <EuiFieldNumber
+                  {...field}
+                  fullWidth={isFlyout}
+                  required
+                  isInvalid={fieldState.invalid}
+                  data-test-subj="sloFormObjectiveTargetInput"
+                  value={field.value}
+                  min={0.001}
+                  max={99.999}
+                  step={0.001}
+                  onChange={(event) => onChange(event.target.value)}
+                />
+              )}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </FieldContainer>
+
+      {isFlyout ? (
+        <>
+          <EuiSpacer size="xs" />
+          <AdvancedSettings isFlyout={isFlyout} />
+          <EuiSpacer size="xs" />
+        </>
+      ) : (
+        <AdvancedSettings isFlyout={isFlyout} />
+      )}
+
+      {isFlyout && <DataPreviewChart />}
+    </EuiFlexGroup>
+  );
+
+  if (isFlyout) {
+    return (
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj="sloEditFormObjectiveSection"
+      >
+        {content}
+      </EuiPanel>
+    );
+  }
+
   return (
     <EuiPanel
       hasBorder={false}
@@ -96,203 +343,7 @@ export function SloEditFormObjectiveSection() {
       style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormObjectiveSection"
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        {isServerless && (
-          <EuiCallOut announceOnMount>
-            {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
-              defaultMessage: 'Initial data backfill is limited to the past 7 days',
-            })}
-          </EuiCallOut>
-        )}
-        <EuiFlexGrid columns={3} gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <span>
-                  {i18n.translate('xpack.slo.sloEdit.timeWindowType.label', {
-                    defaultMessage: 'Time window',
-                  })}{' '}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.slo.sloEdit.timeWindowType.tooltip', {
-                      defaultMessage: 'Choose between a rolling or a calendar aligned window.',
-                    })}
-                    position="top"
-                  />
-                </span>
-              }
-            >
-              <Controller
-                name="timeWindow.type"
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { ref, ...field } }) => (
-                  <EuiSelect
-                    {...field}
-                    required
-                    id={timeWindowTypeSelect}
-                    data-test-subj="sloFormTimeWindowTypeSelect"
-                    options={TIMEWINDOW_TYPE_OPTIONS}
-                    value={field.value}
-                  />
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <span>
-                  {i18n.translate('xpack.slo.sloEdit.timeWindowDuration.label', {
-                    defaultMessage: 'Duration',
-                  })}{' '}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.tooltip', {
-                      defaultMessage: 'The time window duration used to compute the SLO over.',
-                    })}
-                    position="top"
-                  />
-                </span>
-              }
-            >
-              <Controller
-                name="timeWindow.duration"
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { ref, ...field } }) => (
-                  <EuiSelect
-                    {...field}
-                    required
-                    id={timeWindowSelect}
-                    data-test-subj="sloFormTimeWindowDurationSelect"
-                    options={
-                      timeWindowType === 'calendarAligned'
-                        ? CALENDARALIGNED_TIMEWINDOW_OPTIONS
-                        : ROLLING_TIMEWINDOW_OPTIONS
-                    }
-                    value={field.value}
-                  />
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-
-        {indicator === 'sli.metric.timeslice' && (
-          <EuiFlexItem>
-            <EuiCallOut announceOnMount color="warning">
-              <p>
-                <FormattedMessage
-                  id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
-                  defaultMessage="The timeslice metric requires the budgeting method to be set to 'Timeslices' due to the nature of the statistical aggregations. The 'timeslice target' is also ignored in favor of the 'threshold' set in the metric definition above. The 'timeslice window' will set the size of the window the aggregation is performed on."
-                />
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-
-        {indicator === 'sli.synthetics.availability' && (
-          <EuiFlexItem>
-            <EuiCallOut announceOnMount color="warning">
-              <p>
-                <FormattedMessage
-                  id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
-                  defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
-                />
-              </p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        )}
-
-        <EuiFlexGrid columns={3} gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <span>
-                  {i18n.translate('xpack.slo.sloEdit.budgetingMethod.label', {
-                    defaultMessage: 'Budgeting method',
-                  })}{' '}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.slo.sloEdit.budgetingMethod.tooltip', {
-                      defaultMessage:
-                        'Occurrences-based SLO uses the ratio of good events over the total events during the time window. Timeslices-based SLO uses the ratio of good time slices over the total time slices during the time window.',
-                    })}
-                    position="top"
-                  />
-                </span>
-              }
-            >
-              <Controller
-                name="budgetingMethod"
-                control={control}
-                rules={{ required: true }}
-                render={({ field: { ref, ...field } }) => (
-                  <EuiSelect
-                    {...field}
-                    disabled={
-                      indicator === 'sli.metric.timeslice' ||
-                      indicator === 'sli.synthetics.availability'
-                    }
-                    required
-                    id={budgetingSelect}
-                    data-test-subj="sloFormBudgetingMethodSelect"
-                    options={BUDGETING_METHOD_OPTIONS}
-                  />
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-
-          {watch('budgetingMethod') === 'timeslices' ? (
-            <SloEditFormObjectiveSectionTimeslices />
-          ) : null}
-        </EuiFlexGrid>
-
-        <EuiFlexGrid columns={3} gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow
-              isInvalid={getFieldState('objective.target').invalid}
-              label={
-                <span>
-                  {i18n.translate('xpack.slo.sloEdit.targetSlo.label', {
-                    defaultMessage: 'Target / SLO (%)',
-                  })}{' '}
-                  <EuiIconTip
-                    content={i18n.translate('xpack.slo.sloEdit.targetSlo.tooltip', {
-                      defaultMessage: 'The target objective in percentage for the SLO.',
-                    })}
-                    position="top"
-                  />
-                </span>
-              }
-            >
-              <Controller
-                name="objective.target"
-                control={control}
-                rules={{
-                  required: true,
-                  min: 0.001,
-                  max: 99.999,
-                }}
-                render={({ field: { ref, onChange, ...field }, fieldState }) => (
-                  <EuiFieldNumber
-                    {...field}
-                    required
-                    isInvalid={fieldState.invalid}
-                    data-test-subj="sloFormObjectiveTargetInput"
-                    value={field.value}
-                    min={0.001}
-                    max={99.999}
-                    step={0.001}
-                    onChange={(event) => onChange(event.target.value)}
-                  />
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-
-        <AdvancedSettings />
-      </EuiFlexGroup>
+      {content}
     </EuiPanel>
   );
 }

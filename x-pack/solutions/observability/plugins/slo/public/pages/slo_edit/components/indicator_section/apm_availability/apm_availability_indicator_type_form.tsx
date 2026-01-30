@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import type { APMTransactionErrorRateIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -22,7 +22,13 @@ import { QueryBuilder } from '../../common/query_builder';
 import { formatAllFilters } from '../../../helpers/format_filters';
 import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
-export function ApmAvailabilityIndicatorTypeForm() {
+interface ApmAvailabilityIndicatorTypeFormProps {
+  isFlyout?: boolean;
+}
+
+export function ApmAvailabilityIndicatorTypeForm({
+  isFlyout = false,
+}: ApmAvailabilityIndicatorTypeFormProps) {
   const { watch } = useFormContext<CreateSLOForm<APMTransactionErrorRateIndicator>>();
   const { data: apmIndex } = useFetchApmIndex();
   const dataViewId = watch(DATA_VIEW_FIELD);
@@ -55,13 +61,17 @@ export function ApmAvailabilityIndicatorTypeForm() {
     dataViewId,
   });
 
+  // In flyout mode, fields are stacked vertically (column). In full page, they're side by side (row).
+  const fieldDirection = isFlyout ? 'column' : 'row';
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction={fieldDirection} gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName.placeholder', {
             defaultMessage: 'Select the APM service',
           })}
@@ -81,6 +91,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceEnvironment', {
             defaultMessage: 'Service environment',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate(
             'xpack.slo.sloEdit.apmAvailability.serviceEnvironment.placeholder',
             {
@@ -93,11 +104,12 @@ export function ApmAvailabilityIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction={fieldDirection} gutterSize="m">
         <FieldSelector
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.transactionType', {
             defaultMessage: 'Transaction type',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate(
             'xpack.slo.sloEdit.apmAvailability.transactionType.placeholder',
             {
@@ -112,6 +124,7 @@ export function ApmAvailabilityIndicatorTypeForm() {
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.transactionName', {
             defaultMessage: 'Transaction name',
           })}
+          fullWidth={isFlyout}
           placeholder={i18n.translate(
             'xpack.slo.sloEdit.apmAvailability.transactionName.placeholder',
             {
@@ -124,32 +137,83 @@ export function ApmAvailabilityIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <EuiFlexItem>
-          <QueryBuilder
-            dataTestSubj="apmLatencyFilterInput"
-            dataView={dataView}
-            label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
-              defaultMessage: 'Query filter',
+      {isFlyout ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiAccordion
+            id="apmAvailabilityAdvancedSettings"
+            buttonContent={i18n.translate('xpack.slo.sloEdit.apmAvailability.advancedSettings', {
+              defaultMessage: 'Advanced settings',
             })}
-            name="indicator.params.filter"
-            placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
-              defaultMessage: 'Custom filter to apply on the index',
-            })}
-            tooltip={
-              <EuiIconTip
-                content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
-                  defaultMessage:
-                    'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+          >
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <QueryBuilder
+                dataTestSubj="apmAvailabilityFilterInput"
+                dataView={dataView}
+                label={i18n.translate('xpack.slo.sloEdit.apmAvailability.filter', {
+                  defaultMessage: 'Query filter',
                 })}
-                position="top"
+                name="indicator.params.filter"
+                placeholder={i18n.translate(
+                  'xpack.slo.sloEdit.apmAvailability.filter.placeholder',
+                  {
+                    defaultMessage: 'Custom filter to apply on the index',
+                  }
+                )}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
+                      defaultMessage:
+                        'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                    })}
+                    position="top"
+                  />
+                }
               />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
 
-      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
+              <GroupByField
+                dataView={dataView}
+                isLoading={isIndexFieldsLoading}
+                filters={allFilters}
+              />
+            </EuiFlexGroup>
+          </EuiAccordion>
+          <EuiSpacer size="xs" />
+        </>
+      ) : (
+        <>
+          <EuiFlexGroup direction="row" gutterSize="m">
+            <EuiFlexItem>
+              <QueryBuilder
+                dataTestSubj="apmAvailabilityFilterInput"
+                dataView={dataView}
+                label={i18n.translate('xpack.slo.sloEdit.apmAvailability.filter', {
+                  defaultMessage: 'Query filter',
+                })}
+                name="indicator.params.filter"
+                placeholder={i18n.translate(
+                  'xpack.slo.sloEdit.apmAvailability.filter.placeholder',
+                  {
+                    defaultMessage: 'Custom filter to apply on the index',
+                  }
+                )}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
+                      defaultMessage:
+                        'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+                    })}
+                    position="top"
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
+        </>
+      )}
 
       <DataPreviewChart />
     </EuiFlexGroup>

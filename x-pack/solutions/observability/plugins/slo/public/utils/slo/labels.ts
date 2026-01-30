@@ -30,13 +30,69 @@ export const INDICATOR_APM_LATENCY = i18n.translate('xpack.slo.indicators.apmLat
   defaultMessage: 'APM latency',
 });
 
+export const INDICATOR_APM_LATENCY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.apmLatency.description',
+  {
+    defaultMessage:
+      'An APM latency SLO defines a response-time objective for application requests and monitors compliance over time to detect performance degradation and error budget burn.',
+  }
+);
+
 export const INDICATOR_APM_AVAILABILITY = i18n.translate('xpack.slo.indicators.apmAvailability', {
   defaultMessage: 'APM availability',
 });
 
+export const INDICATOR_APM_AVAILABILITY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.apmAvailability.description',
+  {
+    defaultMessage:
+      'An APM availability SLO defines an error-rate objective for application requests and monitors compliance over time to detect reliability issues and error budget burn.',
+  }
+);
+
 export const INDICATOR_SYNTHETICS_AVAILABILITY = i18n.translate(
   'xpack.slo.indicators.syntheticsAvailability',
   { defaultMessage: 'Synthetics availability' }
+);
+
+export const INDICATOR_SYNTHETICS_AVAILABILITY_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.syntheticsAvailability.description',
+  {
+    defaultMessage:
+      'A Synthetics availability SLO monitors uptime and availability of your synthetic monitors over time.',
+  }
+);
+
+export const INDICATOR_CUSTOM_KQL_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.customKql.description',
+  {
+    defaultMessage:
+      'A Custom Query SLO uses KQL queries to define good and total events from any Elasticsearch index.',
+  }
+);
+
+export const INDICATOR_CUSTOM_METRIC_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.customMetric.description',
+  {
+    defaultMessage:
+      'A Custom Metric SLO uses metric aggregations to calculate SLI values from any Elasticsearch index.',
+  }
+);
+
+export const INDICATOR_TIMESLICE_METRIC_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.timesliceMetric.description',
+  {
+    defaultMessage:
+      'A Timeslice Metric SLO evaluates a metric threshold for each time slice to determine compliance.',
+  }
+);
+
+export const INDICATOR_HISTOGRAM_DESCRIPTION = i18n.translate(
+  'xpack.slo.indicators.histogram.description',
+  {
+    defaultMessage:
+      'A Histogram Metric SLO uses histogram aggregations to calculate SLI values from histogram fields.',
+  }
 );
 
 export function toIndicatorTypeLabel(
@@ -63,6 +119,36 @@ export function toIndicatorTypeLabel(
 
     case 'sli.metric.timeslice':
       return INDICATOR_TIMESLICE_METRIC;
+
+    default:
+      assertNever(indicatorType as never);
+  }
+}
+
+export function toIndicatorTypeDescription(
+  indicatorType: SLOWithSummaryResponse['indicator']['type']
+): string {
+  switch (indicatorType) {
+    case 'sli.kql.custom':
+      return INDICATOR_CUSTOM_KQL_DESCRIPTION;
+
+    case 'sli.apm.transactionDuration':
+      return INDICATOR_APM_LATENCY_DESCRIPTION;
+
+    case 'sli.apm.transactionErrorRate':
+      return INDICATOR_APM_AVAILABILITY_DESCRIPTION;
+
+    case 'sli.synthetics.availability':
+      return INDICATOR_SYNTHETICS_AVAILABILITY_DESCRIPTION;
+
+    case 'sli.metric.custom':
+      return INDICATOR_CUSTOM_METRIC_DESCRIPTION;
+
+    case 'sli.histogram.custom':
+      return INDICATOR_HISTOGRAM_DESCRIPTION;
+
+    case 'sli.metric.timeslice':
+      return INDICATOR_TIMESLICE_METRIC_DESCRIPTION;
 
     default:
       assertNever(indicatorType as never);

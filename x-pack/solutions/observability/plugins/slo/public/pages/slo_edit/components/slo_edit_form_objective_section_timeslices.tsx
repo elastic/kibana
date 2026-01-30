@@ -11,14 +11,21 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
-export function SloEditFormObjectiveSectionTimeslices() {
+interface SloEditFormObjectiveSectionTimeslicesProps {
+  isFlyout?: boolean;
+}
+
+export function SloEditFormObjectiveSectionTimeslices({
+  isFlyout = false,
+}: SloEditFormObjectiveSectionTimeslicesProps) {
   const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
   const indicator = watch('indicator.type');
 
   return (
     <>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
+          fullWidth={isFlyout}
           isInvalid={getFieldState('objective.timesliceTarget').invalid}
           label={
             <span>
@@ -47,6 +54,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
             render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
+                fullWidth={isFlyout}
                 required
                 disabled={indicator === 'sli.metric.timeslice'}
                 isInvalid={fieldState.invalid}
@@ -62,8 +70,9 @@ export function SloEditFormObjectiveSectionTimeslices() {
         </EuiFormRow>
       </EuiFlexItem>
 
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
+          fullWidth={isFlyout}
           isInvalid={getFieldState('objective.timesliceWindow').invalid}
           label={
             <span>
@@ -87,6 +96,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
             render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
+                fullWidth={isFlyout}
                 isInvalid={fieldState.invalid}
                 required
                 data-test-subj="sloFormObjectiveTimesliceWindowInput"

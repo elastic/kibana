@@ -9,8 +9,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -20,11 +23,19 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
-import type { CreateSLOForm } from '../types';
+import type { CreateSLOForm, FormSettings } from '../types';
 import { OptionalText } from './common/optional_text';
 import { MAX_WIDTH } from '../constants';
+import { DataPreviewChart } from './common/data_preview_chart';
 
-export function SloEditFormDescriptionSection() {
+interface SloEditFormDescriptionSectionProps {
+  formSettings?: FormSettings;
+}
+
+export function SloEditFormDescriptionSection({
+  formSettings,
+}: SloEditFormDescriptionSectionProps) {
+  const isFlyout = formSettings?.isFlyout ?? false;
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
@@ -34,6 +45,173 @@ export function SloEditFormDescriptionSection() {
   const { services } = useKibana();
   const { uiActions } = services;
 
+  const content = (
+    <>
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          fullWidth
+          isInvalid={getFieldState('name').invalid}
+          label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
+            defaultMessage: 'SLO Name',
+          })}
+        >
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: true }}
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <EuiFieldText
+                {...field}
+                fullWidth
+                isInvalid={fieldState.invalid}
+                id={sloNameId}
+                data-test-subj="sloFormNameInput"
+                placeholder={i18n.translate('xpack.slo.sloEdit.description.sloNamePlaceholder', {
+                  defaultMessage: 'Name for the SLO',
+                })}
+              />
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.slo.sloEdit.description.sloDescription', {
+            defaultMessage: 'Description',
+          })}
+          labelAppend={<OptionalText />}
+        >
+          <Controller
+            name="description"
+            defaultValue=""
+            control={control}
+            rules={{ required: false }}
+            render={({ field: { ref, ...field } }) => (
+              <EuiTextArea
+                {...field}
+                fullWidth
+                id={descriptionId}
+                data-test-subj="sloFormDescriptionTextArea"
+                placeholder={i18n.translate(
+                  'xpack.slo.sloEdit.description.sloDescriptionPlaceholder',
+                  {
+                    defaultMessage: 'A short description of the SLO',
+                  }
+                )}
+              />
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.slo.sloEdit.tags.label', {
+            defaultMessage: 'Tags',
+          })}
+          labelAppend={<OptionalText />}
+        >
+          <Controller
+            name="tags"
+            control={control}
+            defaultValue={[]}
+            rules={{ required: false }}
+            render={({ field: { ref, ...field }, fieldState }) => (
+              <EuiComboBox
+                {...field}
+                id={tagsId}
+                fullWidth
+                aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                  defaultMessage: 'Add tags',
+                })}
+                placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
+                  defaultMessage: 'Add tags',
+                })}
+                isInvalid={fieldState.invalid}
+                options={suggestions?.tags ?? []}
+                selectedOptions={generateTagOptions(field.value)}
+                onChange={(selected: EuiComboBoxOptionOption[]) => {
+                  if (selected.length) {
+                    return field.onChange(selected.map((opts) => opts.value));
+                  }
+
+                  field.onChange([]);
+                }}
+                onCreateOption={(searchValue: string, options: EuiComboBoxOptionOption[] = []) => {
+                  const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+                  if (!normalizedSearchValue) {
+                    return;
+                  }
+                  const values = field.value ?? [];
+
+                  if (
+                    values.findIndex(
+                      (tag) => tag.trim().toLowerCase() === normalizedSearchValue
+                    ) === -1
+                  ) {
+                    field.onChange([...values, searchValue]);
+                  }
+                }}
+                isClearable
+                data-test-subj="sloEditTagsSelector"
+              />
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {
+            defaultMessage: 'Linked dashboards',
+          })}
+          labelAppend={<OptionalText />}
+        >
+          <Controller
+            name="artifacts.dashboards"
+            control={control}
+            defaultValue={undefined}
+            render={({ field }) => (
+              <DashboardsSelector
+                uiActions={uiActions}
+                dashboardsFormData={field.value ?? []}
+                placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
+                onChange={(selected) => field.onChange(selected.map((d) => ({ id: d.value })))}
+              />
+            )}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+
+      {isFlyout && (
+        <>
+          <EuiSpacer size="m" />
+          <DataPreviewChart />
+        </>
+      )}
+    </>
+  );
+
+  if (isFlyout) {
+    return (
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
+        data-test-subj="sloEditFormDescriptionSection"
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {content}
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
   return (
     <EuiPanel
       hasBorder={false}
@@ -42,136 +220,9 @@ export function SloEditFormDescriptionSection() {
       style={{ maxWidth: MAX_WIDTH }}
       data-test-subj="sloEditFormDescriptionSection"
     >
-      <EuiFormRow
-        fullWidth
-        isInvalid={getFieldState('name').invalid}
-        label={i18n.translate('xpack.slo.sloEdit.description.sloName', {
-          defaultMessage: 'SLO Name',
-        })}
-      >
-        <Controller
-          name="name"
-          control={control}
-          rules={{ required: true }}
-          render={({ field: { ref, ...field }, fieldState }) => (
-            <EuiFieldText
-              {...field}
-              fullWidth
-              isInvalid={fieldState.invalid}
-              id={sloNameId}
-              data-test-subj="sloFormNameInput"
-              placeholder={i18n.translate('xpack.slo.sloEdit.description.sloNamePlaceholder', {
-                defaultMessage: 'Name for the SLO',
-              })}
-            />
-          )}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.slo.sloEdit.description.sloDescription', {
-          defaultMessage: 'Description',
-        })}
-        labelAppend={<OptionalText />}
-      >
-        <Controller
-          name="description"
-          defaultValue=""
-          control={control}
-          rules={{ required: false }}
-          render={({ field: { ref, ...field } }) => (
-            <EuiTextArea
-              {...field}
-              fullWidth
-              id={descriptionId}
-              data-test-subj="sloFormDescriptionTextArea"
-              placeholder={i18n.translate(
-                'xpack.slo.sloEdit.description.sloDescriptionPlaceholder',
-                {
-                  defaultMessage: 'A short description of the SLO',
-                }
-              )}
-            />
-          )}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.slo.sloEdit.tags.label', {
-          defaultMessage: 'Tags',
-        })}
-        labelAppend={<OptionalText />}
-      >
-        <Controller
-          name="tags"
-          control={control}
-          defaultValue={[]}
-          rules={{ required: false }}
-          render={({ field: { ref, ...field }, fieldState }) => (
-            <EuiComboBox
-              {...field}
-              id={tagsId}
-              fullWidth
-              aria-label={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                defaultMessage: 'Add tags',
-              })}
-              placeholder={i18n.translate('xpack.slo.sloEdit.tags.placeholder', {
-                defaultMessage: 'Add tags',
-              })}
-              isInvalid={fieldState.invalid}
-              options={suggestions?.tags ?? []}
-              selectedOptions={generateTagOptions(field.value)}
-              onChange={(selected: EuiComboBoxOptionOption[]) => {
-                if (selected.length) {
-                  return field.onChange(selected.map((opts) => opts.value));
-                }
-
-                field.onChange([]);
-              }}
-              onCreateOption={(searchValue: string, options: EuiComboBoxOptionOption[] = []) => {
-                const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-                if (!normalizedSearchValue) {
-                  return;
-                }
-                const values = field.value ?? [];
-
-                if (
-                  values.findIndex((tag) => tag.trim().toLowerCase() === normalizedSearchValue) ===
-                  -1
-                ) {
-                  field.onChange([...values, searchValue]);
-                }
-              }}
-              isClearable
-              data-test-subj="sloEditTagsSelector"
-            />
-          )}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate('xpack.slo.sloEdit.dashboards.label', {
-          defaultMessage: 'Linked dashboards',
-        })}
-        labelAppend={<OptionalText />}
-      >
-        <Controller
-          name="artifacts.dashboards"
-          control={control}
-          defaultValue={undefined}
-          render={({ field }) => (
-            <DashboardsSelector
-              uiActions={uiActions}
-              dashboardsFormData={field.value ?? []}
-              placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
-              onChange={(selected) => field.onChange(selected.map((d) => ({ id: d.value })))}
-            />
-          )}
-        />
-      </EuiFormRow>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {content}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }

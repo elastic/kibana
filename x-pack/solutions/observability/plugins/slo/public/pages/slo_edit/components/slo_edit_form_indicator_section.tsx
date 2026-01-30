@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
@@ -14,6 +24,7 @@ import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import type { CreateSLOForm, FormSettings } from '../types';
 import { MAX_WIDTH } from '../constants';
+import { toIndicatorTypeLabel, toIndicatorTypeDescription } from '../../../utils/slo/labels';
 import { ApmAvailabilityIndicatorTypeForm } from './indicator_section/apm_availability/apm_availability_indicator_type_form';
 import { ApmLatencyIndicatorTypeForm } from './indicator_section/apm_latency/apm_latency_indicator_type_form';
 import { CustomKqlIndicatorTypeForm } from './indicator_section/custom_kql/custom_kql_indicator_type_form';
@@ -27,7 +38,7 @@ interface SloEditFormIndicatorSectionProps {
 }
 
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
-  const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
+  const { isEditMode = false, isFlyout = false, allowedIndicatorTypes = [] } = formSettings;
   const { control, watch } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
@@ -43,23 +54,90 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
   const indicatorTypeForm = useMemo(() => {
     switch (indicatorType) {
       case 'sli.kql.custom':
-        return <CustomKqlIndicatorTypeForm />;
+        return isFlyout ? <UnsupportedIndicatorMessage /> : <CustomKqlIndicatorTypeForm />;
       case 'sli.apm.transactionDuration':
-        return <ApmLatencyIndicatorTypeForm />;
+        return <ApmLatencyIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.apm.transactionErrorRate':
-        return <ApmAvailabilityIndicatorTypeForm />;
+        return <ApmAvailabilityIndicatorTypeForm isFlyout={isFlyout} />;
       case 'sli.synthetics.availability':
-        return <SyntheticsAvailabilityIndicatorTypeForm />;
+        return isFlyout ? (
+          <UnsupportedIndicatorMessage />
+        ) : (
+          <SyntheticsAvailabilityIndicatorTypeForm />
+        );
       case 'sli.metric.custom':
-        return <CustomMetricIndicatorTypeForm />;
+        return isFlyout ? <UnsupportedIndicatorMessage /> : <CustomMetricIndicatorTypeForm />;
       case 'sli.histogram.custom':
-        return <HistogramIndicatorTypeForm />;
+        return isFlyout ? <UnsupportedIndicatorMessage /> : <HistogramIndicatorTypeForm />;
       case 'sli.metric.timeslice':
-        return <TimesliceMetricIndicatorTypeForm />;
+        return isFlyout ? <UnsupportedIndicatorMessage /> : <TimesliceMetricIndicatorTypeForm />;
       default:
         assertNever(indicatorType);
     }
-  }, [indicatorType]);
+  }, [indicatorType, isFlyout]);
+
+  if (isFlyout) {
+    return (
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="sloEditFormIndicatorSection"
+      >
+        <EuiPanel color="subdued" hasBorder={false} hasShadow={false} paddingSize="m">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h4>{toIndicatorTypeLabel(indicatorType)}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">{toIndicatorTypeDescription(indicatorType)}</EuiText>
+            </EuiFlexItem>
+            {(indicatorType === 'sli.apm.transactionDuration' ||
+              indicatorType === 'sli.apm.transactionErrorRate') && (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="sloSloEditFormIndicatorSectionViewDocumentationButton"
+                  href="https://ela.st/docs-create-slo-apm"
+                  target="_blank"
+                >
+                  {i18n.translate('xpack.slo.sloEdit.flyout.viewDocumentation', {
+                    defaultMessage: 'View documentation',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+          {!isEditMode && (
+            <>
+              <EuiFormRow label={indicatorLabel} fullWidth>
+                <Controller
+                  name="indicator.type"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field: { ref, ...field } }) => (
+                    <EuiSelect
+                      {...field}
+                      required
+                      fullWidth
+                      data-test-subj="sloFormIndicatorTypeSelect"
+                      options={filteredSliOptions}
+                      aria-label={indicatorLabel}
+                    />
+                  )}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {indicatorTypeForm}
+        </EuiPanel>
+      </EuiPanel>
+    );
+  }
 
   return (
     <EuiPanel
@@ -91,6 +169,17 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
         </>
       )}
       {indicatorTypeForm}
+    </EuiPanel>
+  );
+}
+
+function UnsupportedIndicatorMessage() {
+  return (
+    <EuiPanel color="subdued" hasBorder>
+      {i18n.translate('xpack.slo.sloEdit.flyout.unsupportedIndicatorType', {
+        defaultMessage:
+          'This indicator type is not yet supported in the quick create flyout. Please use the full SLO editor.',
+      })}
     </EuiPanel>
   );
 }

@@ -19,7 +19,11 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.settings.syncField.placeho
   defaultMessage: 'Select a timestamp field',
 });
 
-export function SyncFieldSelector() {
+interface SyncFieldSelectorProps {
+  fullWidth?: boolean;
+}
+
+export function SyncFieldSelector({ fullWidth }: SyncFieldSelectorProps) {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
   const [index, dataViewId] = watch(['indicator.params.index', 'indicator.params.dataViewId']);
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
@@ -30,6 +34,7 @@ export function SyncFieldSelector() {
 
   return (
     <EuiFormRow
+      fullWidth={fullWidth}
       label={
         <span>
           {i18n.translate('xpack.slo.sloEdit.settings.syncField.label', {
@@ -56,6 +61,7 @@ export function SyncFieldSelector() {
           return (
             <EuiComboBox<string>
               {...field}
+              fullWidth={fullWidth}
               placeholder={placeholder}
               aria-label={placeholder}
               isClearable
