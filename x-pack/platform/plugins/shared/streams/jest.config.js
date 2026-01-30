@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/streams',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/streams/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/streams/{common,public,server,cli}/**/*.{js,ts,tsx}',
   ],
 };
