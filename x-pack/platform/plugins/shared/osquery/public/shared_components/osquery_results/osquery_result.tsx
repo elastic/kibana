@@ -23,7 +23,7 @@ interface OsqueryResultProps extends OsqueryActionResultsProps {
 
 // eslint-disable-next-line react/display-name
 export const OsqueryResult = React.memo<OsqueryResultProps>(
-  ({ actionId, ruleName, startDate, ecsData }) => {
+  ({ actionId, ruleName, startDate, ecsData, addToTimeline }) => {
     const [isLive, setIsLive] = useState(false);
     const { data } = useLiveQueryDetails({
       actionId,
@@ -49,6 +49,7 @@ export const OsqueryResult = React.memo<OsqueryResultProps>(
             startDate={data?.['@timestamp']}
             expirationDate={data?.expiration}
             agentIds={data?.agents}
+            addToTimeline={addToTimeline}
           />
         </EuiComment>
         <EuiSpacer size="s" />
