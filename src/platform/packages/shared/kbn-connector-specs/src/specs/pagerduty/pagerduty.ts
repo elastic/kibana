@@ -126,7 +126,10 @@ export const PagerDutyConnector: ConnectorSpec = {
         sortBy: z.string().optional(),
       }),
       handler: async (ctx, input: PD.ListIncidentsInput) => {
-        const queryParams = buildPaginationParams(input);
+        const baseParams = buildPaginationParams(input);
+        const queryParams: Record<string, string | number | boolean | string[]> = {
+          ...baseParams,
+        };
         if (input.dateRange) {
           queryParams.date_range = input.dateRange;
         }
@@ -134,10 +137,10 @@ export const PagerDutyConnector: ConnectorSpec = {
           queryParams.incident_key = input.incidentKey;
         }
         if (input.statuses) {
-          queryParams.statuses = input.statuses;
+          queryParams['statuses[]'] = input.statuses.split(',').map((s) => s.trim());
         }
         if (input.serviceIds) {
-          queryParams.service_ids = input.serviceIds;
+          queryParams['service_ids[]'] = input.serviceIds.split(',').map((s) => s.trim());
         }
         if (input.since) {
           queryParams.since = input.since;
@@ -146,7 +149,7 @@ export const PagerDutyConnector: ConnectorSpec = {
           queryParams.until = input.until;
         }
         if (input.urgencies) {
-          queryParams.urgencies = input.urgencies;
+          queryParams['urgencies[]'] = input.urgencies.split(',').map((s) => s.trim());
         }
         if (input.timeZone) {
           queryParams.time_zone = input.timeZone;

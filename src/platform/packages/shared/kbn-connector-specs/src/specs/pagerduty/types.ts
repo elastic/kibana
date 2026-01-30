@@ -228,14 +228,14 @@ export interface TransformedSchedule {
     end?: string;
     rotation_virtual_start?: string;
     rotation_turn_length_seconds?: number;
-  users?: Array<{
-    user?: {
-      id: string;
-      summary?: string;
-      name?: string;
-      email?: string;
-    };
-  }>;
+    users?: Array<{
+      user?: {
+        id: string;
+        summary?: string;
+        name?: string;
+        email?: string;
+      };
+    }>;
   }>;
   users?: Array<{
     id: string;
@@ -276,14 +276,6 @@ export interface TransformedOnCall {
   escalation_level?: number;
   start?: string;
   end?: string;
-}
-
-export interface TransformedOnCallsResponse {
-  oncalls?: TransformedOnCall[];
-  limit?: number;
-  offset?: number;
-  more?: boolean;
-  total?: number;
 }
 
 // =============================================================================
@@ -359,4 +351,3 @@ export interface ListOnCallsInput {
   include?: string;
   timeZone?: string;
 }
-
