@@ -6,18 +6,21 @@
  */
 
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
-import { services } from '../services';
 import { pageObjects } from '../page_objects';
+import { services } from '../services';
 
 export default createTestConfig({
-  serverlessProject: 'security',
-  pageObjects,
+  serverlessProject: 'oblt',
   services,
+  pageObjects,
+  testFiles: [require.resolve('./index.onboarding.ts')],
   junit: {
-    reportName: 'Serverless Security Cloud Security Functional Tests',
+    reportName: 'Serverless Observability Onboarding Functional Tests',
   },
+  suiteTags: { exclude: ['skipSvlOblt'] },
 
-  // load tests in the index file
-  testFiles: [require.resolve('../test_suites/ftr/cloud_security_posture/cloud_tests')],
+  // include settings from project controller
+  esServerArgs: [],
+  kbnServerArgs: [],
   enableFleetDockerRegistry: false,
 });
