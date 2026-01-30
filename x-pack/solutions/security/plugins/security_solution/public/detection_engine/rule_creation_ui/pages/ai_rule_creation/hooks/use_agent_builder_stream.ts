@@ -18,7 +18,7 @@ import {
   SecurityAgentBuilderAttachments,
   THREAT_HUNTING_AGENT_ID,
 } from '../../../../../../common/constants';
-import { KibanaServices } from '../../../../../common/lib/kibana/services';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import * as i18n from '../translations';
@@ -57,6 +57,8 @@ const parseRuleResponse = (ruleData: unknown) => {
 };
 
 export const useAgentBuilderStream = () => {
+  const { services } = useKibana();
+  const { http } = services;
   const { addError } = useAppToasts();
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
@@ -102,7 +104,6 @@ export const useAgentBuilderStream = () => {
       abortControllerRef.current = abortController;
 
       try {
-        const http = KibanaServices.get().http;
         const payload = {
           agent_id: THREAT_HUNTING_AGENT_ID,
           input: `Create a detection rule based on the following user_query using the dedicated detection rule creation tool. Do not perform any other actions after creating the rule. user_query: ${message}`,
@@ -180,7 +181,7 @@ export const useAgentBuilderStream = () => {
         cancelRuleCreation();
       }
     },
-    [showErrorToast, cancelRuleCreation]
+    [showErrorToast, cancelRuleCreation, http]
   );
 
   useEffect(() => {
