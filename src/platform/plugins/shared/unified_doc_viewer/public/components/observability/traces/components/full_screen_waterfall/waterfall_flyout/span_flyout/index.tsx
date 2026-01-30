@@ -18,6 +18,7 @@ import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_ove
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { isSpanHit } from '../../helpers/is_span';
 import { useFetchSpan } from '../../hooks/use_fetch_span';
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks';
 
 export const spanFlyoutId = 'spanDetailFlyout' as const;
 
@@ -39,6 +40,7 @@ export const SpanFlyout = ({
   const { span, loading } = useFetchSpan({ spanId, traceId });
   const { indexes } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
+  const actions = useDocViewerExtensionActionsContext();
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
     if (!span) return null;
@@ -89,6 +91,7 @@ export const SpanFlyout = ({
     >
       {documentAsHit ? (
         <Overview
+          actions={actions}
           ref={setFlyoutRef}
           hit={documentAsHit}
           indexes={indexes}

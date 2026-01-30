@@ -135,28 +135,28 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             dataView={dataView}
           />
           <DataSourcesProvider indexes={indexes}>
-            {showSimilarErrors ? (
-              <DocViewerExtensionActionsProvider actions={actions}>
-                <SimilarErrors hit={hit} />
-              </DocViewerExtensionActionsProvider>
-            ) : null}
-            <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
-            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-            {isStacktraceAvailable && (
-              <LogsOverviewStacktraceSection
-                ref={stackTraceSectionRef}
-                hit={hit}
-                dataView={dataView}
-              />
-            )}
-            {traceId && showTraceWaterfall ? (
-              <TraceWaterfall
-                traceId={traceId}
-                docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-                dataView={dataView}
-              />
-            ) : null}
+            <DocViewerExtensionActionsProvider actions={actions}>
+              {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
+              <div>
+                {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}
+              </div>
+              <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+              {isStacktraceAvailable && (
+                <LogsOverviewStacktraceSection
+                  ref={stackTraceSectionRef}
+                  hit={hit}
+                  dataView={dataView}
+                />
+              )}
+              {traceId && showTraceWaterfall ? (
+                <TraceWaterfall
+                  traceId={traceId}
+                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                  dataView={dataView}
+                />
+              ) : null}
+            </DocViewerExtensionActionsProvider>
           </DataSourcesProvider>
           {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
           <EuiSpacer size="m" />

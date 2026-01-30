@@ -18,6 +18,7 @@ import LogsOverview from '../../../../../../doc_viewer_logs_overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
 import { useFetchLog } from '../../hooks/use_fetch_log';
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks';
 
 export const logsFlyoutId = 'logsFlyout' as const;
 
@@ -31,6 +32,7 @@ export interface LogsFlyoutProps {
 export function LogsFlyout({ onCloseFlyout, id, index, dataView }: LogsFlyoutProps) {
   const { loading, log, index: resolvedIndex } = useFetchLog({ id, index });
   const { indexes } = useDataSourcesContext();
+  const actions = useDocViewerExtensionActionsContext();
   const {
     dataView: logDataView,
     error,
@@ -66,6 +68,7 @@ export function LogsFlyout({ onCloseFlyout, id, index, dataView }: LogsFlyoutPro
       {error ? <EuiCallOut announceOnMount title={error} color="danger" /> : null}
       {documentAsHit && logDataView ? (
         <LogsOverview
+          actions={actions}
           hit={documentAsHit}
           dataView={logDataView}
           indexes={indexes}
