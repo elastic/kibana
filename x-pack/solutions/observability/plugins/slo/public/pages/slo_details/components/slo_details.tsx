@@ -25,10 +25,10 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
-  renderMode?: 'flyout' | 'page';
+  isFlyout?: boolean;
 }
 
-export function SloDetails({ slo, isAutoRefreshing, selectedTabId, renderMode = 'page' }: Props) {
+export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: Props) {
   const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
     const now = new Date();
     return {
@@ -68,12 +68,8 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, renderMode = 
         <SloHealthCallout slo={slo} />
 
         <EuiFlexGroup direction="column" gutterSize="l">
-          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} renderMode={renderMode} />
-          <HistoricalDataCharts
-            slo={slo}
-            isAutoRefreshing={isAutoRefreshing}
-            isFlyout={renderMode === 'flyout'}
-          />
+          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
+          <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} isFlyout={isFlyout} />
           <EventsChartPanel slo={slo} range={range} />
         </EuiFlexGroup>
       </EuiFlexGroup>
