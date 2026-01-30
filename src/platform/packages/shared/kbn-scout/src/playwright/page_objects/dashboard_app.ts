@@ -125,7 +125,12 @@ export class DashboardApp {
 
   async openSettingsFlyout() {
     if (!(await this.getSettingsFlyout().isVisible())) {
-      await this.settingsButton.click();
+      if (await this.settingsButton.isVisible()) {
+        await this.settingsButton.click();
+      } else {
+        // Fallback for layouts where the top-nav settings button is not rendered.
+        await this.page.getByRole('button', { name: 'Open dashboard settings' }).click();
+      }
       await expect(this.getSettingsFlyout()).toBeVisible();
     }
   }

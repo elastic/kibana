@@ -52,7 +52,11 @@ export class LensApp {
   async configureXYDimensions(options?: {
     y?: { operation: string; field?: string };
     x?: { operation: string; field?: string };
-    split?: { operation: string; field?: string };
+    split?: {
+      operation: string;
+      field?: string;
+      palette?: { mode: 'legacy' | 'colorMapping'; id: string };
+    };
   }) {
     const y = options?.y ?? { operation: 'average', field: 'bytes' };
     const x = options?.x ?? { operation: 'date_histogram', field: '@timestamp' };
@@ -72,16 +76,77 @@ export class LensApp {
       dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
       operation: split.operation,
       field: split.field,
+      palette: split.palette,
     });
   }
 
-  async configureDimension(opts: { dimension: string; operation: string; field?: string }) {
+  async configureDimension(opts: {
+    dimension: string;
+    operation: string;
+    field?: string;
+    palette?: { mode: 'legacy' | 'colorMapping'; id: string };
+    keepOpen?: boolean;
+  }) {
     await this.openDimensionEditor(opts.dimension);
     await this.selectOperation(opts.operation);
     if (opts.field) {
       await this.selectField(opts.field);
     }
+    if (opts.palette) {
+      await this.setPalette(opts.palette.id, opts.palette.mode === 'legacy');
+    }
+    if (!opts.keepOpen) {
+      await this.closeDimensionEditor();
+    }
+  }
+
+  async openDimensionEditorFor(dimension: string) {
+    await this.openDimensionEditor(dimension);
+  }
+
+  async closeDimensionEditorPanel() {
     await this.closeDimensionEditor();
+  }
+
+  async setTermsNumberOfValues(value: number) {
+    const input = this.page.locator('input[data-test-subj="indexPattern-terms-values"]');
+    await expect(input).toBeVisible();
+    await input.click();
+    await input.fill(`${value}`);
+    await this.page.keyboard.press('Tab');
+    await expect(input).toHaveValue(`${value}`);
+  }
+
+  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+    await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
+  }
+
+  async setPalette(paletteId: string, isLegacy: boolean) {
+    await this.page.testSubj.click('lns_colorEditing_trigger');
+    await expect(this.page.testSubj.locator('lns-palettePanelFlyout')).toBeVisible();
+
+    const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
+    const targetValue = isLegacy ? 'true' : 'false';
+    if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
+      await paletteModeToggle.click();
+    }
+
+    if (isLegacy) {
+      await this.page.testSubj.click('lns-palettePicker');
+      await this.page.locator(`#${paletteId}`).click();
+    } else {
+      await this.page.testSubj.click('kbnColoring_ColorMapping_PalettePicker');
+      await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
+    }
+
+    await this.closePaletteEditor();
+  }
+
+  private async closePaletteEditor() {
+    await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
+    await expect(
+      this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
+    ).toBeHidden();
   }
 
   private async openDimensionEditor(dimension: string) {

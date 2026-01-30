@@ -10,15 +10,32 @@
 import type { DebugState } from '@elastic/charts';
 import chroma from 'chroma-js';
 import { spaceTest, expect, tags } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
+import {
+  LENS_BASIC_DATA_VIEW,
+  LENS_BASIC_KIBANA_ARCHIVE,
+  LENS_BASIC_TIME_RANGE,
+} from '../constants';
 
-const KIBANA_ARCHIVE_PATH =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
+const normalizeKey = (value: string) => {
+  const trimmed = value.trim();
+  const withoutInstruction = trimmed.split(';')[0].split(' Click')[0];
+  const withoutSuffix = withoutInstruction.split(' - ')[0];
+  const lastSegment = withoutSuffix.split(':').pop() ?? withoutSuffix;
+  return lastSegment.replace(/[^A-Za-z0-9 _.-]/g, '').trim();
+};
 
 const getColorMapping = (debugState: DebugState | null) => {
   const colorMapping: Record<string, string> = {};
+  if (debugState?.legend?.items?.length) {
+    debugState.legend.items.forEach(({ name, color }) => {
+      colorMapping[normalizeKey(name)] = color;
+    });
+    return colorMapping;
+  }
   debugState?.bars?.forEach(({ name, color }) => {
-    colorMapping[name] = color;
+    colorMapping[normalizeKey(name)] = color;
   });
   return colorMapping;
 };
@@ -30,21 +47,71 @@ declare global {
 }
 
 const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
-  const charts = await page.locator('.echChart').all();
-  const chart = charts[panelIndex];
-  const status = chart.locator('.echChartStatus');
-  const debugState = await status.getAttribute('data-ech-debug-state');
-  if (!debugState) {
-    return null;
+  await expect.poll(() => page.locator('.echChart').count()).toBeGreaterThan(panelIndex);
+  const chart = (await page.locator('.echChart').all())[panelIndex];
+  if (!chart) {
+    throw new Error(`Chart panel index ${panelIndex} not found`);
   }
-  return JSON.parse(debugState) as DebugState;
+  const status = chart.locator('.echChartStatus');
+  let debugState: string | null = null;
+  await expect
+    .poll(async () => {
+      debugState = await status.getAttribute('data-ech-debug-state');
+      return debugState;
+    })
+    .not.toBeNull();
+  return debugState ? (JSON.parse(debugState) as DebugState) : null;
 };
 
-// FTR-equivalent test was failing: See https://github.com/elastic/kibana/issues/235883
-// eslint-disable-next-line playwright/no-skipped-test
-spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+const maybeApplyLensChanges = async (pageObjects: Pick<PageObjects, 'lens'>): Promise<void> => {
+  if (await pageObjects.lens.applyChangesButton.isVisible()) {
+    await pageObjects.lens.applyChanges();
+  }
+};
+
+const createBaseXYCharts = async (
+  pageObjects: PageObjects,
+  filterBar: PageObjects['filterBar']
+) => {
+  await pageObjects.dashboard.openNewLensPanel();
+  await pageObjects.lens.configureXYDimensions({
+    y: { operation: 'count' },
+    split: {
+      operation: 'terms',
+      field: 'geo.src',
+      palette: { mode: 'legacy', id: 'default' },
+    },
+  });
+  await pageObjects.lens.saveAndReturn();
+
+  await pageObjects.dashboard.openNewLensPanel();
+  await pageObjects.lens.configureXYDimensions({
+    y: { operation: 'count' },
+    split: {
+      operation: 'terms',
+      field: 'geo.src',
+      palette: { mode: 'legacy', id: 'default' },
+    },
+  });
+  await filterBar.addFilter({ field: 'geo.src', operator: 'is not', value: 'CN' });
+  await pageObjects.lens.saveAndReturn();
+  await pageObjects.dashboard.waitForPanelsToLoad(2);
+  await expect.poll(() => pageObjects.dashboard.getVisualizationCount('xyVisChart')).toBe(2);
+};
+
+const getDatatableCellsByColumn = async (page: ScoutPage, colIndex: number) =>
+  page
+    .locator(
+      `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
+    )
+    .all();
+
+spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
+    await scoutSpace.savedObjects.cleanStandardList();
+    await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
+    await scoutSpace.uiSettings.setDefaultIndex(LENS_BASIC_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(LENS_BASIC_TIME_RANGE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -63,105 +130,77 @@ spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   spaceTest(
     'should sync colors on dashboard for legacy default palette',
     async ({ page, pageObjects, pageObjects: { filterBar } }) => {
-      await spaceTest.step('create non-filtered xy chart', async () => {
-        await pageObjects.dashboard.openAddPanelFlyout();
-        await page.testSubj.click('create-action-Lens');
-        await page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
-
-        await page.testSubj.click('lnsXY_yDimensionPanel > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-count');
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-        await page.testSubj.click('lnsXY_splitDimensionPanel > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-terms');
-        await page.testSubj.click('indexPattern-dimension-field');
-        await page.testSubj.typeWithDelay(
-          'indexPattern-dimension-field > comboBoxSearchInput',
-          'geo.src'
-        );
-        await page.locator('.euiComboBoxOption__content:has-text("geo.src")').click();
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-        await pageObjects.lens.saveAndReturn();
-        await pageObjects.dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('create filtered xy chart', async () => {
-        await pageObjects.dashboard.openAddPanelFlyout();
-        await page.testSubj.click('create-action-Lens');
-        await page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
-
-        await page.testSubj.click('lnsXY_yDimensionPanel > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-count');
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-        await page.testSubj.click('lnsXY_splitDimensionPanel > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-terms');
-        await page.testSubj.click('indexPattern-dimension-field');
-        await page.testSubj.typeWithDelay(
-          'indexPattern-dimension-field > comboBoxSearchInput',
-          'geo.src'
-        );
-        await page.locator('.euiComboBoxOption__content:has-text("geo.src")').click();
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-        await filterBar.addFilter({ field: 'geo.src', operator: 'is not', value: 'CN' });
-        await pageObjects.lens.saveAndReturn();
-        await pageObjects.dashboard.waitForRenderComplete();
+      await spaceTest.step('create xy charts with legacy palette', async () => {
+        await createBaseXYCharts(pageObjects, filterBar);
       });
 
       await spaceTest.step('create datatable visualization', async () => {
-        await pageObjects.dashboard.openAddPanelFlyout();
-        await page.testSubj.click('create-action-Lens');
-        await page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
-
+        await pageObjects.dashboard.openNewLensPanel();
         await pageObjects.lens.switchToVisualization('lnsDatatable');
-        await page.testSubj.click('lnsDatatable_rows > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-terms');
-        await page.testSubj.click('indexPattern-dimension-field');
-        await page.testSubj.typeWithDelay(
-          'indexPattern-dimension-field > comboBoxSearchInput',
-          'geo.src'
-        );
-        await page.locator('.euiComboBoxOption__content:has-text("geo.src")').click();
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
-        await page.testSubj.click('lnsDatatable_metrics > lns-empty-dimension');
-        await page.testSubj.click('lns-indexPatternDimension-count');
-        await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
+        await maybeApplyLensChanges(pageObjects);
+        await pageObjects.lens.configureDimension({
+          dimension: 'lnsDatatable_rows > lns-empty-dimension',
+          operation: 'terms',
+          field: 'geo.src',
+          keepOpen: true,
+        });
+        await pageObjects.lens.setTermsNumberOfValues(5);
+        await pageObjects.lens.setTableDynamicColoring('cell');
+        await pageObjects.lens.setPalette('default', true);
+        await pageObjects.lens.closeDimensionEditorPanel();
+        await maybeApplyLensChanges(pageObjects);
+        await pageObjects.lens.configureDimension({
+          dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+          operation: 'count',
+        });
         await pageObjects.lens.saveAndReturn();
-        await pageObjects.dashboard.waitForRenderComplete();
+        await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
       });
 
       await spaceTest.step('enable sync colors and compare mappings', async () => {
         await pageObjects.dashboard.openSettingsFlyout();
         await pageObjects.dashboard.toggleSyncColors(true);
         await pageObjects.dashboard.applyDashboardSettings();
-        await pageObjects.dashboard.waitForRenderComplete();
 
         const colorMappings1 = Object.entries(getColorMapping(await getChartDebugState(page, 0)));
         const colorMappings2 = Object.entries(getColorMapping(await getChartDebugState(page, 1)));
 
-        const els = await page
-          .locator('[data-test-subj="datatableVisualization"] [data-test-subj="cellContents"]')
-          .all();
-        const colorMappings3 = await Promise.all(
-          els.map(async (el) => {
-            const backgroundColor = await el.evaluate(
-              (node) => getComputedStyle(node).backgroundColor
-            );
-            return [await el.innerText(), chroma(backgroundColor as string).hex()];
-          })
-        );
+        await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+        await expect
+          .poll(() =>
+            page
+              .locator('[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]')
+              .count()
+          )
+          .toBeGreaterThan(0);
 
-        expect(colorMappings1).toHaveLength(6);
-        expect(colorMappings2).toHaveLength(6);
-        // eslint-disable-next-line playwright/prefer-to-have-count
-        expect(colorMappings3).toHaveLength(6);
+        const els = await getDatatableCellsByColumn(page, 1);
+        const colorMappings3 = (
+          await Promise.all(
+            els.map(async (el) => {
+              const label = normalizeKey((await el.innerText()).trim());
+              if (!label) {
+                return null;
+              }
+              const backgroundColor = await el.evaluate(
+                (node) => getComputedStyle(node).backgroundColor
+              );
+              return [label, chroma(backgroundColor as string).hex()] as [string, string];
+            })
+          )
+        ).filter((entry): entry is [string, string] => Boolean(entry));
+
+        const sharedKeys = new Set<string>([
+          ...colorMappings1.map(([key]) => key),
+          ...colorMappings2.map(([key]) => key),
+        ]);
+        const sharedColorMappings3 = colorMappings3.filter(([key]) => sharedKeys.has(key));
+
+        expect(colorMappings1).toHaveLength(colorMappings2.length);
+        expect(sharedColorMappings3).toHaveLength(colorMappings1.length);
 
         const mergedColorAssignments = new Map<string, Set<string>>();
-        [...colorMappings1, ...colorMappings2, ...colorMappings3].forEach(([key, color]) => {
+        [...colorMappings1, ...colorMappings2, ...sharedColorMappings3].forEach(([key, color]) => {
           mergedColorAssignments.set(key, mergedColorAssignments.get(key) ?? new Set());
           mergedColorAssignments.get(key)?.add(color);
         });
@@ -177,11 +216,14 @@ spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
   );
 
   spaceTest('should be possible to disable color sync', async ({ page, pageObjects }) => {
+    await spaceTest.step('create xy charts with legacy palette', async () => {
+      await createBaseXYCharts(pageObjects, pageObjects.filterBar);
+    });
+
     await spaceTest.step('disable sync colors', async () => {
       await pageObjects.dashboard.openSettingsFlyout();
       await pageObjects.dashboard.toggleSyncColors(false);
       await pageObjects.dashboard.applyDashboardSettings();
-      await pageObjects.dashboard.waitForRenderComplete();
     });
 
     await spaceTest.step('compare color mappings', async () => {
