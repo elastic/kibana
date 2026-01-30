@@ -199,6 +199,66 @@ steps:
 `;
 }
 
+export function generateSearchWorkflow(stackConnectorId: string): string {
+  return `version: "1"
+name: sources.pagerduty.search
+description: List PagerDuty items by type (schedules, escalation_policies) with query. Uses common params limit, offset, total, query, include.
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  properties:
+    item_type:
+      type: string
+      description: 'The type of items to list, one of: schedules, escalation_policies'
+    limit:
+      type: number
+      description: Maximum number of items to return
+    offset:
+      type: number
+      description: Number of items to skip (pagination)
+    total:
+      type: boolean
+      description: If true, include total count in the response
+    query:
+      type: string
+      description: 'Free-text search across name and description fields'
+    include:
+      type: string
+      description: |
+        Comma-separated list of related resources to include.  Valid values by type:
+            schedules - N/A (list response includes schedule_layers, users)
+            escalation_policies - services, teams, targets
+  required:
+    - item_type
+  additionalProperties: false
+steps:
+  - name: if-schedules
+    type: if
+    condition: "\${{inputs.item_type == 'schedules'}}"
+    steps:
+      - name: list-schedules
+        type: pagerduty-v2.listSchedules
+        connector-id: ${stackConnectorId}
+        with:
+          limit: \${{inputs.limit}}
+          offset: \${{inputs.offset}}
+          total: \${{inputs.total}}
+          query: "\${{inputs.query}}"
+          include: "\${{inputs.include}}"
+    else:
+      - name: list-escalation-policies
+        type: pagerduty-v2.listEscalationPolicies
+        connector-id: ${stackConnectorId}
+        with:
+          limit: \${{inputs.limit}}
+          offset: \${{inputs.offset}}
+          total: \${{inputs.total}}
+          query: "\${{inputs.query}}"
+          include: "\${{inputs.include}}"
+`;
+}
+
 export function generateListOnCallsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.pagerduty.list_oncalls'

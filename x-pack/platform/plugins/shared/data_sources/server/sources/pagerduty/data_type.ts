@@ -13,6 +13,7 @@ import {
   generateListSchedulesWorkflow,
   generateListOnCallsWorkflow,
   generateDownloadWorkflow,
+  generateSearchWorkflow,
 } from './workflows';
 
 export const pagerdutyDataSource: DataSource = {
@@ -37,11 +38,15 @@ export const pagerdutyDataSource: DataSource = {
         shouldGenerateABTool: true,
       },
       {
-        content: generateListEscalationPoliciesWorkflow(stackConnectorId),
+        content: generateSearchWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
+      {
+        content: generateListEscalationPoliciesWorkflow(stackConnectorId),
+        shouldGenerateABTool: false,
+      },
       { content: generateListIncidentsWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateListSchedulesWorkflow(stackConnectorId), shouldGenerateABTool: true },
+      { content: generateListSchedulesWorkflow(stackConnectorId), shouldGenerateABTool: false },
       { content: generateListOnCallsWorkflow(stackConnectorId), shouldGenerateABTool: true },
     ];
   },
