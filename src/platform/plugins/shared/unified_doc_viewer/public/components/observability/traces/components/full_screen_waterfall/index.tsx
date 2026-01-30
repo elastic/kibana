@@ -12,19 +12,18 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
-  useGeneratedHtmlId,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
-import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
-import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
 import type { logsFlyoutId as logsFlyoutIdType } from './waterfall_flyout/logs_flyout';
 import { LogsFlyout, logsFlyoutId } from './waterfall_flyout/logs_flyout';
+import type { spanFlyoutId as spanFlyoutIdType } from './waterfall_flyout/span_flyout';
+import { SpanFlyout, spanFlyoutId } from './waterfall_flyout/span_flyout';
 
 export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
 
@@ -45,6 +44,10 @@ export const FullScreenWaterfall = ({
   serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
+  const { discoverShared } = getUnifiedDocViewerServices();
+  const FullTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-full-trace-waterfall'
+  )?.render;
   const { euiTheme } = useEuiTheme();
   const [docId, setDocId] = useState<string | null>(null);
   const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
@@ -71,7 +74,6 @@ export const FullScreenWaterfall = ({
    * Obtains the EUI flyout scroll container for the trace waterfall embeddable.
    *
    * This pattern is necessary because:
-   * - Embeddables are constructed once with immutable initial state
    * - EUI components don't expose refs, requiring a wrapper div with closest()
    * - scrollElement must be available before the embeddable initializes (conditional render below)
    *
@@ -79,54 +81,47 @@ export const FullScreenWaterfall = ({
    * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody, Issue: 2564 in kibana-team repository),
    * we can replace this workaround with a direct ref usage.
    */
-  const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
+  const waterfallContainerRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
     }
   }, []);
-
-  const getParentApi = useCallback(() => {
-    return {
-      getSerializedStateForChild: () => ({
-        traceId,
-        rangeFrom,
-        rangeTo,
-        serviceName,
-        scrollElement,
-        onErrorClick: (params: {
-          traceId: string;
-          docId: string;
-          errorCount: number;
-          errorDocId?: string;
-          docIndex?: string;
-        }) => {
-          if (params.errorCount > 1) {
-            setActiveFlyoutId(spanFlyoutId);
-            setActiveSection('errors-table');
-            setDocId(params.docId);
-            setDocIndex(undefined);
-          } else if (params.errorDocId) {
-            setActiveFlyoutId(logsFlyoutId);
-            setDocId(params.errorDocId);
-            setDocIndex(params.docIndex);
-          }
-        },
-        onNodeClick: (nodeSpanId: string) => {
-          setActiveSection(undefined);
-          setDocId(nodeSpanId);
-          setDocIndex(undefined);
-          setActiveFlyoutId(spanFlyoutId);
-        },
-        mode: 'full',
-      }),
-    };
-  }, [traceId, rangeFrom, rangeTo, serviceName, scrollElement]);
 
   function handleCloseFlyout() {
     setActiveFlyoutId(null);
     setActiveSection(undefined);
     setDocId(null);
     setDocIndex(undefined);
+  }
+
+  function handleNodeClick(nodeSpanId: string) {
+    setActiveSection(undefined);
+    setDocId(nodeSpanId);
+    setDocIndex(undefined);
+    setActiveFlyoutId(spanFlyoutId);
+  }
+
+  function handleErrorClick(params: {
+    traceId: string;
+    docId: string;
+    errorCount: number;
+    errorDocId?: string;
+    docIndex?: string;
+  }) {
+    if (params.errorCount > 1) {
+      setActiveFlyoutId(spanFlyoutId);
+      setActiveSection('errors-table');
+      setDocId(params.docId);
+      setDocIndex(undefined);
+    } else if (params.errorDocId) {
+      setActiveFlyoutId(logsFlyoutId);
+      setDocId(params.errorDocId);
+      setDocIndex(params.docIndex);
+    }
+  }
+
+  if (!FullTraceWaterfall) {
+    return null;
   }
 
   return (
@@ -153,20 +148,16 @@ export const FullScreenWaterfall = ({
           This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
           Issue: https://github.com/elastic/kibana/issues/248307
           */}
-        <div
-          ref={embeddableContainerRef}
-          css={css`
-            width: 100%;
-            & .embPanel__content {
-              display: block;
-            }
-          `}
-        >
-          {scrollElement ? (
-            <EmbeddableRenderer
-              type="APM_TRACE_WATERFALL_EMBEDDABLE"
-              getParentApi={getParentApi}
-              hidePanelChrome
+        <div ref={waterfallContainerRef}>
+          {scrollElement && serviceName ? (
+            <FullTraceWaterfall
+              traceId={traceId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceName={serviceName}
+              scrollElement={scrollElement}
+              onNodeClick={handleNodeClick}
+              onErrorClick={handleErrorClick}
             />
           ) : null}
         </div>
