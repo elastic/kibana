@@ -8,4 +8,8 @@
 export { getEuidFromObject } from './memory';
 export { getEuidPainlessEvaluation } from './painless';
 export { getEuidDslFilterBasedOnDocument } from './dsl';
-export { getEuidEsqlDocumentsContainsIdFilter, getEuidEsqlEvaluation } from './esql';
+export {
+  getEuidEsqlDocumentsContainsIdFilter,
+  getEuidEsqlEvaluation,
+  getEuidEsqlFilterBasedOnDocument,
+} from './esql';

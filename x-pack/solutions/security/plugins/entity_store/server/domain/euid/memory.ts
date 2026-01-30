@@ -38,7 +38,7 @@ function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string
   return [];
 }
 
-export function getFieldValue(doc: any, field: string) {
+export function getFieldValue(doc: any, field: string): string | undefined {
   const brokenFields = field.split('.');
 
   let fieldInObject = doc;
@@ -48,5 +48,21 @@ export function getFieldValue(doc: any, field: string) {
       return undefined;
     }
   }
-  return fieldInObject;
+
+  // In theory we should not have multi valued fields.
+  // However, it can still happen that elasticsearch
+  // client returns an array of values.
+  if (Array.isArray(fieldInObject)) {
+    if (fieldInObject.length > 0) {
+      return fieldInObject[0];
+    } else {
+      throw new Error(`Field ${field} is an array but has no values`);
+    }
+  }
+
+  if (typeof fieldInObject === 'object') {
+    throw new Error(`Field ${field} is an object, can't convert to value`);
+  }
+
+  return String(fieldInObject);
 }

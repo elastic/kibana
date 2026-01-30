@@ -11,7 +11,7 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getFieldValue } from './memory';
 
 interface FieldValue {
-  [key: string]: any;
+  [key: string]: string;
 }
 
 export function getEuidDslFilterBasedOnDocument(
@@ -30,7 +30,9 @@ export function getEuidDslFilterBasedOnDocument(
 
   const dsl: QueryDslQueryContainer = {
     bool: {
-      filter: fieldsToBeFilteredOn.values.map((field) => ({ term: field })),
+      filter: Object.entries(fieldsToBeFilteredOn.values).map(([field, value]) => ({
+        term: { [field]: value },
+      })),
     },
   };
 
@@ -45,31 +47,31 @@ export function getEuidDslFilterBasedOnDocument(
   return dsl;
 }
 
-function getFieldsToBeFilteredOn(
-  obj: any,
+export function getFieldsToBeFilteredOn(
+  doc: any,
   euidFields: EuidAttribute[][]
-): { values: FieldValue[]; rankingPosition: number } {
+): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
     const composedFields = euidFields[i];
     const fieldAttrs = composedFields.filter((attr) => attr.field !== undefined);
-    const composedFieldValues = fieldAttrs.map((attr) => ({
-      [attr.field!]: getFieldValue(obj, attr.field!),
-    }));
-
-    const allDefined = composedFieldValues.every((subObj) =>
-      Object.values(subObj).every((v) => v !== undefined)
+    const composedFieldValues = fieldAttrs.reduce(
+      (acc, attr) => ({
+        ...acc,
+        [attr.field!]: getFieldValue(doc, attr.field!),
+      }),
+      {}
     );
 
-    if (allDefined) {
+    if (Object.values(composedFieldValues).every((v) => v !== undefined)) {
       return { values: composedFieldValues, rankingPosition: i };
     }
   }
-  return { values: [], rankingPosition: -1 };
+  return { values: {}, rankingPosition: -1 };
 }
 
-function getFieldsToBeFilteredOut(
+export function getFieldsToBeFilteredOut(
   euidFields: EuidAttribute[][],
-  fieldsToBeFilteredOn: { values: FieldValue[]; rankingPosition: number }
+  fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
 ): string[] {
   const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
   const fieldsNotInTheId = euidFieldsBeforeRanking
@@ -78,7 +80,7 @@ function getFieldsToBeFilteredOut(
 
   const toFilterOut: string[] = [];
   for (const field of fieldsNotInTheId) {
-    if (!fieldsToBeFilteredOn.values.some((f) => f[field]) && !toFilterOut.includes(field)) {
+    if (!Object.keys(fieldsToBeFilteredOn.values).includes(field) && !toFilterOut.includes(field)) {
       toFilterOut.push(field);
     }
   }

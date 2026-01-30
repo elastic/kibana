@@ -7,7 +7,29 @@
 
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty } from '../esql/strings';
+import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../esql/strings';
+import { getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './dsl';
+
+export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
+  if (!doc) {
+    return undefined;
+  }
+
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+
+  const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
+    ([field, value]) => `(${field} == "${value}")`
+  );
+
+  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
+
+  return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
+}
 
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);

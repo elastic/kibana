@@ -47,6 +47,7 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // Sequential order of fields to be used to generate the identity field.
   // The ids that are generated using the esqlEvaluation will also be prepended
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
+  // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
   euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
 });
 

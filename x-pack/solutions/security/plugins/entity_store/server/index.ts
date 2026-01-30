@@ -28,6 +28,7 @@ export const euid = {
   getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
   getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
+  getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';
