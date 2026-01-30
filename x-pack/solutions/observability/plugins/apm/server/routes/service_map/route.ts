@@ -25,11 +25,17 @@ import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import {
-  installServiceMapTransforms,
-  uninstallServiceMapTransforms,
-  getServiceMapTransformsStatus,
-  type ServiceMapTransformStatus,
-} from './transforms';
+  computeServiceMapEdges,
+  type ComputeServiceMapEdgesResponse,
+} from './compute_service_map_edges';
+import {
+  resolveServiceMapDestinations,
+  type ResolveServiceMapDestinationsResponse,
+} from './resolve_service_map_destinations';
+import {
+  cleanupServiceMapEdges,
+  type CleanupServiceMapEdgesResponse,
+} from './cleanup_service_map_edges';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -190,19 +196,19 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
-/**
- * Install and start service map transforms.
- *
- * The calling user must have permissions to:
- * - Read from APM source indices (traces-apm*, etc.)
- * - Create and write to transform destination indices (.apm-service-map-*)
- * - Manage transforms
- */
-const serviceMapTransformsInstallRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/service-map/transforms',
+// ─────────────────────────────────────────────────────────────────────────────
+// Workflow Routes for Pre-computed Service Map
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Time windows for workflow operations
+const AGGREGATION_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RESOLUTION_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+const serviceMapWorkflowComputeRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/service-map/workflow/compute-edges',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ success: boolean; status: ServiceMapTransformStatus }> => {
-    const { config, context, logger, getApmIndices } = resources;
+  handler: async (resources): Promise<ComputeServiceMapEdgesResponse> => {
+    const { config, context, logger } = resources;
 
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
@@ -214,63 +220,28 @@ const serviceMapTransformsInstallRoute = createApmServerRoute({
     }
 
     const coreContext = await context.core;
-    const scopedClusterClient = coreContext.elasticsearch.client;
-    const apmIndices = await getApmIndices();
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const apmEventClient = await getApmEventClient(resources);
 
-    await installServiceMapTransforms({
-      scopedClusterClient,
-      logger,
-      apmIndices,
-    });
+    const now = Date.now();
+    const start = now - AGGREGATION_WINDOW_MS;
+    const end = now;
 
-    const status = await getServiceMapTransformsStatus({
-      scopedClusterClient,
-      logger,
-      apmIndices,
-    });
-
-    return { success: true, status };
-  },
-});
-
-/**
- * Get the status of service map transforms.
- */
-const serviceMapTransformsStatusRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/transforms/status',
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapTransformStatus> => {
-    const { config, context, logger, getApmIndices } = resources;
-
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-
-    const coreContext = await context.core;
-    const scopedClusterClient = coreContext.elasticsearch.client;
-    const apmIndices = await getApmIndices();
-
-    return getServiceMapTransformsStatus({
-      scopedClusterClient,
-      logger,
-      apmIndices,
+    return computeServiceMapEdges({
+      apmEventClient,
+      esClient,
+      start,
+      end,
+      logger: logger.get('serviceMapWorkflow'),
     });
   },
 });
 
-/**
- * Stop and uninstall service map transforms.
- */
-const serviceMapTransformsDeleteRoute = createApmServerRoute({
-  endpoint: 'DELETE /internal/apm/service-map/transforms',
+const serviceMapWorkflowResolveRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/service-map/workflow/resolve-destinations',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ success: boolean }> => {
-    const { config, context, logger, getApmIndices } = resources;
+  handler: async (resources): Promise<ResolveServiceMapDestinationsResponse> => {
+    const { config, context, logger } = resources;
 
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
@@ -282,16 +253,45 @@ const serviceMapTransformsDeleteRoute = createApmServerRoute({
     }
 
     const coreContext = await context.core;
-    const scopedClusterClient = coreContext.elasticsearch.client;
-    const apmIndices = await getApmIndices();
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const apmEventClient = await getApmEventClient(resources);
 
-    await uninstallServiceMapTransforms({
-      scopedClusterClient,
-      logger,
-      apmIndices,
+    const now = Date.now();
+    const start = now - RESOLUTION_WINDOW_MS;
+    const end = now;
+
+    return resolveServiceMapDestinations({
+      apmEventClient,
+      esClient,
+      start,
+      end,
+      logger: logger.get('serviceMapWorkflow'),
     });
+  },
+});
 
-    return { success: true };
+const serviceMapWorkflowCleanupRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/service-map/workflow/cleanup',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<CleanupServiceMapEdgesResponse> => {
+    const { config, context, logger } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return cleanupServiceMapEdges({
+      esClient,
+      logger: logger.get('serviceMapWorkflow'),
+    });
   },
 });
 
@@ -299,7 +299,7 @@ export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
-  ...serviceMapTransformsInstallRoute,
-  ...serviceMapTransformsStatusRoute,
-  ...serviceMapTransformsDeleteRoute,
+  ...serviceMapWorkflowComputeRoute,
+  ...serviceMapWorkflowResolveRoute,
+  ...serviceMapWorkflowCleanupRoute,
 };

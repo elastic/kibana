@@ -52,19 +52,17 @@ async function getConnectionData({
   usePrecomputedServiceMap,
 }: IEnvOptions): Promise<{ tracesCount: number; spans: ServiceMapSpan[] }> {
   return withApmSpan('get_service_map_connections', async () => {
-    // Try pre-computed service map if enabled
+    // Try pre-computed service map from OneWorkflow if enabled
     if (usePrecomputedServiceMap) {
       const available = await isPrecomputedServiceMapAvailable(esClient);
       if (available) {
-        logger.debug('Using pre-computed service map');
+        logger.debug('Using OneWorkflow pre-computed service map');
         const { edges } = await getPrecomputedServiceMap({
           esClient,
-          apmEventClient,
           start,
           end,
           environment,
           serviceName,
-          logger,
         });
         const spans = convertEdgesToServiceMapSpans(edges);
         return { spans, tracesCount: 0 }; // tracesCount not applicable for pre-computed

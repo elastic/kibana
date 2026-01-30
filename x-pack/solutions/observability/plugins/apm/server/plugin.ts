@@ -52,7 +52,6 @@ import type {
   APMPluginStartDependencies,
 } from './types';
 import { registerDataProviders } from './agent_builder/data_provider/register_data_providers';
-import { ServiceMapResourceInstaller } from './routes/service_map/transforms';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -290,16 +289,8 @@ export class APMPlugin
       logger.debug(`Failed to create apm-source-map index template: ${e.message}`);
     });
 
-    // create service map index templates without blocking start lifecycle
-    if (this.currentConfig.serviceMapEnabled) {
-      const serviceMapResourceInstaller = new ServiceMapResourceInstaller(
-        client,
-        logger.get('service-map')
-      );
-      serviceMapResourceInstaller.ensureResourcesInstalled().catch((e) => {
-        logger.debug(`Failed to create service map index templates: ${e.message}`);
-      });
-    }
+    // Service map pre-computation is handled by OneWorkflow
+    // See: routes/service_map/transforms/ONE_WORKFLOW_SERVICE_MAP.md
   }
 
   public stop() {}

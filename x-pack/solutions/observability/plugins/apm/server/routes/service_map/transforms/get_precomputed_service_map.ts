@@ -6,19 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  AGENT_NAME,
-  PARENT_ID,
-} from '../../../../common/es_fields/apm';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { SERVICE_MAP_EDGES_INDEX, SERVICE_MAP_ENTRY_POINTS_INDEX } from './constants';
+
+// OneWorkflow index name
+const WORKFLOW_SERVICE_MAP_INDEX = '.apm-service-map-workflow';
 
 interface DestinationService {
   serviceName: string;
@@ -34,7 +25,7 @@ interface ServiceMapEdge {
   destinationService: DestinationService | null;
   spanType: string | null;
   spanSubtype: string | null;
-  hasSpanLinks: boolean;
+  edgeType: string;
 }
 
 interface ServiceInfo {
@@ -48,161 +39,12 @@ interface PrecomputedServiceMapResult {
   services: Map<string, ServiceInfo>;
 }
 
-export interface PrecomputedServiceMapTiming {
-  total: number;
-  fetchPrecomputedData: number;
-  buildSpanIdMapping: number;
-  resolveDestinations: number;
-  buildFinalEdges: number;
-  edgesCount: number;
-  servicesCount: number;
-  resolutionsNeeded: number;
-  resolutionsFound: number;
-}
-
 /**
- * Fetches service map data using a hybrid approach:
- * 1. Pre-computed edges from transforms (fast)
- * 2. Runtime resolution of destination services (accurate)
+ * Fetches service map data from the OneWorkflow pre-computed index.
+ * Destinations are already resolved by the workflow - no runtime resolution needed.
  */
 export async function getPrecomputedServiceMap({
   esClient,
-  apmEventClient,
-  start,
-  end,
-  environment,
-  serviceName,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  apmEventClient: APMEventClient;
-  start: number;
-  end: number;
-  environment?: string;
-  serviceName?: string;
-  logger?: { debug: (msg: string) => void };
-}): Promise<PrecomputedServiceMapResult & { timing?: PrecomputedServiceMapTiming }> {
-  const totalStart = performance.now();
-  const timing: PrecomputedServiceMapTiming = {
-    total: 0,
-    fetchPrecomputedData: 0,
-    buildSpanIdMapping: 0,
-    resolveDestinations: 0,
-    buildFinalEdges: 0,
-    edgesCount: 0,
-    servicesCount: 0,
-    resolutionsNeeded: 0,
-    resolutionsFound: 0,
-  };
-
-  // Step 1: Fetch pre-computed data from transforms
-  const step1Start = performance.now();
-  const { rawEdges, services } = await fetchPrecomputedData({
-    esClient,
-    start,
-    end,
-    environment,
-    serviceName,
-  });
-  timing.fetchPrecomputedData = performance.now() - step1Start;
-  timing.edgesCount = rawEdges.length;
-  timing.servicesCount = services.size;
-
-  // Step 2: Build span ID → resource mapping for edges that need resolution
-  const step2Start = performance.now();
-  const spanIdToResource = new Map<string, string>();
-  for (const edge of rawEdges) {
-    if (edge.destinationResource && edge.sampleSpanId && !services.has(edge.destinationResource)) {
-      spanIdToResource.set(edge.sampleSpanId, edge.destinationResource);
-    }
-  }
-  timing.buildSpanIdMapping = performance.now() - step2Start;
-  timing.resolutionsNeeded = spanIdToResource.size;
-
-  // Step 3: Resolve destination services using pre-stored span IDs
-  const step3Start = performance.now();
-  const resourceToService = await resolveDestinationServices({
-    apmEventClient,
-    spanIdToResource,
-    start,
-    end,
-  });
-  timing.resolveDestinations = performance.now() - step3Start;
-  timing.resolutionsFound = resourceToService.size;
-
-  // Step 4: Build final edges with resolved destinations
-  const step4Start = performance.now();
-  const edges: ServiceMapEdge[] = rawEdges.map((edge) => {
-    let destinationService: DestinationService | null = null;
-
-    if (edge.destinationResource) {
-      const fromCatalog = services.get(edge.destinationResource);
-      if (fromCatalog) {
-        destinationService = {
-          serviceName: fromCatalog.serviceName,
-          serviceEnvironment: fromCatalog.environment,
-          agentName: fromCatalog.agentName,
-        };
-      } else {
-        destinationService = resourceToService.get(edge.destinationResource) ?? null;
-      }
-    }
-
-    if (destinationService && !services.has(destinationService.serviceName)) {
-      services.set(destinationService.serviceName, {
-        serviceName: destinationService.serviceName,
-        environment: destinationService.serviceEnvironment,
-        agentName: destinationService.agentName,
-      });
-    }
-
-    return {
-      sourceService: edge.sourceService,
-      sourceEnvironment: edge.sourceEnvironment,
-      sourceAgentName: edge.sourceAgentName,
-      destinationResource: edge.destinationResource,
-      destinationService,
-      spanType: edge.spanType,
-      spanSubtype: edge.spanSubtype,
-      hasSpanLinks: edge.hasSpanLinks,
-    };
-  });
-  timing.buildFinalEdges = performance.now() - step4Start;
-
-  timing.total = performance.now() - totalStart;
-
-  console.log(
-    `[PrecomputedServiceMap] Timing: ${JSON.stringify({
-      total: `${timing.total.toFixed(0)}ms`,
-      fetchPrecomputedData: `${timing.fetchPrecomputedData.toFixed(0)}ms`,
-      buildSpanIdMapping: `${timing.buildSpanIdMapping.toFixed(0)}ms`,
-      resolveDestinations: `${timing.resolveDestinations.toFixed(0)}ms`,
-      buildFinalEdges: `${timing.buildFinalEdges.toFixed(0)}ms`,
-      edgesCount: timing.edgesCount,
-      servicesCount: timing.servicesCount,
-      resolutionsNeeded: timing.resolutionsNeeded,
-      resolutionsFound: timing.resolutionsFound,
-    })}`
-  );
-
-  return { edges, services, timing };
-}
-
-interface RawEdge {
-  sourceService: string;
-  sourceEnvironment: string | null;
-  sourceAgentName: AgentName | null;
-  destinationResource: string | null;
-  spanType: string | null;
-  spanSubtype: string | null;
-  hasSpanLinks: boolean;
-  // Sample span data for correlation
-  sampleSpanId: string | null;
-  sampleSpanLinkId: string | null;
-}
-
-async function fetchPrecomputedData({
-  esClient,
   start,
   end,
   environment,
@@ -213,87 +55,68 @@ async function fetchPrecomputedData({
   end: number;
   environment?: string;
   serviceName?: string;
-}): Promise<{ rawEdges: RawEdge[]; services: Map<string, ServiceInfo> }> {
-  const timeFilter = {
-    range: { last_seen: { gte: new Date(start).toISOString(), lte: new Date(end).toISOString() } },
-  };
+}): Promise<PrecomputedServiceMapResult> {
+  const filters: object[] = [
+    // Filter by computed_at within 24h (workflow retention period)
+    { range: { computed_at: { gte: 'now-24h' } } },
+  ];
 
-  const edgeFilters: object[] = [timeFilter];
   if (environment && environment !== 'ENVIRONMENT_ALL') {
-    edgeFilters.push({ term: { source_environment: environment } });
+    filters.push({ term: { source_environment: environment } });
   }
+
   if (serviceName) {
-    edgeFilters.push({
+    filters.push({
       bool: {
         should: [
           { term: { source_service: serviceName } },
-          { term: { destination_resource: serviceName } },
+          { term: { destination_service: serviceName } },
         ],
         minimum_should_match: 1,
       },
     });
   }
 
-  const [edgesResponse, catalogResponse] = await Promise.all([
-    esClient.search({
-      index: SERVICE_MAP_EDGES_INDEX,
-      size: 10000,
-      query: { bool: { filter: edgeFilters } },
-      _source: [
-        'source_service',
-        'source_agent_name',
-        'source_environment',
-        'destination_resource',
-        'span_type',
-        'span_subtype',
-        'sample_span',
-      ],
-    }),
-    esClient.search({
-      index: SERVICE_MAP_ENTRY_POINTS_INDEX,
-      size: 10000,
-      query: { bool: { filter: [timeFilter] } },
-      _source: ['service_name', 'service_environment'],
-    }),
-  ]);
+  const response = await esClient.search({
+    index: WORKFLOW_SERVICE_MAP_INDEX,
+    size: 10000,
+    query: { bool: { filter: filters } },
+    _source: [
+      'source_service',
+      'source_agent',
+      'source_environment',
+      'destination_resource',
+      'destination_service',
+      'destination_environment',
+      'destination_agent',
+      'span_type',
+      'span_subtype',
+      'edge_type',
+    ],
+  });
 
   const services = new Map<string, ServiceInfo>();
-  for (const hit of catalogResponse.hits.hits) {
-    const src = hit._source as { service_name?: string; service_environment?: string };
-    if (src.service_name) {
-      services.set(src.service_name, {
-        serviceName: src.service_name,
-        environment: src.service_environment ?? null,
-        agentName: null,
-      });
-    }
-  }
+  const edges: ServiceMapEdge[] = [];
 
-  const rawEdges: RawEdge[] = [];
-  for (const hit of edgesResponse.hits.hits) {
+  for (const hit of response.hits.hits) {
     const src = hit._source as {
       source_service: string;
-      source_agent_name?: string;
+      source_agent?: string;
       source_environment?: string;
       destination_resource?: string;
+      destination_service?: string;
+      destination_environment?: string;
+      destination_agent?: string;
       span_type?: string;
       span_subtype?: string;
-      sample_span?: {
-        'span.id'?: string;
-        'span.links.span_id'?: string;
-        'otel.span.links.span_id'?: string;
-      };
+      edge_type?: string;
     };
 
-    // Extract data
-    const sourceAgentName = (src.source_agent_name as AgentName) ?? null;
-    const sampleSpan = src.sample_span;
-    const sampleSpanId = sampleSpan?.['span.id'] ?? null;
-    const sampleSpanLinkId =
-      sampleSpan?.['span.links.span_id'] ?? sampleSpan?.['otel.span.links.span_id'] ?? null;
+    const sourceAgentName = (src.source_agent as AgentName) ?? null;
+    const destAgentName = (src.destination_agent as AgentName) ?? null;
 
-    // Add/update source service in catalog with agent name
-    if (!services.has(src.source_service) || services.get(src.source_service)?.agentName === null) {
+    // Add source service to catalog
+    if (!services.has(src.source_service)) {
       services.set(src.source_service, {
         serviceName: src.source_service,
         environment: src.source_environment ?? null,
@@ -301,86 +124,55 @@ async function fetchPrecomputedData({
       });
     }
 
-    rawEdges.push({
+    // Add destination service to catalog (if resolved)
+    if (src.destination_service && !services.has(src.destination_service)) {
+      services.set(src.destination_service, {
+        serviceName: src.destination_service,
+        environment: src.destination_environment ?? null,
+        agentName: destAgentName,
+      });
+    }
+
+    edges.push({
       sourceService: src.source_service,
       sourceEnvironment: src.source_environment ?? null,
       sourceAgentName,
       destinationResource: src.destination_resource ?? null,
+      destinationService: src.destination_service
+        ? {
+            serviceName: src.destination_service,
+            serviceEnvironment: src.destination_environment ?? null,
+            agentName: destAgentName,
+          }
+        : null,
       spanType: src.span_type ?? null,
       spanSubtype: src.span_subtype ?? null,
-      hasSpanLinks: sampleSpanLinkId !== null,
-      sampleSpanId,
-      sampleSpanLinkId,
+      edgeType: src.edge_type ?? 'exit_span',
     });
   }
 
-  return { rawEdges, services };
+  return { edges, services };
 }
 
 /**
- * Resolves destination services using pre-stored span IDs from the transform.
- * This is much faster than querying for span IDs at runtime.
- *
- * Uses same pattern as fetchTransactionsFromExitSpans in fetch_exit_span_samples.ts
- */
-async function resolveDestinationServices({
-  apmEventClient,
-  spanIdToResource,
-  start,
-  end,
-}: {
-  apmEventClient: APMEventClient;
-  spanIdToResource: Map<string, string>;
-  start: number;
-  end: number;
-}): Promise<Map<string, DestinationService>> {
-  const result = new Map<string, DestinationService>();
-  const spanIds = Array.from(spanIdToResource.keys());
-
-  if (spanIds.length === 0) return result;
-
-  // Find transactions where parent.id matches the pre-stored span IDs
-  const requiredFields = asMutableArray([SERVICE_NAME, AGENT_NAME, PARENT_ID] as const);
-  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
-
-  const txResponse = await apmEventClient.search('resolve_destination_transactions', {
-    apm: { events: [ProcessorEvent.transaction] },
-    track_total_hits: false,
-    size: spanIds.length,
-    query: { bool: { filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...spanIds)] } },
-    fields: [...requiredFields, ...optionalFields],
-  });
-
-  // Map span.id → service, then resource → service
-  for (const hit of txResponse.hits.hits) {
-    const tx = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
-    const parentId = tx[PARENT_ID];
-    const resource = spanIdToResource.get(parentId);
-
-    if (resource) {
-      result.set(resource, {
-        serviceName: tx[SERVICE_NAME],
-        serviceEnvironment: tx[SERVICE_ENVIRONMENT] ?? null,
-        agentName: tx[AGENT_NAME],
-      });
-    }
-  }
-
-  return result;
-}
-
-/**
- * Checks if the pre-computed service map indexes exist.
+ * Checks if the OneWorkflow service map index exists and has data.
  */
 export async function isPrecomputedServiceMapAvailable(
   esClient: ElasticsearchClient
 ): Promise<boolean> {
   try {
-    const [edgesExists, entryPointsExists] = await Promise.all([
-      esClient.indices.exists({ index: SERVICE_MAP_EDGES_INDEX }),
-      esClient.indices.exists({ index: SERVICE_MAP_ENTRY_POINTS_INDEX }),
-    ]);
-    return edgesExists && entryPointsExists;
+    const exists = await esClient.indices.exists({ index: WORKFLOW_SERVICE_MAP_INDEX });
+    if (!exists) return false;
+
+    // Check if there's recent data (within 24h retention)
+    const countResponse = await esClient.count({
+      index: WORKFLOW_SERVICE_MAP_INDEX,
+      query: {
+        range: { computed_at: { gte: 'now-24h' } },
+      },
+    });
+
+    return countResponse.count > 0;
   } catch {
     return false;
   }
@@ -405,21 +197,22 @@ export function convertEdgesToServiceMapSpans(edges: ServiceMapEdge[]): Array<{
   };
 }> {
   return edges
-    .filter((edge) => edge.destinationResource !== null)
+    .filter((edge) => edge.destinationResource != null && edge.destinationResource !== '')
     .map((edge, index) => ({
-      // Generate synthetic spanId since transforms aggregate away individual spans
+      // Generate synthetic spanId since workflow aggregates away individual spans
       spanId: `precomputed-${index}`,
       serviceName: edge.sourceService,
       agentName: edge.sourceAgentName ?? ('unknown' as AgentName),
-      serviceEnvironment: edge.sourceEnvironment ?? undefined,
-      spanType: edge.spanType ?? 'unknown',
-      spanSubtype: edge.spanSubtype ?? '',
+      serviceEnvironment: edge.sourceEnvironment || undefined,
+      // Ensure spanType is never empty - groupResourceNodes relies on this
+      spanType: edge.spanType || 'external',
+      spanSubtype: edge.spanSubtype || '',
       spanDestinationServiceResource: edge.destinationResource!,
       destinationService: edge.destinationService
         ? {
             serviceName: edge.destinationService.serviceName,
             agentName: edge.destinationService.agentName ?? ('unknown' as AgentName),
-            serviceEnvironment: edge.destinationService.serviceEnvironment ?? undefined,
+            serviceEnvironment: edge.destinationService.serviceEnvironment || undefined,
           }
         : undefined,
     }));
