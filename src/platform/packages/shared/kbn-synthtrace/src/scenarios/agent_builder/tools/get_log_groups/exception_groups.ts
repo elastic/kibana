@@ -24,7 +24,7 @@
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
- *   "tool_id": "observability.get_error_groups",
+ *   "tool_id": "observability.get_log_groups",
  *   "tool_params": {
  *     "start": "now-1h",
  *     "end": "now"

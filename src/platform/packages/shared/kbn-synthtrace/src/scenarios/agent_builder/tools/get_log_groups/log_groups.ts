@@ -8,11 +8,20 @@
  */
 
 /**
- * SCENARIO: Error Groups - APM Errors and OTel Exceptions
+ * SCENARIO: Log Groups - Logs and Exceptions
  *
- * Story: Generates APM error data across multiple services with different exception types,
- * culprits, and handled/unhandled states. Also generates OTel log exceptions for services
- * that emit exceptions via logs (not processed by APM). Used to test the `get_error_groups` tool.
+ * Story: Generates diverse log patterns, APM errors, and OTel log exceptions for testing
+ * the `get_log_groups` tool. This tool returns three categories:
+ * - applicationExceptionGroups: Span exceptions from APM
+ * - logExceptionGroups: OTel log exceptions
+ * - nonExceptionLogGroups: Regular log messages
+ *
+ * Regular Log Patterns (payment-service):
+ * - "Processing payment transaction for order #..." (Info, Frequent, High Cardinality)
+ * - "Payment transaction completed successfully" (Info, Frequent, Low Cardinality)
+ * - "Payment processing failed: connection timeout" (Error, Occasional)
+ * - "Payment gateway response time exceeded threshold" (Warn, Occasional)
+ * - "Debug: Payment API called with request_id=..." (Debug, Very Frequent, High Cardinality)
  *
  * APM Error Services:
  * - `payment-service` (production)
@@ -35,7 +44,7 @@
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
- *   "tool_id": "observability.get_error_groups",
+ *   "tool_id": "observability.get_log_groups",
  *   "tool_params": {
  *     "start": "now-1h",
  *     "end": "now"
@@ -56,6 +65,119 @@ import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
 import type { ApmSynthtraceEsClient } from '../../../../lib/apm/client/apm_synthtrace_es_client';
 import type { LogsSynthtraceEsClient } from '../../../../lib/logs/logs_synthtrace_es_client';
+
+// ============================================================================
+// Regular Log Categories Configuration
+// ============================================================================
+
+/**
+ * Generates log data with various categories/patterns for a service.
+ * These will appear in `nonExceptionLogGroups` response.
+ */
+export function generateLogCategoriesData({
+  range,
+  logsEsClient,
+  serviceName,
+}: {
+  range: Timerange;
+  logsEsClient: LogsSynthtraceEsClient;
+  serviceName: string;
+}): ScenarioReturnType<LogDocument> {
+  // Create multiple log patterns for categorization
+  const paymentProcessingLogs = range
+    .interval('30s')
+    .rate(5)
+    .generator((timestamp, index) =>
+      log
+        .create()
+        .message(`Processing payment transaction for order #${10000 + index}`)
+        .logLevel('info')
+        .service(serviceName)
+        .defaults({
+          'service.name': serviceName,
+          'log.level': 'info',
+        })
+        .timestamp(timestamp)
+    );
+
+  const paymentCompleteLogs = range
+    .interval('30s')
+    .rate(5)
+    .generator((timestamp) =>
+      log
+        .create()
+        .message('Payment transaction completed successfully')
+        .logLevel('info')
+        .service(serviceName)
+        .defaults({
+          'service.name': serviceName,
+          'log.level': 'info',
+        })
+        .timestamp(timestamp)
+    );
+
+  const errorLogs = range
+    .interval('2m')
+    .rate(2)
+    .generator((timestamp) =>
+      log
+        .create()
+        .message('Payment processing failed: connection timeout')
+        .logLevel('error')
+        .service(serviceName)
+        .defaults({
+          'service.name': serviceName,
+          'log.level': 'error',
+        })
+        .timestamp(timestamp)
+    );
+
+  const warningLogs = range
+    .interval('1m')
+    .rate(3)
+    .generator((timestamp) =>
+      log
+        .create()
+        .message('Payment gateway response time exceeded threshold')
+        .logLevel('warn')
+        .service(serviceName)
+        .defaults({
+          'service.name': serviceName,
+          'log.level': 'warn',
+        })
+        .timestamp(timestamp)
+    );
+
+  const debugLogs = range
+    .interval('15s')
+    .rate(10)
+    .generator((timestamp) =>
+      log
+        .create()
+        .message(
+          `Debug: Payment API called with request_id=${Math.random().toString(36).substring(2, 8)}`
+        )
+        .logLevel('debug')
+        .service(serviceName)
+        .defaults({
+          'service.name': serviceName,
+          'log.level': 'debug',
+        })
+        .timestamp(timestamp)
+    );
+
+  return withClient(logsEsClient, [
+    paymentProcessingLogs,
+    paymentCompleteLogs,
+    errorLogs,
+    warningLogs,
+    debugLogs,
+  ]);
+}
+
+// ============================================================================
+// APM Error Groups Configuration
+// ============================================================================
 
 /**
  * Configuration for an error type within a service
@@ -92,7 +214,7 @@ export interface ErrorServiceConfig {
 
 /**
  * Default service configurations for testing error groups.
- * Includes a variety of error types across multiple services with one stack trace example.
+ * These will appear in `applicationExceptionGroups` response.
  */
 export const DEFAULT_ERROR_SERVICES: ErrorServiceConfig[] = [
   {
@@ -168,6 +290,10 @@ export const DEFAULT_ERROR_SERVICES: ErrorServiceConfig[] = [
   },
 ];
 
+// ============================================================================
+// OTel Log Exceptions Configuration
+// ============================================================================
+
 /**
  * Configuration for an OTel log exception
  */
@@ -189,7 +315,7 @@ export interface LogExceptionServiceConfig {
 
 /**
  * Default OTel log exception services for testing.
- * These represent services that emit exceptions via logs, not processed by APM.
+ * These will appear in `logExceptionGroups` response.
  */
 export const DEFAULT_LOG_EXCEPTION_SERVICES: LogExceptionServiceConfig[] = [
   {
@@ -224,6 +350,10 @@ at EmailWorker.process (EmailWorker.java:56)`,
   },
 ];
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 /**
  * Converts structured stacktrace to OTel/ECS compliant string format.
  * Example output: "at processPayment (PaymentProcessor.java:42)\n at handleRequest (PaymentService.java:128)"
@@ -238,10 +368,6 @@ function stacktraceToString(stacktrace?: APMStacktrace[]): string | undefined {
     .join('\n');
 }
 
-/**
- * Generates APM error data for error groups testing.
- * Can be used both by CLI (via default export) and by API tests (via direct import).
- */
 /**
  * Creates a failure span to a downstream service resource.
  * The span will share the same trace.id as the parent transaction.
@@ -272,6 +398,14 @@ function buildDownstreamFailureSpan({
     .failure();
 }
 
+// ============================================================================
+// Data Generators
+// ============================================================================
+
+/**
+ * Generates APM error data for error groups testing.
+ * These will appear in `applicationExceptionGroups` response.
+ */
 export function generateErrorGroupsData({
   range,
   apmEsClient,
@@ -343,7 +477,7 @@ export function generateErrorGroupsData({
 /**
  * Generates OTel log exception data for log exception groups testing.
  * These represent exceptions logged via OTel semantic conventions (event.name: "exception").
- * Can be used both by CLI (via default export) and by API tests (via direct import).
+ * These will appear in `logExceptionGroups` response.
  */
 export function generateLogExceptionGroupsData({
   range,
@@ -391,43 +525,57 @@ export function generateLogExceptionGroupsData({
 }
 
 /**
- * Generates both APM error data and OTel log exception data.
- * This is the complete data generator for the get_error_groups tool.
+ * Generates all data for the get_log_groups tool:
+ * - Regular log categories (nonExceptionLogGroups)
+ * - APM error groups (applicationExceptionGroups)
+ * - OTel log exceptions (logExceptionGroups)
  */
-export function generateAllErrorGroupsData({
+export function generateAllLogGroupsData({
   range,
   apmEsClient,
   logsEsClient,
+  logCategoriesServiceName = 'payment-service',
   apmServices = DEFAULT_ERROR_SERVICES,
   logExceptionServices = DEFAULT_LOG_EXCEPTION_SERVICES,
 }: {
   range: Timerange;
   apmEsClient: ApmSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
+  logCategoriesServiceName?: string;
   apmServices?: ErrorServiceConfig[];
   logExceptionServices?: LogExceptionServiceConfig[];
 }): Array<ScenarioReturnType<ApmFields> | ScenarioReturnType<LogDocument>> {
+  // Generate regular log categories
+  const logCategoriesResult = generateLogCategoriesData({
+    range,
+    logsEsClient,
+    serviceName: logCategoriesServiceName,
+  });
+
+  // Generate APM error groups
   const apmResult = generateErrorGroupsData({
     range,
     apmEsClient,
     services: apmServices,
   });
 
+  // Generate OTel log exception groups
   const logsResult = generateLogExceptionGroupsData({
     range,
     logsEsClient,
     services: logExceptionServices,
   });
 
-  return [apmResult, logsResult];
+  return [logCategoriesResult, apmResult, logsResult];
 }
 
 export default createCliScenario<ApmFields | LogDocument>(
   ({ range, clients: { apmEsClient, logsEsClient } }) => {
-    return generateAllErrorGroupsData({
+    return generateAllLogGroupsData({
       range,
       apmEsClient,
       logsEsClient,
+      logCategoriesServiceName: 'payment-service',
       apmServices: DEFAULT_ERROR_SERVICES,
       logExceptionServices: DEFAULT_LOG_EXCEPTION_SERVICES,
     });

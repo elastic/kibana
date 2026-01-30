@@ -102,7 +102,7 @@ async function getErrorGroupSamples({
 }) {
   logger.debug(`Fetching error groups, kqlFilter: ${kqlFilter ?? 'none'}`);
 
-  const response = await apmEventClient.search('get_error_groups', {
+  const response = await apmEventClient.search('get_span_exceptions', {
     apm: {
       sources: [
         {
