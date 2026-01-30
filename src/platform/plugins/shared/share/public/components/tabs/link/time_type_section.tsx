@@ -32,8 +32,10 @@ const BoldText = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const AbsoluteTimeText = ({ date }: { date: string }) => {
-  const absoluteDate = convertRelativeTimeStringToAbsoluteTimeDate(date);
+const AbsoluteTimeText = ({ date, isToDate }: { date: string; isToDate?: boolean }) => {
+  const absoluteDate = convertRelativeTimeStringToAbsoluteTimeDate(date, {
+    roundUp: isToDate,
+  });
 
   return (
     <BoldText>
@@ -173,7 +175,7 @@ export const TimeTypeSection = ({
               defaultMessage="The users will see all data from {from} to {to}."
               values={{
                 from: <AbsoluteTimeText date={timeRange?.from} />,
-                to: <AbsoluteTimeText date={timeRange?.to} />,
+                to: <AbsoluteTimeText date={timeRange?.to} isToDate />,
               }}
             />
           </div>

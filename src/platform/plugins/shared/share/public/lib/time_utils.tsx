@@ -46,16 +46,22 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   };
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeDate = (dateString?: string) => {
+export const convertRelativeTimeStringToAbsoluteTimeDate = (
+  dateString?: string,
+  options?: { roundUp?: boolean }
+) => {
   if (!dateString) return;
-  const valueParsed = dateMath.parse(dateString);
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed?.isValid() ? valueParsed.toDate() : undefined;
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeString = (dateString?: string) => {
+export const convertRelativeTimeStringToAbsoluteTimeString = (
+  dateString?: string,
+  options?: { roundUp?: boolean }
+) => {
   if (!dateString) return dateString;
-  const valueParsed = dateMath.parse(dateString);
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
 };
