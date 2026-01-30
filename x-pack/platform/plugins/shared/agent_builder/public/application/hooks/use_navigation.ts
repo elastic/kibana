@@ -14,7 +14,7 @@ export interface LocationState {
   initialMessage?: string;
 }
 
-const MANAGEMENT_APP_ID = 'management';
+export const MANAGEMENT_APP_ID = 'management';
 const manageConnectorsPath = '/insightsAndAlerting/triggersActionsConnectors/connectors';
 
 export const useNavigation = () => {

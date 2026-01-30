@@ -9,14 +9,13 @@
 
 /* eslint-disable max-classes-per-file*/
 
-import fetch from 'node-fetch';
-import type { RequestInit } from 'node-fetch';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 import { normalizeUrl } from '../utils/normalize_url';
+import { getBasicAuthHeader } from '../../cli/utils/get_auth_header';
 
-export type KibanaClientFetchOptions = RequestInit & { ignore?: number[] };
-type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[] };
+export type KibanaClientFetchOptions = RequestInit & { ignore?: number[]; timeout?: number };
+type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[]; timeout?: number };
 
 export class KibanaClientHttpError extends Error {
   constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
@@ -50,15 +49,25 @@ export class KibanaClient {
   fetch(pathname: string, options: KibanaClientFetchOptionsWithIgnore) {
     const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
     const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
+    const { username, password } = url;
+    url.username = '';
+    url.password = '';
+
+    // Extract credentials from URL and add them to headers (native fetch doesn't support credentials in URLs)
+    const authHeaders = getBasicAuthHeader(username, password);
+
+    const { timeout, ...fetchOptions } = options;
     const normalizedUrl = normalizeUrl(url.toString());
     return fetch(normalizedUrl, {
-      ...options,
+      ...fetchOptions,
       headers: {
         ...this.headers,
-        ...options.headers,
+        ...authHeaders,
+        ...fetchOptions.headers,
       },
-      agent: getFetchAgent(normalizedUrl),
-    }).then(async (response) => {
+      dispatcher: getFetchAgent(normalizedUrl),
+      signal: timeout ? AbortSignal.timeout(timeout) : undefined,
+    } as RequestInit).then(async (response) => {
       if (options.ignore && options.ignore.includes(response.status)) {
         return undefined;
       }
