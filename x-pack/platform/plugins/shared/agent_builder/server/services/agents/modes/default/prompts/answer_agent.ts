@@ -6,30 +6,19 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
-import type { AttachmentPresentation } from '../../utils/attachment_presentation';
-import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { attachmentTypeInstructions } from './utils/attachments';
+import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
-interface AnswerAgentPromptParams {
-  customInstructions?: string;
-  initialMessages: BaseMessageLike[];
-  conversationTimestamp: string;
-  actions: ResearchAgentAction[];
-  answerActions: AnswerAgentAction[];
-  capabilities: ResolvedAgentCapabilities;
-  attachmentTypes: ProcessedAttachmentType[];
-  versionedAttachmentPresentation?: AttachmentPresentation;
-  clearSystemMessage?: boolean;
-}
+type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
 
-export const getAnswerAgentPrompt = (params: AnswerAgentPromptParams): BaseMessageLike[] => {
+export const getAnswerAgentPrompt = async (
+  params: AnswerAgentPromptParams
+): Promise<BaseMessageLike[]> => {
   const { initialMessages, actions, answerActions } = params;
   return [
     ['system', getAnswerSystemMessage(params)],
@@ -40,10 +29,12 @@ export const getAnswerAgentPrompt = (params: AnswerAgentPromptParams): BaseMessa
 };
 
 export const getAnswerSystemMessage = ({
-  customInstructions,
+  configuration: {
+    answer: { instructions: customInstructions },
+  },
   conversationTimestamp,
   capabilities,
-  attachmentTypes,
+  processedConversation: { attachmentTypes },
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
@@ -91,24 +82,20 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] No internal tool process or names revealed (unless user asked).`);
 };
 
-export const getStructuredAnswerPrompt = ({
-  customInstructions,
-  initialMessages,
-  conversationTimestamp,
-  actions,
-  answerActions,
-  capabilities,
-  attachmentTypes,
-}: {
-  customInstructions?: string;
-  initialMessages: BaseMessageLike[];
-  conversationTimestamp: string;
-  actions: ResearchAgentAction[];
-  answerActions: AnswerAgentAction[];
-  capabilities: ResolvedAgentCapabilities;
-  attachmentTypes: ProcessedAttachmentType[];
-  versionedAttachmentPresentation?: AttachmentPresentation;
-}): BaseMessageLike[] => {
+export const getStructuredAnswerPrompt = async (
+  params: AnswerAgentPromptParams
+): Promise<BaseMessageLike[]> => {
+  const {
+    configuration: {
+      answer: { instructions: customInstructions },
+    },
+    initialMessages,
+    conversationTimestamp,
+    actions,
+    answerActions,
+    capabilities,
+    processedConversation: { attachmentTypes },
+  } = params;
   const visEnabled = capabilities.visualizations;
 
   return [
