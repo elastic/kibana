@@ -35,28 +35,28 @@ flowchart LR
     App[Apps: Discover / Lens / Maps / ML / Alerts]
   end
 
-  subgraph Public["@kbn/esql public plugin"]
+  subgraph Public["kbn/esql public plugin"]
     ESQLLangEditor[ESQLLangEditor]
-    ESQLEditor[ESQLEditor (@kbn/esql-editor)]
-    KibanaServices[Kibana services<br/>(core, data, uiActions, kql, fieldsMetadata, usageCollection)]
+    ESQLEditor[ESQLEditor - kbn esql editor]
+    KibanaServices[Kibana services: core data uiActions kql fieldsMetadata usageCollection]
     VariablesService[EsqlVariablesService]
     Triggers[UI Actions triggers]
     UpdateAction[UpdateESQLQueryAction]
     ControlAction[CreateESQLControlAction]
-    ControlFlyout[ES|QL control flyout]
+    ControlFlyout[ESQL control flyout]
     ChooseColumn[ChooseColumnPopover]
     IdentifierForm[IdentifierControlForm]
     ValueForm[ValueControlForm]
   end
 
-  subgraph Server["@kbn/esql server plugin"]
-    Routes[HTTP routes<br/>/internal/esql/autocomplete/*<br/>/internal/esql_registry/extensions/{query}<br/>/internal/esql/lookup/*<br/>/internal/esql/timefield]
+  subgraph Server["kbn/esql server plugin"]
+    Routes[HTTP routes: autocomplete, extensions, lookup, timefield]
     EsqlService[EsqlService]
     ExtensionsRegistry[ESQLExtensionsRegistry]
   end
 
   subgraph Elasticsearch["Elasticsearch"]
-    ES[indices.resolveIndex<br/>and inference endpoints]
+    ES[indices.resolveIndex and inference endpoints]
   end
 
   App --> ESQLLangEditor --> ESQLEditor
