@@ -381,13 +381,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [sidebarToggleState$]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
@@ -597,7 +596,7 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    height: 'inherit',
+    height: '100%',
     display: 'flex',
     flex: '1 1 auto',
   }),
