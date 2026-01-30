@@ -162,6 +162,7 @@ export async function loadIndices(
       // return undefined and exit early if the request was aborted
       return;
     }
+    throw error;
   });
 
   if (!indices) {

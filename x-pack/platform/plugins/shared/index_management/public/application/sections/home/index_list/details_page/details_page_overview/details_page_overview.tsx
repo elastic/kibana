@@ -30,9 +30,8 @@ import {
   EisCloudConnectPromoCallout,
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
-import numeral from '@elastic/numeral';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { Index } from '../../../../../../../common';
+import { type Index, formatBytes } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
@@ -85,8 +84,8 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const { data } = useUserPrivileges(indexDetails.name);
   const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
 
-  const sizeFormatted = numeral(size).format('0.0b');
-  const primarySizeFormatted = numeral(primarySize).format('0.0b');
+  const sizeFormatted = formatBytes(size);
+  const primarySizeFormatted = formatBytes(primarySize);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,

@@ -29,3 +29,5 @@ export {
 } from './component_template_serialization';
 
 export { getPolicyType, serializeAsESPolicy, getESPolicyCreationApiCall } from './enrich_policies';
+
+export { formatBytes } from './format_bytes';

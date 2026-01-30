@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
-import numeral from '@elastic/numeral';
+import { formatBytes } from '@kbn/index-management-plugin/common';
 
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,17 +37,17 @@ export const StatefulIndexStorageStat = ({
         defaultMessage: 'Storage',
       })}
       data-test-subj="QuickStatsStorage"
-      secondaryTitle={numeral(index.size ?? 0).format('0.00 b')}
+      secondaryTitle={formatBytes(index.size)}
       stats={[
         {
           title: INDEX_SIZE_LABEL,
-          description: numeral(index.size ?? 0).format('0.00 b'),
+          description: formatBytes(index.size),
         },
         {
           title: i18n.translate('xpack.searchIndices.quickStats.primarySize_title', {
             defaultMessage: 'Primary Size',
           }),
-          description: numeral(index.primary_size ?? 0).format('0.00 b'),
+          description: formatBytes(index.primary_size),
         },
       ]}
     />

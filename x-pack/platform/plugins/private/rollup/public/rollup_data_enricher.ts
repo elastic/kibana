@@ -21,15 +21,18 @@ export const rollupDataEnricher = {
       .then((response) => {
         return {
           applyToAliases: true,
-          indices: Object.keys(response).reduce((acc, rollupJob) => {
-            response[rollupJob].rollup_jobs.forEach((job) => {
-              acc.push({
-                name: job.rollup_index,
-                isRollupIndex: true,
+          indices: Object.keys(response).reduce<{ name: string; isRollupIndex: true }[]>(
+            (acc, rollupJob) => {
+              response[rollupJob].rollup_jobs.forEach((job) => {
+                acc.push({
+                  name: job.rollup_index,
+                  isRollupIndex: true,
+                });
               });
-            });
-            return acc;
-          }, [] as { name: string; isRollupIndex: true }[]),
+              return acc;
+            },
+            []
+          ),
           source: SOURCE,
         };
       }),

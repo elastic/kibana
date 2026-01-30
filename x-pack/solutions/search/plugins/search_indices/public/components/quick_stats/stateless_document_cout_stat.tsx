@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
-import numeral from '@elastic/numeral';
+import { formatBytes } from '@kbn/index-management-plugin/common';
 
 import { EuiI18nNumber, useEuiTheme } from '@elastic/eui';
 
@@ -49,7 +49,7 @@ export const StatelessDocumentCountStat = ({
         },
         {
           title: INDEX_SIZE_LABEL,
-          description: numeral(index.size ?? 0).format('0.00 b'),
+          description: formatBytes(index.size),
         },
       ]}
       tooltipContent={DOCUMENT_COUNT_TOOLTIP}

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
-import numeral from '@elastic/numeral';
 
 import {
   EuiButton,
@@ -42,6 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
+import { formatBytes } from '../../../../../../common';
 import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
@@ -136,7 +136,7 @@ const getColumnConfigs = ({
         label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
           defaultMessage: 'Storage size',
         }),
-        render: (index) => numeral(index.size).format('0.00 b'),
+        render: (index) => formatBytes(index.size),
         order: 70,
       }
     );
