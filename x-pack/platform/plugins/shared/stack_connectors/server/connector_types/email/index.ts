@@ -197,12 +197,15 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
     throw new Error(`Invalid email addresses: ${error}`);
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc)).concat(replyTo ?? []);
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
+    const labels = ['to', 'cc', 'bcc'];
+    if (params.replyTo && params.replyTo.length) labels.push('replyTo');
+    throw new Error(`[${labels.join('/')}]: ${invalidEmailsMessage}`);
   }
 }
 

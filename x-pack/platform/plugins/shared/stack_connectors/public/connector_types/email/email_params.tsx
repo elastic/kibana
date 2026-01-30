@@ -34,7 +34,7 @@ export const getFormattedEmailOptions = (
   return formattedOptions;
 };
 
-const getEmailSender = (connector?: ActionConnector): string[] => {
+export const getEmailSender = (connector?: ActionConnector): string[] => {
   if (
     connector &&
     !connector.isPreconfigured &&
@@ -297,7 +297,7 @@ export const EmailParamsFields = ({
             isDisabled={isDisabled}
             isLoading={isLoading}
             fullWidth
-            data-test-subj="bccEmailAddressInput"
+            data-test-subj="replyToEmailAddressInput"
             selectedOptions={replyToOptions}
             onCreateOption={(searchValue: string) => {
               const newOptions = getFormattedEmailOptions(searchValue, replyToOptions);

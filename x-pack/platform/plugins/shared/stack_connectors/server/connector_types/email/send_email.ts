@@ -186,7 +186,7 @@ async function sendEmailWithNodemailer(
     to,
     cc,
     bcc,
-    replyTo,
+    ...(replyTo && replyTo.length ? { replyTo } : {}),
     // email content
     subject,
     html: messageHTML,

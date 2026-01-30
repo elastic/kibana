@@ -115,6 +115,7 @@ export function getConnectorType(
         message: new Array<string>(),
         subject: new Array<string>(),
       };
+
       const validationResult = { errors };
 
       if (!actionParams.message?.length) {
@@ -136,7 +137,7 @@ export function getConnectorType(
         errors.bcc.push(errorText);
       }
 
-      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails)).concat(replyTo);
+      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails)).concat(replyTo ?? []);
       const validatedEmails = services.validateEmailAddresses(allEmails, {
         treatMustacheTemplatesAsValid: true,
       });
@@ -157,7 +158,7 @@ export function getConnectorType(
           if (toEmailSet.has(email)) errors.to.push(message);
           if (ccEmailSet.has(email)) errors.cc.push(message);
           if (bccEmailSet.has(email)) errors.bcc.push(message);
-          if (replyToSet.has(email)) errors.bcc.push(message);
+          if (replyToSet.has(email)) errors.replyTo.push(message);
         }
       }
 
