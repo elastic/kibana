@@ -55,10 +55,10 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
         available_options,
         control_type: control_type as OptionsListESQLControlState['control_type'],
         display_settings,
-        esql_query,
-        selected_options,
+        esql_query: esql_query ?? '',
+        selected_options: selected_options ?? [],
         single_select,
-        variable_name,
+        variable_name: variable_name ?? '',
         variable_type: variable_type as OptionsListESQLControlState['variable_type'],
       };
     },

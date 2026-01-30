@@ -27,7 +27,6 @@ export function transformDataControlIn(
   state: Omit<DataControlState, 'data_view_id'> & { dataViewRefName: string };
   references?: Reference[];
 } {
-  console.log({ state });
   const { data_view_id, ...rest } = state;
   return {
     state: {
@@ -75,7 +74,7 @@ export function transformDataControlOut<
     data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
     use_global_filters,
     ignore_validations,
-    field_name,
+    field_name: field_name ?? '',
   };
 }
 

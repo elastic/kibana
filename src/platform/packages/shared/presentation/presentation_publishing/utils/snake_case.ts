@@ -18,12 +18,13 @@ import type { SnakeCasedKeys } from './types';
  */
 export const convertCamelCasedKeysToSnakeCase = <StateType extends object = object>(
   input: Partial<StateType> & SnakeCasedKeys<Partial<StateType>>
-): SnakeCasedKeys<StateType> => {
-  const snakeCased = {};
+): Partial<SnakeCasedKeys<StateType>> => {
+  const snakeCased: Partial<SnakeCasedKeys<StateType>> = {};
 
   const convertSubObject = (subObject: object, path: string = '') => {
     for (const [key, value] of Object.entries(subObject)) {
       const currentPath = `${path}${path.length ? '.' : ''}${snakeCase(key)}`;
+
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         convertSubObject(value, currentPath);
       } else {
@@ -43,5 +44,5 @@ export const convertCamelCasedKeysToSnakeCase = <StateType extends object = obje
   };
 
   convertSubObject(input); // kick off recursion
-  return snakeCased as SnakeCasedKeys<StateType>;
+  return snakeCased;
 };
