@@ -231,6 +231,9 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
       <EuiInMemoryTable
         className="eui-textBreakWord"
         compressed={true}
+        tableCaption={i18n.translate('xpack.ml.modelSnapshotTable.tableCaption', {
+          defaultMessage: 'Model snapshots for the job',
+        })}
         items={snapshots}
         columns={columns}
         pagination={{

@@ -215,7 +215,7 @@ describe('Clusters Routes', () => {
       });
     });
 
-    it('should return 500 for insufficient permissions', async () => {
+    it('should return 403 for insufficient permissions', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'cluster-uuid-456',
@@ -238,12 +238,12 @@ describe('Clusters Routes', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 500,
+        statusCode: 403,
         body: { message: 'Forbidden' },
       });
     });
 
-    it('should return 500 when cluster not found', async () => {
+    it('should return 404 when cluster not found', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'non-existent-cluster',
@@ -266,12 +266,12 @@ describe('Clusters Routes', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 500,
+        statusCode: 404,
         body: { message: 'Not found' },
       });
     });
 
-    it('should return 500 for bad request errors', async () => {
+    it('should return 400 for bad request errors', async () => {
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'valid-key',
         clusterId: 'cluster-uuid-456',
@@ -294,8 +294,78 @@ describe('Clusters Routes', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
-        statusCode: 500,
+        statusCode: 400,
         body: { message: 'Bad request' },
+      });
+    });
+
+    it('should return 429 for rate limit errors', async () => {
+      mockStorageService.getApiKey.mockResolvedValue({
+        apiKey: 'valid-key',
+        clusterId: 'cluster-uuid-456',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+
+      const axiosError = {
+        isAxiosError: true,
+        response: {
+          status: 429,
+          data: {
+            errors: [
+              {
+                code: 'clusters.get_cluster.rate_limit_exceeded',
+                message: 'User-rate limit exceeded',
+              },
+            ],
+          },
+        },
+      };
+
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+
+      mockRequest = {};
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: { message: 'User-rate limit exceeded' },
+      });
+    });
+
+    it('should extract error message from errors array in API response', async () => {
+      mockStorageService.getApiKey.mockResolvedValue({
+        apiKey: 'valid-key',
+        clusterId: 'cluster-uuid-456',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      });
+
+      const axiosError = {
+        isAxiosError: true,
+        response: {
+          status: 403,
+          data: {
+            errors: [
+              {
+                code: 'clusters.get_cluster.forbidden',
+                message: 'request is not authorized',
+              },
+            ],
+          },
+        },
+      };
+
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue(axiosError);
+
+      mockRequest = {};
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: 'request is not authorized' },
       });
     });
 

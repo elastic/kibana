@@ -109,6 +109,7 @@ export function createChatCompleteCallbackApi({
             temperature,
             toolChoice,
             tools,
+            timeout,
           } = callback(executor);
 
           const messages = givenMessages.map((message) => {
@@ -176,6 +177,8 @@ export function createChatCompleteCallbackApi({
                       modelName,
                       abortSignal,
                       metadata,
+                      timeout,
+                      stream,
                     })
                     .pipe(
                       chunksIntoMessage({

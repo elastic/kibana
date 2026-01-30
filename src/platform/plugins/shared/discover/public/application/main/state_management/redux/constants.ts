@@ -33,5 +33,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
     breakdownField: false,
     hideChart: false,
   },
+  expandedDoc: undefined,
   uiState: {},
 };

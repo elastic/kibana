@@ -18,6 +18,7 @@ import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 import type { SetRequired } from 'type-fest';
+import { EuiContextMenu } from '@elastic/eui';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
@@ -135,7 +136,17 @@ describe('Grouping', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue({ items: [{ key: '1', name: '1' }], panels: [] });
+    takeActionItems.mockReturnValue(
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            items: [{ key: '1', name: '1' }],
+          },
+        ]}
+      />
+    );
     render(
       <I18nProvider>
         <Grouping {...testProps} />
@@ -143,12 +154,47 @@ describe('Grouping', () => {
     );
     expect(screen.getByTestId('null-group-icon')).toBeInTheDocument();
 
-    let lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
+    const lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('take-action-button'));
 
-    expect(takeActionItems).toHaveBeenCalledWith(getNullGroupFilter('host.name'), 2);
+    expect((takeActionItems.mock.lastCall as any[])?.[0]).toEqual(getNullGroupFilter('host.name'));
+    expect((takeActionItems.mock.lastCall as any[])?.[1]).toEqual(2);
+    expect((takeActionItems.mock.lastCall as any[])?.[2]).toMatchInlineSnapshot(`
+      Object {
+        "alertsCount": Object {
+          "value": 11,
+        },
+        "doc_count": 11,
+        "hostTags": Object {
+          "buckets": Array [],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "hostsCountAggregation": Object {
+          "value": 11,
+        },
+        "isNullGroup": true,
+        "key": Array [
+          "-",
+        ],
+        "key_as_string": "-",
+        "selectedGroup": "host.name",
+        "severitiesSubAggregation": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 11,
+              "key": "low",
+            },
+          ],
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+        },
+        "usersCountAggregation": Object {
+          "value": 11,
+        },
+      }
+    `);
 
-    lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
 
     expect(renderChildComponent).toHaveBeenCalledWith(

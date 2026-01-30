@@ -6,4 +6,4 @@
  */
 
 export const OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM = 'openFlyout';
-export const SELECTED_FEATURES_URL_PARAM = 'selectedFeatures';
+export const SELECTED_SYSTEMS_URL_PARAM = 'selectedSystems';

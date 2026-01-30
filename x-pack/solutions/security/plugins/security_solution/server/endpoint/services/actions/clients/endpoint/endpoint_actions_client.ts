@@ -10,6 +10,7 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
@@ -62,6 +63,7 @@ import type {
   ResponseActionRunScriptParameters,
   EndpointScript,
   EndpointActionDataParameterTypes,
+  ResponseActionScriptsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -210,7 +212,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         const scriptDetails = await this.fetchScript(runscriptActionParams.scriptId);
         const scriptInfo = {
           file_id: scriptDetails.fileId,
-          file_hash: scriptDetails.fileHash,
+          file_sha256: scriptDetails.fileHash,
           file_name: scriptDetails.fileName,
           file_size: scriptDetails.fileSize,
           path_to_executable: scriptDetails.pathToExecutable,
@@ -565,10 +567,65 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       );
     }
 
+    let runscriptActionRequestParams = actionRequest;
+
+    // Apply default for `timeout` if not set on request payload
+    if (
+      !(runscriptActionRequestParams.parameters as EndpointRunScriptActionRequestParams).timeout
+    ) {
+      runscriptActionRequestParams = {
+        ...runscriptActionRequestParams,
+        parameters: {
+          ...runscriptActionRequestParams.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
     return this.handleResponseAction<
       RunScriptActionRequestBody,
       ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
-    >('runscript', actionRequest, options);
+    >('runscript', runscriptActionRequestParams, options);
+  }
+
+  async getCustomScripts({
+    osType,
+  }: Omit<
+    CustomScriptsRequestQueryParams,
+    'agentType'
+  > = {}): Promise<ResponseActionScriptsApiResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      !this.options.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement
+    ) {
+      throw new ResponseActionsClientError(
+        'Elastic Defend runscript operation is not enabled',
+        400
+      );
+    }
+
+    const scriptsClient = this.options.endpointService.getScriptsLibraryClient(
+      this.options.spaceId,
+      this.options.username
+    );
+
+    const scriptList = await scriptsClient.list({
+      sortField: 'name',
+      sortDirection: 'asc',
+      pageSize: 10_000,
+      kuery: osType ? `platform: "${osType}"` : undefined,
+    });
+
+    return {
+      data: scriptList.data.map((script) => {
+        return {
+          id: script.id,
+          name: script.name,
+          description: script.description ?? '',
+          meta: script,
+        };
+      }),
+    };
   }
 
   async getFileDownload(actionId: string, fileId: string): Promise<GetFileDownloadMethodResponse> {

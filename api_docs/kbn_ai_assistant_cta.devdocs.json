@@ -24,6 +24,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+            "lineNumber": 29,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +99,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 79,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,6 +130,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +152,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "lineNumber": 34,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -171,6 +183,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -191,6 +205,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+            "lineNumber": 30,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,6 +236,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -240,6 +258,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+            "lineNumber": 31,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -261,6 +281,8 @@
           "(props: NoConnectorAccessProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/no_connector_access/no_connector_access.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,6 +297,8 @@
               "NoConnectorAccessProps"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/no_connector_access/no_connector_access.tsx",
+            "lineNumber": 21,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -304,6 +328,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -324,6 +350,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
+            "lineNumber": 26,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -362,6 +390,8 @@
           ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -378,6 +408,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -396,6 +428,8 @@
           "Props for the `AssistantCallToAction`"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -412,6 +446,8 @@
               "\"subdued\" | \"plain\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,6 +464,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -444,6 +482,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,6 +500,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -476,6 +518,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -492,6 +536,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -526,6 +572,8 @@
           ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -542,6 +590,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -560,6 +610,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -576,6 +628,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -610,6 +664,8 @@
           ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -626,6 +682,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -662,6 +720,8 @@
           ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -678,6 +738,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -714,6 +776,8 @@
           ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -730,6 +794,8 @@
               "\"stack\" | \"search\" | \"security\" | \"oblt\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -752,6 +818,8 @@
           "\"aiCTAAddConnectorButton\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -769,6 +837,8 @@
           "\"aiCTAInstallKnowledgeBaseButton\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -786,6 +856,8 @@
           "\"aiCTAManageLicenseButton\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -803,6 +875,8 @@
           "\"aiCTAManageSubscriptionButton\""
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

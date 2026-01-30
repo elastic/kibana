@@ -12,20 +12,40 @@ import { type Streams, isDescendantOf } from '@kbn/streams-schema';
 
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { AssetImage } from '../asset_image';
-import { StreamsList } from '../streams_list';
-import { useWiredStreams } from '../../hooks/use_wired_streams';
+import { StreamsList, type StreamListItem } from '../streams_list';
+import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 
 export function ChildStreamList({ definition }: { definition?: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
 
-  const { wiredStreams } = useWiredStreams();
+  // Fetch from internal API to get data_stream info for TSDB mode detection
+  const { value: streamsResponse } = useStreamsAppFetch(
+    async ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /internal/streams', {
+        signal,
+      }),
+    [streamsRepositoryClient]
+  );
 
-  const childrenStreams = useMemo(() => {
-    if (!definition) {
-      return [];
+  const childrenStreams = useMemo((): StreamListItem[] | undefined => {
+    if (!definition || !streamsResponse?.streams) {
+      return undefined;
     }
-    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
-  }, [definition, wiredStreams]);
+    return streamsResponse.streams
+      .filter((item) => isDescendantOf(definition.stream.name, item.stream.name))
+      .map((item) => ({
+        stream: item.stream,
+        data_stream: item.data_stream,
+      }));
+  }, [definition, streamsResponse?.streams]);
 
   if (definition && childrenStreams?.length === 0) {
     return (

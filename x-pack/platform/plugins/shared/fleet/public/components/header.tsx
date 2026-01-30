@@ -19,6 +19,9 @@ const Container = styled.div`
       margin-bottom: 0 !important;
     }
   }
+
+  // should be alice blue
+  background-color: ${(props) => props.theme.eui.euiColorBackgroundBaseSubdued};
 `;
 
 const Wrapper = styled.div<{ maxWidth?: number | string }>`

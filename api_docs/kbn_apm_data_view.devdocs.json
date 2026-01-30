@@ -30,6 +30,8 @@
           "(spaceId: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "(dataViewId: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -7,7 +7,5 @@
 
 export { FeatureClient } from './feature_client';
 export type { FeatureBulkOperation } from './feature_client';
-export { FeatureTypeRegistry } from './feature_type_registry';
-export type { FeatureTypeHandler } from './feature_type_handler';
 export type { StoredFeature } from './stored_feature';
 export { storedFeatureSchema } from './stored_feature';

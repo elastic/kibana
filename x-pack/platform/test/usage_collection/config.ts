@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         ...findTestPluginPaths(resolve(__dirname, 'plugins')),
+        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(['unifiedRulesPage'])}`,
       ],
     },
 

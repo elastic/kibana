@@ -84,22 +84,22 @@ export function initializeSettingsManager(initialState: DashboardState) {
           ...settings,
         });
       },
-      projectRoutingRestore$: stateManager.api.project_routing_restore$,
+      projectRoutingRestore$: stateManager.api.projectRoutingRestore$,
       title$: stateManager.api.title$,
       description$: stateManager.api.description$,
-      timeRestore$: stateManager.api.time_restore$,
-      hideTitle$: stateManager.api.hide_panel_titles$,
+      timeRestore$: stateManager.api.timeRestore$,
+      hideTitle$: stateManager.api.hidePanelTitles$,
       settings: {
-        autoApplyFilters$: stateManager.api.auto_apply_filters$,
-        syncColors$: stateManager.api.sync_colors$,
-        syncCursor$: stateManager.api.sync_cursor$,
-        syncTooltips$: stateManager.api.sync_tooltips$,
-        useMargins$: stateManager.api.use_margins$,
+        autoApplyFilters$: stateManager.api.autoApplyFilters$,
+        syncColors$: stateManager.api.syncColors$,
+        syncCursor$: stateManager.api.syncCursor$,
+        syncTooltips$: stateManager.api.syncTooltips$,
+        useMargins$: stateManager.api.useMargins$,
       },
     },
     internalApi: {
       serializeSettings,
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
           debounceTime(100),
           map(() => stateManager.getLatestState()),

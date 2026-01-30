@@ -399,7 +399,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 customIdentifier: 'draft',
                 action: 'grok' as const,
                 from: 'body.text',
-                patterns: ['%{INVALID_PATTERN:field}'],
+                patterns: ['%{INVALID_PATTERN:attributes.field}'],
                 where: { always: {} },
               },
             ],
@@ -415,7 +415,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processor_id: 'draft',
             type: 'generic_simulation_failure',
             message:
-              "parse_exception\n\tRoot causes:\n\t\tparse_exception: [patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
+              "parse_exception\n\tRoot causes:\n\t\tparse_exception: [patterns] Invalid regex pattern found in: [%{INVALID_PATTERN:attributes.field}]. Unable to find pattern [INVALID_PATTERN] in Grok's pattern dictionary",
           },
         ]);
       });

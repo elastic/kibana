@@ -26,6 +26,8 @@
         "label": "Semaphore",
         "description": [],
         "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
+                "lineNumber": 19,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,6 +80,8 @@
               "<T, T>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -90,6 +98,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/semaphore.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -113,6 +123,8 @@
           "(x: never) => never"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/assert_never.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +139,8 @@
               "never"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/assert_never.ts",
+            "lineNumber": 16,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -152,6 +166,8 @@
           "<T, any>) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +185,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+            "lineNumber": 22,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -187,6 +205,8 @@
               "<T, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+            "lineNumber": 22,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -212,6 +232,8 @@
           "<T, any>) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,6 +251,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -246,6 +270,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -264,6 +290,8 @@
               "<T, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/for_each.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -289,6 +317,8 @@
           "<T1, T2>) => Promise<T2[]>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -306,6 +336,8 @@
               "<T1>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+            "lineNumber": 29,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -324,6 +356,8 @@
               "<T1, T2>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+            "lineNumber": 29,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -349,6 +383,8 @@
           "<T1, T2>) => Promise<T2[]>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -366,6 +402,8 @@
               "<T1>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -383,6 +421,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -401,6 +441,8 @@
               "<T1, T2>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/map.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -422,6 +464,8 @@
           "(list: string[], chunkSize?: number) => string[][]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -436,6 +480,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+            "lineNumber": 19,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -451,6 +497,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/byte_partition/byte_partition.ts",
+            "lineNumber": 19,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -480,6 +528,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -494,6 +544,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
+            "lineNumber": 22,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -515,6 +567,8 @@
           "(obj: any, path: string[]) => any"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -531,6 +585,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "lineNumber": 20,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,6 +604,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "lineNumber": 20,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -569,6 +627,8 @@
           "(obj: any) => void"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/ensure_no_unsafe_properties.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -583,6 +643,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/ensure_no_unsafe_properties.ts",
+            "lineNumber": 18,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -602,6 +664,8 @@
           "(path: string[]) => void"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -616,6 +680,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/ensure_deep_object.ts",
+            "lineNumber": 60,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -643,6 +709,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -657,6 +725,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -678,6 +748,8 @@
           "(obj: CFG, path: [A, B, C, D, E]) => CFG[A][B][C][D][E]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -692,6 +764,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -707,6 +781,8 @@
               "[A, B, C, D, E]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 23,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -726,6 +802,8 @@
           "(obj: CFG, path: [A, B, C, D]) => CFG[A][B][C][D]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -740,6 +818,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -755,6 +835,8 @@
               "[A, B, C, D]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 30,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -774,6 +856,8 @@
           "(obj: CFG, path: [A, B, C]) => CFG[A][B][C]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -788,6 +872,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -803,6 +889,8 @@
               "[A, B, C]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 36,
+            "columnNumber": 13,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -822,6 +910,8 @@
           "(obj: CFG, path: [A, B]) => CFG[A][B]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -836,6 +926,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -851,6 +943,8 @@
               "[A, B]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -870,6 +964,8 @@
           "(obj: CFG, path: A | [A]) => CFG[A]"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -884,6 +980,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -899,6 +997,8 @@
               "A | [A]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -918,6 +1018,8 @@
           "(obj: CFG, path: string | string[]) => any"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -932,6 +1034,8 @@
               "CFG"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 45,
+            "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -947,6 +1051,8 @@
               "string | string[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get.ts",
+            "lineNumber": 45,
+            "columnNumber": 65,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -968,6 +1074,8 @@
           "(rootValue: Record<string, any>) => { [key: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -982,6 +1090,8 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
+            "lineNumber": 25,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1003,6 +1113,8 @@
           "(url: string) => string | null"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1017,6 +1129,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 123,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1038,6 +1152,8 @@
           "(url: string, basePath: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1052,6 +1168,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1067,6 +1185,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/is_internal_url.ts",
+            "lineNumber": 13,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1086,6 +1206,8 @@
           "(maybePromise: T | Promise<T>) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1100,6 +1222,8 @@
               "T | Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+            "lineNumber": 32,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1121,6 +1245,8 @@
           "(candidatePath: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1135,6 +1261,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 104,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1162,6 +1290,8 @@
           "<T2>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1179,6 +1309,8 @@
               "<T1>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+            "lineNumber": 26,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1197,6 +1329,8 @@
               "<T1, T2>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+            "lineNumber": 26,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1216,6 +1350,8 @@
           "(map: ReadonlyMap<string, V>) => Record<string, V>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/map_to_object.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1230,6 +1366,8 @@
               "ReadonlyMap<string, V>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/map_to_object.ts",
+            "lineNumber": 10,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1257,6 +1395,8 @@
           "<T2>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1274,6 +1414,8 @@
               "<T1>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1291,6 +1433,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1309,6 +1453,8 @@
               "<T1, T2>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/iteration/observable.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1328,6 +1474,8 @@
           "({ pattern, str }: { pattern: string; str: string; }) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1339,6 +1487,8 @@
             "label": "{ pattern, str }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+            "lineNumber": 10,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1350,6 +1500,8 @@
                 "label": "pattern",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+                "lineNumber": 10,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1361,6 +1513,8 @@
                 "label": "str",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-std/src/match_wildcard_pattern.ts",
+                "lineNumber": 10,
+                "columnNumber": 75,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1383,6 +1537,8 @@
           "(baseObj: TBase, source1: TSource1) => TBase & TSource1"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1397,6 +1553,8 @@
               "TBase"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1412,6 +1570,8 @@
               "TSource1"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1431,6 +1591,8 @@
           "(baseObj: TBase, overrideObj: TSource1, overrideObj2: TSource2) => TBase & TSource1 & TSource2"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1445,6 +1607,8 @@
               "TBase"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1460,6 +1624,8 @@
               "TSource1"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 26,
+            "columnNumber": 19,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1475,6 +1641,8 @@
               "TSource2"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 26,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1494,6 +1662,8 @@
           "(baseObj: TBase, overrideObj: TSource1, overrideObj2: TSource2) => TBase & TSource1 & TSource2 & TSource3"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1508,6 +1678,8 @@
               "TBase"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1523,6 +1695,8 @@
               "TSource1"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1538,6 +1712,8 @@
               "TSource2"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1557,6 +1733,8 @@
           "(baseObj: Record<string, any>, sources: Record<string, any>[]) => TReturn"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1571,6 +1749,8 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1586,6 +1766,8 @@
               "Record<string, any>[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/merge.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1623,6 +1805,8 @@
           ">) => string"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1639,6 +1823,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1672,6 +1858,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1695,6 +1883,8 @@
           "(href: string, basePath: string, nextUrlQueryParam: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1709,6 +1899,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1724,6 +1916,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1739,6 +1933,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/parse_next_url.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1758,6 +1954,8 @@
           "(obj: T, keys: readonly K[]) => Pick<T, K>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1772,6 +1970,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
+            "lineNumber": 10,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1787,6 +1987,8 @@
               "readonly K[]"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/pick.ts",
+            "lineNumber": 10,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1808,6 +2010,8 @@
           "(value: string, handleError: (error: Error) => T) => T"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1824,6 +2028,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1841,6 +2047,8 @@
               "(error: Error) => T"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_parse.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1864,6 +2072,8 @@
           "(value: unknown, handleError: (error: Error) => string | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1880,6 +2090,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1897,6 +2109,8 @@
               "(error: Error) => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/safe_json_stringify.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1920,6 +2134,8 @@
           "(version: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1934,6 +2150,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
+            "lineNumber": 14,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1953,6 +2171,8 @@
           "({\n  promise,\n  timeoutMs,\n}: { promise: Promise<T>; timeoutMs: number; }) => Promise<{ timedout: true; } | { timedout: false; value: T; }>"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1964,6 +2184,8 @@
             "label": "{\n  promise,\n  timeoutMs,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+            "lineNumber": 13,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1978,6 +2200,8 @@
                   "Promise<T>"
                 ],
                 "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+                "lineNumber": 14,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1989,6 +2213,8 @@
                 "label": "timeoutMs",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-std/src/promise.ts",
+                "lineNumber": 15,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2010,6 +2236,8 @@
           "\nWe define our own typings because the current version of @types/node\ndeclares properties to be optional \"hostname?: string\".\nAlthough, parse call returns \"hostname: null | string\".\n"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2024,6 +2252,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2038,6 +2268,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2052,6 +2284,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2066,6 +2300,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2080,6 +2316,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2094,6 +2332,8 @@
               "boolean | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2108,6 +2348,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2123,6 +2365,8 @@
               "<string>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/url.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2143,6 +2387,8 @@
           "any[] | { [k: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2160,6 +2406,8 @@
           "T extends any ? { [K in keyof T]: { type: K; value: T[K]; }; }[keyof T] : never"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

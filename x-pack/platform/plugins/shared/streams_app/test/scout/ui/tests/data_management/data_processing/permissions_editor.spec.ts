@@ -47,9 +47,11 @@ test.describe(
     test('should NOT allow editor to add processors (requires simulate privilege)', async ({
       page,
     }) => {
-      // Verify the "Create step" button is not visible (requires simulate)
-      const createStepButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-      await expect(createStepButton).toBeHidden();
+      // Verify the "Create processor" button is not visible (requires simulate)
+      const createProcessorButton = page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
+      );
+      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should NOT allow editor to edit existing processors (requires simulate privilege)', async ({

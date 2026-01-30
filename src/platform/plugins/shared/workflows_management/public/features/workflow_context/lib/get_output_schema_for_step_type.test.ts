@@ -8,160 +8,99 @@
  */
 
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { z } from '@kbn/zod/v4';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 import { stepSchemas } from '../../../../common/step_schemas';
 
 describe('getOutputSchemaForStepType', () => {
-  it('should return z.unknown() for elasticsearch step types', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'elasticsearch.search',
-      type: 'atomic' as const,
-      configuration: {},
-    };
+  let originalGetAllConnectorsMapCache: typeof stepSchemas.getAllConnectorsMapCache;
+  let mockConnectorsMap: Map<string, { type: string; outputSchema?: z.ZodSchema }>;
 
-    const result = getOutputSchemaForStepType(mockNode);
-
-    // Check that it's a ZodUnknown schema by testing its behavior
-    expect(result.def.type).toBe('unknown');
-    expect(result.safeParse('any value')).toEqual({ success: true, data: 'any value' });
-    expect(result.safeParse(123)).toEqual({ success: true, data: 123 });
-    expect(result.safeParse(null)).toEqual({ success: true, data: null });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Save original and mock getAllConnectorsMapCache
+    originalGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache;
+    mockConnectorsMap = new Map();
+    stepSchemas.getAllConnectorsMapCache = jest.fn().mockImplementation(() => mockConnectorsMap);
   });
 
-  it('should return z.unknown() for kibana step types', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'kibana.request',
-      type: 'atomic' as const,
-      configuration: {},
-    };
-
-    const result = getOutputSchemaForStepType(mockNode);
-
-    // Check that it's a ZodUnknown schema by testing its behavior
-    expect(result.def.type).toBe('unknown');
-    expect(result.safeParse('any value')).toEqual({ success: true, data: 'any value' });
+  afterEach(() => {
+    stepSchemas.getAllConnectorsMapCache = originalGetAllConnectorsMapCache;
   });
 
-  it('should return z.unknown() for unknown step types', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'unknown-step-type',
-      type: 'atomic' as const,
-      configuration: {},
-    };
+  describe('elasticsearch and kibana connectors', () => {
+    it('should return outputSchema from elasticsearch connector', () => {
+      const mockOutputSchema = z.object({ hits: z.array(z.any()) });
+      mockConnectorsMap.set('elasticsearch.search', {
+        type: 'elasticsearch.search',
+        outputSchema: mockOutputSchema,
+      });
 
-    const result = getOutputSchemaForStepType(mockNode);
-
-    // Check that it's a ZodUnknown schema by testing its behavior
-    expect(result.def.type).toBe('unknown');
-    expect(result.safeParse(undefined)).toEqual({ success: true, data: undefined });
-  });
-
-  it('should return z.unknown() for node with empty stepType', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: '',
-      type: 'atomic' as const,
-      configuration: {},
-    };
-
-    const result = getOutputSchemaForStepType(mockNode);
-
-    // Check that it's a ZodUnknown schema by testing its behavior
-    expect(result.def.type).toBe('unknown');
-    expect(result.safeParse({})).toEqual({ success: true, data: {} });
-  });
-
-  it.each([
-    'elasticsearch.indices.exists',
-    'elasticsearch.indices.delete',
-    'elasticsearch.index',
-    'elasticsearch.search',
-    'elasticsearch.bulk',
-  ])('should handle %s node', (testCase) => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: testCase,
-      type: 'atomic' as const,
-      configuration: {},
-    };
-    const result = getOutputSchemaForStepType(mockNode);
-    expect(result.def.type).toBe('unknown');
-  });
-
-  it.each(['kibana.request', 'kibana.dashboard', 'kibana.visualizations', 'kibana.data_views'])(
-    'should handle %s node',
-    (testCase) => {
       const mockNode = {
         id: 'test-id',
         stepId: 'test-step-id',
-        stepType: testCase,
+        stepType: 'elasticsearch.search',
         type: 'atomic' as const,
         configuration: {},
       };
+
       const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result).toBe(mockOutputSchema);
+    });
+
+    it('should return outputSchema from kibana connector', () => {
+      const mockOutputSchema = z.object({ id: z.string(), title: z.string() });
+      mockConnectorsMap.set('kibana.create_case_default_space', {
+        type: 'kibana.create_case_default_space',
+        outputSchema: mockOutputSchema,
+      });
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'kibana.create_case_default_space',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result).toBe(mockOutputSchema);
+    });
+
+    it('should return z.unknown() when connector has no outputSchema', () => {
+      mockConnectorsMap.set('elasticsearch.search', {
+        type: 'elasticsearch.search',
+        // no outputSchema defined
+      });
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'elasticsearch.search',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
       expect(result.def.type).toBe('unknown');
-    }
-  );
+    });
 
-  it('should validate that returned schema is a Zod schema', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'test-step',
-      type: 'atomic' as const,
-      configuration: {},
-    };
+    it.each([
+      'elasticsearch.indices.exists',
+      'elasticsearch.indices.delete',
+      'elasticsearch.index',
+      'elasticsearch.search',
+      'elasticsearch.bulk',
+    ])('should return connector outputSchema for %s', (stepType) => {
+      const mockOutputSchema = z.object({ result: z.string() });
+      mockConnectorsMap.set(stepType, {
+        type: stepType,
+        outputSchema: mockOutputSchema,
+      });
 
-    const result = getOutputSchemaForStepType(mockNode);
-
-    // Verify it's a Zod schema by checking for the def property
-    expect(result).toHaveProperty('def');
-    expect(typeof result.parse).toBe('function');
-    expect(typeof result.safeParse).toBe('function');
-  });
-
-  it('should handle nodes with configuration objects', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'test-step',
-      type: 'atomic' as const,
-      configuration: {
-        with: { param: 'value' },
-      },
-    };
-
-    const result = getOutputSchemaForStepType(mockNode);
-
-    expect(result.def.type).toBe('unknown');
-  });
-
-  it('should handle nodes with null configuration', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'test-step',
-      type: 'atomic' as const,
-      configuration: null,
-    };
-
-    const result = getOutputSchemaForStepType(mockNode);
-
-    expect(result.def.type).toBe('unknown');
-  });
-
-  it('should handle custom connector step types', () => {
-    const customStepTypes = ['slack', 'email', 'webhook', 'custom-connector'];
-
-    customStepTypes.forEach((stepType) => {
       const mockNode = {
         id: 'test-id',
         stepId: 'test-step-id',
@@ -169,22 +108,140 @@ describe('getOutputSchemaForStepType', () => {
         type: 'atomic' as const,
         configuration: {},
       };
+
       const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result).toBe(mockOutputSchema);
+    });
+
+    it.each(['kibana.create_case_default_space', 'kibana.add_case_comment_default_space'])(
+      'should return connector outputSchema for %s',
+      (stepType) => {
+        const mockOutputSchema = z.object({ id: z.string() });
+        mockConnectorsMap.set(stepType, {
+          type: stepType,
+          outputSchema: mockOutputSchema,
+        });
+
+        const mockNode = {
+          id: 'test-id',
+          stepId: 'test-step-id',
+          stepType,
+          type: 'atomic' as const,
+          configuration: {},
+        };
+
+        const result = getOutputSchemaForStepType(mockNode);
+
+        expect(result).toBe(mockOutputSchema);
+      }
+    );
+  });
+
+  describe('fallback behavior', () => {
+    it('should return z.unknown() for unknown step types', () => {
+      // Map is empty, connector not found
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'unknown-step-type',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result.def.type).toBe('unknown');
+      expect(result.safeParse(undefined)).toEqual({ success: true, data: undefined });
+    });
+
+    it('should return z.unknown() for node with empty stepType', () => {
+      // Map is empty, connector not found
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: '',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result.def.type).toBe('unknown');
+      expect(result.safeParse({})).toEqual({ success: true, data: {} });
+    });
+
+    it('should return z.unknown() when connectors map cache is null', () => {
+      stepSchemas.getAllConnectorsMapCache = jest.fn().mockReturnValue(null);
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'elasticsearch.search',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
       expect(result.def.type).toBe('unknown');
     });
   });
 
-  it('should handle atomic node type specifically', () => {
-    const mockNode = {
-      id: 'test-id',
-      stepId: 'test-step-id',
-      stepType: 'test-step',
-      type: 'atomic' as const,
-      configuration: {},
-    };
+  describe('zod schema validation', () => {
+    it('should validate that returned schema is a Zod schema', () => {
+      // Map is empty, will return z.unknown()
 
-    const result = getOutputSchemaForStepType(mockNode);
-    expect(result.def.type).toBe('unknown');
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'test-step',
+        type: 'atomic' as const,
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result).toHaveProperty('def');
+      expect(typeof result.parse).toBe('function');
+      expect(typeof result.safeParse).toBe('function');
+    });
+
+    it('should handle nodes with configuration objects', () => {
+      // Map is empty, will return z.unknown()
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'test-step',
+        type: 'atomic' as const,
+        configuration: {
+          with: { param: 'value' },
+        },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result.def.type).toBe('unknown');
+    });
+
+    it('should handle nodes with null configuration', () => {
+      // Map is empty, will return z.unknown()
+
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'test-step',
+        type: 'atomic' as const,
+        configuration: null,
+      };
+
+      const result = getOutputSchemaForStepType(mockNode);
+
+      expect(result.def.type).toBe('unknown');
+    });
   });
 
   describe('custom steps output schemas', () => {
@@ -200,6 +257,8 @@ describe('getOutputSchemaForStepType', () => {
       (stepSchemas.isPublicStepDefinition as unknown as jest.Mock) = jest
         .fn()
         .mockReturnValue(true);
+      // Reset connector map for custom steps tests (empty map)
+      mockConnectorsMap.clear();
     });
 
     afterEach(() => {
@@ -285,14 +344,14 @@ describe('getOutputSchemaForStepType', () => {
       const result = getOutputSchemaForStepType(mockNode);
 
       // Should call getOutputSchema first
-      expect(mockStepDefinition.editorHandlers?.dynamicSchema.getOutputSchema).toHaveBeenCalledWith(
-        {
-          input: {
-            param: 'value',
-          },
-          config: mockNode.configuration,
-        }
-      );
+      expect(
+        mockStepDefinition.editorHandlers?.dynamicSchema?.getOutputSchema
+      ).toHaveBeenCalledWith({
+        input: {
+          param: 'value',
+        },
+        config: mockNode.configuration,
+      });
 
       // Should fallback to static schema when dynamic throws
       expect(result).toBe(mockStaticSchema);

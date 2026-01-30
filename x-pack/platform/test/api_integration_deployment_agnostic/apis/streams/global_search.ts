@@ -39,7 +39,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.types).to.contain('stream');
       expect(response.body.types).to.contain('classic stream');
       expect(response.body.types).to.contain('wired stream');
-      expect(response.body.types).to.contain('group stream');
     });
 
     it('should find Streams', async () => {

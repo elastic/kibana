@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiCard, EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { DATA_CONNECTORS_APP_ID } from '@kbn/deeplinks-data-connectors';
+import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { AGENT_BUILDER_AGENT_NEW_PATH } from '../../../common';
 import { useNavigateToApp } from '../hooks/use_navigate_to_app';
 import searchWindowSVG from '../../assets/search_window_illustration.svg';
@@ -20,7 +20,7 @@ export const ExploreWorkplaceAI: React.FC = () => {
   const navigateToApp = useNavigateToApp();
 
   const onConnectSource = useCallback(() => {
-    navigateToApp(DATA_CONNECTORS_APP_ID);
+    navigateToApp(DATA_SOURCES_APP_ID);
   }, [navigateToApp]);
 
   const onCreateAgent = useCallback(() => {

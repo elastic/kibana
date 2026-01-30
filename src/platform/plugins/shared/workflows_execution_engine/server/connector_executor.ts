@@ -10,7 +10,6 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
@@ -59,18 +58,14 @@ export class ConnectorExecutor {
   }
 
   private async resolveConnectorId(connectorName: string, spaceId: string): Promise<string> {
-    if (validateUuid(connectorName)) {
-      return connectorName;
-    }
-
     const allConnectors = await (this.actionsClient as ActionsClient).getAll();
 
     const connector = allConnectors.find(
-      (c: ConnectorWithExtraFindData) => c.name === connectorName
+      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
     );
 
     if (!connector) {
-      throw new Error(`Connector with name ${connectorName} not found`);
+      throw new Error(`Connector ${connectorName} not found`);
     }
 
     return connector.id;

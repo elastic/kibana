@@ -89,8 +89,11 @@ describe('autocomplete', () => {
     },
   });
 
-  const sourceCommands = ['row', 'from', 'show', 'ts'];
-  const headerCommands = ['set'];
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  const headerCommands = esqlCommandRegistry
+    .getAllCommands()
+    .filter(({ metadata }) => metadata.type === 'header')
+    .map(({ name }) => name);
 
   const getSourceAndHeaderCommands = () => {
     return [
@@ -139,6 +142,18 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | /', commands);
     testSuggestions('from a | eval col0 = a | /', commands);
     testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+
+    const promqlPipedQueries = [
+      'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
+      'PROMQL index=metrics sum by (instance) rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics (rate(http_requests_total[5m])) | /',
+      'PROMQL rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics col0=(rate(http_requests_total[5m])) | /',
+    ];
+
+    promqlPipedQueries.forEach((query) => {
+      testSuggestions(query, commands);
+    });
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
@@ -1091,6 +1106,41 @@ describe('autocomplete', () => {
         [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
+      );
+    });
+  });
+
+  describe('Unmmapped fields', () => {
+    describe('should suggest unmapped field after its first usage if unmapped is LOAD or NULLIFY', () => {
+      testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+        { text: 'unmappedField' },
+      ]);
+      testSuggestions(
+        'SET unmapped_fields = "NULLIFY"; FROM a | WHERE unmappedField > 0 | KEEP /',
+        [...getFieldNamesByType('any'), { text: 'unmappedField' }]
+      );
+    });
+    describe('should not suggest unmapped field after its first usage if unmapped is FAIL', () => {
+      testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+      ]);
+    });
+    describe('unmapped fields should be considered in columnsAfter methods', () => {
+      // Don't suggest unmappedField because it was dropped
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
+        [...getFieldNamesByType('any')]
+      );
+      // Suggest only the unmappedField because it was kept
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  KEEP unmappedField | KEEP /',
+        [{ text: 'unmappedField' }]
+      );
+      // Don't suggest unmappedField because STATS destroyed all fields
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | STATS col0 = AVG(3) | KEEP /',
+        [{ text: 'col0' }]
       );
     });
   });

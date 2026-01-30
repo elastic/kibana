@@ -20,6 +20,7 @@ export interface ErrorData {
 
 export interface Error {
   id: string;
+  index?: string;
   parent?: { id?: string };
   trace?: { id?: string };
   span?: { id?: string };

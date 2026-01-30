@@ -28,7 +28,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_sidebar_field_stats'));
     loadTestFile(require.resolve('./_time_field_column'));
     loadTestFile(require.resolve('./_unsaved_changes_modal'));
-    loadTestFile(require.resolve('./_unsaved_changes_badge'));
+    loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
     loadTestFile(require.resolve('./_view_mode_toggle'));
     loadTestFile(require.resolve('./_field_stats_table'));
   });

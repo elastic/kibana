@@ -40,9 +40,9 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  let controlGroupOut;
+  let pinnedControlsOut;
   if (controlGroupInput) {
-    controlGroupOut = transformControlGroupOut(
+    pinnedControlsOut = transformControlGroupOut(
       controlGroupInput,
       references ?? [],
       controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
@@ -60,7 +60,6 @@ export function transformDashboardOut(
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
-    ...(controlGroupOut && { controlGroupInput: controlGroupOut }),
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(Object.keys(options).length && { options }),
@@ -68,6 +67,7 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
 
+    ...(pinnedControlsOut && { pinned_panels: pinnedControlsOut }),
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },

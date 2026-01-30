@@ -64,15 +64,6 @@ export async function readStream({
     return query.query;
   });
 
-  if (Streams.GroupStream.Definition.is(streamDefinition)) {
-    return {
-      stream: streamDefinition,
-      dashboards,
-      rules,
-      queries,
-    };
-  }
-
   const privileges = await streamsClient.getPrivileges(name);
 
   // These queries are only relavant for IngestStreams
@@ -100,6 +91,7 @@ export async function readStream({
     return {
       stream: streamDefinition,
       privileges,
+      index_mode: dataStream?.index_mode,
       elasticsearch_assets:
         dataStream && privileges.manage
           ? await getUnmanagedElasticsearchAssets({
@@ -139,6 +131,7 @@ export async function readStream({
     rules,
     privileges,
     queries,
+    index_mode: dataStream?.index_mode,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     effective_settings: getInheritedSettings([...ancestors, streamDefinition]),
     inherited_fields: inheritedFields,

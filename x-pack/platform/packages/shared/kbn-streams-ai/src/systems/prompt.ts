@@ -7,8 +7,10 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import { merge } from 'lodash';
-import systemPromptTemplate from './system_prompt.text';
-import userPromptTemplate from './user_prompt.text';
+import systemsSystemPrompt from './system_prompt.text';
+import systemsUserPrompt from './user_prompt.text';
+
+export { systemsSystemPrompt as systemsPrompt };
 
 const systemsSchemaBase = {
   type: 'object',
@@ -59,13 +61,7 @@ export interface FinalizeSystemsResponse {
   }>;
 }
 
-export function createIdentifySystemsPrompt({
-  systemPromptOverride,
-}: {
-  systemPromptOverride?: string;
-}) {
-  const systemPrompt = systemPromptOverride ?? systemPromptTemplate;
-
+export function createIdentifySystemsPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
     name: 'identify_systems',
     input: z.object({
@@ -86,7 +82,7 @@ export function createIdentifySystemsPrompt({
       },
       template: {
         mustache: {
-          template: userPromptTemplate,
+          template: systemsUserPrompt,
         },
       },
       tools: {
@@ -102,5 +98,3 @@ export function createIdentifySystemsPrompt({
     })
     .get();
 }
-
-export { systemPromptTemplate as systemsSystemPromptTemplate };

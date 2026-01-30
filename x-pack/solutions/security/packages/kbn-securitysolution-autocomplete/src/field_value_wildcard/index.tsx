@@ -15,7 +15,7 @@ import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../../../../src/plugins/unified_search/public';
+// import { AutocompleteStart } from '../../../../../../../../../../src/plugins/kql/public';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AutocompleteStart = any;
 

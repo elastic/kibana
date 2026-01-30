@@ -32,6 +32,8 @@
           "<any>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "string"
             ],
             "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
+            "lineNumber": 11,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
           "<any>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +84,8 @@
             "label": "createOptions",
             "description": [],
             "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+            "lineNumber": 12,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,6 +97,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 13,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -103,6 +113,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 14,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -117,6 +129,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
+                "lineNumber": 15,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -171,6 +185,8 @@
           ">; }; }; }>"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -185,6 +201,8 @@
               "symbol"
             ],
             "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+            "lineNumber": 45,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -242,6 +260,8 @@
           ">; }; }; }"
         ],
         "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

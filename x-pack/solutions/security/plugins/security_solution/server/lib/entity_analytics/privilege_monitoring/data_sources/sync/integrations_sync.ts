@@ -10,14 +10,18 @@ import type { MonitoringEntitySource } from '../../../../../../common/api/entity
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { createDeletionDetectionService } from './deletion_detection/integrations/deletion_detection';
 import { createSourcesSyncService } from './sources_sync';
-import { createUpdateDetectionService } from './update_detection/integrations/update_detection';
+import { createUpdateDetectionService } from './update_detection/update_detection';
 
 export type IntegrationsSyncService = ReturnType<typeof createIntegrationsSyncService>;
 export const createIntegrationsSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {
-  const updateDetectionService = createUpdateDetectionService(dataClient, soClient);
+  const updateDetectionService = createUpdateDetectionService(
+    dataClient,
+    soClient,
+    'entity_analytics_integration'
+  );
   const sourcesSyncService = createSourcesSyncService(dataClient);
   const deletionDetectionService = createDeletionDetectionService(dataClient, soClient);
 

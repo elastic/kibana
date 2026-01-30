@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { conditionSchema } from '@kbn/streamlang';
 import {
   systemSchema,
   type SignificantEventsGenerateResponse,
@@ -11,18 +12,17 @@ import {
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { conditionSchema } from '@kbn/streamlang';
-import { from as fromRxjs, map, catchError } from 'rxjs';
-import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
-import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
-import { resolveConnectorId } from '../../utils/resolve_connector_id';
+import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { createConnectorSSEError } from '../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
+import { resolveConnectorId } from '../../utils/resolve_connector_id';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -97,91 +97,6 @@ const previewSignificantEventsRoute = createServerRoute({
   },
 });
 
-const readAllSignificantEventsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_significant_events 2023-10-31',
-  params: z.object({
-    query: z.object({
-      from: dateFromString.describe('Start of the time range'),
-      to: dateFromString.describe('End of the time range'),
-      bucketSize: z.string().describe('Size of time buckets for aggregation'),
-    }),
-  }),
-  options: {
-    access: 'public',
-    summary: 'Read all significant events',
-    description: 'Read all significant events',
-    availability: {
-      since: '9.4.0',
-      stability: 'experimental',
-    },
-    oasOperationObject: () => ({
-      requestBody: {
-        content: {
-          'application/json': {
-            examples: {
-              readAllExample: {
-                value: {},
-              },
-            },
-          },
-        },
-      },
-      responses: {
-        200: {
-          description: 'Successfully retrieved all significant events',
-          content: {
-            'application/json': {
-              examples: {
-                readAllResponse: {
-                  value: {
-                    significant_events: [
-                      {
-                        kql: { query: 'log.level: error' },
-                        occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
-                        change_points: { type: {} },
-                      },
-                    ],
-                    aggregated_occurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 10 }],
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    }),
-  },
-
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const { from, to, bucketSize } = params.query;
-
-    return await readSignificantEventsFromAlertsIndices(
-      {
-        from,
-        to,
-        bucketSize,
-      },
-      { queryClient, scopedClusterClient }
-    );
-  },
-});
-
 const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
@@ -227,9 +142,9 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query } = params.query;
 
-    return await readSignificantEventsFromAlertsIndices(
+    return readSignificantEventsFromAlertsIndices(
       {
-        name,
+        streamNames: [name],
         from,
         to,
         bucketSize,
@@ -292,6 +207,7 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
+      featureClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -303,17 +219,14 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    const promptsConfigService = new PromptsConfigService({
-      soClient,
-      logger,
-    });
-
     // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const definition = await streamsClient.getStream(params.path.name);
-
-    const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
+    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        featureClient.getFeatures(params.path.name),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -324,7 +237,8 @@ const generateSignificantEventsRoute = createServerRoute({
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,
-          systemPromptOverride: significantEventsPromptOverride,
+          systemPrompt: significantEventsPromptOverride,
+          features,
         },
         {
           inferenceClient,
@@ -347,7 +261,6 @@ const generateSignificantEventsRoute = createServerRoute({
 });
 
 export const significantEventsRoutes = {
-  ...readAllSignificantEventsRoute,
   ...readStreamSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,

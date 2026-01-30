@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
-
 import { omit } from 'lodash';
 import { type DashboardState } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
@@ -17,7 +15,7 @@ import type { DashboardSection } from '../../../server';
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'controlGroupInput'> {
+): Pick<DashboardState, 'panels' | 'pinned_panels'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
@@ -44,16 +42,14 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
-    controlGroupInput: {
-      controls: Object.entries(layout.controls)
-        .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
-        .map(([id, control]) => {
-          return {
-            uid: id,
-            ...omit(control, 'order'),
-            config: childState[id],
-          } as ControlsGroupState['controls'][number];
-        }),
-    },
+    pinned_panels: Object.entries(layout.pinnedPanels)
+      .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+      .map(([id, panel]) => {
+        return {
+          uid: id,
+          ...omit(panel, 'order'),
+          config: childState[id],
+        } as Required<DashboardState>['pinned_panels'][number];
+      }),
   };
 }

@@ -17,6 +17,7 @@ import { useGenAIConnectors, type UseGenAIConnectorsResult } from './use_genai_c
 import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 
 export interface AIFeatures {
+  loading: boolean;
   enabled: boolean;
   couldBeEnabled: boolean;
   genAiConnectors: UseGenAIConnectorsResult;
@@ -44,8 +45,20 @@ export function useAIFeatures(): AIFeatures | null {
     ElasticLlmCalloutKey.TOUR_CALLOUT
   );
 
-  if (!isAIAvailableForTier || genAiConnectors.loading) {
+  if (!isAIAvailableForTier) {
     return null;
+  }
+
+  if (genAiConnectors.loading) {
+    return {
+      loading: true,
+      enabled: false,
+      couldBeEnabled: false,
+      genAiConnectors,
+      isManagedAIConnector: false,
+      hasAcknowledgedAdditionalCharges: tourCalloutDismissed,
+      acknowledgeAdditionalCharges: setTourCalloutDismissed,
+    };
   }
 
   const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
@@ -66,6 +79,7 @@ export function useAIFeatures(): AIFeatures | null {
     : false;
 
   return {
+    loading: false,
     enabled,
     couldBeEnabled,
     genAiConnectors,

@@ -10,7 +10,7 @@ import { type Middleware } from '.';
 export const featureFlagEnabledMiddleware: Middleware = async (ctx, _req, res) => {
   const entityStoreCtx = await ctx.entityStore;
   const logger = entityStoreCtx.logger.get('featureFlagMiddleware');
-  const isEntityStoreV2Enabled = await entityStoreCtx.getFeatureFlags().isEntityStoreV2Enabled();
+  const isEntityStoreV2Enabled = await entityStoreCtx.featureFlags.isEntityStoreV2Enabled();
 
   if (!isEntityStoreV2Enabled) {
     logger.warn('Entity store v2 not enabled (feature flag not enabled)');

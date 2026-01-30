@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
@@ -29,7 +30,7 @@ type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActi
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
-  popoverAnchorPosition?: PopoverAnchorPosition;
+  onCloseOverflowButton?: () => void;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -54,7 +55,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     popoverTestId,
     onPopoverToggle,
     onPopoverClose,
-    popoverAnchorPosition,
+    onCloseOverflowButton,
   } = props;
 
   const itemText = upperFirst(label);
@@ -76,7 +77,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
@@ -84,10 +85,10 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    run?.();
+    run?.({ triggerElement: event.currentTarget });
   };
 
-  const handleSecondaryButtonClick = () => {
+  const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
@@ -95,11 +96,14 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    splitButtonRun?.();
+    splitButtonRun?.({ triggerElement: event.currentTarget });
   };
 
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
   const commonProps = {
-    onClick: href ? undefined : handleClick,
+    ...routerLinkProps,
     id: htmlId,
     'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,
@@ -198,7 +202,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
         onClose={onPopoverClose}
-        anchorPosition={popoverAnchorPosition}
+        onCloseOverflowButton={onCloseOverflowButton}
       />
     );
   }

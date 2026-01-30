@@ -217,14 +217,6 @@ describe('utils', () => {
       expect(result.onClick).toBeDefined();
     });
 
-    it('should not set onClick when href is provided', () => {
-      const item = { ...baseItem, href: 'http://example.com' };
-      const result = mapAppMenuItemToPanelItem(item);
-
-      expect(result.onClick).toBeUndefined();
-      expect(result.href).toBe('http://example.com');
-    });
-
     it('should not set onClick when childPanelId is provided', () => {
       const result = mapAppMenuItemToPanelItem(baseItem, 1);
 
@@ -379,11 +371,11 @@ describe('utils', () => {
         { id: '2', label: 'Item 2', run: jest.fn(), order: 2 },
       ];
 
-      const result = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(0);
-      expect(result[0].items).toHaveLength(2);
+      expect(panels).toHaveLength(1);
+      expect(panels[0].id).toBe(0);
+      expect(panels[0].items).toHaveLength(2);
     });
 
     it('should create nested panels for items with sub-items', () => {
@@ -396,11 +388,11 @@ describe('utils', () => {
         },
       ];
 
-      const result = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
-      expect(result).toHaveLength(2);
-      const mainPanel = result.find((p) => p.id === 0);
-      const childPanel = result.find((p) => p.id === 1);
+      expect(panels).toHaveLength(2);
+      const mainPanel = panels.find((p) => p.id === 0);
+      const childPanel = panels.find((p) => p.id === 1);
 
       expect(mainPanel).toBeDefined();
       expect(childPanel).toBeDefined();
@@ -412,8 +404,8 @@ describe('utils', () => {
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'above' },
       ];
 
-      const result = getPopoverPanels({ items });
-      const panelItems = result[0].items as Array<{ isSeparator?: boolean; key?: string }>;
+      const panels = getPopoverPanels({ items });
+      const panelItems = panels[0].items as Array<{ isSeparator?: boolean; key?: string }>;
 
       expect(panelItems[0].isSeparator).toBe(true);
       expect(panelItems[0].key).toBe('separator-1');
@@ -424,8 +416,8 @@ describe('utils', () => {
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1, separator: 'below' },
       ];
 
-      const result = getPopoverPanels({ items });
-      const panelItems = result[0].items as Array<{ isSeparator?: boolean; key?: string }>;
+      const panels = getPopoverPanels({ items });
+      const panelItems = panels[0].items as Array<{ isSeparator?: boolean; key?: string }>;
 
       expect(panelItems[1].isSeparator).toBe(true);
       expect(panelItems[1].key).toBe('separator-1');
@@ -434,12 +426,12 @@ describe('utils', () => {
     it('should append action items to main panel when provided', () => {
       const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
-      const result = getPopoverPanels({
+      const panels = getPopoverPanels({
         items,
         primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
       });
 
-      const mainPanel = result[0];
+      const mainPanel = panels[0];
       const panelItems = mainPanel.items as Array<{ key?: string; isSeparator?: boolean }>;
 
       expect(panelItems).toHaveLength(3);
@@ -450,9 +442,9 @@ describe('utils', () => {
     it('should use custom startPanelId', () => {
       const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
 
-      const result = getPopoverPanels({ items, startPanelId: 10 });
+      const panels = getPopoverPanels({ items, startPanelId: 10 });
 
-      expect(result[0].id).toBe(10);
+      expect(panels[0].id).toBe(10);
     });
 
     it('should handle deeply nested items', () => {
@@ -472,9 +464,53 @@ describe('utils', () => {
         },
       ];
 
-      const result = getPopoverPanels({ items });
+      const panels = getPopoverPanels({ items });
 
-      expect(result).toHaveLength(3);
+      expect(panels).toHaveLength(3);
+    });
+
+    it('should set data-test-subj on panels with popoverTestId', () => {
+      const items: AppMenuPopoverItem[] = [
+        {
+          id: '1',
+          label: 'Export',
+          order: 1,
+          popoverTestId: 'exportPopoverPanel',
+          items: [
+            {
+              id: '1-1',
+              label: 'PDF',
+              run: jest.fn(),
+              order: 1,
+            },
+          ],
+        },
+        {
+          id: '2',
+          label: 'Share',
+          order: 2,
+          popoverTestId: 'sharePopoverPanel',
+          items: [
+            {
+              id: '2-1',
+              label: 'Link',
+              run: jest.fn(),
+              order: 1,
+            },
+          ],
+        },
+      ];
+
+      const panels = getPopoverPanels({ items });
+
+      expect(panels).toHaveLength(3);
+      const exportPanel = panels.find((p) => p.title === 'Export');
+      const sharePanel = panels.find((p) => p.title === 'Share');
+      const mainPanel = panels.find((p) => p.id === 0);
+
+      expect(exportPanel?.['data-test-subj']).toBe('exportPopoverPanel');
+      expect(sharePanel?.['data-test-subj']).toBe('sharePopoverPanel');
+      expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
   });
 

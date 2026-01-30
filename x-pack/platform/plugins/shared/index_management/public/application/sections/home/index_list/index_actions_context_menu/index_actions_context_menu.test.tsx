@@ -104,6 +104,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableSemanticText: false,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
+      isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
     setBreadcrumbs: jest.fn(),
@@ -116,7 +117,6 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
     kibanaVersion: {} as unknown as AppDependencies['kibanaVersion'],
     overlays: {} as unknown as AppDependencies['overlays'],
     canUseSyntheticSource: false,
-    canUseEis: false,
     privs: { monitor: true, manageEnrich: true, monitorEnrich: true, manageIndexTemplates: true },
   };
 

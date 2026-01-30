@@ -26,6 +26,8 @@
           "<ApiType, PropsType>) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               "<ApiType, PropsType>"
             ],
             "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,6 +88,8 @@
               "PresentationPanelErrorProps"
             ],
             "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+            "lineNumber": 25,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,6 +113,8 @@
           "\"ACTION_CUSTOMIZE_PANEL\""
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/customize_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -120,6 +130,8 @@
           "\"editPanel\""
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -135,6 +147,8 @@
           "\"deletePanel\""
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/remove_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -162,6 +176,8 @@
           "<ApiType, PropsType> | null>; }"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/types.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -183,6 +199,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -200,6 +218,8 @@
           " | undefined>"
         ],
         "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_quick_action_context.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -231,6 +251,8 @@
           "\"presentationPanel\""
         ],
         "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -246,6 +268,8 @@
           "\"presentationPanel\""
         ],
         "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

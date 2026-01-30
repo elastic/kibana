@@ -32,6 +32,8 @@
           "; signal: AbortSignal; configPath?: string | undefined; grpcPort?: number | undefined; httpPort?: number | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
             "label": "{\n  log,\n  signal,\n  configPath,\n  grpcPort = 4317,\n  httpPort = 4318,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+            "lineNumber": 71,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,6 +67,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 72,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -77,6 +83,8 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 73,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -91,6 +99,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 74,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -105,6 +115,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 75,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -119,6 +131,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-edot-collector/src/ensure_edot_collector.ts",
+                "lineNumber": 76,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

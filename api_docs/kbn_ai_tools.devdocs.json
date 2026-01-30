@@ -36,6 +36,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
             "label": "{\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n  sampleDocsSize,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,7 +142,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -702,6 +706,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -1047,6 +1053,8 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1058,6 +1066,8 @@
                 "label": "start",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1069,6 +1079,8 @@
                 "label": "end",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1083,6 +1095,8 @@
                   "string | string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 26,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1097,6 +1111,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 27,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1114,6 +1130,8 @@
                   "[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1128,6 +1146,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1202,6 +1222,8 @@
           "<{ prompt: string; esql_system_prompt: string; }, [{ system: { mustache: { template: string; }; }; template: { mustache: { template: string; }; }; temperature: number; tools: { readonly get_documentation: { readonly description: \"Get documentation about specific ES|QL commands or functions\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly commands: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly functions: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"commands\", \"functions\"]; }; }; readonly validate_queries: { readonly description: \"Validate one or more ES|QL queries for syntax errors and/or mapping issues\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly run_queries: { readonly description: \"Run one or more validated ES|QL queries and retrieve the results\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly list_datasets: { readonly description: \"List datasets (index, data stream, aliases) based on a name or pattern, similar to _resolve/_index\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly name: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"name\"]; }; }; readonly describe_dataset: { readonly description: \"Get dataset description via sampling of documents\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly index: { readonly type: \"string\"; readonly description: \"Index, data stream or index pattern you want to analyze\"; }; readonly kql: { readonly type: \"string\"; readonly description: \"KQL for filtering the data\"; }; }; readonly required: readonly [\"index\"]; }; }; }; }]>> & { tools: TTools; stream: false; }>>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1244,6 +1266,8 @@
               " | undefined>> ? { toolCallbacks: ToolCallbacksOfTools<TTools>; } : {})"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1331,6 +1355,8 @@
           " | undefined>[]>>>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1342,6 +1368,8 @@
             "label": "{\n  inferenceClient,\n  esClient,\n  start,\n  end,\n  signal,\n  prompt,\n  toolCallbacks,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+            "lineNumber": 51,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1362,6 +1390,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 52,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1453,7 +1483,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -2017,6 +2047,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -2362,6 +2394,8 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 53,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2376,6 +2410,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 54,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2390,6 +2426,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2404,6 +2442,8 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 56,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2415,6 +2455,8 @@
                 "label": "prompt",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 57,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2453,6 +2495,8 @@
                   ">; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
+                "lineNumber": 58,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2488,6 +2532,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2508,6 +2554,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2523,6 +2571,8 @@
               "FormatDocumentAnalysisOptions | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2544,6 +2594,8 @@
           "<TChanges>[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/log_patterns/get_log_patterns.ts",
+        "lineNumber": 267,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2558,6 +2610,8 @@
               "LogPatternOptions & { includeChanges?: TChanges | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/log_patterns/get_log_patterns.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2579,6 +2633,8 @@
           "<boolean>[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/log_patterns/get_log_patterns.ts",
+        "lineNumber": 271,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2593,6 +2649,8 @@
               "LogPatternOptions & { includeChanges?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/log_patterns/get_log_patterns.ts",
+            "lineNumber": 271,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2623,6 +2681,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2634,6 +2694,8 @@
             "label": "{\n  total,\n  hits,\n  fieldCaps,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+            "lineNumber": 17,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2645,6 +2707,8 @@
                 "label": "total",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2660,6 +2724,8 @@
                   "<unknown>[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2674,6 +2740,8 @@
                   "FieldCapsResponse"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2694,6 +2762,8 @@
           "(pValue: number) => \"medium\" | \"high\" | \"low\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2708,6 +2778,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
+            "lineNumber": 11,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2726,6 +2798,8 @@
         "label": "DocumentAnalysis",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2737,6 +2811,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2748,6 +2824,8 @@
             "label": "sampled",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2763,6 +2841,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2777,6 +2857,8 @@
         "label": "FormattedDocumentAnalysis",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2788,6 +2870,8 @@
             "label": "total",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2799,6 +2883,8 @@
             "label": "sampled",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2813,6 +2899,8 @@
               "{ [x: string]: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2833,6 +2921,8 @@
           "FieldPatternResultBase & FieldPatternResultChanges"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/log_patterns/get_log_patterns.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2848,6 +2938,8 @@
           "0.000001"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2863,6 +2955,8 @@
           "0.001"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/utils/p_value_to_label.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

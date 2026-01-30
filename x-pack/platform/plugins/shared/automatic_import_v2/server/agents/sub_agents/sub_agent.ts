@@ -29,7 +29,7 @@ export const createTaskTool = (params: TaskToolParams) => {
     // Create ReAct agent for the subagent
     const baseSubAgent = createReactAgent({
       llm: model,
-      tools: (subagent.tools || []) as any,
+      tools: subagent.tools || [],
       messageModifier: subagent.prompt,
       stateSchema: AutomaticImportAgentState,
     });

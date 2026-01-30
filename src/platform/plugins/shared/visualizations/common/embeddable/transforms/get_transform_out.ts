@@ -8,14 +8,18 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
-import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
-import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import { injectVisReferences } from '../../references/inject_vis_references';
+import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 
-export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
+  function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;

@@ -16,6 +16,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
+import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
@@ -73,16 +74,20 @@ export const operationFromColumn = (
   columnId: string,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
 ): LensApiAllOperations | undefined => {
-  const typedLayer = convertToTypedLayerColumns(layer);
+  const cleanedLayer = cleanupFormulaReferenceColumns(layer);
+  const typedLayer = convertToTypedLayerColumns(cleanedLayer);
   const column = typedLayer.columns[columnId];
   if (!column) return;
 
-  // map columns to array of { column, id }
-  const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
-    // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
-    column: c as AnyLensStateColumn,
-    id,
-  }));
+  // map columns to array of { column, id } in columnOrder sequence (matches visualization.columns order)
+  const columnMap = cleanedLayer.columnOrder
+    .filter((id) => cleanedLayer.columns[id] != null)
+    .map((id) => ({
+      // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
+      column: cleanedLayer.columns[id] as AnyLensStateColumn,
+      id,
+    }));
+
   if (isLensStateBucketColumnType(column)) {
     return fromBucketLensStateToAPI(column, columnMap);
   }

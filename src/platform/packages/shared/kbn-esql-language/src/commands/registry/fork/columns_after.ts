@@ -11,13 +11,15 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import { esqlCommandRegistry } from '../../../..';
 import type { ESQLAstAllCommands, ESQLAstForkCommand } from '../../../types';
 import type { ESQLColumnData } from '../types';
+import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
 
 export const columnsAfter = async (
   command: ESQLAstAllCommands,
   previousColumns: ESQLColumnData[],
   query: string,
-  additionalFields: IAdditionalFields
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
 ) => {
   const forkCommand = command as ESQLAstForkCommand;
   const branches = forkCommand.args.map((parens) => parens.child);
@@ -34,7 +36,8 @@ export const columnsAfter = async (
           branchCommand,
           columnsFromBranch,
           query,
-          additionalFields
+          additionalFields,
+          unmappedFieldsStrategy
         );
       }
     }

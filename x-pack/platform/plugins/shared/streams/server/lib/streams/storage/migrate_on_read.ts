@@ -109,30 +109,6 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
-  // Add metadata to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('metadata' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        metadata: {},
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
-  // Add tags to Group stream if missing
-  if (isObject(migratedDefinition.group) && !('tags' in migratedDefinition.group)) {
-    migratedDefinition = {
-      ...migratedDefinition,
-      group: {
-        ...migratedDefinition.group,
-        tags: [],
-      },
-    };
-    hasBeenMigrated = true;
-  }
-
   // Add failure_store to ingest streams if missing
   if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
     const streamName = migratedDefinition.name;

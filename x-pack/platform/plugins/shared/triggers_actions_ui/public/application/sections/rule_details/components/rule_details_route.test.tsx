@@ -27,6 +27,15 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/rules/',
+  }),
+}));
+
 function renderWithIntl(ui: React.ReactElement) {
   return render(
     <IntlProvider locale="en" messages={{}}>

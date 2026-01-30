@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  CoreSecurityDelegateContract,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+} from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
@@ -15,9 +20,11 @@ import type { UserProfileServiceStartInternal } from './user_profile';
 export const buildSecurityApi = ({
   getAuthc,
   audit,
+  config,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
   audit: AuditServiceSetup;
+  config: { uiam?: { enabled: boolean } };
 }): CoreSecurityDelegateContract => {
   return {
     authc: {
@@ -34,6 +41,18 @@ export const buildSecurityApi = ({
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),
+        uiam: config.uiam?.enabled
+          ? {
+              grant: (request: KibanaRequest, grantUiamApiKeyParams: GrantUiamAPIKeyParams) =>
+                getAuthc().apiKeys.uiam!.grant(request, grantUiamApiKeyParams),
+              invalidate: (
+                request: KibanaRequest,
+                invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
+              ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
+              getScopedClusterClientWithApiKey: (apiKey: string) =>
+                getAuthc().apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey),
+            }
+          : null,
       },
     },
     audit: {

@@ -35,6 +35,7 @@ export default function ({ loadTestFile, getService }: AgentBuilderUiFtrProvider
       loadTestFile(require.resolve('./tools/landing_page.ts'));
       loadTestFile(require.resolve('./tools/manage_tool.ts'));
       loadTestFile(require.resolve('./agents/agents_list.ts'));
+      loadTestFile(require.resolve('./tools/mcp_tools.ts'));
     });
 
     describe('agents', function () {
