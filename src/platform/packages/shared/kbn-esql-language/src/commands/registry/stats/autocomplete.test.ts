@@ -256,7 +256,7 @@ describe('STATS Autocomplete', () => {
           [
             ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS_BY,
               ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
               {
                 scalar: true,
@@ -277,9 +277,9 @@ describe('STATS Autocomplete', () => {
             }),
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS_BY,
               roundParameterTypes,
-              { scalar: true },
+              { scalar: true, grouping: true },
               undefined,
               ['round']
             ),
@@ -294,9 +294,9 @@ describe('STATS Autocomplete', () => {
             }),
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS_BY,
               ESQL_NUMBER_TYPES,
-              { scalar: true },
+              { scalar: true, grouping: true },
               undefined,
               ['round']
             ),
@@ -308,9 +308,9 @@ describe('STATS Autocomplete', () => {
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              Location.STATS,
+              Location.STATS_BY,
               ESQL_NUMBER_TYPES,
-              { scalar: true },
+              { scalar: true, grouping: true },
               undefined,
               ['round']
             ),
@@ -325,8 +325,9 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, {
+            ...getFunctionSignaturesByReturnType(Location.STATS_BY, AVG_TYPES, {
               scalar: true,
+              grouping: true,
             }),
           ],
           mockCallbacks
@@ -352,9 +353,9 @@ describe('STATS Autocomplete', () => {
           [
             ...expectedFieldsAvg,
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS_BY,
               AVG_TYPES,
-              { scalar: true },
+              { scalar: true, grouping: true },
               undefined,
               ['round']
             ),
@@ -395,6 +396,7 @@ describe('STATS Autocomplete', () => {
             ],
             {
               scalar: true,
+              grouping: true,
             }
           ),
         ];
@@ -414,10 +416,11 @@ describe('STATS Autocomplete', () => {
           [
             ...getFieldNamesByType(AVG_TYPES),
             ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
+              Location.STATS_BY,
               [...AVG_TYPES, 'aggregate_metric_double'],
               {
                 scalar: true,
+                grouping: true,
               }
             ),
           ],
@@ -568,11 +571,6 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions('from a | stats a=max(b) by ', expected);
         await statsExpectSuggestions('from a | stats a=max(b) BY ', expected);
         await statsExpectSuggestions('from a | stats a=min(b) by ', expected);
-      });
-
-      test('no grouping functions as args to scalar function', async () => {
-        const suggestions = await suggest('FROM a | STATS a=MIN(b) BY ACOS(');
-        expect(suggestions.some((s) => allGroupingFunctions.includes(s.text))).toBe(false);
       });
 
       test('on partial column name', async () => {
