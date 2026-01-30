@@ -120,7 +120,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         <p>
           <FormattedMessage
             id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use the Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector.
+            defaultMessage={`AI-powered features require a large language model (LLM) connector. You can use an Elastic Managed LLM ({atAdditionalCost}) or configure a third-party connector.
               When you set a default AI connector, it is pre-selected for all of these features in this space.
               If you haven't set a default, the most recently used connector is selected automatically. {manageConnectors}`}
             values={{
@@ -162,7 +162,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       <p>
         <FormattedMessage
           id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses {preconfiguredLLM} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
             showSpacesNote
               ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
               : ''
@@ -192,11 +192,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 />
               </EuiLink>
             ),
-            preconfiguredConnectors: (
+            preconfiguredLLM: (
               <strong>
                 <FormattedMessage
-                  id="genAiSettings.preconfiguredConnectors"
-                  defaultMessage="pre-configured AI connectors"
+                  id="genAiSettings.preconfiguredLLM"
+                  defaultMessage="pre-configured LLM"
                 />
               </strong>
             ),
