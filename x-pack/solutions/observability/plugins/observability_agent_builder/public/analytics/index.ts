@@ -15,4 +15,4 @@ export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) =>
 };
 
 export { ObservabilityAgentBuilderTelemetryEventType } from './telemetry_event_type';
-export type { InsightType, InsightFeedback } from './schemas/insight_feedback';
+export type { InsightType, InsightFeedback, ConnectorInfo } from './schemas/insight_feedback';

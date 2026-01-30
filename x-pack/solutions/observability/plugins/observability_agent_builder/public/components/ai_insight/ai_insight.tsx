@@ -70,7 +70,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
-  const { hasConnectors } = useGenAIConnectors();
+  const { hasConnectors, selectedConnector } = useGenAIConnectors();
 
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
@@ -93,9 +93,16 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
       analytics.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
         feedback,
         insight_type: insightType,
+        connector: selectedConnector
+          ? {
+              connectorId: selectedConnector.connectorId,
+              name: selectedConnector.name,
+              type: selectedConnector.type,
+            }
+          : undefined,
       });
     },
-    [analytics, insightType]
+    [analytics, insightType, selectedConnector]
   );
 
   if (

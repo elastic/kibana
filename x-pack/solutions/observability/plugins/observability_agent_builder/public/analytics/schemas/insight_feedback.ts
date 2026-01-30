@@ -11,9 +11,16 @@ import { ObservabilityAgentBuilderTelemetryEventType } from '../telemetry_event_
 
 export type InsightType = 'log' | 'alert' | 'error';
 
+export interface ConnectorInfo {
+  connectorId: string;
+  name: string;
+  type: string;
+}
+
 export interface InsightFeedback {
   feedback: Feedback;
   insight_type: InsightType;
+  connector: ConnectorInfo;
 }
 
 export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
@@ -29,6 +36,31 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
       type: 'keyword',
       _meta: {
         description: 'Type of AI insight: log, alert, or error',
+      },
+    },
+    connector: {
+      properties: {
+        connectorId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The ID of the connector used',
+          },
+        },
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'The name of the connector',
+          },
+        },
+        type: {
+          type: 'keyword',
+          _meta: {
+            description: 'The type of the connector',
+          },
+        },
+      },
+      _meta: {
+        description: 'Information about the connector used for the insight',
       },
     },
   },
