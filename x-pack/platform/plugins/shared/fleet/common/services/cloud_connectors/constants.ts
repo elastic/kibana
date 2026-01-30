@@ -4,4 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const APM_TRACE_WATERFALL_EMBEDDABLE = 'APM_TRACE_WATERFALL_EMBEDDABLE';
+
+/**
+ * Sentinel value indicating an index was not found (e.g., from findIndex returning -1)
+ */
+export const INVALID_INDEX = -1;

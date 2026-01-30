@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Journey } from '@kbn/journeys';
+import { createDashboardJourney } from './utils/dashboard_journey';
 
-export const journey = new Journey({
-  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test'],
+export const journey = createDashboardJourney({
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
-}).step('Go to dashboard', async ({ page, kbnUrl, kibanaServer, kibanaPage }) => {
-  await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`));
-  await kibanaPage.waitForVisualizations({ count: 1 });
+  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test'],
+  dashboardName: 'Stress Test Dashboard',
+  dashboardLinkSubj: 'dashboardListingTitleLink-Stresstest',
+  visualizationCount: 1,
+  setup: async (kibanaServer) => {
+    await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
+  },
 });
