@@ -59,8 +59,6 @@ export interface DashboardRendererProps {
    * @param internalApi - The {@link DashboardInternalApi} instance.
    */
   onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
-  /** Whether to render the control group above the dashboard viewport. Disable if the control group is rendered elsewhere. */
-  showControlGroup?: boolean;
 }
 
 export function DashboardRenderer({
@@ -70,12 +68,6 @@ export function DashboardRenderer({
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
-  /** Default showControlGroup to true. This simplifies embedding DashboardRenderer outside of the dashboard app,
-   *  ensuring that DashboardRenderer, by default, will never fail to render a dashboard due to missing controls.
-   *  Other contexts that want to render the control group in a different location in the UI should explicitly pass `false`
-   *  to the DashboardRenderer.
-   */
-  showControlGroup = true,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -84,6 +76,12 @@ export function DashboardRenderer({
     DashboardInternalApi | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
+  /** Default showControlGroup to true. This simplifies embedding DashboardRenderer outside of the dashboard app,
+   *  ensuring that DashboardRenderer, by default, will never fail to render a dashboard due to missing controls.
+   *  Other contexts that want to render the control group in a different location in the UI should explicitly pass `false`
+   *  to the DashboardRenderer.
+   */
+  const [showControlGroup, setShowControlGroup] = useState<boolean>(true);
 
   const euiPaddingS = useEuiPaddingSize('s');
   const styles = useMemo(
@@ -138,6 +136,8 @@ export function DashboardRenderer({
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
         onApiAvailable?.(results.api, results.internalApi);
+        if (typeof results.useControlsIntegration !== 'undefined')
+          setShowControlGroup(results.useControlsIntegration);
       })
       .catch((err) => {
         if (!canceled) setError(err);
