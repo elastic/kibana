@@ -157,7 +157,7 @@ export class EuiComboBoxWrapper {
     // Prefer a specific test subj when option text is ambiguous.
     const optionLocator = options.optionTestSubj
       ? this.page.testSubj.locator(options.optionTestSubj)
-      : this.page.getByRole('option', { name: options.optionRoleName ?? value, exact: true });
+      : this.page.getByRole('option', { name: options.optionRoleName ?? value, exact: false });
     await optionLocator.click();
     expect(await this.getSelectedValue()).toBe(value);
   }
