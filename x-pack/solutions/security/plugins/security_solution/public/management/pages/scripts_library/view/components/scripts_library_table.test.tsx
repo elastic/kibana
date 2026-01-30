@@ -17,7 +17,7 @@ import {
   SCRIPT_TAGS,
   SORTED_SCRIPT_TAGS_KEYS,
 } from '../../../../../../common/endpoint/service/scripts_library/constants';
-import { APP_SCRIPTS_LIBRARY_PATH, SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
+import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
@@ -272,6 +272,24 @@ describe('ScriptsLibraryTable', () => {
         expect.objectContaining({
           sort: {
             field: 'updatedBy',
+            direction: 'asc',
+          },
+        })
+      );
+    });
+
+    it('should sort by column `Size` when header clicked', async () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByText } = renderResult;
+      const sizeHeader = getByText('Size');
+
+      await userEve.click(sizeHeader);
+      expect(defaultProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: 'fileSize',
             direction: 'asc',
           },
         })
