@@ -9,7 +9,8 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Configuration } from '@rspack/core';
+import crypto from 'crypto';
+import { rspack, type Configuration, type Compiler } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { discoverPlugins, createCoreEntry } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
@@ -108,6 +109,9 @@ export async function createSingleCompileConfig(
 
   // eslint-disable-next-line no-console
   console.log(`[rspack] Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
+
+  // Collect plugin manifest paths for watching
+  const pluginManifests = plugins.map((p) => Path.join(p.contextDir, 'kibana.jsonc'));
 
   // Get externals for shared deps
   const sharedDepsExternals = getExternals();
@@ -256,6 +260,9 @@ export async function createSingleCompileConfig(
       new rspack.ProgressPlugin({
         prefix: 'rspack',
       }),
+
+      // Watch plugin manifests and regenerate entry when plugins are added/removed
+      ...(watch ? [new PluginWatchPlugin(pluginManifests, options)] : []),
     ],
 
     stats: {
@@ -289,12 +296,34 @@ function findEntry(contextDir: string): string | null {
  *
  * This ensures RSPack can deduplicate all shared modules across plugins
  * while maintaining the __kbnBundles__ registration pattern.
+ *
+ * The entry file includes a hash of all plugin paths so it can detect
+ * when plugins are added/removed and regenerate accordingly.
  */
 function createUnifiedEntry(
   wrapperDir: string,
   pluginEntries: Array<{ id: string; path: string; bundleId: string }>
 ): string {
   const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
+
+  // Create a hash of the plugin list to detect changes
+  const pluginListHash = crypto
+    .createHash('md5')
+    .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'))
+    .digest('hex');
+
+  // Check if file exists and has the same hash (skip regeneration)
+  if (Fs.existsSync(unifiedEntryPath)) {
+    const existingContent = Fs.readFileSync(unifiedEntryPath, 'utf-8');
+    const hashMatch = existingContent.match(/\/\/ Plugin list hash: ([a-f0-9]+)/);
+    if (hashMatch && hashMatch[1] === pluginListHash) {
+      // Plugin list hasn't changed, skip regeneration
+      return unifiedEntryPath;
+    }
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`[rspack] Regenerating unified entry (${pluginEntries.length} bundles)`);
 
   // Generate imports for all plugins
   const imports = pluginEntries.map((entry, i) => {
@@ -319,8 +348,9 @@ function createUnifiedEntry(
 })();`;
   }).join('\n');
 
-  const content = `
-// Auto-generated unified entry for Kibana RSPack build
+  const content = `// Auto-generated unified entry for Kibana RSPack build
+// Plugin list hash: ${pluginListHash}
+// Generated at: ${new Date().toISOString()}
 // This file imports ALL plugins and registers them with __kbnBundles__
 
 ${imports}
@@ -338,4 +368,51 @@ export { plugin_0 as core };
 
   Fs.writeFileSync(unifiedEntryPath, content);
   return unifiedEntryPath;
+}
+
+/**
+ * RSPack plugin that watches for plugin changes (kibana.jsonc files)
+ * and triggers a rebuild when plugins are added or removed.
+ */
+class PluginWatchPlugin {
+  private pluginManifests: string[];
+  private options: SingleCompileConfigOptions;
+
+  constructor(pluginManifests: string[], options: SingleCompileConfigOptions) {
+    this.pluginManifests = pluginManifests;
+    this.options = options;
+  }
+
+  apply(compiler: Compiler) {
+    // Add plugin manifest files as context dependencies so RSPack watches them
+    compiler.hooks.afterCompile.tap('PluginWatchPlugin', (compilation) => {
+      for (const manifest of this.pluginManifests) {
+        compilation.contextDependencies.add(Path.dirname(manifest));
+      }
+    });
+
+    // Watch for changes to kibana.jsonc files
+    compiler.hooks.watchRun.tapAsync('PluginWatchPlugin', async (_compiler, callback) => {
+      try {
+        // Re-discover plugins on each watch run to detect additions/removals
+        const currentPlugins = await discoverPlugins({
+          repoRoot: this.options.repoRoot,
+          outputRoot: this.options.outputRoot || this.options.repoRoot,
+          examples: this.options.examples || false,
+          testPlugins: this.options.testPlugins || false,
+          focus: this.options.plugins,
+          filter: this.options.filter,
+        });
+
+        // Update manifest list for next run
+        this.pluginManifests = currentPlugins.map((p) =>
+          Path.join(p.contextDir, 'kibana.jsonc')
+        );
+
+        callback();
+      } catch (err) {
+        callback(err as Error);
+      }
+    });
+  }
 }
