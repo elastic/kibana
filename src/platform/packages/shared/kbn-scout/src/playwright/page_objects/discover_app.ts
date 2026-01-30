@@ -114,12 +114,61 @@ export class DiscoverApp {
     });
   }
 
+  // Waits for the document table to be fully rendered and stable
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
     await expect(table).toBeVisible();
-    await expect(table).toHaveAttribute('data-render-complete', 'true', {
-      timeout: 30_000,
-    });
+
+    const minDurationMs = 2_000;
+    const pollIntervalMs = 100;
+    const totalTimeoutMs = 30_000;
+
+    let stableSince: number | null = null;
+
+    await expect
+      .poll(
+        async () => {
+          const attr = await table.getAttribute('data-render-complete');
+          const now = Date.now();
+
+          if (attr === 'true') {
+            if (!stableSince) {
+              stableSince = now;
+            }
+            const elapsed = now - stableSince;
+            return elapsed >= minDurationMs;
+          } else {
+            // Reset if it flips to anything other than 'true'
+            stableSince = null;
+            return false;
+          }
+        },
+        {
+          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
+          timeout: totalTimeoutMs,
+          intervals: [pollIntervalMs],
+        }
+      )
+      .toBe(true);
+  }
+
+  async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
+    const expandButton = this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+    );
+
+    // Ensure button stable after grid render (catches row shifts)
+    await expect(expandButton).toBeVisible();
+
+    // Scroll to, hover, and click the expand button
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click({ delay: 50 });
+  }
+
+  async waitForDocViewerFlyoutOpen() {
+    const docViewer = this.page.testSubj.locator('kbnDocViewer');
+    await expect(docViewer).toBeVisible({ timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -149,10 +198,14 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 

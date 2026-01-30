@@ -552,46 +552,6 @@ export const updateInputVarsWithCredentials = (
   return inputVars;
 };
 
-/**
- * Updates policy inputs with new variables
- * @param updatedPolicy - The policy to update
- * @param inputVars - The variables to apply to the policy
- * @returns Updated policy with new inputs
- */
-export const updatePolicyInputs = (
-  updatedPolicy: NewPackagePolicy,
-  inputVars: PackagePolicyConfigRecord
-): NewPackagePolicy => {
-  if (!updatedPolicy.inputs || updatedPolicy.inputs.length === 0 || !inputVars) {
-    return updatedPolicy;
-  }
-
-  const updatedInputs = updatedPolicy.inputs.map((policyInput) => {
-    if (policyInput.enabled && policyInput.streams && policyInput.streams.length > 0) {
-      const updatedStreams = policyInput.streams.map((stream) => {
-        if (stream.enabled) {
-          return {
-            ...stream,
-            vars: inputVars,
-          };
-        }
-        return stream;
-      });
-
-      return {
-        ...policyInput,
-        streams: updatedStreams,
-      };
-    }
-    return policyInput;
-  });
-
-  return {
-    ...updatedPolicy,
-    inputs: updatedInputs,
-  };
-};
-
 export const isCloudConnectorReusableEnabled = (
   provider: string,
   packageInfoVersion: string,

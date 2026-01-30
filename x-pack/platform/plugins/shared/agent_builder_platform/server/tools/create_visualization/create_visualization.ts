@@ -10,12 +10,14 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { VisualizationConfig } from './types';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
+
+/** Attachment type for visualization configurations */
+const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -160,7 +162,7 @@ This tool will:
           logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
         } else {
           const newAttachment = await attachments.add({
-            type: AttachmentType.visualization,
+            type: VISUALIZATION_ATTACHMENT_TYPE,
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
               nlQuery.length > 50 ? '...' : ''
