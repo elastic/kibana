@@ -11,7 +11,11 @@ import {
   getPrivilegedMonitorUsersIndex,
 } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { MonitoringEntitySourceDescriptorClient } from '../saved_objects/monitoring_entity_source';
-import type { MonitoringEntitySourceType } from '../../../../../common/api/entity_analytics';
+import type {
+  MonitoringEntitySource,
+  MonitoringEntitySourceAttributes,
+  MonitoringEntitySourceType,
+} from '../../../../../common/api/entity_analytics';
 import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import type { IntegrationType } from '../data_sources';
 import {
@@ -25,6 +29,8 @@ import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { MANAGED_SOURCES_VERSION, monitoringEntitySourceTypeName } from '../saved_objects';
 import { createPrivMonAuditLogger } from '../audit_logger';
 import { createPrivMonLogger } from '../logger';
+
+type RequiredSource = MonitoringEntitySourceAttributes & { name: string };
 
 export type InitialisationSourcesService = ReturnType<typeof createInitialisationSourcesService>;
 
@@ -57,13 +63,14 @@ export const createInitialisationSourcesService = (deps: {
         perPage: requiredIntegrationNames.length,
       });
 
-      const installedByName = new Map(installedIntegrations.map((source) => [source.name, source]));
+      const installedByName = new Map<string, MonitoringEntitySource>();
+      for (const source of installedIntegrations) {
+        if (source.name) {
+          installedByName.set(source.name, source);
+        }
+      }
 
-      // If any source is missing or managed version outdated, upsert/migrate sources.
-      const requiresUpsert = requiredInitSources.some((requiredSource) => {
-        const existing = installedByName.get(requiredSource.name);
-        return !existing || existing?.managedVersion !== requiredSource.managedVersion;
-      });
+      const requiresUpsert = shouldUpsertManagedSources(requiredInitSources, installedByName);
 
       if (requiresUpsert) {
         const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
@@ -89,6 +96,21 @@ export const createInitialisationSourcesService = (deps: {
   };
 };
 
+/**
+ * Checks if any required source is missing or if a managed source version changed.
+ * @param requiredSources
+ * @param installedByName
+ * @returns
+ */
+export const shouldUpsertManagedSources = (
+  requiredSources: RequiredSource[],
+  installedByName: Map<string, MonitoringEntitySource>
+): boolean =>
+  requiredSources.some((source) => {
+    const existing = installedByName.get(source.name);
+    return !existing || existing?.managedVersion !== source.managedVersion;
+  });
+
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
   if (integration === 'entityanalytics_ad') {
     return getStreamPatternFor(integration, namespace);
@@ -97,7 +119,11 @@ const getLastFullSyncMarkersIndex = (namespace: string, integration: Integration
   return oktaLastFullSyncMarkersIndex(namespace);
 };
 
-function buildRequiredSources(namespace: string, indexPattern: string, managedVersion: number) {
+function buildRequiredSources(
+  namespace: string,
+  indexPattern: string,
+  managedVersion: number
+): RequiredSource[] {
   const integrationsSources = INTEGRATION_TYPES.map((integration) =>
     buildIntegrationSource(namespace, integration, managedVersion)
   );
@@ -105,7 +131,11 @@ function buildRequiredSources(namespace: string, indexPattern: string, managedVe
   return [indexSource, ...integrationsSources];
 }
 
-const buildDefaultIndexSource = (namespace: string, name: string, managedVersion: number) => ({
+const buildDefaultIndexSource = (
+  namespace: string,
+  name: string,
+  managedVersion: number
+): RequiredSource => ({
   type: 'index' as const,
   managed: true,
   managedVersion,
@@ -117,7 +147,7 @@ const buildIntegrationSource = (
   namespace: string,
   integration: IntegrationType,
   managedVersion: number
-) => ({
+): RequiredSource => ({
   type: 'entity_analytics_integration' as MonitoringEntitySourceType,
   managed: true,
   managedVersion,
