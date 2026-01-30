@@ -47,7 +47,7 @@ export function EnableWiredStreamsConfirmModal({
       <EuiModalHeader>
         <EuiModalHeaderTitle id="enableWiredStreamsModalTitle">
           {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.title', {
-            defaultMessage: 'Enable Wired Streams?',
+            defaultMessage: 'Enable Wired Streams',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -132,7 +132,7 @@ export function EnableWiredStreamsConfirmModal({
 
         <EuiSpacer size="m" />
 
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s">
           {i18n.translate(
             'xpack.observability_onboarding.enableWiredStreamsModal.reversibleNote',
             {
