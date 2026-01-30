@@ -1335,9 +1335,10 @@ const ESQLEditorInternal = function ESQLEditor({
           query={code}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
-          onUpdateAndSubmitQuery={(newQuery) =>
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
-          }
+          onUpdateAndSubmitQuery={(newQuery) => {
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH);
+            editorRef.current?.focus();
+          }}
           onToggleVisor={onToggleVisor}
         />
       )}
