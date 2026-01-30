@@ -118,7 +118,6 @@ async function fetchLogContext({
   const isErrorOrWarning = isWarningOrAbove(logEntry);
 
   const [correlatedLogsResult, distributedTraceResult] = await Promise.all([
-
     (async () => {
       try {
         const { sequences } = await getCorrelatedLogs({
