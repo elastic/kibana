@@ -141,6 +141,8 @@ const CreateRulePageComponent: React.FC<{
   // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
 
+  const isAICreatedRuleValidated = useRef<boolean>(false);
+
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const defineStepDefault = useMemo(
@@ -370,6 +372,15 @@ const CreateRulePageComponent: React.FC<{
 
     return { valid, warnings };
   }, [validateStep]);
+
+  useEffect(() => {
+    // validate Define step when rule is loaded after AI suggestion.
+    // It's required to make sure we highlight possible errors in query that were not caught during AI generation.
+    if (rule && sendToAgentChat && isAICreatedRuleValidated.current === false) {
+      validateStep(RuleStep.defineRule);
+      isAICreatedRuleValidated.current = true;
+    }
+  }, [rule, sendToAgentChat, validateStep]);
 
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
