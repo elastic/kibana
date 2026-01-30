@@ -20,7 +20,6 @@ export interface ExecuteQueryParams {
 
 export interface QueryServiceContract {
   executeQuery(params: ExecuteQueryParams): Promise<EsqlQueryResponse>;
-  queryResponseToRecords<T extends Record<string, unknown>>(response: EsqlQueryResponse): T[];
 }
 
 @injectable()
@@ -68,33 +67,5 @@ export class QueryService implements QueryServiceContract {
 
       throw error;
     }
-  }
-
-  public queryResponseToRecords<T extends Record<string, unknown>>(
-    response: EsqlQueryResponse
-  ): T[] {
-    const objects: T[] = [];
-    const columns = response.columns ?? [];
-    const values = response.values ?? [];
-
-    if (columns.length === 0 || values.length === 0) {
-      return [];
-    }
-
-    for (const row of values) {
-      const object: T = {} as T;
-
-      for (const [columnIndex, value] of row.entries()) {
-        const columnName = columns[columnIndex]?.name as keyof T;
-
-        if (columnName) {
-          object[columnName] = value as T[keyof T];
-        }
-      }
-
-      objects.push(object);
-    }
-
-    return objects;
   }
 }

@@ -100,6 +100,7 @@ packages/kbn-tsconfig/base @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
+packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
@@ -664,16 +665,6 @@ src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
-src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
-src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
-src/platform/packages/shared/response-ops/form-generator @elastic/response-ops
-src/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
-src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
-src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
-src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-presentation-team
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
@@ -998,8 +989,18 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/response-ops
-x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/yaml-rule-editor @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -1107,7 +1108,6 @@ x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/streams @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
-x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/test
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1252,6 +1252,7 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
@@ -1766,6 +1767,9 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 
+
+# Alerting alerting_v2
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/response-ops
 
 ### END Observability Plugins
 
@@ -2340,6 +2344,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
 
 # Gap fill feature has shared responsibility between response-ops and security-detection-engine
 /x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
@@ -2567,6 +2572,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
+/x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
