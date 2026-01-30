@@ -41,7 +41,7 @@ export const QueryStreamSchemaEditor = ({
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
       <EuiCallOut
         iconType="info"
-        title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
+        title={i18n.translate('xpack.streams.queryStreamSchemaEditor.readonlyMode', {
           defaultMessage: 'Query streams are readonly and their schema cannot be modified.',
         })}
         announceOnMount={false}
@@ -55,8 +55,8 @@ export const QueryStreamSchemaEditor = ({
           defaultColumns={defaultColumns}
           stream={definition.stream}
           onRefreshData={refreshFields}
-          onFieldUpdate={() => { }}
-          onFieldSelection={() => { }}
+          onFieldUpdate={() => {}}
+          onFieldSelection={() => {}}
           fieldSelection={[]}
         />
       </EuiFlexItem>
