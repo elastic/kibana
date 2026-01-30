@@ -30,7 +30,7 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
     return {
       value: 0,
       unit: 'second',
-      roundingUnit: undefined,
+      roundingUnit: roundingPart ? unitMap.get(roundingPart) : undefined,
     };
   }
 

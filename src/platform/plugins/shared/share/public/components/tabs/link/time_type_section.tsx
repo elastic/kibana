@@ -56,11 +56,40 @@ const RelativeTimeText = ({
   value,
   unit,
   roundingUnit,
+  isToDate,
 }: {
   value?: number;
   unit?: string;
   roundingUnit?: string;
+  isToDate?: boolean;
 }) => {
+  // Handle "now/d" (start/end of day), "now/w" (start/end of week), etc.
+  // When used as "to" date, it means "end of the period" (with roundUp)
+  if (value === 0 && unit === 'second' && roundingUnit) {
+    if (isToDate) {
+      return (
+        <FormattedMessage
+          id="share.link.timeRange.endOfRoundingUnit"
+          defaultMessage="<bold>the end of the {roundingUnit}</bold>"
+          values={{
+            roundingUnit,
+            bold: (chunks) => <BoldText>{chunks}</BoldText>,
+          }}
+        />
+      );
+    }
+    return (
+      <FormattedMessage
+        id="share.link.timeRange.startOfRoundingUnit"
+        defaultMessage="<bold>the start of the {roundingUnit}</bold>"
+        values={{
+          roundingUnit,
+          bold: (chunks) => <BoldText>{chunks}</BoldText>,
+        }}
+      />
+    );
+  }
+
   // Handle plain "now" case - FormattedRelativeTime can't render it properly
   if (value === 0 && unit === 'second' && !roundingUnit) {
     return (
@@ -118,9 +147,9 @@ const getTimeRangeText = (timeRange: TimeRange) => {
   );
 
   const toValue = toIsRelative ? (
-    <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} />
+    <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} isToDate />
   ) : (
-    <AbsoluteTimeText date={timeRange.to} />
+    <AbsoluteTimeText date={timeRange.to} isToDate />
   );
 
   return (

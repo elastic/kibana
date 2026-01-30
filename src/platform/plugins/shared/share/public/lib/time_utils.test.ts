@@ -60,6 +60,20 @@ describe('Time Utils', () => {
       const result = getRelativeTimeValueAndUnitFromTimeString(date);
       expect(result).toEqual({ value: -1, unit: 'minute', roundingUnit: undefined });
     });
+
+    it('handles plain "now" with rounding unit for "Today" case', () => {
+      const date = 'now/d';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: 0, unit: 'second', roundingUnit: 'day' });
+    });
+
+    it('handles plain "now" without rounding unit', () => {
+      const date = 'now';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: 0, unit: 'second', roundingUnit: undefined });
+    });
   });
 
   describe('convertRelativeTimeStringToAbsoluteTimeDate', () => {
