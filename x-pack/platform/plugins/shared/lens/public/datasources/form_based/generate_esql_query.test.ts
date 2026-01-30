@@ -6,7 +6,7 @@
  */
 
 import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
-import { getESQLForLayer } from './to_esql';
+import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 
 const defaultUiSettingsGet = (key: string) => {
@@ -24,7 +24,7 @@ const defaultUiSettingsGet = (key: string) => {
   }
 };
 
-describe('to_esql', () => {
+describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
@@ -47,7 +47,7 @@ describe('to_esql', () => {
   } as unknown as IndexPattern;
 
   it('should produce valid esql for date histogram and count', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -81,7 +81,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(result).toEqual(
       expect.objectContaining({
         success: true,
         esql: `FROM myIndexPattern
@@ -94,7 +94,7 @@ describe('to_esql', () => {
   });
 
   it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -128,14 +128,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual({
+    expect(result).toEqual({
       success: false,
       reason: 'include_empty_rows_not_supported',
     });
   });
 
   it('should return failure with formula_not_supported reason if lens formula is used', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -158,14 +158,14 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual({
+    expect(result).toEqual({
       success: false,
       reason: 'formula_not_supported',
     });
   });
 
   test('it should add a where condition to esql if timeField is set', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -199,7 +199,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(result).toEqual(
       expect.objectContaining({
         success: true,
         esql: `FROM myIndexPattern
@@ -212,7 +212,7 @@ describe('to_esql', () => {
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -253,7 +253,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(result).toEqual(
       expect.objectContaining({
         success: true,
         esql: `FROM myIndexPattern
@@ -270,7 +270,7 @@ describe('to_esql', () => {
       return defaultUiSettingsGet(key);
     });
 
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -304,7 +304,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual({
+    expect(result).toEqual({
       success: false,
       reason: 'non_utc_timezone',
     });
@@ -317,7 +317,7 @@ describe('to_esql', () => {
       return defaultUiSettingsGet(key);
     });
 
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -351,7 +351,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(result).toEqual(
       expect.objectContaining({
         success: true,
         esql: `FROM myIndexPattern
@@ -363,8 +363,134 @@ describe('to_esql', () => {
     );
   });
 
+  it('should preserve user-configured format (e.g., currency) in esAggsIdMap', () => {
+    uiSettings.get.mockImplementation((key: string) => {
+      return defaultUiSettingsGet(key);
+    });
+
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            interval: 'auto',
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'sum',
+            sourceField: 'price',
+            label: 'Sum of price',
+            dataType: 'number',
+            isBucketed: false,
+            params: {
+              format: {
+                id: 'currency',
+                params: {
+                  decimals: 2,
+                  pattern: '$0,0.00',
+                },
+              },
+            },
+          },
+        ],
+      ],
+      layer,
+      indexPattern,
+      uiSettings,
+      {
+        fromDate: '2021-01-01T00:00:00.000Z',
+        toDate: '2021-01-01T23:59:59.999Z',
+      },
+      new Date()
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Find the metric column in esAggsIdMap
+      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
+      expect(metricKey).toBeDefined();
+      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      expect(metricColumn.format).toEqual({
+        id: 'currency',
+        params: {
+          decimals: 2,
+          pattern: '$0,0.00',
+        },
+      });
+    }
+  });
+
+  it('should preserve user-configured bytes format in esAggsIdMap', () => {
+    uiSettings.get.mockImplementation((key: string) => {
+      return defaultUiSettingsGet(key);
+    });
+
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            interval: 'auto',
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'average',
+            sourceField: 'bytes',
+            label: 'Average bytes',
+            dataType: 'number',
+            isBucketed: false,
+            params: {
+              format: {
+                id: 'bytes',
+                params: {
+                  decimals: 2,
+                },
+              },
+            },
+          },
+        ],
+      ],
+      layer,
+      indexPattern,
+      uiSettings,
+      {
+        fromDate: '2021-01-01T00:00:00.000Z',
+        toDate: '2021-01-01T23:59:59.999Z',
+      },
+      new Date()
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Find the metric column in esAggsIdMap
+      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
+      expect(metricKey).toBeDefined();
+      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      expect(metricColumn.format).toEqual({
+        id: 'bytes',
+        params: {
+          decimals: 2,
+        },
+      });
+    }
+  });
+
   it('should work with custom filters on the layer', () => {
-    const esql = getESQLForLayer(
+    const result = generateEsqlQuery(
       [
         [
           '1',
@@ -402,7 +528,7 @@ describe('to_esql', () => {
       new Date()
     );
 
-    expect(esql).toEqual(
+    expect(result).toEqual(
       expect.objectContaining({
         success: true,
         esql: `FROM myIndexPattern
