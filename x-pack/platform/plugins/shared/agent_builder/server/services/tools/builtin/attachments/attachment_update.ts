@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -24,6 +25,7 @@ const attachmentUpdateSchema = z.object({
  */
 export const createAttachmentUpdateTool = ({
   attachmentManager,
+  attachmentsService,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
   id: platformCoreTools.attachmentUpdate,
   type: ToolType.builtin,
@@ -56,12 +58,30 @@ export const createAttachmentUpdateTool = ({
       };
     }
 
+    const definition = attachmentsService?.getTypeDefinition(existing.type);
+    const typeReadonly = definition?.isReadonly ?? true;
+    const isReadonly = typeReadonly || existing.readonly === true;
+    if (isReadonly) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Attachment '${attachmentId}' is read-only`,
+            metadata: { attachment_id: attachmentId },
+          }),
+        ],
+      };
+    }
+
     // Capture version before update (attachmentManager mutates the object in place)
     const previousVersion = existing.current_version;
 
     let updated;
     try {
-      updated = await attachmentManager.update(attachmentId, { data, description });
+      updated = await attachmentManager.update(
+        attachmentId,
+        { data, description },
+        ATTACHMENT_REF_ACTOR.agent
+      );
     } catch (e) {
       return {
         results: [

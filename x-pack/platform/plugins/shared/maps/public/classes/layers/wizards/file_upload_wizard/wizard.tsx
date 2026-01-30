@@ -16,7 +16,7 @@ import { GeoJsonFileSource } from '../../../sources/geojson_file_source';
 import { GeoJsonVectorLayer } from '../../vector_layer';
 import { createDefaultLayerDescriptor } from '../../../sources/es_search_source';
 import type { RenderWizardArguments } from '../layer_wizard_registry';
-import { getFileUploadComponent } from '../../../../kibana_services';
+import { getFileUploadComponent, getAnalytics } from '../../../../kibana_services';
 
 export enum UPLOAD_STEPS {
   CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',
@@ -142,6 +142,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
   render() {
     const FileUpload = getFileUploadComponent();
+    const analytics = getAnalytics();
 
     return (
       <EuiPanel>
@@ -153,6 +154,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
           disableImportBtn={this.props.disableNextBtn}
           onUploadComplete={this._onUploadComplete}
           onUploadError={this._onUploadError}
+          analytics={analytics}
+          location="maps"
         />
       </EuiPanel>
     );
