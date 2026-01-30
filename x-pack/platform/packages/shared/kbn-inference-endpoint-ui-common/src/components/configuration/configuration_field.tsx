@@ -70,7 +70,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   useEffect(() => {
     // Only sync from external value if it has actual content
     // Don't reset to default when user clears the field (value becomes null)
-    if (value !== null && value !== undefined && value.toString().length > 0) {
+    if (value != null && String(value).length > 0) {
       setInnerValue(value);
     }
   }, [value]);
@@ -151,7 +151,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   useEffect(() => {
     // Only sync from external value if it has actual content
     // Don't reset to default when user clears the field (value becomes null)
-    if (value !== null && value !== undefined && value.toString().length > 0) {
+    if (value != null && String(value).length > 0) {
       setInnerValue(value);
     }
   }, [value]);
