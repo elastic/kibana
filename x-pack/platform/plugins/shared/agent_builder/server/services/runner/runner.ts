@@ -36,7 +36,7 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { HooksServiceStart } from '../hooks';
-import type { ModelProviderFactoryFn } from './model_provider';
+import type { ModelProviderFactoryFn, ModelCallContextRef } from './model_provider';
 import type { TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
@@ -64,6 +64,8 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  // context for model call hooks (set when running an agent, used by wrapped chatComplete)
+  modelCallContextRef?: ModelCallContextRef;
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
@@ -153,24 +155,45 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversation,
     nextInput,
     promptState,
+    agentId,
+    conversationId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
+    agentId?: string;
+    conversationId?: string;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelCallContextRef: ModelCallContextRef | undefined =
+      agentId !== undefined && conversationId !== undefined
+        ? {
+            current: {
+              agentId,
+              conversationId,
+              request,
+              connectorId: '',
+            },
+          }
+        : undefined;
+
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      modelCallContextRef,
+    });
     const allDeps = {
       ...runnerDeps,
       modelProvider,
       request,
       defaultConnectorId,
+      modelCallContextRef,
       resultStore,
       attachmentStateManager,
       stateManager,
@@ -191,13 +214,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
-      const { request, defaultConnectorId, ...otherParams } = params;
+      const { request, defaultConnectorId, agentId, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         conversation,
         nextInput,
+        agentId,
+        conversationId: conversation?.id ?? '',
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

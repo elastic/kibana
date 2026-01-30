@@ -8,8 +8,33 @@
 import { createBadRequestError, isBadRequestError } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { HooksService } from './hooks_service';
-import { HookEvent, HookExecutionMode } from './types';
-import type { ConversationRoundStartHookContext } from './types';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
+import type {
+  BeforeConversationRoundHookContext,
+  BeforeToolCallHookContext,
+  AfterToolCallHookContext,
+} from '@kbn/agent-builder-server';
+
+const TEST_AGENT_ID = 'agent-1';
+const TEST_CONVERSATION_ID = 'conv-1';
+
+const baseToolCallContext: BeforeToolCallHookContext = {
+  agentId: TEST_AGENT_ID,
+  conversationId: TEST_CONVERSATION_ID,
+  toolId: 'tool-1',
+  toolCallId: 'call-1',
+  toolParams: {},
+  source: 'agent',
+  request: {} as any,
+};
+
+const createAfterToolCallContext = (
+  overrides: Partial<AfterToolCallHookContext> = {}
+): AfterToolCallHookContext => ({
+  ...baseToolCallContext,
+  toolReturn: { results: [] },
+  ...overrides,
+});
 
 describe('HooksService', () => {
   const createService = () => {
@@ -20,13 +45,18 @@ describe('HooksService', () => {
     return { setup, start };
   };
 
+  const createCallRecorder = (calls: string[]) => (label: string) => async () => {
+    calls.push(label);
+  };
+
+  const flushEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
+
   const baseContext = {
-    event: HookEvent.onConversationRoundStart as const,
-    agentId: 'agent-1',
-    conversationId: 'conv-1',
+    agentId: TEST_AGENT_ID,
+    conversationId: TEST_CONVERSATION_ID,
     conversation: {
-      id: 'conv-1',
-      agent_id: 'agent-1',
+      id: TEST_CONVERSATION_ID,
+      agent_id: TEST_AGENT_ID,
       user: { id: 'u-1', name: 'User', username: 'user' },
       title: 't',
       created_at: new Date().toISOString(),
@@ -43,27 +73,222 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'h1',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.blocking,
       priority: 5,
-      handler: async () => {
-        calls.push('h1');
-        return { nextInput: { message: 'mutated' } };
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: async () => {
+          calls.push('h1');
+          return { nextInput: { message: 'mutated' } };
+        },
       },
     });
     setup.register({
       id: 'h2',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.blocking,
       priority: 10,
-      handler: async (ctx: ConversationRoundStartHookContext) => {
-        calls.push(`h2:${ctx.nextInput.message}`);
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: async (ctx: BeforeConversationRoundHookContext) => {
+          calls.push(`h2:${ctx.nextInput.message}`);
+        },
       },
     });
 
-    const result = await start.runBlocking(HookEvent.onConversationRoundStart, baseContext);
+    const result = await start.run(HookLifecycle.beforeConversationRound, baseContext);
     expect(calls).toEqual(['h2:hello', 'h1']);
     expect(result.nextInput.message).toBe('mutated');
+  });
+
+  it('runs after* hooks in reverse order', async () => {
+    const { setup, start } = createService();
+    const hookCalls: string[] = [];
+    const afterContext = createAfterToolCallContext();
+    const handler = createCallRecorder(hookCalls);
+
+    // No priority: order is registration order. Before = registration order, after = reverse.
+    setup.register({
+      id: 'order-first',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-first'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-first'),
+      },
+    });
+    setup.register({
+      id: 'order-second',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-second'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-second'),
+      },
+    });
+    setup.register({
+      id: 'order-third',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-third'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-third'),
+      },
+    });
+
+    await start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    await start.run(HookLifecycle.afterToolCall, afterContext);
+
+    expect(hookCalls).toEqual([
+      'before-first',
+      'before-second',
+      'before-third',
+      'after-third',
+      'after-second',
+      'after-first',
+    ]);
+  });
+
+  it('runs before* hooks by priority (desc) and after* in reverse of that order', async () => {
+    const { setup, start } = createService();
+    const hookCalls: string[] = [];
+    const afterContext = createAfterToolCallContext();
+    const handler = createCallRecorder(hookCalls);
+
+    // Priority 1 (low), 5 (mid), 10 (high). Before = high first; after = reverse (low first).
+    setup.register({
+      id: 'priority-low',
+      priority: 1,
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-low'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-low'),
+      },
+    });
+    setup.register({
+      id: 'priority-mid',
+      priority: 5,
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-mid'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-mid'),
+      },
+    });
+    setup.register({
+      id: 'priority-high',
+      priority: 10,
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('before-high'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('after-high'),
+      },
+    });
+
+    await start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    await start.run(HookLifecycle.afterToolCall, afterContext);
+
+    expect(hookCalls).toEqual([
+      'before-high',
+      'before-mid',
+      'before-low',
+      'after-low',
+      'after-mid',
+      'after-high',
+    ]);
+  });
+
+  it('run() runs blocking first then non-blocking with updated context and returns updated context', async () => {
+    const { setup, start } = createService();
+    const hookCalls: string[] = [];
+    const handler = createCallRecorder(hookCalls);
+
+    setup.register({
+      id: 'blocking',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.blocking,
+        handler: handler('blocking'),
+      },
+    });
+    setup.register({
+      id: 'non-blocking',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('non-blocking'),
+      },
+    });
+
+    const result = await start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    expect(result).toBeDefined();
+    await flushEventLoop();
+    expect(hookCalls).toEqual(['blocking', 'non-blocking']);
+  });
+
+  it('runs non-blocking before* hooks in registration order and after* in reverse order', async () => {
+    const { setup, start } = createService();
+    const hookCalls: string[] = [];
+    const afterContext = createAfterToolCallContext();
+    const handler = createCallRecorder(hookCalls);
+
+    setup.register({
+      id: 'nonBlocking-first',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('before-first'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('after-first'),
+      },
+    });
+    setup.register({
+      id: 'nonBlocking-second',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('before-second'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('after-second'),
+      },
+    });
+    setup.register({
+      id: 'nonBlocking-third',
+      [HookLifecycle.beforeToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('before-third'),
+      },
+      [HookLifecycle.afterToolCall]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler: handler('after-third'),
+      },
+    });
+
+    start.run(HookLifecycle.beforeToolCall, baseToolCallContext);
+    await flushEventLoop();
+
+    start.run(HookLifecycle.afterToolCall, afterContext);
+    await flushEventLoop();
+
+    expect(hookCalls).toEqual([
+      'before-first',
+      'before-second',
+      'before-third',
+      'after-third',
+      'after-second',
+      'after-first',
+    ]);
   });
 
   it('aborts blocking execution when a hook throws a non-AgentBuilderError', async () => {
@@ -71,15 +296,16 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'h1',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.blocking,
-      handler: async () => {
-        throw new Error('nope');
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: async () => {
+          throw new Error('nope');
+        },
       },
     });
 
     try {
-      await start.runBlocking(HookEvent.onConversationRoundStart, baseContext);
+      await start.run(HookLifecycle.beforeConversationRound, baseContext);
       throw new Error('Expected hook execution to throw');
     } catch (e) {
       expect(e).toMatchObject({ message: 'nope' });
@@ -87,32 +313,59 @@ describe('HooksService', () => {
     }
   });
 
+  it('throws when a blocking hook exceeds its timeout (default 3min, overridden for test)', async () => {
+    const { setup, start } = createService();
+
+    setup.register({
+      id: 'slow-hook',
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        timeout: 50,
+        handler: () =>
+          new Promise<void>((resolve) => {
+            setTimeout(resolve, 500);
+          }),
+      },
+    });
+
+    await expect(
+      start.run(HookLifecycle.beforeConversationRound, baseContext)
+    ).rejects.toMatchObject({
+      message: expect.stringContaining('timed out after 50ms'),
+      meta: expect.objectContaining({
+        hookId: 'slow-hook-beforeConversationRound',
+        hookLifecycle: HookLifecycle.beforeConversationRound,
+      }),
+    });
+  });
+
   it('preserves AgentBuilderErrors thrown by hooks and augments metadata', async () => {
     const { setup, start } = createService();
 
     setup.register({
       id: 'h1',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.blocking,
-      handler: async () => {
-        throw createBadRequestError('blocked', { reason: 'test' });
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.blocking,
+        handler: async () => {
+          throw createBadRequestError('blocked', { reason: 'test' });
+        },
       },
     });
 
     await expect(
-      start.runBlocking(HookEvent.onConversationRoundStart, baseContext)
+      start.run(HookLifecycle.beforeConversationRound, baseContext)
     ).rejects.toMatchObject({
       message: 'blocked',
       meta: expect.objectContaining({
         reason: 'test',
-        hookId: 'h1',
-        hookEvent: HookEvent.onConversationRoundStart,
+        hookId: 'h1-beforeConversationRound',
+        hookLifecycle: HookLifecycle.beforeConversationRound,
         hookMode: HookExecutionMode.blocking,
       }),
     });
   });
 
-  it('runs parallel hooks without blocking and swallows errors', async () => {
+  it('runs non-blocking hooks without blocking and swallows errors', async () => {
     const { setup, start } = createService();
 
     const handler = jest.fn(async () => {
@@ -121,36 +374,12 @@ describe('HooksService', () => {
 
     setup.register({
       id: 'p1',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.parallel,
-      handler,
-    });
-
-    expect(() => start.runParallel(HookEvent.onConversationRoundStart, baseContext)).not.toThrow();
-  });
-
-  it('aborts via abortController when a parallel hook throws', async () => {
-    const { setup, start } = createService();
-
-    setup.register({
-      id: 'p1',
-      event: HookEvent.onConversationRoundStart,
-      mode: HookExecutionMode.parallel,
-      handler: async () => {
-        throw new Error('guardrails violation');
+      [HookLifecycle.beforeConversationRound]: {
+        mode: HookExecutionMode.nonBlocking,
+        handler,
       },
     });
 
-    const abortController = new AbortController();
-    const context = { ...baseContext, abortController };
-
-    start.runParallel(HookEvent.onConversationRoundStart, context as any);
-
-    // allow the promise chain + catch handler to run
-    await new Promise((resolve) => setImmediate(resolve));
-
-    expect(abortController.signal.aborted).toBe(true);
-    const reason = (abortController.signal as any).reason;
-    expect(reason).toMatchObject({ message: 'guardrails violation' });
+    expect(() => start.run(HookLifecycle.beforeConversationRound, baseContext)).not.toThrow();
   });
 });

@@ -13,6 +13,7 @@ import {
   type ToolIdMapping,
   toolsToLangchain,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -39,7 +40,6 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
 import type { StateType } from './state';
-
 const chatAgentGraphName = 'default-agent-builder-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
@@ -90,6 +90,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
+
+  const conversationId = conversation?.id ?? '';
+  const modelName =
+    (model.chatModel.identifyingParams?.() as { model_name?: string } | undefined)?.model_name ??
+    getConnectorDefaultModel(model.connector);
+
+  if (context.modelCallContextRef?.current) {
+    context.modelCallContextRef.current = {
+      ...context.modelCallContextRef.current,
+      connectorId: model.connector.connectorId,
+      model: modelName,
+      abortSignal,
+    };
+  }
 
   const manualEvents$ = new Subject<ChatAgentEvent>();
   const eventEmitter: AgentEventEmitterFn = (event) => {
@@ -149,6 +163,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput,
     outputSchema,
     processedConversation,
+    modelCallContext: {
+      agentId: agentId ?? '',
+      conversationId,
+      request,
+      connectorId: model.connector.connectorId,
+      model: modelName,
+      abortSignal,
+    },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

@@ -26,6 +26,7 @@ import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
+import { registerAgentBuilderHooksExample } from './examples/register_hooks_example';
 
 export class AgentBuilderPlugin
   implements
@@ -106,7 +107,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    return {
+    const setupContract: AgentBuilderPluginSetup = {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
@@ -120,6 +121,10 @@ export class AgentBuilderPlugin
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
     };
+
+    registerAgentBuilderHooksExample(setupContract);
+
+    return setupContract;
   }
 
   start(

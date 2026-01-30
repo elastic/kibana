@@ -34,7 +34,7 @@ import {
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
-import type { HooksServiceStart } from '../hooks';
+import type { HooksServiceStart } from '@kbn/agent-builder-server';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -64,8 +64,7 @@ describe('ChatService', () => {
     uiSettings = uiSettingsServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
     hooks = {
-      runBlocking: async (_event, context) => context,
-      runParallel: () => {},
+      run: async (_event: any, context: any) => context,
     };
 
     chatService = createChatService({

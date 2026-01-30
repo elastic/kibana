@@ -22,7 +22,7 @@ export type {
   ToolsStart,
 } from './types';
 
-export { HookEvent, HookExecutionMode } from './services/hooks';
+export { HookLifecycle, HookExecutionMode } from './services/hooks';
 export type { HookRegistration } from './services/hooks';
 
 export const plugin: PluginInitializer<

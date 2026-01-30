@@ -203,7 +203,6 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
 
 export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
   return {
-    runBlocking: jest.fn(async (_event: any, context: any) => context),
-    runParallel: jest.fn(),
+    run: jest.fn(async (_event: any, context: any) => context),
   };
 };

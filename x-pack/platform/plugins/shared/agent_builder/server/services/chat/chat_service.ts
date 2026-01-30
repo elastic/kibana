@@ -7,7 +7,18 @@
 
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
-import { concatMap, filter, finalize, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
+import {
+  concatMap,
+  filter,
+  finalize,
+  of,
+  defer,
+  shareReplay,
+  share,
+  switchMap,
+  merge,
+  EMPTY,
+} from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -19,6 +30,12 @@ import {
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
+import type {
+  AfterConversationRoundHookContext,
+  BeforeConversationRoundHookContext,
+  HooksServiceStart,
+} from '@kbn/agent-builder-server';
+import { HookLifecycle } from '@kbn/agent-builder-server';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -37,12 +54,6 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { HookEvent } from '../hooks';
-import type { HooksServiceStart } from '../hooks';
-import type {
-  ConversationRoundEndHookContext,
-  ConversationRoundStartHookContext,
-} from '../hooks/types';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -126,50 +137,21 @@ class ChatServiceImpl implements ChatService {
               : EMPTY;
 
           const effectiveConversationId = context.conversation.id;
-          const hookAbortController = new AbortController();
-          const combinedAbortController = new AbortController();
-
-          const abortWith = (reason?: unknown) => {
-            if (!combinedAbortController.signal.aborted) {
-              combinedAbortController.abort(reason);
-            }
-          };
-
-          const onExternalAbort = () => abortWith((abortSignal as any)?.reason);
-          const onHookAbort = () => abortWith((hookAbortController.signal as any)?.reason);
-
-          if (abortSignal) {
-            if (abortSignal.aborted) {
-              abortWith((abortSignal as any).reason);
-            } else {
-              abortSignal.addEventListener('abort', onExternalAbort);
-            }
-          }
-          hookAbortController.signal.addEventListener('abort', onHookAbort);
-
-          const effectiveAbortSignal = combinedAbortController.signal;
+          const effectiveAbortSignal = abortSignal ?? new AbortController().signal;
 
           const nextInputWithHooks$ = defer(async () => {
-            const hookContext: ConversationRoundStartHookContext = {
-              event: HookEvent.onConversationRoundStart as const,
+            const hookContext: BeforeConversationRoundHookContext = {
               agentId,
               conversationId: effectiveConversationId,
               conversation: context.conversation,
               nextInput,
-              capabilities,
               request,
               abortSignal: effectiveAbortSignal,
-              abortController: hookAbortController,
             };
 
-            const updatedHookContext = await this.dependencies.hooks.runBlocking(
-              HookEvent.onConversationRoundStart,
+            const updatedHookContext = await this.dependencies.hooks.run(
+              HookLifecycle.beforeConversationRound,
               hookContext
-            );
-
-            this.dependencies.hooks.runParallel(
-              HookEvent.onConversationRoundStart,
-              updatedHookContext
             );
 
             return updatedHookContext.nextInput;
@@ -190,7 +172,9 @@ class ChatServiceImpl implements ChatService {
                 browserApiTools,
               });
 
-              // Gate/augment the round completion event with onConversationRoundEnd hooks.
+              // Gate/augment the round completion event with afterConversationRound hooks.
+              // share() so this stream is multicast: merge() and persistConversation() both
+              // subscribe to agentEvents$; without sharing, hooks would run twice per round.
               const agentEvents$ = rawAgentEvents$.pipe(
                 concatMap((event) => {
                   if (!isRoundCompleteEvent(event)) {
@@ -198,24 +182,19 @@ class ChatServiceImpl implements ChatService {
                   }
 
                   return defer(async () => {
-                    const hookContext: ConversationRoundEndHookContext = {
-                      event: HookEvent.onConversationRoundEnd as const,
+                    const hookContext: AfterConversationRoundHookContext = {
                       agentId,
                       conversationId: effectiveConversationId,
                       conversation: context.conversation,
                       round: event.data.round,
-                      resumed: !!event.data.resumed,
-                      capabilities,
                       request,
                       abortSignal: effectiveAbortSignal,
-                      abortController: hookAbortController,
                     };
 
-                    const updated = await this.dependencies.hooks.runBlocking(
-                      HookEvent.onConversationRoundEnd,
+                    const updated = await this.dependencies.hooks.run(
+                      HookLifecycle.afterConversationRound,
                       hookContext
                     );
-                    this.dependencies.hooks.runParallel(HookEvent.onConversationRoundEnd, updated);
 
                     return {
                       ...event,
@@ -225,7 +204,8 @@ class ChatServiceImpl implements ChatService {
                       },
                     };
                   });
-                })
+                }),
+                share()
               );
 
               // Generate title (for CREATE) or use existing title (for UPDATE)
@@ -235,6 +215,13 @@ class ChatServiceImpl implements ChatService {
                       chatModel: context.chatModel,
                       conversation: context.conversation,
                       nextInput: effectiveNextInput,
+                      modelCallContext: {
+                        agentId,
+                        conversationId: effectiveConversationId,
+                        request,
+                        connectorId: context.selectedConnectorId,
+                        abortSignal: effectiveAbortSignal,
+                      },
                     })
                   : of(context.conversation.title);
 
@@ -283,17 +270,7 @@ class ChatServiceImpl implements ChatService {
                   }
                 }),
                 finalize(() => {
-                  // Avoid leaking abort listeners for long-lived signals in tests and real usage.
-                  try {
-                    abortSignal?.removeEventListener('abort', onExternalAbort);
-                  } catch (_) {
-                    // ignore
-                  }
-                  try {
-                    hookAbortController.signal.removeEventListener('abort', onHookAbort);
-                  } catch (_) {
-                    // ignore
-                  }
+                  // No-op: we use the request's abortSignal directly when provided; no listeners to remove.
                 }),
                 shareReplay()
               );

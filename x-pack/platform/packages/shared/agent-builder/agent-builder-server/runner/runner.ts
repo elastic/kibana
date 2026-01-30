@@ -101,6 +101,10 @@ export interface RunContext {
    * The current execution stack
    */
   stack: RunContextStackEntry[];
+  /**
+   * Optional conversation id when the run is part of a conversation (e.g. agent execution).
+   */
+  conversationId?: string;
 }
 
 /**

@@ -27,6 +27,7 @@ import type {
   ConversationStateManager,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
@@ -103,6 +104,25 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Optional hooks service for lifecycle interception.
+   */
+  hooks?: AgentBuilderHooks;
+  /**
+   * Optional ref to the current model call context. When set, the runner updates it so that
+   * before/after model call hooks (e.g. for tool-originated LLM calls) have access to agentId,
+   * conversationId, connectorId, model, abortSignal.
+   */
+  modelCallContextRef?: {
+    current: Partial<{
+      agentId: string;
+      conversationId: string;
+      request: KibanaRequest;
+      connectorId: string;
+      model?: string;
+      abortSignal?: AbortSignal;
+    }> | null;
+  };
 }
 
 /**

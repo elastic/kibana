@@ -106,6 +106,7 @@ export class InferencePlugin
           connectorId: options.connectorId,
           chatModelOptions: options.chatModelOptions,
           callbacks: options.callbacks,
+          wrapChatComplete: options.wrapChatComplete,
           actions: pluginsStart.actions,
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,

@@ -20,9 +20,9 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
-import type { HookRegistration } from './services/hooks';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -100,9 +100,7 @@ export interface AgentBuilderPluginSetup {
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */
-  hooks: {
-    register: (registration: HookRegistration) => void;
-  };
+  hooks: HooksServiceSetup;
 }
 
 /**

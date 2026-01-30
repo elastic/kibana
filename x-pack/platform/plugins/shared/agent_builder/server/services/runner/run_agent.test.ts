@@ -87,6 +87,7 @@ describe('runAgent', () => {
       {
         runId: runnerManager.context.runId,
         agentParams: params.agentParams,
+        abortSignal: expect.any(AbortSignal),
       },
       expect.any(Object)
     );

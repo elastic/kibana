@@ -43,6 +43,7 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import type { ModelCallContext } from '../../../runner/model_provider';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -57,6 +58,7 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
+  modelCallContext,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -67,6 +69,7 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
+  modelCallContext?: ModelCallContext;
 }) => {
   const init = async () => {
     return {};
@@ -81,16 +84,19 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
+      const promptMessages = getResearchAgentPrompt({
+        customInstructions: configuration.research.instructions,
+        clearSystemMessage: configuration.research.replace_default_instructions,
+        capabilities,
+        initialMessages: state.initialMessages,
+        actions: state.mainActions,
+        attachmentTypes: processedConversation.attachmentTypes,
+        outputSchema,
+      });
+
       const response = await researcherModel.invoke(
-        getResearchAgentPrompt({
-          customInstructions: configuration.research.instructions,
-          clearSystemMessage: configuration.research.replace_default_instructions,
-          capabilities,
-          initialMessages: state.initialMessages,
-          actions: state.mainActions,
-          attachmentTypes: processedConversation.attachmentTypes,
-          outputSchema,
-        })
+        promptMessages,
+        modelCallContext?.abortSignal ? { signal: modelCallContext.abortSignal } : {}
       );
 
       const action = processResearchResponse(response);
@@ -196,16 +202,19 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
     try {
+      const promptMessages = getAnswerAgentPrompt({
+        customInstructions: configuration.answer.instructions,
+        clearSystemMessage: configuration.answer.replace_default_instructions,
+        capabilities,
+        initialMessages: state.initialMessages,
+        actions: state.mainActions,
+        answerActions: state.answerActions,
+        attachmentTypes: processedConversation.attachmentTypes,
+      });
+
       const response = await answeringModel.invoke(
-        getAnswerAgentPrompt({
-          customInstructions: configuration.answer.instructions,
-          clearSystemMessage: configuration.answer.replace_default_instructions,
-          capabilities,
-          initialMessages: state.initialMessages,
-          actions: state.mainActions,
-          answerActions: state.answerActions,
-          attachmentTypes: processedConversation.attachmentTypes,
-        })
+        promptMessages,
+        modelCallContext?.abortSignal ? { signal: modelCallContext.abortSignal } : {}
       );
 
       const action = processAnswerResponse(response);
@@ -235,6 +244,7 @@ export const createAgentGraph = ({
     outputSchema,
     attachmentTypes: processedConversation.attachmentTypes,
     logger,
+    modelCallContext,
   });
 
   const answerAgentEdge = async (state: StateType) => {

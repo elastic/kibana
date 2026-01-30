@@ -67,4 +67,35 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
 } from './agents';
+export type {
+  AgentBuilderHooks,
+  HookContext,
+  HookContextByEvent,
+  BlockingHookHandler as HookHandler,
+  HookHandlerResult,
+  HookHandlerResultByEvent,
+  NonBlockingHookHandler,
+  HookRegistration,
+  HookRegistrationEntry,
+  HookRegistrationInput,
+  HookRegistrationsBundle,
+  HooksServiceSetup,
+  HooksServiceStart,
+  BeforeConversationRoundHookContext,
+  AfterConversationRoundHookContext,
+  BeforeToolCallHookContext,
+  AfterToolCallHookContext,
+  BeforeConversationRoundHookUpdatable,
+  AfterConversationRoundHookUpdatable,
+  BeforeToolCallHookUpdatable,
+  AfterToolCallHookUpdatable,
+} from './hooks/types';
+export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export {
+  applyHookResultByEvent,
+  applyBeforeConversationRoundResult,
+  applyAfterConversationRoundResult,
+  applyBeforeToolCallResult,
+  applyAfterToolCallResult,
+} from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';

@@ -14,10 +14,12 @@ import {
 } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
+  RunContext,
   RunToolReturn,
   ToolHandlerContext,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
+import { context as otelContext } from '@opentelemetry/api';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
@@ -33,7 +35,12 @@ import { ToolCallSource } from '../../telemetry';
 import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
-import { HookEvent } from '../hooks';
+import { HookLifecycle } from '../hooks';
+
+function getAgentIdFromRunContext(context: RunContext): string | undefined {
+  const agentEntry = [...context.stack].reverse().find((e) => e.type === 'agent');
+  return agentEntry?.type === 'agent' ? agentEntry.agentId : undefined;
+}
 
 export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
@@ -81,25 +88,25 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const manager = parentManager.createChild(context);
   const { resultStore, promptManager } = manager.deps;
 
-  const hookAbortController = new AbortController();
-  const effectiveAbortSignal = hookAbortController.signal;
+  const effectiveAbortSignal = new AbortController().signal;
+  const hookTracingContext = otelContext.active();
 
-  // allow hooks to mutate tool params or abort the call before validation/handler invocation
+  // allow hooks to mutate tool params (blocking hooks can still throw to abort)
   let toolParams = initialToolParams as unknown as Record<string, unknown>;
   const hooks = manager.deps.hooks;
   if (hooks) {
     const hookContext = {
-      event: HookEvent.preToolCall as const,
+      agentId: getAgentIdFromRunContext(parentManager.context),
+      conversationId: manager.context.conversationId,
       toolId: tool.id,
       toolCallId,
       toolParams,
       source,
       request: manager.deps.request,
       abortSignal: effectiveAbortSignal,
-      abortController: hookAbortController,
+      tracingContext: hookTracingContext,
     };
-    const updated = await hooks.runBlocking(HookEvent.preToolCall, hookContext);
-    hooks.runParallel(HookEvent.preToolCall, updated);
+    const updated = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
     toolParams = updated.toolParams;
   }
 
@@ -146,9 +153,28 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   }
 
+  const schema = await tool.getSchema();
+  const validation = schema.safeParse(toolParams);
+  if (validation.error) {
+    throw createBadRequestError(
+      `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
+    );
+  }
+
+  const toolHandlerContext = await createToolHandlerContext<TParams>({
+    toolExecutionParams: {
+      ...toolExecutionParams,
+      toolId: tool.id,
+      toolParams: toolParams as any,
+    },
+    manager,
+  });
+
+  const toolHandler = await tool.getHandler();
+
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams } },
+    { tool: { input: toolParams, toolCallId } },
     async (): Promise<ToolHandlerReturn> => {
       if (effectiveAbortSignal.aborted) {
         throw (
@@ -156,25 +182,8 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           createRequestAbortedError('Tool execution was aborted')
         );
       }
-      const schema = await tool.getSchema();
-      const validation = schema.safeParse(toolParams);
-      if (validation.error) {
-        throw createBadRequestError(
-          `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
-        );
-      }
-
-      const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams: {
-          ...toolExecutionParams,
-          toolId: tool.id,
-          toolParams: toolParams as any,
-        },
-        manager,
-      });
 
       try {
-        const toolHandler = await tool.getHandler();
         return await Promise.race([
           Promise.resolve(toolHandler(validation.data as Record<string, any>, toolHandlerContext)),
           abortPromise,
@@ -212,21 +221,21 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     runToolReturn = { prompt: toolReturn.prompt };
   }
 
-  // post tool call hook can block or mutate the final tool return
+  // afterToolCall hook can block or mutate the final tool return
   if (hooks) {
     const postContext = {
-      event: HookEvent.postToolCall as const,
+      agentId: getAgentIdFromRunContext(parentManager.context),
+      conversationId: manager.context.conversationId,
       toolId: tool.id,
       toolCallId,
       toolParams,
       source,
       request: manager.deps.request,
       abortSignal: effectiveAbortSignal,
-      abortController: hookAbortController,
       toolReturn: runToolReturn,
+      tracingContext: hookTracingContext,
     };
-    const updated = await hooks.runBlocking(HookEvent.postToolCall, postContext);
-    hooks.runParallel(HookEvent.postToolCall, updated);
+    const updated = await hooks.run(HookLifecycle.afterToolCall, postContext);
     runToolReturn = updated.toolReturn;
   }
 

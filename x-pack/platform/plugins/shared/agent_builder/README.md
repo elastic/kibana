@@ -126,6 +126,80 @@ Agents can be either built-in or user-defined.
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
 
+## Hooks
+
+The hooks API lets you register lifecycle callbacks around agent execution. Register hooks
+in your plugin `setup` by calling `agentBuilder.hooks.register`.
+
+### Lifecycle: user prompt → response
+
+A **conversation round** is one turn in the chat: the user sends a message and the agent produces a full response (possibly after multiple LLM calls and tool calls).
+
+| Order | Hook | Layer | When it runs | What you can mutate |
+|-------|------|--------|----------------|---------------------|
+| 1 | `beforeConversationRound` | Chat | Right after the user sends a message, before any agent execution | `nextInput` (user message, attachments, etc.) |
+| 2 | `beforeToolCall` | Runner | Before each tool invocation | `toolParams` |
+| 3 | `afterToolCall` | Runner | After each tool returns | `toolReturn` (tool result) |
+| 4 | (steps 2–3 repeat as the agent loops: model → tools → model → …) | | | |
+| 5 | `afterConversationRound` | Chat | When the round is complete and the user sees the response | `round` (round summary) |
+
+Example: register hooks for every lifecycle event in a single call. `priority` apply to all entries; each lifecycle entry has `mode` and `handler`:
+
+```ts
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-plugin/server';
+
+export const registerAgentBuilderHooks = (agentBuilder?: AgentBuilderPluginSetup) => {
+  if (!agentBuilder) return;
+
+  agentBuilder.hooks.register({
+    id: 'example-hooks',
+    [HookLifecycle.beforeConversationRound]: {
+      mode: HookExecutionMode.blocking,
+      handler: (context) => {
+        // eslint-disable-next-line no-console
+        console.log('beforeConversationRound', context);
+        return {
+          nextInput: {
+            ...context.nextInput,
+            message: context.nextInput.message
+              ? `${context.nextInput.message} (hooked)`
+              : undefined,
+          },
+        };
+      },
+    },
+    [HookLifecycle.afterConversationRound]: {
+      mode: HookExecutionMode.blocking,
+      handler: (context) => {
+        // eslint-disable-next-line no-console
+        console.log('afterConversationRound', context);
+      },
+    },
+    [HookLifecycle.beforeToolCall]: {
+      mode: HookExecutionMode.blocking,
+      handler: (context) => {
+        // eslint-disable-next-line no-console
+        console.log('beforeToolCall', context);
+        return {
+          toolParams: {
+            ...context.toolParams,
+            _hooked: true,
+          },
+        };
+      },
+    },
+    [HookLifecycle.afterToolCall]: {
+      mode: HookExecutionMode.blocking,
+      handler: (context) => {
+        // eslint-disable-next-line no-console
+        console.log('afterToolCall', context);
+      },
+    },
+  });
+};
+```
+
 ## MCP Server
 
 The MCP server provides a standardized interface for external MCP clients to access agentBuilder tools. It's available on `/api/agent_builder/mcp` endpoint.

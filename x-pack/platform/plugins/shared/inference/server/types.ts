@@ -18,6 +18,7 @@ import type {
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
+import type { ChatCompleteAPI } from '@kbn/inference-common';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -167,4 +168,10 @@ export interface CreateChatModelOptions {
    * Additional parameters to be passed down to the model constructor.
    */
   chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
+  /**
+   * Optional wrapper around the chatComplete API. When provided, every LLM call
+   * (including from tools) will go through this wrapper before hitting the connector.
+   * Used by consumers (e.g. agent builder) to run before/after model call hooks.
+   */
+  wrapChatComplete?: (chatComplete: ChatCompleteAPI) => ChatCompleteAPI;
 }
