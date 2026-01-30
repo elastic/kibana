@@ -15,6 +15,7 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getUpdatesComponentTemplateName } from './component_templates';
+import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
 import { getEntitySpaceId } from './latest_index';
 
 const DATA_RETENTION_PERIOD = '1d';
@@ -36,7 +37,13 @@ export const getUpdatesEntityIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getUpdatesComponentTemplateName(namespace)],
+  composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
+    ...ALL_ENTITY_TYPES.map((t) => getUpdatesComponentTemplateName(t, namespace)),
+  ],
+  ignore_missing_component_templates: [
+    ...ALL_ENTITY_TYPES.map((t) => getUpdatesComponentTemplateName(t, namespace)),
+  ],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,

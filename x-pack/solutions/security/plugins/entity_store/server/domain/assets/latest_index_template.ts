@@ -16,6 +16,7 @@ import {
 } from '../constants';
 import { getComponentTemplateName } from './component_templates';
 import { getEntitySpaceId } from './latest_index';
+import { ALL_ENTITY_TYPES } from '../definitions/entity_schema';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
 
@@ -35,7 +36,13 @@ export const getLatestEntityIndexTemplateConfig = (
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getComponentTemplateName(namespace)],
+  composed_of: [
+    ECS_MAPPINGS_COMPONENT_TEMPLATE,
+    ...ALL_ENTITY_TYPES.map((t) => getComponentTemplateName(t, namespace)),
+  ],
+  ignore_missing_component_templates: [
+    ...ALL_ENTITY_TYPES.map((t) => getComponentTemplateName(t, namespace)),
+  ],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,

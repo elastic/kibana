@@ -13,53 +13,66 @@ import type {
   ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export const createIndex = (
+export const createIndex = async (
   esClient: EsClient,
   index: IndexName,
   if_not_exists: boolean = false
 ) => {
-  esClient.indices.create(
-    { index },
-    {
-      ignore: if_not_exists ? [409] : [],
-      meta: false,
+  try {
+    await esClient.indices.create({ index });
+  } catch (error) {
+    if (if_not_exists && error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+      return;
     }
-  );
+    throw error;
+  }
 };
 
-export const deleteIndex = (esClient: EsClient, index: IndexName) =>
-  esClient.indices.delete({ index }, { ignore: [404] });
+export const deleteIndex = async (esClient: EsClient, index: IndexName) => {
+  await esClient.indices.delete({ index }, { ignore: [404] });
+};
 
-export const putComponentTemplate = (
+export const putComponentTemplate = async (
   esClient: EsClient,
   request: ClusterPutComponentTemplateRequest
-) => esClient.cluster.putComponentTemplate(request);
+) => {
+  await esClient.cluster.putComponentTemplate(request);
+};
 
-export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
-  esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+export const deleteComponentTemplate = async (esClient: EsClient, name: Names) => {
+  await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+};
 
-export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) =>
-  esClient.indices.putIndexTemplate(template);
-
-export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
-  esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
-
-export const createDataStream = (
+export const putIndexTemplate = async (
   esClient: EsClient,
-  name: IndexName,
-  if_not_exists: boolean = false
-) => esClient.indices.createDataStream({ name });
+  template: IndicesPutIndexTemplateRequest
+) => {
+  await esClient.indices.putIndexTemplate(template);
+};
 
-export const deleteDataStream = (
+export const deleteIndexTemplate = async (esClient: EsClient, name: Names) => {
+  await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+};
+
+export const createDataStream = async (
   esClient: EsClient,
   name: IndexName,
   if_not_exists: boolean = false
 ) => {
-  esClient.indices.deleteDataStream(
-    { name },
-    {
-      ignore: if_not_exists ? [409] : [],
-      meta: false,
+  try {
+    await esClient.indices.createDataStream({ name });
+  } catch (error) {
+    if (if_not_exists && error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+      return;
     }
-  );
+    throw error;
+  }
+};
+
+export const deleteDataStream = async (
+  esClient: EsClient,
+  name: IndexName,
+  if_not_exists: boolean = false
+) => {
+  await esClient.indices.deleteDataStream({ name });
 };

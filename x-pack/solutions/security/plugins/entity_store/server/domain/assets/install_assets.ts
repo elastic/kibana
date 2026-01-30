@@ -16,7 +16,7 @@ import {
   deleteIndexTemplate,
   deleteComponentTemplate,
 } from '../../infra/elasticsearch';
-import type { ManagedEntityDefinition } from '../definitions/entity_schema';
+import type { EntityDefinition, ManagedEntityDefinition } from '../definitions/entity_schema';
 import {
   getLatestEntityIndexTemplateConfig,
   getLatestIndexTemplateId,
@@ -52,7 +52,7 @@ export async function installElasticsearchAssets({
     await installIndexTemplates(esClient, namespace, logger);
     await installIndicesAndDataStreams(esClient, namespace, logger);
   } catch (error) {
-    logger.error(`error installing assets: ${error}`);
+    logger.error(`error installing assets for ${definition.type} in ${namespace}: ${error}`);
 
     // TODO: We need to uninstall everything, as currently we are in a partial state
     throw error;
@@ -67,12 +67,12 @@ async function installIndicesAndDataStreams(
   await Promise.all([
     (async () => {
       await createIndex(esClient, getLatestEntitiesIndexName(namespace), true);
-      logger.debug(`created latest entity index`);
+      logger.debug(`created latest entity index in ${namespace}`);
     })(),
 
     (async () => {
       await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), true);
-      logger.debug(`created updates entity data stream`);
+      logger.debug(`created updates entity data stream in ${namespace}`);
     })(),
   ]);
 }
@@ -85,12 +85,12 @@ async function installIndexTemplates(
   await Promise.all([
     (async () => {
       await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace));
-      logger.debug(`installed latest index template`);
+      logger.debug(`installed latest index template in ${namespace}`);
     })(),
 
     (async () => {
       await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace));
-      logger.debug(`installed updates index template`);
+      logger.debug(`installed updates index template in ${namespace}`);
     })(),
   ]);
 }
@@ -103,8 +103,11 @@ async function installComponentTemplates(
 ) {
   await Promise.all([
     (async () => {
-      await putComponentTemplate(esClient, getEntityDefinitionComponentTemplate(definition));
-      logger.debug(`installed latest component template`);
+      await putComponentTemplate(
+        esClient,
+        getEntityDefinitionComponentTemplate(definition, namespace)
+      );
+      logger.debug(`installed latest component template for: ${definition.type} in ${namespace}`);
     })(),
 
     (async () => {
@@ -112,7 +115,7 @@ async function installComponentTemplates(
         esClient,
         getUpdatesEntityDefinitionComponentTemplate(definition, namespace)
       );
-      logger.debug(`installed updates component template`);
+      logger.debug(`installed updates component template for: ${definition.type} in ${namespace}`);
     })(),
   ]);
 }
@@ -127,7 +130,7 @@ export async function uninstallElasticsearchAssets({
   try {
     await uninstallIndicesAndDataStreams(esClient, namespace, logger);
     await uninstallIndexTemplates(esClient, namespace, logger);
-    await uninstallComponentTemplates(esClient, namespace, logger);
+    await uninstallComponentTemplates(esClient, definition, namespace, logger);
   } catch (error) {
     logger.error(`error uninstalling assets: ${error}`);
     // TODO: degrade status?
@@ -137,16 +140,20 @@ export async function uninstallElasticsearchAssets({
 
 async function uninstallComponentTemplates(
   esClient: ElasticsearchClient,
+  definition: EntityDefinition,
   namespace: string,
   logger: Logger
 ) {
   await Promise.all([
     (async () => {
-      await deleteComponentTemplate(esClient, getComponentTemplateName(namespace));
+      await deleteComponentTemplate(esClient, getComponentTemplateName(definition.type, namespace));
       logger.debug(`deleted entity index component template`);
     })(),
     (async () => {
-      await deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(namespace));
+      await deleteComponentTemplate(
+        esClient,
+        getUpdatesComponentTemplateName(definition.type, namespace)
+      );
       logger.debug(`deleted entity index updates component template`);
     })(),
   ]);

@@ -6,11 +6,11 @@
  */
 
 import { getEntityIndexPattern, ENTITY_SCHEMA_VERSION_V2, ENTITY_UPDATES } from '../constants';
-import { getEntityDefinitionId } from './latest_index';
+import { getEntitySpaceId } from './latest_index';
 
 export const getUpdatesEntitiesDataStreamName = (namespace: string) =>
   getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_UPDATES,
-    definitionId: getEntityDefinitionId(namespace),
+    spaceId: getEntitySpaceId(namespace),
   });
