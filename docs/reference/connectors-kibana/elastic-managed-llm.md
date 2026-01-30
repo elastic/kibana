@@ -12,11 +12,11 @@ Elastic provides built-in LLMs through AI connectors vetted for GenAI product fe
 ## Prerequisites
 
 * Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
-* {applies_to}`self: ga 9.3+` Elastic Managed LLMs are available through [EIS with Cloud-Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md)
+* {applies_to}`ece:` {applies_to}`eck:` {applies_to}`self:` For on-premises installations ({{ece}}, {{eck}}, or self managed clusters), Elastic Managed LLMs are only available through [EIS with Cloud Connect](docs-content://explore-analyze/elastic-inference/connect-self-managed-cluster-to-eis.md). Your {{stack}} version must be 9.3 or later.
 
 ## Region and hosting
 
-The Preconfigured AI Connectors use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](https://www.elastic.co/docs/explore-analyze/elastic-inference/eis) for details.
+The Elastic Managed LLMs use third party service providers for {{infer}}. Refer to [the Elastic {{infer-cap}} Service page](docs-content://explore-analyze/elastic-inference/eis.md) for details.
 
 ## Data protection
 
@@ -31,7 +31,7 @@ Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to lea
 
 ## Pricing
 
-Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details.
+Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic [pricing page](https://www.elastic.co/pricing) that correspond to your Elastic setup for details.
 
 ## Available models
 
