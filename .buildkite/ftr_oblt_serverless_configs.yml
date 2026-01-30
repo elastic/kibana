@@ -20,6 +20,7 @@ enabled:
   - x-pack/solutions/observability/test/serverless/functional/configs/config.cases_and_rules.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.ml_and_discover.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.onboarding.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management.ts

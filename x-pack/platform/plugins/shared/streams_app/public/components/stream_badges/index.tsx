@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
@@ -15,7 +15,7 @@ import {
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
-  getIndexPatternsForStream,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -167,9 +167,11 @@ export function LifecycleBadge({
 export function DiscoverBadgeButton({
   definition,
   isWiredStream,
+  spellOut = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   isWiredStream: boolean;
+  spellOut?: boolean;
 }) {
   const {
     dependencies: {
@@ -178,10 +180,11 @@ export function DiscoverBadgeButton({
   } = useKibana();
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns
-    ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
-    : undefined;
+  const esqlQuery = getDiscoverEsqlQuery({
+    definition: definition.stream,
+    indexMode: definition.index_mode,
+    includeMetadata: isWiredStream,
+  });
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -198,16 +201,29 @@ export function DiscoverBadgeButton({
     return null;
   }
 
-  return (
+  const ariaLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+    { defaultMessage: 'Open in Discover' }
+  );
+
+  return spellOut ? (
+    <EuiButton
+      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      href={discoverLink}
+      size="s"
+      aria-label={ariaLabel}
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel', {
+        defaultMessage: 'View in Discover',
+      })}
+    </EuiButton>
+  ) : (
     <EuiButtonIcon
       data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"
-      aria-label={i18n.translate(
-        'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-        { defaultMessage: 'Open in Discover' }
-      )}
+      aria-label={ariaLabel}
     />
   );
 }
