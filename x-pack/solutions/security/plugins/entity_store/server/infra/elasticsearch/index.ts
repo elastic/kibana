@@ -69,10 +69,6 @@ export const createDataStream = async (
   }
 };
 
-export const deleteDataStream = async (
-  esClient: EsClient,
-  name: IndexName,
-  if_not_exists: boolean = false
-) => {
-  await esClient.indices.deleteDataStream({ name });
+export const deleteDataStream = async (esClient: EsClient, name: IndexName) => {
+  await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
 };
