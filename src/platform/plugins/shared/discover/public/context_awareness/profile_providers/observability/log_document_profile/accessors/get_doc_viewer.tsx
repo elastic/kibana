@@ -25,7 +25,6 @@ import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
 import type { LogDocumentProfileProvider } from '../profile';
-import type { DocViewerExtensionParams } from '../../../../types';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -86,8 +85,6 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
   streamsFeature: ObservabilityStreamsFeature | undefined;
   indexes: ObservabilityIndexes;
-  actions?: DocViewerExtensionParams['actions'];
-  // TODO should I add this to DocViewRenderProps ?
 }
 
 const LogOverviewTab = ({

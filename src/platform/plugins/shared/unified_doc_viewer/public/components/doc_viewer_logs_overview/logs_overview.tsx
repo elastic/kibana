@@ -25,7 +25,6 @@ import type {
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
-import type { DocViewerExtensionParams } from '@kbn/discover-plugin/public/context_awareness/types';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -49,7 +48,6 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: ObservabilityIndexes;
   showTraceWaterfall?: boolean;
-  actions?: DocViewerExtensionParams['actions'];
 };
 
 export interface LogsOverviewApi {

@@ -24,7 +24,6 @@ import {
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerExtensionParams } from '@kbn/discover-plugin/public/context_awareness/types';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
@@ -46,7 +45,6 @@ export type OverviewProps = DocViewRenderProps & {
   indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
-  actions?: DocViewerExtensionParams['actions'];
 };
 
 export type TraceOverviewSections = 'errors-table';
