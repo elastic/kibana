@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -20,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from '@kbn/core/public';
+import { getCurrentAppTitle } from '../utils/get_current_app_title';
 import { FormLabel } from './form_label';
 
 const options = ({ htmlId }: { htmlId: string }) => [
@@ -46,16 +49,18 @@ const options = ({ htmlId }: { htmlId: string }) => [
 ];
 
 interface Props {
-  appId?: string;
+  core: CoreStart;
 }
 
-export const CsatButtons = ({ appId }: Props) => {
+export const CsatButtons = ({ core }: Props) => {
   const { euiTheme } = useEuiTheme();
   const basicButtonGroupPrefix = useGeneratedHtmlId({
     prefix: 'csat',
   });
 
-  const [selectedOptionId, setSelectedOptionId] = useState(`${basicButtonGroupPrefix}_5`);
+  const [selectedOptionId, setSelectedOptionId] = useState('');
+
+  const appTitle = getCurrentAppTitle(core.application);
 
   const handleChange = (optionId: string) => {
     setSelectedOptionId(optionId);
@@ -76,10 +81,10 @@ export const CsatButtons = ({ appId }: Props) => {
         <FormLabel>
           <FormattedMessage
             id="feedback.form.body.csatButtons.label"
-            defaultMessage="How would you rate your experience with {appId}?"
+            defaultMessage="How would you rate your experience with {appTitle}?"
             values={{
-              appId: appId
-                ? appId
+              appTitle: appTitle
+                ? appTitle
                 : i18n.translate('feedback.csatButtons.defaultAppTitle', {
                     defaultMessage: 'Kibana',
                   }),
@@ -100,6 +105,7 @@ export const CsatButtons = ({ appId }: Props) => {
           isFullWidth={true}
           buttonSize="compressed"
         />
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" css={labelsCss}>
           <EuiFlexItem>
             <EuiText size="xs">

@@ -23,14 +23,7 @@ interface Props {
 export const FeedbackButton = ({ core, getLicense }: Props) => {
   const openModal = () => {
     core.overlays.openModal(
-      toMountPoint(
-        <FeedbackForm
-          getCurrentUser={core.security.authc.getCurrentUser}
-          getLicense={getLicense}
-          currentAppId$={core.application.currentAppId$}
-        />,
-        core.rendering
-      )
+      toMountPoint(<FeedbackForm getLicense={getLicense} core={core} />, core.rendering)
     );
   };
 

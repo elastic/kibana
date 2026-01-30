@@ -8,7 +8,7 @@
  */
 
 import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
-import type { ApplicationStart, CoreAuthenticationService } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -17,43 +17,31 @@ import { FeedbackBody } from './feedback_body';
 import { FeedbackFooter } from './feedback_footer';
 
 interface Props {
-  getCurrentUser: CoreAuthenticationService['getCurrentUser'];
+  core: CoreStart;
   getLicense: LicensingPluginStart['getLicense'];
-  currentAppId$: ApplicationStart['currentAppId$'];
 }
 
-export const FeedbackForm = ({ getCurrentUser, getLicense, currentAppId$ }: Props) => {
+export const FeedbackForm = ({ core, getLicense }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackText, setFeedbackText] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [currentAppId, setCurrentAppId] = useState<string | undefined>('');
 
   const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
 
   const getEmail = useCallback(async () => {
     try {
-      const user = await getCurrentUser();
+      const user = await core.security.authc.getCurrentUser();
       if (user?.email) {
         setUserEmail(user.email);
       }
     } catch (_) {
       setUserEmail('');
     }
-  }, [getCurrentUser]);
+  }, [core.security.authc]);
 
   useEffect(() => {
     getEmail();
   }, [getEmail]);
-
-  useEffect(() => {
-    const subscription = currentAppId$.subscribe((id) => {
-      setCurrentAppId(id);
-    });
-    return () => {
-      setCurrentAppId(undefined);
-      subscription.unsubscribe();
-    };
-  }, [currentAppId$]);
 
   const handleChangeFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setFeedbackText(e.target.value);
@@ -75,9 +63,9 @@ export const FeedbackForm = ({ getCurrentUser, getLicense, currentAppId$ }: Prop
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackForm" css={formCss}>
       <FeedbackHeader />
       <FeedbackBody
+        core={core}
         feedbackText={feedbackText}
         userEmail={userEmail}
-        currentAppId={currentAppId}
         handleChangeFeedbackText={handleChangeFeedbackText}
         handleChangeEmail={handleChangeEmail}
         getLicense={getLicense}

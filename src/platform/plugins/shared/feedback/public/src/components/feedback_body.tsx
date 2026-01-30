@@ -23,22 +23,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ILicense } from '@kbn/licensing-types';
+import type { CoreStart } from '@kbn/core/public';
 import { FormLabel } from './form_label';
 import { CsatButtons } from './csat_buttons';
 import { BenefitsCallout } from './benefits_callout';
 
 interface Props {
+  core: CoreStart;
   feedbackText: string;
   userEmail: string;
-  currentAppId?: string;
   handleChangeFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
   getLicense: LicensingPluginStart['getLicense'];
 }
 export const FeedbackBody = ({
+  core,
   feedbackText,
   userEmail,
-  currentAppId,
   getLicense,
   handleChangeFeedbackText,
   handleChangeEmail,
@@ -75,29 +76,32 @@ export const FeedbackBody = ({
   return (
     <EuiFlexItem css={bodyCss} data-test-subj="feedbackFormBody">
       <EuiForm component="form" css={formCss}>
-        <CsatButtons appId={currentAppId} />
+        <CsatButtons core={core} />
         <EuiSpacer size="m" />
         {showBenefitsCallout && <BenefitsCallout licenseType={licenseType} />}
+        <EuiFormRow fullWidth>
+          <EuiTextArea
+            fullWidth
+            data-test-subj="feedbackFormTextArea"
+            value={feedbackText}
+            aria-label={i18n.translate('feedback.form.body.textArea.ariaLabel', {
+              defaultMessage: 'Describe your experience',
+            })}
+            onChange={handleChangeFeedbackText}
+            placeholder={i18n.translate('feedback.form.body.textArea.placeholder', {
+              defaultMessage: 'Describe your experience',
+            })}
+          />
+        </EuiFormRow>
         <EuiFormRow
           fullWidth
           label={
             <FormLabel>
               <FormattedMessage
-                id="feedback.form.textArea.featureRequestLabel"
-                defaultMessage="Describe your idea"
+                id="feedback.form.body.additionalFeedback.label"
+                defaultMessage="Anything else you would like to share about Elastic overall?"
               />
             </FormLabel>
-          }
-          helpText={
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s">
-                <FormattedMessage
-                  id="feedback.form.body.textArea.helpText"
-                  defaultMessage="Please share your email so we can get in touch for possible follow-up questions:"
-                />
-              </EuiText>
-            </>
           }
         >
           <EuiTextArea
@@ -105,7 +109,7 @@ export const FeedbackBody = ({
             data-test-subj="feedbackFormTextArea"
             value={feedbackText}
             aria-label={i18n.translate('feedback.form.body.textArea.ariaLabel', {
-              defaultMessage: 'Enter your feedback here',
+              defaultMessage: 'Describe your experience',
             })}
             onChange={handleChangeFeedbackText}
           />
