@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
-import type { GenerateDescriptionResult } from '@kbn/streams-schema/src/api/description_generation';
+import type { GenerateDescriptionResult, TaskResult } from '@kbn/streams-schema';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,
   getDescriptionGenerationTaskId,

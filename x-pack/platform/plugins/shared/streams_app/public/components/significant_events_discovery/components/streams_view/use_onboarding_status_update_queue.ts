@@ -6,10 +6,9 @@
  */
 
 import { TaskStatus } from '@kbn/streams-schema';
-import type { OnboardingResult } from '@kbn/streams-schema/src/onboarding';
+import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useRef, useCallback } from 'react';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import { useInsightsApi } from '../../../../hooks/use_insights_api';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 

@@ -14,9 +14,8 @@ import type {
 import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
-import { type OnboardingResult, OnboardingStep } from '@kbn/streams-schema/src/onboarding';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import { OnboardingStep } from '@kbn/streams-schema';
 import type { StreamsTaskType, TaskContext } from '.';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';

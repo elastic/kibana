@@ -7,8 +7,7 @@
 
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { OnboardingResult } from '@kbn/streams-schema/src/onboarding';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 

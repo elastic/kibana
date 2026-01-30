@@ -8,7 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { identifyFeatures } from '@kbn/streams-ai';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';

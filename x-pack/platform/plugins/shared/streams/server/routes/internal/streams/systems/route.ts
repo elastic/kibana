@@ -14,7 +14,7 @@ import type {
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
 import { type IdentifySystemsResult } from '@kbn/streams-ai';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { TaskResult } from '@kbn/streams-schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import {
   SYSTEMS_IDENTIFICATION_TASK_TYPE,

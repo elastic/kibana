@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
-import { OnboardingStep, type OnboardingResult } from '@kbn/streams-schema/src/onboarding';
+import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { OnboardingTaskParams } from '../../../../lib/tasks/task_definitions/onboarding';
 import {

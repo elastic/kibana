@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { TaskStatus } from '@kbn/streams-schema';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { TaskResult } from '@kbn/streams-schema';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';

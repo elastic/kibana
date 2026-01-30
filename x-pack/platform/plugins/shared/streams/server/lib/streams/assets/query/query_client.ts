@@ -616,18 +616,25 @@ export class QueryClient {
     }
 
     await this.installQueries(toPromote, [], streamName);
-    for (const link of toPromote) {
+
+    const bulkOperations = toPromote.map((link) => {
       const document = toStorage(streamName, {
         [ASSET_ID]: link[ASSET_ID],
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
         rule_backed: true,
       });
-      await this.dependencies.storageClient.index({
-        id: document[ASSET_UUID],
-        document,
-      });
-    }
+      return {
+        index: {
+          document,
+          _id: document[ASSET_UUID],
+        },
+      };
+    });
+    await this.dependencies.storageClient.bulk({
+      operations: bulkOperations,
+      throwOnFail: true,
+    });
 
     return { promoted: toPromote.length };
   }

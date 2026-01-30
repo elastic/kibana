@@ -7,7 +7,7 @@
 
 import type { InsightsResult } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { TaskResult } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';

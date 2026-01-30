@@ -28,4 +28,3 @@ export interface InsightsResult {
   insights: Insight[];
   tokensUsed: ChatCompletionTokenCount;
 }
-

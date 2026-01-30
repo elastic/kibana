@@ -8,7 +8,7 @@
 import { conflict } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/streams-schema';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { TaskResult } from '@kbn/streams-schema';
 import { AcknowledgingIncompleteError } from '../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../lib/tasks/cancellation_in_progress_error';
 import type { TaskClient } from '../../lib/tasks/task_client';

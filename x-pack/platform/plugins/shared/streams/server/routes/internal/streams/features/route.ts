@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
-import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
+import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
