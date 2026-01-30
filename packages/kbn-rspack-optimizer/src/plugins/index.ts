@@ -17,3 +17,9 @@ export {
   finishUnifiedProgress,
   type UnifiedProgressPluginOptions,
 } from './unified_progress_plugin';
+export {
+  BundleAnalyzerPlugin,
+  type BundleAnalyzerPluginOptions,
+  type BundleMetrics,
+  type PluginMetrics,
+} from './bundle_analyzer_plugin';

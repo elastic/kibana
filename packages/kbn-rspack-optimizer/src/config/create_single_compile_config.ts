@@ -13,6 +13,12 @@ import { rspack, type Configuration } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { discoverPlugins, createCoreEntry } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
+import {
+  getSharedResolveConfig,
+  getSharedResolveFallback,
+  getSharedModuleRules,
+  getSharedIgnoreWarnings,
+} from './shared_config';
 import type { ThemeTag } from '../types';
 
 export interface SingleCompileConfigOptions {
@@ -140,17 +146,13 @@ export async function createSingleCompileConfig(
     // This ensures proper module deduplication and service initialization order
     externals: sharedDepsExternals,
 
+    // Use shared resolve config (same as external plugins)
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.peggy', '.scss', '.css'],
-      mainFields: ['browser', 'module', 'main'],
-      conditionNames: ['browser', 'module', 'import', 'require', 'default'],
-      alias: {
-        '@elastic/eui$': '@elastic/eui/optimize/es',
-      },
-      tsConfig: Path.resolve(repoRoot, 'tsconfig.base.json'),
-      // NodeLibsBrowserPlugin will configure most fallbacks
-      // We just add node:-prefixed module fallbacks here
+      ...getSharedResolveConfig(repoRoot),
+      // Additional fallbacks for node:-prefixed modules
       fallback: {
+        ...getSharedResolveFallback(),
+        // Node:-prefixed modules (NodeLibsBrowserPlugin handles regular ones)
         'node:fs': false,
         'node:path': false,
         'node:os': false,
@@ -163,10 +165,6 @@ export async function createSingleCompileConfig(
         'node:https': false,
         'node:events': false,
         'node:process': false,
-        'node:child_process': false,
-        'node:net': false,
-        'node:tls': false,
-        'node:dns': false,
         'node:querystring': false,
         'node:assert': false,
         'node:zlib': false,
@@ -176,104 +174,14 @@ export async function createSingleCompileConfig(
     },
 
     module: {
+      // Use shared module rules (same loaders as external plugins)
+      // Plus additional rules specific to main build
       rules: [
-        // TypeScript/JavaScript with Babel (same as kbn-optimizer for Emotion support)
-        {
-          test: /\.[jt]sx?$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: dist ? 'production' : 'development',
-              presets: [
-                [
-                  require.resolve('@kbn/babel-preset/webpack_preset'),
-                  { useTransformRequireDefault: true },
-                ],
-              ],
-            },
-          },
-        },
-        // PEG grammar files
-        {
-          test: /\.peggy$/,
-          type: 'asset/source',
-        },
-        // URL imports
+        ...getSharedModuleRules(repoRoot, dist),
+        // URL imports (?asUrl query) - specific to main build
         {
           resourceQuery: /asUrl/,
           type: 'asset/resource',
-        },
-        // Raw imports
-        {
-          resourceQuery: /raw/,
-          type: 'asset/source',
-        },
-        // CSS
-        {
-          test: /\.css$/,
-          use: ['style-loader', 'css-loader'],
-        },
-        // SCSS with sass-loader - use style-loader to inject CSS
-        // Default theme is borealislight
-        {
-          test: /\.scss$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: 'style-loader',
-            },
-            {
-              loader: 'css-loader',
-              options: {
-                sourceMap: !dist,
-              },
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                implementation: require('sass-embedded'),
-                // Prepend EUI globals to every SCSS file
-                additionalData: `@import '${Path.resolve(
-                  repoRoot,
-                  'src/core/public/styles/core_app/_globals_borealislight.scss'
-                ).replace(/\\/g, '/')}';\n`,
-                sassOptions: {
-                  outputStyle: dist ? 'compressed' : 'expanded',
-                  includePaths: [Path.resolve(repoRoot, 'node_modules')],
-                  sourceMap: !dist,
-                  quietDeps: true,
-                  silenceDeprecations: [
-                    'color-functions',
-                    'import',
-                    'global-builtin',
-                    'legacy-js-api',
-                  ],
-                },
-              },
-            },
-          ],
-        },
-        // Images
-        {
-          test: /\.(png|jpg|jpeg|gif|svg|ico|webp)$/,
-          type: 'asset',
-          parser: {
-            dataUrlCondition: {
-              maxSize: 8 * 1024,
-            },
-          },
-        },
-        // Fonts
-        {
-          test: /\.(woff|woff2|eot|ttf|otf)$/,
-          type: 'asset/resource',
-        },
-        // Text files
-        {
-          test: /\.(html|md|text|txt)$/,
-          type: 'asset/source',
         },
       ],
     },
@@ -309,7 +217,8 @@ export async function createSingleCompileConfig(
                 mangle: true,
               },
             }),
-            new rspack.LightningCssMinimizerRspackPlugin({}),
+            // Note: CSS is injected via style-loader, not extracted to files
+            // So we don't need LightningCssMinimizerRspackPlugin
           ]
         : [],
     },
@@ -354,16 +263,8 @@ export async function createSingleCompileConfig(
       timings: true,
     },
 
-    ignoreWarnings: [
-      /Can't resolve 'fs'/,
-      /Can't resolve 'path'/,
-      /Can't resolve 'child_process'/,
-      /Can't resolve 'crypto'/,
-      /Critical dependency/,
-      // Third-party package export issues (not our code)
-      /ESModulesLinkingWarning.*@elastic\/ems-client/,
-      /export.*was not found in/,
-    ],
+    // Use shared ignore warnings (same as external plugins)
+    ignoreWarnings: getSharedIgnoreWarnings(),
   };
 }
 

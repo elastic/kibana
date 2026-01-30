@@ -17,6 +17,7 @@ import { LOAD_BOOTSTRAP_START } from './events';
 
 /** @internal */
 export async function __kbnBootstrap__() {
+  console.log('kasjdklsajdklasjdklasdasdsad');
   performance.mark(KBN_LOAD_MARKS, {
     detail: LOAD_BOOTSTRAP_START,
   });

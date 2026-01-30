@@ -52,6 +52,20 @@ export {
 } from './run_single_rspack_build';
 
 // ============================================================================
+// EXTERNAL PLUGIN SUPPORT - For third-party plugins
+// ============================================================================
+export {
+  createExternalPluginConfig,
+  type ExternalPluginConfigOptions,
+} from './config/create_external_plugin_config';
+export {
+  getSharedResolveConfig,
+  getSharedResolveFallback,
+  getSharedModuleRules,
+  getSharedIgnoreWarnings,
+} from './config/shared_config';
+
+// ============================================================================
 // LEGACY MODE - For gradual migration
 // ============================================================================
 export { createRspackConfig, type RspackConfigOptions } from './config/create_rspack_config';

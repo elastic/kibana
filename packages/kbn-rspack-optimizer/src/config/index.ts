@@ -52,6 +52,22 @@ export {
   getSharedDependencies,
 } from './module_federation';
 
+// External/third-party plugin support
+export {
+  createExternalPluginConfig,
+  type ExternalPluginConfigOptions,
+} from './create_external_plugin_config';
+
+// Shared configuration (used by both main build and external plugins)
+export {
+  getSharedResolveConfig,
+  getSharedResolveFallback,
+  getSharedModuleRules,
+  getSharedIgnoreWarnings,
+  getBabelLoaderRule,
+  getScssLoaderRule,
+} from './shared_config';
+
 // Legacy approach (bundle refs)
 export { createRspackConfig, type RspackConfigOptions } from './create_rspack_config';
 export {
