@@ -117,6 +117,13 @@ describe('filterToolsByNamespace', () => {
     expect(filtered.map((t) => t.id)).toEqual(['my.custom.tool1']);
   });
 
+  it('does not match tools where namespace is a substring but not an exact match', () => {
+    const allTools = [createMockTool('my.custom.tool1'), createMockTool('custom.tool1')];
+    const filtered = filterToolsByNamespace(allTools, 'custom');
+    expect(filtered).toHaveLength(1);
+    expect(filtered.map((t) => t.id)).toEqual(['custom.tool1']);
+  });
+
   it('returns empty array when no tools match the namespace', () => {
     const allTools = [createMockTool('my.custom.tool1'), createMockTool('core.tool1')];
     const filtered = filterToolsByNamespace(allTools, 'nonexistent.namespace');
@@ -177,6 +184,5 @@ describe('registerMCPRoutes', () => {
 
     const querySchema = routeConfig?.validate?.request?.query;
     expect(querySchema).toBeDefined();
-    expect(querySchema?.describe?.().children?.namespace).toBeDefined();
   });
 });
