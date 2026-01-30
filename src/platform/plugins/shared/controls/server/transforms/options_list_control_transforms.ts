@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import {
   type LegacyStoredDataControlState,
   transformDataControlIn,
@@ -70,66 +71,29 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         containerReferences
       );
 
+      /**
+       * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
+       */
       const {
-        existsSelected,
+        exclude,
+        sort,
         exists_selected,
-        displaySettings,
         display_settings,
-        runPastTimeout,
         run_past_timeout,
-        searchTechnique,
         search_technique,
-        selectedOptions,
         selected_options,
-        singleSelect,
         single_select,
-      } = state;
-
+      } = convertCamelCasedKeysToSnakeCase(state);
       return {
         ...dataControlState,
-        exclude: state.exclude,
-        sort: state.sort as OptionsListDSLControlState['sort'],
-
-        /**
-         * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
-         */
-        ...(typeof existsSelected === 'boolean' && { exists_selected: existsSelected }),
-        ...(typeof exists_selected === 'boolean' && { exists_selected }),
-        ...(displaySettings
-          ? {
-              display_settings: {
-                ...(typeof displaySettings.hideActionBar === 'boolean' && {
-                  hide_action_bar: displaySettings.hideActionBar,
-                }),
-                ...(typeof displaySettings.hideExclude === 'boolean' && {
-                  hide_exclude: displaySettings.hideExclude,
-                }),
-                ...(typeof displaySettings.hideExists === 'boolean' && {
-                  hide_exists: displaySettings.hideExists,
-                }),
-                ...(typeof displaySettings.hideSort === 'boolean' && {
-                  hide_sort: displaySettings.hideSort,
-                }),
-                ...(displaySettings.placeholder && {
-                  placeholder: displaySettings.placeholder,
-                }),
-              },
-            }
-          : {}),
-        ...(display_settings ? { display_settings } : {}),
-
-        ...(typeof runPastTimeout === 'boolean' && { run_past_timeout: runPastTimeout }),
-        ...(typeof run_past_timeout === 'boolean' && { run_past_timeout }),
-        ...(searchTechnique && {
-          search_technique: searchTechnique as OptionsListDSLControlState['search_technique'],
-        }),
-        ...(search_technique && { search_technique }),
-        ...(Array.isArray(selectedOptions) && selectedOptions.length
-          ? { selected_options: selectedOptions }
-          : {}),
-        ...(selected_options && { selected_options }),
-        ...(typeof singleSelect === 'boolean' && { single_select: singleSelect }),
-        ...(typeof single_select === 'boolean' && { single_select }),
+        exclude,
+        sort,
+        exists_selected,
+        display_settings,
+        run_past_timeout,
+        search_technique: search_technique as OptionsListDSLControlState['search_technique'],
+        selected_options,
+        single_select,
       };
     },
   });

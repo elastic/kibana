@@ -7,29 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { snakeCase } from 'lodash';
+import { pick, snakeCase } from 'lodash';
 import type { SnakeCasedKeys } from './types';
 
 /**
  * This function takes an object and recursively converts all of the keys to `snaked_cased`
- * @param camelCased The object with `camelCased` keys
+ * @param input The object with `camelCased` keys
  * @returns The object with `snake_cased` keys
  */
 export const convertCamelCasedKeysToSnakeCase = <StateType extends object = object>(
-  camelCased: StateType
+  input: Partial<StateType> & SnakeCasedKeys<Partial<StateType>>
 ): SnakeCasedKeys<StateType> => {
   const convertSubObject = (
     camelCasedSubObject: object,
     snakeCased: { [key: string]: any } = {}
   ): object => {
+    const snakeCasedKeys = Object.keys(camelCasedSubObject).map(snakeCase);
+
     for (const [key, value] of Object.entries(camelCasedSubObject)) {
+      const snakeCasedKey = snakeCase(key);
+      if (snakeCasedKey in snakeCased) {
+        continue; // ignore keys that are already snake cased
+      }
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         snakeCased[snakeCase(key)] = convertSubObject(value);
       } else {
         snakeCased[snakeCase(key)] = value;
       }
     }
-    return snakeCased;
+    // prioritize keys that are already snake cased
+    return { ...snakeCased, ...pick(camelCasedSubObject, snakeCasedKeys) };
   };
-  return convertSubObject(camelCased) as SnakeCasedKeys<StateType>;
+  return convertSubObject(input) as SnakeCasedKeys<StateType>;
 };

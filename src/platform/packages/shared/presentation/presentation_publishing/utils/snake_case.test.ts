@@ -88,4 +88,21 @@ describe('snake case', () => {
       i_am_snake_cased: 'true',
     });
   });
+
+  test('object with matching key in snake case should prioritize snake case regardless of order', () => {
+    const matchingKeys = {
+      weMatch: true,
+      we_match: 'true',
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeys)).toEqual({
+      we_match: 'true',
+    });
+    const matchingKeysReverseOrder = {
+      we_match: 'true',
+      weMatch: true,
+    };
+    expect(convertCamelCasedKeysToSnakeCase(matchingKeysReverseOrder)).toEqual({
+      we_match: 'true',
+    });
+  });
 });

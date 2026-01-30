@@ -12,10 +12,10 @@ import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { PluginSetup as KqlSetup } from '@kbn/kql/server';
 
-import { registerESQLControlTransforms } from '../common/transforms/esql_control_transforms';
-import { registerOptionsListControlTransforms } from '../common/transforms/options_list_control_transforms';
-import { registerRangeSliderControlTransforms } from '../common/transforms/range_slider_control_transforms';
-import { registerTimeSliderControlTransforms } from '../common/transforms/time_slider_control_transforms';
+import { registerESQLControlTransforms } from './transforms/esql_control_transforms';
+import { registerOptionsListControlTransforms } from './transforms/options_list_control_transforms';
+import { registerRangeSliderControlTransforms } from './transforms/range_slider_control_transforms';
+import { registerTimeSliderControlTransforms } from './transforms/time_slider_control_transforms';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 

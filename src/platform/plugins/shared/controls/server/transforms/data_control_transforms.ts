@@ -10,6 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 export interface LegacyStoredDataControlState extends SerializedTitles {
@@ -66,32 +67,15 @@ export function transformDataControlOut<
     dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
 
-  const {
-    useGlobalFilters,
-    use_global_filters,
-    ignoreValidations,
-    ignore_validations,
-    fieldName,
-    field_name,
-  } = state;
-
+  /** Pick the state that we care about after ensu */
+  const { title, use_global_filters, ignore_validations, field_name } =
+    convertCamelCasedKeysToSnakeCase(state);
   return {
-    title: state.title,
-    description: state.description,
-
-    /** Get the data view ID from the reference */
-    data_view_id: dataViewRef?.id ?? '',
-
-    /**
-     * Pre 9.4 the control state was stored in camelCase; these transforms ensure they are converted to snake_case
-     */
-    ...(typeof useGlobalFilters === 'boolean' && { use_global_filters: useGlobalFilters }),
-    ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
-    ...(typeof ignoreValidations === 'boolean' && { ignore_validations: ignoreValidations }),
-    ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-    field_name: '',
-    ...(fieldName && { field_name: fieldName }),
-    ...(field_name && { field_name }),
+    title,
+    data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
+    use_global_filters,
+    ignore_validations,
+    field_name,
   };
 }
 
