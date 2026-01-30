@@ -16,9 +16,9 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiPortal,
   EuiPagination,
+  EuiHorizontalRule,
   keys,
   useEuiTheme,
   useIsWithinMinBreakpoint,
@@ -320,13 +320,14 @@ export function UnifiedDocViewerFlyout({
       >
         {screenReaderDescription}
         {renderSubheader && (
-          <EuiFlyoutHeader hasBorder>
+          <>
             <EuiFlexGroup
               direction="row"
               alignItems="center"
               justifyContent="spaceBetween"
               responsive={false}
               wrap={true}
+              css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}
             >
               {activePage !== -1 && (
                 <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
@@ -346,7 +347,8 @@ export function UnifiedDocViewerFlyout({
                 {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlyoutHeader>
+            <EuiHorizontalRule margin="none" />
+          </>
         )}
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
       </EuiFlyout>
