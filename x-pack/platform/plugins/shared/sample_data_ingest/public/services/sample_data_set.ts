@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
+import type { SampleDataSet, InstalledStatus, AppLink } from '@kbn/home-sample-data-types';
 import {
   type StatusResponse,
   InstallationStatus,
@@ -29,8 +29,9 @@ const mapInstallationStatusToInstalledStatus = (status: InstallationStatus): Ins
     case InstallationStatus.Installed:
       return 'installed';
     case InstallationStatus.Uninstalled:
-    case InstallationStatus.Installing:
       return 'not_installed';
+    case InstallationStatus.Installing:
+      return 'installing';
     case InstallationStatus.Error:
     default:
       return 'unknown';
@@ -38,15 +39,41 @@ const mapInstallationStatusToInstalledStatus = (status: InstallationStatus): Ins
 };
 
 /**
+ * Creates the app links for viewing the sample data in various Kibana apps.
+ */
+const createAppLinks = (dashboardId: string, indexPatternId: string): AppLink[] => [
+  {
+    path: `/app/dashboards#/view/${dashboardId}`,
+    label: i18n.translate('xpack.sampleDataIngest.sampleDataSet.viewDashboardLink', {
+      defaultMessage: 'Dashboard',
+    }),
+    icon: 'dashboardApp',
+  },
+  {
+    path: `/app/discover#/?_a=(dataSource:(dataViewId:'${indexPatternId}',type:dataView))`,
+    label: i18n.translate('xpack.sampleDataIngest.sampleDataSet.viewDiscoverLink', {
+      defaultMessage: 'Discover',
+    }),
+    icon: 'discoverApp',
+  },
+];
+
+/**
  * Creates a SampleDataSet object for the Elasticsearch documentation dataset
  * from the sample_data_ingest status response.
  *
  * @param statusResponse - The status response from the sample_data_ingest API
  * @param http - The Kibana HTTP service for constructing asset paths
+ * @param install - The install function from the installation service
+ * @param uninstall - The uninstall function from the installation service
+ * @param getStatus - Function to get the current installation status
  */
 export const createSampleDataSet = (
   statusResponse: StatusResponse,
-  http: HttpStart
+  http: HttpStart,
+  install: () => Promise<unknown>,
+  uninstall: () => Promise<void>,
+  getStatus: () => Promise<InstalledStatus>
 ): SampleDataSet => {
   const assetBasePath = http.basePath.prepend(`/plugins/${SAMPLE_DATA_INGEST_PLUGIN_ID}/assets`);
   const dashboardId = statusResponse.dashboardId || DEFAULT_DASHBOARD_ID;
@@ -64,8 +91,16 @@ export const createSampleDataSet = (
     darkPreviewImagePath: `${assetBasePath}/search_results_illustration.svg`,
     overviewDashboard: dashboardId,
     defaultIndex: DEFAULT_INDEX_PATTERN_ID,
-    appLinks: [],
+    appLinks: createAppLinks(dashboardId, DEFAULT_INDEX_PATTERN_ID),
     status: mapInstallationStatusToInstalledStatus(statusResponse.status),
     statusMsg: statusResponse.error,
+    // Custom install/remove handlers that use the sample_data_ingest API
+    customInstall: async () => {
+      await install();
+    },
+    customRemove: async () => {
+      await uninstall();
+    },
+    customStatusCheck: getStatus,
   };
 };
