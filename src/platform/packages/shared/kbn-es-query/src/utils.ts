@@ -12,9 +12,16 @@ import type { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from 
 
 /** @internal */
 export function getTimeZoneFromSettings(dateFormatTZ: string) {
-  const detectedTimezone = moment.tz.guess();
+  if (dateFormatTZ === 'Browser') {
+    try {
+      const detectedTimezone = moment.tz.guess();
+      return detectedTimezone || 'UTC';
+    } catch (e) {
+      return 'UTC';
+    }
+  }
 
-  return dateFormatTZ === 'Browser' ? detectedTimezone : dateFormatTZ;
+  return dateFormatTZ;
 }
 
 type HasSubtype = Pick<DataViewFieldBase, 'subType'>;
