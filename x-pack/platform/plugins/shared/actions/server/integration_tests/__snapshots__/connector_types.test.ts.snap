@@ -842,6 +842,14 @@ Object {
             "null",
           ],
         },
+        "replyTo": Object {
+          "items": Object {
+            "maxLength": 512, 
+            "type": "string",
+          },
+          "maxItems": 10,
+          "type": "array",
+        },
         "subject": Object {
           "type": "string",
         },
