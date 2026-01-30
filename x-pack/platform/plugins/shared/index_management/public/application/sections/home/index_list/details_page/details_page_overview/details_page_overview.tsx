@@ -31,7 +31,8 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import { type Index, formatBytes } from '../../../../../../../common';
+import { type Index } from '../../../../../../../common';
+import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';

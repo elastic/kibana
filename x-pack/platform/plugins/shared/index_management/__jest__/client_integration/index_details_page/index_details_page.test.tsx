@@ -15,7 +15,8 @@ import type { RouteComponentProps } from 'react-router-dom';
 
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsSection } from '../../../common/constants';
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH, formatBytes } from '../../../common';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import { formatBytes } from '../../../public';
 
 import { DetailsPage } from '../../../public/application/sections/home/index_list/details_page/details_page';
 import { TYPE_DEFINITION } from '../../../public/application/components/mappings_editor/constants';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
-import { formatBytes } from '@kbn/index-management-plugin/common';
+import { formatBytes } from '@kbn/index-management-plugin/public';
 
 import { EuiI18nNumber, useEuiTheme } from '@elastic/eui';
 
