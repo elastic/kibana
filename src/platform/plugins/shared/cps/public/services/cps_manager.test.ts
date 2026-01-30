@@ -58,6 +58,7 @@ describe('CPSManager', () => {
   beforeEach(() => {
     mockHttp = {
       post: jest.fn().mockResolvedValue(mockResponse),
+      get: jest.fn().mockResolvedValue({ projectRouting: undefined }),
     } as unknown as jest.Mocked<HttpSetup>;
 
     mockApplication = {
@@ -206,6 +207,144 @@ describe('CPSManager', () => {
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
 
       jest.useRealTimers();
+    });
+  });
+
+  describe('default project routing', () => {
+    const waitForInitialization = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    const createManagerWithProjectRouting = async (
+      projectRouting?: string,
+      shouldError = false
+    ) => {
+      if (shouldError) {
+        mockHttp.get = jest.fn().mockRejectedValue(new Error('Network error'));
+      } else {
+        mockHttp.get = jest.fn().mockResolvedValue({ projectRouting });
+      }
+
+      const manager = new CPSManager({
+        http: mockHttp,
+        logger: mockLogger,
+        application: mockApplication,
+      });
+
+      await waitForInitialization();
+      return manager;
+    };
+
+    describe('initializeDefaultProjectRouting', () => {
+      it('should initialize with undefined when space has no projectRouting', async () => {
+        const manager = await createManagerWithProjectRouting(undefined);
+
+        expect(mockHttp.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
+        expect(manager.getDefaultProjectRouting()).toBe(undefined);
+      });
+
+      it('should initialize with space projectRouting when it exists', async () => {
+        const spaceProjectRouting = '_alias:_origin';
+        const manager = await createManagerWithProjectRouting(spaceProjectRouting);
+
+        expect(mockHttp.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
+        expect(manager.getDefaultProjectRouting()).toBe(spaceProjectRouting);
+      });
+
+      it('should update current project routing if still set to default', async () => {
+        const spaceProjectRouting = '_alias:_origin';
+        const manager = await createManagerWithProjectRouting(spaceProjectRouting);
+
+        expect(manager.getProjectRouting()).toBe(spaceProjectRouting);
+      });
+
+      it('should handle fetch errors gracefully', async () => {
+        const manager = await createManagerWithProjectRouting(undefined, true);
+
+        expect(mockHttp.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
+        expect(manager.getDefaultProjectRouting()).toBe(undefined);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Failed to fetch active space for default project routing',
+          expect.any(Error)
+        );
+      });
+    });
+
+    describe('updateDefaultProjectRouting', () => {
+      it('should update both default and current project routing', () => {
+        const newRouting = '_alias:_origin';
+
+        cpsManager.updateDefaultProjectRouting(newRouting);
+
+        expect(cpsManager.getDefaultProjectRouting()).toBe(newRouting);
+        expect(cpsManager.getProjectRouting()).toBe(newRouting);
+      });
+
+      it('should not update if new routing is the same as current default', () => {
+        const routing = '_alias:_origin';
+
+        cpsManager.updateDefaultProjectRouting(routing);
+        const nextSpy = jest.spyOn(cpsManager.projectRouting$, 'next');
+
+        cpsManager.updateDefaultProjectRouting(routing);
+
+        expect(nextSpy).not.toHaveBeenCalled();
+      });
+
+      it('should handle undefined projectRouting', () => {
+        cpsManager.updateDefaultProjectRouting(undefined);
+
+        expect(cpsManager.getDefaultProjectRouting()).toBe(undefined);
+      });
+
+      it('should update current routing even when user has manually set a value', () => {
+        const userCustomRouting = '_alias:_origin';
+        const newSpaceDefault = '_alias:*';
+
+        cpsManager.setProjectRouting(userCustomRouting);
+
+        cpsManager.updateDefaultProjectRouting(newSpaceDefault);
+
+        // Both should be updated to the new default
+        expect(cpsManager.getProjectRouting()).toBe(newSpaceDefault);
+        expect(cpsManager.getDefaultProjectRouting()).toBe(newSpaceDefault);
+      });
+
+      it('should update current routing when it matches the old default', async () => {
+        const initialRouting = '_alias:_origin';
+        const manager = await createManagerWithProjectRouting(initialRouting);
+
+        expect(manager.getDefaultProjectRouting()).toBe(initialRouting);
+        expect(manager.getProjectRouting()).toBe(initialRouting);
+
+        // Update default to a new value
+        const newDefault = '_alias:*';
+        manager.updateDefaultProjectRouting(newDefault);
+
+        // Both current and default should be updated
+        expect(manager.getProjectRouting()).toBe(newDefault);
+        expect(manager.getDefaultProjectRouting()).toBe(newDefault);
+      });
+
+      it('should sync multiple updates correctly', () => {
+        const routings = ['_alias:_origin', '_alias:*', '_alias:project1,project2'];
+
+        routings.forEach((routing) => {
+          cpsManager.updateDefaultProjectRouting(routing);
+          expect(cpsManager.getDefaultProjectRouting()).toBe(routing);
+        });
+      });
+    });
+
+    describe('getDefaultProjectRouting', () => {
+      it('should return the current default project routing', () => {
+        expect(cpsManager.getDefaultProjectRouting()).toBe(undefined);
+      });
+
+      it('should return updated default after updateDefaultProjectRouting', () => {
+        const newRouting = '_alias:_origin';
+        cpsManager.updateDefaultProjectRouting(newRouting);
+
+        expect(cpsManager.getDefaultProjectRouting()).toBe(newRouting);
+      });
     });
   });
 });
