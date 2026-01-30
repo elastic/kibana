@@ -133,13 +133,12 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
 
     describe('searching', () => {
-      it('prefix searching works as expected', async () => {
+      it('wildcard searching works as expected', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSearchForOption('G');
-
-        const startsWithG = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+        await dashboardControls.optionsListPopoverSearchForOption('r');
+        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
           (result, [key, docCount]) => {
-            if (key[0] === 'g') return { ...result, [key]: docCount };
+            if (key.includes('r')) return { ...result, [key]: docCount };
             return { ...result };
           },
           {}
@@ -147,7 +146,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await dashboardControls.ensureAvailableOptionsEqual(
           controlId,
           {
-            suggestions: startsWithG,
+            suggestions: containsR,
             invalidSelections: [],
           },
           true
@@ -163,12 +162,13 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await dashboard.ensureHasUnsavedChangesNotification();
       });
 
-      it('wildcard searching works as expected', async () => {
+      it('prefix searching works as expected', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSearchForOption('r');
-        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+        await dashboardControls.optionsListPopoverSearchForOption('G');
+
+        const startsWithG = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
           (result, [key, docCount]) => {
-            if (key.includes('r')) return { ...result, [key]: docCount };
+            if (key[0] === 'g') return { ...result, [key]: docCount };
             return { ...result };
           },
           {}
@@ -176,7 +176,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await dashboardControls.ensureAvailableOptionsEqual(
           controlId,
           {
-            suggestions: containsR,
+            suggestions: startsWithG,
             invalidSelections: [],
           },
           true
