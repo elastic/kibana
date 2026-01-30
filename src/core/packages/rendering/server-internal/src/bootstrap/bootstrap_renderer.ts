@@ -116,17 +116,21 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     let body: string;
 
     if (useRspack) {
-      // RSPack mode - bundles are at /bundles/{pluginId}/{pluginId}.plugin.js
+      // RSPack unified mode - all plugins in single bundle at /bundles/kibana.bundle.js
+      // Async chunks are served from /bundles/chunks/
       const rspackPaths = getRspackDependencyPaths(bundlesHref, bundlePaths);
 
-      // Include shared deps paths - they're still loaded from webpack-built bundles
+      // All plugins use the same bundles directory for loading async chunks
+      // Shared deps are still served from webpack-built bundles
+      const bundlesDir = `${bundlesHref}/`;
       const publicPathMap = JSON.stringify({
-        core: `${bundlesHref}/core/`,
+        core: bundlesDir,
         'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
         'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
         'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
+        // All plugins use the same bundles directory
         ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId]) => [pluginId, `${bundlesHref}/${pluginId}/`])
+          [...bundlePaths.entries()].map(([pluginId]) => [pluginId, bundlesDir])
         ),
       });
 

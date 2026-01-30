@@ -48,7 +48,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
-    themeTags = ['borealislight', 'borealisdark'],
+    themeTags: _themeTags = ['borealislight', 'borealisdark'],
     plugins: targetPlugins,
     filter,
   } = options;
@@ -69,52 +69,47 @@ export async function createSingleCompileConfig(
   // Add core entry
   const coreEntry = createCoreEntry(repoRoot, outputRoot);
 
-  // Build entry map - each plugin gets its own entry
-  // We create wrapper entries that register exports with __kbnBundles__
-  const entry: Record<string, { import: string }> = {};
-
-  // Create temporary wrapper entries directory
+  // Create a SINGLE unified entry that imports ALL plugins
+  // This ensures RSPack can properly deduplicate modules across all plugins
   const wrapperDir = Path.resolve(outputRoot, 'target/.rspack-entry-wrappers');
   if (!Fs.existsSync(wrapperDir)) {
     Fs.mkdirSync(wrapperDir, { recursive: true });
   }
 
+  // Collect all plugin entries
+  const pluginEntries: Array<{ id: string; path: string; bundleId: string }> = [];
+
   // Add core
   const coreEntryPath = findEntry(coreEntry.contextDir);
   if (coreEntryPath) {
-    const wrapperPath = createEntryWrapper(wrapperDir, 'core', coreEntryPath, 'entry/core/public');
-    entry['core'] = { import: wrapperPath };
+    pluginEntries.push({ id: 'core', path: coreEntryPath, bundleId: 'entry/core/public' });
   }
 
   // Add plugins
   for (const plugin of plugins) {
     const entryPath = findEntry(plugin.contextDir);
     if (entryPath) {
-      const wrapperPath = createEntryWrapper(
-        wrapperDir,
-        plugin.id,
-        entryPath,
-        `plugin/${plugin.id}/public`
-      );
-      entry[plugin.id] = { import: wrapperPath };
+      pluginEntries.push({
+        id: plugin.id,
+        path: entryPath,
+        bundleId: `plugin/${plugin.id}/public`,
+      });
     }
   }
 
+  // Create unified entry that imports and registers all plugins
+  const unifiedEntryPath = createUnifiedEntry(wrapperDir, pluginEntries);
+
   // eslint-disable-next-line no-console
-  console.log(`[rspack] Single compilation: ${Object.keys(entry).length} entries (core + ${plugins.length} plugins)`);
+  console.log(`[rspack] Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
 
   // Get externals for shared deps
   const sharedDepsExternals = getExternals();
 
-  // Build map of plugin pkgIds to their bundle IDs for cross-plugin externals
-  const pluginIdMap = new Map<string, { id: string; type: string }>();
-  for (const plugin of plugins) {
-    pluginIdMap.set(plugin.pkgId, { id: plugin.id, type: 'plugin' });
-  }
-  pluginIdMap.set('@kbn/core', { id: 'core', type: 'entry' });
-
-  // eslint-disable-next-line no-console
-  console.log('[rspack] Plugin externals configured for', pluginIdMap.size, 'plugins');
+  // Note: In single compilation mode, cross-plugin imports are NOT externalized.
+  // This allows RSPack to properly deduplicate modules and ensures services
+  // are initialized in the correct order. The `externals` only covers
+  // npm packages from @kbn/ui-shared-deps.
 
   return {
     name: 'kibana-plugins',
@@ -123,65 +118,27 @@ export async function createSingleCompileConfig(
     target: 'web',
     context: repoRoot,
 
-    entry,
+    entry: {
+      // Single entry point that imports all plugins
+      kibana: unifiedEntryPath,
+    },
 
     output: {
       // Output to a central location
       path: Path.resolve(outputRoot, 'target/public/bundles'),
-      // Entry points go to [name]/[name].plugin.js
-      filename: (pathData) => {
-        // Runtime chunk goes to root
-        if (pathData.chunk?.name === 'runtime') {
-          return 'runtime.js';
-        }
-        // Entry points go to subdirectories
-        return '[name]/[name].plugin.js';
-      },
-      // Async chunks and shared chunks
-      chunkFilename: (pathData) => {
-        const name = pathData.chunk?.name || 'chunk';
-        // Shared chunks go to root for easy loading
-        if (['plugin-shared', 'packages-shared', 'vendors'].includes(name)) {
-          return `${name}.js`;
-        }
-        // Other chunks go to their plugin's directory
-        return '[name]/[name].[contenthash:8].chunk.js';
-      },
+      // Single unified bundle
+      filename: 'kibana.bundle.js',
+      // Async chunks get content hash for caching
+      chunkFilename: 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
-      // This ensures chunks are loaded from the correct path regardless of where Kibana serves them
       publicPath: 'auto',
       clean: !watch,
     },
 
-    // Externalize shared deps AND cross-plugin imports
-    externals: [
-      // Static externals for shared deps
-      sharedDepsExternals,
-      // Dynamic externals for cross-plugin imports
-      (data: { request?: string }): string | undefined => {
-        const { request } = data;
-        if (!request) return undefined;
-
-        // Check if this is a plugin import (e.g., @kbn/xxx-plugin/public)
-        if (request.startsWith('@kbn/') && request.includes('-plugin')) {
-          const parts = request.split('/');
-          const pkgId = parts.slice(0, 2).join('/'); // @kbn/xxx-plugin
-          const target = parts[2] || 'public'; // public, common, etc.
-
-          const pluginInfo = pluginIdMap.get(pkgId);
-          if (pluginInfo && (target === 'public' || target === 'common')) {
-            const bundleId = pluginInfo.type === 'entry'
-              ? `entry/${pluginInfo.id}/${target}`
-              : `plugin/${pluginInfo.id}/${target}`;
-            // Return as a global variable expression that will be evaluated at runtime
-            return `__kbnBundles__.get('${bundleId}')`;
-          }
-        }
-
-        // Not a plugin import, let RSPack handle it normally
-        return undefined;
-      },
-    ],
+    // Only externalize shared deps (npm packages), NOT cross-plugin imports
+    // In single compilation mode, cross-plugin imports are bundled together
+    // This ensures proper module deduplication and service initialization order
+    externals: sharedDepsExternals,
 
     resolve: {
       extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.peggy', '.scss', '.css'],
@@ -425,40 +382,59 @@ function findEntry(contextDir: string): string | null {
 }
 
 /**
- * Create a wrapper entry module that:
- * 1. Imports the real entry module
- * 2. Registers its exports with __kbnBundles__
+ * Create a unified entry module that:
+ * 1. Imports ALL plugin entry modules
+ * 2. Registers each with __kbnBundles__ using the bundleRequire pattern
+ *
+ * This ensures RSPack can deduplicate all shared modules across plugins
+ * while maintaining the __kbnBundles__ registration pattern.
  */
-function createEntryWrapper(
+function createUnifiedEntry(
   wrapperDir: string,
-  pluginId: string,
-  realEntryPath: string,
-  bundleId: string
+  pluginEntries: Array<{ id: string; path: string; bundleId: string }>
 ): string {
-  const wrapperPath = Path.join(wrapperDir, `${pluginId}-entry.js`);
+  const unifiedEntryPath = Path.join(wrapperDir, 'kibana-unified-entry.js');
 
-  // Create a wrapper that exports everything from the real entry
-  // and registers with __kbnBundles__
-  const wrapperContent = `
-// Auto-generated entry wrapper for ${pluginId}
-// This registers the bundle exports with __kbnBundles__
+  // Generate imports for all plugins
+  const imports = pluginEntries.map((entry, i) => {
+    return `import * as plugin_${i} from ${JSON.stringify(entry.path)};`;
+  }).join('\n');
 
-import * as entryModule from ${JSON.stringify(realEntryPath)};
-
-// Register with __kbnBundles__ if available
-if (typeof __kbnBundles__ !== 'undefined' && typeof __kbnBundles__.define === 'function') {
+  // Generate registrations for all plugins
+  // Use the same pattern as kbn-optimizer: bundleRequire function + module key
+  const registrations = pluginEntries.map((entry, i) => {
+    return `
+// Register ${entry.id}
+(function() {
+  var moduleExports = plugin_${i};
   __kbnBundles__.define(
-    '${bundleId}',
-    function(key) { return entryModule; },
-    '${bundleId}'
+    '${entry.bundleId}',
+    function bundleRequire(key) {
+      // Return the module exports when requested
+      return moduleExports;
+    },
+    '${entry.bundleId}'
   );
+})();`;
+  }).join('\n');
+
+  const content = `
+// Auto-generated unified entry for Kibana RSPack build
+// This file imports ALL plugins and registers them with __kbnBundles__
+
+${imports}
+
+// Wait for __kbnBundles__ to be available (should be defined in bootstrap template)
+if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
+  throw new Error('__kbnBundles__ is not defined. Make sure the bootstrap template runs before loading bundles.');
 }
 
-// Re-export everything from the entry module
-export * from ${JSON.stringify(realEntryPath)};
-export default entryModule;
+${registrations}
+
+// Export core for the bootstrap to call __kbnBootstrap__
+export { plugin_0 as core };
 `;
 
-  Fs.writeFileSync(wrapperPath, wrapperContent);
-  return wrapperPath;
+  Fs.writeFileSync(unifiedEntryPath, content);
+  return unifiedEntryPath;
 }
