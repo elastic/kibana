@@ -32,7 +32,7 @@
 
 2. **Structured for summarization** — Output should be easy for LLMs to extract insights and present them in natural language to users.
 
-3. **Progressive disclosure** — Return high-level summaries first; provide parameters for deeper investigation when needed.
+3. **Progressive disclosure** Return high-level summaries first to conserve context window tokens. The agent needs to see the shape of the data and identifying information to decide where to drill down. Tool parameters must be available for deeper investigation when needed.
 
 ### Tool Design
 
