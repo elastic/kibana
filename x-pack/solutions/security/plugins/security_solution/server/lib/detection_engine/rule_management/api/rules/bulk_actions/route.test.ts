@@ -24,7 +24,6 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
-import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -36,9 +35,6 @@ describe('Perform bulk action route', () => {
   let context: ReturnType<typeof requestContextMock.createTools>['context'];
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const mockRule = getFindResultWithSingleHit().data[0];
-  const experimentalFeatures = {
-    bulkEditAlertSuppressionEnabled: true,
-  } as ConfigType['experimentalFeatures'];
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -52,9 +48,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, ml, {
-      experimentalFeatures,
-    } as ConfigType);
+    performBulkActionRoute(server.router, ml);
   });
 
   afterEach(() => {
@@ -826,59 +820,6 @@ describe('Perform bulk action route', () => {
         },
       })
     );
-  });
-});
-
-describe('Perform bulk action route, experimental feature bulkEditAlertSuppressionEnabled is disabled', () => {
-  let server: ReturnType<typeof serverMock.create>;
-  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
-  let context: ReturnType<typeof requestContextMock.createTools>['context'];
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  const experimentalFeatures = {} as ConfigType['experimentalFeatures'];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-    performBulkActionRoute(server.router, ml, {
-      experimentalFeatures,
-    } as ConfigType);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
-  it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
-    const response = await server.inject(
-      getBulkActionEditAlertSuppressionRequest(),
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body).toEqual({
-      message:
-        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
-      status_code: 400,
-    });
-  });
-
-  it('returns error for dry run mode if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
-    const response = await server.inject(
-      { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body).toEqual({
-      message:
-        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
-      status_code: 400,
-    });
   });
 });
 
