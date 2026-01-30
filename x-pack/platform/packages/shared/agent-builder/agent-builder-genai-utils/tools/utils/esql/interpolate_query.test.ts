@@ -77,28 +77,29 @@ describe('interpolateEsqlQuery', () => {
     it('should correctly interpolate array of integers', () => {
       const template = 'FROM logs | WHERE id IN (?ids)';
       const params = { ids: [1, 2, 3] };
-      const expected = 'FROM logs | WHERE id IN ([1, 2, 3])';
+      const expected = 'FROM logs | WHERE MV_CONTAINS([1, 2, 3], id)';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
     it('should correctly interpolate array of strings', () => {
       const template = 'FROM users | WHERE name IN (?names)';
       const params = { names: ['alice', 'bob', 'charlie'] };
-      const expected = 'FROM users | WHERE name IN (["alice", "bob", "charlie"])';
+      const expected = 'FROM users | WHERE MV_CONTAINS(["alice", "bob", "charlie"], name)';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
     it('should correctly interpolate array of decimals', () => {
       const template = 'FROM metrics | WHERE value IN (?values)';
       const params = { values: [1.5, 2.7, 3.14] };
-      const expected = 'FROM metrics | WHERE value IN ([1.5, 2.7, 3.14])';
+      const expected = 'FROM metrics | WHERE MV_CONTAINS([1.5, 2.7, 3.14], value)';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
     it('should replace all occurrences of an array parameter', () => {
       const template = 'FROM logs | WHERE id IN (?ids) OR parent_id IN (?ids)';
       const params = { ids: [10, 20, 30] };
-      const expected = 'FROM logs | WHERE (id IN ([10, 20, 30])) OR (parent_id IN ([10, 20, 30]))';
+      const expected =
+        'FROM logs | WHERE (MV_CONTAINS([10, 20, 30], id)) OR (MV_CONTAINS([10, 20, 30], parent_id))';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
@@ -106,21 +107,22 @@ describe('interpolateEsqlQuery', () => {
       const template = 'FROM events | WHERE id IN (?ids) AND status IN (?statuses)';
       const params = { ids: [1, 2, 3], statuses: ['active', 'pending'] };
       const expected =
-        'FROM events | WHERE (id IN ([1, 2, 3])) AND (status IN (["active", "pending"]))';
+        'FROM events | WHERE (MV_CONTAINS([1, 2, 3], id)) AND (MV_CONTAINS(["active", "pending"], status))';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
     it('should handle mix of array and non-array parameters', () => {
       const template = 'FROM tickets | WHERE priority == ?priority AND id IN (?ids)';
       const params = { priority: 'high', ids: [100, 200, 300] };
-      const expected = 'FROM tickets | WHERE priority == "high" AND (id IN ([100, 200, 300]))';
+      const expected =
+        'FROM tickets | WHERE priority == "high" AND (MV_CONTAINS([100, 200, 300], id))';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
     it('should handle array with single element', () => {
       const template = 'FROM users | WHERE id IN (?ids)';
       const params = { ids: [42] };
-      const expected = 'FROM users | WHERE id IN ([42])';
+      const expected = 'FROM users | WHERE MV_CONTAINS([42], id)';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
 
@@ -128,7 +130,7 @@ describe('interpolateEsqlQuery', () => {
       const template = 'FROM logs | WHERE message IN (?messages)';
       const params = { messages: ['hello "world"', "it's ok", 'test\\backslash'] };
       const expected =
-        'FROM logs | WHERE message IN (["hello \\"world\\"", "it\'s ok", "test\\\\backslash"])';
+        'FROM logs | WHERE MV_CONTAINS(["hello \\"world\\"", "it\'s ok", "test\\\\backslash"], message)';
       expect(interpolateEsqlQuery(template, params)).toBe(expected);
     });
   });
