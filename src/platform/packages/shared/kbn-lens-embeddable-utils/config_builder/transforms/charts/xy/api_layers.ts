@@ -237,8 +237,8 @@ function convertReferenceLinesDecorationsToAPIFormat(
 > {
   return stripUndefined({
     color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
-    stroke_dash: yConfig.lineStyle ? yConfig.lineStyle : undefined,
-    stroke_width: yConfig.lineWidth ? yConfig.lineWidth : undefined,
+    stroke_dash: yConfig.lineStyle,
+    stroke_width: yConfig.lineWidth,
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
