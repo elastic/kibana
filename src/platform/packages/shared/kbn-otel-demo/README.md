@@ -36,7 +36,6 @@ node scripts/otel_demo.js --teardown
 ## Log Collection
 
 The collector reads container logs directly from the Kubernetes node filesystem:
-
 - Mounts `/var/log/pods`, `/var/log/containers`, and `/var/lib/docker/containers`
 - Parses Docker JSON log format
 - Groups multiline logs (stack traces with indented lines)
@@ -45,7 +44,6 @@ The collector reads container logs directly from the Kubernetes node filesystem:
 ### Metadata Enrichment
 
 Each log entry is enriched with:
-
 - `k8s.pod.name`
 - `k8s.container.name`
 - `k8s.namespace.name`
@@ -60,13 +58,12 @@ Each log entry is enriched with:
 The script reads Elasticsearch credentials from `config/kibana.dev.yml`:
 
 ```yaml
-elasticsearch.hosts: ['http://localhost:9200']
-elasticsearch.username: 'elastic'
-elasticsearch.password: 'changeme'
+elasticsearch.hosts: ["http://localhost:9200"]
+elasticsearch.username: "elastic"
+elasticsearch.password: "changeme"
 ```
 
 Or via environment variables:
-
 - `ELASTICSEARCH_HOSTS`
 - `ELASTICSEARCH_USERNAME`
 - `ELASTICSEARCH_PASSWORD`
@@ -145,13 +142,11 @@ node scripts/otel_demo.js --reset
 ### Resetting Scenarios
 
 Quick reset (patches running pods):
-
 ```bash
 node scripts/otel_demo.js --reset
 ```
 
 Or full redeploy without scenarios:
-
 ```bash
 node scripts/otel_demo.js --teardown
 node scripts/otel_demo.js
@@ -181,23 +176,23 @@ kubectl logs -f -n otel-demo -l app=frontend
 
 ## Deployed Services
 
-| Service         | Description            | Port                   |
-| --------------- | ---------------------- | ---------------------- |
-| frontend        | Web store UI           | 8080 (NodePort: 30080) |
-| cart            | Shopping cart service  | 7070                   |
-| checkout        | Checkout service       | 5050                   |
-| currency        | Currency conversion    | 7285                   |
-| email           | Email service          | 6060                   |
-| payment         | Payment processing     | 50051                  |
-| product-catalog | Product catalog        | 3550                   |
-| recommendation  | Recommendations        | 9001                   |
-| shipping        | Shipping quotes        | 50051                  |
-| ad              | Advertisement service  | 9555                   |
-| quote           | Quote service          | 8090                   |
-| load-generator  | Traffic generator      | 8089                   |
-| otel-collector  | Telemetry collector    | 4317, 4318             |
-| flagd           | Feature flags          | 8013                   |
-| valkey          | Redis-compatible cache | 6379                   |
+| Service | Description | Port |
+|---------|-------------|------|
+| frontend | Web store UI | 8080 (NodePort: 30080) |
+| cart | Shopping cart service | 7070 |
+| checkout | Checkout service | 5050 |
+| currency | Currency conversion | 7285 |
+| email | Email service | 6060 |
+| payment | Payment processing | 50051 |
+| product-catalog | Product catalog | 3550 |
+| recommendation | Recommendations | 9001 |
+| shipping | Shipping quotes | 50051 |
+| ad | Advertisement service | 9555 |
+| quote | Quote service | 8090 |
+| load-generator | Traffic generator | 8089 |
+| otel-collector | Telemetry collector | 4317, 4318 |
+| flagd | Feature flags | 8013 |
+| valkey | Redis-compatible cache | 6379 |
 
 ## Troubleshooting
 
@@ -223,7 +218,6 @@ The collector connects via `host.minikube.internal`. Ensure Elasticsearch is run
 ## Development
 
 Key files:
-
 - `src/ensure_otel_demo.ts` - Main orchestration logic
 - `src/get_kubernetes_manifests.ts` - Generates Kubernetes YAML
 - `src/get_otel_collector_config.ts` - OTel Collector config with filelog + k8sattributes
