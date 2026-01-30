@@ -1,0 +1,71 @@
+# Bundle size limits for @kbn/rspack-optimizer
+# Values are in bytes
+
+pageLoadAssetSize:
+  # Core
+  core: 500000
+
+  # Common plugins with size limits
+  dashboard: 100000
+  discover: 150000
+  visualizations: 120000
+  lens: 200000
+  maps: 150000
+  ml: 200000
+  security: 100000
+  fleet: 150000
+  observability: 100000
+  apm: 150000
+  infra: 100000
+  logs: 100000
+  uptime: 100000
+  siem: 200000
+  cases: 80000
+  actions: 50000
+  alerting: 80000
+  triggersActionsUi: 100000
+  stackAlerts: 50000
+  ruleRegistry: 50000
+  data: 150000
+  dataViews: 50000
+  unifiedSearch: 80000
+  embeddable: 80000
+  uiActions: 50000
+  expressions: 80000
+  charts: 80000
+  savedObjects: 50000
+  share: 50000
+  kibanaUtils: 50000
+  kibanaReact: 80000
+  home: 100000
+  management: 50000
+  advancedSettings: 50000
+  indexPatternManagement: 50000
+  indexManagement: 100000
+  devTools: 50000
+  console: 80000
+  searchprofiler: 50000
+  painlessLab: 50000
+  grokdebugger: 50000
+  ingestPipelines: 80000
+  snapshotRestore: 80000
+  crossClusterReplication: 50000
+  remoteClusters: 50000
+  ilm: 80000
+  rollup: 50000
+  transform: 80000
+  watcher: 50000
+  licensing: 30000
+  cloud: 30000
+  spaces: 50000
+  features: 30000
+  globalSearch: 50000
+  savedObjectsTagging: 50000
+  taskManager: 30000
+  eventLog: 30000
+  encryptedSavedObjects: 30000
+  usageCollection: 30000
+  telemetry: 50000
+  reporting: 80000
+  screenshotMode: 20000
+  screenshotting: 30000

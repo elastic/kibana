@@ -20,16 +20,14 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-import { getJsDependencyPaths, getRspackDependencyPaths } from './get_js_dependency_paths';
 import { getMFDependencyPaths } from './get_mf_dependency_paths';
-import { renderTemplate } from './render_template';
 import { renderMFTemplate } from './render_mf_template';
 import { getBundlesHref } from '../render_utils';
 
-export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
-export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
+export type MFBootstrapRendererFactory = (factoryOptions: MFFactoryOptions) => MFBootstrapRenderer;
+export type MFBootstrapRenderer = (options: MFRenderedOptions) => Promise<MFRendererResult>;
 
-interface FactoryOptions {
+interface MFFactoryOptions {
   /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
   baseHref: string;
   packageInfo: PackageInfo;
@@ -39,35 +37,23 @@ interface FactoryOptions {
   themeName$: BehaviorSubject<ThemeName>;
 }
 
-interface RenderedOptions {
+interface MFRenderedOptions {
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   isAnonymousPage?: boolean;
 }
 
-interface RendererResult {
+interface MFRendererResult {
   body: string;
   etag: string;
 }
 
 /**
- * Check if RSPack mode is enabled via environment variable
+ * Bootstrap renderer factory for Module Federation mode
+ * 
+ * Creates a renderer that generates HTML with MF runtime instead of __kbnBundles__
  */
-export function isRspackModeEnabled(): boolean {
-  return (
-    process.env.KBN_USE_RSPACK === 'true' ||
-    process.env.KBN_USE_MODULE_FEDERATION === 'true'
-  );
-}
-
-/**
- * @deprecated Use isRspackModeEnabled instead
- */
-export function isMFModeEnabled(): boolean {
-  return isRspackModeEnabled();
-}
-
-export const bootstrapRendererFactory: BootstrapRendererFactory = ({
+export const mfBootstrapRendererFactory: MFBootstrapRendererFactory = ({
   packageInfo,
   baseHref,
   uiPlugins,
@@ -77,13 +63,14 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 }) => {
   const isAuthenticated = (request: KibanaRequest) => {
     const { status: authStatus } = auth.get(request);
-    // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
     return authStatus !== 'unauthenticated';
   };
 
-  const useRspack = isRspackModeEnabled();
-
-  return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
+  return async function mfBootstrapRenderer({
+    uiSettingsClient,
+    request,
+    isAnonymousPage = false,
+  }) {
     let darkMode: DarkModeValue = false;
     const themeName = themeName$.getValue();
 
@@ -113,52 +100,24 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       isAnonymousPage,
     });
 
-    let body: string;
+    // Get MF-specific dependency paths
+    const mfPaths = getMFDependencyPaths(bundlesHref, bundlePaths);
 
-    if (useRspack) {
-      // RSPack mode - bundles are at /bundles/{pluginId}/{pluginId}.plugin.js
-      const rspackPaths = getRspackDependencyPaths(bundlesHref, bundlePaths);
+    // Build public path map (still needed for asset resolution)
+    const publicPathMap = JSON.stringify({
+      core: `${bundlesHref}/core/`,
+      ...Object.fromEntries(
+        [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
+      ),
+    });
 
-      // Include shared deps paths - they're still loaded from webpack-built bundles
-      const publicPathMap = JSON.stringify({
-        core: `${bundlesHref}/core/`,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId]) => [pluginId, `${bundlesHref}/${pluginId}/`])
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths: rspackPaths,
-        publicPathMap,
-      });
-    } else {
-      // Legacy mode - use __kbnBundles__ with DLLs
-      const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
-
-      // These paths should align with the bundle routes configured in
-      // src/optimize/bundles_route/bundles_route.ts
-      const publicPathMap = JSON.stringify({
-        core: `${bundlesHref}/core/`,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths,
-        publicPathMap,
-      });
-    }
+    const body = renderMFTemplate({
+      colorMode,
+      themeTagName,
+      coreRemoteEntry: mfPaths.coreRemoteEntry,
+      plugins: mfPaths.plugins,
+      publicPathMap,
+    });
 
     const hash = createHash('sha256');
     hash.update(body);
@@ -170,3 +129,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     };
   };
 };
+
+/**
+ * Check if MF mode is enabled
+ */
+export function isMFModeEnabled(): boolean {
+  return process.env.KBN_USE_MODULE_FEDERATION === 'true';
+}

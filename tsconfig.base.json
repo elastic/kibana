@@ -1824,6 +1824,8 @@
       "@kbn/routing-example-plugin/*": ["examples/routing_example/*"],
       "@kbn/rrule": ["src/platform/packages/shared/kbn-rrule"],
       "@kbn/rrule/*": ["src/platform/packages/shared/kbn-rrule/*"],
+      "@kbn/rspack-optimizer": ["packages/kbn-rspack-optimizer"],
+      "@kbn/rspack-optimizer/*": ["packages/kbn-rspack-optimizer/*"],
       "@kbn/rule-data-utils": ["src/platform/packages/shared/kbn-rule-data-utils"],
       "@kbn/rule-data-utils/*": ["src/platform/packages/shared/kbn-rule-data-utils/*"],
       "@kbn/rule-registry-plugin": ["x-pack/platform/plugins/shared/rule_registry"],

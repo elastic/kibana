@@ -22,3 +22,32 @@ export const getJsDependencyPaths = (
     ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
   ];
 };
+
+/**
+ * Get JS dependency paths for RSPack single-compilation mode.
+ * Bundles are output to /bundles/{pluginId}/{pluginId}.plugin.js
+ *
+ * Load order:
+ * 1. Webpack shared deps (kbn-ui-shared-deps)
+ * 2. Core bundle
+ * 3. Plugin bundles
+ *
+ * Each bundle is self-contained with its own runtime.
+ * Shared chunks are loaded automatically when needed.
+ */
+export const getRspackDependencyPaths = (
+  regularBundlePath: string,
+  bundlePaths: Map<string, PluginInfo>
+) => {
+  return [
+    // 1. Shared deps are still built by webpack
+    `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
+    `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
+    // 2. Core from RSPack output
+    `${regularBundlePath}/core/core.plugin.js`,
+    // 3. Plugins from RSPack output
+    ...[...bundlePaths.keys()].map(
+      (pluginId) => `${regularBundlePath}/${pluginId}/${pluginId}.plugin.js`
+    ),
+  ];
+};

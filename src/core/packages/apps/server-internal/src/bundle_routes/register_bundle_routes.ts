@@ -19,6 +19,16 @@ import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
 /**
+ * Check if RSPack mode is enabled via environment variable
+ */
+function isRspackMode(): boolean {
+  return (
+    process.env.KBN_USE_RSPACK === 'true' ||
+    process.env.KBN_USE_MODULE_FEDERATION === 'true'
+  );
+}
+
+/**
  *  Creates the routes that serves files from `bundlesPath`.
  *
  *  @param {Object} options
@@ -40,11 +50,15 @@ export function registerBundleRoutes({
   staticAssets: InternalStaticAssets;
 }) {
   const { dist: isDist } = packageInfo;
+  const useRspack = isRspackMode();
+
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
+  // Shared deps bundles are always served - they're built by webpack
+  // and used by both webpack and RSPack built plugins
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
     publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',
@@ -61,16 +75,6 @@ export function registerBundleRoutes({
     fileHashCache,
     isDist,
   });
-  const coreBundlePath = '/bundles/core/';
-  registerRouteForBundle(router, {
-    publicPath: staticAssets.prependPublicUrl(coreBundlePath) + '/',
-    routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
-    bundlesPath: isDist
-      ? fromRoot('node_modules/@kbn/core/target/public')
-      : fromRoot('src/core/target/public'),
-    fileHashCache,
-    isDist,
-  });
   const monacoEditorPath = '/bundles/kbn-monaco/';
   registerRouteForBundle(router, {
     publicPath: staticAssets.prependPublicUrl(monacoEditorPath) + '/',
@@ -80,14 +84,42 @@ export function registerBundleRoutes({
     isDist,
   });
 
-  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
-    const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
+  if (useRspack) {
+    // RSPack mode: serve all bundles from central directory
+    // This includes core and all plugins in one location
+    const rspackBundlesPath = '/bundles/';
     registerRouteForBundle(router, {
-      publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
-      routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
-      bundlesPath: publicTargetDir,
+      publicPath: staticAssets.prependPublicUrl(rspackBundlesPath) + '/',
+      routePath: staticAssets.prependServerPath(rspackBundlesPath) + '/',
+      bundlesPath: fromRoot('target/public/bundles'),
       fileHashCache,
       isDist,
     });
-  });
+  } else {
+    // Legacy webpack mode: serve from individual plugin directories
+
+    // Core bundle
+    const coreBundlePath = '/bundles/core/';
+    registerRouteForBundle(router, {
+      publicPath: staticAssets.prependPublicUrl(coreBundlePath) + '/',
+      routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
+      bundlesPath: isDist
+        ? fromRoot('node_modules/@kbn/core/target/public')
+        : fromRoot('src/core/target/public'),
+      fileHashCache,
+      isDist,
+    });
+
+    // Plugin bundles from their individual directories
+    [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+      const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
+      registerRouteForBundle(router, {
+        publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
+        routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
+        bundlesPath: publicTargetDir,
+        fileHashCache,
+        isDist,
+      });
+    });
+  }
 }

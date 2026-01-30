@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  InternalPluginsServiceSetup,
-  InternalPluginsServiceStart,
-  PluginsServiceSetupDeps,
-  PluginsServiceStartDeps,
-} from './plugins_service';
+require('@kbn/setup-node-env');
 
-// Plugin reader exports
-export { read, readMF, readPlugin, isMFMode } from './plugin_reader';
-export type {
-  PluginDefinition,
-  UnknownPluginInitializer,
-  CoreWindow,
-  MFCoreWindow,
-  KbnMFRuntime,
-} from './plugin_reader';
+var Path = require('path');
+
+require('@kbn/rspack-optimizer').runRspackCli({
+  defaultLimitsPath: Path.resolve(
+    require('@kbn/repo-info').REPO_ROOT,
+    'packages/kbn-rspack-optimizer/limits.yml'
+  ),
+});

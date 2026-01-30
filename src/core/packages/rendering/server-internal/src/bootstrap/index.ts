@@ -8,4 +8,13 @@
  */
 
 export { registerBootstrapRoute } from './register_bootstrap_route';
-export { bootstrapRendererFactory } from './bootstrap_renderer';
+export { bootstrapRendererFactory, isRspackModeEnabled, isMFModeEnabled } from './bootstrap_renderer';
+export { getRspackDependencyPaths } from './get_js_dependency_paths';
+
+// Module Federation exports (legacy)
+export { mfBootstrapRendererFactory } from './bootstrap_renderer_mf';
+export type { MFBootstrapRenderer, MFBootstrapRendererFactory } from './bootstrap_renderer_mf';
+export { getMFDependencyPaths } from './get_mf_dependency_paths';
+export type { MFDependencyPaths } from './get_mf_dependency_paths';
+export { renderMFTemplate } from './render_mf_template';
+export type { MFBootstrapTemplateData } from './render_mf_template';

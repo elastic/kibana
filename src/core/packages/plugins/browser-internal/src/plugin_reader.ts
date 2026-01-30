@@ -36,9 +36,37 @@ export interface CoreWindow {
 }
 
 /**
- * Reads the plugin's bundle declared in the global context.
+ * MF Runtime interface
+ * @internal
  */
-export function read(name: string) {
+export interface KbnMFRuntime {
+  registerPlugin(id: string, remoteEntry: string): void;
+  loadPlugin<T = unknown>(id: string): Promise<T>;
+  loadPluginExport<T = unknown>(id: string, exportName: string): Promise<T>;
+  isPluginLoaded(id: string): boolean;
+  getLoadedPlugins(): string[];
+}
+
+/**
+ * Custom window type for MF loading.
+ * @internal
+ */
+export interface MFCoreWindow {
+  __kbnMF__: KbnMFRuntime;
+}
+
+/**
+ * Check if Module Federation runtime is available
+ */
+export function isMFMode(): boolean {
+  return typeof (window as unknown as MFCoreWindow).__kbnMF__ !== 'undefined';
+}
+
+/**
+ * Reads the plugin's bundle declared in the global context.
+ * Legacy mode using __kbnBundles__
+ */
+export function read(name: string): PluginDefinition {
   const coreWindow = window as unknown as CoreWindow;
   const exportId = `plugin/${name}/public`;
 
@@ -52,4 +80,64 @@ export function read(name: string) {
   }
 
   return pluginExport;
+}
+
+/**
+ * Reads the plugin's bundle using Module Federation.
+ * Returns a promise since MF loads modules asynchronously.
+ */
+export async function readMF(name: string): Promise<PluginDefinition> {
+  const mfWindow = window as unknown as MFCoreWindow;
+
+  if (!mfWindow.__kbnMF__) {
+    throw new Error('Module Federation runtime not available. Is Kibana running in MF mode?');
+  }
+
+  try {
+    const module = await mfWindow.__kbnMF__.loadPlugin(name);
+
+    // The module should export either a plugin function or a ContainerModule
+    if (typeof module === 'function') {
+      return { plugin: module as UnknownPluginInitializer };
+    }
+
+    if (module && typeof module === 'object') {
+      const moduleObj = module as Record<string, unknown>;
+
+      // Check for plugin export
+      if (typeof moduleObj.plugin === 'function') {
+        return { plugin: moduleObj.plugin as UnknownPluginInitializer };
+      }
+
+      // Check for default export
+      if (typeof moduleObj.default === 'function') {
+        return { plugin: moduleObj.default as UnknownPluginInitializer };
+      }
+
+      // Check for ContainerModule
+      if (moduleObj.module) {
+        return { module: moduleObj.module as ContainerModule };
+      }
+    }
+
+    throw new Error(
+      `Plugin "${name}" does not export a valid plugin. Expected a function or module with plugin/default export.`
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to load plugin "${name}" via Module Federation: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+/**
+ * Universal plugin reader - uses MF if available, falls back to __kbnBundles__
+ */
+export async function readPlugin(name: string): Promise<PluginDefinition> {
+  if (isMFMode()) {
+    return readMF(name);
+  }
+  return read(name);
 }

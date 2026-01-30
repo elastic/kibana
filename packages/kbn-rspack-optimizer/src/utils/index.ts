@@ -7,20 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  InternalPluginsServiceSetup,
-  InternalPluginsServiceStart,
-  PluginsServiceSetupDeps,
-  PluginsServiceStartDeps,
-} from './plugins_service';
-
-// Plugin reader exports
-export { read, readMF, readPlugin, isMFMode } from './plugin_reader';
-export type {
-  PluginDefinition,
-  UnknownPluginInitializer,
-  CoreWindow,
-  MFCoreWindow,
-  KbnMFRuntime,
-} from './plugin_reader';
+export { discoverPlugins, createCoreEntry, type PluginEntry } from './plugin_discovery';
+export { collectBundleMetrics, formatMetricsTable, type BundleMetric } from './metrics';

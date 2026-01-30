@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  InternalPluginsServiceSetup,
-  InternalPluginsServiceStart,
-  PluginsServiceSetupDeps,
-  PluginsServiceStartDeps,
-} from './plugins_service';
+export {
+  createKibanaMFRuntime,
+  initializeKibanaMFRuntime,
+  loadKibanaPlugin,
+  type KibanaMFRuntime,
+  type PluginDefinition,
+} from './mf_runtime';
 
-// Plugin reader exports
-export { read, readMF, readPlugin, isMFMode } from './plugin_reader';
-export type {
-  PluginDefinition,
-  UnknownPluginInitializer,
-  CoreWindow,
-  MFCoreWindow,
-  KbnMFRuntime,
-} from './plugin_reader';
+export { generateBootstrapTemplate, type BootstrapTemplateData } from './bootstrap_template';

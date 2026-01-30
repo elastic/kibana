@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PluginsService } from './plugins_service';
-export type {
-  InternalPluginsServiceSetup,
-  InternalPluginsServiceStart,
-  PluginsServiceSetupDeps,
-  PluginsServiceStartDeps,
-} from './plugins_service';
-
-// Plugin reader exports
-export { read, readMF, readPlugin, isMFMode } from './plugin_reader';
-export type {
-  PluginDefinition,
-  UnknownPluginInitializer,
-  CoreWindow,
-  MFCoreWindow,
-  KbnMFRuntime,
-} from './plugin_reader';
+export { KbnBundleRefsPlugin } from './kbn_bundle_refs_plugin';
+export { KbnEntryWrapperPlugin } from './kbn_entry_wrapper_plugin';
+export { OutputRouterPlugin } from './output_router_plugin';
+export { BundleMetricsPlugin, type BundleMetricsPluginOptions } from './bundle_metrics_plugin';
+export {
+  UnifiedProgressPlugin,
+  createUnifiedProgressPlugins,
+  finishUnifiedProgress,
+  type UnifiedProgressPluginOptions,
+} from './unified_progress_plugin';
