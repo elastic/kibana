@@ -7,51 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlsRenderer, type PublishesControlsLayout } from '@kbn/controls-renderer';
-import deepEqual from 'fast-deep-equal';
-import React, { useMemo, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { ControlsLayout } from '@kbn/controls-renderer';
+import { ControlsRenderer } from '@kbn/controls-renderer';
+import React, { useEffect, useCallback, useState } from 'react';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
-import { arePinnedPanelLayoutsEqual } from '../dashboard_api/layout_manager/are_layouts_equal';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 
 export const DashboardControlsRenderer = () => {
   const dashboardApi = useDashboardApi();
-  /**
-   * `ControlsRenderer` expects `controls` rather than `pinnedPanels` when rendering its layout; so,
-   * we should map this to the expected key and keep them in sync
-   */
-  const dashboardWithControlsApi = useMemo(() => {
-    const controlLayout: PublishesControlsLayout['layout$'] = new BehaviorSubject({
-      controls: dashboardApi.layout$.getValue().pinnedPanels, // only controls can be pinned at the moment, so no need to filter
-    });
-    return { ...dashboardApi, layout$: controlLayout };
-  }, [dashboardApi]);
+  const onControlsLayoutChanged = useCallback(
+    ({ controls }: ControlsLayout) => {
+      dashboardApi.layout$.next({
+        ...dashboardApi.layout$.getValue(),
+        pinnedPanels: controls,
+      });
+    },
+    [dashboardApi.layout$]
+  );
 
+  const [controls, setControls] = useState<{ controls: DashboardLayout['pinnedPanels'] }>({
+    controls: dashboardApi.layout$.getValue().pinnedPanels,
+  });
   useEffect(() => {
-    const syncControlsWithPinnedPanels = dashboardWithControlsApi.layout$.subscribe(
-      ({ controls }) => {
-        const currentLayout = dashboardApi.layout$.getValue();
-        if (
-          !arePinnedPanelLayoutsEqual({ pinnedPanels: controls } as DashboardLayout, currentLayout)
-        ) {
-          dashboardApi.layout$.next({ ...currentLayout, pinnedPanels: controls });
-        }
-      }
-    );
-    const syncPinnedPanelsWithControls = dashboardApi.layout$.subscribe((layout) => {
-      const { controls: currentControls } = dashboardWithControlsApi.layout$.getValue();
-      if (!deepEqual(currentControls, layout.pinnedPanels)) {
-        dashboardWithControlsApi.layout$.next({
-          controls: layout.pinnedPanels,
-        });
-      }
+    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
+      setControls({ controls: pinnedPanels });
     });
     return () => {
-      syncControlsWithPinnedPanels.unsubscribe();
-      syncPinnedPanelsWithControls.unsubscribe();
+      controlLayoutChangedSubscription.unsubscribe();
     };
-  }, [dashboardWithControlsApi, dashboardApi.layout$]);
+  }, [dashboardApi.layout$]);
 
-  return <ControlsRenderer parentApi={dashboardWithControlsApi} />;
+  useEffect(() => {
+    const controlLayoutChangedSubscription = dashboardApi.layout$.subscribe(({ pinnedPanels }) => {
+      setControls({ controls: pinnedPanels });
+    });
+    return () => {
+      controlLayoutChangedSubscription.unsubscribe();
+    };
+  }, [dashboardApi.layout$]);
+
+  return (
+    <ControlsRenderer
+      parentApi={dashboardApi}
+      controls={controls} // only controls can currently be pinned
+      onControlsChanged={onControlsLayoutChanged}
+    />
+  );
 };

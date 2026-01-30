@@ -8,12 +8,12 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams, System } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import { Streams, type System, getDiscoverEsqlQuery } from '@kbn/streams-schema';
 import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SystemEventsSparklineLast24hrs } from './system_events_sparkline';
 
 export const SystemEventsData = ({
@@ -28,16 +28,24 @@ export const SystemEventsData = ({
       start: { share },
     },
   } = useKibana();
+  // Get index_mode from the stream detail context (API response)
+  const { definition: fullDefinition } = useStreamDetail();
   const useUrl = share.url.locators.useUrl;
 
-  const esqlQuery = `FROM ${getIndexPatternsForStream(definition).join(',')}
-      | WHERE ${conditionToESQL(system.filter)}`;
+  const indexMode = Streams.ingest.all.GetResponse.is(fullDefinition)
+    ? fullDefinition.index_mode
+    : undefined;
+  const baseQuery = getDiscoverEsqlQuery({ definition, indexMode });
+  const esqlQuery = baseQuery
+    ? `${baseQuery}
+      | WHERE ${conditionToESQL(system.filter)}`
+    : undefined;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
-        query: { esql: esqlQuery },
+        query: { esql: esqlQuery || '' },
         timeRange: { from: 'now-24h', to: 'now' },
       },
     }),
@@ -57,7 +65,7 @@ export const SystemEventsData = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {discoverLink ? (
+          {discoverLink && esqlQuery ? (
             <EuiButtonEmpty
               size="s"
               href={discoverLink}
