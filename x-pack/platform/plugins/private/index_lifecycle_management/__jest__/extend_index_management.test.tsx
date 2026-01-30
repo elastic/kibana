@@ -410,7 +410,7 @@ describe('extend index management', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
         indexLifecycleTab.shouldRenderTab({
-          index: indexWithoutLifecyclePolicy as Index,
+          index: indexWithoutLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeFalsy();
     });

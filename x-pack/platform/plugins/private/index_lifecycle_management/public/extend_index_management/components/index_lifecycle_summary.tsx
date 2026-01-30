@@ -33,7 +33,7 @@ import { getPolicyEditPath } from '../../application/services/navigation';
 import { usePhaseColors } from '../../application/lib';
 
 interface IndexLifecycleSummaryProps {
-  index: Omit<Index, 'size' | 'primary_size'>;
+  index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
