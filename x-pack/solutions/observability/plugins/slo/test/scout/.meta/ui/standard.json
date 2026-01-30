@@ -1,7 +1,21 @@
 {
-  "lastModified": "2025-12-08T16:58:37.117Z",
-  "sha1": "bf0aa4087bc3474f73e1703271bfa2af80018f45",
+  "lastModified": "2026-01-30T09:08:46.486Z",
+  "sha1": "49bf7f78d11965c80fdeb0515e9344301a80795b",
   "tests": [
+    {
+      "id": "b77b3725a7cda3a-a405bc5e45e74c0",
+      "title": "Setup environment for SLO tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
     {
       "id": "27cb3cfb52afaa0-d4057e4746e6d25",
       "title": "Annotations List create an annotation",
@@ -11,46 +25,20 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 22,
+        "line": 17,
         "column": 7
       }
     },
     {
-      "id": "27cb3cfb52afaa0-4a66eac20dcf4de",
-      "title": "Annotations List validate annotation list",
+      "id": "27cb3cfb52afaa0-847fd6698b3b503",
+      "title": "Annotations List Go to SLOs and check that annotation is displayed",
       "expectedStatus": "passed",
       "tags": [
         "@ess"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 35,
-        "column": 7
-      }
-    },
-    {
-      "id": "27cb3cfb52afaa0-b222cbd20756cd5",
-      "title": "Annotations List Go to slos",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 48,
-        "column": 7
-      }
-    },
-    {
-      "id": "27cb3cfb52afaa0-22c9a04a2fb76de",
-      "title": "Annotations List check that annotation is displayed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@ess"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 56,
+        "line": 40,
         "column": 7
       }
     },
@@ -63,7 +51,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 65,
+        "line": 53,
         "column": 7
       }
     },
@@ -76,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 84,
+        "line": 72,
         "column": 7
       }
     },
@@ -90,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
-        "line": 28,
+        "line": 22,
         "column": 7
       }
     }
