@@ -20,6 +20,8 @@ import type {
   ToolPromptManager,
   ToolStateManager,
 } from '../runner';
+import type { IToolFileStore } from '../runner/filestore';
+import type { AttachmentStateManager } from '../attachments';
 
 /**
  * Tool result as returned by the tool handler.
@@ -119,4 +121,13 @@ export interface ToolHandlerContext {
    * Manager to store/load tool state during interrupted executions.
    */
   stateManager: ToolStateManager;
+  /**
+   * Attachment state manager to manage conversation attachments.
+   * Allows tools to create, read, update, and delete attachments that persist across conversation rounds.
+   */
+  attachments: AttachmentStateManager;
+  /**
+   * File store to access data from the agent's virtual filesystem
+   */
+  filestore: IToolFileStore;
 }

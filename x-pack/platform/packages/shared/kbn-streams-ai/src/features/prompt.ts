@@ -30,6 +30,10 @@ const featuresSchema = {
           name: {
             type: 'string',
           },
+          title: {
+            type: 'string',
+            description: 'Very short human-readable title for UI (e.g. table, flyout header).',
+          },
           value: {
             type: 'object',
             properties: {},
@@ -64,6 +68,7 @@ const featuresSchema = {
           'type',
           'description',
           'name',
+          'title',
           'value',
           'confidence',
           'evidence',
