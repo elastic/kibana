@@ -173,6 +173,7 @@ export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
   'name',
   'type',
   'format',
+  'description',
   'parent',
   'status',
 ];

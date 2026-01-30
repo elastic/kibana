@@ -13,6 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Streams } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
+import { EditDescriptionFlyout } from './flyout/edit_description_flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
 import type { SchemaField } from './types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -74,6 +75,31 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       );
     };
 
+    const openEditDescriptionFlyout = () => {
+      const overlay = core.overlays.openFlyout(
+        toMountPoint(
+          <StreamsAppContextProvider context={context}>
+            <EditDescriptionFlyout
+              field={field}
+              onClose={() => overlay.close()}
+              onSave={(updatedField) => {
+                onFieldUpdate(updatedField);
+              }}
+            />
+          </StreamsAppContextProvider>,
+          core
+        ),
+        { maxWidth: 500 }
+      );
+    };
+
+    const editDescriptionAction = {
+      name: i18n.translate('xpack.streams.actions.editDescriptionLabel', {
+        defaultMessage: 'Edit description',
+      }),
+      onClick: () => openEditDescriptionFlyout(),
+    };
+
     const viewFieldAction = {
       name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
         defaultMessage: 'View field',
@@ -91,6 +117,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             }),
             onClick: () => openFlyout({ isEditingByDefault: true }),
           },
+          editDescriptionAction,
           {
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
@@ -114,6 +141,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             }),
             onClick: () => openFlyout({ isEditingByDefault: true }),
           },
+          editDescriptionAction,
         ];
 
         if (enableGeoPointSuggestions !== false) {
@@ -135,7 +163,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
         break;
       case 'inherited':
-        actions = [viewFieldAction];
+        actions = [viewFieldAction, editDescriptionAction];
         break;
     }
 

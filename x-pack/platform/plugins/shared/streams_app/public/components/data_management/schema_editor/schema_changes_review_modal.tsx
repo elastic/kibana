@@ -387,10 +387,16 @@ export function getChanges(fields: SchemaEditorField[], storedFields: SchemaEdit
   const addedFields = fields.filter(
     (field) =>
       (field.status === 'mapped' || field.status === 'unmapped') &&
+      // Filter out fields with type 'unmapped' since they don't affect ES mappings
+      field.type !== 'unmapped' &&
       !storedFields.some((stored) => stored.name === field.name)
   );
 
   const changedFields = fields.filter((field) => {
+    // Filter out fields with type 'unmapped' since they don't affect ES mappings
+    if (field.type === 'unmapped') {
+      return false;
+    }
     const stored = storedFields.find(
       (storedField) => field.status !== 'inherited' && storedField.name === field.name
     );
