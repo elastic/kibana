@@ -12,7 +12,7 @@ import {
   generateListIncidentsWorkflow,
   generateListSchedulesWorkflow,
   generateListOnCallsWorkflow,
-  generateDownloadWorkflow,
+  generateGetItemWorkflow,
   generateSearchWorkflow,
 } from './workflows';
 
@@ -34,7 +34,7 @@ export const pagerdutyDataSource: DataSource = {
   generateWorkflows(stackConnectorId: string) {
     return [
       {
-        content: generateDownloadWorkflow(stackConnectorId),
+        content: generateGetItemWorkflow(stackConnectorId),
         shouldGenerateABTool: true,
       },
       {

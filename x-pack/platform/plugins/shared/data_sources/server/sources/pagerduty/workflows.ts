@@ -38,10 +38,10 @@ steps:
 `;
 }
 
-export function generateDownloadWorkflow(stackConnectorId: string): string {
+export function generateGetItemWorkflow(stackConnectorId: string): string {
   return `version: "1"
-name: sources.pagerduty.download
-description: Get a number of different pagerduty items by ID including schedule, incident, and escalation policy
+name: sources.pagerduty.get_item
+description: Get a PagerDuty item by ID (schedule, incident, or escalation policy)
 enabled: true
 triggers:
   - type: manual
