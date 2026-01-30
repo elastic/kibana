@@ -15,6 +15,7 @@ import type {
   LogsEndpointActionWithHosts,
 } from '../../../../common/endpoint/types';
 import { useKibana } from '../../lib/kibana';
+import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
@@ -28,6 +29,7 @@ export const ResponseActionsResults = React.memo(
       services: { osquery },
     } = useKibana();
     const { OsqueryResult } = osquery;
+    const addToTimeline = useAddToTimeline();
 
     const getAction = useCallback(
       (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {
@@ -42,6 +44,7 @@ export const ResponseActionsResults = React.memo(
               startDate={startDate}
               ruleName={ruleName}
               ecsData={ecsData}
+              addToTimeline={addToTimeline}
             />
           );
         }
@@ -56,7 +59,7 @@ export const ResponseActionsResults = React.memo(
         }
         return null;
       },
-      [OsqueryResult, ecsData, ruleName]
+      [OsqueryResult, addToTimeline, ecsData, ruleName]
     );
 
     return (
