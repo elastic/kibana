@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XY_API_LINE_INTERPOLATION, type XYDecorations } from '../../../schema/charts/xy';
+import { type XYDecorations } from '../../../schema/charts/xy';
 import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 
 describe('XY Appearances Transforms', () => {
@@ -20,7 +20,7 @@ describe('XY Appearances Transforms', () => {
   it('should preserve complex config through API -> State -> API', () => {
     const original: XYDecorations = {
       show_value_labels: true,
-      line_interpolation: XY_API_LINE_INTERPOLATION.SMOOTH,
+      line_interpolation: 'smooth',
       fill_opacity: 0.5,
       minimum_bar_height: 3,
       show_end_zones: true,

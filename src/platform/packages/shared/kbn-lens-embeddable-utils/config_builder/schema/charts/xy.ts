@@ -179,11 +179,13 @@ const sharedLegendSchema = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
 };
 
-export const XY_API_LINE_INTERPOLATION = {
+const XY_API_LINE_INTERPOLATION = {
   LINEAR: 'linear',
   SMOOTH: 'smooth',
   STEPPED: 'stepped',
 } as const;
+
+export type XYApiLineInterpolation = typeof XY_API_LINE_INTERPOLATION;
 
 const decorationsSchema = schema.object(
   {

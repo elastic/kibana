@@ -11,19 +11,19 @@ import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
 import type { XYDecorations } from '../../../schema/charts/xy';
-import { XY_API_LINE_INTERPOLATION } from '../../../schema/charts/xy';
+import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { stripUndefined } from '../utils';
 
-const curveTypeAPItoState: Record<$Values<typeof XY_API_LINE_INTERPOLATION>, XYCurveType> = {
-  [XY_API_LINE_INTERPOLATION.LINEAR]: 'LINEAR',
-  [XY_API_LINE_INTERPOLATION.SMOOTH]: 'CURVE_MONOTONE_X',
-  [XY_API_LINE_INTERPOLATION.STEPPED]: 'CURVE_STEP_AFTER',
+const curveTypeAPItoState: Record<$Values<XYApiLineInterpolation>, XYCurveType> = {
+  linear: 'LINEAR',
+  smooth: 'CURVE_MONOTONE_X',
+  stepped: 'CURVE_STEP_AFTER',
 };
 
-const curveTypeStateToAPI: Record<XYCurveType, $Values<typeof XY_API_LINE_INTERPOLATION>> = {
-  LINEAR: XY_API_LINE_INTERPOLATION.LINEAR,
-  CURVE_MONOTONE_X: XY_API_LINE_INTERPOLATION.SMOOTH,
-  CURVE_STEP_AFTER: XY_API_LINE_INTERPOLATION.STEPPED,
+const curveTypeStateToAPI: Record<XYCurveType, $Values<XYApiLineInterpolation>> = {
+  LINEAR: 'linear',
+  CURVE_MONOTONE_X: 'smooth',
+  CURVE_STEP_AFTER: 'stepped',
 };
 
 type XYLensAppearanceState = Pick<
@@ -42,12 +42,11 @@ export function convertAppearanceToAPIFormat(config: XYLensAppearanceState): XYD
     show_value_labels: config.valueLabels != null ? config.valueLabels === 'show' : undefined,
     line_interpolation:
       config.curveType != null ? curveTypeStateToAPI[config.curveType] : undefined,
-    fill_opacity: config.fillOpacity != null ? config.fillOpacity : undefined,
-    minimum_bar_height: config.minBarHeight != null ? config.minBarHeight : undefined,
-    show_end_zones: config.hideEndzones != null ? !config.hideEndzones : undefined,
-    show_current_time_marker:
-      config.showCurrentTimeMarker != null ? config.showCurrentTimeMarker : undefined,
-    point_visibility: config.pointVisibility != null ? config.pointVisibility : undefined,
+    fill_opacity: config.fillOpacity,
+    minimum_bar_height: config.minBarHeight,
+    show_end_zones: config.hideEndzones,
+    show_current_time_marker: config.showCurrentTimeMarker,
+    point_visibility: config.pointVisibility,
   });
 }
 
@@ -59,11 +58,10 @@ export function convertAppearanceToStateFormat(config: XYDecorations): XYLensApp
       config.line_interpolation != null
         ? curveTypeAPItoState[config.line_interpolation]
         : undefined,
-    fillOpacity: config.fill_opacity != null ? config.fill_opacity : undefined,
-    minBarHeight: config.minimum_bar_height != null ? config.minimum_bar_height : undefined,
-    hideEndzones: config.show_end_zones != null ? !config.show_end_zones : undefined,
-    showCurrentTimeMarker:
-      config.show_current_time_marker != null ? config.show_current_time_marker : undefined,
-    pointVisibility: config.point_visibility != null ? config.point_visibility : undefined,
+    fillOpacity: config.fill_opacity,
+    minBarHeight: config.minimum_bar_height,
+    hideEndzones: config.show_end_zones,
+    showCurrentTimeMarker: config.show_current_time_marker,
+    pointVisibility: config.point_visibility,
   });
 }
