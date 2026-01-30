@@ -11,10 +11,10 @@ import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 // Cloud Connector field labels
 const AWS_CLOUD_CONNECTOR_FIELD_LABELS = {
-  role_arn: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
+  role_arn: i18n.translate('xpack.fleet.cloudConnector.aws.roleArnLabel', {
     defaultMessage: 'Role ARN',
   }),
-  external_id: i18n.translate('securitySolutionPackages.awsIntegration.externalId', {
+  external_id: i18n.translate('xpack.fleet.cloudConnector.aws.externalIdLabel', {
     defaultMessage: 'External ID',
   }),
 } as const;
