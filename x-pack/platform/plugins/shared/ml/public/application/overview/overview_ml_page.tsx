@@ -130,7 +130,6 @@ export const OverviewPage: FC = () => {
     'overview'
   );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
-  console.log('--- GETTING UI SETTINGS ---', uiSettings.get('theme:darkMode')); // remove
 
   return (
     <>
