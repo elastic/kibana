@@ -75,6 +75,10 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:firehose-quick-start');
   }
 
+  public get cloudforwarderQuickstartCard() {
+    return this.page.getByTestId('integration-card:cloudforwarder-quick-start');
+  }
+
   public get useCaseGrid() {
     return this.page.getByRole('group', { name: 'What do you want to monitor?' });
   }
