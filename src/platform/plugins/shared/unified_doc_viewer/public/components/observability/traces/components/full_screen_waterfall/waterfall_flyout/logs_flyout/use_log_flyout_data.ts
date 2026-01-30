@@ -22,7 +22,6 @@ export interface UseLogFlyoutDataParams {
 }
 
 export interface LogFlyoutData extends BaseFlyoutData {
-  error: string | null;
   logDataView: DocViewRenderProps['dataView'] | null;
 }
 

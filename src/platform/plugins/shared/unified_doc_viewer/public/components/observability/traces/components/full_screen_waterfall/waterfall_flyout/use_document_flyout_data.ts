@@ -29,13 +29,13 @@ export interface BaseFlyoutData {
   hit: DataTableRecord | null;
   loading: boolean;
   title: string;
+  error: string | null;
 }
 
 export interface DocumentFlyoutData extends BaseFlyoutData {
   type: DocumentType;
   // Log-specific fields (only present when type is 'logsFlyout')
   logDataView?: DocViewRenderProps['dataView'] | null;
-  error?: string | null;
 }
 
 /**
@@ -67,6 +67,7 @@ export function useDocumentFlyoutData({
       hit: spanData.hit,
       loading: spanData.loading,
       title: spanData.title,
+      error: spanData.error,
     };
   }
 

@@ -55,6 +55,7 @@ describe('useDocumentFlyoutData', () => {
       hit: null,
       loading: false,
       title: 'Span document',
+      error: null,
     });
 
     mockUseLogFlyoutData.mockReturnValue({
@@ -79,6 +80,7 @@ describe('useDocumentFlyoutData', () => {
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
+        error: null,
       });
 
       const { result } = renderHook(() =>
@@ -95,6 +97,7 @@ describe('useDocumentFlyoutData', () => {
         hit: null,
         loading: true,
         title: 'Span document',
+        error: null,
       });
 
       const { result } = renderHook(() =>
@@ -109,6 +112,7 @@ describe('useDocumentFlyoutData', () => {
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
+        error: null,
       });
 
       const { result } = renderHook(() =>
@@ -116,7 +120,22 @@ describe('useDocumentFlyoutData', () => {
       );
 
       expect(result.current).not.toHaveProperty('logDataView');
-      expect(result.current).not.toHaveProperty('error');
+    });
+
+    it('should return error from span data', () => {
+      const errorMessage = 'Failed to fetch span';
+      mockUseSpanFlyoutData.mockReturnValue({
+        hit: null,
+        loading: false,
+        title: 'Span document',
+        error: errorMessage,
+      });
+
+      const { result } = renderHook(() =>
+        useDocumentFlyoutData({ type: 'spanDetailFlyout', docId, traceId })
+      );
+
+      expect(result.current.error).toBe(errorMessage);
     });
   });
 
@@ -187,6 +206,7 @@ describe('useDocumentFlyoutData', () => {
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
+        error: null,
       });
 
       mockUseLogFlyoutData.mockReturnValue({

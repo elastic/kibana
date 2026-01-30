@@ -23,7 +23,7 @@ export interface UseSpanFlyoutDataParams {
 export type SpanFlyoutData = BaseFlyoutData;
 
 export function useSpanFlyoutData({ spanId, traceId }: UseSpanFlyoutDataParams): SpanFlyoutData {
-  const { span, loading } = useFetchSpan({ spanId, traceId });
+  const { span, loading, error } = useFetchSpan({ spanId, traceId });
 
   const hit = useMemo<DataTableRecord | null>(() => {
     if (!span) return null;
@@ -59,5 +59,5 @@ export function useSpanFlyoutData({ spanId, traceId }: UseSpanFlyoutDataParams):
     }
   );
 
-  return { hit, loading, title };
+  return { hit, loading, title, error: error?.message ?? null };
 }

@@ -36,12 +36,14 @@ describe('useSpanFlyoutData', () => {
     mockUseFetchSpan.mockReturnValue({
       span: undefined,
       loading: true,
+      error: undefined,
     });
 
     const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.hit).toBeNull();
+    expect(result.current.error).toBeNull();
     expect(mockUseFetchSpan).toHaveBeenCalledWith({ spanId, traceId });
   });
 
@@ -49,6 +51,7 @@ describe('useSpanFlyoutData', () => {
     mockUseFetchSpan.mockReturnValue({
       span: undefined,
       loading: false,
+      error: undefined,
     });
 
     const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
@@ -75,6 +78,7 @@ describe('useSpanFlyoutData', () => {
     mockUseFetchSpan.mockReturnValue({
       span: mockSpan,
       loading: false,
+      error: undefined,
     });
 
     const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
@@ -88,6 +92,7 @@ describe('useSpanFlyoutData', () => {
     expect(result.current.hit?.raw._id).toBe('test-id');
     expect(result.current.hit?.raw._source).toBe(mockSpan);
     expect(result.current.hit?.flattened).toBeDefined();
+    expect(result.current.error).toBeNull();
   });
 
   it('should return "Span document" title when hit is a span', async () => {
@@ -103,6 +108,7 @@ describe('useSpanFlyoutData', () => {
     mockUseFetchSpan.mockReturnValue({
       span: mockSpan,
       loading: false,
+      error: undefined,
     });
 
     const isSpanHitMock = jest.requireMock('../../helpers/is_span').isSpanHit;
@@ -128,6 +134,7 @@ describe('useSpanFlyoutData', () => {
     mockUseFetchSpan.mockReturnValue({
       span: mockTransaction,
       loading: false,
+      error: undefined,
     });
 
     const isSpanHitMock = jest.requireMock('../../helpers/is_span').isSpanHit;
@@ -154,8 +161,8 @@ describe('useSpanFlyoutData', () => {
     } as UnifiedSpanDocument;
 
     mockUseFetchSpan
-      .mockReturnValueOnce({ span: mockSpan1, loading: false })
-      .mockReturnValueOnce({ span: mockSpan2, loading: false });
+      .mockReturnValueOnce({ span: mockSpan1, loading: false, error: undefined })
+      .mockReturnValueOnce({ span: mockSpan2, loading: false, error: undefined });
 
     const { result, rerender } = renderHook(
       ({ sId, tId }: { sId: string; tId: string }) =>
@@ -182,7 +189,7 @@ describe('useSpanFlyoutData', () => {
       span: { id: spanId, name: 'test-span' },
     } as UnifiedSpanDocument;
 
-    mockUseFetchSpan.mockReturnValue({ span: mockSpan, loading: false });
+    mockUseFetchSpan.mockReturnValue({ span: mockSpan, loading: false, error: undefined });
 
     const { rerender } = renderHook(
       ({ sId, tId }: { sId: string; tId: string }) =>
@@ -206,7 +213,7 @@ describe('useSpanFlyoutData', () => {
       span: { id: spanId, name: 'test-span' },
     } as UnifiedSpanDocument;
 
-    mockUseFetchSpan.mockReturnValue({ span: mockSpan, loading: false });
+    mockUseFetchSpan.mockReturnValue({ span: mockSpan, loading: false, error: undefined });
 
     const { result, rerender } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
 
@@ -216,5 +223,21 @@ describe('useSpanFlyoutData', () => {
     rerender();
 
     expect(result.current.hit).toBe(firstHit);
+  });
+
+  it('should return error message when fetch fails', async () => {
+    const errorMessage = 'Failed to fetch span';
+    mockUseFetchSpan.mockReturnValue({
+      span: undefined,
+      loading: false,
+      error: new Error(errorMessage),
+    });
+
+    const { result } = renderHook(() => useSpanFlyoutData({ spanId, traceId }));
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.error).toBe(errorMessage);
+    expect(result.current.hit).toBeNull();
   });
 });
