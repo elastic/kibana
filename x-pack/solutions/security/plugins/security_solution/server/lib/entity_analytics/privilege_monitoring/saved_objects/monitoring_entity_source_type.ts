@@ -56,17 +56,6 @@ const version1: SavedObjectsModelVersion = {
     {
       type: 'mappings_addition',
       addedMappings: {
-        managedVersion: { type: 'integer' },
-      },
-    },
-  ],
-};
-
-const version2: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
         matchersModifiedByUser: { type: 'boolean' },
       },
     },
@@ -77,6 +66,28 @@ const version2: SavedObjectsModelVersion = {
           attributes: {
             ...document.attributes,
             matchersModifiedByUser: false,
+          },
+        };
+      },
+    },
+  ],
+};
+
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        managedVersion: { type: 'integer' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            managedVersion: { MANAGED_SOURCES_VERSION },
           },
         };
       },
