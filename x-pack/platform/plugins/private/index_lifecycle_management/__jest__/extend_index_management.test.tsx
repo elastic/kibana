@@ -12,7 +12,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import type { Index as IndexManagementIndex } from '@kbn/index-management-shared-types';
 import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
@@ -67,8 +66,8 @@ const indexWithoutLifecyclePolicy: Index = {
   replica: 1,
   documents: 1,
   documents_deleted: 0,
-  size: '3.4kb',
-  primary_size: '3.4kb',
+  size: 3480,
+  primary_size: 3480,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -87,8 +86,8 @@ const indexWithLifecyclePolicy: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -116,8 +115,8 @@ const indexWithLifecycleError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -149,8 +148,8 @@ const indexWithLifecyclePhaseDefinition: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -183,8 +182,8 @@ const indexWithLifecycleWaitingStep: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -217,8 +216,8 @@ const indexWithNonExistentPolicyError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -402,7 +401,7 @@ describe('extend index management', () => {
     const policyErrorPanel = 'policyErrorPanel';
     const phaseDefinitionPanel = 'phaseDefinitionPanel';
 
-    const IlmContentComponent = ({ index }: { index: IndexManagementIndex }) => {
+    const IlmContentComponent = ({ index }: { index: Index }) => {
       const { euiTheme } = useEuiTheme();
       return <IlmComponent index={index} getUrlForApp={getUrlForApp} euiTheme={euiTheme} />;
     };
@@ -411,7 +410,7 @@ describe('extend index management', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
         indexLifecycleTab.shouldRenderTab({
-          index: indexWithoutLifecyclePolicy as IndexManagementIndex,
+          index: indexWithoutLifecyclePolicy as Index,
         });
       expect(shouldRenderTab).toBeFalsy();
     });
@@ -420,11 +419,11 @@ describe('extend index management', () => {
       const shouldRenderTab =
         indexLifecycleTab.shouldRenderTab &&
         indexLifecycleTab.shouldRenderTab({
-          index: indexWithLifecyclePolicy as IndexManagementIndex,
+          index: indexWithLifecyclePolicy,
         });
       expect(shouldRenderTab).toBeTruthy();
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecyclePolicy as IndexManagementIndex} />
+        <IlmContentComponent index={indexWithLifecyclePolicy} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
@@ -434,9 +433,7 @@ describe('extend index management', () => {
     });
 
     test('should render an error panel when index has lifecycle error', () => {
-      const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecycleError as IndexManagementIndex} />
-      );
+      const { container } = renderWithI18n(<IlmContentComponent index={indexWithLifecycleError} />);
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
       expect(screen.queryByTestId(phaseDefinitionPanel)).not.toBeInTheDocument();
@@ -446,7 +443,7 @@ describe('extend index management', () => {
 
     test('should render a phase definition panel when lifecycle has phase definition', () => {
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecyclePhaseDefinition as IndexManagementIndex} />
+        <IlmContentComponent index={indexWithLifecyclePhaseDefinition} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
@@ -457,7 +454,7 @@ describe('extend index management', () => {
 
     test('should render a step info panel when lifecycle is waiting for a step completion', () => {
       const { container } = renderWithI18n(
-        <IlmContentComponent index={indexWithLifecycleWaitingStep as IndexManagementIndex} />
+        <IlmContentComponent index={indexWithLifecycleWaitingStep} />
       );
       expect(container).toMatchSnapshot();
       expect(screen.getByTestId(policyPropertiesPanel)).toBeInTheDocument();
