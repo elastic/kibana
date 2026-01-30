@@ -23,11 +23,16 @@ interface EdgeMarkers {
   highlightedStart: EdgeMarker;
 }
 
+interface ApplyEdgeHighlightingOptions {
+  selectedNodeId?: string | null;
+  selectedEdgeId?: string | null;
+}
+
 interface UseEdgeHighlightingResult {
   markers: EdgeMarkers;
   applyEdgeHighlighting: (
     edges: ServiceMapEdge[],
-    selectedNodeId: string | null
+    options: ApplyEdgeHighlightingOptions | string | null
   ) => ServiceMapEdge[];
   colors: {
     primary: string;
@@ -81,17 +86,27 @@ export function useEdgeHighlighting(): UseEdgeHighlightingResult {
     [primaryColor, defaultEdgeColor]
   );
 
-  // Helper to apply edge highlighting based on selected node
   const applyEdgeHighlighting = useCallback(
-    (edges: ServiceMapEdge[], selectedNodeId: string | null): ServiceMapEdge[] => {
+    (
+      edges: ServiceMapEdge[],
+      options: ApplyEdgeHighlightingOptions | string | null
+    ): ServiceMapEdge[] => {
+      // Support legacy API: passing selectedNodeId directly as string
+      const { selectedNodeId, selectedEdgeId } =
+        typeof options === 'string' || options === null
+          ? { selectedNodeId: options, selectedEdgeId: null }
+          : options;
+
       return edges.map((edge) => {
-        const isConnected =
+        const isDirectlySelected = selectedEdgeId !== null && edge.id === selectedEdgeId;
+        const isConnectedToNode =
           selectedNodeId !== null &&
           (edge.source === selectedNodeId || edge.target === selectedNodeId);
+        const isHighlighted = isDirectlySelected || isConnectedToNode;
 
-        const markerEnd = isConnected ? markers.highlightedEnd : markers.defaultEnd;
+        const markerEnd = isHighlighted ? markers.highlightedEnd : markers.defaultEnd;
         const markerStart = edge.data?.isBidirectional
-          ? isConnected
+          ? isHighlighted
             ? markers.highlightedStart
             : markers.defaultStart
           : undefined;
@@ -99,12 +114,12 @@ export function useEdgeHighlighting(): UseEdgeHighlightingResult {
         return {
           ...edge,
           style: {
-            stroke: isConnected ? primaryColor : defaultEdgeColor,
-            strokeWidth: isConnected ? HIGHLIGHTED_STROKE_WIDTH : DEFAULT_STROKE_WIDTH,
+            stroke: isHighlighted ? primaryColor : defaultEdgeColor,
+            strokeWidth: isHighlighted ? HIGHLIGHTED_STROKE_WIDTH : DEFAULT_STROKE_WIDTH,
           },
           markerEnd,
           markerStart,
-          zIndex: isConnected ? highlightedZIndex : defaultZIndex,
+          zIndex: isHighlighted ? highlightedZIndex : defaultZIndex,
         };
       });
     },

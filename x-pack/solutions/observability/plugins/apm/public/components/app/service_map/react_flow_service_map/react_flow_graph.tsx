@@ -18,6 +18,7 @@ import {
   type EdgeTypes,
   type FitViewOptions,
   type NodeMouseHandler,
+  type EdgeMouseHandler,
 } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,6 +80,9 @@ function ReactFlowGraphInner({
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
+  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+    null
+  );
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -114,16 +118,35 @@ function ReactFlowGraphInner({
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
-      // Set the selected node for the popover
+      // Set the selected node for the popover and clear any selected edge
       setSelectedNodeForPopover(newSelectedId ? node : null);
+      setSelectedEdgeForPopover(null);
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
+  );
+
+  // Handle edge click - show edge popover and highlight the edge
+  const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
+    (_, edge) => {
+      // Clear node selection
+      setSelectedNodeId(null);
+      setSelectedNodeForPopover(null);
+      // Toggle edge selection
+      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
+      setSelectedEdgeForPopover(newSelectedEdge);
+      // Apply edge highlighting for the selected edge
+      setEdges((currentEdges) =>
+        applyEdgeHighlighting(currentEdges, { selectedEdgeId: newSelectedEdge?.id ?? null })
+      );
+    },
+    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
   );
 
   // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -137,6 +160,7 @@ function ReactFlowGraphInner({
   const handlePopoverClose = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -213,6 +237,7 @@ function ReactFlowGraphInner({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        onEdgeClick={handleEdgeClick}
         onPaneClick={handlePaneClick}
         onInit={onInit}
         fitView
@@ -222,7 +247,7 @@ function ReactFlowGraphInner({
         proOptions={{ hideAttribution: true }}
         nodesDraggable={true}
         nodesConnectable={false}
-        edgesFocusable={false}
+        edgesFocusable={true}
         aria-label={i18n.translate('xpack.apm.serviceMap.ariaLabel', {
           defaultMessage:
             'Service map showing {nodeCount} services and dependencies. Use tab or arrow keys to navigate between nodes, enter or space to view details.',
@@ -234,6 +259,7 @@ function ReactFlowGraphInner({
       </ReactFlow>
       <ReactFlowPopover
         selectedNode={selectedNodeForPopover}
+        selectedEdge={selectedEdgeForPopover}
         focusedServiceName={serviceName}
         environment={environment}
         kuery={kuery}

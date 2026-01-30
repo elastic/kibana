@@ -7,6 +7,7 @@
 
 import type { Node, Edge, MarkerType } from '@xyflow/react';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
+import type { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 
 /**
@@ -101,10 +102,22 @@ export interface EdgeMarker {
 }
 
 /**
+ * Source data for edge popover (matches ConnectionNode structure)
+ */
+export interface EdgeSourceData extends Record<string, unknown> {
+  id: string;
+  [SERVICE_NAME]?: string;
+  [SPAN_DESTINATION_SERVICE_RESOURCE]?: string;
+}
+
+/**
  * Data for edges in the React Flow service map
  */
 export interface ServiceMapEdgeData extends Record<string, unknown> {
   isBidirectional: boolean;
+  sourceData?: EdgeSourceData;
+  targetData?: EdgeSourceData;
+  resources?: string[];
 }
 
 /**

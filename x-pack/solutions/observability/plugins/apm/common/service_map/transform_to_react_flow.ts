@@ -94,7 +94,12 @@ function toReactFlowEdge(edge: ConnectionEdge): ServiceMapEdge {
     style: DEFAULT_EDGE_STYLE,
     markerEnd: createEdgeMarker(),
     ...(isBidirectional && { markerStart: createEdgeMarker() }),
-    data: { isBidirectional },
+    data: {
+      isBidirectional,
+      sourceData: edge.sourceData,
+      targetData: edge.targetData,
+      resources: edge.resources,
+    },
   };
 }
 

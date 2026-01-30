@@ -14,7 +14,9 @@ import type {
   ServiceNodeData,
   DependencyNodeData,
   GroupedNodeData,
+  ServiceMapEdge,
 } from '../../../../../common/service_map';
+import { MarkerType } from '@xyflow/react';
 
 // Mock the EUI theme
 jest.mock('@elastic/eui', () => {
@@ -43,7 +45,7 @@ jest.mock('@elastic/eui', () => {
           radius: { medium: '4px' },
           width: { thin: '1px', thick: '2px' },
         },
-        levels: { header: 1000 },
+        levels: { header: 1000, menu: 2000 },
         font: { family: 'Inter, sans-serif' },
       },
       colorMode: 'LIGHT',
@@ -125,6 +127,7 @@ jest.mock('@xyflow/react', () => {
 describe('ReactFlowPopover', () => {
   const defaultProps = {
     selectedNode: null,
+    selectedEdge: null,
     focusedServiceName: undefined,
     environment: 'ENVIRONMENT_ALL' as const,
     kuery: '',
@@ -250,5 +253,37 @@ describe('ReactFlowPopover', () => {
     renderPopover({ selectedNode: serviceNode, kuery: 'service.name: test' });
 
     expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
+  });
+
+  it('renders popover when an edge is selected', () => {
+    const edge: ServiceMapEdge = {
+      id: 'service-a->dependency-b',
+      source: 'service-a',
+      target: 'dependency-b',
+      type: 'default',
+      style: { stroke: '#98A2B3', strokeWidth: 1 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: '#98A2B3' },
+      data: {
+        isBidirectional: false,
+        sourceData: { id: 'service-a', 'service.name': 'Service A' },
+        targetData: { id: 'dependency-b' },
+        resources: ['dependency-b'],
+      },
+    };
+
+    mockGetNode.mockImplementation((id: string) => ({
+      id,
+      position: { x: id === 'service-a' ? 0 : 200, y: 100 },
+      measured: { width: 56, height: 56 },
+    }));
+
+    renderPopover({ selectedEdge: edge });
+
+    expect(screen.getByTestId('serviceMapPopover')).toBeInTheDocument();
+  });
+
+  it('does not show popover content when neither node nor edge is selected', () => {
+    renderPopover();
+    expect(screen.queryByTestId('serviceMapPopoverContent')).not.toBeInTheDocument();
   });
 });
