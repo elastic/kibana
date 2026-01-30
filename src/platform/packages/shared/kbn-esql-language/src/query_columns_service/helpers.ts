@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -149,7 +149,8 @@ export async function getCurrentQueryAvailableColumns(
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string,
-  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
+  getDefaultPromqlIndexes?: () => Promise<{ indices: IndexAutocompleteItem[] }>
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -165,6 +166,7 @@ export async function getCurrentQueryAvailableColumns(
     fromJoin: getJoinFields,
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
+    getDefaultPromqlIndexes,
   };
 
   const previousCommands = commands.slice(0, -1);
