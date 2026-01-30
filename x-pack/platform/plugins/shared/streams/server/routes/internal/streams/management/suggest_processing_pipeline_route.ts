@@ -136,10 +136,16 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           throw new SecurityError('Cannot access API on the current pricing tier');
         }
 
-        const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
-          await getScopedClients({ request });
+        const {
+          inferenceClient,
+          scopedClusterClient,
+          streamsClient,
+          fieldsMetadataClient,
+          featureClient,
+        } = await getScopedClients({ request });
 
         const stream = await streamsClient.getStream(params.path.name);
+        const { hits: features } = await featureClient.getFeatures(params.path.name, { type: [] });
 
         const abortController = new AbortController();
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
@@ -238,6 +244,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
+          features,
           simulatePipeline: (pipeline: StreamlangDSL) =>
             simulateProcessing({
               params: {
