@@ -29,14 +29,10 @@ export interface Dimension {
   type: ES_FIELD_TYPES;
 }
 
-export type TimeSeriesMetricType =
-  | ES_FIELD_TYPES.HISTOGRAM
-  | ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM
-  | ES_FIELD_TYPES.TDIGEST;
 export interface MetricField {
   name: string;
   index: string;
-  type: TimeSeriesMetricType;
+  type: ES_FIELD_TYPES;
   instrument?: MappingTimeSeriesMetricType;
   unit?: MetricUnit;
   dimensions: Dimension[];

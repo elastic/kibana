@@ -13,7 +13,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const mockMetric: MetricField = {
   name: 'cpu.usage',
-  type: 'gauge',
+  type: ES_FIELD_TYPES.DOUBLE,
   index: 'metrics-*',
   dimensions: [
     { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
@@ -33,14 +33,14 @@ const mockCounterMetric: MetricField = {
 const mockTdigestMetric: MetricField = {
   ...mockMetric,
   name: 'http.request.duration',
-  type: 'tdigest',
+  type: ES_FIELD_TYPES.TDIGEST,
   instrument: 'histogram',
 };
 
 const mockExponentialHistogramMetric: MetricField = {
   ...mockMetric,
   name: 'http.request.duration',
-  type: 'exponential_histogram',
+  type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
   instrument: 'histogram',
 };
 
@@ -310,7 +310,7 @@ TS metrics-*
   describe('special character escaping', () => {
     const mockMetricWithSpecialChars: MetricField = {
       name: 'cpu.usage',
-      type: 'gauge',
+      type: ES_FIELD_TYPES.LONG,
       index: 'metrics-*',
       dimensions: [
         { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
@@ -371,7 +371,7 @@ TS metrics-*
     it('should escape field names with backticks by doubling them', () => {
       const mockMetricWithBackticks: MetricField = {
         name: 'cpu.usage',
-        type: 'gauge',
+        type: ES_FIELD_TYPES.DOUBLE,
         index: 'metrics-*',
         dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
       };
