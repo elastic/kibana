@@ -112,6 +112,24 @@ describe('PageFilters', () => {
       />
     );
     expect(container).toBeInTheDocument();
+
+    const lastProps = (alertFilterControlsPackage.AlertFilterControls as jest.Mock).mock.calls.at(
+      -1
+    )?.[0];
+    expect(lastProps).toEqual(
+      expect.objectContaining({
+        defaultControls: expect.arrayContaining([
+          expect.objectContaining({
+            title: 'Status',
+            fieldName: 'kibana.alert.workflow_status',
+          }),
+          expect.objectContaining({
+            title: 'Assignee',
+            fieldName: 'kibana.alert.workflow_assignee_ids',
+          }),
+        ]),
+      })
+    );
   });
 
   it('persists the filter control configuration to the url', async () => {

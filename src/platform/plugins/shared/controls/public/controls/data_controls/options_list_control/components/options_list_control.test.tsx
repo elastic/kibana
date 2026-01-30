@@ -18,6 +18,18 @@ import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
 
+let httpPostMock: jest.Mock;
+jest.mock('../../../../services/kibana_services', () => {
+  httpPostMock = jest.fn();
+  return {
+    coreServices: {
+      http: {
+        post: (...args: unknown[]) => httpPostMock(...args),
+      },
+    },
+  };
+});
+
 describe('Options list control', () => {
   const mountComponent = ({
     componentApi,
@@ -115,5 +127,43 @@ describe('Options list control', () => {
     expect(
       control.queryByTestId('optionsList__invalidSelectionsToken-testInvalid')
     ).toBeInTheDocument();
+  });
+
+  test('assignee field renders avatar stack instead of raw ids', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.uuid = 'testAssignees';
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setSelectedOptions(['uid-1', 'uid-2']);
+
+    httpPostMock.mockResolvedValueOnce([
+      {
+        uid: 'uid-1',
+        enabled: true,
+        user: { username: 'user1', full_name: 'User One' },
+        data: { avatar: {} },
+      },
+      {
+        uid: 'uid-2',
+        enabled: true,
+        user: { username: 'user2', full_name: 'User Two' },
+        data: { avatar: {} },
+      },
+    ]);
+
+    const control = mountComponent(contextMock);
+    expect(control.getByTestId('optionsListAssigneeAvatars')).toBeInTheDocument();
+    // We no longer render the raw IDs in the collapsed selection preview.
+    expect(control.queryByText('uid-1')).not.toBeInTheDocument();
+    expect(control.queryByText('uid-2')).not.toBeInTheDocument();
+  });
+
+  test('assignee field shows a dedicated avatar for \"No assignees\" selection', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.uuid = 'testNoAssignees';
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setSelectedOptions(['__options_list_no_assignees__']);
+
+    const control = mountComponent(contextMock);
+    expect(control.getByTestId('optionsListNoAssigneesAvatar')).toBeInTheDocument();
   });
 });

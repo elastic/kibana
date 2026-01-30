@@ -29,6 +29,16 @@ const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
       hide_exists: true,
     },
   },
+  {
+    title: 'Assignee',
+    fieldName: 'kibana.alert.workflow_assignee_ids',
+    selectedOptions: [],
+    persist: true,
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
+  },
 ];
 
 const RULE_TYPES = [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];

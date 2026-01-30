@@ -285,6 +285,10 @@ export const OptionsListStrings = {
         defaultMessage: '{negate, plural, one {Exist} other {Exists}}',
         values: { negate },
       }),
+    getNoAssignees: () =>
+      i18n.translate('controls.optionsList.controlAndPopover.noAssignees', {
+        defaultMessage: 'No assignees',
+      }),
   },
   editorAndPopover: {
     getSortDirectionLegend: () =>

@@ -10,3 +10,9 @@
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
 export const MAX_OPTIONS_LIST_BULK_SELECT_SIZE = 100;
+
+/**
+ * Special selection value used by the Options List control when filtering
+ * `kibana.alert.workflow_assignee_ids` for documents with no assignees (missing field).
+ */
+export const NO_ASSIGNEES_OPTION_KEY = '__options_list_no_assignees__';

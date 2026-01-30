@@ -12,13 +12,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
+import { MAX_OPTIONS_LIST_REQUEST_SIZE, NO_ASSIGNEES_OPTION_KEY } from '../constants';
+import {
+  bulkGetUserProfilesWithAvatar,
+  getCachedUserProfileWithAvatar,
+} from '../utils/user_profile_lookup';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
@@ -82,6 +87,37 @@ export const OptionsListPopoverSuggestions = ({
     return (showOnlySelected ? selectedOptions : availableOptions) ?? [];
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
+  const [assigneeProfilesVersion, setAssigneeProfilesVersion] = useState(0);
+  const isAssigneeField = fieldName === 'kibana.alert.workflow_assignee_ids';
+
+  const suggestionUids = useMemo<string[]>(() => {
+    if (!isAssigneeField) return [];
+    return suggestions
+      .map((suggestion) => {
+        const value = typeof suggestion === 'object' ? suggestion.value : suggestion;
+        return String(value);
+      })
+      .filter((value) => Boolean(value) && value !== NO_ASSIGNEES_OPTION_KEY);
+  }, [isAssigneeField, suggestions]);
+
+  useEffect(() => {
+    if (!isAssigneeField) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        await bulkGetUserProfilesWithAvatar(suggestionUids);
+        if (!cancelled) setAssigneeProfilesVersion((v) => v + 1);
+      } catch {
+        // best-effort: if security/user profiles are unavailable, fall back to default rendering
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAssigneeField, suggestionUids]);
+
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
     if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
@@ -103,21 +139,55 @@ export const OptionsListPopoverSuggestions = ({
         suggestion = { value: suggestion };
       }
 
+      const rawValue = String(suggestion.value);
+      const userProfile =
+        isAssigneeField && rawValue !== NO_ASSIGNEES_OPTION_KEY
+          ? getCachedUserProfileWithAvatar(rawValue)
+          : undefined;
+      const assigneeLabel =
+        userProfile && userProfile !== null ? getUserDisplayName(userProfile.user) : undefined;
+
+      const isNoAssignees = isAssigneeField && rawValue === NO_ASSIGNEES_OPTION_KEY;
+
       return {
-        key: String(suggestion.value),
-        label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
+        key: rawValue,
+        label: String(
+          (isNoAssignees
+            ? OptionsListStrings.controlAndPopover.getNoAssignees()
+            : isAssigneeField
+              ? assigneeLabel
+              : undefined) ??
+            fieldFormatter(suggestion.value) ??
+            suggestion.value
+        ),
         checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
           showOnlySelected && invalidSelections.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
+        prepend:
+          isNoAssignees ? (
+            <UserAvatar size="s" />
+          ) : isAssigneeField && userProfile && userProfile !== null ? (
+            <UserAvatar user={userProfile.user} avatar={userProfile.data.avatar} size="s" />
+          ) : undefined,
         append:
           !showOnlySelected && suggestion?.docCount ? (
             <OptionsListPopoverSuggestionBadge documentCount={suggestion.docCount} />
           ) : undefined,
       } as EuiSelectableOption;
     });
+
+    // Special-case: allow filtering to “No assignees” even when `hideExists` is true.
+    if (isAssigneeField) {
+      options.unshift({
+        key: NO_ASSIGNEES_OPTION_KEY,
+        label: OptionsListStrings.controlAndPopover.getNoAssignees(),
+        checked: (selectedOptions ?? []).includes(NO_ASSIGNEES_OPTION_KEY) ? 'on' : undefined,
+        'data-test-subj': 'optionsList-control-selection-no-assignees',
+      });
+    }
 
     if (canLoadMoreSuggestions) {
       options.push({
@@ -145,6 +215,8 @@ export const OptionsListPopoverSuggestions = ({
     existsSelectableOption,
     canLoadMoreSuggestions,
     fieldFormatter,
+    isAssigneeField,
+    assigneeProfilesVersion,
     styles,
   ]);
 

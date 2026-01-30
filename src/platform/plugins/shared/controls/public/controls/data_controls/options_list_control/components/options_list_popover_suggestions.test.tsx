@@ -14,6 +14,18 @@ import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react'
 import { EuiThemeProvider } from '@elastic/eui';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
+let httpPostMock: jest.Mock;
+jest.mock('../../../../services/kibana_services', () => {
+  httpPostMock = jest.fn();
+  return {
+    coreServices: {
+      http: {
+        post: (...args: unknown[]) => httpPostMock(...args),
+      },
+    },
+  };
+});
+
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { OptionsListControlContext } from '../options_list_context_provider';
@@ -106,5 +118,64 @@ describe('Options list popover', () => {
     // ensure we don't fetch more than MAX_OPTIONS_LIST_REQUEST_SIZE
     fireEvent.scroll(suggestionsComponent.getByTestId('optionsList--scrollListener'));
     expect(contextMock.componentApi.requestSize$.getValue()).toBe(MAX_OPTIONS_LIST_REQUEST_SIZE);
+  });
+
+  test('renders user avatar + display name for assignee ids field', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
+
+    httpPostMock.mockResolvedValueOnce([
+      {
+        uid: 'uid-1',
+        enabled: true,
+        user: { username: 'user1', full_name: 'User One' },
+        data: { avatar: {} },
+      },
+    ]);
+
+    const suggestionsComponent = mountComponent(contextMock);
+
+    await waitFor(() => {
+      expect(httpPostMock).toHaveBeenCalled();
+      expect(suggestionsComponent.getByText('User One')).toBeInTheDocument();
+    });
+  });
+
+  test('assignee ids field shows a \"No assignees\" option and toggles does-not-exist state', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('kibana.alert.workflow_assignee_ids');
+    // emulate FilterGroup hiding the built-in exists option
+    const suggestionsComponent = mountComponent({
+      ...contextMock,
+      displaySettings: { hideExists: true } as any,
+    });
+
+    const option = await suggestionsComponent.findByTestId(
+      'optionsList-control-selection-no-assignees'
+    );
+    fireEvent.click(option);
+
+    expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith(
+      '__options_list_no_assignees__',
+      false
+    );
+  });
+
+  test('does not fetch user profiles for non-assignee fields', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.fieldName$.next('host.name');
+    contextMock.componentApi.setAvailableOptions([{ value: 'uid-1', docCount: 1 }]);
+
+    const suggestionsComponent = mountComponent(contextMock);
+
+    await waitFor(async () => {
+      const optionComponents = await suggestionsComponent.findAllByRole('option');
+      expect(optionComponents.length).toBeGreaterThan(0);
+    });
+
+    expect(httpPostMock).not.toHaveBeenCalled();
+    // Default behavior: raw value is displayed.
+    expect(suggestionsComponent.getByText('uid-1')).toBeInTheDocument();
   });
 });

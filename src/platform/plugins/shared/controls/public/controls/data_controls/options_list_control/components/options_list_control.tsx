@@ -8,7 +8,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
@@ -26,11 +26,17 @@ import { css } from '@emotion/react';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
+import { NO_ASSIGNEES_OPTION_KEY } from '../constants';
+import {
+  bulkGetUserProfilesWithAvatar,
+  getCachedUserProfileWithAvatar,
+} from '../utils/user_profile_lookup';
 import { OptionsListPopover } from './options_list_popover';
 
 const optionListControlStyles = {
@@ -70,6 +76,16 @@ const optionListControlStyles = {
     flexGrow: 1,
     textAlign: 'left',
   }),
+  assigneeAvatars: css({
+    display: 'flex',
+    alignItems: 'center',
+  }),
+  assigneeAvatarWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // overlap avatars slightly
+      marginLeft: `-${euiTheme.size.xs}`,
+      '&:first-of-type': { marginLeft: 0 },
+    }),
   inputButtonOverride: css({
     width: '100%',
     height: '100%',
@@ -132,6 +148,22 @@ export const OptionsListControl = ({
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
   const styles = useMemoCss(optionListControlStyles);
 
+  const isAssigneeField =
+    componentApi.fieldName$.getValue() === 'kibana.alert.workflow_assignee_ids';
+  const [assigneeProfilesVersion, setAssigneeProfilesVersion] = useState(0);
+
+  useEffect(() => {
+    if (!isAssigneeField) return;
+    const idsToFetch = (selectedOptions ?? [])
+      .map(String)
+      .filter((id) => id !== NO_ASSIGNEES_OPTION_KEY);
+    if (!idsToFetch.length) return;
+    // best-effort fetch; if unavailable or forbidden, we'll just render fallback avatars
+    bulkGetUserProfilesWithAvatar(idsToFetch)
+      .then(() => setAssigneeProfilesVersion((v) => v + 1))
+      .catch(() => {});
+  }, [isAssigneeField, selectedOptions]);
+
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
       hasSelections: !isEmpty(selectedOptions),
@@ -140,7 +172,7 @@ export const OptionsListControl = ({
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
           <EuiFlexItem css={styles.selectionWrapper} data-test-subj="optionsListSelections">
             <div className="eui-textTruncate">
-              {excludeSelected && (
+              {excludeSelected && !isAssigneeField && (
                 <>
                   <span css={styles.excludeSelected}>
                     {existsSelected
@@ -155,8 +187,51 @@ export const OptionsListControl = ({
                 </span>
               ) : (
                 <>
-                  {selectedOptions?.length
-                    ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
+                  {selectedOptions?.length ? (
+                    isAssigneeField ? (
+                      <span
+                        css={styles.assigneeAvatars}
+                        data-test-subj="optionsListAssigneeAvatars"
+                      >
+                        {selectedOptions.map((value) => {
+                          const key = String(value);
+                          if (key === NO_ASSIGNEES_OPTION_KEY) {
+                            return (
+                              <span
+                                key={key}
+                                css={styles.assigneeAvatarWrapper}
+                                data-test-subj="optionsListNoAssigneesAvatar"
+                              >
+                                <EuiToolTip
+                                  content={OptionsListStrings.controlAndPopover.getNoAssignees()}
+                                >
+                                  <UserAvatar size="s" />
+                                </EuiToolTip>
+                              </span>
+                            );
+                          }
+                          const profile = getCachedUserProfileWithAvatar(key);
+                          const avatar =
+                            profile && profile !== null ? (
+                              <UserAvatar
+                                user={profile.user}
+                                avatar={profile.data.avatar}
+                                size="s"
+                              />
+                            ) : (
+                              <EuiToolTip content={key}>
+                                <UserAvatar size="s" />
+                              </EuiToolTip>
+                            );
+                          return (
+                            <span key={key} css={styles.assigneeAvatarWrapper}>
+                              {avatar}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ) : (
+                      selectedOptions.map((value: OptionsListSelection, i, { length }) => {
                         const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
                         const isInvalid = invalidSelections?.has(value);
                         return (
@@ -168,7 +243,8 @@ export const OptionsListControl = ({
                           </span>
                         );
                       })
-                    : null}
+                    )
+                  ) : null}
                 </>
               )}
             </div>
@@ -215,6 +291,8 @@ export const OptionsListControl = ({
     componentApi.uuid,
     styles,
     customStrings,
+    isAssigneeField,
+    assigneeProfilesVersion,
   ]);
 
   const button = (

@@ -15,6 +15,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query';
+import { NO_ASSIGNEES_OPTION_KEY } from '../constants';
 
 export const buildFilter = (
   dataView: DataView,
@@ -27,6 +28,35 @@ export const buildFilter = (
   let newFilter: Filter | undefined;
   const field = dataView.getFieldByName(filterState.field_name);
   if (field) {
+    const isAssigneeField = filterState.field_name === 'kibana.alert.workflow_assignee_ids';
+    const selected = filterState.selected_options ?? [];
+    const hasNoAssigneesSelected = isAssigneeField && selected.includes(NO_ASSIGNEES_OPTION_KEY);
+    if (hasNoAssigneesSelected) {
+      const assigneeIds = selected.filter((v) => v !== NO_ASSIGNEES_OPTION_KEY);
+      const should = [
+        ...assigneeIds.map((id) => ({ match_phrase: { [field.name]: id } })),
+        { bool: { must_not: { exists: { field: field.name } } } },
+      ];
+      newFilter = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+          index: dataView.id,
+          type: 'custom',
+          key: field.name,
+          controlledBy: controlId,
+          ...(filterState.sectionId ? { group: filterState.sectionId } : {}),
+        },
+        query: {
+          bool: {
+            should,
+            minimum_should_match: 1,
+          },
+        },
+      };
+      return newFilter;
+    }
     if (filterState.exists_selected) {
       newFilter = buildExistsFilter(field, dataView);
     } else if (filterState.selected_options && filterState.selected_options.length > 0) {
@@ -38,7 +68,10 @@ export const buildFilter = (
   }
   if (newFilter) {
     newFilter.meta.key = field?.name;
-    if (filterState.exclude) newFilter.meta.negate = true;
+    // Special-case: assignee filtering never uses negation; selecting “No assignees” is additive (OR).
+    if (filterState.exclude && filterState.field_name !== 'kibana.alert.workflow_assignee_ids') {
+      newFilter.meta.negate = true;
+    }
     newFilter.meta.controlledBy = controlId;
     if (filterState.sectionId) newFilter.meta.group = filterState.sectionId;
   }
