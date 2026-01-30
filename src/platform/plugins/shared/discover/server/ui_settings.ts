@@ -48,9 +48,8 @@ export const getUiSettings: (
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
-    schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: 50 })
-      : schema.arrayOf(schema.string()),
+    // maxSize: 50 - aligns with security_solution/server/ui_settings.ts DEFAULT_INDEX_KEY
+    schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
@@ -178,7 +177,8 @@ export const getUiSettings: (
         'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    // maxSize: 10 - tie-breaker fields are typically just 1-3 fields for sorting tie resolution
+    schema: schema.arrayOf(schema.string(), { maxSize: 10 }),
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {

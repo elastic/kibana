@@ -26,7 +26,8 @@ export const referenceSchema = schema.object(
   { unknowns: 'forbid', meta: { id: 'kbn-content-management-utils-referenceSchema' } }
 );
 
-export const referencesSchema = schema.arrayOf(referenceSchema);
+// maxSize: 100 - aligns with references pattern in visualizations/event_annotation/graph cm_services.ts
+export const referencesSchema = schema.arrayOf(referenceSchema, { maxSize: 100 });
 
 export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T) =>
   schema.object(
@@ -41,7 +42,8 @@ export const savedObjectSchema = <T extends ObjectType<any>>(attributesSchema: T
       error: schema.maybe(apiError),
       attributes: attributesSchema,
       references: referencesSchema,
-      namespaces: schema.maybe(schema.arrayOf(schema.string())),
+      // maxSize: 100 - aligns with namespaces in fleet/server/types and visualizations cm_services.ts
+      namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       originId: schema.maybe(schema.string()),
       managed: schema.maybe(schema.boolean()),
     },
@@ -80,7 +82,8 @@ export const createOptionsSchemas = {
   overwrite: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
   refresh: schema.maybe(schema.boolean()),
-  initialNamespaces: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 100 - aligns with namespaces pattern
+  initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   managed: schema.maybe(schema.boolean()),
 };
 
@@ -92,17 +95,23 @@ export const searchOptionsSchemas = {
   perPage: schema.maybe(schema.number()),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 100 - aligns with searchFields pattern in visualizations/graph/event_annotation cm_services.ts
+  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   search: schema.maybe(schema.string()),
-  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  rootSearchFields: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 100 - aligns with searchFields pattern in visualizations/graph/event_annotation cm_services.ts
+  searchFields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })])),
+  // maxSize: 100 - aligns with searchFields pattern
+  rootSearchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 
-  hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  // maxSize: 100 - aligns with references pattern
+  hasReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])),
   hasReferenceOperator: schema.maybe(schemaAndOr),
-  hasNoReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])),
+  // maxSize: 100 - aligns with references pattern
+  hasNoReference: schema.maybe(schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])),
   hasNoReferenceOperator: schema.maybe(schemaAndOr),
   defaultSearchOperator: schema.maybe(schemaAndOr),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  // maxSize: 100 - aligns with namespaces pattern
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   type: schema.maybe(schema.string()),
 
   filter: schema.maybe(schema.string()),
@@ -136,7 +145,8 @@ export const searchResultSchema = <T extends ObjectType<any>, M extends ObjectTy
 ) =>
   schema.object(
     {
-      hits: schema.arrayOf(soSchema),
+      // maxSize: 10000 - search result hits; aligns with fleet/server/types items patterns
+      hits: schema.arrayOf(soSchema, { maxSize: 10000 }),
       pagination: schema.object({
         total: schema.number(),
         cursor: schema.maybe(schema.string()),

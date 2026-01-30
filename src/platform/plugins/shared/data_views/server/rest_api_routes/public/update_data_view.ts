@@ -35,12 +35,14 @@ const indexPatternUpdateSchema = schema.object({
   type: schema.maybe(schema.string()),
   typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   timeFieldName: schema.maybe(schema.string()),
+  // maxSize: 100 - aligns with filter patterns in kbn-lens-embeddable-utils config_builder schemas
   sourceFilters: schema.maybe(
     schema.arrayOf(
       schema.object({
         value: schema.string(),
         clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),

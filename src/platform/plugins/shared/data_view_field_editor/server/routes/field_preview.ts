@@ -38,9 +38,11 @@ const responseSchema = () => {
   return schema.object({
     values: schema.oneOf([
       // composite field
-      schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
+      // maxSize: 100 - field preview values; reasonable limit for preview response
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema, { maxSize: 100 })),
       // primitive field
-      schema.arrayOf(valueSchema),
+      // maxSize: 100 - field preview values; reasonable limit for preview response
+      schema.arrayOf(valueSchema, { maxSize: 100 }),
     ]),
     error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     status: schema.maybe(schema.number()),
