@@ -21,17 +21,21 @@ jest.mock('../dashboard_api/load_dashboard_api');
 describe('Dashboard Renderer', () => {
   dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
 
-  (loadDashboardApi as jest.Mock).mockImplementation(async () =>
-    buildMockDashboardApi({
-      overrides: {
-        pinned_panels: [
-          {
-            type: 'optionsListControl',
-          },
-        ] as DashboardPinnedPanelsState,
-      },
-    })
-  );
+  (loadDashboardApi as jest.Mock).mockImplementation(async ({ getCreationOptions }) => {
+    const { useControlsIntegration } = await (getCreationOptions?.() ?? Promise.resolve({}));
+    return {
+      useControlsIntegration,
+      ...buildMockDashboardApi({
+        overrides: {
+          pinned_panels: [
+            {
+              type: 'optionsListControl',
+            },
+          ] as DashboardPinnedPanelsState,
+        },
+      }),
+    };
+  });
 
   it('renders the dashboard control group and dashboard viewport', async () => {
     render(<DashboardRenderer />);
@@ -42,8 +46,12 @@ describe('Dashboard Renderer', () => {
     });
   });
 
-  it('renders only the dashboard viewport when showControlGroup is false', async () => {
-    render(<DashboardRenderer showControlGroup={false} />);
+  it('renders only the dashboard viewport when useControlsIntegration is false', async () => {
+    render(
+      <DashboardRenderer
+        getCreationOptions={() => Promise.resolve({ useControlsIntegration: false })}
+      />
+    );
 
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();
