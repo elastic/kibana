@@ -662,16 +662,32 @@ const ESQLEditorInternal = function ESQLEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
           const timeRange = data.query.timefilter.timefilter.getTime();
-          return (
-            (await memoizedFieldsFromESQL({
+
+          const [fields, dataView] = await Promise.all([
+            memoizedFieldsFromESQL({
               esqlQuery: queryToExecute,
               search: data.search.search,
               timeRange,
               signal: abortController.signal,
               variables: variablesService?.esqlVariables,
               dropNullColumns: true,
-            }).result) || []
+            }).result,
+            getESQLAdHocDataview({
+              dataViewsService: data.dataViews,
+              query: queryToExecute,
+            }),
+          ]);
+
+          const dimensionFields = new Set(
+            dataView.fields
+              .filter(({ timeSeriesDimension }) => timeSeriesDimension)
+              .map(({ name }) => name)
           );
+
+          return (fields || []).map((field) => ({
+            ...field,
+            timeSeriesDimension: dimensionFields.has(field.name),
+          }));
         }
         return [];
       },

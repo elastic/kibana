@@ -355,22 +355,28 @@ function suggestMetrics(
   return buildFieldSuggestions(context, types, wrap ? 'wrap' : 'plain');
 }
 
-/* Converts label field types into autocomplete suggestions. */
+/* Converts dimension fields into label autocomplete suggestions for PromQL selectors. */
 function suggestLabels(context?: ICommandContext): ISuggestionItem[] {
-  return buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+  return buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
 }
 
 function buildFieldSuggestions(
   context: ICommandContext | undefined,
   types: readonly string[],
-  wrap: 'wrap' | 'plain'
+  wrap: 'wrap' | 'plain',
+  onlyDimensions: boolean = false
 ): ISuggestionItem[] {
   if (!context?.columns) {
     return [];
   }
 
   return Array.from(context.columns.values())
-    .filter((column) => !column.userDefined && types.includes(column.type))
+    .filter(
+      (column) =>
+        !column.userDefined &&
+        types.includes(column.type) &&
+        (!onlyDimensions || column.timeSeriesDimension)
+    )
     .map((column) => {
       const text = wrap === 'wrap' ? `(${column.name})` : `${column.name} `;
 

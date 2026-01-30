@@ -169,9 +169,18 @@ export const mockContext: ICommandContext = {
         userDefined: true,
       },
     ],
-    ['keywordField', { name: 'keywordField', type: 'keyword', userDefined: false }],
-    ['any#Char$Field', { name: 'any#Char$Field', type: 'keyword', userDefined: false }],
-    ['textField', { name: 'textField', type: 'text', userDefined: false }],
+    [
+      'keywordField',
+      { name: 'keywordField', type: 'keyword', userDefined: false, timeSeriesDimension: true },
+    ],
+    [
+      'any#Char$Field',
+      { name: 'any#Char$Field', type: 'keyword', userDefined: false, timeSeriesDimension: true },
+    ],
+    [
+      'textField',
+      { name: 'textField', type: 'text', userDefined: false, timeSeriesDimension: true },
+    ],
     ['doubleField', { name: 'doubleField', type: 'double', userDefined: false }],
     ['integerField', { name: 'integerField', type: 'integer', userDefined: false }],
     [
