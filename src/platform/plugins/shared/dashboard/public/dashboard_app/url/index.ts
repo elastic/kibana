@@ -8,8 +8,4 @@
  */
 
 export { extractDashboardState } from './bwc';
-export {
-  loadAndRemoveAttachmentIdFromURL,
-  loadAndRemoveDashboardState,
-  startSyncingExpandedPanelState,
-} from './url_utils';
+export { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url_utils';
