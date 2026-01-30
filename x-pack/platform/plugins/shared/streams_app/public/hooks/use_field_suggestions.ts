@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { flattenObjectNestedLast } from '@kbn/object-utils';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useSimulatorSelector } from '../components/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine/use_stream_enrichment';
 import { selectPreviewRecords } from '../components/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
@@ -15,14 +17,26 @@ import type { Suggestion } from '../components/data_management/shared/autocomple
 
 /**
  * Hook for providing field suggestions from enrichment simulation data - to be used with Enrichment only
+ *
+ * When condition filtering is active and no documents match the condition,
+ * falls back to all samples to ensure field suggestions are always available.
  */
 export const useEnrichmentFieldSuggestions = (): Suggestion[] => {
   const previewRecords = useSimulatorSelector((state) => selectPreviewRecords(state.context));
+  const allSamples = useSimulatorSelector((state) => state.context.samples);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
 
   return useMemo(() => {
-    return createFieldSuggestions(previewRecords, detectedFields);
-  }, [previewRecords, detectedFields]);
+    // Fall back to all samples when condition-filtered records are empty.
+    // This ensures field suggestions are always available, even when
+    // creating/editing processors under conditions with 0% match rate.
+    const recordsForSuggestions =
+      previewRecords.length > 0
+        ? previewRecords
+        : (allSamples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[]);
+
+    return createFieldSuggestions(recordsForSuggestions, detectedFields);
+  }, [previewRecords, allSamples, detectedFields]);
 };
 
 /**
