@@ -78,61 +78,56 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await teardownLlmProxy(getService, { llmProxy, connectorId });
       });
 
-      it('returns summary and context for error log with additional context', async () => {
-        void llmProxy.interceptors.userMessage({
-          name: 'error-log-ai-insight',
-          response: MOCKED_AI_SUMMARY_ERROR,
-        });
+      const testCases = [
+        {
+          name: 'error',
+          getLogId: () => errorLogId,
+          getLogIndex: () => errorLogIndex,
+          mockedSummary: MOCKED_AI_SUMMARY_ERROR,
+          expectedContextTags: ['<CorrelatedLogSequence>', '<DistributedTrace>'],
+        },
+        {
+          name: 'info',
+          getLogId: () => infoLogId,
+          getLogIndex: () => infoLogIndex,
+          mockedSummary: MOCKED_AI_SUMMARY_INFO,
+          expectedContextTags: ['<CorrelatedLogSequence>'],
+        },
+      ];
 
-        const { status, body } = await observabilityAgentBuilderApi.editor({
-          endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
-          params: {
-            body: {
-              index: errorLogIndex,
-              id: errorLogId,
+      for (const testCase of testCases) {
+        it(`returns summary and context for ${testCase.name} log with additional context`, async () => {
+          llmProxy.clear();
+
+          const interceptorName = `${testCase.name}-log-ai-insight`;
+          void llmProxy.interceptors.userMessage({
+            name: interceptorName,
+            response: testCase.mockedSummary,
+          });
+
+          const { status, body } = await observabilityAgentBuilderApi.editor({
+            endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
+            params: {
+              body: {
+                index: testCase.getLogIndex(),
+                id: testCase.getLogId(),
+              },
             },
-          },
+          });
+
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          expect(status).to.be(200);
+          expect(body).to.have.property('summary');
+          expect(body).to.have.property('context');
+          expect(body.summary).to.contain(testCase.mockedSummary);
+
+          const { user: userMessage } = getLlmMessages(llmProxy, interceptorName);
+          for (const tag of testCase.expectedContextTags) {
+            expect(userMessage.content).to.contain(tag);
+          }
         });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        expect(status).to.be(200);
-        expect(body).to.have.property('summary');
-        expect(body).to.have.property('context');
-        expect(body.summary).to.contain(MOCKED_AI_SUMMARY_ERROR);
-
-        const { user: userMessage } = getLlmMessages(llmProxy, 'error-log-ai-insight');
-        expect(userMessage.content).to.contain('<CorrelatedLogSequence>');
-      });
-
-      it('returns summary and context for info log with additional context', async () => {
-        llmProxy.clear();
-
-        void llmProxy.interceptors.userMessage({
-          name: 'info-log-ai-insight',
-          response: MOCKED_AI_SUMMARY_INFO,
-        });
-
-        const { status, body } = await observabilityAgentBuilderApi.editor({
-          endpoint: 'POST /internal/observability_agent_builder/ai_insights/log',
-          params: {
-            body: {
-              index: infoLogIndex,
-              id: infoLogId,
-            },
-          },
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        expect(status).to.be(200);
-        expect(body).to.have.property('summary');
-        expect(body).to.have.property('context');
-        expect(body.summary).to.contain(MOCKED_AI_SUMMARY_INFO);
-
-        const { user: userMessage } = getLlmMessages(llmProxy, 'info-log-ai-insight');
-        expect(userMessage.content).to.contain('<CorrelatedLogSequence>');
-      });
+      }
     });
   });
 }
