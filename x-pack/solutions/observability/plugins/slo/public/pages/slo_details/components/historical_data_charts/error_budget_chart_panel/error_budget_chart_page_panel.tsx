@@ -12,61 +12,28 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useState } from 'react';
-import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { ChartData } from '../../../typings/slo';
-import type { TimeBounds } from '../types';
+import React, { useState } from 'react';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
+import type { ErrorBudgetChartPanelProps } from './types';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-export interface Props {
-  data: ChartData[];
-  isLoading: boolean;
-  slo: SLOWithSummaryResponse;
-  onBrushed?: (timeBounds: TimeBounds) => void;
-  hideHeaderDurationLabel?: boolean;
+interface Props extends ErrorBudgetChartPanelProps {
+  handleAttachToDashboardSave: SaveModalDashboardProps['onSave'];
 }
 
-export function ErrorBudgetChartPanel({
+export function ErrorBudgetChartPagePanel({
   data,
   isLoading,
   slo,
+  handleAttachToDashboardSave,
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
-  const { embeddable } = useKibana().services;
-
-  const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    async ({ dashboardId, newTitle, newDescription }) => {
-      const stateTransfer = embeddable!.getStateTransfer();
-      const embeddableInput = {
-        title: newTitle,
-        description: newDescription,
-        sloId: slo.id,
-        sloInstanceId: slo.instanceId,
-      };
-
-      const state = {
-        serializedState: embeddableInput,
-        type: SLO_ERROR_BUDGET_ID,
-      };
-
-      const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
-
-      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-        state: [state],
-        path,
-      });
-    },
-    [embeddable, slo.id, slo.instanceId]
-  );
 
   return (
     <>

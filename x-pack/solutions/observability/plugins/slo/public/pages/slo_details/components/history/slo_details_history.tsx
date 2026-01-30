@@ -16,7 +16,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
-import { HistoricalDataCharts } from '../historical_data_charts';
+import { HistoricalDataCharts } from '../historical_data_charts/historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';
 
 export interface Props {

@@ -8,13 +8,13 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { useKibana } from '../../../hooks/use_kibana';
-import { render } from '../../../utils/test_helper';
-import { buildSlo } from '../../../data/slo/slo';
-import { SliChartPanel } from './sli_chart_panel';
-import type { ChartData } from '../../../typings/slo';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { render } from '../../../../../utils/test_helper';
+import { buildSlo } from '../../../../../data/slo/slo';
+import { SliChartPagePanel } from './sli_chart_page_panel';
+import type { ChartData } from '../../../../../typings/slo';
 
-jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../../../hooks/use_kibana');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -44,7 +44,7 @@ describe('SliChartPanel', () => {
 
   it('renders the SLI chart panel', () => {
     const slo = buildSlo();
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} />);
+    render(<SliChartPagePanel data={mockChartData} isLoading={false} slo={slo} />);
 
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
   });
@@ -55,7 +55,7 @@ describe('SliChartPanel', () => {
       ...mockChartData,
       { key: new Date('2024-01-04').getTime(), value: 0.95 },
     ];
-    render(<SliChartPanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
+    render(<SliChartPagePanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
 
     // Should display the observed value from the last data point (95.0%)
     expect(screen.getByText('95.0%')).toBeTruthy();
@@ -68,7 +68,7 @@ describe('SliChartPanel', () => {
       ...mockChartData,
       { key: new Date('2024-01-04').getTime(), value: -1 }, // NO_DATA indicator
     ];
-    render(<SliChartPanel data={chartDataWithNoData} isLoading={false} slo={slo} />);
+    render(<SliChartPagePanel data={chartDataWithNoData} isLoading={false} slo={slo} />);
 
     // Should display '-' for NO_DATA
     expect(screen.getByText('-')).toBeTruthy();
@@ -91,7 +91,7 @@ describe('SliChartPanel', () => {
       },
     });
     // Empty data array - component should use slo.summary.status
-    render(<SliChartPanel data={[]} isLoading={false} slo={slo} />);
+    render(<SliChartPagePanel data={[]} isLoading={false} slo={slo} />);
 
     // Should display '-' for NO_DATA
     expect(screen.getByText('-')).toBeTruthy();
@@ -118,7 +118,7 @@ describe('SliChartPanel', () => {
       ...mockChartData,
       { key: new Date('2024-01-04').getTime(), value: 0.92 },
     ];
-    render(<SliChartPanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
+    render(<SliChartPagePanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
 
     // Should display the observed value from data (92.0%), not the summary value (98.0%)
     // Objective should be 95.0%

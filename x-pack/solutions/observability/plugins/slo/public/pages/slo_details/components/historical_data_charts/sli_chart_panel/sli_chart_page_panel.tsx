@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { ChartData } from '../../../typings/slo';
-import { getSloChartState, isSloFailed } from '../utils/is_slo_failed';
-import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import type { TimeBounds } from '../types';
-import { WideChart } from './wide_chart';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import type { ChartData } from '../../../../../typings/slo';
+import { getSloChartState, isSloFailed } from '../../../utils/is_slo_failed';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
+import type { TimeBounds } from '../../../types';
+import { WideChart } from '../../wide_chart';
 
 export interface Props {
   data: ChartData[];
@@ -26,7 +26,7 @@ export interface Props {
   hideHeaderDurationLabel?: boolean;
 }
 
-export function SliChartPanel({
+export function SliChartPagePanel({
   data,
   isLoading,
   slo,

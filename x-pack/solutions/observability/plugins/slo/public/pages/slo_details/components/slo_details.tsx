@@ -13,7 +13,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
-import { HistoricalDataCharts } from './historical_data_charts';
+import { HistoricalDataCharts } from './historical_data_charts/historical_data_charts';
 import { SloDetailsHistory } from './history/slo_details_history';
 import { Definition } from './definition/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
@@ -69,7 +69,11 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, renderMode = 
 
         <EuiFlexGroup direction="column" gutterSize="l">
           <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} renderMode={renderMode} />
-          <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
+          <HistoricalDataCharts
+            slo={slo}
+            isAutoRefreshing={isAutoRefreshing}
+            isFlyout={renderMode === 'flyout'}
+          />
           <EventsChartPanel slo={slo} range={range} />
         </EuiFlexGroup>
       </EuiFlexGroup>
