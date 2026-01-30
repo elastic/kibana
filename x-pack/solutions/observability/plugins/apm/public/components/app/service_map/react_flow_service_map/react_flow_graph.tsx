@@ -152,8 +152,8 @@ function ReactFlowGraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  // Close popover when user starts panning/dragging the map
-  const handleMoveStart = useCallback(() => {
+  // Close popover when user starts dragging (map panning or node dragging)
+  const handleDragStart = useCallback(() => {
     if (selectedNodeForPopover || selectedEdgeForPopover) {
       handlePopoverClose();
     }
@@ -228,7 +228,8 @@ function ReactFlowGraphInner({
         onNodeClick={handleNodeClick}
         onEdgeClick={handleEdgeClick}
         onPaneClick={handlePaneClick}
-        onMoveStart={handleMoveStart}
+        onMoveStart={handleDragStart}
+        onNodeDragStart={handleDragStart}
         onInit={onInit}
         fitView
         fitViewOptions={fitViewOptions}
