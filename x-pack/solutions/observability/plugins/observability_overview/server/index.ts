@@ -9,5 +9,5 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ObservabilityOverviewServerPlugin } = await import('./plugin');
-  return new ObservabilityOverviewServerPlugin(initializerContext);
+  return new ObservabilityOverviewServerPlugin();
 }
