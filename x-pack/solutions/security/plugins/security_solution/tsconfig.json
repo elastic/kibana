@@ -271,6 +271,8 @@
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/babel-register",
+    "@kbn/core-security-common"
   ]
 }
