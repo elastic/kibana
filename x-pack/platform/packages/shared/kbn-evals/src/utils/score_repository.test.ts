@@ -77,6 +77,8 @@ describe('EvaluationScoreRepository', () => {
         putIndexTemplate: jest.fn(),
         getDataStream: jest.fn(),
         createDataStream: jest.fn(),
+        create: jest.fn(),
+        delete: jest.fn(),
       },
       helpers: {
         bulk: jest.fn(),
@@ -423,7 +425,9 @@ describe('EvaluationScoreRepository', () => {
       const result = await repository.getScoresByRunId('non-existent-run');
 
       expect(result).toEqual([]);
-      expect(mockLog.info).toHaveBeenCalledWith('Retrieved 0 scores for run ID: non-existent-run');
+      expect(mockLog.info).toHaveBeenCalledWith(
+        'Retrieved 0 scores for run ID: non-existent-run'
+      );
     });
 
     it('should handle search errors gracefully', async () => {
@@ -439,4 +443,5 @@ describe('EvaluationScoreRepository', () => {
       );
     });
   });
+
 });

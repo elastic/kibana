@@ -2061,6 +2061,7 @@
     "selenium-webdriver": "4.39.0",
     "sharp": "0.34.4",
     "simple-git": "3.27.0",
+    "simple-statistics": "^7.8.8",
     "sinon": "19.0.2",
     "sort-package-json": "3.2.1",
     "source-map": "0.7.6",

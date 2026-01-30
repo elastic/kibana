@@ -85,7 +85,6 @@ export interface RunStats {
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
-
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
