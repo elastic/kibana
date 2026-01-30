@@ -17,6 +17,7 @@ import type {
   ProcessorType,
   ReplaceProcessor,
   SplitProcessor,
+  SortProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -61,6 +62,7 @@ import type {
   ReplaceFormState,
   SetFormState,
   SplitFormState,
+  SortFormState,
   TrimFormState,
   UppercaseFormState,
 } from './types';
@@ -82,6 +84,7 @@ export const SPECIALISED_TYPES = [
   'trim',
   'join',
   'split',
+  'sort',
   'concat',
 ];
 
@@ -275,6 +278,14 @@ const defaultSplitProcessorFormState = (): SplitFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultSortProcessorFormState = (): SortFormState => ({
+  action: 'sort' as const,
+  from: '',
+  order: 'asc',
+  ignore_failure: false,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -318,6 +329,7 @@ const defaultProcessorFormStateByType: Record<
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
   split: defaultSplitProcessorFormState,
+  sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -364,6 +376,7 @@ export const getFormStateFromActionStep = (
     step.action === 'trim' ||
     step.action === 'join' ||
     step.action === 'split' ||
+    step.action === 'sort' ||
     step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
@@ -648,6 +661,21 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as SplitProcessor,
+      };
+    }
+
+    if (formState.action === 'sort') {
+      const { from, order, to, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'sort',
+          from,
+          order,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SortProcessor,
       };
     }
 

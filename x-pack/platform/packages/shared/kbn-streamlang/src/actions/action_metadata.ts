@@ -648,6 +648,46 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  sort: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.sort.name', {
+      defaultMessage: 'Sort',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.sort.description', {
+      defaultMessage: 'Sort the elements of an array field in ascending or descending order',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.sort.usage', {
+      defaultMessage:
+        'Provide `from` for the array field to sort, optionally `to` for a target field, and `order` for sort direction ("asc" or "desc", defaults to "asc").',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.sort.examples.simple', {
+          defaultMessage: 'Sort an array in ascending order (default)',
+        }),
+        yaml: `- action: sort
+  from: tags`,
+      },
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.sort.examples.descending', {
+          defaultMessage: 'Sort an array in descending order into a new field',
+        }),
+        yaml: `- action: sort
+  from: values
+  to: sorted_values
+  order: desc`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.sort.tips.types', {
+        defaultMessage:
+          'Homogeneous arrays of numbers are sorted numerically. Arrays of strings or mixed types are sorted lexicographically.',
+      }),
+      i18n.translate('xpack.streamlang.actionMetadata.sort.tips.esql', {
+        defaultMessage: 'In ES|QL, uses the MV_SORT function which sorts multivalued fields.',
+      }),
+    ],
+  },
+
   concat: {
     name: i18n.translate('xpack.streamlang.actionMetadata.concat.name', {
       defaultMessage: 'Concat',

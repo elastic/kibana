@@ -492,6 +492,30 @@ export const splitProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<SplitProcessor>;
 
 /**
+ * Sort processor
+ */
+export type SortOrder = 'asc' | 'desc';
+export const sortOrders = ['asc', 'desc'] as const;
+
+export interface SortProcessor extends ProcessorBaseWithWhere {
+  action: 'sort';
+  from: string;
+  to?: string;
+  order?: SortOrder;
+}
+
+export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('sort'),
+  from: StreamlangSourceField.describe('Array field to sort'),
+  to: z
+    .optional(StreamlangTargetField)
+    .describe('Target field for the sorted array (defaults to source)'),
+  order: z
+    .optional(z.enum(sortOrders))
+    .describe('Sort order - "asc" (ascending) or "desc" (descending). Defaults to "asc"'),
+}) satisfies z.Schema<SortProcessor>;
+
+/**
  * Concat processor
  */
 
@@ -554,6 +578,7 @@ export type StreamlangProcessorDefinition =
   | TrimProcessor
   | JoinProcessor
   | SplitProcessor
+  | SortProcessor
   | ConcatProcessor
   | ManualIngestPipelineProcessor;
 
@@ -574,6 +599,7 @@ export const streamlangProcessorSchema = z.union([
   trimProcessorSchema,
   joinProcessorSchema,
   splitProcessorSchema,
+  sortProcessorSchema,
   convertProcessorSchema,
   concatProcessorSchema,
   manualIngestPipelineProcessorSchema,
