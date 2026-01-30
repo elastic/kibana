@@ -189,8 +189,7 @@ function incompleteBeta(x: number, a: number, b: number): number {
     return 1;
   }
 
-  const logBeta =
-    gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x);
+  const logBeta = gammaln(a + b) - gammaln(a) - gammaln(b) + a * Math.log(x) + b * Math.log(1 - x);
   const bt = Math.exp(logBeta);
 
   if (x < (a + 1) / (a + b + 2)) {
@@ -201,9 +200,9 @@ function incompleteBeta(x: number, a: number, b: number): number {
 }
 
 function betaContinuedFraction(a: number, b: number, x: number): number {
-  let qab = a + b;
-  let qap = a + 1;
-  let qam = a - 1;
+  const qab = a + b;
+  const qap = a + 1;
+  const qam = a - 1;
   let c = 1;
   let d = 1 - (qab * x) / qap;
 
@@ -247,4 +246,3 @@ function betaContinuedFraction(a: number, b: number, x: number): number {
 
   return h;
 }
-

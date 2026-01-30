@@ -214,7 +214,9 @@ describe('EvaluationScoreRepository', () => {
       mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false as any);
       mockEsClient.indices.putIndexTemplate.mockRejectedValue(error);
 
-      await expect(repository.exportScores(mockDocuments)).rejects.toThrow('Template creation failed');
+      await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
+        'Template creation failed'
+      );
 
       expect(mockLog.error).toHaveBeenCalledWith('Failed to create index template:', error);
     });
@@ -422,9 +424,7 @@ describe('EvaluationScoreRepository', () => {
       const result = await repository.getScoresByRunId('non-existent-run');
 
       expect(result).toEqual([]);
-      expect(mockLog.info).toHaveBeenCalledWith(
-        'Retrieved 0 scores for run ID: non-existent-run'
-      );
+      expect(mockLog.info).toHaveBeenCalledWith('Retrieved 0 scores for run ID: non-existent-run');
     });
 
     it('should handle search errors gracefully', async () => {
@@ -440,5 +440,4 @@ describe('EvaluationScoreRepository', () => {
       );
     });
   });
-
 });

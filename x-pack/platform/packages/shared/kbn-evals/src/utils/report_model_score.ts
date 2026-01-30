@@ -10,8 +10,8 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import { hostname } from 'os';
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
 import type { Model } from '@kbn/inference-common';
+import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
 import { getGitMetadata } from './git_metadata';
 import { getCurrentTraceId } from './tracing';
 import type { RanExperiment } from '../types';
@@ -71,7 +71,10 @@ export async function buildFlattenedScoreDocuments({
       let runEntry: (typeof runsById)[string] | undefined;
       if (evalRunInfo.experimentRunId && runsById[evalRunInfo.experimentRunId]) {
         runEntry = runsById[evalRunInfo.experimentRunId];
-      } else if (evalRunInfo.exampleIndex !== undefined && evalRunInfo.repetitionIndex !== undefined) {
+      } else if (
+        evalRunInfo.exampleIndex !== undefined &&
+        evalRunInfo.repetitionIndex !== undefined
+      ) {
         runEntry = runsList.find(
           (run) =>
             run.exampleIndex === evalRunInfo.exampleIndex &&
@@ -158,4 +161,3 @@ export async function exportEvaluations(
     );
   }
 }
-

@@ -37,9 +37,7 @@ export const compareCmd: Command<void> = {
 
     const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL ?? DEFAULT_EVALUATIONS_ES_URL;
     if (!process.env.EVALUATIONS_ES_URL) {
-      log.warning(
-        `EVALUATIONS_ES_URL not set; defaulting to ${DEFAULT_EVALUATIONS_ES_URL}.`
-      );
+      log.warning(`EVALUATIONS_ES_URL not set; defaulting to ${DEFAULT_EVALUATIONS_ES_URL}.`);
     }
 
     const esClient = createEsClientForTesting({ esUrl: evaluationsEsUrl });

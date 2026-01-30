@@ -61,7 +61,11 @@ describe('buildFlattenedScoreDocuments', () => {
         datasetId: 'dataset-1',
         datasetName: 'Dataset 1',
         runs: {
-          'run-1': { datasetExampleId: 'example-2', traceId: 'trace-1', input: { question: 'two' } },
+          'run-1': {
+            datasetExampleId: 'example-2',
+            traceId: 'trace-1',
+            input: { question: 'two' },
+          },
         },
         evaluationRuns: [
           {
