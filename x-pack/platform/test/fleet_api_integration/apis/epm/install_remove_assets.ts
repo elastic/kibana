@@ -1210,11 +1210,6 @@ const expectAssetsInstalled = ({
                   type: 'epm-packages-assets',
                 },
                 {
-                  id: '5f10bbdb-7505-52c9-b244-160447fb3d59',
-                  path: 'all_assets-0.2.0/elasticsearch/.DS_Store',
-                  type: 'epm-packages-assets',
-                },
-                {
                   id: 'f8da8ce3-77bb-5fa9-ad05-9f362684d494',
                   path: 'all_assets-0.2.0/elasticsearch/esql_view/test_query.yml',
                   type: 'epm-packages-assets',
@@ -1318,13 +1313,15 @@ const expectAssetsInstalled = ({
               verification_key_id: null,
             };
 
-      expectedSavedObject.installed_es.forEach((item) => {
-        expect(
-          sortedRes.installed_es.find(
-            (asset: any) => asset.type === item.type && asset.id === item.id
-          )
-        ).to.not.be(undefined);
-      });
+      expectedSavedObject.installed_es
+        .filter((item) => item.type !== 'knowledge_base') // Exclude knowledge_base types as they are installed asynchronously
+        .forEach((item) => {
+          expect(
+            sortedRes.installed_es.find(
+              (asset: any) => asset.type === item.type && asset.id === item.id
+            )
+          ).to.not.be(undefined);
+        });
       expect({ ...sortedRes, installed_es: [] }).eql({
         ...expectedSavedObject,
         installed_es: [],
