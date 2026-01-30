@@ -115,10 +115,10 @@ export class AlertActionsClient {
         BY group_hash
       | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
       | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
-    `;
+    `.toRequest();
 
     return queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.print() })
+      await this.queryService.executeQuery({ query: query.query })
     );
   }
 
@@ -159,10 +159,10 @@ export class AlertActionsClient {
       | SORT @timestamp DESC
       | RENAME rule.id AS rule_id
       | KEEP @timestamp, group_hash, episode_id, rule_id
-      | LIMIT 1`;
+      | LIMIT 1`.toRequest();
 
     const result = queryResponseToRecords<AlertEventRecord>(
-      await this.queryService.executeQuery({ query: query.print() })
+      await this.queryService.executeQuery({ query: query.query })
     );
 
     if (result.length === 0) {
