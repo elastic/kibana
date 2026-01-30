@@ -56,6 +56,9 @@ Analyze this data stream and determine if an ingest pipeline is needed. Use an *
 
 {{{stream.description}}}
 
+## Features
+{{{features}}}
+
 ---
 
 ## Dataset Analysis

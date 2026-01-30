@@ -68,14 +68,16 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { inferenceClient, scopedClusterClient, streamsClient, featureClient } =
+      await getScopedClients({
+        request,
+      });
 
     const stream = await streamsClient.getStream(params.path.name);
     if (!Streams.ingest.all.Definition.is(stream)) {
       throw new StatusError('Partitioning suggestions are only available for ingest streams', 400);
     }
+    const { hits: features } = await featureClient.getFeatures(params.path.name, { type: [] });
 
     const partitionsPromise = partitionStream({
       definition: stream,
@@ -86,6 +88,7 @@ export const suggestPartitionsRoute = createServerRoute({
       end: params.body.end,
       maxSteps: 1, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
       signal: getRequestAbortSignal(request),
+      features,
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the

@@ -4,5 +4,8 @@ Stream name:
 Stream description:
 - {{{stream.description}}}
 
+Features:
+{{{features}}}
+
 Initial clustering:
 {{{initial_clustering}}}
