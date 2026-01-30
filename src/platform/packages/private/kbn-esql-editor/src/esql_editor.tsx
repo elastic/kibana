@@ -474,13 +474,24 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, []);
 
-  const styles = esqlEditorStyles(
-    theme.euiTheme,
-    editorHeight,
-    Boolean(editorMessages.errors.length),
-    Boolean(editorMessages.warnings.length),
-    Boolean(editorIsInline),
-    Boolean(hasOutline)
+  const styles = useMemo(
+    () =>
+      esqlEditorStyles(
+        theme.euiTheme,
+        editorHeight,
+        Boolean(editorMessages.errors.length),
+        Boolean(editorMessages.warnings.length),
+        Boolean(editorIsInline),
+        Boolean(hasOutline)
+      ),
+    [
+      theme.euiTheme,
+      editorHeight,
+      editorMessages.errors.length,
+      editorMessages.warnings.length,
+      editorIsInline,
+      hasOutline,
+    ]
   );
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
@@ -872,10 +883,10 @@ const ESQLEditorInternal = function ESQLEditor({
         allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
       }
 
-      const unerlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
+      const underlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
       const nonOverlappingWarnings = filterOutWarningsOverlappingWithErrors(
         allErrors,
-        unerlinedWarnings
+        underlinedWarnings
       );
 
       const underlinedMessages = [...allErrors, ...nonOverlappingWarnings];
@@ -966,14 +977,16 @@ const ESQLEditorInternal = function ESQLEditor({
           parsedErrors.length ? parsedErrors : []
         );
         return;
-      } else {
-        queryValidation(subscription).catch(() => {});
       }
-      return () => (subscription.active = false);
+      queryValidation(subscription)
+        .catch(() => {})
+        .finally(() => {
+          subscription.active = false;
+        });
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code, queryValidation]
+    [serverErrors, serverWarning, code, codeWhenSubmitted, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -997,6 +1010,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const inlineCompletionsProvider = useMemo(() => {
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
+
+  const codeEditorHoverProvider = useMemo(
+    () => ({
+      provideHover: (
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken
+      ) => hoverProvider?.provideHover?.(model, position, token) ?? { contents: [] },
+    }),
+    [hoverProvider]
+  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editorRef.current) {
@@ -1197,14 +1221,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}
-                hoverProvider={{
-                  provideHover: (model, position, token) => {
-                    if (!hoverProvider?.provideHover) {
-                      return { contents: [] };
-                    }
-                    return hoverProvider?.provideHover(model, position, token);
-                  },
-                }}
+                hoverProvider={codeEditorHoverProvider}
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 onChange={onQueryUpdate}
@@ -1368,7 +1385,7 @@ const ESQLEditorInternal = function ESQLEditor({
         onErrorClick={onErrorClick}
       />
       {createPortal(
-        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
+        Object.keys(popoverPosition).length > 0 && (
           <div
             tabIndex={0}
             style={{
@@ -1377,7 +1394,7 @@ const ESQLEditorInternal = function ESQLEditor({
               borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
-              zIndex: 1001,
+              zIndex: theme.euiTheme.levels.modal,
               border: theme.euiTheme.border.thin,
             }}
             ref={popoverRef}
