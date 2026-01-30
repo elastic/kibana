@@ -27,18 +27,17 @@ import {
   URL_FULL,
 } from '@kbn/observability-shared-plugin/common';
 import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
-import { ERROR_GROUP_ID as ERROR_GROUP_ID_MD } from '@kbn/observability-shared-plugin/common';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
 import { getFirstSeenPerGroup } from './get_first_seen_per_group';
 import { getDownstreamServicePerGroup } from './get_downstream_service_resource';
 
-export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>[number];
+export type SpanExceptionSample = Awaited<ReturnType<typeof getSpanExceptionSamples>>[number];
 
 // Span exceptions captured by Otel agents are represented as APM error documents
 // This function thus returns both APM error groups and Otel span exceptions
-export async function getApplicationExceptionGroups({
+export async function getSpanExceptionGroups({
   apmEventClient,
   startMs,
   endMs,
@@ -57,7 +56,7 @@ export async function getApplicationExceptionGroups({
   size: number;
   logger: Logger;
 }) {
-  const errorGroups = await getErrorGroupSamples({
+  const spanExceptionSamples = await getSpanExceptionSamples({
     apmEventClient,
     startMs,
     endMs,
@@ -69,21 +68,32 @@ export async function getApplicationExceptionGroups({
 
   const [firstSeenMap, downstreamServiceMap] = await Promise.all([
     includeFirstSeen
-      ? getFirstSeenPerGroup({ apmEventClient, errorGroups, endMs, logger })
+      ? getFirstSeenPerGroup({
+          apmEventClient,
+          spanExceptionSamples,
+          endMs,
+          logger,
+        })
       : new Map<string, string>(),
-    getDownstreamServicePerGroup({ apmEventClient, errorGroups, startMs, endMs, logger }),
+    getDownstreamServicePerGroup({
+      apmEventClient,
+      spanExceptionSamples,
+      startMs,
+      endMs,
+      logger,
+    }),
   ]);
 
-  return errorGroups.map((errorGroup) => {
-    const groupId = errorGroup.sample[ERROR_GROUP_ID_MD];
+  return spanExceptionSamples.map((sample) => {
+    const groupId = sample.sample[ERROR_GROUP_ID];
     const downstreamServiceResource = downstreamServiceMap.get(groupId);
     const firstSeen = firstSeenMap.get(groupId);
 
-    return { ...errorGroup, firstSeen, downstreamServiceResource };
+    return { ...sample, firstSeen, downstreamServiceResource };
   });
 }
 
-async function getErrorGroupSamples({
+async function getSpanExceptionSamples({
   apmEventClient,
   startMs,
   endMs,
@@ -100,7 +110,7 @@ async function getErrorGroupSamples({
   size: number;
   logger: Logger;
 }) {
-  logger.debug(`Fetching error groups, kqlFilter: ${kqlFilter ?? 'none'}`);
+  logger.debug(`Fetching span exception samples, kqlFilter: ${kqlFilter ?? 'none'}`);
 
   const response = await apmEventClient.search('get_span_exceptions', {
     apm: {
@@ -122,7 +132,7 @@ async function getErrorGroupSamples({
       },
     },
     aggs: {
-      error_groups: {
+      span_exception_groups: {
         terms: {
           field: ERROR_GROUP_ID,
           size,
@@ -172,7 +182,7 @@ async function getErrorGroupSamples({
     },
   });
 
-  const buckets = response.aggregations?.error_groups?.buckets ?? [];
+  const buckets = response.aggregations?.span_exception_groups?.buckets ?? [];
 
   return buckets.map((bucket) => {
     const sample = unwrapEsFields(bucket.sample?.hits?.hits?.[0]?.fields) as {

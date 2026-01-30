@@ -84,7 +84,7 @@ export function createGetLogGroupsTool({
       Returns categorized log messages and exceptions from logs and spans within a specified time range.
       
       Returns three categories:
-      - **applicationExceptionGroups**: Span exceptions (errors) collected in an application
+      - **spanExceptionGroups**: Span exceptions (errors) collected in an application
       - **logExceptionGroups**: Logs with exception attributes
       - **nonExceptionLogGroups**: Regular log messages without exception attributes
 

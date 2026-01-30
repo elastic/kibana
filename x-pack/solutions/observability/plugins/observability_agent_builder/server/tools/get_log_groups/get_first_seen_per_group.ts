@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
 import type { ApmEventClient } from './types';
-import type { ErrorGroupSample } from './get_application_exception_groups';
+import type { SpanExceptionSample } from './get_span_exception_groups';
 import { getTotalHits } from '../../utils/get_total_hits';
 
 const LOOKBACK_DAYS = 7;
@@ -28,12 +28,12 @@ const LOOKBACK_DAYS = 7;
  */
 export async function getFirstSeenPerGroup({
   apmEventClient,
-  errorGroups,
+  spanExceptionSamples: errorGroups,
   endMs,
   logger,
 }: {
   apmEventClient: ApmEventClient;
-  errorGroups: ErrorGroupSample[];
+  spanExceptionSamples: SpanExceptionSample[];
   endMs: number;
   logger: Logger;
 }): Promise<Map<string, string>> {

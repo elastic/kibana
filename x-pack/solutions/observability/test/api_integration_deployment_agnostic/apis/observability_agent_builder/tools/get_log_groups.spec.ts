@@ -54,7 +54,7 @@ async function setupSynthtraceData(synthtrace: ReturnType<typeof SynthtraceProvi
 
   await historicalClient.index(historicalGenerator);
 
-  // Generate APM error data (applicationExceptionGroups)
+  // Generate APM error data (spanExceptionGroups)
   const { client: apmClient, generator: apmGenerator } = generateErrorGroupsData({
     range,
     apmEsClient,
@@ -118,17 +118,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const data = results[0].data;
 
       // Verify structure
-      expect(data).to.have.property('applicationExceptionGroups');
+      expect(data).to.have.property('spanExceptionGroups');
       expect(data).to.have.property('logExceptionGroups');
       expect(data).to.have.property('nonExceptionLogGroups');
 
-      const { applicationExceptionGroups, logExceptionGroups, nonExceptionLogGroups } = data;
+      const { spanExceptionGroups, logExceptionGroups, nonExceptionLogGroups } = data;
 
       // Should have application exception groups (from APM)
-      expect(applicationExceptionGroups).to.be.an('array');
-      expect(applicationExceptionGroups.length).to.be.greaterThan(0);
+      expect(spanExceptionGroups).to.be.an('array');
+      expect(spanExceptionGroups.length).to.be.greaterThan(0);
 
-      for (const group of applicationExceptionGroups) {
+      for (const group of spanExceptionGroups) {
         expect(group.count).to.be.greaterThan(0);
         expect(group.lastSeen).to.be.a('string');
 
@@ -163,7 +163,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('applicationExceptionGroups', () => {
+    describe('spanExceptionGroups', () => {
       describe('when filtering by service.name', () => {
         it('returns only error groups from the specified service', async () => {
           const results = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
@@ -175,11 +175,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          expect(applicationExceptionGroups).to.have.length(2);
+          expect(spanExceptionGroups).to.have.length(2);
 
-          for (const group of applicationExceptionGroups) {
+          for (const group of spanExceptionGroups) {
             const sample = group.sample;
             expect(sample['service.name']).to.be('payment-service');
           }
@@ -197,11 +197,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          expect(applicationExceptionGroups).to.have.length(1);
+          expect(spanExceptionGroups).to.have.length(1);
 
-          const sample = applicationExceptionGroups[0].sample;
+          const sample = spanExceptionGroups[0].sample;
           expect(sample['error.exception.type']).to.be('TimeoutException');
         });
       });
@@ -217,11 +217,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          expect(applicationExceptionGroups.length).to.be.greaterThan(0);
+          expect(spanExceptionGroups.length).to.be.greaterThan(0);
 
-          for (const group of applicationExceptionGroups) {
+          for (const group of spanExceptionGroups) {
             expect(group).to.have.property('firstSeen');
             expect(group.firstSeen).to.be.a('string');
           }
@@ -237,9 +237,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          const oldGroup = applicationExceptionGroups.find((group) => {
+          const oldGroup = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.message'] === 'Cannot invoke method on null object';
           });
@@ -257,9 +257,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          const newGroup = applicationExceptionGroups.find((group) => {
+          const newGroup = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.type'] === 'ValidationException';
           });
@@ -280,10 +280,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
           // NullPointerException in payment-service has a stacktrace defined
-          const groupWithStackTrace = applicationExceptionGroups.find((group) => {
+          const groupWithStackTrace = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.type'] === 'NullPointerException';
           });
@@ -307,9 +307,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
-          const groupWithStackTrace = applicationExceptionGroups.find((group) => {
+          const groupWithStackTrace = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.type'] === 'NullPointerException';
           });
@@ -326,10 +326,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: { start: START, end: END },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
           // TimeoutException in payment-service has a downstream dependency
-          const groupWithDownstream = applicationExceptionGroups.find((group) => {
+          const groupWithDownstream = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.type'] === 'TimeoutException';
           });
@@ -344,10 +344,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: { start: START, end: END },
           });
 
-          const { applicationExceptionGroups } = results[0].data;
+          const { spanExceptionGroups } = results[0].data;
 
           // NullPointerException has no downstream dependency
-          const groupWithoutDownstream = applicationExceptionGroups.find((group) => {
+          const groupWithoutDownstream = spanExceptionGroups.find((group) => {
             const sample = group.sample;
             return sample['error.exception.type'] === 'NullPointerException';
           });
@@ -518,11 +518,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { applicationExceptionGroups, logExceptionGroups, nonExceptionLogGroups } =
-          results[0].data;
+        const { spanExceptionGroups, logExceptionGroups, nonExceptionLogGroups } = results[0].data;
 
         // Application exceptions should be filtered
-        for (const group of applicationExceptionGroups) {
+        for (const group of spanExceptionGroups) {
           expect(group.sample['service.name']).to.be('payment-service');
         }
 
@@ -548,7 +547,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(results.length).to.be(1);
       const data = results[0].data;
-      expect(data.applicationExceptionGroups.length).to.be.greaterThan(0);
+      expect(data.spanExceptionGroups.length).to.be.greaterThan(0);
       expect(data.logExceptionGroups.length).to.be.greaterThan(0);
       expect(data.nonExceptionLogGroups.length).to.be.greaterThan(0);
     });
@@ -593,11 +592,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        const { applicationExceptionGroups, logExceptionGroups, nonExceptionLogGroups } =
-          results[0].data;
+        const { spanExceptionGroups, logExceptionGroups, nonExceptionLogGroups } = results[0].data;
 
         // Each category should have at most 2 groups
-        expect(applicationExceptionGroups.length).to.be.lessThan(3);
+        expect(spanExceptionGroups.length).to.be.lessThan(3);
         expect(logExceptionGroups.length).to.be.lessThan(3);
         // nonExceptionLogGroups may have up to 4 (2 high severity + 2 low severity)
         expect(nonExceptionLogGroups.length).to.be.lessThan(5);
@@ -626,8 +624,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const largeData = largeSizeResults[0].data;
 
         // Larger size should return at least as many (likely more) groups
-        expect(largeData.applicationExceptionGroups.length).to.be.greaterThan(
-          smallData.applicationExceptionGroups.length
+        expect(largeData.spanExceptionGroups.length).to.be.greaterThan(
+          smallData.spanExceptionGroups.length
         );
       });
     });

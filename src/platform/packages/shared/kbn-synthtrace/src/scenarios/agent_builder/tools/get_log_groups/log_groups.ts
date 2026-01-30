@@ -12,7 +12,7 @@
  *
  * Story: Generates diverse log patterns, APM errors, and OTel log exceptions for testing
  * the `get_log_groups` tool. This tool returns three categories:
- * - applicationExceptionGroups: Span exceptions from APM
+ * - spanExceptionGroups: Span exceptions from APM
  * - logExceptionGroups: OTel log exceptions
  * - nonExceptionLogGroups: Regular log messages
  *
@@ -211,7 +211,7 @@ export interface ErrorServiceConfig {
 
 /**
  * Default service configurations for testing error groups.
- * These will appear in `applicationExceptionGroups` response.
+ * These will appear in `spanExceptionGroups` response.
  */
 export const DEFAULT_ERROR_SERVICES: ErrorServiceConfig[] = [
   {
@@ -401,7 +401,7 @@ function buildDownstreamFailureSpan({
 
 /**
  * Generates APM error data for error groups testing.
- * These will appear in `applicationExceptionGroups` response.
+ * These will appear in `spanExceptionGroups` response.
  */
 export function generateErrorGroupsData({
   range,
@@ -523,7 +523,7 @@ export function generateLogExceptionGroupsData({
 /**
  * Generates all data for the get_log_groups tool:
  * - Regular log categories (nonExceptionLogGroups)
- * - APM error groups (applicationExceptionGroups)
+ * - APM error groups (spanExceptionGroups)
  * - OTel log exceptions (logExceptionGroups)
  */
 export function generateAllLogGroupsData({

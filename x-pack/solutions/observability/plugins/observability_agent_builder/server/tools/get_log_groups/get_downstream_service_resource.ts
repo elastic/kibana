@@ -17,7 +17,7 @@ import {
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
-import type { ErrorGroupSample } from './get_application_exception_groups';
+import type { SpanExceptionSample } from './get_span_exception_groups';
 
 /**
  * Fetches the name of the downstream service resource for errors that occurred during outbound calls.
@@ -25,37 +25,37 @@ import type { ErrorGroupSample } from './get_application_exception_groups';
  */
 export async function getDownstreamServicePerGroup({
   apmEventClient,
-  errorGroups,
+  spanExceptionSamples,
   startMs,
   endMs,
   logger,
 }: {
   apmEventClient: ApmEventClient;
-  errorGroups: ErrorGroupSample[];
+  spanExceptionSamples: SpanExceptionSample[];
   startMs: number;
   endMs: number;
   logger: Logger;
 }): Promise<Map<string, string>> {
-  const errorSamples = compact(
-    errorGroups.map((errorGroup) => {
-      const traceId = errorGroup.sample['trace.id'];
-      const serviceName = errorGroup.sample['service.name'];
-      const groupId = errorGroup.sample['error.grouping_key'];
+  const samples = compact(
+    spanExceptionSamples.map(({ sample }) => {
+      const traceId = sample['trace.id'];
+      const serviceName = sample['service.name'];
+      const groupId = sample['error.grouping_key'];
       if (traceId && serviceName && groupId) {
         return { traceId, serviceName, groupId };
       }
     })
   );
 
-  if (errorSamples.length === 0) {
+  if (samples.length === 0) {
     return new Map();
   }
 
-  logger.debug(`Fetching downstream service resource for ${errorSamples.length} error samples`);
+  logger.debug(`Fetching downstream service resource for ${samples.length} error samples`);
 
   const { responses } = await apmEventClient.msearch(
     'get_downstream_service_resource',
-    ...errorSamples.map(({ traceId, serviceName }) => ({
+    ...samples.map(({ traceId, serviceName }) => ({
       apm: {
         sources: [
           {
@@ -84,10 +84,10 @@ export async function getDownstreamServicePerGroup({
   );
 
   // msearch returns responses in the same order as the input queries,
-  // so responses[i] corresponds to errorSamples[i]
+  // so responses[i] corresponds to samples[i]
   const entries = compact(
     responses.map((response, i) => {
-      const { groupId } = errorSamples[i];
+      const { groupId } = samples[i];
       const hit = response.hits?.hits?.[0];
       if (!hit?.fields) {
         return null;

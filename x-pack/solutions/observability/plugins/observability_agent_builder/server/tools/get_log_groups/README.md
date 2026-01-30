@@ -6,7 +6,7 @@ Returns a comprehensive view of application health by grouping and categorizing 
 
 This tool returns three arrays:
 
-### `applicationExceptionGroups`
+### `spanExceptionGroups`
 
 - Span exceptions grouped by `error.grouping_key` (pre-computed hash based on exception type, stack trace fingerprint, and code location)
 - Includes errors from both Elastic APM agents and [OpenTelemetry span exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/)

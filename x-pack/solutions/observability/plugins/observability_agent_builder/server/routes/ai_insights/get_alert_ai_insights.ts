@@ -175,7 +175,7 @@ async function fetchAlertContext({
       });
       const hasGroups =
         (result.nonExceptionLogGroups?.length ?? 0) > 0 ||
-        (result.applicationExceptionGroups?.length ?? 0) > 0 ||
+        (result.spanExceptionGroups?.length ?? 0) > 0 ||
         (result.logExceptionGroups?.length ?? 0) > 0;
       return hasGroups ? { key: 'logGroups' as const, start, data: result } : null;
     } catch (err) {

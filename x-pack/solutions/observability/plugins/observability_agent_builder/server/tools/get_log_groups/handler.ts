@@ -14,7 +14,7 @@ import type {
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { getNonExceptionLogGroups } from './get_non_exception_logs_groups';
-import { getApplicationExceptionGroups } from './get_application_exception_groups';
+import { getSpanExceptionGroups } from './get_span_exception_groups';
 import { getLogExceptionGroups } from './get_log_exception_groups';
 
 export async function getToolHandler({
@@ -50,46 +50,44 @@ export async function getToolHandler({
   const endMs = parseDatemath(end, { roundUp: true });
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
-  const [applicationExceptionGroups, logExceptionGroups, nonExceptionLogGroups] = await Promise.all(
-    [
-      getApplicationExceptionGroups({
-        apmEventClient,
-        logger,
-        startMs,
-        endMs,
-        kqlFilter,
-        includeStackTrace,
-        includeFirstSeen,
-        size,
-      }),
-      getLogExceptionGroups({
-        core,
-        logger,
-        esClient,
-        index,
-        startMs,
-        endMs,
-        kqlFilter,
-        includeStackTrace,
-        size,
-        fields,
-      }),
-      getNonExceptionLogGroups({
-        core,
-        logger,
-        esClient,
-        index,
-        startMs,
-        endMs,
-        kqlFilter,
-        fields,
-        size,
-      }),
-    ]
-  );
+  const [spanExceptionGroups, logExceptionGroups, nonExceptionLogGroups] = await Promise.all([
+    getSpanExceptionGroups({
+      apmEventClient,
+      logger,
+      startMs,
+      endMs,
+      kqlFilter,
+      includeStackTrace,
+      includeFirstSeen,
+      size,
+    }),
+    getLogExceptionGroups({
+      core,
+      logger,
+      esClient,
+      index,
+      startMs,
+      endMs,
+      kqlFilter,
+      includeStackTrace,
+      size,
+      fields,
+    }),
+    getNonExceptionLogGroups({
+      core,
+      logger,
+      esClient,
+      index,
+      startMs,
+      endMs,
+      kqlFilter,
+      fields,
+      size,
+    }),
+  ]);
 
   return {
-    applicationExceptionGroups: orderBy(applicationExceptionGroups, ['count'], ['desc']),
+    spanExceptionGroups: orderBy(spanExceptionGroups, ['count'], ['desc']),
     logExceptionGroups: orderBy(logExceptionGroups, ['count'], ['desc']),
     nonExceptionLogGroups: orderBy(nonExceptionLogGroups, ['count'], ['desc']),
   };
