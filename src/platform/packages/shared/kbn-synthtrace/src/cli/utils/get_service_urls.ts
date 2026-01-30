@@ -104,11 +104,18 @@ async function getKibanaUrl({
       dispatcher: getFetchAgent(targetKibanaUrl),
     } as RequestInit);
 
-    const discoveredKibanaUrl =
+    let discoveredKibanaUrl =
       unredirectedResponse.headers
         .get('location')
         ?.replace('/spaces/enter', '')
         ?.replace('spaces/space_selector', '') || targetKibanaUrl;
+
+    // When redirected, it might only return the pathname, so we need to add the base URL back to it
+    if (discoveredKibanaUrl.startsWith('/')) {
+      url.pathname = discoveredKibanaUrl;
+    }
+
+    discoveredKibanaUrl = url.toString();
 
     const redirectedResponse = await fetch(discoveredKibanaUrl, {
       method: 'HEAD',
