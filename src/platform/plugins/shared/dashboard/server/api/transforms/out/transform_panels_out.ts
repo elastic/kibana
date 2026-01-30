@@ -95,7 +95,7 @@ function transformPanelProperties(
     transformedPanelConfig =
       transforms?.transformOut?.(
         config,
-        transformPanelReferencesOut(panelReferences, panelRefName),
+        panelReferences ? transformPanelReferencesOut(panelReferences, panelRefName) : undefined,
         containerReferences
       ) ?? defaultTransform(config);
   } catch (transformOutError) {
