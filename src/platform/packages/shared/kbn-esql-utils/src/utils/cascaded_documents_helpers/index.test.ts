@@ -15,7 +15,7 @@ import {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
-} from './cascaded_documents_helpers';
+} from '.';
 
 describe('cascaded documents helpers utils', () => {
   const dataViewMock = createStubDataView({
@@ -29,6 +29,14 @@ describe('cascaded documents helpers utils', () => {
         | STATS count = COUNT(bytes), average = AVG(memory)
               BY clientip
       `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
+    it('does not process a query if it contains a categorize function with a function argument', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(event.dataset))`;
 
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([]);
@@ -109,6 +117,15 @@ describe('cascaded documents helpers utils', () => {
       ]);
     });
 
+    it(`when the stats query provides unsupported functions as the by option, said functions should not be present in the returned metadata`, () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), CATEGORIZE(bytes)`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
     it('should return the appropriate metadata when there are multiple stats commands in the query if value of a group references a field that was defined by a preceding command', () => {
       const queryString = `
        FROM kibana_sample_data_logs 
@@ -129,20 +146,6 @@ describe('cascaded documents helpers utils', () => {
         { identifier: 'count', aggregation: 'SUM' },
         { identifier: 'Trend', aggregation: 'VALUES' },
       ]);
-    });
-
-    it(`when the stats query provides unsupported functions as the by option, said functions should not be present in the returned metadata`, () => {
-      const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), CATEGORIZE(bytes)`;
-
-      const result = getESQLStatsQueryMeta(queryString);
-
-      expect(result.groupByFields).toEqual([
-        {
-          field: 'CATEGORIZE(bytes)',
-          type: 'categorize',
-        },
-      ]);
-      expect(result.appliedFunctions).toEqual([{ identifier: 'var0', aggregation: 'AVG' }]);
     });
 
     it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
@@ -179,7 +182,7 @@ describe('cascaded documents helpers utils', () => {
 
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([]);
-      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
+      expect(result.appliedFunctions).toEqual([]);
     });
 
     it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
@@ -443,6 +446,28 @@ describe('cascaded documents helpers utils', () => {
 
       describe('function group operations', () => {
         describe('categorize operation', () => {
+          it('should throw an error if we attempt to construct a cascade query if the query contains a categorize function with a function argument', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(message))
+              `,
+            };
+
+            const nodePath = ['CATEGORIZE(TO_UPPER(message))'];
+            const nodePathMap = { 'CATEGORIZE(TO_UPPER(message))': 'some random pattern' };
+
+            expect(() => {
+              constructCascadeQuery({
+                query: editorQuery,
+                dataView: dataViewMock,
+                esqlVariables: [],
+                nodeType,
+                nodePath,
+                nodePathMap,
+              });
+            }).toThrow();
+          });
+
           it('should construct a valid cascade query for an un-named categorize operation', () => {
             const editorQuery: AggregateQuery = {
               esql: `
@@ -500,12 +525,12 @@ describe('cascaded documents helpers utils', () => {
           it('should construct a valid cascade query for an un-named categorize operation with a function as the argument', () => {
             const editorQuery: AggregateQuery = {
               esql: `
-                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(message))
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
               `,
             };
 
-            const nodePath = ['CATEGORIZE(TO_UPPER(message))'];
-            const nodePathMap = { 'CATEGORIZE(TO_UPPER(message))': 'some random pattern' };
+            const nodePath = ['CATEGORIZE(message)'];
+            const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
 
             const cascadeQuery = constructCascadeQuery({
               query: editorQuery,
@@ -525,7 +550,7 @@ describe('cascaded documents helpers utils', () => {
           it('should construct a valid cascade query for a named categorize operation with a function as the argument', () => {
             const editorQuery: AggregateQuery = {
               esql: `
-                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(TO_UPPER(message))
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(message)
               `,
             };
 

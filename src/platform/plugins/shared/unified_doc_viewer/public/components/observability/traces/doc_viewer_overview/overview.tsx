@@ -26,6 +26,7 @@ import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerExtensionParams } from '@kbn/discover-plugin/public/context_awareness/types';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
 import {
   DEFAULT_MARGIN_BOTTOM,
@@ -38,7 +39,6 @@ import { SpanLinks } from '../components/span_links';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { TraceWaterfall } from '../components/trace_waterfall';
 import { isTransaction } from '../helpers';
-import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import { TraceRootSpanProvider } from './hooks/use_fetch_trace_root_span';
 import { DocViewerExtensionActionsProvider } from '../../../../hooks/use_doc_viewer_extension_actions';
 
