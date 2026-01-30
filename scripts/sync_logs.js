@@ -1,12 +1,5 @@
 #!/usr/bin/env node
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 /**
  * Sync documents from a source Elasticsearch cluster to a destination cluster.
  * Runs in a loop: each cycle fetches documents (24h @timestamp window), transforms,
@@ -51,10 +44,7 @@ const BASE_QUERY = {
  * Uses config file (default config/kibana.dev.yml or --config), then env overrides.
  */
 function readKibanaConfig(configPath, log) {
-  const configPathToUse = path.resolve(
-    process.cwd(),
-    configPath || 'config/kibana.dev.yml'
-  );
+  const configPathToUse = path.resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
   let esConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
@@ -132,8 +122,8 @@ function parseConfig(log = () => {}) {
     typeof destEsConfig.hosts === 'string'
       ? destEsConfig.hosts
       : Array.isArray(destEsConfig.hosts)
-        ? destEsConfig.hosts[0]
-        : 'http://localhost:9200';
+      ? destEsConfig.hosts[0]
+      : 'http://localhost:9200';
 
   const config = {
     sourceHost,
@@ -224,9 +214,7 @@ function search(sourceClient, config, cycleNumber, log) {
     };
   } else {
     const seed =
-      config.randomSeed !== null
-        ? config.randomSeed
-        : (config.runSeed ?? Date.now()) + cycleNumber;
+      config.randomSeed !== null ? config.randomSeed : (config.runSeed ?? Date.now()) + cycleNumber;
     body = {
       query: {
         function_score: {
@@ -337,7 +325,9 @@ async function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, ba
           const create = item.create;
           if (create?.error) {
             log(
-              `Bulk create error [${create._index}] (ES _id: ${create._id ?? 'auto-generated'}): ${create.error.reason ?? JSON.stringify(create.error)}`
+              `Bulk create error [${create._index}] (ES _id: ${create._id ?? 'auto-generated'}): ${
+                create.error.reason ?? JSON.stringify(create.error)
+              }`
             );
           } else if (create) {
             totalUploaded += 1;
@@ -359,13 +349,7 @@ async function runSyncCycle(sourceClient, destClient, config, cycleNumber, log) 
   transform(docs, config.targetIndex);
 
   if (config.targetIndex) {
-    return uploadDocumentsToStream(
-      destClient,
-      docs,
-      config.targetIndex,
-      config.batchSize,
-      log
-    );
+    return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
   }
 
   const byStream = new Map();
