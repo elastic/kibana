@@ -11,6 +11,8 @@ export const LANDING_PAGE_PATH = '/list';
 /** The application ID for the Dashboard app. */
 export const DASHBOARD_APP_ID = 'dashboards';
 export const SEARCH_SESSION_ID = 'searchSessionId';
+/** URL parameter for agent conversation attachment ID. */
+export const DASHBOARD_ATTACHMENT_ID_PARAM = 'dashboardAttachmentId';
 /** The number of columns in the dashboard grid layout. */
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;
 

@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { extractDashboardState } from './bwc';
-export {
-  loadAndRemoveAttachmentIdFromURL,
-  loadAndRemoveDashboardState,
-  startSyncingExpandedPanelState,
-} from './url_utils';
+export { useDashboardAgentContext } from './use_dashboard_agent_context';

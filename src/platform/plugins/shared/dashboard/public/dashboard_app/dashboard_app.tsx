@@ -33,7 +33,7 @@ import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/ur
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { useDashboardAgentContext } from './hooks/use_dashboard_agent_context';
+import { useDashboardAgentContext } from './hooks/agent';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -49,6 +49,7 @@ import {
 } from './url/search_sessions_integration';
 import {
   extractDashboardState,
+  loadAndRemoveAttachmentIdFromURL,
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
@@ -106,20 +107,6 @@ export function DashboardApp({
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
-  useObservabilityAIAssistantContext({
-    dashboardApi,
-  });
-
-  useDashboardAgentContext({
-    dashboardApi,
-  });
-
-  useExecutionContext(coreServices.executionContext, {
-    type: 'application',
-    page: 'app',
-    id: savedDashboardId || 'new',
-  });
-
   const kbnUrlStateStorage = useMemo(
     () =>
       createKbnUrlStateStorage({
@@ -128,6 +115,29 @@ export function DashboardApp({
       }),
     [history]
   );
+
+  useObservabilityAIAssistantContext({
+    dashboardApi,
+  });
+
+  // Extract attachmentId from URL query parameter and remove it from URL.
+  // The attachment ID is passed when navigating from the agent to a dashboard.
+  const urlAttachmentId = useMemo(
+    () => loadAndRemoveAttachmentIdFromURL(history, kbnUrlStateStorage),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useDashboardAgentContext({
+    dashboardApi,
+    urlAttachmentId,
+  });
+
+  useExecutionContext(coreServices.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
 
   /**
    * Clear search session when leaving dashboard route
