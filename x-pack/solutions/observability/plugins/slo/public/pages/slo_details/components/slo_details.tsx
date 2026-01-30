@@ -11,7 +11,7 @@ import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID, DEFINITION_TAB_ID, HISTORY_TAB_ID } from '@kbn/deeplinks-observability';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
+import { BurnRatePanel } from './burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
 import { SloDetailsHistory } from './history/slo_details_history';
@@ -25,8 +25,10 @@ export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
+  renderMode?: 'flyout' | 'page';
 }
-export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
+
+export function SloDetails({ slo, isAutoRefreshing, selectedTabId, renderMode = 'page' }: Props) {
   const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
     const now = new Date();
     return {
@@ -66,7 +68,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
         <SloHealthCallout slo={slo} />
 
         <EuiFlexGroup direction="column" gutterSize="l">
-          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
+          <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} renderMode={renderMode} />
           <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
           <EventsChartPanel slo={slo} range={range} />
         </EuiFlexGroup>
