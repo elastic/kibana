@@ -668,11 +668,17 @@ const ESQLEditorInternal = function ESQLEditor({
               variables: variablesService?.esqlVariables,
               dropNullColumns: true,
             }).result,
+            // Enrich fields with timeSeriesDimension for PromQL label suggestions.
             getESQLAdHocDataview({
               dataViewsService: data.dataViews,
               query: queryToExecute,
-            }),
+              http: core.http, // Use http so time field detection can populate the DataView cache correctly.
+            }).catch(() => undefined),
           ]);
+
+          if (!dataView) {
+            return fields || [];
+          }
 
           const dimensionFields = new Set(
             dataView.fields
