@@ -82,7 +82,10 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     }
 
     const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
-    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator, dataView);
+    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(
+      indicator,
+      dataView
+    );
     return {
       ...getCustomMetricIndicatorAggregation.execute({
         type: 'good',

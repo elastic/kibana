@@ -73,7 +73,10 @@ export class HistogramTransformGenerator extends TransformGenerator {
 
   private async buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
     const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator, dataView);
+    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
+      indicator,
+      dataView
+    );
 
     return {
       ...getHistogramIndicatorAggregations.execute({

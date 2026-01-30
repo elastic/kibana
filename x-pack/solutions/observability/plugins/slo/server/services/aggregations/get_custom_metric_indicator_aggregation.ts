@@ -15,10 +15,7 @@ type MetricCustomMetricDef =
   | MetricCustomIndicator['params']['total'];
 
 export class GetCustomMetricIndicatorAggregation {
-  constructor(
-    private indicator: MetricCustomIndicator,
-    private dataView?: DataView
-  ) {}
+  constructor(private indicator: MetricCustomIndicator, private dataView?: DataView) {}
 
   private buildMetricAggregations(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
     return metricDef.metrics.reduce((acc, metric) => {
