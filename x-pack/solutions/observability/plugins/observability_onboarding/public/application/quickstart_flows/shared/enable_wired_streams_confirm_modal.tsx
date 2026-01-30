@@ -15,19 +15,29 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 
 interface EnableWiredStreamsConfirmModalProps {
   onCancel: () => void;
   onConfirm: () => void;
   isLoading?: boolean;
+  isServerless?: boolean;
+  streamsDocLink?: string;
 }
 
 export function EnableWiredStreamsConfirmModal({
   onCancel,
   onConfirm,
   isLoading = false,
+  isServerless = false,
+  streamsDocLink,
 }: EnableWiredStreamsConfirmModalProps) {
+  const envType = isServerless ? 'project' : 'cluster';
+
   return (
     <EuiModal
       onClose={onCancel}
@@ -42,10 +52,94 @@ export function EnableWiredStreamsConfirmModal({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.description', {
-          defaultMessage:
-            'Wired Streams is currently in tech preview. This will enable the feature for your entire cluster.',
-        })}
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.observability_onboarding.enableWiredStreamsModal.introText', {
+              defaultMessage:
+                'Wired Streams is a next-generation log management feature that provides a managed hierarchy for logs with centralized data retention and routing.',
+            })}{' '}
+            {streamsDocLink && (
+              <EuiLink
+                href={streamsDocLink}
+                target="_blank"
+                external
+                data-test-subj="observabilityOnboardingEnableWiredStreamsModalLearnMoreLink"
+              >
+                {i18n.translate(
+                  'xpack.observability_onboarding.enableWiredStreamsModal.learnMore',
+                  {
+                    defaultMessage: 'Learn more',
+                  }
+                )}
+              </EuiLink>
+            )}
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate(
+                'xpack.observability_onboarding.enableWiredStreamsModal.whatHappensTitle',
+                {
+                  defaultMessage: 'What happens when you enable it:',
+                }
+              )}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <ul>
+              <li>
+                {i18n.translate(
+                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet1',
+                  {
+                    defaultMessage: 'A root "logs" stream is created for your {envType}',
+                    values: { envType },
+                  }
+                )}
+              </li>
+              <li>
+                {i18n.translate(
+                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet2',
+                  {
+                    defaultMessage:
+                      'Logs from this setup will route to Wired Streams (e.g., logs.system.auth)',
+                  }
+                )}
+              </li>
+              <li>
+                {i18n.translate(
+                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet3',
+                  {
+                    defaultMessage: 'Metrics and traces continue through standard data streams',
+                  }
+                )}
+              </li>
+              <li>
+                {i18n.translate(
+                  'xpack.observability_onboarding.enableWiredStreamsModal.bullet4',
+                  {
+                    defaultMessage: 'Your existing data is not affected',
+                  }
+                )}
+              </li>
+            </ul>
+          </EuiText>
+        </EuiPanel>
+
+        <EuiSpacer size="m" />
+
+        <EuiText size="xs" color="subdued">
+          {i18n.translate(
+            'xpack.observability_onboarding.enableWiredStreamsModal.reversibleNote',
+            {
+              defaultMessage: 'This can be changed later in Streams settings.',
+            }
+          )}
+        </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty

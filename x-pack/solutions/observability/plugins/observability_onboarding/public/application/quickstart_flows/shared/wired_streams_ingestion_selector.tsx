@@ -15,8 +15,10 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FlowType } from '../../../hooks/use_wired_streams_status';
+import { useKibana } from '../../../hooks/use_kibana';
 import { EnableWiredStreamsConfirmModal } from './enable_wired_streams_confirm_modal';
 
 export type IngestionMode = 'classic' | 'wired';
@@ -42,6 +44,11 @@ export function WiredStreamsIngestionSelector({
   flowType,
   onEnableWiredStreams,
 }: WiredStreamsIngestionSelectorProps) {
+  const {
+    services: {
+      context: { isServerless },
+    },
+  } = useKibana();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleModeChange = useCallback(
@@ -79,31 +86,64 @@ export function WiredStreamsIngestionSelector({
     {
       id: 'wired' as const,
       label: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
-          <EuiFlexItem grow={false} component="span">
-            {i18n.translate('xpack.observability_onboarding.wiredStreams.wiredStreamsOption', {
-              defaultMessage: 'Wired Streams',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} component="span">
-            <EuiBetaBadge
-              label={i18n.translate('xpack.observability_onboarding.wiredStreams.techPreview', {
-                defaultMessage: 'Tech Preview',
+        <EuiToolTip
+          position="top"
+          title={i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.title', {
+            defaultMessage: 'Wired Streams (Tech Preview)',
+          })}
+          content={
+            <>
+              {i18n.translate('xpack.observability_onboarding.wiredStreams.tooltip.description', {
+                defaultMessage:
+                  'Route logs to a managed hierarchy instead of classic data streams. Streams inherit lifecycle settings and processors from parent streams, enabling centralized configuration for data retention and routing.',
               })}
-              size="s"
-              color="hollow"
-              alignment="middle"
-            />
-          </EuiFlexItem>
-          {isEnabling && (
+              {streamsDocLink && (
+                <>
+                  {' '}
+                  <EuiLink
+                    href={streamsDocLink}
+                    target="_blank"
+                    external
+                    data-test-subj="observabilityOnboardingWiredStreamsTooltipLearnMoreLink"
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.wiredStreams.tooltip.learnMore',
+                      {
+                        defaultMessage: 'Learn more',
+                      }
+                    )}
+                  </EuiLink>
+                </>
+              )}
+            </>
+          }
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
             <EuiFlexItem grow={false} component="span">
-              <EuiLoadingSpinner
+              {i18n.translate('xpack.observability_onboarding.wiredStreams.wiredStreamsOption', {
+                defaultMessage: 'Wired Streams',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <EuiBetaBadge
+                label={i18n.translate('xpack.observability_onboarding.wiredStreams.techPreview', {
+                  defaultMessage: 'Tech Preview',
+                })}
                 size="s"
-                data-test-subj="observabilityOnboardingWiredStreamsEnablingSpinner"
+                color="hollow"
+                alignment="middle"
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+            {isEnabling && (
+              <EuiFlexItem grow={false} component="span">
+                <EuiLoadingSpinner
+                  size="s"
+                  data-test-subj="observabilityOnboardingWiredStreamsEnablingSpinner"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiToolTip>
       ),
     },
   ];
@@ -164,7 +204,8 @@ export function WiredStreamsIngestionSelector({
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.observability_onboarding.wiredStreams.willEnableNote', {
                 defaultMessage:
-                  'Selecting Wired Streams will automatically enable the feature for your cluster.',
+                  'Selecting Wired Streams will enable the feature for your {envType}.',
+                values: { envType: isServerless ? 'project' : 'cluster' },
               })}
             </EuiText>
           </EuiFlexItem>
@@ -176,6 +217,8 @@ export function WiredStreamsIngestionSelector({
           onCancel={handleModalCancel}
           onConfirm={handleModalConfirm}
           isLoading={isEnabling}
+          isServerless={isServerless}
+          streamsDocLink={streamsDocLink}
         />
       )}
     </>
