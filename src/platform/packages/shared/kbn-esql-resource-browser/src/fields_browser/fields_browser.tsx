@@ -13,97 +13,34 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
-import type { GetColumnMapFn } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
-import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { FieldIcon } from '@kbn/react-field';
-import { getEditorExtensions } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
-import type { HttpStart } from '@kbn/core/public';
-import { BrowserPopoverWrapper } from './browser_popover_wrapper';
-
-const FIELDS_BROWSER_I18N_KEYS = {
-  title: i18n.translate('esqlEditor.fieldsBrowser.title', {
-    defaultMessage: 'Fields',
-  }),
-  searchPlaceholder: i18n.translate('esqlEditor.fieldsBrowser.searchPlaceholder', {
-    defaultMessage: 'Search',
-  }),
-  filterTitle: i18n.translate('esqlEditor.fieldsBrowser.filterTitle', {
-    defaultMessage: 'Filter by field type',
-  }),
-  closeLabel: i18n.translate('esqlEditor.fieldsBrowser.closeLabel', {
-    defaultMessage: 'Close',
-  }),
-  loading: i18n.translate('esqlEditor.fieldsBrowser.loading', {
-    defaultMessage: 'Loading fields',
-  }),
-  empty: i18n.translate('esqlEditor.fieldsBrowser.empty', {
-    defaultMessage: 'No fields found',
-  }),
-  noMatches: i18n.translate('esqlEditor.fieldsBrowser.noMatches', {
-    defaultMessage: 'No fields match your search',
-  }),
-} as const;
-
-const getFieldTypeLabel = (type: string): string => {
-  const typeLower = type.toLowerCase();
-  if (typeLower.includes('date') || typeLower.includes('time')) return 'Date';
-  if (
-    typeLower.includes('number') ||
-    typeLower.includes('long') ||
-    typeLower.includes('double') ||
-    typeLower.includes('integer')
-  )
-    return 'Number';
-  if (typeLower.includes('ip')) return 'IP address';
-  if (typeLower.includes('geo')) return 'Geo point';
-  if (typeLower.includes('keyword')) return 'Keyword';
-  if (typeLower.includes('text')) return 'Text';
-  return type;
-};
-
-const getFieldTypeIconType = (typeLabel: string): string => {
-  const typeLower = typeLabel.toLowerCase();
-  if (typeLower.includes('date') || typeLower.includes('time')) return 'date';
-  if (typeLower.includes('number')) return 'number';
-  if (typeLower.includes('ip')) return 'ip';
-  if (typeLower.includes('geo')) return 'geo_point';
-  if (typeLower.includes('keyword')) return 'keyword';
-  if (typeLower.includes('text')) return 'text';
-  return 'text';
-};
+import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
+import { FIELDS_BROWSER_I18N_KEYS } from './i18n';
+import { getFieldTypeLabel, getFieldTypeIconType } from './utils';
 
 interface FieldsBrowserProps {
   isOpen: boolean;
+  isLoading: boolean;
   onClose: () => void;
   onSelect: (fieldNames: string[], previousCount: number) => void;
-  getColumnMap?: GetColumnMapFn;
+  allFields: ESQLFieldWithMetadata[];
+  recommendedFields: RecommendedField[];
   position?: { top?: number; left?: number };
-  queryString?: string;
-  activeSolutionId?: SolutionId | null;
-  // Field names suggested by autocomplete - used to filter the displayed fields
-  suggestedFieldNames?: Set<string>;
-  http: HttpStart;
 }
 
 export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   isOpen,
+  isLoading,
   onClose,
   onSelect,
-  getColumnMap,
+  allFields,
+  recommendedFields,
   position,
-  queryString = '',
-  activeSolutionId,
-  suggestedFieldNames,
-  http,
 }) => {
-  const [items, setItems] = useState<ESQLFieldWithMetadata[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [recommendedFields, setRecommendedFields] = useState<RecommendedField[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
 
   // Reset state when popover opens
@@ -115,84 +52,6 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       setSearchValue('');
     }
   }, [isOpen]);
-
-  // Fetch recommended fields when popover opens
-  useEffect(() => {
-    const fetchRecommendedFields = async () => {
-      if (isOpen && http && activeSolutionId && queryString.trim() !== '') {
-        try {
-          const extensions = await getEditorExtensions(http, queryString, activeSolutionId);
-          setRecommendedFields(extensions.recommendedFields || []);
-        } catch (error) {
-          // If fetching fails, just don't show recommended fields
-          setRecommendedFields([]);
-        }
-      } else {
-        setRecommendedFields([]);
-      }
-    };
-
-    fetchRecommendedFields();
-  }, [isOpen, http, activeSolutionId, queryString]);
-
-  const fetchData = useCallback(async (): Promise<ESQLFieldWithMetadata[]> => {
-    if (!getColumnMap) {
-      return [];
-    }
-    const columnMap: Map<string, ESQLColumnData> = await getColumnMap();
-    // Convert ESQLColumnData map to ESQLFieldWithMetadata array
-    // Filter out user-defined columns and only keep fields with metadata
-    // Also filter by suggested field names if provided (from autocomplete)
-    return Array.from(columnMap.values())
-      .filter((column: ESQLColumnData): column is ESQLFieldWithMetadata => {
-        // Only include fields that are not user-defined (i.e., ESQLFieldWithMetadata)
-        if (column.userDefined !== false) {
-          return false;
-        }
-        // If suggestedFieldNames is provided, only include fields that are in the set
-        if (suggestedFieldNames && suggestedFieldNames.size > 0) {
-          return suggestedFieldNames.has(column.name);
-        }
-        return true;
-      })
-      .map((column: ESQLFieldWithMetadata) => ({
-        name: column.name,
-        type: column.type,
-        hasConflict: column.hasConflict || false,
-        userDefined: false as const,
-        metadata: column.metadata,
-      }));
-  }, [getColumnMap, suggestedFieldNames]);
-
-  // Fetch data when popover opens
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      fetchData()
-        .then((fetchedItems) => {
-          setItems(fetchedItems);
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setItems([]);
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, fetchData]);
-
-  const getTypeKey = useCallback((field: ESQLFieldWithMetadata) => {
-    return getFieldTypeLabel(field.type);
-  }, []);
-
-  const getTypeLabel = useCallback((typeLabel: string) => {
-    return typeLabel;
-  }, []);
-
-  const getTypeIcon = useCallback((typeLabel: string) => {
-    return (
-      <FieldIcon type={getFieldTypeIconType(typeLabel)} size="s" className="eui-alignMiddle" />
-    );
-  }, []);
 
   const createOptions = useCallback(
     (fields: ESQLFieldWithMetadata[], selectedFields: string[]): EuiSelectableOption[] => {
@@ -278,25 +137,25 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   // Get unique types from items
   const availableTypes = useMemo(() => {
     const typeSet = new Set<string>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allFields.forEach((item) => {
+      const typeKey = getFieldTypeLabel(item.type);
       typeSet.add(typeKey);
     });
     return Array.from(typeSet).sort();
-  }, [items, getTypeKey]);
+  }, [allFields]);
 
   const typeCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allFields.forEach((item) => {
+      const typeKey = getFieldTypeLabel(item.type);
       counts.set(typeKey, (counts.get(typeKey) ?? 0) + 1);
     });
     return counts;
-  }, [items, getTypeKey]);
+  }, [allFields]);
 
   const options: EuiSelectableOption[] = useMemo(() => {
-    return createOptions(items, selectedItems);
-  }, [items, selectedItems, createOptions]);
+    return createOptions(allFields, selectedItems);
+  }, [allFields, selectedItems, createOptions]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -341,15 +200,15 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
     [onSelect, selectedItems]
   );
 
-  const handleTypeFilterChange = useCallback(
-    (newOptions: EuiSelectableOption[], changedOption: EuiSelectableOption | undefined) => {
-      const selected = newOptions
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as string);
-      setSelectedTypes(selected);
-    },
-    []
-  );
+  const handleTypeFilterChange = (
+    newOptions: EuiSelectableOption[],
+    changedOption: EuiSelectableOption | undefined
+  ) => {
+    const selected = newOptions
+      .filter((opt) => opt.checked === 'on')
+      .map((opt) => opt.key as string);
+    setSelectedTypes(selected);
+  };
 
   // Overwriting the border style as setting listProps.bordered to false doesn't work
   const filterListStyles = useMemo(
@@ -367,9 +226,11 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
     return availableTypes.map((typeKey) => {
       return {
         key: typeKey,
-        label: getTypeLabel(typeKey),
+        label: getFieldTypeLabel(typeKey),
         checked: selectedTypes.includes(typeKey) ? ('on' as const) : undefined,
-        prepend: getTypeIcon(typeKey),
+        prepend: (
+          <FieldIcon type={getFieldTypeIconType(typeKey)} size="s" className="eui-alignMiddle" />
+        ),
         append: (
           <EuiNotificationBadge color="subdued" size="m">
             {typeCounts.get(typeKey) ?? 0}
@@ -377,7 +238,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
         ),
       };
     });
-  }, [availableTypes, selectedTypes, getTypeLabel, typeCounts, getTypeIcon]);
+  }, [availableTypes, selectedTypes, typeCounts]);
 
   const filterPanel = (
     <>

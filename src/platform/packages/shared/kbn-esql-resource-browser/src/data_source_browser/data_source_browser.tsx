@@ -20,100 +20,40 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
-import type { ILicense } from '@kbn/licensing-types';
-import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
-import { BrowserPopoverWrapper } from './browser_popover_wrapper';
+import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
+import { getSourceTypeKey, getSourceTypeLabel } from './utils';
+import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
 const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
 
-const SOURCE_TYPE_PATTERNS = [
-  { patterns: ['lookup'], label: 'Lookup Index', key: 'lookup_index' },
-  { patterns: ['integration'], label: 'Integration', key: 'integration' },
-  { patterns: ['timeseries', 'time series'], label: 'Timeseries', key: 'timeseries' },
-  { patterns: ['stream', 'data stream'], label: 'Stream', key: 'stream' },
-  { patterns: ['alias'], label: 'Alias', key: 'alias' },
-  { patterns: ['index'], label: 'Index', key: 'index' },
-] as const;
-
-const getSourceTypeLabel = (type?: string): string => {
-  if (!type) return 'Index';
-  const typeLower = type.toLowerCase();
-  const match = SOURCE_TYPE_PATTERNS.find(({ patterns }) =>
-    patterns.some((pattern) => typeLower.includes(pattern))
-  );
-  return match?.label ?? type;
-};
-
-const getSourceTypeKey = (type?: string): string => {
-  if (!type) return 'index';
-  const typeLower = type.toLowerCase();
-  const match = SOURCE_TYPE_PATTERNS.find(({ patterns }) =>
-    patterns.some((pattern) => typeLower.includes(pattern))
-  );
-  return match?.key ?? 'index';
-};
-
-const DATA_SOURCE_BROWSER_I18N_KEYS = {
-  title: i18n.translate('esqlEditor.indicesBrowser.title', {
-    defaultMessage: 'Data sources',
-  }),
-  searchPlaceholder: i18n.translate('esqlEditor.indicesBrowser.searchPlaceholder', {
-    defaultMessage: 'Search',
-  }),
-  filterTitle: i18n.translate('esqlEditor.indicesBrowser.filterTitle', {
-    defaultMessage: 'Filter by data source type',
-  }),
-  integrationFilterTitle: i18n.translate('esqlEditor.indicesBrowser.integrationFilterTitle', {
-    defaultMessage: 'Integrations',
-  }),
-  closeLabel: i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
-    defaultMessage: 'Close',
-  }),
-  loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
-    defaultMessage: 'Loading data sources',
-  }),
-  empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
-    defaultMessage: 'No data sources found',
-  }),
-  noMatches: i18n.translate('esqlEditor.indicesBrowser.noMatches', {
-    defaultMessage: 'No data sources match your search',
-  }),
-} as const;
-
 interface DataSourceBrowserProps {
   isOpen: boolean;
+  isLoading: boolean;
+  allSources: ESQLSourceResult[];
+  selectedSources?: string[];
   onClose: () => void;
   onSelect: (selectedSources: string[]) => void;
   position?: { top?: number; left?: number };
-  isTSCommand?: boolean;
-  initialSources?: string[];
-  core: Pick<CoreStart, 'application' | 'http'>;
-  getLicense?: () => Promise<ILicense | undefined>;
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
+  isLoading,
+  allSources,
+  selectedSources = [],
   onClose,
   onSelect,
   position,
-  isTSCommand = false,
-  initialSources = [],
-  core,
-  getLicense,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [items, setItems] = useState<ESQLSourceResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>(initialSources);
+  const [selectedItems, setSelectedItems] = useState<string[]>(selectedSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
@@ -127,9 +67,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       setSearchValue('');
       setIsIntegrationPopoverOpen(false);
       // Pre-select sources that are already in the query
-      setSelectedItems(initialSources);
+      setSelectedItems(selectedSources);
     }
-  }, [isOpen, initialSources]);
+  }, [isOpen, selectedSources]);
 
   useEffect(() => {
     if (isFilterPopoverOpen) {
@@ -137,109 +77,54 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     }
   }, [isFilterPopoverOpen]);
 
-  const fetchData = useCallback(async (): Promise<ESQLSourceResult[]> => {
-    if (isTSCommand) {
-      const timeseriesIndices = await getTimeseriesIndices(core.http);
-      return timeseriesIndices.indices.map((index) => ({
-        name: index.name,
-        type: 'timeseries',
-        title: index.name,
-        hidden: false,
-      }));
-    }
-
-    return await getESQLSources(core, getLicense);
-  }, [core, getLicense, isTSCommand]);
-
-  const getTypeKey = useCallback((source: ESQLSourceResult) => {
-    return getSourceTypeKey(source.type);
-  }, []);
-
-  const getTypeLabel = useCallback((typeKey: string) => {
-    return getSourceTypeLabel(typeKey);
-  }, []);
-
-  // Fetch data when popover opens
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      fetchData()
-        .then((fetchedItems) => {
-          setItems(fetchedItems);
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setItems([]);
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, fetchData]);
-
-  const createOptions = useCallback(
-    (sources: ESQLSourceResult[], selectedIndices: string[]): EuiSelectableOption[] => {
-      return sources.map((source) => ({
-        key: source.name,
-        label: source.name,
-        checked: selectedIndices.includes(source.name) ? ('on' as const) : undefined,
-        append: <EuiTextColor color="subdued">{getSourceTypeLabel(source.type)}</EuiTextColor>,
-        data: {
-          type: source.type,
-          typeKey: getSourceTypeKey(source.type),
-          title: source.title,
-        },
-      }));
-    },
-    []
-  );
-
-  // Get unique types from items
+  // Get unique types from allSources
   const availableTypes = useMemo(() => {
     const typeSet = new Set<string>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allSources.forEach((source) => {
+      const typeKey = getSourceTypeKey(source.type);
       typeSet.add(typeKey);
     });
     return Array.from(typeSet).sort();
-  }, [items, getTypeKey]);
+  }, [allSources]);
 
   const typeCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allSources.forEach((source) => {
+      const typeKey = getSourceTypeKey(source.type);
       counts.set(typeKey, (counts.get(typeKey) ?? 0) + 1);
     });
     return counts;
-  }, [items, getTypeKey]);
+  }, [allSources]);
 
   // Extract unique integration names from integration items
   const availableIntegrations = useMemo(() => {
     const integrationSet = new Set<string>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allSources.forEach((source) => {
+      const typeKey = getSourceTypeKey(source.type);
       if (typeKey === 'integration') {
-        const integrationName = item.title;
+        const integrationName = source.title;
         if (integrationName) {
           integrationSet.add(integrationName);
         }
       }
     });
     return Array.from(integrationSet).sort();
-  }, [items, getTypeKey]);
+  }, [allSources]);
 
   // Count items per integration
   const integrationCounts = useMemo(() => {
     const counts = new Map<string, number>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
+    allSources.forEach((source) => {
+      const typeKey = getSourceTypeKey(source.type);
       if (typeKey === 'integration') {
-        const integrationName = item.title;
+        const integrationName = source.title;
         if (integrationName) {
           counts.set(integrationName, (counts.get(integrationName) ?? 0) + 1);
         }
       }
     });
     return counts;
-  }, [items, getTypeKey]);
+  }, [allSources]);
 
   // Create integration filter options
   const integrationFilterOptions: EuiSelectableOption[] = useMemo(() => {
@@ -256,8 +141,18 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [availableIntegrations, selectedIntegrations, integrationCounts]);
 
   const options: EuiSelectableOption[] = useMemo(() => {
-    return createOptions(items, selectedItems);
-  }, [items, selectedItems, createOptions]);
+    return allSources.map((source) => ({
+      key: source.name,
+      label: source.name,
+      checked: selectedItems.includes(source.name) ? ('on' as const) : undefined,
+      append: <EuiTextColor color="subdued">{getSourceTypeLabel(source.type)}</EuiTextColor>,
+      data: {
+        type: source.type,
+        typeKey: getSourceTypeKey(source.type),
+        title: source.title,
+      },
+    }));
+  }, [allSources, selectedItems]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -306,37 +201,34 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     [onSelect, selectedItems]
   );
 
-  const handleTypeFilterChange = useCallback(
-    (newOptions: EuiSelectableOption[], changedOption: EuiSelectableOption | undefined) => {
-      if (changedOption?.key === 'integration') {
-        setIsIntegrationPopoverOpen(true);
-      } else {
-        const selected = newOptions
-          .filter((opt) => opt.checked === 'on')
-          .map((opt) => opt.key as string);
-        setSelectedTypes(selected);
-      }
-    },
-    []
-  );
+  const handleTypeFilterChange = (
+    newOptions: EuiSelectableOption[],
+    changedOption: EuiSelectableOption | undefined
+  ) => {
+    if (changedOption?.key === 'integration') {
+      setIsIntegrationPopoverOpen(true);
+    } else {
+      const selected = newOptions
+        .filter((opt) => opt.checked === 'on')
+        .map((opt) => opt.key as string);
+      setSelectedTypes(selected);
+    }
+  };
 
-  const handleIntegrationFilterChange = useCallback((newOptions: EuiSelectableOption[]) => {
+  const handleIntegrationFilterChange = (newOptions: EuiSelectableOption[]) => {
     const selected = newOptions
       .filter((opt) => opt.checked === 'on')
       .map((opt) => opt.key as string);
     setSelectedIntegrations(selected);
-  }, []);
+  };
 
   // Overwriting the border style as setting listProps.bordered to false doesn't work
-  const filterListStyles = useMemo(
-    () => css`
-      .euiSelectableListItem {
-        border-top: none;
-        border-bottom: none;
-      }
-    `,
-    []
-  );
+  const filterListStyles = css`
+    .euiSelectableListItem {
+      border-top: none;
+      border-bottom: none;
+    }
+  `;
 
   // Create filter options for the type filter popover
   const typeFilterOptions: EuiSelectableOption[] = useMemo(() => {
@@ -346,7 +238,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       return {
         key: typeKey,
-        label: getTypeLabel(typeKey),
+        label: getSourceTypeLabel(typeKey),
         checked: selectedTypes.includes(typeKey) ? ('on' as const) : undefined,
         append: (
           <>
@@ -375,7 +267,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [
     availableTypes,
     selectedTypes,
-    getTypeLabel,
     typeCounts,
     availableIntegrations.length,
     selectedIntegrations,

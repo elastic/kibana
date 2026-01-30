@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
@@ -100,39 +100,9 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const closeButtonRef = useRef<HTMLElement | null>(null);
-  const filterButtonRef = useRef<HTMLElement | null>(null);
-  const setSearchInputRef = useCallback((node: HTMLInputElement | null) => {
+  const setSearchInputRef = (node: HTMLInputElement | null) => {
     searchInputRef.current = node;
-  }, []);
-
-  const setCloseButtonRef = useCallback((node: HTMLElement | null) => {
-    closeButtonRef.current = node;
-  }, []);
-
-  const setFilterButtonRef = useCallback((node: HTMLElement | null) => {
-    filterButtonRef.current = node;
-  }, []);
-
-  // Find the actual button elements after render
-  useEffect(() => {
-    if (isOpen) {
-      // Find close button
-      if (closeButtonRef.current) {
-        const button = closeButtonRef.current.querySelector('button');
-        if (button) {
-          closeButtonRef.current = button as HTMLElement;
-        }
-      }
-      // Find filter button
-      if (filterButtonRef.current) {
-        const button = filterButtonRef.current.querySelector('button');
-        if (button) {
-          filterButtonRef.current = button as HTMLElement;
-        }
-      }
-    }
-  }, [isOpen]);
+  };
 
   // Focus the search input when popover opens
   useEffect(() => {
@@ -154,7 +124,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       numActiveFilters={numActiveFilters}
       css={filterButtonStyle}
       onClick={() => setIsFilterOpen(!isFilterOpen)}
-      buttonRef={setFilterButtonRef}
     >
       <EuiIcon type="filter" />
     </EuiFilterButton>
@@ -224,7 +193,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
                     color="text"
                     aria-label={i18nKeys.closeLabel}
                     onClick={onClose}
-                    buttonRef={setCloseButtonRef}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

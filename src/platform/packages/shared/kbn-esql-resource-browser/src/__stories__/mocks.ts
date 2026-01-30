@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, HttpStart } from '@kbn/core/public';
-import type { ESQLSourceResult, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLSourceResult, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
 import type { ColumnsMap } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
 import type { ILicense } from '@kbn/licensing-types';
@@ -37,6 +37,13 @@ export const mockFields: ESQLFieldWithMetadata[] = [
   { name: 'status_code', type: 'integer', userDefined: false },
   { name: 'user.name', type: 'keyword', userDefined: false },
   { name: 'tags', type: 'keyword', userDefined: false },
+];
+
+export const mockRecommendedFields: RecommendedField[] = [
+  { name: '@timestamp', pattern: 'logs-*' },
+  { name: 'message', pattern: 'logs-*' },
+  { name: 'host.name', pattern: 'logs-*' },
+  { name: 'bytes', pattern: 'logs-*' },
 ];
 
 // Mock HTTP client

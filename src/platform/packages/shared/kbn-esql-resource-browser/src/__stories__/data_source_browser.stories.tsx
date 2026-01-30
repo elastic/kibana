@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DataSourceBrowser } from '../data_source_browser';
-import { createMockCore, mockGetLicense } from './mocks';
+import { mockDataSources } from './mocks';
 
 const meta: Meta<typeof DataSourceBrowser> = {
   title: 'ES|QL Resource Browser/Data Source Browser',
@@ -27,19 +27,13 @@ const meta: Meta<typeof DataSourceBrowser> = {
 export default meta;
 type Story = StoryObj<typeof DataSourceBrowser>;
 
-const InteractiveWrapper = ({
-  isTSCommand = false,
-  initialSources = [],
-}: {
-  isTSCommand?: boolean;
-  initialSources?: string[];
-}) => {
+const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string[] }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const core = createMockCore();
 
   return (
     <DataSourceBrowser
       isOpen={isOpen}
+      isLoading={false}
       onClose={() => {
         setIsOpen(false);
         action('onClose')();
@@ -47,10 +41,8 @@ const InteractiveWrapper = ({
       onSelect={(sources) => {
         action('onSelect')(sources);
       }}
-      core={core}
-      getLicense={mockGetLicense}
-      isTSCommand={isTSCommand}
-      initialSources={initialSources}
+      allSources={mockDataSources}
+      selectedSources={selectedSources}
       position={{ top: 100, left: 100 }}
     />
   );
@@ -61,5 +53,5 @@ export const Default: Story = {
 };
 
 export const WithInitialSelection: Story = {
-  render: () => <InteractiveWrapper initialSources={['logs-*', 'kibana_sample_data_logs']} />,
+  render: () => <InteractiveWrapper selectedSources={['logs-*', 'kibana_sample_data_logs']} />,
 };

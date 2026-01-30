@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FieldsBrowser } from '../fields_browser';
-import { createMockHttp, createMockGetColumnMap } from './mocks';
+import { mockFields, mockRecommendedFields } from './mocks';
 
 const meta: Meta<typeof FieldsBrowser> = {
   title: 'ES|QL Resource Browser/Fields Browser',
@@ -28,30 +28,27 @@ export default meta;
 type Story = StoryObj<typeof FieldsBrowser>;
 
 const InteractiveWrapper = ({
-  queryString = 'FROM logs-* | ',
-  suggestedFieldNames,
+  isLoading = false,
+  recommendedFields = [],
 }: {
-  queryString?: string;
-  suggestedFieldNames?: Set<string>;
+  isLoading?: boolean;
+  recommendedFields?: RecommendedField[];
 }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const http = createMockHttp();
-  const getColumnMap = createMockGetColumnMap();
 
   return (
     <FieldsBrowser
       isOpen={isOpen}
+      isLoading={isLoading}
       onClose={() => {
         setIsOpen(false);
         action('onClose')();
       }}
-      onSelect={(fieldName, oldLength) => {
-        action('onSelect')(fieldName, oldLength);
+      onSelect={(fieldNames, previousCount) => {
+        action('onSelect')(fieldNames, previousCount);
       }}
-      http={http}
-      getColumnMap={getColumnMap}
-      queryString={queryString}
-      suggestedFieldNames={suggestedFieldNames}
+      allFields={mockFields}
+      recommendedFields={recommendedFields}
       position={{ top: 100, left: 100 }}
     />
   );
@@ -61,10 +58,6 @@ export const Default: Story = {
   render: () => <InteractiveWrapper />,
 };
 
-export const WithSuggestedFields: Story = {
-  render: () => (
-    <InteractiveWrapper
-      suggestedFieldNames={new Set(['@timestamp', 'message', 'host.name', 'bytes'])}
-    />
-  ),
+export const WithRecommendedFields: Story = {
+  render: () => <InteractiveWrapper recommendedFields={mockRecommendedFields} />,
 };
