@@ -82,27 +82,11 @@ export class LogsExtractionClient {
 
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-<<<<<<< HEAD
       const { esqlResponse, indexPatterns } = await this.runQueryAndIngestDocs({
         engineDescriptor,
         opts,
         delayMs,
-=======
 
-      const maxPageSearchSize = 10000; // TODO: get from config in the saved object
-      const indexPatterns = await this.getIndexPatterns(type);
-      const latestIndex = getLatestEntitiesIndexName(this.namespace);
-
-      // TODO: Fetch the default lookback window from the entity store saved object configuration
-      // instead of using a hard-coded 5-minute lookback. This temporary default ensures that, when
-      // no explicit from/to dates are provided, we still retrieve recent data for entity extraction.
-      const fromDateISO = opts?.fromDateISO || moment().utc().subtract(5, 'minute').toISOString();
-      const toDateISO = opts?.toDateISO || moment().utc().toISOString();
-
-      const query = buildLogsExtractionEsqlQuery({
-        indexPatterns,
-        latestIndex,
->>>>>>> 181f926d8d43 (ensure index creation)
         entityDefinition,
       });
 
