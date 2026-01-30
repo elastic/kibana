@@ -367,6 +367,8 @@ export class Plugin
                 });
                 break;
             }
+
+            return () => {};
           }
           const { renderApp } = await import('./application/rules_app');
 
