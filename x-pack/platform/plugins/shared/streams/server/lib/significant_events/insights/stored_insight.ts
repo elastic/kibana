@@ -13,14 +13,9 @@ import {
   INSIGHT_IMPACT,
   INSIGHT_EVIDENCE,
   INSIGHT_RECOMMENDATIONS,
-  INSIGHT_STATUS,
-  INSIGHT_CREATED_AT,
-  INSIGHT_UPDATED_AT,
 } from './fields';
 
 export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
-
-export type InsightStatus = 'active' | 'dismissed';
 
 export interface InsightEvidence {
   streamName: string;
@@ -36,14 +31,9 @@ export interface StoredInsight {
   [INSIGHT_IMPACT]: InsightImpactLevel;
   [INSIGHT_EVIDENCE]: InsightEvidence[];
   [INSIGHT_RECOMMENDATIONS]: string[];
-  [INSIGHT_STATUS]: InsightStatus;
-  [INSIGHT_CREATED_AT]: string;
-  [INSIGHT_UPDATED_AT]: string;
 }
 
 export const insightImpactLevelSchema = z.enum(['critical', 'high', 'medium', 'low']);
-
-export const insightStatusSchema = z.enum(['active', 'dismissed']);
 
 export const insightEvidenceSchema = z.object({
   streamName: z.string(),
@@ -59,9 +49,6 @@ export const storedInsightSchema: z.Schema<StoredInsight> = z.object({
   [INSIGHT_IMPACT]: insightImpactLevelSchema,
   [INSIGHT_EVIDENCE]: z.array(insightEvidenceSchema),
   [INSIGHT_RECOMMENDATIONS]: z.array(z.string()),
-  [INSIGHT_STATUS]: insightStatusSchema,
-  [INSIGHT_CREATED_AT]: z.string(),
-  [INSIGHT_UPDATED_AT]: z.string(),
 });
 
 /**
@@ -74,9 +61,6 @@ export interface PersistedInsight {
   impact: InsightImpactLevel;
   evidence: InsightEvidence[];
   recommendations: string[];
-  status: InsightStatus;
-  created_at: string;
-  updated_at: string;
 }
 
 /**

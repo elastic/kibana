@@ -7,7 +7,7 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import type { StreamsPluginStartDependencies } from '../../types';
+import type { StreamsPluginStartDependencies } from '../../../types';
 import { InsightClient } from './insight_client';
 import type { StoredInsight } from './stored_insight';
 import type { InsightStorageSettings } from './storage_settings';

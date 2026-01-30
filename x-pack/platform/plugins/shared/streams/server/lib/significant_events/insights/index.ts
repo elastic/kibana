@@ -12,14 +12,12 @@ export type {
   StoredInsight,
   PersistedInsight,
   InsightInput,
-  InsightStatus,
   InsightImpactLevel,
   InsightEvidence,
 } from './stored_insight';
 export {
   storedInsightSchema,
   insightInputSchema,
-  insightStatusSchema,
   insightImpactLevelSchema,
   insightEvidenceSchema,
 } from './stored_insight';

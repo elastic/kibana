@@ -24,7 +24,7 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { SystemClient } from '../lib/streams/system/system_client';
-import type { InsightClient } from '../lib/insights/insight_client';
+import type { InsightClient } from '../lib/significant_events/insights/insight_client';
 
 export type GetScopedClients = ({
   request,

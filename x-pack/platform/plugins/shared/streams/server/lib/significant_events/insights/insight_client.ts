@@ -16,35 +16,20 @@ import {
   INSIGHT_IMPACT,
   INSIGHT_EVIDENCE,
   INSIGHT_RECOMMENDATIONS,
-  INSIGHT_STATUS,
-  INSIGHT_CREATED_AT,
-  INSIGHT_UPDATED_AT,
 } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
-import type {
-  StoredInsight,
-  PersistedInsight,
-  InsightInput,
-  InsightStatus,
-} from './stored_insight';
-import { StatusError } from '../streams/errors/status_error';
+import type { StoredInsight, PersistedInsight, InsightInput } from './stored_insight';
+import { StatusError } from '../../streams/errors/status_error';
 
 interface InsightBulkIndexOperation {
   index: { insight: InsightInput; id?: string };
-}
-
-interface InsightBulkUpdateOperation {
-  update: { id: string; insight: Partial<InsightInput>; status?: InsightStatus };
 }
 
 interface InsightBulkDeleteOperation {
   delete: { id: string };
 }
 
-export type InsightBulkOperation =
-  | InsightBulkIndexOperation
-  | InsightBulkUpdateOperation
-  | InsightBulkDeleteOperation;
+export type InsightBulkOperation = InsightBulkIndexOperation | InsightBulkDeleteOperation;
 
 export class InsightClient {
   constructor(
@@ -61,15 +46,11 @@ export class InsightClient {
    * Create a new insight
    */
   async create(input: InsightInput): Promise<PersistedInsight> {
-    const now = new Date().toISOString();
     const id = uuidv4();
 
     const document = toStorage({
       ...input,
       id,
-      status: 'active',
-      created_at: now,
-      updated_at: now,
     });
 
     await this.clients.storageClient.index({
@@ -97,15 +78,8 @@ export class InsightClient {
   /**
    * List all insights with optional filters
    */
-  async list(filters?: {
-    status?: InsightStatus;
-    impact?: string[];
-  }): Promise<{ hits: PersistedInsight[]; total: number }> {
+  async list(filters?: { impact?: string[] }): Promise<{ hits: PersistedInsight[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [];
-
-    if (filters?.status) {
-      filterClauses.push({ term: { [INSIGHT_STATUS]: filters.status } });
-    }
 
     if (filters?.impact?.length) {
       filterClauses.push({
@@ -128,7 +102,6 @@ export class InsightClient {
               },
             }
           : { match_all: {} },
-      sort: [{ [INSIGHT_CREATED_AT]: { order: 'desc' } }],
     });
 
     const hits: PersistedInsight[] = [];
@@ -152,24 +125,13 @@ export class InsightClient {
   }
 
   /**
-   * Update an existing insight
+   * Save an insight (create or update)
    */
-  async update(
-    id: string,
-    input: Partial<InsightInput> & { status?: InsightStatus }
-  ): Promise<PersistedInsight> {
-    // First verify the insight exists
-    const existing = await this.get(id);
-
-    const now = new Date().toISOString();
-
-    const updated: PersistedInsight = {
-      ...existing,
+  async save(id: string, input: InsightInput): Promise<PersistedInsight> {
+    const document = toStorage({
       ...input,
-      updated_at: now,
-    };
-
-    const document = toStorage(updated);
+      id,
+    });
 
     await this.clients.storageClient.index({
       id,
@@ -192,31 +154,28 @@ export class InsightClient {
   }
 
   /**
-   * Bulk operations for insights
+   * Bulk operations for insights (save/delete only)
    */
   async bulk(operations: InsightBulkOperation[]): Promise<{ acknowledged: boolean }> {
-    const now = new Date().toISOString();
-
-    // Validate that update/delete operations target existing documents
-    const updateDeleteIds = operations.flatMap((op) => {
-      if ('update' in op) return [op.update.id];
+    // Validate that delete operations target existing documents
+    const deleteIds = operations.flatMap((op) => {
       if ('delete' in op) return [op.delete.id];
       return [];
     });
 
-    if (updateDeleteIds.length > 0) {
+    if (deleteIds.length > 0) {
       const existingDocs = await this.clients.storageClient.search({
-        size: updateDeleteIds.length,
+        size: deleteIds.length,
         track_total_hits: false,
         query: {
           bool: {
-            filter: [{ terms: { _id: updateDeleteIds } }],
+            filter: [{ terms: { _id: deleteIds } }],
           },
         },
       });
 
       const existingIds = new Set(existingDocs.hits.hits.map((hit) => hit._id));
-      const missingIds = updateDeleteIds.filter((id) => !existingIds.has(id));
+      const missingIds = deleteIds.filter((id) => !existingIds.has(id));
 
       if (missingIds.length > 0) {
         throw new StatusError(`Insights not found: ${missingIds.join(', ')}`, 404);
@@ -224,45 +183,23 @@ export class InsightClient {
     }
 
     // Build storage operations
-    const storageOperations = await Promise.all(
-      operations.map(async (operation) => {
-        if ('index' in operation) {
-          const id = operation.index.id || uuidv4();
-          const document = toStorage({
-            ...operation.index.insight,
-            id,
-            status: 'active',
-            created_at: now,
-            updated_at: now,
-          });
-          return {
-            index: {
-              document,
-              _id: id,
-            },
-          };
-        }
+    const storageOperations = operations.map((operation) => {
+      if ('index' in operation) {
+        const id = operation.index.id || uuidv4();
+        const document = toStorage({
+          ...operation.index.insight,
+          id,
+        });
+        return {
+          index: {
+            document,
+            _id: id,
+          },
+        };
+      }
 
-        if ('update' in operation) {
-          const existing = await this.get(operation.update.id);
-          const updated: PersistedInsight = {
-            ...existing,
-            ...operation.update.insight,
-            ...(operation.update.status && { status: operation.update.status }),
-            updated_at: now,
-          };
-          const document = toStorage(updated);
-          return {
-            index: {
-              document,
-              _id: operation.update.id,
-            },
-          };
-        }
-
-        return { delete: { _id: operation.delete.id } };
-      })
-    );
+      return { delete: { _id: operation.delete.id } };
+    });
 
     await this.clients.storageClient.bulk({
       operations: storageOperations,
@@ -281,9 +218,6 @@ function toStorage(insight: PersistedInsight): StoredInsight {
     [INSIGHT_IMPACT]: insight.impact,
     [INSIGHT_EVIDENCE]: insight.evidence,
     [INSIGHT_RECOMMENDATIONS]: insight.recommendations,
-    [INSIGHT_STATUS]: insight.status,
-    [INSIGHT_CREATED_AT]: insight.created_at,
-    [INSIGHT_UPDATED_AT]: insight.updated_at,
   };
 }
 
@@ -295,8 +229,5 @@ function fromStorage(stored: StoredInsight): PersistedInsight {
     impact: stored[INSIGHT_IMPACT],
     evidence: stored[INSIGHT_EVIDENCE],
     recommendations: stored[INSIGHT_RECOMMENDATIONS],
-    status: stored[INSIGHT_STATUS],
-    created_at: stored[INSIGHT_CREATED_AT],
-    updated_at: stored[INSIGHT_UPDATED_AT],
   };
 }

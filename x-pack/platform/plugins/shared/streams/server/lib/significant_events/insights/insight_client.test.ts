@@ -15,11 +15,8 @@ import {
   INSIGHT_IMPACT,
   INSIGHT_EVIDENCE,
   INSIGHT_RECOMMENDATIONS,
-  INSIGHT_STATUS,
-  INSIGHT_CREATED_AT,
-  INSIGHT_UPDATED_AT,
 } from './fields';
-import { StatusError } from '../streams/errors/status_error';
+import { StatusError } from '../../streams/errors/status_error';
 
 describe('InsightClient', () => {
   const createMockStorageClient = () => ({
@@ -58,14 +55,11 @@ describe('InsightClient', () => {
       },
     ],
     [INSIGHT_RECOMMENDATIONS]: ['Check the logs', 'Restart the service'],
-    [INSIGHT_STATUS]: 'active',
-    [INSIGHT_CREATED_AT]: '2024-01-01T00:00:00.000Z',
-    [INSIGHT_UPDATED_AT]: '2024-01-01T00:00:00.000Z',
     ...overrides,
   });
 
   describe('create', () => {
-    it('creates a new insight with generated id and timestamps', async () => {
+    it('creates a new insight with generated id', async () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
 
@@ -77,10 +71,7 @@ describe('InsightClient', () => {
       expect(result.title).toEqual(sampleInsightInput.title);
       expect(result.description).toEqual(sampleInsightInput.description);
       expect(result.impact).toEqual(sampleInsightInput.impact);
-      expect(result.status).toEqual('active');
       expect(result.id).toBeDefined();
-      expect(result.created_at).toBeDefined();
-      expect(result.updated_at).toBeDefined();
     });
   });
 
@@ -135,30 +126,6 @@ describe('InsightClient', () => {
       expect(result.total).toEqual(1);
     });
 
-    it('filters by status', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 0 },
-        },
-      });
-
-      await client.list({ status: 'dismissed' });
-
-      expect(mockStorageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [{ term: { [INSIGHT_STATUS]: 'dismissed' } }],
-            },
-          },
-        })
-      );
-    });
-
     it('filters by impact levels', async () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
@@ -194,34 +161,39 @@ describe('InsightClient', () => {
     });
   });
 
-  describe('update', () => {
-    it('updates an existing insight', async () => {
+  describe('save', () => {
+    it('saves an insight with the provided id', async () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
 
-      const storedInsight = createStoredInsight();
-      mockStorageClient.get.mockResolvedValue({ _source: storedInsight });
       mockStorageClient.index.mockResolvedValue({});
 
-      const result = await client.update('test-id', { title: 'Updated Title' });
+      const result = await client.save('custom-id', sampleInsightInput);
 
-      expect(mockStorageClient.get).toHaveBeenCalledWith({ id: 'test-id' });
       expect(mockStorageClient.index).toHaveBeenCalledTimes(1);
-      expect(result.title).toEqual('Updated Title');
-      expect(result.description).toEqual('This is a test insight'); // unchanged
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'custom-id',
+        })
+      );
+      expect(result.id).toEqual('custom-id');
+      expect(result.title).toEqual(sampleInsightInput.title);
+      expect(result.description).toEqual(sampleInsightInput.description);
+      expect(result.impact).toEqual(sampleInsightInput.impact);
     });
 
-    it('can update status to dismissed', async () => {
+    it('can overwrite an existing insight', async () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
 
-      const storedInsight = createStoredInsight();
-      mockStorageClient.get.mockResolvedValue({ _source: storedInsight });
       mockStorageClient.index.mockResolvedValue({});
 
-      const result = await client.update('test-id', { status: 'dismissed' });
+      const updatedInput = { ...sampleInsightInput, title: 'Updated Title' };
+      const result = await client.save('test-id', updatedInput);
 
-      expect(result.status).toEqual('dismissed');
+      expect(mockStorageClient.index).toHaveBeenCalledTimes(1);
+      expect(result.id).toEqual('test-id');
+      expect(result.title).toEqual('Updated Title');
     });
   });
 
@@ -247,12 +219,6 @@ describe('InsightClient', () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
 
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-          total: { value: 0 },
-        },
-      });
       mockStorageClient.bulk.mockResolvedValue({});
 
       const result = await client.bulk([
@@ -265,27 +231,6 @@ describe('InsightClient', () => {
           throwOnFail: true,
         })
       );
-      expect(result).toEqual({ acknowledged: true });
-    });
-
-    it('performs bulk update operations', async () => {
-      const mockStorageClient = createMockStorageClient();
-      const client = new InsightClient({ storageClient: mockStorageClient as any });
-
-      const storedInsight = createStoredInsight();
-      mockStorageClient.search.mockResolvedValue({
-        hits: {
-          hits: [{ _id: 'test-id', _source: storedInsight }],
-          total: { value: 1 },
-        },
-      });
-      mockStorageClient.get.mockResolvedValue({ _source: storedInsight });
-      mockStorageClient.bulk.mockResolvedValue({});
-
-      const result = await client.bulk([
-        { update: { id: 'test-id', insight: { title: 'Updated' } } },
-      ]);
-
       expect(result).toEqual({ acknowledged: true });
     });
 
@@ -311,7 +256,7 @@ describe('InsightClient', () => {
       expect(result).toEqual({ acknowledged: true });
     });
 
-    it('throws error when update/delete targets non-existent documents', async () => {
+    it('throws error when delete targets non-existent documents', async () => {
       const mockStorageClient = createMockStorageClient();
       const client = new InsightClient({ storageClient: mockStorageClient as any });
 

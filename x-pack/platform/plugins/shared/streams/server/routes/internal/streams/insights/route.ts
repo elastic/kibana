@@ -15,8 +15,8 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import type { PersistedInsight } from '../../../../lib/insights';
-import { insightInputSchema, insightStatusSchema } from '../../../../lib/insights';
+import type { PersistedInsight } from '../../../../lib/significant_events/insights';
+import { insightInputSchema } from '../../../../lib/significant_events/insights';
 
 export type InsightsTaskResult = TaskResult<InsightsResult>;
 
@@ -137,8 +137,10 @@ const listInsightsRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      status: insightStatusSchema.optional(),
-      impact: z.string().optional(),
+      impact: z
+        .union([z.string(), z.array(z.string())])
+        .optional()
+        .describe('Filter by impact level(s). Can be a single value or comma-separated values.'),
     }),
   }),
   handler: async ({
@@ -150,12 +152,12 @@ const listInsightsRoute = createServerRoute({
     const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const filters: { status?: 'active' | 'dismissed'; impact?: string[] } = {};
-    if (params.query.status) {
-      filters.status = params.query.status;
-    }
+    const filters: { impact?: string[] } = {};
     if (params.query.impact) {
-      filters.impact = params.query.impact.split(',');
+      // Support both array and comma-separated string
+      filters.impact = Array.isArray(params.query.impact)
+        ? params.query.impact
+        : params.query.impact.split(',');
     }
 
     const { hits, total } = await insightClient.list(filters);
@@ -192,12 +194,12 @@ const getInsightRoute = createServerRoute({
   },
 });
 
-const createInsightRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/_insights',
+const saveInsightRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/_insights/{id}',
   options: {
     access: 'internal',
-    summary: 'Create a new insight',
-    description: 'Creates a new persisted insight',
+    summary: 'Save an insight',
+    description: 'Creates or updates a persisted insight by ID',
   },
   security: {
     authz: {
@@ -205,6 +207,7 @@ const createInsightRoute = createServerRoute({
     },
   },
   params: z.object({
+    path: z.object({ id: z.string() }),
     body: insightInputSchema,
   }),
   handler: async ({
@@ -216,39 +219,7 @@ const createInsightRoute = createServerRoute({
     const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const insight = await insightClient.create(params.body);
-    return { insight };
-  },
-});
-
-const updateInsightRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/_insights/{id}',
-  options: {
-    access: 'internal',
-    summary: 'Update an insight',
-    description: 'Updates an existing insight by ID',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({ id: z.string() }),
-    body: insightInputSchema.partial().extend({
-      status: insightStatusSchema.optional(),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ insight: PersistedInsight }> => {
-    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const insight = await insightClient.update(params.path.id, params.body);
+    const insight = await insightClient.save(params.path.id, params.body);
     return { insight };
   },
 });
@@ -286,7 +257,7 @@ const bulkInsightsRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bulk operations on insights',
-    description: 'Perform bulk create, update, or delete operations on insights',
+    description: 'Perform bulk save or delete operations on insights',
   },
   security: {
     authz: {
@@ -301,13 +272,6 @@ const bulkInsightsRoute = createServerRoute({
             index: z.object({
               insight: insightInputSchema,
               id: z.string().optional(),
-            }),
-          }),
-          z.object({
-            update: z.object({
-              id: z.string(),
-              insight: insightInputSchema.partial(),
-              status: insightStatusSchema.optional(),
             }),
           }),
           z.object({
@@ -335,8 +299,7 @@ export const internalInsightsRoutes = {
   ...insightsStatusRoute,
   ...listInsightsRoute,
   ...getInsightRoute,
-  ...createInsightRoute,
-  ...updateInsightRoute,
+  ...saveInsightRoute,
   ...deleteInsightRoute,
   ...bulkInsightsRoute,
 };

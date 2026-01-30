@@ -14,9 +14,6 @@ import {
   INSIGHT_IMPACT,
   INSIGHT_EVIDENCE,
   INSIGHT_RECOMMENDATIONS,
-  INSIGHT_STATUS,
-  INSIGHT_CREATED_AT,
-  INSIGHT_UPDATED_AT,
 } from './fields';
 
 export const insightStorageSettings = {
@@ -29,9 +26,6 @@ export const insightStorageSettings = {
       [INSIGHT_IMPACT]: types.keyword(),
       [INSIGHT_EVIDENCE]: types.object({ enabled: false }),
       [INSIGHT_RECOMMENDATIONS]: types.keyword(),
-      [INSIGHT_STATUS]: types.keyword(),
-      [INSIGHT_CREATED_AT]: types.date(),
-      [INSIGHT_UPDATED_AT]: types.date(),
     },
   },
 } satisfies IndexStorageSettings;
