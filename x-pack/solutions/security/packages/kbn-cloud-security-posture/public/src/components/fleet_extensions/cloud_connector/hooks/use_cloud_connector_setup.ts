@@ -6,18 +6,24 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type {
+  NewPackagePolicy,
+  PackageInfo,
   PackagePolicyConfigRecord,
-  PackagePolicyConfigRecordEntry,
-} from '@kbn/fleet-plugin/public/types';
+} from '@kbn/fleet-plugin/common';
+import type { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/public/types';
 import type { AccountType, CloudProvider } from '@kbn/fleet-plugin/public';
+import {
+  extractRawCredentialVars,
+  getCredentialStorageScope,
+  resolveVarTarget,
+  applyVarsAtTarget,
+} from '@kbn/fleet-plugin/common';
 import type { UpdatePolicy } from '../../types';
 import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
 import {
   isAzureCloudConnectorVars,
   updateInputVarsWithCredentials,
-  updatePolicyInputs,
   isCloudConnectorNameValid,
 } from '../utils';
 import {
@@ -127,17 +133,35 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
   } as AwsCloudConnectorCredentials;
 };
 
+/**
+ * Updates the vars at the correct location based on credential storage scope.
+ *
+ * Cloud connector credentials can be stored at two scopes:
+ * - Package scope: policy.vars (global to the package)
+ * - Input/stream scope: policy.inputs[].streams[].vars
+ */
+const updatePolicyVarsByScope = (
+  policy: NewPackagePolicy,
+  updatedVars: PackagePolicyConfigRecord,
+  packageInfo: PackageInfo
+): NewPackagePolicy => {
+  const scope = getCredentialStorageScope(packageInfo);
+  const { target } = resolveVarTarget(policy, scope);
+
+  return applyVarsAtTarget(policy, updatedVars, target);
+};
+
 export const useCloudConnectorSetup = (
-  input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
+  packageInfo: PackageInfo,
   cloudProvider?: CloudProvider
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
-      // Safely access vars from the first enabled stream or fallback to empty object
-      const vars = input.streams?.find((stream) => stream.enabled)?.vars ?? {};
+      // Use accessor to get vars from the correct location
+      const vars = extractRawCredentialVars(newPolicy, packageInfo) ?? {};
       return createInitialCredentials(vars);
     });
 
@@ -156,68 +180,74 @@ export const useCloudConnectorSetup = (
   // Update policy with new connection credentials
   const updatePolicyWithNewCredentials = useCallback(
     (credentials: CloudConnectorCredentials) => {
-      const updatedPolicy = { ...newPolicy };
-      const inputVars = input.streams?.find((i) => i.enabled)?.vars;
+      // Get current vars from the correct location
+      const currentVars = extractRawCredentialVars(newPolicy, packageInfo);
 
       // Use shared validation utility for name validation
       const isNameValid = isCloudConnectorNameValid(credentials.name);
 
+      // Update credentials in vars
+      const updatedInputVars = updateInputVarsWithCredentials(
+        currentVars as PackagePolicyConfigRecord,
+        credentials
+      );
+
+      // Create updated policy with vars at the correct location
+      let updatedPolicy = updatePolicyVarsByScope(
+        { ...newPolicy },
+        updatedInputVars as PackagePolicyConfigRecord,
+        packageInfo
+      );
+
       // Set cloud_connector_name directly on the policy object (not in input vars)
-      updatedPolicy.cloud_connector_name = credentials.name;
+      updatedPolicy = {
+        ...updatedPolicy,
+        cloud_connector_name: credentials.name,
+        cloud_connector_id: undefined,
+      };
 
-      // Handle undefined cases safely
-      if (inputVars) {
-        const updatedInputVars = updateInputVarsWithCredentials(
-          inputVars as PackagePolicyConfigRecord,
-          credentials
-        );
-
-        const updatedPolicyWithInputs = updatePolicyInputs(
-          updatedPolicy,
-          updatedInputVars as PackagePolicyConfigRecord
-        );
-        updatePolicy({
-          updatedPolicy: { ...updatedPolicyWithInputs, cloud_connector_id: undefined },
-          isValid: isNameValid ? undefined : false,
-        });
-      }
+      updatePolicy({
+        updatedPolicy,
+        isValid: isNameValid ? undefined : false,
+      });
 
       setNewConnectionCredentials(credentials);
     },
-    [input.streams, newPolicy, updatePolicy]
+    [newPolicy, updatePolicy, packageInfo]
   );
 
   // Update policy with existing connection credentials
   const updatePolicyWithExistingCredentials = useCallback(
     (credentials: CloudConnectorCredentials) => {
-      const updatedPolicy = { ...newPolicy };
-      const inputVars = input.streams?.find((i) => i.enabled)?.vars;
+      // Get current vars from the correct location
+      const currentVars = extractRawCredentialVars(newPolicy, packageInfo);
 
-      // Handle undefined cases safely
-      if (inputVars) {
-        const updatedInputVars = updateInputVarsWithCredentials(
-          inputVars as PackagePolicyConfigRecord,
-          credentials
-        );
+      // Update credentials in vars
+      const updatedInputVars = updateInputVarsWithCredentials(
+        currentVars as PackagePolicyConfigRecord,
+        credentials
+      );
 
-        if (updatedInputVars) {
-          const updatedPolicyWithInputs = updatePolicyInputs(updatedPolicy, updatedInputVars);
-          // Create a clean copy to avoid circular references
-          updatedPolicy.inputs = [...(updatedPolicyWithInputs.inputs || [])];
-        }
+      // Create updated policy with vars at the correct location
+      let updatedPolicy = newPolicy;
+      if (updatedInputVars) {
+        updatedPolicy = updatePolicyVarsByScope({ ...newPolicy }, updatedInputVars, packageInfo);
+      }
+
+      // Set cloud connector ID if provided
+      if (credentials.cloudConnectorId) {
+        updatedPolicy = {
+          ...updatedPolicy,
+          cloud_connector_id: credentials.cloudConnectorId,
+        };
       }
 
       // Update existing connection credentials state
       setExistingConnectionCredentials(credentials);
 
-      // Set cloud connector ID if provided
-      if (credentials.cloudConnectorId) {
-        updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
-      }
-
       updatePolicy({ updatedPolicy });
     },
-    [input.streams, newPolicy, updatePolicy]
+    [newPolicy, updatePolicy, packageInfo]
   );
 
   return {
