@@ -15,8 +15,8 @@ import type { CaseUI } from '../../../../common/ui/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
-import { FilesTable } from '../../files/files_table';
-import { FilesUtilityBar } from '../../files/files_utility_bar';
+import { FilesTable } from '../../attachments/file/files_table';
+import { FilesUtilityBar } from '../../attachments/file/files_utility_bar';
 
 interface CaseViewFilesProps {
   caseData: CaseUI;
