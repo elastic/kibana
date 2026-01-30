@@ -29,13 +29,13 @@ import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-d
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import type { StatsCommandSummary } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import type { StatsCommandSummary } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
+import { type ESQLStatsQueryMeta } from '@kbn/esql-utils';
 import {
-  type ESQLStatsQueryMeta,
   type SupportedStatsFunction,
   getStatsGroupFieldType,
   getFieldParamDefinition,
-} from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+} from '@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
