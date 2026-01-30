@@ -266,13 +266,11 @@ export const useListDetailsView = (exceptionListId: string) => {
         onError: handleDeleteError,
         onSuccess: () => {
           handleDeleteSuccess(list.name)();
-          requestAnimationFrame(() => {
-            setReferenceModalState(exceptionReferenceModalInitialState);
-            setShowReferenceErrorModal(false);
-            navigateToApp(APP_UI_ID, {
-              deepLinkId: SecurityPageName.exceptions,
-              path: '',
-            });
+          setReferenceModalState(exceptionReferenceModalInitialState);
+          setShowReferenceErrorModal(false);
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.exceptions,
+            path: '',
           });
         },
       });
