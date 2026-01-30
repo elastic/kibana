@@ -21,7 +21,7 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 19,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -37,7 +37,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 19,
+            "lineNumber": 23,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +65,7 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-        "lineNumber": 12,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -81,7 +81,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/utils.ts",
-            "lineNumber": 12,
+            "lineNumber": 16,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -110,7 +110,7 @@
           "; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -123,7 +123,7 @@
             "label": "{ parentApi }",
             "description": [],
             "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
@@ -147,17 +147,17 @@
                   "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesUnifiedSearch",
+                    "section": "def-common.PublishesUnifiedSearch",
                     "text": "PublishesUnifiedSearch"
                   },
                   "> & ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesViewMode",
+                    "section": "def-common.PublishesViewMode",
                     "text": "PublishesViewMode"
                   },
                   " & ",
@@ -171,9 +171,9 @@
                   "<object> & Partial<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.PublishesDisabledActionIds",
+                    "section": "def-common.PublishesDisabledActionIds",
                     "text": "PublishesDisabledActionIds"
                   },
                   "> & { registerChildApi: (api: ",
@@ -191,7 +191,7 @@
                   ">; isCompressed?: (() => boolean) | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-controls-renderer/src/controls_renderer.tsx",
-                "lineNumber": 36,
+                "lineNumber": 38,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
@@ -293,17 +293,17 @@
           "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnifiedSearch",
+            "section": "def-common.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
+            "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
           " & ",
@@ -317,9 +317,9 @@
           "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDisabledActionIds",
+            "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
           "> & { registerChildApi: (api: ",

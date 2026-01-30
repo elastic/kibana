@@ -1138,7 +1138,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly totalCount: number; readonly additionalFilters: Record<",
+          "[] | undefined; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly totalCount: number; readonly additionalFilters: Record<",
           "AlertPageFilterType",
           ", boolean>; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",

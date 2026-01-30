@@ -496,9 +496,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
+                "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
               " | undefined"
@@ -757,17 +757,17 @@
           "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnifiedSearch",
+            "section": "def-common.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
+            "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
           " & ",
@@ -781,9 +781,9 @@
           "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDisabledActionIds",
+            "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
           "> & { registerChildApi: (api: ",
@@ -801,9 +801,9 @@
           ">; isCompressed?: (() => boolean) | undefined; } & HasEditorConfig & Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesFilters",
+            "section": "def-common.AppliesFilters",
             "text": "AppliesFilters"
           },
           ", \"appliedFilters$\"> & ",
@@ -817,9 +817,9 @@
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesTimeslice",
+            "section": "def-common.AppliesTimeslice",
             "text": "AppliesTimeslice"
           },
           " & { reload: () => void; updateInput: (input: Partial<",

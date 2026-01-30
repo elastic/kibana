@@ -773,9 +773,9 @@
           "(children$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
+            "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<{ [key: string]: Api; }>) => ",
@@ -798,9 +798,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<{ [key: string]: Api; }>"
@@ -981,9 +981,9 @@
           "<void>; serializeState: () => StateType; getComparators: () => ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.StateComparators",
+            "section": "def-common.StateComparators",
             "text": "StateComparators"
           },
           "<StateType>; defaultState?: Partial<StateType> | undefined; onReset: (lastSavedPanelState?: StateType | undefined) => ",
@@ -997,9 +997,9 @@
           "<void>; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnsavedChanges",
+            "section": "def-common.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           }
         ],
@@ -1097,9 +1097,9 @@
                   "() => ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.StateComparators",
+                    "section": "def-common.StateComparators",
                     "text": "StateComparators"
                   },
                   "<StateType>"
@@ -2845,9 +2845,9 @@
               "{ [x: string]: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.PublishingSubject",
+                "section": "def-common.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<boolean | undefined>; }"

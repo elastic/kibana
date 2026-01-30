@@ -6647,9 +6647,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.HasType",
+            "section": "def-common.HasType",
             "text": "HasType"
           },
           "<\"visualization\"> & { getVis: () => ",
@@ -9851,7 +9851,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"last_value\" | \"percentile\" | \"average\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 201,
@@ -9885,7 +9885,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"last_value\" | \"percentile\" | \"average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 202,

@@ -30,7 +30,7 @@
         "label": "AXE_IMPACT_LEVELS",
         "description": [],
         "signature": [
-          "(\"minor\" | \"critical\" | \"moderate\" | \"serious\")[]"
+          "(\"critical\" | \"minor\" | \"moderate\" | \"serious\")[]"
         ],
         "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
         "lineNumber": 54,

@@ -239,7 +239,7 @@
           "WithActiveSpan"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_active_inference_span.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -550,7 +550,27 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.EVAL_RUN_ID_BAGGAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "EVAL_RUN_ID_BAGGAGE_KEY",
+        "description": [
+          "\nW3C baggage key used by offline eval runs to tag all inference spans with the current eval run id.\n\nThis is intended to be set by clients (e.g. Scout/evals test runner) via the `baggage` HTTP header,\nand then propagated through tracing context."
+        ],
+        "signature": [
+          "\"kibana.evals.run_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/baggage.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

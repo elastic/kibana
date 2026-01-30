@@ -1522,7 +1522,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 154,
+        "lineNumber": 155,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1544,7 +1544,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 154,
+            "lineNumber": 155,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1842,7 +1842,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 131,
+        "lineNumber": 132,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1864,7 +1864,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 131,
+            "lineNumber": 132,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -2870,7 +2870,7 @@
           "\nRepresents the final answer from the agent in a conversation round."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2885,7 +2885,7 @@
               "\nThe text message from the assistant."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2901,7 +2901,7 @@
               "object | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3080,7 +3080,7 @@
           "\nMain structure representing a conversation with an agent."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 226,
+        "lineNumber": 229,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3095,7 +3095,7 @@
               "unique id for this conversation"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 230,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3110,7 +3110,7 @@
               "id of the agent this conversation is bound to"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 232,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3134,7 +3134,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 234,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3149,7 +3149,7 @@
               "title of the conversation"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 236,
+            "lineNumber": 239,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3164,7 +3164,7 @@
               "creation date"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 238,
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3179,7 +3179,7 @@
               "update date"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 240,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3204,7 +3204,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 242,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3229,7 +3229,7 @@
               "<string, unknown>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 244,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3248,7 +3248,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 249,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3337,7 +3337,7 @@
           "\nRepresents a round in a conversation, containing all the information\nrelated to this particular round."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 172,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3352,7 +3352,7 @@
               "unique id for this round"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3376,7 +3376,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 179,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3395,7 +3395,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 181,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3414,7 +3414,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 183,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3438,7 +3438,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3463,7 +3463,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 187,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3487,7 +3487,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 189,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3502,7 +3502,7 @@
               "when the round was started"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3517,7 +3517,7 @@
               "time it took to first token, in ms"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3532,7 +3532,7 @@
               "time it took to last token, in ms"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 195,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3556,7 +3556,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 197,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3574,7 +3574,32 @@
               "string | string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 199,
+            "lineNumber": 200,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ConversationRound.configuration_overrides",
+            "type": "Object",
+            "tags": [],
+            "label": "configuration_overrides",
+            "description": [
+              "Runtime configuration overrides that were applied to this round"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.RuntimeAgentConfigurationOverrides",
+                "text": "RuntimeAgentConfigurationOverrides"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
+            "lineNumber": 202,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3634,7 +3659,7 @@
           "\nRepresents the input used to interact with an agent (new round, resume round)"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3652,7 +3677,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3673,7 +3698,7 @@
               "<string, Record<string, unknown>>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -3742,7 +3767,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3762,7 +3787,7 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3778,7 +3803,7 @@
         "label": "EsqlToolParam",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-        "lineNumber": 38,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3793,10 +3818,10 @@
               "\nThe data types of the parameter. Must be one of these"
             ],
             "signature": [
-              "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
+              "\"string\" | \"boolean\" | \"date\" | \"integer\" | \"float\""
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-            "lineNumber": 39,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3811,7 +3836,7 @@
               "\nDescription of the parameter's purpose or expected values."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-            "lineNumber": 43,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3829,7 +3854,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-            "lineNumber": 47,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3854,7 +3879,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-            "lineNumber": 51,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4029,7 +4054,7 @@
         "label": "ReasoningStepData",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 142,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4044,7 +4069,7 @@
               "plain text reasoning content"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 143,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4062,7 +4087,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 145,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4182,7 +4207,7 @@
           "\nRepresents the input that initiated a conversation round."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4197,7 +4222,7 @@
               "\nA text message from the user."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4218,7 +4243,7 @@
               "<string, Record<string, unknown>>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
@@ -4311,7 +4336,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4327,7 +4352,7 @@
         "label": "RoundModelUsageStats",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 203,
+        "lineNumber": 206,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4342,7 +4367,7 @@
               "\nId of the connector used for this round"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 204,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4357,7 +4382,7 @@
               "\nNumber of LLM calls which were done during this round."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 208,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4372,7 +4397,7 @@
               "\nTotal number of input tokens sent this round."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 212,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4387,7 +4412,7 @@
               "\nTotal number of output tokens received this round."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 216,
+            "lineNumber": 219,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4405,7 +4430,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 220,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4512,7 +4537,7 @@
           "\nTool call progress which were emitted during the tool execution"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 83,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4527,7 +4552,7 @@
               "\nThe full text message"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4545,7 +4570,7 @@
           "\nRepresents a tool call with the corresponding result."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 93,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4560,7 +4585,7 @@
               "\nId of the tool call, as returned by the LLM"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4575,7 +4600,7 @@
               "\nIdentifier of the tool."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4593,7 +4618,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 105,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4618,7 +4643,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 109,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4643,7 +4668,7 @@
               "<Record<string, unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-            "lineNumber": 113,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5215,6 +5240,24 @@
           },
           {
             "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VersionedAttachment.readonly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readonly",
+            "description": [
+              "Whether the attachment is read-only in this conversation"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
             "id": "def-common.VersionedAttachment.client_id",
             "type": "string",
             "tags": [],
@@ -5226,7 +5269,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/versioned_attachment.ts",
-            "lineNumber": 49,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5288,7 +5331,7 @@
         "label": "ConversationRoundStatus",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 163,
+        "lineNumber": 164,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5302,7 +5345,7 @@
         "label": "ConversationRoundStepType",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5318,7 +5361,7 @@
           "\nCommon ES Field Types"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-        "lineNumber": 10,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6152,7 +6195,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 158,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6227,7 +6270,7 @@
           "<string, unknown>[] | undefined; agent_id: string; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 264,
+        "lineNumber": 267,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6320,7 +6363,7 @@
           ">; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-        "lineNumber": 60,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6360,7 +6403,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-        "lineNumber": 65,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6400,7 +6443,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
-        "lineNumber": 66,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6414,7 +6457,7 @@
         "label": "EsqlToolFieldTypes",
         "description": [],
         "signature": [
-          "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
+          "\"string\" | \"boolean\" | \"date\" | \"integer\" | \"float\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
         "lineNumber": 26,
@@ -6433,7 +6476,7 @@
           "\nValid types for parameter values and default values"
         ],
         "signature": [
-          "string | number | boolean | Record<string, unknown> | Record<string, unknown>[]"
+          "string | number | boolean"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/types/esql.ts",
         "lineNumber": 28,
@@ -6691,7 +6734,7 @@
           ".reasoning; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 149,
+        "lineNumber": 150,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6774,6 +6817,33 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
         "lineNumber": 226,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.RuntimeAgentConfigurationOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeAgentConfigurationOverrides",
+        "description": [
+          "\nRuntime configuration overrides exposed via the public API and persisted on conversation rounds.\nLimited to `instructions` and `tools` - other fields from AgentConfigurationOverrides\n(like research/answer step configs) are internal implementation details.\n\nThis type is used for:\n- API input validation (converse endpoint)\n- Auditing: stored on ConversationRound to record what overrides were applied"
+        ],
+        "signature": [
+          "{ instructions?: string | undefined; tools?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.ByIdsToolSelection",
+            "text": "ByIdsToolSelection"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+        "lineNumber": 130,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6933,7 +7003,7 @@
           ".toolCall; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation.ts",
-        "lineNumber": 119,
+        "lineNumber": 120,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
