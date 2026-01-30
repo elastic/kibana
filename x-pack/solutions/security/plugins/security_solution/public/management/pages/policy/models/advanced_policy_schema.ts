@@ -472,7 +472,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
       {
-        defaultMessage: 'Enable collection of entropy and header bytes in file events. Default: true.',
+        defaultMessage:
+          'Enable collection of entropy and header bytes in file events. Default: true.',
       }
     ),
   },
@@ -2779,7 +2780,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
       {
-        defaultMessage: 'Maximum size of scripts captured by mac.advanced.events.script_capturein bytes. Default 1024.'
+        defaultMessage:
+          'Maximum size of scripts captured by mac.advanced.events.script_capturein bytes. Default 1024.',
       }
     ),
   },
