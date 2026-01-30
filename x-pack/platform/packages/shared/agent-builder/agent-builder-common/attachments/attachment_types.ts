@@ -16,14 +16,12 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
-  visualization = 'visualization',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
-  [AttachmentType.visualization]: VisualizationAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -77,27 +75,6 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
-}
-
-export const visualizationAttachmentDataSchema = z.object({
-  query: z.string(),
-  visualization: z.record(z.unknown()),
-  chart_type: z.string(),
-  esql: z.string(),
-});
-
-/**
- * Data for a visualization attachment.
- */
-export interface VisualizationAttachmentData {
-  /** the natural language query used to generate the visualization */
-  query: string;
-  /** the visualization configuration (Lens API format) */
-  visualization: Record<string, unknown>;
-  /** the chart type (metric, gauge, xy, etc.) */
-  chart_type: string;
-  /** the ES|QL query used by the visualization */
-  esql: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
