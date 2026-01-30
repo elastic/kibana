@@ -45,18 +45,10 @@ export const PagerDutyConnector: ConnectorSpec = {
         query: z.string().optional(),
         include: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          offset?: number;
-          total?: boolean;
-          query?: string;
-          include?: string;
-        };
-
-        const queryParams = buildPaginationParams(typedInput);
-        if (typedInput.query) {
-          queryParams.query = typedInput.query;
+      handler: async (ctx, input: PD.ListEscalationPoliciesInput) => {
+        const queryParams = buildPaginationParams(input);
+        if (input.query) {
+          queryParams.query = input.query;
         }
 
         const response = await ctx.client.get('https://api.pagerduty.com/escalation_policies', {
@@ -89,15 +81,10 @@ export const PagerDutyConnector: ConnectorSpec = {
         id: z.string(),
         include: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          id: string;
-          include?: string;
-        };
-
-        const queryParams = buildPaginationParams(typedInput);
+      handler: async (ctx, input: PD.GetEscalationPolicyInput) => {
+        const queryParams = buildPaginationParams(input);
         const response = await ctx.client.get(
-          `https://api.pagerduty.com/escalation_policies/${typedInput.id}`,
+          `https://api.pagerduty.com/escalation_policies/${input.id}`,
           queryParams
         );
 
@@ -138,50 +125,34 @@ export const PagerDutyConnector: ConnectorSpec = {
         timeZone: z.string().optional(),
         sortBy: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          offset?: number;
-          total?: boolean;
-          dateRange?: string;
-          incidentKey?: string;
-          include?: string;
-          statuses?: string;
-          serviceIds?: string;
-          since?: string;
-          until?: string;
-          urgencies?: string;
-          timeZone?: string;
-          sortBy?: string;
-        };
-
-        const queryParams = buildPaginationParams(typedInput);
-        if (typedInput.dateRange) {
-          queryParams.date_range = typedInput.dateRange;
+      handler: async (ctx, input: PD.ListIncidentsInput) => {
+        const queryParams = buildPaginationParams(input);
+        if (input.dateRange) {
+          queryParams.date_range = input.dateRange;
         }
-        if (typedInput.incidentKey) {
-          queryParams.incident_key = typedInput.incidentKey;
+        if (input.incidentKey) {
+          queryParams.incident_key = input.incidentKey;
         }
-        if (typedInput.statuses) {
-          queryParams.statuses = typedInput.statuses;
+        if (input.statuses) {
+          queryParams.statuses = input.statuses;
         }
-        if (typedInput.serviceIds) {
-          queryParams.service_ids = typedInput.serviceIds;
+        if (input.serviceIds) {
+          queryParams.service_ids = input.serviceIds;
         }
-        if (typedInput.since) {
-          queryParams.since = typedInput.since;
+        if (input.since) {
+          queryParams.since = input.since;
         }
-        if (typedInput.until) {
-          queryParams.until = typedInput.until;
+        if (input.until) {
+          queryParams.until = input.until;
         }
-        if (typedInput.urgencies) {
-          queryParams.urgencies = typedInput.urgencies;
+        if (input.urgencies) {
+          queryParams.urgencies = input.urgencies;
         }
-        if (typedInput.timeZone) {
-          queryParams.time_zone = typedInput.timeZone;
+        if (input.timeZone) {
+          queryParams.time_zone = input.timeZone;
         }
-        if (typedInput.sortBy) {
-          queryParams.sort_by = typedInput.sortBy;
+        if (input.sortBy) {
+          queryParams.sort_by = input.sortBy;
         }
 
         const response = await ctx.client.get('https://api.pagerduty.com/incidents', {
@@ -198,16 +169,9 @@ export const PagerDutyConnector: ConnectorSpec = {
         id: z.string(),
         include: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          id: string;
-          include?: string;
-        };
-
+      handler: async (ctx, input: PD.GetIncidentInput) => {
         // Parse and filter the include parameter
-        const includeValues = typedInput.include
-          ? typedInput.include.split(',').map((v) => v.trim())
-          : [];
+        const includeValues = input.include ? input.include.split(',').map((v) => v.trim()) : [];
         const apiIncludes: string[] = [];
         const additionalData: {
           alerts?: Awaited<ReturnType<typeof listAlertsForIncidentHandler>>;
@@ -220,28 +184,28 @@ export const PagerDutyConnector: ConnectorSpec = {
           switch (includeValue) {
             case 'alerts':
               additionalData.alerts = await listAlertsForIncidentHandler(ctx, {
-                incidentId: typedInput.id,
+                incidentId: input.id,
                 limit: 10,
               });
               break;
 
             case 'notes':
               additionalData.notes = await listNotesForIncidentHandler(ctx, {
-                incidentId: typedInput.id,
+                incidentId: input.id,
                 limit: 10,
               });
               break;
 
             case 'related':
               additionalData.related = await listRelatedIncidentsHandler(ctx, {
-                incidentId: typedInput.id,
+                incidentId: input.id,
                 limit: 10,
               });
               break;
 
             case 'past':
               additionalData.past = await listPastIncidentsHandler(ctx, {
-                incidentId: typedInput.id,
+                incidentId: input.id,
                 limit: 10,
               });
               break;
@@ -256,12 +220,9 @@ export const PagerDutyConnector: ConnectorSpec = {
         const queryParams = buildPaginationParams({
           include: apiIncludes.length > 0 ? apiIncludes.join(',') : undefined,
         });
-        const response = await ctx.client.get(
-          `https://api.pagerduty.com/incidents/${typedInput.id}`,
-          {
-            params: queryParams,
-          }
-        );
+        const response = await ctx.client.get(`https://api.pagerduty.com/incidents/${input.id}`, {
+          params: queryParams,
+        });
         const result = transformIncidentsResponse(response.data);
 
         // Merge the additional data into the result
@@ -335,77 +296,19 @@ export const PagerDutyConnector: ConnectorSpec = {
         include: z.string().optional(),
         timeZone: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          offset?: number;
-          total?: boolean;
-          query?: string;
-          include?: string;
-          timeZone?: string;
-        };
-
-        const queryParams = buildPaginationParams(typedInput);
-        if (typedInput.query) {
-          queryParams.query = typedInput.query;
+      handler: async (ctx, input: PD.ListSchedulesInput) => {
+        const queryParams = buildPaginationParams(input);
+        if (input.query) {
+          queryParams.query = input.query;
         }
-        if (typedInput.timeZone) {
-          queryParams.time_zone = typedInput.timeZone;
+        if (input.timeZone) {
+          queryParams.time_zone = input.timeZone;
         }
 
         const response = await ctx.client.get('https://api.pagerduty.com/schedules', {
           params: queryParams,
         });
-
-        const data = response.data;
-        const transformSchedule = (schedule: PD.PagerDutySchedule): PD.TransformedSchedule => ({
-          id: schedule.id,
-          name: schedule.name,
-          description: schedule.description,
-          time_zone: schedule.time_zone,
-          schedule_layers: schedule.schedule_layers?.map((layer) => ({
-            id: layer.id,
-            name: layer.name,
-            start: layer.start,
-            rotation_virtual_start: layer.rotation_virtual_start,
-            rotation_turn_length_seconds: layer.rotation_turn_length_seconds,
-            users: layer.users
-              ?.map((user) => ({
-                user:
-                  user.user && user.user.id
-                    ? {
-                        id: user.user.id,
-                        summary: user.user.summary,
-                        name: user.user.name,
-                        email: user.user.email,
-                      }
-                    : undefined,
-              }))
-              .filter((item) => item.user !== undefined),
-          })),
-          users: schedule.users
-            ?.filter((user) => user && user.id)
-            .map((user) => ({
-              id: user.id,
-              summary: user.summary,
-            })),
-        });
-
-        if (data.schedule) {
-          return {
-            schedule: transformSchedule(data.schedule),
-          };
-        }
-        if (data.schedules) {
-          return {
-            limit: data.limit,
-            offset: data.offset,
-            total: data.total,
-            more: data.more,
-            schedules: data.schedules.map(transformSchedule),
-          };
-        }
-        return data;
+        return transformScheduleResponse(response.data);
       },
     },
 
@@ -417,66 +320,16 @@ export const PagerDutyConnector: ConnectorSpec = {
         include: z.string().optional(),
         timeZone: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          id: string;
-          include?: string;
-          timeZone?: string;
-        };
-        typedInput.include = undefined; // this does not accept include params
-
-        const queryParams = buildPaginationParams(typedInput);
-        if (typedInput.timeZone) {
-          queryParams.time_zone = typedInput.timeZone;
+      handler: async (ctx, input: PD.GetScheduleInput) => {
+        const queryParams = buildPaginationParams({ ...input, include: undefined });
+        if (input.timeZone) {
+          queryParams.time_zone = input.timeZone;
         }
 
-        const response = await ctx.client.get(
-          `https://api.pagerduty.com/schedules/${typedInput.id}`,
-          {
-            params: queryParams,
-          }
-        );
-
-        const data = response.data;
-        const transformSchedule = (schedule: PD.PagerDutySchedule): PD.TransformedSchedule => ({
-          id: schedule.id,
-          name: schedule.name,
-          description: schedule.description,
-          time_zone: schedule.time_zone,
-          schedule_layers: schedule.schedule_layers?.map((layer) => ({
-            id: layer.id,
-            name: layer.name,
-            start: layer.start,
-            rotation_virtual_start: layer.rotation_virtual_start,
-            rotation_turn_length_seconds: layer.rotation_turn_length_seconds,
-            users: layer.users
-              ?.map((user) => ({
-                user:
-                  user.user && user.user.id
-                    ? {
-                        id: user.user.id,
-                        summary: user.user.summary,
-                        name: user.user.name,
-                        email: user.user.email,
-                      }
-                    : undefined,
-              }))
-              .filter((item) => item.user !== undefined),
-          })),
-          users: schedule.users
-            ?.filter((user) => user && user.id)
-            .map((user) => ({
-              id: user.id,
-              summary: user.summary,
-            })),
+        const response = await ctx.client.get(`https://api.pagerduty.com/schedules/${input.id}`, {
+          params: queryParams,
         });
-
-        if (data.schedule) {
-          return {
-            schedule: transformSchedule(data.schedule),
-          };
-        }
-        return data;
+        return transformScheduleResponse(response.data);
       },
     },
 
@@ -495,44 +348,31 @@ export const PagerDutyConnector: ConnectorSpec = {
         include: z.string().optional(),
         timeZone: z.string().optional(),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          offset?: number;
-          total?: boolean;
-          scheduleIds?: string;
-          userIds?: string;
-          escalationPolicyIds?: string;
-          since?: string;
-          until?: string;
-          include?: string;
-          timeZone?: string;
-        };
-
-        const baseParams = buildPaginationParams(typedInput);
+      handler: async (ctx, input: PD.ListOnCallsInput) => {
+        const baseParams = buildPaginationParams(input);
         const queryParams: Record<string, string | number | boolean | string[]> = {
           ...baseParams,
         };
-        if (typedInput.scheduleIds) {
+        if (input.scheduleIds) {
           // PagerDuty expects schedule_ids[] as an array, but we accept comma-separated string
-          queryParams['schedule_ids[]'] = typedInput.scheduleIds.split(',').map((id) => id.trim());
+          queryParams['schedule_ids[]'] = input.scheduleIds.split(',').map((id) => id.trim());
         }
-        if (typedInput.userIds) {
-          queryParams['user_ids[]'] = typedInput.userIds.split(',').map((id) => id.trim());
+        if (input.userIds) {
+          queryParams['user_ids[]'] = input.userIds.split(',').map((id) => id.trim());
         }
-        if (typedInput.escalationPolicyIds) {
-          queryParams['escalation_policy_ids[]'] = typedInput.escalationPolicyIds
+        if (input.escalationPolicyIds) {
+          queryParams['escalation_policy_ids[]'] = input.escalationPolicyIds
             .split(',')
             .map((id) => id.trim());
         }
-        if (typedInput.since) {
-          queryParams.since = typedInput.since;
+        if (input.since) {
+          queryParams.since = input.since;
         }
-        if (typedInput.until) {
-          queryParams.until = typedInput.until;
+        if (input.until) {
+          queryParams.until = input.until;
         }
-        if (typedInput.timeZone) {
-          queryParams.time_zone = typedInput.timeZone;
+        if (input.timeZone) {
+          queryParams.time_zone = input.timeZone;
         }
 
         const response = await ctx.client.get('https://api.pagerduty.com/oncalls', {
@@ -621,18 +461,13 @@ export const PagerDutyConnector: ConnectorSpec = {
 /**
  * Handler for listAlertsForIncident action
  */
-async function listAlertsForIncidentHandler(ctx: ActionContext, input: unknown) {
-  const typedInput = input as {
-    incidentId: string;
-    limit?: number;
-    offset?: number;
-    total?: boolean;
-    include?: string;
-  };
-
-  const queryParams = buildPaginationParams(typedInput);
+async function listAlertsForIncidentHandler(
+  ctx: ActionContext,
+  input: PD.IncidentIdPaginationInput
+) {
+  const queryParams = buildPaginationParams(input);
   const response = await ctx.client.get(
-    `https://api.pagerduty.com/incidents/${typedInput.incidentId}/alerts`,
+    `https://api.pagerduty.com/incidents/${input.incidentId}/alerts`,
     {
       params: queryParams,
     }
@@ -688,18 +523,13 @@ async function listAlertsForIncidentHandler(ctx: ActionContext, input: unknown) 
 /**
  * Handler for listNotesForIncident action
  */
-async function listNotesForIncidentHandler(ctx: ActionContext, input: unknown) {
-  const typedInput = input as {
-    incidentId: string;
-    limit?: number;
-    offset?: number;
-    total?: boolean;
-    include?: string;
-  };
-
-  const queryParams = buildPaginationParams(typedInput);
+async function listNotesForIncidentHandler(
+  ctx: ActionContext,
+  input: PD.IncidentIdPaginationInput
+) {
+  const queryParams = buildPaginationParams(input);
   const response = await ctx.client.get(
-    `https://api.pagerduty.com/incidents/${typedInput.incidentId}/notes`,
+    `https://api.pagerduty.com/incidents/${input.incidentId}/notes`,
     {
       params: queryParams,
     }
@@ -745,18 +575,13 @@ async function listNotesForIncidentHandler(ctx: ActionContext, input: unknown) {
 /**
  * Handler for listRelatedIncidents action
  */
-async function listRelatedIncidentsHandler(ctx: ActionContext, input: unknown) {
-  const typedInput = input as {
-    incidentId: string;
-    limit?: number;
-    offset?: number;
-    total?: boolean;
-    include?: string;
-  };
-
-  const queryParams = buildPaginationParams(typedInput);
+async function listRelatedIncidentsHandler(
+  ctx: ActionContext,
+  input: PD.IncidentIdPaginationInput
+) {
+  const queryParams = buildPaginationParams(input);
   const response = await ctx.client.get(
-    `https://api.pagerduty.com/incidents/${typedInput.incidentId}/related_change_events`,
+    `https://api.pagerduty.com/incidents/${input.incidentId}/related_change_events`,
     {
       params: queryParams,
     }
@@ -768,18 +593,10 @@ async function listRelatedIncidentsHandler(ctx: ActionContext, input: unknown) {
 /**
  * Handler for listPastIncidents action
  */
-async function listPastIncidentsHandler(ctx: ActionContext, input: unknown) {
-  const typedInput = input as {
-    incidentId: string;
-    limit?: number;
-    offset?: number;
-    total?: boolean;
-    include?: string;
-  };
-
-  const queryParams = buildPaginationParams(typedInput);
+async function listPastIncidentsHandler(ctx: ActionContext, input: PD.IncidentIdPaginationInput) {
+  const queryParams = buildPaginationParams(input);
   const response = await ctx.client.get(
-    `https://api.pagerduty.com/incidents/${typedInput.incidentId}/past_incidents`,
+    `https://api.pagerduty.com/incidents/${input.incidentId}/past_incidents`,
     {
       params: queryParams,
     }
@@ -867,7 +684,9 @@ function transformIncident(incident: PD.PagerDutyIncident): PD.TransformedIncide
 /**
  * Transform escalation policy response to include only essential fields
  */
-function transformEscalationPolicy(ep: PD.PagerDutyEscalationPolicy): PD.TransformedEscalationPolicy {
+function transformEscalationPolicy(
+  ep: PD.PagerDutyEscalationPolicy
+): PD.TransformedEscalationPolicy {
   return {
     id: ep.id,
     name: ep.name,
@@ -885,6 +704,70 @@ function transformEscalationPolicy(ep: PD.PagerDutyEscalationPolicy): PD.Transfo
       summary: service.summary,
     })),
   };
+}
+
+/**
+ * Transform schedule to include only essential fields
+ */
+function transformSchedule(schedule: PD.PagerDutySchedule): PD.TransformedSchedule {
+  return {
+    id: schedule.id,
+    name: schedule.name,
+    description: schedule.description,
+    time_zone: schedule.time_zone,
+    schedule_layers: schedule.schedule_layers?.map((layer) => ({
+      id: layer.id,
+      name: layer.name,
+      start: layer.start,
+      rotation_virtual_start: layer.rotation_virtual_start,
+      rotation_turn_length_seconds: layer.rotation_turn_length_seconds,
+      users: layer.users
+        ?.map((user) => ({
+          user:
+            user.user && user.user.id
+              ? {
+                  id: user.user.id,
+                  summary: user.user.summary,
+                  name: user.user.name,
+                  email: user.user.email,
+                }
+              : undefined,
+        }))
+        .filter((item) => item.user !== undefined),
+    })),
+    users: schedule.users
+      ?.filter((user) => user && user.id)
+      .map((user) => ({
+        id: user.id,
+        summary: user.summary,
+      })),
+  };
+}
+
+/**
+ * Transform schedule(s) API response (single schedule or list)
+ */
+function transformScheduleResponse(data: {
+  schedule?: PD.PagerDutySchedule;
+  schedules?: PD.PagerDutySchedule[];
+  limit?: number;
+  offset?: number;
+  total?: number;
+  more?: boolean;
+}) {
+  if (data.schedule) {
+    return { schedule: transformSchedule(data.schedule) };
+  }
+  if (data.schedules) {
+    return {
+      limit: data.limit,
+      offset: data.offset,
+      total: data.total,
+      more: data.more,
+      schedules: data.schedules.map(transformSchedule),
+    };
+  }
+  return data;
 }
 
 /**

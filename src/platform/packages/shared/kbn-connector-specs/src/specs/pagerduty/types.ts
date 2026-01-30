@@ -286,3 +286,77 @@ export interface TransformedOnCallsResponse {
   total?: number;
 }
 
+// =============================================================================
+// Action input types (handler parameters)
+// =============================================================================
+
+export interface ListEscalationPoliciesInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  query?: string;
+  include?: string;
+}
+
+export interface GetEscalationPolicyInput {
+  id: string;
+  include?: string;
+}
+
+export interface ListIncidentsInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  dateRange?: string;
+  incidentKey?: string;
+  include?: string;
+  statuses?: string;
+  serviceIds?: string;
+  since?: string;
+  until?: string;
+  urgencies?: string;
+  timeZone?: string;
+  sortBy?: string;
+}
+
+export interface GetIncidentInput {
+  id: string;
+  include?: string;
+}
+
+export interface IncidentIdPaginationInput {
+  incidentId: string;
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  include?: string;
+}
+
+export interface ListSchedulesInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  query?: string;
+  include?: string;
+  timeZone?: string;
+}
+
+export interface GetScheduleInput {
+  id: string;
+  include?: string;
+  timeZone?: string;
+}
+
+export interface ListOnCallsInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  scheduleIds?: string;
+  userIds?: string;
+  escalationPolicyIds?: string;
+  since?: string;
+  until?: string;
+  include?: string;
+  timeZone?: string;
+}
+
