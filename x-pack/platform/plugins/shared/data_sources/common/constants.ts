@@ -28,7 +28,6 @@ export const DATASOURCES_SCOPE = 'dataSources';
 export const WORKFLOWS_SCOPE = 'workflows';
 export const TOOLS_SCOPE = 'tools';
 export const FAKE_REQUEST_NOT_DEFINED_ERROR = 'fakeRequest is not defined';
-export const UNKNOWN_DATA_SOURCE_ID = 'unknown';
 
 // Error and success messages
 export const PARTIALLY_DELETED_ERROR = 'Partially deleted: some resources failed to delete';

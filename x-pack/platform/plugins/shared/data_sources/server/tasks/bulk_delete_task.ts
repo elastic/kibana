@@ -15,11 +15,7 @@ import type {
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataSourceAttributes } from '../saved_objects';
 import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
-import {
-  FAKE_REQUEST_NOT_DEFINED_ERROR,
-  UNKNOWN_DATA_SOURCE_ID,
-  PARTIALLY_DELETED_ERROR,
-} from '../../common/constants';
+import { FAKE_REQUEST_NOT_DEFINED_ERROR, PARTIALLY_DELETED_ERROR } from '../../common/constants';
 
 export const TYPE = 'data-sources:bulk-delete-task';
 
@@ -98,73 +94,58 @@ export class BulkDeleteTask {
               let deletedCount = 0;
               const errors: Array<{ dataSourceId: string; error: string }> = [];
 
-              try {
-                for (const id of dataSourceIds) {
-                  try {
-                    const dataSource = await savedObjectsClient.get<DataSourceAttributes>(
-                      DATA_SOURCE_SAVED_OBJECT_TYPE,
-                      id
-                    );
+              for (const id of dataSourceIds) {
+                try {
+                  const dataSource = await savedObjectsClient.get<DataSourceAttributes>(
+                    DATA_SOURCE_SAVED_OBJECT_TYPE,
+                    id
+                  );
 
-                    const result = await deleteDataSourceAndRelatedResources({
-                      dataSource,
-                      savedObjectsClient,
-                      actionsClient,
-                      toolRegistry,
-                      workflowManagement,
-                      request: fakeRequest,
-                      logger: this.logger,
-                    });
+                  const result = await deleteDataSourceAndRelatedResources({
+                    dataSource,
+                    savedObjectsClient,
+                    actionsClient,
+                    toolRegistry,
+                    workflowManagement,
+                    request: fakeRequest,
+                    logger: this.logger,
+                  });
 
-                    if (result.fullyDeleted) {
-                      deletedCount++;
-                    } else {
-                      errors.push({
-                        dataSourceId: id,
-                        error: PARTIALLY_DELETED_ERROR,
-                      });
-                    }
-                  } catch (error) {
-                    if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-                      // Already deleted (e.g. by another process); skip
-                      this.logger.debug(`Data source ${id} not found, skipping`);
-                      continue;
-                    }
-                    const errorMessage = (error as Error).message;
-                    this.logger.error(`Failed to delete data source ${id}: ${errorMessage}`);
+                  if (result.fullyDeleted) {
+                    deletedCount++;
+                  } else {
                     errors.push({
                       dataSourceId: id,
-                      error: errorMessage,
+                      error: PARTIALLY_DELETED_ERROR,
                     });
                   }
+                } catch (error) {
+                  if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+                    // Already deleted (e.g. by another process); skip
+                    this.logger.debug(`Data source ${id} not found, skipping`);
+                    continue;
+                  }
+                  const errorMessage = (error as Error).message;
+                  this.logger.error(`Failed to delete data source ${id}: ${errorMessage}`);
+                  errors.push({
+                    dataSourceId: id,
+                    error: errorMessage,
+                  });
                 }
-
-                this.logger.info(
-                  `Bulk delete completed: ${deletedCount} data sources deleted, ${errors.length} errors`
-                );
-
-                return {
-                  runAt: new Date(Date.now() + 60 * 60 * 1000),
-                  state: {
-                    isDone: true,
-                    deletedCount,
-                    errors,
-                  } satisfies BulkDeleteTaskState,
-                };
-              } catch (err) {
-                this.logger.error(`Bulk delete error: ${(err as Error).message}`);
-                return {
-                  runAt: new Date(Date.now() + 60 * 60 * 1000),
-                  state: {
-                    isDone: true,
-                    deletedCount,
-                    errors: [
-                      ...errors,
-                      { dataSourceId: UNKNOWN_DATA_SOURCE_ID, error: (err as Error).message },
-                    ],
-                  } satisfies BulkDeleteTaskState,
-                };
               }
+
+              this.logger.info(
+                `Bulk delete completed: ${deletedCount} data sources deleted, ${errors.length} errors`
+              );
+
+              return {
+                runAt: new Date(Date.now() + 60 * 60 * 1000),
+                state: {
+                  isDone: true,
+                  deletedCount,
+                  errors,
+                } satisfies BulkDeleteTaskState,
+              };
             },
             cancel: async () => {
               this.logger.debug('Bulk delete task cancelled');
