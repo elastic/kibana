@@ -36,4 +36,4 @@ Elastic Managed LLMs incur a cost per million tokens for input and output tokens
 ## Available models
 
 Elastic Managed LLMs are available exclusively through the Elastic {{infer-cap}} Service.
-You can find the [list of supported models]((docs-content://explore-analyze/elastic-inference/eis.md#supported-models)) on the EIS documentation page.
+You can find the [list of supported models](docs-content://explore-analyze/elastic-inference/eis.md#supported-models) on the EIS documentation page.
