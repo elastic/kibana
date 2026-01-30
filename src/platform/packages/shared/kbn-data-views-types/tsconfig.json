@@ -1,8 +1,20 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-common-types"
+    ]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"]
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/field-formats-plugin"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
 }

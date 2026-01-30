@@ -7,13 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Re-export from @kbn/data-views-types for backward compatibility
-export {
-  RUNTIME_FIELD_TYPES,
-  META_FIELDS,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
-} from '@kbn/data-views-types';
+/**
+ * All runtime field types.
+ * @public
+ */
+export const RUNTIME_FIELD_TYPES = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+  'composite',
+] as const;
+
+/**
+ * UiSettings key for metaFields list.
+ * @public
+ */
+export const META_FIELDS = 'metaFields';
+
+/**
+ * Data view saved object type.
+ * @public
+ */
+export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
+
+/**
+ * Max length for the custom field description
+ */
+export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
 
 /**
  * Used to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources

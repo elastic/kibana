@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Constants
-export {
-  RUNTIME_FIELD_TYPES,
-  META_FIELDS,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
-} from './src/constants';
-
 // Runtime field types
 export type {
   RuntimeType,

@@ -8,12 +8,19 @@
  */
 
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { RUNTIME_FIELD_TYPES } from './constants';
 
 /**
  * Runtime field types
  */
-export type RuntimeType = (typeof RUNTIME_FIELD_TYPES)[number];
+export type RuntimeType =
+  | 'keyword'
+  | 'long'
+  | 'double'
+  | 'date'
+  | 'ip'
+  | 'boolean'
+  | 'geo_point'
+  | 'composite';
 
 /**
  * Runtime field primitive types - excluding composite
