@@ -210,10 +210,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
