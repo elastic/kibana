@@ -52,8 +52,6 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 export const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
 export const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
 export const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
-export const AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ =
-  'launchCloudConnectorArmAccordianInstructions';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azureCredentialsTypeSelector';
 export const AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ =
   'azureLaunchCloudConnectorArmTemplate';
@@ -76,13 +74,3 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
 
 export const ADVANCED_OPTION_ACCORDION_TEST_SUBJ = 'advancedOptionsAccordion';
 export const NAMESPACE_INPUT_TEST_SUBJ = 'namespaceInputTestId';
-
-// Re-export cloud connector test subjects from Fleet for backward compatibility
-export {
-  AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
-  AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
-  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
-  CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ,
-  getCloudConnectorEditIconTestSubj,
-  CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS,
-} from '@kbn/fleet-plugin/common';

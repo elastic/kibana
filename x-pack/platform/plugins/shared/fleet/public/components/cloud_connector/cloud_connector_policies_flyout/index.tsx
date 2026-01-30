@@ -102,18 +102,12 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   const identifierLabel =
     provider === 'aws'
-      ? i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.roleArnLabel',
-          {
-            defaultMessage: 'Role ARN',
-          }
-        )
-      : i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.cloudConnectorIdLabel',
-          {
-            defaultMessage: 'Cloud Connector ID',
-          }
-        );
+      ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.roleArnLabel', {
+          defaultMessage: 'Role ARN',
+        })
+      : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.cloudConnectorIdLabel', {
+          defaultMessage: 'Cloud Connector ID',
+        });
 
   const handleSaveName = () => {
     if (editedName && editedName !== cloudConnectorName) {
@@ -130,13 +124,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
   const tableCaption = useMemo(
     () =>
-      i18n.translate(
-        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.tableCaption',
-        {
-          defaultMessage: 'Integrations using cloud connector {name}',
-          values: { name: cloudConnectorName },
-        }
-      ),
+      i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.tableCaption', {
+        defaultMessage: 'Integrations using cloud connector {name}',
+        values: { name: cloudConnectorName },
+      }),
     [cloudConnectorName]
   );
 
@@ -170,12 +161,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     () => [
       {
         field: 'name',
-        name: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.nameColumn',
-          {
-            defaultMessage: 'Name',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.nameColumn', {
+          defaultMessage: 'Name',
+        }),
         render: (name: string, item) => {
           return (
             <EuiLink
@@ -192,32 +180,23 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       },
       {
         field: 'package',
-        name: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.integrationTypeColumn',
-          {
-            defaultMessage: 'Integration Type',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.integrationTypeColumn', {
+          defaultMessage: 'Integration Type',
+        }),
         render: (pkg: (typeof usageItems)[0]['package']) => pkg?.title || pkg?.name || '-',
       },
       {
         field: 'created_at',
-        name: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.createdColumn',
-          {
-            defaultMessage: 'Created',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.createdColumn', {
+          defaultMessage: 'Created',
+        }),
         render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
       },
       {
         field: 'updated_at',
-        name: i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.lastUpdatedColumn',
-          {
-            defaultMessage: 'Last Updated',
-          }
-        ),
+        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.lastUpdatedColumn', {
+          defaultMessage: 'Last Updated',
+        }),
         render: (updatedAt: string) => new Date(updatedAt).toLocaleDateString(),
       },
     ],
@@ -268,7 +247,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                     onClick={copy}
                     iconType="copy"
                     aria-label={i18n.translate(
-                      'securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.copyIdentifier',
+                      'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
                       {
                         defaultMessage: 'Copy {label}',
                         values: { label: identifierLabel },
@@ -305,7 +284,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON}
         >
           <FormattedMessage
-            id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.saveButton"
+            id="xpack.fleet.cloudConnector.policiesFlyout.saveButton"
             defaultMessage="Save"
           />
         </EuiButton>
@@ -319,7 +298,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         >
           <h4>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.usedByTitle"
+              id="xpack.fleet.cloudConnector.policiesFlyout.usedByTitle"
               defaultMessage="Used by {count} {count, plural, one {integration} other {integrations}}"
               values={{ count: totalItemCount }}
             />
@@ -335,7 +314,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             title={
               <h3>
                 <FormattedMessage
-                  id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.errorTitle"
+                  id="xpack.fleet.cloudConnector.policiesFlyout.errorTitle"
                   defaultMessage="Failed to load policies"
                 />
               </h3>
@@ -343,7 +322,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             body={
               <p>
                 <FormattedMessage
-                  id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.errorBody"
+                  id="xpack.fleet.cloudConnector.policiesFlyout.errorBody"
                   defaultMessage="There was an error loading the policies using this cloud connector. Please try again."
                 />
               </p>
@@ -366,7 +345,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             title={
               <h3>
                 <FormattedMessage
-                  id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.emptyStateTitle"
+                  id="xpack.fleet.cloudConnector.policiesFlyout.emptyStateTitle"
                   defaultMessage="No integrations using this cloud connector"
                 />
               </h3>
@@ -374,7 +353,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             body={
               <p>
                 <FormattedMessage
-                  id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.emptyStateBody"
+                  id="xpack.fleet.cloudConnector.policiesFlyout.emptyStateBody"
                   defaultMessage="This cloud connector is not currently used by any integrations."
                 />
               </p>

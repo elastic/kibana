@@ -57,7 +57,7 @@ export const CloudConnectorSelector = ({
 
   const label = (
     <FormattedMessage
-      id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorLabel"
+      id="xpack.fleet.cloudConnector.selector.label"
       defaultMessage="Cloud Connector Name"
     />
   );
@@ -102,22 +102,16 @@ export const CloudConnectorSelector = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={i18n.translate(
-                  'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.editConnectorTooltip',
-                  {
-                    defaultMessage: 'View and edit connector details',
-                  }
-                )}
+                content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
+                  defaultMessage: 'View and edit connector details',
+                })}
               >
                 <EuiButtonIcon
                   iconType="pencil"
-                  aria-label={i18n.translate(
-                    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.editConnectorAriaLabel',
-                    {
-                      defaultMessage: 'Edit {name}',
-                      values: { name: connector.name },
-                    }
-                  )}
+                  aria-label={i18n.translate('xpack.fleet.cloudConnector.selector.editAriaLabel', {
+                    defaultMessage: 'Edit {name}',
+                    values: { name: connector.name },
+                  })}
                   color="text"
                   size="s"
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
@@ -213,12 +207,9 @@ export const CloudConnectorSelector = ({
           valueOfSelected={selectedValue}
           onChange={handleChange}
           fullWidth
-          placeholder={i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.reusableConnectorSelect.placeholder',
-            {
-              defaultMessage: 'Select a cloud connector',
-            }
-          )}
+          placeholder={i18n.translate('xpack.fleet.cloudConnector.selector.placeholder', {
+            defaultMessage: 'Select a cloud connector',
+          })}
           hasDividers
           data-test-subj={testSubj}
         />

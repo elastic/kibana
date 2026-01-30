@@ -35,12 +35,9 @@ export const CloudConnectorNameField: React.FC<CloudConnectorNameFieldProps> = (
 
   return (
     <EuiFormRow
-      label={i18n.translate(
-        'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorNameField.label',
-        {
-          defaultMessage: 'Cloud Connector Name',
-        }
-      )}
+      label={i18n.translate('xpack.fleet.cloudConnector.nameField.label', {
+        defaultMessage: 'Cloud Connector Name',
+      })}
       isInvalid={!!error}
       error={error}
       fullWidth

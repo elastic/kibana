@@ -90,7 +90,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       id: TABS.NEW_CONNECTION,
       name: (
         <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.newConnectionTab"
+          id="xpack.fleet.cloudConnector.setup.newConnectionTab"
           defaultMessage="New Connection"
         />
       ),
@@ -100,7 +100,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           <div>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudFormation.guide.description.cloudConnectors"
+                id="xpack.fleet.cloudConnector.setup.cloudFormation.guide.description"
                 defaultMessage="Create a reusable IAM role in your AWS account, then give Elastic its Role ARN and the External ID shown below. You'll need rights to launch a CloudFormation stack and create/update IAM roles in the target AWS account {learnMore}."
                 values={{
                   learnMore: (
@@ -111,7 +111,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
                       data-test-subj="externalLink"
                     >
                       <FormattedMessage
-                        id="securitySolutionPackages.assetInventory.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                        id="xpack.fleet.cloudConnector.setup.cloudFormation.guide.learnMoreLink"
                         defaultMessage="Learn more about CloudFormation"
                       />
                     </EuiLink>
@@ -141,7 +141,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
       id: TABS.EXISTING_CONNECTION,
       name: (
         <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.existingConnectionTab"
+          id="xpack.fleet.cloudConnector.setup.existingConnectionTab"
           defaultMessage="Existing Connection"
         />
       ),

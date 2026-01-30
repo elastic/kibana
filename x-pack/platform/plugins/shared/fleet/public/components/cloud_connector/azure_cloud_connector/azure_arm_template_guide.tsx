@@ -20,13 +20,13 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
         <ol>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.1"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.login"
               defaultMessage="Log in to the Azure console."
             />
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.2"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.deploy"
               defaultMessage="Return to Kibana. Click {deployButton}, below."
               values={{
                 deployButton: <strong>{'Deploy in Azure'}</strong>,
@@ -35,7 +35,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.3"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.region"
               defaultMessage="(Optional) Set the {region} where you want to deploy your ARM template."
               values={{
                 region: <strong>{'region'}</strong>,
@@ -44,7 +44,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.3"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.stackId"
               defaultMessage="Copy your {elasticStackId} into the ARM template. Do not change the value of the {issuer} field"
               values={{
                 issuer: <strong>{'Elastic Cloud Issuer'}</strong>,
@@ -59,7 +59,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.4"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.review"
               defaultMessage="Click {reviewButton}."
               values={{
                 reviewButton: <strong>{'Review + Create'}</strong>,
@@ -68,7 +68,7 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudconnectors.guide.steps.5"
+              id="xpack.fleet.cloudConnector.azure.guide.steps.outputs"
               defaultMessage="Once the deployment is complete, go to the {outputs} tab and copy the {outputValues} fields and paste them into Kibana, below."
               values={{
                 outputs: <strong>{'Outputs'}</strong>,

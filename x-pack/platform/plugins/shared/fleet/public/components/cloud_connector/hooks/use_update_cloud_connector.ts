@@ -70,12 +70,9 @@ export const useUpdateCloudConnector = (
         queryClient.invalidateQueries(['cloud-connector-usage', cloudConnectorId]);
 
         notifications?.toasts.addSuccess({
-          title: i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnector.updateSuccess',
-            {
-              defaultMessage: 'Cloud connector updated successfully',
-            }
-          ),
+          title: i18n.translate('xpack.fleet.cloudConnector.updateSuccess', {
+            defaultMessage: 'Cloud connector updated successfully',
+          }),
         });
 
         if (onSuccess) {
@@ -84,12 +81,9 @@ export const useUpdateCloudConnector = (
       },
       onError: (error: Error) => {
         notifications?.toasts.addError(error, {
-          title: i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudConnector.updateError',
-            {
-              defaultMessage: 'Failed to update cloud connector',
-            }
-          ),
+          title: i18n.translate('xpack.fleet.cloudConnector.updateError', {
+            defaultMessage: 'Failed to update cloud connector',
+          }),
         });
 
         if (onError) {

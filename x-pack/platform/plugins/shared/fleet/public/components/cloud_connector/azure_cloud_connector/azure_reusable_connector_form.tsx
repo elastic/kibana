@@ -26,7 +26,7 @@ export const AzureReusableConnectorForm: React.FC<{
       <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.azure.cloudConnectorInstructions"
+          id="xpack.fleet.cloudConnector.azure.reusableConnectorInstructions"
           defaultMessage="To streamline your Azure integration process, you can reuse the same cloud connector for different use cases within Elastic. Simply choose the existing connection from the options below:"
         />
       </EuiText>

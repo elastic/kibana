@@ -41,12 +41,9 @@ const TooltipContent: React.FC<{
       >
         <EuiLoadingSpinner size="s" />
         <span>
-          {i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.integrationCountBadge.loading',
-            {
-              defaultMessage: 'Loading...',
-            }
-          )}
+          {i18n.translate('xpack.fleet.cloudConnector.integrationCountBadge.loading', {
+            defaultMessage: 'Loading...',
+          })}
         </span>
       </div>
     );
@@ -55,12 +52,9 @@ const TooltipContent: React.FC<{
   if (isError) {
     return (
       <EuiText size="s" color="danger">
-        {i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.integrationCountBadge.error',
-          {
-            defaultMessage: 'Failed to load integrations',
-          }
-        )}
+        {i18n.translate('xpack.fleet.cloudConnector.integrationCountBadge.error', {
+          defaultMessage: 'Failed to load integrations',
+        })}
       </EuiText>
     );
   }
@@ -83,13 +77,10 @@ const TooltipContent: React.FC<{
       </ul>
       {hasMore && (
         <EuiText size="xs" color="subdued">
-          {i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.integrationCountBadge.andMore',
-            {
-              defaultMessage: '+{remaining} more',
-              values: { remaining: total - MAX_VISIBLE_POLICIES },
-            }
-          )}
+          {i18n.translate('xpack.fleet.cloudConnector.integrationCountBadge.andMore', {
+            defaultMessage: '+{remaining} more',
+            values: { remaining: total - MAX_VISIBLE_POLICIES },
+          })}
         </EuiText>
       )}
     </div>
@@ -110,13 +101,10 @@ export const IntegrationCountBadge: React.FC<IntegrationCountBadgeProps> = ({
     setIsHovered(false);
   }, []);
 
-  const badgeLabel = i18n.translate(
-    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.integrationCountBadge',
-    {
-      defaultMessage: 'Used by {count, plural, one {# integration} other {# integrations}}',
-      values: { count },
-    }
-  );
+  const badgeLabel = i18n.translate('xpack.fleet.cloudConnector.integrationCountBadge.label', {
+    defaultMessage: 'Used by {count, plural, one {# integration} other {# integrations}}',
+    values: { count },
+  });
 
   const badge = <EuiBadge color="default">{badgeLabel}</EuiBadge>;
 

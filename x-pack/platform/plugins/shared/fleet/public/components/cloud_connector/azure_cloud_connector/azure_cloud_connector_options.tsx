@@ -16,24 +16,15 @@ import type { CloudConnectorField } from '../types';
 import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
 
 const AZURE_CLOUD_CONNECTOR_FIELD_LABELS = {
-  tenant_id: i18n.translate(
-    'securitySolutionPackages.cloudSecurityPosture.cloudConnector.azure.tenantIdLabel',
-    {
-      defaultMessage: 'Tenant ID',
-    }
-  ),
-  client_id: i18n.translate(
-    'securitySolutionPackages.cloudSecurityPosture.cloudConnector.azure.clientIdLabel',
-    {
-      defaultMessage: 'Client ID',
-    }
-  ),
-  cloud_connector_id: i18n.translate(
-    'securitySolutionPackages.cloudSecurityPosture.cloudConnector.azure.cloudConnectorIdLabel',
-    {
-      defaultMessage: 'Cloud Connector ID',
-    }
-  ),
+  tenant_id: i18n.translate('xpack.fleet.cloudConnector.azure.tenantIdLabel', {
+    defaultMessage: 'Tenant ID',
+  }),
+  client_id: i18n.translate('xpack.fleet.cloudConnector.azure.clientIdLabel', {
+    defaultMessage: 'Client ID',
+  }),
+  cloud_connector_id: i18n.translate('xpack.fleet.cloudConnector.azure.cloudConnectorIdLabel', {
+    defaultMessage: 'Cloud Connector ID',
+  }),
 };
 
 interface AzureCloudConnectorOptions {
@@ -160,7 +151,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
     description: (
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.cloudSecurityPosture.cloudConnector.azure.description"
+          id="xpack.fleet.cloudConnector.azure.description"
           defaultMessage="Configure Azure Cloud Connector credentials to securely connect to your Azure resources. The Cloud Connector will use these credentials to authenticate and collect security posture data."
         />
       </EuiText>

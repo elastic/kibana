@@ -120,7 +120,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             href={armTemplateUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.azureCloudConnector.launchButton"
+              id="xpack.fleet.cloudConnector.azure.deployToAzureButton"
               defaultMessage="Deploy to Azure"
             />
           </EuiButton>

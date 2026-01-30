@@ -26,19 +26,13 @@ export const AccountBadge: React.FC<AccountBadgeProps> = ({ accountType, variant
 
   let label: string;
   if (accountType === SINGLE_ACCOUNT) {
-    label = i18n.translate(
-      'securitySolutionPackages.cloudSecurityPosture.accountBadge.singleAccountLabel',
-      {
-        defaultMessage: 'Single Account',
-      }
-    );
+    label = i18n.translate('xpack.fleet.cloudConnector.accountBadge.singleAccount', {
+      defaultMessage: 'Single Account',
+    });
   } else if (accountType === ORGANIZATION_ACCOUNT) {
-    label = i18n.translate(
-      'securitySolutionPackages.cloudSecurityPosture.accountBadge.organizationLabel',
-      {
-        defaultMessage: 'Organization',
-      }
-    );
+    label = i18n.translate('xpack.fleet.cloudConnector.accountBadge.organization', {
+      defaultMessage: 'Organization',
+    });
   } else {
     // Fallback for unknown account types
     label = accountType;

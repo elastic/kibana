@@ -52,7 +52,7 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
             }
           >
             <FormattedMessage
-              id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab"
+              id="xpack.fleet.cloudConnector.tabs.tabName"
               defaultMessage="{name}"
               values={{
                 name: tab.name,
