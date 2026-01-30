@@ -20,6 +20,7 @@ import type { XYLegendValue } from '@kbn/chart-expressions-common';
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
+export type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 
 type Identity<T> = T extends object
   ? {
