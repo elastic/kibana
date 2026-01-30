@@ -210,7 +210,7 @@ const ContextMenu = React.memo(
     const rowDataViewField = useMemo(() => {
       const fieldParamDef = getFieldParamDefinition(
         row.groupId,
-        rowStatsFieldSummary?.definition ? getFieldTerminals(rowStatsFieldSummary.definition) : [],
+        rowStatsFieldSummary?.arg ? getFieldTerminals(rowStatsFieldSummary.arg) : [],
         esqlVariables
       );
 
@@ -219,7 +219,7 @@ const ContextMenu = React.memo(
       }
 
       return dataView.fields.getByName(fieldParamDef ?? row.groupId);
-    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.definition]);
+    }, [dataView.fields, esqlVariables, row.groupId, rowStatsFieldSummary?.arg]);
 
     const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       return [
