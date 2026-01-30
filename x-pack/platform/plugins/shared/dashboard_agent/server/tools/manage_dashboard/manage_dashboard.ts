@@ -342,7 +342,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
 
-        // Generate dashboard URL
+        // Generate dashboard URL with attachmentId for agent context persistence
         const dashboardUrl = await dashboardLocator.getRedirectUrl(
           {
             panels: dashboardPanels,
@@ -350,6 +350,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             description: updatedDescription,
             viewMode: 'edit',
             time_range: { from: 'now-15m', to: 'now' },
+            dashboardAttachmentId: currentAttachmentId,
           },
           { spaceId }
         );

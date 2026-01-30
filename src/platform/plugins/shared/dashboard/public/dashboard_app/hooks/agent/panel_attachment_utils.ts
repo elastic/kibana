@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo } from 'react';
-import { filter, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import { isToolUiEvent } from '@kbn/agent-builder-common/chat';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   LensConfigBuilder,
   type LensApiSchemaType,
@@ -21,19 +16,10 @@ import {
   isLensAPIFormat,
   isLensLegacyAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_AGENT_ID,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANEL_REMOVED_EVENT,
-  type PanelAddedEventData,
-  type DashboardUiEvent,
-  type AttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import { type AttachmentPanel } from '@kbn/dashboard-agent-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { isDashboardSection, type DashboardState } from '../../../common';
-import type { DashboardApi } from '../../dashboard_api/types';
-import { agentBuilderService, dataService } from '../../services/kibana_services';
+import { isDashboardSection, type DashboardState } from '../../../../common';
+import type { DashboardApi } from '../../../dashboard_api/types';
 
 const lensConfigBuilder = new LensConfigBuilder(undefined, true);
 
@@ -54,7 +40,7 @@ const lensConfigBuilder = new LensConfigBuilder(undefined, true);
  * @param title - Optional panel title
  * @returns LensAttachmentPanel or GenericAttachmentPanel
  */
-function convertToAttachmentPanel(
+export function convertToAttachmentPanel(
   panelId: string,
   embeddableType: string,
   rawState: Record<string, unknown>,
@@ -106,7 +92,7 @@ function convertToAttachmentPanel(
       return {
         type: embeddableType,
         panelId,
-        visualization: rawState,
+        visualization: rawState as LensApiSchemaType,
         title: (rawState.title as string) ?? title,
       };
     }
@@ -120,7 +106,6 @@ function convertToAttachmentPanel(
     };
   } catch (error) {
     // If conversion fails, return as generic 'lens' panel with rawConfig
-
     return {
       type: embeddableType,
       panelId,
@@ -139,7 +124,7 @@ function convertToAttachmentPanel(
  * Note: Serialized state structure varies by embeddable type. We use runtime checks
  * since there's no universal type for all embeddable serialization formats.
  */
-function extractRawState(
+export function extractRawState(
   childApi: unknown,
   dashboardApi: DashboardApi,
   panelId: string,
@@ -190,7 +175,7 @@ function extractRawState(
  * Resolves a panel definition to an AttachmentPanel by extracting its state.
  * Returns null if the panel is not yet available in children$ or extraction fails.
  */
-function resolvePanelToAttachment(
+export function resolvePanelToAttachment(
   panel: { uid?: string; type: string },
   children: Record<string, unknown>,
   dashboardApi: DashboardApi
@@ -209,7 +194,11 @@ function resolvePanelToAttachment(
   return convertToAttachmentPanel(panelId, panel.type, extracted.rawState, extracted.title);
 }
 
-function extractPanelsAndSections(
+/**
+ * Extracts all panels and sections from a dashboard state into AttachmentPanel format.
+ * Separates top-level panels from panels within sections.
+ */
+export function extractPanelsAndSections(
   panels: DashboardState['panels'],
   dashboardApi: DashboardApi
 ): {
@@ -243,149 +232,4 @@ function extractPanelsAndSections(
   }
 
   return { panels: topLevelPanels, sections };
-}
-
-/**
- * Hook that integrates the dashboard app with the agent builder system.
- *
- * This hook:
- * 1. Sets up the conversation flyout with the current dashboard context
- * 2. Listens for dashboard:panel_added and dashboard:panel_removed UI events
- * 3. Applies those events to the dashboard API in real-time
- */
-export function useDashboardAgentContext({
-  dashboardApi,
-  dashboardAttachmentId,
-}: {
-  dashboardApi: DashboardApi | undefined;
-  dashboardAttachmentId?: string;
-}) {
-  // Generate a stable attachment ID for this dashboard session
-  const sessionAttachmentId = useMemo(() => {
-    return dashboardAttachmentId ?? `dashboard-${Date.now()}`;
-  }, [dashboardAttachmentId]);
-
-  // Effect to set up conversation flyout config with dashboard context
-  useEffect(
-    function setupDashboardAttachment() {
-      if (!agentBuilderService || !dashboardApi) {
-        return;
-      }
-
-      // Capture the service reference for use in callbacks
-      const agentBuilder = agentBuilderService;
-
-      // Subscribe to dashboard state changes to update the attachment
-      // When children$ changes, we extract full panel configs in API format
-      const stateSubscription = combineLatest([
-        dashboardApi.title$,
-        dashboardApi.description$,
-        dashboardApi.savedObjectId$,
-        dashboardApi.children$,
-      ])
-        .pipe(debounceTime(300), distinctUntilChanged(deepEqual))
-        .subscribe(([title, description, savedObjectId]) => {
-          const { attributes } = dashboardApi.getSerializedState();
-          const { panels: extractedPanels, sections } = extractPanelsAndSections(
-            attributes.panels,
-            dashboardApi
-          );
-
-          // Create dashboard attachment with full panel configs
-          const dashboardAttachment: AttachmentInput = {
-            id: sessionAttachmentId,
-            type: DASHBOARD_ATTACHMENT_TYPE,
-            data: {
-              title: title ?? 'Untitled Dashboard',
-              description: description ?? '',
-              savedObjectId,
-              panels: extractedPanels,
-              sections,
-            },
-          };
-
-          // Set the conversation flyout config with dashboard context
-          agentBuilder.setConversationFlyoutActiveConfig({
-            sessionTag: 'dashboard',
-            agentId: DASHBOARD_AGENT_ID,
-            attachments: [dashboardAttachment],
-          });
-        });
-
-      return () => {
-        stateSubscription.unsubscribe();
-        // Clear the flyout config when leaving the dashboard
-        agentBuilder.clearConversationFlyoutActiveConfig();
-      };
-    },
-    [dashboardApi, sessionAttachmentId]
-  );
-
-  // Effect to handle UI events from the agent builder
-  useEffect(
-    function handleDashboardUiEvents() {
-      if (!agentBuilderService || !dashboardApi) {
-        return;
-      }
-
-      const { events } = agentBuilderService;
-
-      // Subscribe to chat events and filter for dashboard UI events
-      const subscription = events.chat$
-        .pipe(
-          filter(
-            (event): event is DashboardUiEvent =>
-              isToolUiEvent(event, DASHBOARD_PANEL_ADDED_EVENT) ||
-              isToolUiEvent(event, DASHBOARD_PANEL_REMOVED_EVENT)
-          )
-        )
-        .subscribe(async (event) => {
-          const { custom_event: eventType, data } = event.data;
-
-          // Guard: only apply events for our dashboard attachment
-          if (sessionAttachmentId && data.dashboardAttachmentId !== sessionAttachmentId) {
-            // TODO: We need to make sure that we're adding panels to the correct dashboard
-          }
-
-          // TODO: Handle DASHBOARD_PANEL_REMOVED_EVENT
-          if (eventType !== DASHBOARD_PANEL_ADDED_EVENT) {
-            return;
-          }
-
-          const panelData = data as PanelAddedEventData;
-          const { panel } = panelData;
-
-          if (panel.type !== LENS_EMBEDDABLE_TYPE || !panel.visualization) {
-            return;
-          }
-
-          try {
-            const configBuilder = new LensConfigBuilder(dataService.dataViews);
-            const lensConfig = panel.visualization as LensApiSchemaType;
-
-            // fromAPIFormat converts the API schema to LensAttributes
-            const lensAttributes = configBuilder.fromAPIFormat(lensConfig);
-            const panelTitle = lensAttributes.title ?? panel.title ?? 'Generated panel';
-
-            // Add the panel to the dashboard with the correct serialized state format
-            await dashboardApi.addNewPanel({
-              panelType: LENS_EMBEDDABLE_TYPE,
-              maybePanelId: panel.panelId,
-              serializedState: {
-                attributes: lensAttributes,
-                title: panelTitle,
-              },
-            });
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to add panel from agent builder:', error);
-          }
-        });
-
-      return () => {
-        subscription.unsubscribe();
-      };
-    },
-    [dashboardApi, sessionAttachmentId]
-  );
 }
