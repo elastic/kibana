@@ -76,8 +76,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await apmSynthtraceEsClient?.clean();
-        await logsSynthtraceEsClient?.clean();
+        await apmSynthtraceEsClient.clean();
+        await logsSynthtraceEsClient.clean();
         await teardownLlmProxy(getService, { llmProxy, connectorId });
       });
 
