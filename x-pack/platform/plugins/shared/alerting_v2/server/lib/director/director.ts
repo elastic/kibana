@@ -63,7 +63,12 @@ export class DirectorService {
     groupHashes: string[]
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
-    const response = await this.queryService.executeQuery({ query: request.query });
+    const response = await this.queryService.executeQuery({
+      query: request.query,
+      params: request.params,
+      filter: request.filter,
+    });
+
     const records = queryResponseToRecords<LatestAlertEventState>(response);
 
     return new Map(records.map((record) => [record.group_hash, record]));

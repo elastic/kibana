@@ -25,12 +25,11 @@ export const getLatestAlertEventStateQuery = ({
   ruleId,
   groupHashes,
 }: GetLatestAlertEventStateQueryParams): ComposerQuery => {
+  const groupHashList = groupHashes.map((hash) => `"${hash}"`).join(', ');
+
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
-  query = query.where`rule.id == ${{ ruleId }}`;
-
-  const groupHashList = groupHashes.map((hash) => `"${hash}"`).join(', ');
-  query = query.pipe(`WHERE rule.id == ${ruleId} AND group_hash IN (${groupHashList})`);
+  query = query.where`rule.id == "${{ ruleId }}" AND group_hash IN (${groupHashList})`;
 
   query = query.pipe`STATS 
       last_status = LAST(status, @timestamp), 
