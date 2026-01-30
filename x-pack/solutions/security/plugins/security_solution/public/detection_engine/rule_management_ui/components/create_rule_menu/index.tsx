@@ -44,7 +44,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     setIsPopoverOpen(false);
   }, []);
 
-  const button = (
+  const createRuleButton = (
     <EuiButton
       iconType="arrowDown"
       iconSide="right"
@@ -64,7 +64,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   return (
     <EuiPopover
       id={contextMenuPopoverId}
-      button={button}
+      button={createRuleButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"

@@ -57,7 +57,6 @@ import {
   getActionMessageParams,
   MaxWidthEuiFlexItem,
   getStepsData,
-  type GetStepsData,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -168,13 +167,11 @@ const CreateRulePageComponent: React.FC<{
     [kibanaAbsoluteUrl]
   );
 
-  let stepsData: GetStepsData | undefined;
-
-  if (rule) {
-    stepsData = getStepsData({
-      rule,
-    });
-  }
+  const stepsData = rule
+    ? getStepsData({
+        rule,
+      })
+    : undefined;
 
   const {
     defineStepForm,
