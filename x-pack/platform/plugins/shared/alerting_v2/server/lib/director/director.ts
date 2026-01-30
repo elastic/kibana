@@ -102,7 +102,7 @@ export class DirectorService {
     nextStatus: AlertEpisodeStatus
   ): string {
     const wasInactive =
-      !previousAlertEvent || previousAlertEvent.last_episode_status === 'inactive';
+      !previousAlertEvent || previousAlertEvent.last_episode_status === alertEpisodeStatus.inactive;
 
     const isNowInactive = nextStatus === alertEpisodeStatus.inactive;
 

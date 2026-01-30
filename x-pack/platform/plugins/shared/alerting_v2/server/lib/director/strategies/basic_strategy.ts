@@ -26,17 +26,17 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     [alertEpisodeStatus.pending]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.inactive,
-      no_data: alertEpisodeStatus.inactive,
+      no_data: alertEpisodeStatus.pending,
     },
     [alertEpisodeStatus.active]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.recovering,
-      no_data: alertEpisodeStatus.inactive,
+      no_data: alertEpisodeStatus.active,
     },
     [alertEpisodeStatus.recovering]: {
       breached: alertEpisodeStatus.active,
       recovered: alertEpisodeStatus.inactive,
-      no_data: alertEpisodeStatus.inactive,
+      no_data: alertEpisodeStatus.recovering,
     },
   };
 
@@ -45,6 +45,11 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     alertEventStatus,
   }: TransitionContext): AlertEpisodeStatus {
     const stateRules = this.stateMachine[currentAlertEpisodeStatus];
+
+    if (!stateRules) {
+      return alertEpisodeStatus.inactive;
+    }
+
     const nextState = stateRules[alertEventStatus];
 
     return nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.inactive;
