@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { OBSERVABILITY_OVERVIEW_FEATURE } from './feature';
 
@@ -14,15 +14,15 @@ export interface ObservabilityOverviewServerPluginSetupDeps {
 }
 
 export class ObservabilityOverviewServerPlugin implements Plugin {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor() {}
 
-  public setup(core: CoreSetup, plugins: ObservabilityOverviewServerPluginSetupDeps) {
+  public setup(_: CoreSetup, plugins: ObservabilityOverviewServerPluginSetupDeps) {
     plugins.features.registerKibanaFeature(OBSERVABILITY_OVERVIEW_FEATURE);
 
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start() {
     return {};
   }
 
