@@ -11,7 +11,7 @@
         "label": "ProjectPicker",
         "description": [],
         "signature": [
-          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, }: ",
+          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, settingsComponent, }: ",
           {
             "pluginId": "@kbn/cps-utils",
             "scope": "public",
@@ -22,7 +22,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
             "id": "def-public.ProjectPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n}",
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n  settingsComponent,\n}",
             "description": [],
             "signature": [
               {
@@ -44,7 +44,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -67,7 +67,7 @@
           "({ cpsManager }: ProjectPickerContainerProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -83,7 +83,7 @@
               "ProjectPickerContainerProps"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -101,7 +101,7 @@
         "label": "ProjectPickerContent",
         "description": [],
         "signature": [
-          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, }: ",
+          "({ projectRouting, onProjectRoutingChange, fetchProjects, isReadonly, settingsComponent, }: ",
           {
             "pluginId": "@kbn/cps-utils",
             "scope": "public",
@@ -112,7 +112,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
-        "lineNumber": 52,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -122,7 +122,7 @@
             "id": "def-public.ProjectPickerContent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n}",
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  isReadonly = false,\n  settingsComponent,\n}",
             "description": [],
             "signature": [
               {
@@ -134,7 +134,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -631,6 +631,22 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContentProps.settingsComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "settingsComponent",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -752,6 +768,22 @@
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
             "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.settingsComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "settingsComponent",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

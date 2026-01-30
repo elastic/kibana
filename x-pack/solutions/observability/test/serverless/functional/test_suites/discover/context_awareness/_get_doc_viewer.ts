@@ -57,8 +57,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await dataViews.switchTo('my-example-logs');
         await PageObjects.discover.waitUntilTabIsLoaded();
+        // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await dataViews.switchTo('my-example-logs');
         await dataGrid.clickRowToggle();
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
@@ -95,6 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        // Closes tabPreview_contentPanel to prevent intercepting clicks to reduce flakiness
+        await browser.pressKeys(browser.keys.ESCAPE);
         await dataViews.switchTo('my-example-metrics');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle();

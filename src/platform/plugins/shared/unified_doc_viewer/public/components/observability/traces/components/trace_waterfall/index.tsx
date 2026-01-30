@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
-import { EuiDelayRender } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
@@ -39,22 +37,16 @@ const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.trace
 });
 
 export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props) {
-  const { data } = getUnifiedDocViewerServices();
+  const { data, discoverShared } = getUnifiedDocViewerServices();
+  const FocusedTraceWaterfall = discoverShared.features.registry.getById(
+    'observability-focused-trace-waterfall'
+  )?.render;
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        traceId,
-        rangeFrom,
-        rangeTo,
-        docId,
-        mode: 'summary',
-      }),
-    }),
-    [docId, rangeFrom, rangeTo, traceId]
-  );
 
+  if (!FocusedTraceWaterfall) {
+    return null;
+  }
   const actionId = 'traceWaterfallFullScreenAction';
 
   return (
@@ -86,24 +78,14 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
           },
         ]}
       >
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-        The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-        This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-        */}
-        <div
-          css={css`
-            width: 100%;
-            & .embPanel__content {
-              display: block;
-            }
-          `}
-        >
-          <EmbeddableRenderer
-            type="APM_TRACE_WATERFALL_EMBEDDABLE"
-            getParentApi={getParentApi}
-            hidePanelChrome
+        {docId ? (
+          <FocusedTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
           />
-        </div>
+        ) : null}
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

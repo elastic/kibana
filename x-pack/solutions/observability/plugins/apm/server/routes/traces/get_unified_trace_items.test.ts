@@ -50,14 +50,14 @@ describe('getErrorsByDocId', () => {
   it('groups errors by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
       apmErrors: [
-        { span: { id: 'a' }, id: 'error-1' },
+        { span: { id: 'a' }, id: 'error-1', index: 'logs-apm.error-default' },
         { span: { id: 'a' }, id: 'error-2' },
         { span: { id: 'b' }, id: 'error-3' },
         { span: { id: undefined }, id: 'error-4' },
       ],
       unprocessedOtelErrors: [
         { span: { id: 'a' }, id: 'error-5' },
-        { span: { id: 'c' }, id: 'error-6' },
+        { span: { id: 'c' }, id: 'error-6', index: 'logs-generic.otel-default' },
         { span: { id: undefined }, id: 'error-7' },
       ],
       totalErrors: 7,
@@ -66,9 +66,13 @@ describe('getErrorsByDocId', () => {
     const result = getErrorsByDocId(unifiedTraceErrors);
 
     expect(result).toEqual({
-      a: [{ errorDocId: 'error-1' }, { errorDocId: 'error-2' }, { errorDocId: 'error-5' }],
+      a: [
+        { errorDocId: 'error-1', errorDocIndex: 'logs-apm.error-default' },
+        { errorDocId: 'error-2' },
+        { errorDocId: 'error-5' },
+      ],
       b: [{ errorDocId: 'error-3' }],
-      c: [{ errorDocId: 'error-6' }],
+      c: [{ errorDocId: 'error-6', errorDocIndex: 'logs-generic.otel-default' }],
     });
   });
 

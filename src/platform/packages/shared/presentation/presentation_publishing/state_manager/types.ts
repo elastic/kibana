@@ -20,6 +20,13 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
 ) => boolean;
 
 /**
+ * A type that converts a single key from snake case to camel case.
+ */
+type SnakeToCamelCase<S extends string> = S extends `${infer P1}_${infer P2}${infer P3}`
+  ? `${P1}${Uppercase<P2>}${SnakeToCamelCase<P3>}`
+  : S;
+
+/**
  * A type that maps each key in a state type to a definition of how it should be compared. If a custom
  * comparator is provided, return true if the values are equal, false otherwise.
  */
@@ -36,11 +43,13 @@ export type CustomComparators<StateType> = {
 };
 
 export type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
+  [KeyType in keyof Required<T> as `${SnakeToCamelCase<string & KeyType>}$`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
 export type SettersOf<T extends object> = {
-  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
+  [KeyType in keyof Required<T> as `set${Capitalize<SnakeToCamelCase<string & KeyType>>}`]: (
     value: T[KeyType]
   ) => void;
 };

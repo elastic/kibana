@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
+import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';

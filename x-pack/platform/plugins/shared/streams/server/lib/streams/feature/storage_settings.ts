@@ -16,10 +16,12 @@ import {
   FEATURE_STATUS,
   FEATURE_LAST_SEEN,
   FEATURE_NAME,
+  FEATURE_TITLE,
   FEATURE_TYPE,
   FEATURE_UUID,
   FEATURE_TAGS,
   FEATURE_META,
+  FEATURE_EXPIRES_AT,
 } from './fields';
 
 export const featureStorageSettings = {
@@ -30,6 +32,7 @@ export const featureStorageSettings = {
       [STREAM_NAME]: types.keyword(),
       [FEATURE_TYPE]: types.keyword(),
       [FEATURE_NAME]: types.keyword(),
+      [FEATURE_TITLE]: types.keyword(),
       [FEATURE_DESCRIPTION]: types.text(),
       [FEATURE_VALUE]: types.object({ enabled: false }),
       [FEATURE_CONFIDENCE]: types.long(),
@@ -38,6 +41,7 @@ export const featureStorageSettings = {
       [FEATURE_LAST_SEEN]: types.date(),
       [FEATURE_TAGS]: types.keyword(),
       [FEATURE_META]: types.object({ enabled: false }),
+      [FEATURE_EXPIRES_AT]: types.date(),
     },
   },
 } satisfies IndexStorageSettings;

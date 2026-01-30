@@ -254,6 +254,23 @@
     "misc": [
       {
         "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-public.OBSERVABILITY_AGENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AGENT_ID",
+        "description": [],
+        "signature": [
+          "\"observability.agent\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-public.OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -263,7 +280,7 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 9,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -280,7 +297,7 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -297,7 +314,7 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -314,7 +331,7 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1004,6 +1021,23 @@
     "misc": [
       {
         "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_AGENT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_AGENT_ID",
+        "description": [],
+        "signature": [
+          "\"observability.agent\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-common.OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1013,7 +1047,7 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 9,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1030,7 +1064,7 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1047,7 +1081,7 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 10,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1064,7 +1098,7 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

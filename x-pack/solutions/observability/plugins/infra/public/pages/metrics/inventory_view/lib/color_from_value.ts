@@ -92,7 +92,7 @@ export const calculateStepColor = (
   defaultColor = 'rgba(217, 217, 217, 1)'
 ): string => {
   return rules.reduce((color: string, rule) => {
-    const operatorFn = OPERATOR_TO_FN[rule.operator];
+    const operatorFn = OPERATOR_TO_FN.gte;
     if (operatorFn(value, rule.value)) {
       return rule.color;
     }

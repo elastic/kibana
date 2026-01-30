@@ -17,12 +17,12 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
-  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
@@ -89,28 +89,20 @@ export function WaterfallFlyout({
   flyoutId,
 }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlyout
-      // Temporarily opt out from the flyout system, until the waterfall is migrated to properly use it
-      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/kibana/pull/247451
-      session="never"
+      size="s"
       includeFixedHeadersInFocusTrap={false}
-      ownFocus={false}
-      // This is temporary fix until we migrate to the new flyout system to show the complete trace as main flyout instead of full screen
-      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/observability-dev/issues/4980
-      css={css`
-        z-index: ${(euiTheme.levels.mask as number) + 1} !important;
-      `}
       onClose={onCloseFlyout}
-      aria-labelledby={flyoutId}
+      aria-labelledby={flyoutTitleId}
       id={flyoutId}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h2 id={flyoutTitleId}>{title}</h2>
           </EuiTitle>
         </EuiSkeletonTitle>
       </EuiFlyoutHeader>

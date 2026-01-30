@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EntityType, EntityRetentionField } from './entity_schema';
+import type { EntityType, EntityField } from './entity_schema';
 import { oldestValue, newestValue } from './field_retention_operations';
 
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
-): EntityRetentionField[] => [
+): EntityField[] => [
   oldestValue({
     source: '_index',
     destination: 'entity.source',

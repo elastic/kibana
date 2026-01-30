@@ -15,8 +15,14 @@ export type { ESQLCommandSummary } from './registry/types';
 export * from './definitions/constants';
 export * from './definitions/types';
 export * from './definitions/all_operators';
+export * from './definitions/utils/promql';
 
 // Utilities from definitions
 export { METADATA_FIELDS } from './registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
+export {
+  Commands as CommandNames,
+  Functions as FunctionNames,
+  Settings as SettingNames,
+} from './definitions/keywords';

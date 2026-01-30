@@ -28,7 +28,7 @@ export function getColumnExists(
 }
 
 export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<string>) {
-  const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
+  const columnName = getColumnName(node);
   if (columns.has(columnName)) {
     return true;
   }
@@ -38,4 +38,8 @@ export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<
   }
 
   return false;
+}
+
+export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
+  return node.type === 'identifier' ? node.name : node.parts.join('.');
 }

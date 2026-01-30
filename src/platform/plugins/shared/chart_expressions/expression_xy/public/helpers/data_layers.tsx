@@ -26,7 +26,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { RawValue } from '@kbn/data-plugin/common';
+import { MULTI_FIELD_KEY_SEPARATOR, type RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import type {
   CommonXYDataLayerConfig,
@@ -176,6 +176,8 @@ export const getFormattedTable = (
     {}
   );
 
+  // The InvertedRawValueMap is a link between a table columnId and a map
+  // with links between each row formatterValue and its original raw value
   const invertedRawValueMap: InvertedRawValueMap = new Map(
     table.columns.map((c) => [c.id, new Map<string, RawValue>()])
   );
@@ -292,10 +294,12 @@ export const getSeriesName: GetSeriesNameFn = (
     if (splitValues.length === 0) {
       return yAccessorTitle;
     }
-    return `${splitValues.join(' - ')}${yAccessorTitle ? ' - ' + yAccessorTitle : ''}`;
+    return `${splitValues.join(MULTI_FIELD_KEY_SEPARATOR)}${
+      yAccessorTitle ? ' - ' + yAccessorTitle : ''
+    }`;
   }
 
-  return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
+  return splitValues.length > 0 ? splitValues.join(MULTI_FIELD_KEY_SEPARATOR) : yAccessorTitle;
 };
 
 const getPointConfig: GetPointConfigFn = ({
@@ -479,7 +483,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     return getSeriesName(
       d,
       {
-        splitAccessors: layer.splitAccessors || [],
+        splitAccessors: layer.splitAccessors ?? [],
         accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
@@ -501,9 +505,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           isDarkMode,
           {
             type: 'categories',
-            categories: getColorCategories(table.rows, splitColumnIds[0]),
+            categories: getColorCategories(table.rows, splitColumnIds),
           },
-          splitColumnIds[0]
+          splitColumnIds
         )
       : (series) =>
           getColor(

@@ -54,9 +54,7 @@ test.describe(
       ).toBeVisible();
 
       const targetFieldName = 'grouped_fields';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(targetFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(targetFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
 
@@ -72,9 +70,7 @@ test.describe(
       ).toBeVisible();
 
       const sourceFieldName = 'attributes.source_field';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(sourceFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(sourceFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
 
       // Expand advanced options and add copy_to
@@ -137,10 +133,7 @@ test.describe(
       ).toBeVisible();
 
       const fieldName = 'attributes.geo_test';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(fieldName);
-      await page.keyboard.press('Enter');
-
+      await pageObjects.streams.typeFieldName(fieldName);
       await pageObjects.streams.setFieldMappingType('geo_point');
 
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();

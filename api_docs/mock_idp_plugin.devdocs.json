@@ -22,10 +22,10 @@
         "label": "CreateSAMLResponseParams",
         "description": [],
         "signature": [
-          "{ readonly email?: string | null | undefined; readonly full_name?: string | null | undefined; readonly username: string; readonly roles: string[]; }"
+          "{ readonly email?: string | null | undefined; readonly full_name?: string | null | undefined; readonly username: string; readonly url: string; readonly roles: string[]; }"
         ],
         "path": "packages/kbn-mock-idp-plugin/server/plugin.ts",
-        "lineNumber": 78,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

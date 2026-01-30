@@ -135,5 +135,7 @@ const getOptionSubtitle = (dataSourceType: EnrichmentDataSourceWithUIAttributes[
       return DATA_SOURCES_I18N.kqlDataSource.subtitle;
     case 'custom-samples':
       return DATA_SOURCES_I18N.customSamples.subtitle;
+    case 'failure-store':
+      return DATA_SOURCES_I18N.failureStore.subtitle;
   }
 };

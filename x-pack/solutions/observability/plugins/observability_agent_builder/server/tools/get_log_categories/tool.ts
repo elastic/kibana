@@ -39,13 +39,13 @@ const getLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'A KQL query to filter logs. Examples: service.name:"payment", host.name:"web-server-01", service.name:"payment" AND log.level:error'
+      'A KQL query to filter logs. Examples: \'service.name: "payment"\', \'host.name: "web-server-01"\', \'service.name: "payment" AND log.level: error\'.'
     ),
   fields: z
     .array(z.string())
-    .optional()
+    .default([])
     .describe(
-      'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
+      'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Examples: ["service.name", "host.name"].'
     ),
 });
 

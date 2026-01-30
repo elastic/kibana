@@ -15,12 +15,9 @@ import type {
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
-export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries' | 'schema'> {
+export interface UseSnapshotRequest extends Omit<SnapshotRequest, 'timerange' | 'schema'> {
   currentTime: number;
-  includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
-
   schema?: DataSchemaFormat | null;
 }
 
@@ -61,7 +58,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     dropPartialBuckets = true,
     kuery,
     groupBy = null,
-    includeTimeseries = true,
+    includeTimeseries,
     metrics,
     nodeType,
     overrideCompositeSize,

@@ -304,6 +304,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
+        defaultMessage: 'Change point detection results',
+      })}
       itemId="id"
       selection={selectionValue}
       loading={isLoading}

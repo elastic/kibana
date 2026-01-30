@@ -15,7 +15,10 @@ export class CopyIntegrationPage {
   }
 
   async waitForPageToLoad() {
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('createPackagePolicy_page', {
+      state: 'visible',
+      timeout: 20_000,
+    });
   }
 
   getPackagePolicyNameInput() {
@@ -28,6 +31,10 @@ export class CopyIntegrationPage {
 
   getAgentPolicySelect() {
     return this.page.testSubj.locator('agentPolicyMultiSelect');
+  }
+
+  getAgentPolicySelectIsLoading() {
+    return this.getAgentPolicySelect().getByRole('progressbar');
   }
 
   async fillPackagePolicyName(name: string) {

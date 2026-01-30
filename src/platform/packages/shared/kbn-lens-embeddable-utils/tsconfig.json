@@ -21,5 +21,6 @@
     "@kbn/chart-expressions-common",
     "@kbn/expression-xy-plugin",
     "@kbn/utility-types",
+    "@kbn/transpose-utils",
   ]
 }

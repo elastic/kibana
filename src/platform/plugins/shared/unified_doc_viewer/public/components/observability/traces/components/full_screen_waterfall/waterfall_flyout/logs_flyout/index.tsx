@@ -21,34 +21,35 @@ import { useFetchLog } from '../../hooks/use_fetch_log';
 
 export const logsFlyoutId = 'logsFlyout' as const;
 
-export interface SpanFlyoutProps {
+export interface LogsFlyoutProps {
   onCloseFlyout: () => void;
   id: string;
+  index?: string;
   dataView: DocViewRenderProps['dataView'];
 }
 
-export function LogsFlyout({ onCloseFlyout, id, dataView }: SpanFlyoutProps) {
-  const { loading, log, index } = useFetchLog({ id });
+export function LogsFlyout({ onCloseFlyout, id, index, dataView }: LogsFlyoutProps) {
+  const { loading, log, index: resolvedIndex } = useFetchLog({ id, index });
   const { indexes } = useDataSourcesContext();
   const {
     dataView: logDataView,
     error,
     loading: loadingDataView,
-  } = useAdhocDataView({ index: index ?? null });
+  } = useAdhocDataView({ index: resolvedIndex ?? null });
 
   const documentAsHit = useMemo<DataTableRecord | null>(() => {
-    if (!log || !id || !index) return null;
+    if (!log || !id || !resolvedIndex) return null;
 
     return {
       id,
       raw: {
-        _index: index,
+        _index: resolvedIndex,
         _id: id,
         _source: log,
       },
       flattened: flattenObject(log),
     };
-  }, [id, log, index]);
+  }, [id, log, resolvedIndex]);
 
   return (
     <WaterfallFlyout
