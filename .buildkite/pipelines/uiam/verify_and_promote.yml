@@ -2,7 +2,7 @@
 
 ### Parameters for this job:
 # UIAM_IMAGE: the full image path for the docker image to test
-# FORCE_PUBLISH: if set to true, promotion will happen on non-main branches
+# FORCE_PROMOTE: if set to true, promotion will happen on non-main branches
 
 agents:
   image: family/kibana-ubuntu-2404
@@ -54,7 +54,7 @@ steps:
   - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
     command: .buildkite/scripts/steps/uiam/promote_uiam_image.sh $UIAM_IMAGE
     key: promote-uiam-image
-    if: "build.branch == 'main' || build.env('FORCE_PUBLISH') == 'true'"
+    if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
     retry:
       automatic:
         - exit_status: '-1'
