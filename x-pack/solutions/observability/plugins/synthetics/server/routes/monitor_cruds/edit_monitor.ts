@@ -280,9 +280,16 @@ export const syncEditedMonitor = async ({
       spaceId
     );
 
-    const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
-      [editedSOPromise, editSyncPromise]
-    );
+    const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates, activePolicyIds }] =
+      await Promise.all([editedSOPromise, editSyncPromise]);
+
+    // Update monitor with package policy references
+    if (activePolicyIds && activePolicyIds.length > 0) {
+      await monitorConfigRepository.updatePackagePolicyReferences(
+        decryptedPreviousMonitor.id,
+        activePolicyIds
+      );
+    }
 
     sendTelemetryEvents(
       server.logger,

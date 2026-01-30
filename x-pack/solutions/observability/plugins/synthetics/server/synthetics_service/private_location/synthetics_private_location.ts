@@ -447,8 +447,15 @@ export class SyntheticsPrivateLocation {
       };
     });
 
+    // Collect all active policy IDs (created + updated)
+    const activePolicyIds = [
+      ...policiesToCreate.map((p) => p.id),
+      ...policiesToUpdate.map((p) => p.id),
+    ].filter((id): id is string => id !== undefined);
+
     return {
       failedUpdates,
+      activePolicyIds,
     };
   }
 

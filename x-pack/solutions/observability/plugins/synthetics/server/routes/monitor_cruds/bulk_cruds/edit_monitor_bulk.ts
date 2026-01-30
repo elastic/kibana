@@ -90,7 +90,32 @@ export const syncEditedMonitorBulk = async ({
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
-    const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
+    const { failedPolicyUpdates, publicSyncErrors, activePolicyIds } = editSyncResponse;
+
+    // Update monitor references with active package policies
+    // Policy IDs are in format: {configId}-{locationId}
+    if (activePolicyIds && activePolicyIds.length > 0) {
+      const monitorIds = monitorsToUpdate.map((m) => m.decryptedPreviousMonitor.id);
+      const policyIdsByMonitor = new Map<string, string[]>();
+
+      for (const policyId of activePolicyIds) {
+        // Find which monitor this policy belongs to by checking if policy ID starts with monitor ID
+        const monitorId = monitorIds.find((id) => policyId.startsWith(id + '-'));
+        if (monitorId) {
+          if (!policyIdsByMonitor.has(monitorId)) {
+            policyIdsByMonitor.set(monitorId, []);
+          }
+          policyIdsByMonitor.get(monitorId)!.push(policyId);
+        }
+      }
+
+      // Update references for each monitor
+      await Promise.all(
+        [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) =>
+          monitorConfigRepository.updatePackagePolicyReferences(monitorId, policyIds)
+        )
+      );
+    }
 
     monitorsToUpdate.forEach(({ normalizedMonitor, decryptedPreviousMonitor }) => {
       const editedMonitorSavedObject = editedMonitorSavedObjects?.saved_objects.find(

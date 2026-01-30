@@ -14,6 +14,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { type SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -869,6 +870,51 @@ describe('MonitorConfigRepository', () => {
   const mockLogger = {
     error: jest.fn(),
   };
+
+  describe('updatePackagePolicyReferences', () => {
+    it('should update monitor with package policy references using built-in references array', async () => {
+      const monitorId = 'test-monitor-id';
+      const packagePolicyIds = ['policy-id-1', 'policy-id-2'];
+
+      const expectedReferences = [
+        { id: 'policy-id-1', name: 'policy-id-1', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+        { id: 'policy-id-2', name: 'policy-id-2', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+      ];
+
+      const mockUpdateResult = {
+        id: monitorId,
+        attributes: {},
+        type: syntheticsMonitorSavedObjectType,
+        references: expectedReferences,
+      };
+
+      soClient.update.mockResolvedValue(mockUpdateResult);
+
+      const result = await repository.updatePackagePolicyReferences(monitorId, packagePolicyIds);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        syntheticsMonitorSavedObjectType,
+        monitorId,
+        {},
+        { references: expectedReferences }
+      );
+
+      expect(result).toBe(mockUpdateResult);
+    });
+
+    it('should handle empty package policy ids', async () => {
+      const monitorId = 'test-monitor-id';
+      const packagePolicyIds: string[] = [];
+
+      soClient.update.mockResolvedValue({} as any);
+
+      await repository.updatePackagePolicyReferences(monitorId, packagePolicyIds);
+
+      expect(soClient.update).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, monitorId, {
+        references: [],
+      });
+    });
+  });
 
   describe('handleLegacyOptions', () => {
     // Clear mock history before each test

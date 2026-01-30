@@ -23,6 +23,10 @@ export const getRouteContextMock = () => {
   );
 
   const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+
+  // Add mock for updatePackagePolicyReferences
+  monitorConfigRepo.updatePackagePolicyReferences = jest.fn().mockResolvedValue({});
+
   return {
     routeContext: {
       syntheticsMonitorClient,
