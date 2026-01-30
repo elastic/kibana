@@ -342,7 +342,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             all: capabilities.fleetv2.settings_all as boolean,
           },
           generateReports: {
-            all: capabilities.fleetv2.generate_reports_all as boolean,
+            all: capabilities.fleetv2.generate_report as boolean,
           },
         },
         integrations: {

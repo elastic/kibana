@@ -20,7 +20,7 @@ import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from 
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
-import { getSpaceAwarenessFilter } from '../../services/agents/crud';
+import { getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
 
 type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
@@ -115,7 +115,7 @@ const getJobParams = async (
   });
 
   const agentsQuery = Array.isArray(agents) ? `agent.id:(${agents.join(' OR ')})` : agents;
-  const spaceFilter = await getSpaceAwarenessFilter(spaceId);
+  const spaceFilter = await getSpaceAwarenessFilterForAgents(spaceId);
   const filterQuery = spaceFilter.length
     ? `${agentsQuery} AND (${spaceFilter.join(' AND ')})`
     : agentsQuery;

@@ -156,7 +156,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     });
     const fleetGenerateReportsAllAuth = getAuthorizationFromPrivileges({
       kibanaPrivileges: privileges.kibana,
-      prefix: `${PLUGIN_ID}-generate-reports-all`,
+      prefix: `${PLUGIN_ID}-generate-report`,
     });
 
     return {

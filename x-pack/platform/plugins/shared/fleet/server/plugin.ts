@@ -523,10 +523,10 @@ export class FleetPlugin
                 groupType: 'mutually_exclusive',
                 privileges: [
                   {
-                    id: `generate_reports_all`,
-                    api: [`${PLUGIN_ID}-generate-reports-all`],
+                    id: `generate_report`,
+                    api: [`${PLUGIN_ID}-generate-report`],
                     name: 'All',
-                    ui: ['generate_reports_all'],
+                    ui: ['generate_report'],
                     savedObject: {
                       all: allSavedObjectTypes,
                       read: allSavedObjectTypes,

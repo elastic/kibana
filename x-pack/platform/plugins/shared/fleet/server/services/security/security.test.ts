@@ -948,7 +948,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-generate-reports-all',
+              privilege: 'api:fleet-generate-report',
               authorized: true,
             },
             {
@@ -971,7 +971,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-generate-reports-all',
+              privilege: 'api:fleet-generate-report',
               authorized: true,
             },
             {
@@ -1017,7 +1017,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-generate-reports-all',
+              privilege: 'api:fleet-generate-report',
               authorized: true,
             },
           ],
