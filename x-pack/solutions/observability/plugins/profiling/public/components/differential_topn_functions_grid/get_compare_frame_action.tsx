@@ -101,9 +101,12 @@ export const getCompareFrameAction =
                   render: (_, value) => `${value.totalCPUPerc.toFixed(2)}%`,
                 },
               ]}
-              tableCaption={i18n.translate('xpack.profiling.diffTopNFunctions.compareFrameMetricsCaption', {
-                defaultMessage: 'Frame metrics',
-              })}
+              tableCaption={i18n.translate(
+                'xpack.profiling.diffTopNFunctions.compareFrameMetricsCaption',
+                {
+                  defaultMessage: 'Frame metrics',
+                }
+              )}
             />
           </div>
         ) : (
