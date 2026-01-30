@@ -19,23 +19,21 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { OverlayRef } from '@kbn/core/public';
-
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
-  feedbackFormRef: OverlayRef | null;
+  hideFeedbackForm: () => void;
   submitFeedback: () => void;
 }
 
 export const FeedbackFooter = ({
   isSendFeedbackButtonDisabled,
-  feedbackFormRef,
+  hideFeedbackForm,
   submitFeedback,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const handleCancel = () => {
-    feedbackFormRef?.close();
+    hideFeedbackForm();
   };
 
   const footerCss = css`

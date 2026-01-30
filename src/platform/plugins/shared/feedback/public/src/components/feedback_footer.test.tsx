@@ -15,7 +15,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 const mockProps = {
   isSendFeedbackButtonDisabled: false,
   submitFeedback: jest.fn(),
-  feedbackFormRef: null,
+  hideFeedbackForm: jest.fn(),
 };
 
 describe('FeedbackFooter', () => {

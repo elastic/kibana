@@ -8,7 +8,7 @@
  */
 
 import React, { type ChangeEvent, useState } from 'react';
-import type { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,10 +18,10 @@ import { FeedbackFooter } from './feedback_footer';
 
 interface Props {
   core: CoreStart;
-  feedbackFormRef: OverlayRef | null;
+  hideFeedbackForm: () => void;
 }
 
-export const FeedbackForm = ({ core, feedbackFormRef }: Props) => {
+export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
   const [generalFeedbackText, setGeneralFeedbackText] = useState('');
@@ -53,7 +53,7 @@ export const FeedbackForm = ({ core, feedbackFormRef }: Props) => {
 
   const formCss = css`
     padding: ${euiTheme.size.l};
-    width: 648px;
+    width: calc(600px + ${euiTheme.size.l} * 2);
   `;
 
   return (
@@ -89,7 +89,7 @@ export const FeedbackForm = ({ core, feedbackFormRef }: Props) => {
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
-        feedbackFormRef={feedbackFormRef}
+        hideFeedbackForm={hideFeedbackForm}
       />
     </EuiFlexGroup>
   );

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { CoreStart, OverlayRef, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { filter, firstValueFrom } from 'rxjs';
@@ -21,12 +21,11 @@ export interface FeedbackPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface FeedbackPluginStart {}
+interface FeedbackPluginStart {
+  registeredItems: string[];
+}
 
 export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
-  private feedbackFormRef: OverlayRef | null = null;
-
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(): FeedbackPluginSetup {
@@ -38,14 +37,17 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
     { licensing }: FeedbackPluginStartDependencies
   ): FeedbackPluginStart {
     const handleShowFeedbackForm = () => {
-      const ref = core.overlays.openModal(
+      const feedbackFormRef = core.overlays.openModal(
         toMountPoint(
-          <FeedbackForm core={core} feedbackFormRef={this.feedbackFormRef} />,
+          <FeedbackForm
+            core={core}
+            hideFeedbackForm={() => {
+              feedbackFormRef?.close();
+            }}
+          />,
           core.rendering
         )
       );
-
-      this.feedbackFormRef = ref;
     };
 
     firstValueFrom(
@@ -62,7 +64,10 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
       }
     });
 
-    return {};
+    // TODO: Return a way to register additional feedback options
+    return {
+      registeredItems: ['securitySolutionQuestion1', 'securitySolutionQuestion2'],
+    };
   }
 
   public stop() {}
