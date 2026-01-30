@@ -18,6 +18,7 @@
   },
   "peerDependencies": {
     "@kbn/node-libs-browser-webpack-plugin": "link:../kbn-node-libs-browser-webpack-plugin",
+    "@kbn/peggy-loader": "link:../kbn-peggy-loader",
     "@kbn/repo-info": "link:../kbn-repo-info",
     "@kbn/repo-packages": "link:../kbn-repo-packages",
     "@kbn/tooling-log": "link:../kbn-tooling-log",

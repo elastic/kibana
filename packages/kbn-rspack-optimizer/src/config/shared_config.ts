@@ -190,11 +190,14 @@ export function getRawQueryLoaderRule(): RuleSetRule {
 
 /**
  * Get peggy grammar loader rule.
+ * Uses @kbn/peggy-loader to compile .peggy grammars to JavaScript parsers.
  */
 export function getPeggyLoaderRule(): RuleSetRule {
   return {
     test: /\.peggy$/,
-    type: 'asset/source',
+    use: {
+      loader: require.resolve('@kbn/peggy-loader'),
+    },
   };
 }
 

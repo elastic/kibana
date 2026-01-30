@@ -13302,7 +13302,7 @@
   dependencies:
     tslib "^2.8.0"
 
-"@swc/plugin-emotion@*", "@swc/plugin-emotion@^14.5.0":
+"@swc/plugin-emotion@^14.5.0":
   version "14.5.0"
   resolved "https://registry.yarnpkg.com/@swc/plugin-emotion/-/plugin-emotion-14.5.0.tgz#c945250ce9b591d185997a565b14010cd6110f0b"
   integrity sha512-lRk31FQuVY6vN7h75CLukU3Q+ijLqgvKgrZzHYfLDXB/K+pNyHdIG2ACdMyRL8rTZW77fEUBh4nVJkmg/sg2zg==
@@ -16543,7 +16543,7 @@ babel-jest@29.7.0, babel-jest@^29.7.0:
     graceful-fs "^4.2.9"
     slash "^3.0.0"
 
-babel-loader@9.2.1, babel-loader@^9.2.1:
+babel-loader@*, babel-loader@9.2.1, babel-loader@^9.2.1:
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-9.2.1.tgz#04c7835db16c246dd19ba0914418f3937797587b"
   integrity sha512-fqe8naHt46e0yIdkjUZYqddSXfej3AHajX+CSO5X7oy0EmPc6o5Xh+RClNoHjnieWz9AW4kZxW9yyFMhVB1QLA==
