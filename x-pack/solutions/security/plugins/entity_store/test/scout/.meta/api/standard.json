@@ -1,0 +1,84 @@
+{
+  "lastModified": "2026-01-30T09:08:57.038Z",
+  "sha1": "6c2cfe630a27ecf96caa4daffa4ab738c831cd04",
+  "tests": [
+    {
+      "id": "aad38721f43b8af-cdb5a56a9eaac4a",
+      "title": "Entity Store API tests Should extract properly generate euid for host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
+        "line": 50,
+        "column": 10
+      }
+    },
+    {
+      "id": "aad38721f43b8af-ee88fd4577b524a",
+      "title": "Entity Store API tests Should extract properly generate euid for user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
+        "line": 316,
+        "column": 10
+      }
+    },
+    {
+      "id": "aad38721f43b8af-350e665e330ba8a",
+      "title": "Entity Store API tests Should extract properly generate euid for service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
+        "line": 641,
+        "column": 10
+      }
+    },
+    {
+      "id": "aad38721f43b8af-372a7d967af7937",
+      "title": "Entity Store API tests Should extract properly generate euid for generic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
+        "line": 695,
+        "column": 10
+      }
+    },
+    {
+      "id": "b9f6da09bb1a1e2-6c5b60f8439f3d5",
+      "title": "Entity Store API tests Should install the entity store happy path with feature flag enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "b9f6da09bb1a1e2-b00ff4ea2f75181",
+      "title": "Entity Store API tests Should fail with feature flag disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    }
+  ]
+}
