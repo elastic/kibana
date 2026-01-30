@@ -638,6 +638,13 @@ export enum PromqlParamValueType {
   Static = 'static',
 }
 
+export enum PromqlParamName {
+  Index = 'index',
+  Step = 'step',
+  Start = 'start',
+  End = 'end',
+}
+
 export interface PromqlParamDefinition {
   name: string;
   description: string;
@@ -648,23 +655,23 @@ export interface PromqlParamDefinition {
 
 const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
-    name: 'index',
+    name: PromqlParamName.Index,
     description: 'Index pattern to query',
     valueType: PromqlParamValueType.TimeseriesSources,
   },
   {
-    name: 'step',
+    name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
     required: true,
   },
   {
-    name: 'start',
+    name: PromqlParamName.Start,
     description: 'Range query start time (requires end)',
     valueType: PromqlParamValueType.DateLiterals,
   },
   {
-    name: 'end',
+    name: PromqlParamName.End,
     description: 'Range query end time (requires start)',
     valueType: PromqlParamValueType.DateLiterals,
   },

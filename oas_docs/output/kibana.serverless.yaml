@@ -17479,9 +17479,10 @@ paths:
                       message: Invalid monitored field
                       username: john.doe
                   stats:
-                    failed: 1
-                    successful: 1
-                    total: 2
+                    failedOperations: 1
+                    successfulOperations: 1
+                    totalOperations: 2
+                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -78386,16 +78387,19 @@ components:
     Security_Entity_Analytics_API_PrivmonUserCsvUploadStats:
       type: object
       properties:
-        failed:
+        failedOperations:
           type: integer
-        successful:
+        successfulOperations:
           type: integer
-        total:
+        totalOperations:
+          type: integer
+        uploaded:
           type: integer
       required:
-        - successful
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
