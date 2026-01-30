@@ -16,6 +16,8 @@ const createFieldsMetadataServerSetupMock = (): jest.Mocked<FieldsMetadataServer
     createFieldsMetadataServiceSetupMock().registerIntegrationFieldsExtractor,
   registerIntegrationListExtractor:
     createFieldsMetadataServiceSetupMock().registerIntegrationListExtractor,
+  registerStreamsFieldsExtractor:
+    createFieldsMetadataServiceSetupMock().registerStreamsFieldsExtractor,
 });
 
 const createFieldsMetadataServerStartMock = (): jest.Mocked<FieldsMetadataServerStart> => ({

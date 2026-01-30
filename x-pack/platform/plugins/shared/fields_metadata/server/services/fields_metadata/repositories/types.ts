@@ -28,3 +28,15 @@ export interface ExtractedIntegration {
 }
 
 export type IntegrationListExtractor = () => Promise<ExtractedIntegration[]>;
+
+// Streams extractor types
+export interface StreamsFieldsSearchParams {
+  streamName: string;
+}
+
+export type StreamName = string;
+export type ExtractedStreamFields = Record<StreamName, FieldMetadataPlain>;
+
+export type StreamsFieldsExtractor = (
+  params: StreamsFieldsSearchParams
+) => Promise<ExtractedStreamFields>;

@@ -137,6 +137,34 @@ describe('FieldDescription', () => {
     expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
       attributes: ['description', 'type'],
       fieldNames: ['bytes'],
+      streamName: undefined,
+    });
+  });
+
+  it('should pass streamName to useFieldsMetadata for stream-specific descriptions', async () => {
+    const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
+      useFieldsMetadata: jest.fn(() => ({
+        fieldsMetadata: {
+          message: { description: 'Stream-specific description', type: 'keyword' },
+        },
+        loading: false,
+        error: undefined,
+        reload: jest.fn(),
+      })),
+    };
+    render(
+      <FieldDescription
+        field={{ name: 'message', type: 'string', customDescription: undefined }}
+        fieldsMetadataService={fieldsMetadataService as FieldsMetadataPublicStart}
+        streamName="logs.nginx"
+      />
+    );
+    const desc = screen.queryByTestId('fieldDescription-message');
+    expect(desc).toHaveTextContent('Stream-specific description');
+    expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
+      attributes: ['description', 'type'],
+      fieldNames: ['message'],
+      streamName: 'logs.nginx',
     });
   });
 
@@ -181,6 +209,7 @@ describe('FieldDescription', () => {
     expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
       attributes: ['description', 'type'],
       fieldNames: ['extension'],
+      streamName: undefined,
     });
   });
 });

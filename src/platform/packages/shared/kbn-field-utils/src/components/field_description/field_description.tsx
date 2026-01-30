@@ -45,14 +45,25 @@ export interface FieldDescriptionContentProps {
 
 export interface FieldDescriptionProps extends FieldDescriptionContentProps {
   fieldsMetadataService?: FieldsMetadataPublicStart;
+  /**
+   * Optional stream name to fetch stream-specific field descriptions (e.g., from Streams plugin)
+   */
+  streamName?: string;
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   fieldsMetadataService,
+  streamName,
   ...props
 }) => {
   if (fieldsMetadataService && !props.field.customDescription) {
-    return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
+    return (
+      <EcsFieldDescriptionFallback
+        fieldsMetadataService={fieldsMetadataService}
+        streamName={streamName}
+        {...props}
+      />
+    );
   }
 
   return <FieldDescriptionContent {...props} />;
@@ -60,23 +71,24 @@ export const FieldDescription: React.FC<FieldDescriptionProps> = ({
 
 const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
-> = ({ fieldsMetadataService, ...props }) => {
+> = ({ fieldsMetadataService, streamName, ...props }) => {
   const fieldName = removeKeywordSuffix(props.field.name);
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
     attributes: ['description', 'type'],
     fieldNames: [fieldName],
+    streamName,
   });
 
-  const escFieldDescription = fieldsMetadata?.[fieldName]?.description;
-  const escFieldType = fieldsMetadata?.[fieldName]?.type;
+  const fieldDescription = fieldsMetadata?.[fieldName]?.description;
+  const fieldType = fieldsMetadata?.[fieldName]?.type;
 
   return (
     <EuiSkeletonText isLoading={loading} size="s">
       <FieldDescriptionContent
         {...props}
         ecsFieldDescription={
-          escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
-            ? escFieldDescription
+          fieldType && esFieldTypeToKibanaFieldType(fieldType) === props.field.type
+            ? fieldDescription
             : undefined
         }
       />

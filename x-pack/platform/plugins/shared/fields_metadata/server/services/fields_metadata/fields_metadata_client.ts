@@ -16,6 +16,7 @@ import type { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import type { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import type { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import type { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import type { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 import type {
   FindFieldsMetadataOptions,
   GetFieldsMetadataOptions,
@@ -34,6 +35,7 @@ interface FieldsMetadataClientDeps {
   metadataFieldsRepository: MetadataFieldsRepository;
   integrationFieldsRepository: IntegrationFieldsRepository;
   otelFieldsRepository: OtelFieldsRepository;
+  streamsFieldsRepository: StreamsFieldsRepository;
 }
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
@@ -43,12 +45,13 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     private readonly ecsFieldsRepository: EcsFieldsRepository,
     private readonly metadataFieldsRepository: MetadataFieldsRepository,
     private readonly integrationFieldsRepository: IntegrationFieldsRepository,
-    private readonly otelFieldsRepository: OtelFieldsRepository
+    private readonly otelFieldsRepository: OtelFieldsRepository,
+    private readonly streamsFieldsRepository: StreamsFieldsRepository
   ) {}
 
   async getByName<TFieldName extends FieldName>(
     fieldName: TFieldName,
-    { integration, dataset, source = [] }: GetFieldsMetadataOptions = {}
+    { integration, dataset, streamName, source = [] }: GetFieldsMetadataOptions = {}
   ): Promise<FieldMetadata | undefined> {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
@@ -57,28 +60,33 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
 
     let field: FieldMetadata | undefined;
 
-    // 1. Try resolving from metadata-fields static metadata (highest priority)
-    if (isSourceAllowed('metadata')) {
+    // 1. Try resolving from streams (highest priority when streamName is provided)
+    if (isSourceAllowed('streams') && streamName) {
+      field = await this.streamsFieldsRepository.getByName(fieldName, { streamName });
+    }
+
+    // 2. Try resolving from metadata-fields static metadata
+    if (!field && isSourceAllowed('metadata')) {
       field = this.metadataFieldsRepository.getByName(fieldName);
     }
 
-    // 2. For prefixed fields (attributes.* or resource.attributes.*),
+    // 3. For prefixed fields (attributes.* or resource.attributes.*),
     //    prioritize OpenTelemetry over ECS to avoid conflicts with namespaced ECS fields
     if (!field && prefix && isSourceAllowed('otel')) {
       field = this.otelFieldsRepository.getByName(fieldName);
     }
 
-    // 3. Try resolving from ECS static metadata (authoritative schema for non-prefixed fields)
+    // 4. Try resolving from ECS static metadata (authoritative schema for non-prefixed fields)
     if (!field && isSourceAllowed('ecs')) {
       field = this.ecsFieldsRepository.getByName(fieldName);
     }
 
-    // 4. For non-prefixed fields, try OpenTelemetry as fallback
+    // 5. For non-prefixed fields, try OpenTelemetry as fallback
     if (!field && !prefix && isSourceAllowed('otel')) {
       field = this.otelFieldsRepository.getByName(fieldName);
     }
 
-    // 5. Try searching for the field in the Elastic Package Registry (integration-specific)
+    // 6. Try searching for the field in the Elastic Package Registry (integration-specific)
     if (!field && isSourceAllowed('integration') && this.hasFleetPermissions(this.capabilities)) {
       field = await this.integrationFieldsRepository.getByName(fieldName, {
         integration,
@@ -93,6 +101,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     fieldNames,
     integration,
     dataset,
+    streamName,
     source = [],
   }: FindFieldsMetadataOptions = {}): Promise<FieldsMetadataDictionary> {
     const isSourceAllowed = this.makeSourceValidator(source);
@@ -109,6 +118,10 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
        * conflicts with namespaced ECS fields. However, when returning all fields,
        * we merge in this order to ensure ECS base fields are preferred, and the
        * proxy will generate prefixed variants as needed.
+       *
+       * Stream fields are not included in the find() without fieldNames since
+       * we don't want to load all stream fields by default - they require a
+       * specific stream context.
        */
       return FieldsMetadataDictionary.create({
         ...(isSourceAllowed('otel') && this.otelFieldsRepository.find().getFields()),
@@ -119,7 +132,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
 
     const fields: Record<string, FieldMetadata> = {};
     for (const fieldName of fieldNames) {
-      const field = await this.getByName(fieldName, { integration, dataset, source });
+      const field = await this.getByName(fieldName, { integration, dataset, streamName, source });
 
       if (field) {
         fields[fieldName] = field;
@@ -149,6 +162,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     metadataFieldsRepository,
     integrationFieldsRepository,
     otelFieldsRepository,
+    streamsFieldsRepository,
   }: FieldsMetadataClientDeps) {
     return new FieldsMetadataClient(
       capabilities,
@@ -156,7 +170,8 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       ecsFieldsRepository,
       metadataFieldsRepository,
       integrationFieldsRepository,
-      otelFieldsRepository
+      otelFieldsRepository,
+      streamsFieldsRepository
     );
   }
 }

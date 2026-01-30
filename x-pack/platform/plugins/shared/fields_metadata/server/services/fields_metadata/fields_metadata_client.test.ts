@@ -11,6 +11,7 @@ import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import { StreamsFieldsRepository } from './repositories/streams_fields_repository';
 import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
 
 const ecsFields = {
@@ -128,6 +129,22 @@ const otelFields = {
   },
 } as Partial<TOtelFields>;
 
+// Mock stream fields
+const streamFields = {
+  'stream.custom_field': {
+    name: 'stream.custom_field',
+    type: 'keyword',
+    description: 'A custom field defined in the stream',
+    flat_name: 'stream.custom_field',
+  },
+  '@timestamp': {
+    name: '@timestamp',
+    type: 'date',
+    description: 'Stream-specific timestamp description',
+    flat_name: '@timestamp',
+  },
+};
+
 describe('FieldsMetadataClient class', () => {
   const logger = loggerMock.create();
   const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
@@ -153,14 +170,22 @@ describe('FieldsMetadataClient class', () => {
     ])
   );
 
+  const streamsFieldsExtractor = jest.fn();
+  streamsFieldsExtractor.mockImplementation(() => Promise.resolve(streamFields));
+
   let integrationFieldsRepository: IntegrationFieldsRepository;
+  let streamsFieldsRepository: StreamsFieldsRepository;
   let fieldsMetadataClient: FieldsMetadataClient;
 
   beforeEach(() => {
     integrationFieldsExtractor.mockClear();
+    streamsFieldsExtractor.mockClear();
     integrationFieldsRepository = IntegrationFieldsRepository.create({
       integrationFieldsExtractor,
       integrationListExtractor,
+    });
+    streamsFieldsRepository = StreamsFieldsRepository.create({
+      streamsFieldsExtractor,
     });
     fieldsMetadataClient = FieldsMetadataClient.create({
       capabilities: { fleet: { read: true }, fleetv2: { read: true } },
@@ -169,6 +194,7 @@ describe('FieldsMetadataClient class', () => {
       integrationFieldsRepository,
       metadataFieldsRepository,
       otelFieldsRepository,
+      streamsFieldsRepository,
     });
   });
 
@@ -255,6 +281,7 @@ describe('FieldsMetadataClient class', () => {
         integrationFieldsRepository,
         metadataFieldsRepository,
         otelFieldsRepository,
+        streamsFieldsRepository,
       });
 
       const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
@@ -481,6 +508,73 @@ describe('FieldsMetadataClient class', () => {
 
       // Verify it's a proper FieldMetadata instance
       expect(typeof field.toPlain).toBe('function');
+    });
+  });
+
+  describe('Streams field-specific functionality', () => {
+    it('should resolve stream fields when streamName is provided', async () => {
+      const field = await fieldsMetadataClient.getByName('stream.custom_field', {
+        streamName: 'logs',
+      });
+
+      expect(streamsFieldsExtractor).toHaveBeenCalledWith({ streamName: 'logs' });
+      expectToBeDefined(field);
+      expect(field.source).toBe('streams');
+      expect(field.name).toBe('stream.custom_field');
+      expect(field.description).toBe('A custom field defined in the stream');
+    });
+
+    it('should prioritize stream fields over other sources when streamName is provided', async () => {
+      // '@timestamp' exists in ECS, OTel, and streams - streams should have highest priority when streamName is provided
+      const field = await fieldsMetadataClient.getByName('@timestamp', {
+        streamName: 'logs',
+      });
+
+      expectToBeDefined(field);
+      expect(field.source).toBe('streams');
+      expect(field.description).toBe('Stream-specific timestamp description');
+    });
+
+    it('should not query streams when streamName is not provided', async () => {
+      const field = await fieldsMetadataClient.getByName('stream.custom_field');
+
+      expect(streamsFieldsExtractor).not.toHaveBeenCalled();
+      expect(field).toBeUndefined();
+    });
+
+    it('should fall back to other sources if field not found in streams', async () => {
+      // 'user.name' exists in ECS but not in streams
+      const field = await fieldsMetadataClient.getByName('user.name', {
+        streamName: 'logs',
+      });
+
+      expect(streamsFieldsExtractor).toHaveBeenCalledWith({ streamName: 'logs' });
+      expectToBeDefined(field);
+      expect(field.source).toBe('ecs');
+    });
+
+    it('should not resolve stream fields if streams source is not allowed', async () => {
+      const field = await fieldsMetadataClient.getByName('stream.custom_field', {
+        streamName: 'logs',
+        source: ['ecs'],
+      });
+
+      expect(streamsFieldsExtractor).not.toHaveBeenCalled();
+      expect(field).toBeUndefined();
+    });
+
+    it('should include stream fields in find() when streamName and fieldNames are provided', async () => {
+      const fieldsDict = await fieldsMetadataClient.find({
+        fieldNames: ['stream.custom_field', '@timestamp'],
+        streamName: 'logs',
+      });
+      const fields = fieldsDict.getFields();
+
+      expect(streamsFieldsExtractor).toHaveBeenCalled();
+      expect(fields['stream.custom_field']).toBeDefined();
+      expect(fields['stream.custom_field'].source).toBe('streams');
+      // @timestamp should come from streams since it's higher priority
+      expect(fields['@timestamp'].source).toBe('streams');
     });
   });
 });
