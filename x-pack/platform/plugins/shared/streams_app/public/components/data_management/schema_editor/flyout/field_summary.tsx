@@ -64,7 +64,15 @@ interface FieldSummaryProps {
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions, onGoToField } = props;
+  const {
+    field,
+    isEditing,
+    toggleEditMode,
+    onChange,
+    stream,
+    enableGeoPointSuggestions,
+    onGoToField,
+  } = props;
 
   const router = useStreamsAppRouter();
 
