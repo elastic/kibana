@@ -17,7 +17,6 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -45,7 +44,6 @@ export interface RenderingServiceContextDeps {
 export interface RenderingServiceRenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
-  http: InternalHttpStart;
   overlays: OverlayStart;
   featureFlags: FeatureFlagsStart;
 }

@@ -15,8 +15,9 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
+import chromeBgDark from './assets/chrome-bg-dark.webp';
+import chromeBgLight from './assets/chrome-bg-light.webp';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
@@ -88,13 +89,13 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
  * Project mode background styles with gradient and wave pattern.
  * Only applied when chromeStyle is 'project' to differentiate from classic mode.
  */
-const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme, assetsHrefBase: string) => {
+const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
   const { colorMode } = euiThemeContext;
   const isDarkMode = colorMode === 'DARK';
 
-  // Wave pattern images - use assetsHrefBase to construct proper URL
-  const wavePatternDark = `url("${assetsHrefBase}/ui/backgrounds/chrome-bg-dark.webp")`;
-  const wavePatternLight = `url("${assetsHrefBase}/ui/backgrounds/chrome-bg-light.webp")`;
+  // Wave pattern images imported via bundler
+  const wavePatternDark = `url("${chromeBgDark}")`;
+  const wavePatternLight = `url("${chromeBgLight}")`;
 
   // Dark mode layered background: radial light source in center, blue tint, wave pattern, dark gradient base
   const darkModeBackground = [
@@ -188,14 +189,11 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme']) => css`
 `;
 
 interface GridLayoutGlobalStylesProps {
-  chromeStyle?: ChromeStyle;
-  assetsHrefBase?: string;
+  // TODO: https://github.com/elastic/kibana/issues/251035
+  chromeStyle?: 'project' | 'classic';
 }
 
-export const GridLayoutGlobalStyles = ({
-  chromeStyle,
-  assetsHrefBase = '',
-}: GridLayoutGlobalStylesProps) => {
+export const GridLayoutGlobalStyles = ({ chromeStyle }: GridLayoutGlobalStylesProps) => {
   const euiTheme = useEuiTheme();
   const isProjectStyle = chromeStyle === 'project';
 
@@ -206,7 +204,7 @@ export const GridLayoutGlobalStyles = ({
           globalLayoutStyles(euiTheme),
           globalTempHackStyles(euiTheme.euiTheme),
           // Only apply the decorative background for project mode
-          isProjectStyle && projectModeBackgroundStyles(euiTheme, assetsHrefBase),
+          isProjectStyle && projectModeBackgroundStyles(euiTheme),
         ]}
       />
       <CommonGlobalAppStyles />
