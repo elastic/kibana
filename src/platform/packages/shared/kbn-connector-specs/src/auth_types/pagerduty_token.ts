@@ -16,10 +16,10 @@ const authSchema = z
   .object({
     token: z
       .string()
-      .min(1, { message: i18n.BEARER_AUTH_REQUIRED_MESSAGE })
-      .meta({ sensitive: true, label: i18n.BEARER_TOKEN_LABEL }),
+      .min(1, { message: i18n.PAGERDUTY_TOKEN_REQUIRED_MESSAGE })
+      .meta({ sensitive: true, label: i18n.PAGERDUTY_TOKEN_LABEL }),
   })
-  .meta({ label: i18n.BEARER_AUTH_LABEL });
+  .meta({ label: i18n.PAGERDUTY_TOKEN_AUTH_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
