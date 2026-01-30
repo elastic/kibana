@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T10:19:36.976Z",
-  "sha1": "050fbd89767a4b4212b0fdb34e7f27beb9bc57a5",
+  "lastModified": "2026-01-30T09:08:59.989Z",
+  "sha1": "a956b47d46590516392db19f4b9ed94426cfc214",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -11,6 +11,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 11,
         "column": 16
+      }
+    },
+    {
+      "id": "6abec00b7295e6e-b421a7b50b12d02",
+      "title": "Entity analytics dashboard page enables risk score followed by the store",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@ess",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/dashboard.spec.ts",
+        "line": 26,
+        "column": 14
       }
     },
     {

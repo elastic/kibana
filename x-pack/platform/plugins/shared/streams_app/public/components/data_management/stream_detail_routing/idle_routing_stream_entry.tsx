@@ -53,11 +53,13 @@ export function IdleRoutingStreamEntry({
 
   return (
     <EuiPanel
+      color="subdued"
       hasShadow={false}
-      hasBorder
+      hasBorder={false}
       data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
+        border: ${euiTheme.border.thin};
         .streamsDragHandle {
           transition: margin-left ${euiTheme.animation.normal};
           padding: ${euiTheme.size.s} 0;
