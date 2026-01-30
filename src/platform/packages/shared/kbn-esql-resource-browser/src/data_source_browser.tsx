@@ -59,6 +59,33 @@ const getSourceTypeKey = (type?: string): string => {
   return match?.key ?? 'index';
 };
 
+const DATA_SOURCE_BROWSER_I18N_KEYS = {
+  title: i18n.translate('esqlEditor.indicesBrowser.title', {
+    defaultMessage: 'Data sources',
+  }),
+  searchPlaceholder: i18n.translate('esqlEditor.indicesBrowser.searchPlaceholder', {
+    defaultMessage: 'Search',
+  }),
+  filterTitle: i18n.translate('esqlEditor.indicesBrowser.filterTitle', {
+    defaultMessage: 'Filter by data source type',
+  }),
+  integrationFilterTitle: i18n.translate('esqlEditor.indicesBrowser.integrationFilterTitle', {
+    defaultMessage: 'Integrations',
+  }),
+  closeLabel: i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
+    defaultMessage: 'Close',
+  }),
+  loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
+    defaultMessage: 'Loading data sources',
+  }),
+  empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
+    defaultMessage: 'No data sources found',
+  }),
+  noMatches: i18n.translate('esqlEditor.indicesBrowser.noMatches', {
+    defaultMessage: 'No data sources match your search',
+  }),
+} as const;
+
 interface DataSourceBrowserProps {
   isOpen: boolean;
   onClose: () => void;
@@ -88,6 +115,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>(initialSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
+  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
 
   // Reset state when popover opens and pre-select initial sources
@@ -102,6 +130,12 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       setSelectedItems(initialSources);
     }
   }, [isOpen, initialSources]);
+
+  useEffect(() => {
+    if (isFilterPopoverOpen) {
+      setIsIntegrationPopoverOpen(false);
+    }
+  }, [isFilterPopoverOpen]);
 
   const fetchData = useCallback(async (): Promise<ESQLSourceResult[]> => {
     if (isTSCommand) {
@@ -155,36 +189,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         },
       }));
     },
-    []
-  );
-
-  const i18nKeys = useMemo(
-    () => ({
-      title: i18n.translate('esqlEditor.indicesBrowser.title', {
-        defaultMessage: 'Data sources',
-      }),
-      searchPlaceholder: i18n.translate('esqlEditor.indicesBrowser.searchPlaceholder', {
-        defaultMessage: 'Search',
-      }),
-      filterTitle: i18n.translate('esqlEditor.indicesBrowser.filterTitle', {
-        defaultMessage: 'Filter by data source type',
-      }),
-      integrationFilterTitle: i18n.translate('esqlEditor.indicesBrowser.integrationFilterTitle', {
-        defaultMessage: 'Integrations',
-      }),
-      closeLabel: i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
-        defaultMessage: 'Close',
-      }),
-      loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
-        defaultMessage: 'Loading data sources',
-      }),
-      empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
-        defaultMessage: 'No data sources found',
-      }),
-      noMatches: i18n.translate('esqlEditor.indicesBrowser.noMatches', {
-        defaultMessage: 'No data sources match your search',
-      }),
-    }),
     []
   );
 
@@ -387,7 +391,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
             padding-left: ${euiTheme.size.s};
           `}
         >
-          {i18nKeys.integrationFilterTitle}
+          {DATA_SOURCE_BROWSER_I18N_KEYS.integrationFilterTitle}
         </EuiLink>
       </EuiPopoverTitle>
       <EuiSelectable
@@ -413,7 +417,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     </>
   ) : (
     <>
-      <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{DATA_SOURCE_BROWSER_I18N_KEYS.filterTitle}</EuiPopoverTitle>
       <EuiSelectable
         options={typeFilterOptions}
         onChange={(newOptions, event, changedOption) =>
@@ -447,8 +451,10 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onSelect={handleSelectionChange}
+      isFilterOpen={isFilterPopoverOpen}
+      setIsFilterOpen={setIsFilterPopoverOpen}
       position={position}
-      i18nKeys={i18nKeys}
+      i18nKeys={DATA_SOURCE_BROWSER_I18N_KEYS}
       numTypes={availableTypes.length + availableIntegrations.length}
       isLoading={isLoading}
       searchValue={searchValue}

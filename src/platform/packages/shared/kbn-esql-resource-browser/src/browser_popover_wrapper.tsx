@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
@@ -61,6 +61,8 @@ export interface BrowserPopoverWrapperProps<TItem> {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (changedOption: EuiSelectableOption | undefined) => void;
+  isFilterOpen: boolean;
+  setIsFilterOpen: (isOpen: boolean) => void;
   position?: { top?: number; left?: number };
   // i18n keys
   i18nKeys: {
@@ -85,6 +87,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   isOpen,
   onClose,
   onSelect,
+  isFilterOpen,
+  setIsFilterOpen,
   position,
   i18nKeys,
   numTypes,
@@ -95,7 +99,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   setSearchValue,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
-  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLElement | null>(null);
@@ -145,12 +148,12 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     <EuiFilterButton
       aria-label={i18nKeys.filterTitle}
       color="text"
-      isSelected={isFilterPopoverOpen}
+      isSelected={isFilterOpen}
       numFilters={numTypes}
       hasActiveFilters={numActiveFilters > 0}
       numActiveFilters={numActiveFilters}
       css={filterButtonStyle}
-      onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
+      onClick={() => setIsFilterOpen(!isFilterOpen)}
       buttonRef={setFilterButtonRef}
     >
       <EuiIcon type="filter" />
@@ -189,8 +192,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               display="block"
               css={filterPopoverStyle(euiTheme)}
               button={filterButton}
-              isOpen={isFilterPopoverOpen}
-              closePopover={() => setIsFilterPopoverOpen(false)}
+              isOpen={isFilterOpen}
+              closePopover={() => setIsFilterOpen(false)}
               panelStyle={{ transform: `translateX(${FILTER_POPOVER_HORIZONTAL_OFFSET}px)` }}
               offset={FILTER_POPOVER_VERTICAL_OFFSET}
             >

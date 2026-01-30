@@ -22,6 +22,30 @@ import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/u
 import type { HttpStart } from '@kbn/core/public';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 
+const FIELDS_BROWSER_I18N_KEYS = {
+  title: i18n.translate('esqlEditor.fieldsBrowser.title', {
+    defaultMessage: 'Fields',
+  }),
+  searchPlaceholder: i18n.translate('esqlEditor.fieldsBrowser.searchPlaceholder', {
+    defaultMessage: 'Search',
+  }),
+  filterTitle: i18n.translate('esqlEditor.fieldsBrowser.filterTitle', {
+    defaultMessage: 'Filter by field type',
+  }),
+  closeLabel: i18n.translate('esqlEditor.fieldsBrowser.closeLabel', {
+    defaultMessage: 'Close',
+  }),
+  loading: i18n.translate('esqlEditor.fieldsBrowser.loading', {
+    defaultMessage: 'Loading fields',
+  }),
+  empty: i18n.translate('esqlEditor.fieldsBrowser.empty', {
+    defaultMessage: 'No fields found',
+  }),
+  noMatches: i18n.translate('esqlEditor.fieldsBrowser.noMatches', {
+    defaultMessage: 'No fields match your search',
+  }),
+} as const;
+
 const getFieldTypeLabel = (type: string): string => {
   const typeLower = type.toLowerCase();
   if (typeLower.includes('date') || typeLower.includes('time')) return 'Date';
@@ -80,6 +104,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [recommendedFields, setRecommendedFields] = useState<RecommendedField[]>([]);
+  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
 
   // Reset state when popover opens
   useEffect(() => {
@@ -250,33 +275,6 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
     [recommendedFields]
   );
 
-  const i18nKeys = useMemo(
-    () => ({
-      title: i18n.translate('esqlEditor.fieldsBrowser.title', {
-        defaultMessage: 'Fields',
-      }),
-      searchPlaceholder: i18n.translate('esqlEditor.fieldsBrowser.searchPlaceholder', {
-        defaultMessage: 'Search',
-      }),
-      filterTitle: i18n.translate('esqlEditor.fieldsBrowser.filterTitle', {
-        defaultMessage: 'Filter by field type',
-      }),
-      closeLabel: i18n.translate('esqlEditor.fieldsBrowser.closeLabel', {
-        defaultMessage: 'Close',
-      }),
-      loading: i18n.translate('esqlEditor.fieldsBrowser.loading', {
-        defaultMessage: 'Loading fields',
-      }),
-      empty: i18n.translate('esqlEditor.fieldsBrowser.empty', {
-        defaultMessage: 'No fields found',
-      }),
-      noMatches: i18n.translate('esqlEditor.fieldsBrowser.noMatches', {
-        defaultMessage: 'No fields match your search',
-      }),
-    }),
-    []
-  );
-
   // Get unique types from items
   const availableTypes = useMemo(() => {
     const typeSet = new Set<string>();
@@ -383,7 +381,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
 
   const filterPanel = (
     <>
-      <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{FIELDS_BROWSER_I18N_KEYS.filterTitle}</EuiPopoverTitle>
       <EuiSelectable
         options={typeFilterOptions}
         onChange={(newOptions, event, changedOption) =>
@@ -408,8 +406,10 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onSelect={handleSelectionChange}
+      isFilterOpen={isFilterPopoverOpen}
+      setIsFilterOpen={setIsFilterPopoverOpen}
       position={position}
-      i18nKeys={i18nKeys}
+      i18nKeys={FIELDS_BROWSER_I18N_KEYS}
       numTypes={availableTypes.length}
       numActiveFilters={selectedTypes.length}
       filterPanel={filterPanel}
