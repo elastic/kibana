@@ -153,7 +153,7 @@ export const MetricsGrid = ({
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
 
             return (
-              <EuiFlexItem key={index}>
+              <EuiFlexItem key={id}>
                 <ChartItem
                   id={id}
                   index={index}
