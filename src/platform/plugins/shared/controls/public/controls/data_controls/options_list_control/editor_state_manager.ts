@@ -8,8 +8,8 @@
  */
 
 import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
-import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
-import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 
 export type EditorState = Pick<
@@ -23,8 +23,8 @@ export const editorComparators: StateComparators<EditorState> = {
   singleSelect: 'referenceEquality',
 };
 
-const defaultEditorState = {
-  searchTechnique: DEFAULT_SEARCH_TECHNIQUE as OptionsListSearchTechnique,
+const defaultEditorState: WithAllKeys<EditorState> = {
+  searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
   singleSelect: undefined,
   runPastTimeout: undefined,
 };
