@@ -15,6 +15,7 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import { useESQLQueryStats } from '@kbn/esql/public';
 import {
   type Filter,
   type Query,
@@ -41,7 +42,6 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
-import { useESQLQueryStats } from './use_esql_query_stats';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
