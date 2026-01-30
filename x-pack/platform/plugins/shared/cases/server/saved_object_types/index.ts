@@ -7,7 +7,6 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../common/constants';
 import { createCaseSavedObjectType } from './cases/cases';
 import { caseConfigureSavedObjectType } from './configure';
 import { createCaseCommentSavedObjectType } from './comments';
