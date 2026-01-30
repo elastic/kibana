@@ -11,7 +11,18 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DataSourceBrowser } from '../data_source_browser';
-import { mockDataSources } from './mocks';
+import type { ESQLSourceResult } from '@kbn/esql-types';
+
+const mockDataSources: ESQLSourceResult[] = [
+  { name: 'logs-*', type: 'data stream', title: 'logs-*', hidden: false },
+  { name: 'metrics-*', type: 'data stream', title: 'metrics-*', hidden: false },
+  { name: 'kibana_sample_data_logs', type: 'index', title: 'Sample Logs', hidden: false },
+  { name: 'kibana_sample_data_ecommerce', type: 'index', title: 'Sample eCommerce', hidden: false },
+  { name: 'kibana_sample_data_flights', type: 'index', title: 'Sample Flights', hidden: false },
+  { name: '.ds-logs-nginx-2024.01.01', type: 'integration', title: 'Nginx Logs', hidden: false },
+  { name: 'users_lookup', type: 'lookup index', title: 'Users Lookup', hidden: false },
+  { name: 'tsdb-metrics', type: 'timeseries', title: 'TSDB Metrics', hidden: false },
+];
 
 const meta: Meta<typeof DataSourceBrowser> = {
   title: 'ES|QL Resource Browser/Data Source Browser',

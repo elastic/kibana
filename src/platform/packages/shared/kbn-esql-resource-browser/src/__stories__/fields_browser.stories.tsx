@@ -11,7 +11,27 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FieldsBrowser } from '../fields_browser';
-import { mockFields, mockRecommendedFields } from './mocks';
+import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+
+const mockFields: ESQLFieldWithMetadata[] = [
+  { name: '@timestamp', type: 'date', userDefined: false },
+  { name: 'message', type: 'text', userDefined: false },
+  { name: 'host.name', type: 'keyword', userDefined: false },
+  { name: 'host.ip', type: 'ip', userDefined: false },
+  { name: 'bytes', type: 'long', userDefined: false },
+  { name: 'response_time', type: 'double', userDefined: false },
+  { name: 'geo.location', type: 'geo_point', userDefined: false },
+  { name: 'status_code', type: 'integer', userDefined: false },
+  { name: 'user.name', type: 'keyword', userDefined: false },
+  { name: 'tags', type: 'keyword', userDefined: false },
+];
+
+const mockRecommendedFields: RecommendedField[] = [
+  { name: '@timestamp', pattern: 'logs-*' },
+  { name: 'message', pattern: 'logs-*' },
+  { name: 'host.name', pattern: 'logs-*' },
+  { name: 'bytes', pattern: 'logs-*' },
+];
 
 const meta: Meta<typeof FieldsBrowser> = {
   title: 'ES|QL Resource Browser/Fields Browser',
