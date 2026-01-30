@@ -35,7 +35,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
     onError: showFetchErrorToast,
   });
 
-  const features = useMemo(
+  const features: Feature[] = useMemo(
     () =>
       (data?.features ?? []).filter((feature) => feature.type !== DATASET_ANALYSIS_FEATURE_TYPE),
     [data?.features]

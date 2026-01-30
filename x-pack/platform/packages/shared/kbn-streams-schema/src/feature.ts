@@ -21,9 +21,9 @@ export const baseFeatureSchema = z.object({
   description: z.string(),
   properties: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(100),
-  evidence: z.array(z.string()),
-  tags: z.array(z.string()),
-  meta: z.record(z.string(), z.any()),
+  evidence: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  meta: z.record(z.string(), z.any()).optional(),
 });
 
 export type BaseFeature = z.infer<typeof baseFeatureSchema>;

@@ -62,9 +62,6 @@ function toComputedFeature(
     description: generator.description,
     properties: value,
     confidence: 100,
-    evidence: [],
-    tags: [],
-    meta: {},
     id: generator.type,
   };
 }
