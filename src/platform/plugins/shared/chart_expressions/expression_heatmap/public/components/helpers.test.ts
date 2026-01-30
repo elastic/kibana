@@ -151,7 +151,7 @@ describe('getDataMinMax', () => {
 });
 
 describe('getSortPredicate', () => {
-  it('should return dataIndex if none preticate was configured', () => {
+  it('should return dataIndex if none predicate was configured', () => {
     const column = {
       id: '0c4cfb78-3c2f-4eaf-82b3-4b2c1c6abe5a',
       name: 'Top values of Carrier',
