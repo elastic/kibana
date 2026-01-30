@@ -11,6 +11,7 @@ import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
+import { i18n } from '@kbn/i18n';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 
@@ -55,7 +56,16 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
     },
   ];
 
-  return <EuiBasicTable items={data?.dataStreams ?? []} rowHeader="firstName" columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={data?.dataStreams ?? []}
+      rowHeader="firstName"
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.diagnostics.dataStreamTab.dataStreams', {
+        defaultMessage: 'Diagnostics data streams',
+      })}
+    />
+  );
 }
 
 export function getIndexTemplateState(diagnosticsBundle: DiagnosticsBundle, templateName: string) {
