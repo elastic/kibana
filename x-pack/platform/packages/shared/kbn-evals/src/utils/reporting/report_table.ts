@@ -10,6 +10,10 @@ import { table } from 'table';
 import chalk from 'chalk';
 import type { EvaluatorStats, DatasetScoreWithStats } from '../evaluation_stats';
 import { getUniqueEvaluatorNames, calculateOverallStats } from '../evaluation_stats';
+import {
+  expandPatternsToEvaluators,
+  matchesEvaluatorPattern,
+} from '../../evaluators/patterns';
 
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
@@ -29,6 +33,34 @@ export interface EvaluationTableOptions {
   evaluatorDisplayGroups?: EvaluatorDisplayGroup[];
 }
 
+/**
+ * Gets display options for an evaluator, supporting pattern matching.
+ * For example, if options has "Precision@K" as a key, it will match "Precision@5", "Precision@10", etc.
+ */
+function getEvaluatorDisplayOptions(
+  evaluatorName: string,
+  evaluatorFormats: Map<string, EvaluatorDisplayOptions>
+): EvaluatorDisplayOptions {
+  // First try exact match
+  const exactMatch = evaluatorFormats.get(evaluatorName);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // Then try pattern matching
+  for (const [pattern, options] of evaluatorFormats.entries()) {
+    if (matchesEvaluatorPattern(evaluatorName, pattern)) {
+      return options;
+    }
+  }
+
+  return {};
+}
+
+/**
+ * Groups evaluator scores, supporting pattern-based matching.
+ * Patterns like "Precision@K" will match all evaluators like "Precision@5", "Precision@10", etc.
+ */
 function groupEvaluatorScores(
   evaluatorNames: string[],
   evaluatorScoreGroups: EvaluatorDisplayGroup[]
@@ -40,9 +72,18 @@ function groupEvaluatorScores(
   const grouped = new Set<string>();
 
   evaluatorScoreGroups.forEach((group) => {
-    if (group.evaluatorNames.every((name) => evaluatorNames.includes(name))) {
-      groupMapping.set(group.combinedColumnName, group);
-      group.evaluatorNames.forEach((name) => grouped.add(name));
+    // Expand patterns to actual evaluator names
+    const expandedNames = expandPatternsToEvaluators(group.evaluatorNames, evaluatorNames);
+
+    // Only create group if at least one evaluator matched
+    if (expandedNames.length > 0) {
+      // Create a new group with expanded names
+      const expandedGroup: EvaluatorDisplayGroup = {
+        evaluatorNames: expandedNames,
+        combinedColumnName: group.combinedColumnName,
+      };
+      groupMapping.set(group.combinedColumnName, expandedGroup);
+      expandedNames.forEach((name) => grouped.add(name));
     }
   });
 
@@ -75,7 +116,7 @@ function formatStatsCell(
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
   const percentageColor = chalk.bold.yellow;
 
-  const evaluatorConfig = evaluatorFormats.get(evaluatorName) || {};
+  const evaluatorConfig = getEvaluatorDisplayOptions(evaluatorName, evaluatorFormats);
   const decimalPlaces = evaluatorConfig.decimalPlaces ?? 2;
   const unitSuffix = evaluatorConfig.unitSuffix || '';
   const statsToInclude = evaluatorConfig.statsToInclude;
