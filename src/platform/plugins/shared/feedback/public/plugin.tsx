@@ -9,44 +9,35 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart, OverlayRef, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart, OverlayRef, Plugin } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { FeedbackButton, FeedbackForm } from './src';
+import { FeedbackTriggerButton, FeedbackContainer } from './src';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface FeedbackPluginSetup {}
-
-export interface FeedbackPluginStartDependencies {
+interface FeedbackPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface FeedbackPluginStart {}
+export class FeedbackPlugin implements Plugin {
+  private feedbackContainer?: OverlayRef;
 
-export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPluginStart> {
-  private feedbackFormRef?: OverlayRef | undefined;
+  constructor() {}
 
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(): FeedbackPluginSetup {
+  public setup() {
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    { licensing }: FeedbackPluginStartDependencies
-  ): FeedbackPluginStart {
-    const handleShowFeedbackForm = () => {
-      this.feedbackFormRef?.close();
+  public start(core: CoreStart, { licensing }: FeedbackPluginStartDependencies) {
+    const handleShowFeedbackContainer = () => {
+      this.feedbackContainer?.close();
 
-      this.feedbackFormRef = core.overlays.openModal(
+      this.feedbackContainer = core.overlays.openModal(
         toMountPoint(
-          <FeedbackForm
+          <FeedbackContainer
             core={core}
-            hideFeedbackForm={() => {
-              this.feedbackFormRef?.close();
-              this.feedbackFormRef = undefined;
+            hideFeedbackContainer={() => {
+              this.feedbackContainer?.close();
+              this.feedbackContainer = undefined;
             }}
           />,
           core.rendering
@@ -58,8 +49,8 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
       order: 1000,
       mount: (element) => {
         ReactDOM.render(
-          <FeedbackButton
-            handleShowFeedbackForm={handleShowFeedbackForm}
+          <FeedbackTriggerButton
+            handleShowFeedbackContainer={handleShowFeedbackContainer}
             analytics={core.analytics}
           />,
           element
@@ -75,9 +66,9 @@ export class FeedbackPlugin implements Plugin<FeedbackPluginSetup, FeedbackPlugi
   }
 
   public stop() {
-    if (this.feedbackFormRef) {
-      this.feedbackFormRef.close();
-      this.feedbackFormRef = undefined;
+    if (this.feedbackContainer) {
+      this.feedbackContainer.close();
+      this.feedbackContainer = undefined;
     }
   }
 }

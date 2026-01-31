@@ -7,16 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-export const FeedbackHeader = () => (
-  <EuiFlexItem grow={false} data-test-subj="feedbackFormHeader">
-    <EuiTitle size="l">
-      <h2>
-        <FormattedMessage id="feedback.form.header.title" defaultMessage="Feedback" />
-      </h2>
-    </EuiTitle>
-  </EuiFlexItem>
-);
+export { EmailInput } from './email_input';
+export { EmailConsentCheck } from './email_consent_check';
+export { EmailSection } from './email_section';

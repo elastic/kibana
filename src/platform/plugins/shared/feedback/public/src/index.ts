@@ -7,11 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './components';
-export { FeedbackForm } from './components';
-export { FeedbackBody } from './components';
-export { FeedbackFooter } from './components';
+export { FeedbackTriggerButton } from './components';
+
 export { FeedbackHeader } from './components';
+
+export { EmailInput } from './components';
+export { EmailConsentCheck } from './components';
+export { EmailSection } from './components';
+export { CsatButtons } from './components';
+export { FeedbackTextArea } from './components';
+export { SessionInfoDisclaimer } from './components';
+export { FeedbackBody } from './components';
+
+export { SessionDataDisclaimer } from './components';
+export { CancelButton } from './components';
+export { SendFeedbackButton } from './components';
+export { FeedbackFooter } from './components';
+
+export { FeedbackContainer } from './components';
 
 export { getUserEmail } from './utils';
 export { getCurrentAppTitle } from './utils';

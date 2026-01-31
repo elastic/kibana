@@ -7,10 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackButton } from './feedback_button';
-export { CsatButtons } from './csat_buttons';
-export { FormLabel } from './form_label';
-export { FeedbackForm } from './feedback_form';
-export { FeedbackBody } from './feedback_body';
-export { FeedbackFooter } from './feedback_footer';
-export { FeedbackHeader } from './feedback_header';
+export { FeedbackTriggerButton } from './feedback_trigger_button';
+
+export { FeedbackHeader } from './header';
+
+export { EmailInput } from './body';
+export { EmailConsentCheck } from './body';
+export { EmailSection } from './body';
+export { CsatButtons } from './body';
+export { FeedbackTextArea } from './body';
+export { SessionInfoDisclaimer } from './body';
+export { FeedbackBody } from './body';
+
+export { SessionDataDisclaimer } from './footer';
+export { CancelButton } from './footer';
+export { SendFeedbackButton } from './footer';
+export { FeedbackFooter } from './footer';
+
+export { FeedbackContainer } from './feedback_container';

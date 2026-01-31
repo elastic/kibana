@@ -8,19 +8,18 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { FeedbackButton } from './feedback_button';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import type { ChangeEvent } from 'react';
+import { EuiFieldText } from '@elastic/eui';
 
-const propsMock = {
-  handleShowFeedbackForm: jest.fn(),
+interface Props {
+  email: string;
+  handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+export const EmailInput = ({ email, handleChangeEmail }: Props) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    handleChangeEmail(e);
+  };
+
+  return <EuiFieldText onChange={handleChange} type="email" value={email} compressed />;
 };
-
-describe('FeedbackButton', () => {
-  it('should render feedback button', () => {
-    renderWithI18n(<FeedbackButton {...propsMock} />);
-
-    const feedbackButton = screen.getByTestId('feedbackButton');
-    expect(feedbackButton).toBeInTheDocument();
-  });
-});

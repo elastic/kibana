@@ -21,6 +21,8 @@ const propsMock = {
   handleChangeExperienceFeedbackText: jest.fn(),
   handleChangeGeneralFeedbackText: jest.fn(),
   handleChangeAllowEmailContact: jest.fn(),
+  handleChangeEmail: jest.fn(),
+  email: '',
   allowEmailContact: false,
   selectedCsatOptionId: '',
   experienceFeedbackText: '',

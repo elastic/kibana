@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -20,10 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
-import { getCurrentAppTitle } from '../utils/get_current_app_title';
-import { FormLabel } from './form_label';
+import { getCurrentAppTitle } from '../../utils/get_current_app_title';
 
 const options = ({ htmlId }: { htmlId: string }) => [
   {
@@ -78,26 +76,17 @@ export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }
   return (
     <EuiFormRow
       fullWidth
-      label={
-        <FormLabel>
-          <FormattedMessage
-            id="feedback.form.body.csatButtons.label"
-            defaultMessage="How would you rate your experience with {appTitle}?"
-            values={{
-              appTitle: appTitle
-                ? appTitle
-                : i18n.translate('feedback.csatButtons.defaultAppTitle', {
-                    defaultMessage: 'Kibana',
-                  }),
-            }}
-          />
-        </FormLabel>
-      }
+      label={i18n.translate('feedback.body.csatButtons.titleText', {
+        defaultMessage: 'How would you rate your experience with {appTitle}?',
+        values: {
+          appTitle: appTitle ? appTitle : 'Elastic',
+        },
+      })}
     >
       <>
         <EuiButtonGroup
           options={options({ htmlId: basicButtonGroupPrefix })}
-          legend={i18n.translate('feedback.csatButtons.legend', {
+          legend={i18n.translate('feedback.body.csatButtons.legend', {
             defaultMessage: 'Customer satisfaction rating',
           })}
           type="single"
@@ -110,14 +99,14 @@ export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" css={labelsCss}>
           <EuiFlexItem>
             <EuiText size="xs">
-              {i18n.translate('feedback.csatButtons.notSatisfiedLabel', {
+              {i18n.translate('feedback.body.csatButtons.notSatisfiedLabel', {
                 defaultMessage: 'Very dissatisfied',
               })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem css={rightLabelCss}>
             <EuiText size="xs">
-              {i18n.translate('feedback.csatButtons.verySatisfiedLabel', {
+              {i18n.translate('feedback.body.csatButtons.verySatisfiedLabel', {
                 defaultMessage: 'Very satisfied',
               })}
             </EuiText>

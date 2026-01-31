@@ -15,10 +15,10 @@ import { canSendTelemetry } from '../utils';
 
 interface Props {
   analytics: AnalyticsServiceStart;
-  handleShowFeedbackForm: () => void;
+  handleShowFeedbackContainer: () => void;
 }
 
-export const FeedbackButton = ({ analytics, handleShowFeedbackForm }: Props) => {
+export const FeedbackTriggerButton = ({ analytics, handleShowFeedbackContainer }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
 
@@ -46,7 +46,7 @@ export const FeedbackButton = ({ analytics, handleShowFeedbackForm }: Props) => 
       aria-label={i18n.translate('feedback.button.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
-      onClick={handleShowFeedbackForm}
+      onClick={handleShowFeedbackContainer}
       isLoading={isLoading}
       disabled={!enabledFeedbackButton}
     >

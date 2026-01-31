@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { PropsWithChildren } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+export { EmailInput } from './email';
+export { EmailConsentCheck } from './email';
+export { EmailSection } from './email';
 
-export const FormLabel = ({ children }: PropsWithChildren) => {
-  const { euiTheme } = useEuiTheme();
+export { CsatButtons } from './csat_buttons';
 
-  const semiBoldTextCss = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
+export { FeedbackTextArea } from './feedback_text_area';
 
-  return (
-    <EuiText size="xs" css={semiBoldTextCss}>
-      {children}
-    </EuiText>
-  );
-};
+export { SessionInfoDisclaimer } from './session_info_disclaimer';
+
+export { FeedbackBody } from './feedback_body';

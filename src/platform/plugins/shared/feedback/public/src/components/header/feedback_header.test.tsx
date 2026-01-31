@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin } from '@kbn/core/server';
+import React from 'react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { FeedbackHeader } from './feedback_header';
 
-export class FeedbackPlugin implements Plugin {
-  constructor() {}
+describe('FeedbackHeader', () => {
+  it('should render the feedback form header', () => {
+    renderWithI18n(<FeedbackHeader />);
 
-  public setup() {
-    return {};
-  }
+    const header = screen.getByTestId('feedbackFormHeader');
 
-  public start() {
-    return {};
-  }
-
-  public stop() {}
-}
+    expect(header).toBeInTheDocument();
+  });
+});

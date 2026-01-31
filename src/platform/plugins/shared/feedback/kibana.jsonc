@@ -4,7 +4,7 @@
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared",
-  "description": "Feedback form components and utilities",
+  "description": "Universal way of giving feedback in Kibana",
   "plugin": {
     "id": "feedback",
     "browser": true,

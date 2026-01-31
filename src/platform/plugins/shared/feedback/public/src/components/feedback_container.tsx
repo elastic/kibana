@@ -9,24 +9,25 @@
 
 import React, { type ChangeEvent, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FeedbackHeader } from './feedback_header';
-import { FeedbackBody } from './feedback_body';
-import { FeedbackFooter } from './feedback_footer';
+
+import { FeedbackHeader } from './header';
+import { FeedbackBody } from './body/feedback_body';
+import { FeedbackFooter } from './footer/feedback_footer';
 
 interface Props {
   core: CoreStart;
-  hideFeedbackForm: () => void;
+  hideFeedbackContainer: () => void;
 }
 
-export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
+export const FeedbackContainer = ({ core, hideFeedbackContainer }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
   const [generalFeedbackText, setGeneralFeedbackText] = useState('');
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
   const [allowEmailContact, setAllowEmailContact] = useState(false);
+  const [email, setEmail] = useState('');
 
   // TODO: If custom questions exist - at least one of them should be required
   const isSendFeedbackButtonDisabled = !selectedCsatOptionId;
@@ -47,17 +48,26 @@ export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
     setAllowEmailContact(e.target.checked);
   };
 
-  const submitFeedback = () => {
+  const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  const submitFeedback = async () => {
     // TODO: Send to EBT
   };
 
-  const formCss = css`
+  const containerCss = css`
     padding: ${euiTheme.size.l};
     width: calc(600px + ${euiTheme.size.l} * 2);
   `;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackForm" css={formCss}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="feedbackContainer"
+      css={containerCss}
+    >
       <FeedbackHeader />
       <FeedbackBody
         core={core}
@@ -65,31 +75,17 @@ export const FeedbackForm = ({ core, hideFeedbackForm }: Props) => {
         generalFeedbackText={generalFeedbackText}
         selectedCsatOptionId={selectedCsatOptionId}
         allowEmailContact={allowEmailContact}
+        email={email}
         handleChangeCsatOptionId={handleChangeCsatOptionId}
         handleChangeExperienceFeedbackText={handleChangeExperienceFeedbackText}
         handleChangeGeneralFeedbackText={handleChangeGeneralFeedbackText}
         handleChangeAllowEmailContact={handleChangeAllowEmailContact}
+        handleChangeEmail={handleChangeEmail}
       />
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
-        <EuiText size="s" color="subdued" data-test-subj="feedbackFormSessionInfo">
-          <FormattedMessage
-            id="feedback.form.sessionInfo.description"
-            defaultMessage="Your session information is included along with your input and email. If you need assistance, <supportLink>submit a support request</supportLink> instead."
-            values={{
-              supportLink: (linkText) => (
-                <EuiLink href="https://support.elastic.co/home" target="_blank">
-                  {linkText}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
-        hideFeedbackForm={hideFeedbackForm}
+        hideFeedbackContainer={hideFeedbackContainer}
       />
     </EuiFlexGroup>
   );

@@ -7,18 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin } from '@kbn/core/server';
+export { SessionDataDisclaimer } from './session_data_disclaimer';
+export { CancelButton } from './cancel_button';
+export { SendFeedbackButton } from './send_feedback_button';
 
-export class FeedbackPlugin implements Plugin {
-  constructor() {}
-
-  public setup() {
-    return {};
-  }
-
-  public start() {
-    return {};
-  }
-
-  public stop() {}
-}
+export { FeedbackFooter } from './feedback_footer';

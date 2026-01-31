@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { FeedbackHeader } from './feedback_header';
+import { EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-describe('FeedbackHeader', () => {
-  it('should render the feedback form header', () => {
-    renderWithI18n(<FeedbackHeader />);
-    const header = screen.getByTestId('feedbackFormHeader');
-
-    expect(header).toBeInTheDocument();
-  });
-});
+export const FeedbackHeader = () => (
+  <EuiFlexItem grow={false} data-test-subj="feedbackHeader">
+    <EuiTitle size="l">
+      <h2>
+        <FormattedMessage id="feedback.header.title" defaultMessage="Feedback" />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+);
