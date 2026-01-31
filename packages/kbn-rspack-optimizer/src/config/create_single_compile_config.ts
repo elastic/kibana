@@ -49,7 +49,8 @@ export function resetShutdown(): void {
  * This avoids terminal state issues when pressing Ctrl+C.
  *
  * Logging strategy:
- * - Logs at 10% intervals (0%, 10%, 20%, ..., 100%)
+ * - Logs at 5% intervals (more frequent feedback)
+ * - Also logs if 3+ seconds have passed (never wait too long)
  * - Shows current stage (building, sealing, emitting, etc.)
  * - Shows elapsed time
  * - Immediately stops logging when shutdown is signaled
@@ -57,8 +58,13 @@ export function resetShutdown(): void {
  * @param log - ToolingLog instance for consistent formatting with Kibana's dev mode
  */
 function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
-  let lastLoggedPercent = -10;
+  let lastLoggedPercent = -5;
+  let lastLogTime = Date.now();
   let startTime = Date.now();
+
+  // How often to log (in percentage points and seconds)
+  const PERCENT_INTERVAL = 10; // Log every 10%
+  const TIME_INTERVAL_MS = 10000; // Also log if 10 seconds have passed
 
   // Fallback logger if no ToolingLog provided
   const logInfo = (message: string) => {
@@ -86,7 +92,8 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
       compiler.hooks.compile.tap('LogProgressPlugin', () => {
         if (isShuttingDown) return;
         startTime = Date.now();
-        lastLoggedPercent = -10;
+        lastLogTime = Date.now();
+        lastLoggedPercent = -PERCENT_INTERVAL;
         logInfo('Starting compilation...');
       });
 
@@ -96,14 +103,24 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
           if (isShuttingDown) return; // Don't log during shutdown
 
           const percentInt = Math.floor(percent * 100);
+          const now = Date.now();
+          const timeSinceLastLog = now - lastLogTime;
 
-          // Log at every 10% milestone (0%, 10%, 20%, ..., 100%)
-          if (percentInt >= lastLoggedPercent + 10) {
-            lastLoggedPercent = Math.floor(percentInt / 10) * 10;
+          // Calculate next milestone (e.g., if last was 43%, next milestone is 50%)
+          const nextMilestone = Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
+          
+          // Log at percentage milestones OR if enough time has passed
+          const hitPercentMilestone = percentInt >= nextMilestone;
+          const hitTimeInterval = timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
+
+          if (hitPercentMilestone || hitTimeInterval) {
+            // Track actual percent logged, not floored milestone
+            lastLoggedPercent = percentInt;
+            lastLogTime = now;
 
             // Extract just the stage name (first word), ignore file paths
             const stage = msg.split(' ')[0] || 'processing';
-            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            const elapsed = ((now - startTime) / 1000).toFixed(1);
 
             logInfo(`${percentInt}% ${stage} [${elapsed}s]`);
           }
