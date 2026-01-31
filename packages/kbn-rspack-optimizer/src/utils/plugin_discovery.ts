@@ -95,9 +95,13 @@ function scanDirectory(
       const plugin = parsePlugin(manifestPath, repoRoot, outputRoot, options);
       if (plugin) {
         plugins.push(plugin);
+      } else {
+        // Manifest exists but is not a plugin (e.g., test-helper, package)
+        // Continue scanning subdirectories for nested plugins
+        scanDirectory(subDir, repoRoot, outputRoot, plugins, options);
       }
     } else {
-      // Recursively scan subdirectories (for nested plugin structures)
+      // No manifest, recursively scan subdirectories
       scanDirectory(subDir, repoRoot, outputRoot, plugins, options);
     }
   }
@@ -138,7 +142,9 @@ function parsePlugin(
     }
 
     // Skip test plugins unless requested
-    const isTest = isTestPlugin(contextDir, repoRoot);
+    // Use manifest-based detection (matching webpack optimizer's approach)
+    // A plugin is a test plugin if it has "testPlugin: true" in its manifest categories
+    const isTest = manifest.plugin.testPlugin === true;
     if (isTest && !options.testPlugins) {
       return null;
     }
@@ -169,15 +175,6 @@ function isExamplePlugin(pluginDir: string, repoRoot: string): boolean {
   return relative.startsWith('examples') || relative.includes('/examples/');
 }
 
-function isTestPlugin(pluginDir: string, repoRoot: string): boolean {
-  const relative = Path.relative(repoRoot, pluginDir);
-  return (
-    relative.includes('test_') ||
-    relative.includes('_test') ||
-    relative.includes('/test/') ||
-    relative.includes('_fixtures')
-  );
-}
 
 /**
  * Create the core entry configuration

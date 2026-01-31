@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { discoverPlugins, createCoreEntry } from '../utils/plugin_discovery';
+import { discoverPlugins, createCoreEntry, type PluginEntry } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -98,33 +98,31 @@ function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
       });
 
       // Use RSPack's built-in progress tracking
-      new rspack.ProgressPlugin({
-        handler(percent, msg) {
-          if (isShuttingDown) return; // Don't log during shutdown
+      new rspack.ProgressPlugin((percent: number, msg: string) => {
+        if (isShuttingDown) return; // Don't log during shutdown
 
-          const percentInt = Math.floor(percent * 100);
-          const now = Date.now();
-          const timeSinceLastLog = now - lastLogTime;
+        const percentInt = Math.floor(percent * 100);
+        const now = Date.now();
+        const timeSinceLastLog = now - lastLogTime;
 
-          // Calculate next milestone (e.g., if last was 43%, next milestone is 50%)
-          const nextMilestone = Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
-          
-          // Log at percentage milestones OR if enough time has passed
-          const hitPercentMilestone = percentInt >= nextMilestone;
-          const hitTimeInterval = timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
+        // Calculate next milestone (e.g., if last was 43%, next milestone is 50%)
+        const nextMilestone = Math.ceil((lastLoggedPercent + 1) / PERCENT_INTERVAL) * PERCENT_INTERVAL;
 
-          if (hitPercentMilestone || hitTimeInterval) {
-            // Track actual percent logged, not floored milestone
-            lastLoggedPercent = percentInt;
-            lastLogTime = now;
+        // Log at percentage milestones OR if enough time has passed
+        const hitPercentMilestone = percentInt >= nextMilestone;
+        const hitTimeInterval = timeSinceLastLog >= TIME_INTERVAL_MS && percentInt > lastLoggedPercent;
 
-            // Extract just the stage name (first word), ignore file paths
-            const stage = msg.split(' ')[0] || 'processing';
-            const elapsed = ((now - startTime) / 1000).toFixed(1);
+        if (hitPercentMilestone || hitTimeInterval) {
+          // Track actual percent logged, not floored milestone
+          lastLoggedPercent = percentInt;
+          lastLogTime = now;
 
-            logInfo(`${percentInt}% ${stage} [${elapsed}s]`);
-          }
-        },
+          // Extract just the stage name (first word), ignore file paths
+          const stage = msg.split(' ')[0] || 'processing';
+          const elapsed = ((now - startTime) / 1000).toFixed(1);
+
+          logInfo(`${percentInt}% ${stage} [${elapsed}s]`);
+        }
       }).apply(compiler);
 
       compiler.hooks.done.tap('LogProgressPlugin', (stats) => {
@@ -194,9 +192,6 @@ export async function createSingleCompileConfig(
   // Plugins are already filtered by discoverPlugins
   const plugins = allPlugins;
 
-  // Add core entry
-  const coreEntry = createCoreEntry(repoRoot, outputRoot);
-
   // Create a SINGLE unified entry that imports ALL plugins
   // This ensures RSPack can properly deduplicate modules across all plugins
   const wrapperDir = Path.resolve(outputRoot, 'target/.rspack-entry-wrappers');
@@ -204,26 +199,8 @@ export async function createSingleCompileConfig(
     Fs.mkdirSync(wrapperDir, { recursive: true });
   }
 
-  // Collect all plugin entries
-  const pluginEntries: Array<{ id: string; path: string; bundleId: string }> = [];
-
-  // Add core
-  const coreEntryPath = findEntry(coreEntry.contextDir);
-  if (coreEntryPath) {
-    pluginEntries.push({ id: 'core', path: coreEntryPath, bundleId: 'entry/core/public' });
-  }
-
-  // Add plugins
-  for (const plugin of plugins) {
-    const entryPath = findEntry(plugin.contextDir);
-    if (entryPath) {
-      pluginEntries.push({
-        id: plugin.id,
-        path: entryPath,
-        bundleId: `plugin/${plugin.id}/public`,
-      });
-    }
-  }
+  // Collect all plugin entries (core + plugins)
+  const pluginEntries = collectPluginEntries(repoRoot, outputRoot, plugins);
 
   // Create unified entry that imports and registers all plugins
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, pluginEntries);
@@ -444,7 +421,7 @@ export async function createSingleCompileConfig(
       createLogProgressPlugin(log),
 
       // Watch plugin manifests and regenerate entry when plugins are added/removed
-      ...(watch ? [new PluginWatchPlugin(pluginManifests, options)] : []),
+      ...(watch ? [new PluginWatchPlugin(pluginManifests, options, wrapperDir)] : []),
     ],
 
     stats: {
@@ -643,6 +620,7 @@ export { core_0 as core };
 
 /**
  * Create a zone-specific chunk file that exports all plugins in that zone.
+ * Uses hash-based caching to avoid unnecessary file writes.
  */
 function createZoneChunk(
   wrapperDir: string,
@@ -651,9 +629,22 @@ function createZoneChunk(
 ): string {
   const chunkPath = Path.join(wrapperDir, `${zoneName}-chunk.js`);
 
+  // Create hash of plugin list for this zone
+  const zoneHash = crypto
+    .createHash('md5')
+    .update(plugins.map((e) => `${e.id}:${e.path}`).join('\n'))
+    .digest('hex');
+
   if (plugins.length === 0) {
-    // Empty chunk
-    Fs.writeFileSync(chunkPath, `// Empty ${zoneName} chunk\nexport const plugins = {};\n`);
+    const emptyContent = `// Empty ${zoneName} chunk\n// Hash: ${zoneHash}\nexport const plugins = {};\n`;
+    // Check if we need to write
+    if (Fs.existsSync(chunkPath)) {
+      const existing = Fs.readFileSync(chunkPath, 'utf-8');
+      if (existing.includes(`// Hash: ${zoneHash}`)) {
+        return chunkPath; // No change needed
+      }
+    }
+    Fs.writeFileSync(chunkPath, emptyContent);
     return chunkPath;
   }
 
@@ -666,6 +657,7 @@ function createZoneChunk(
   }).join('\n');
 
   const content = `// Auto-generated ${zoneName} chunk
+// Hash: ${zoneHash}
 ${imports}
 
 export const plugins = {
@@ -673,8 +665,48 @@ ${exports}
 };
 `;
 
+  // Check if we need to write
+  if (Fs.existsSync(chunkPath)) {
+    const existing = Fs.readFileSync(chunkPath, 'utf-8');
+    if (existing.includes(`// Hash: ${zoneHash}`)) {
+      return chunkPath; // No change needed
+    }
+  }
+
   Fs.writeFileSync(chunkPath, content);
   return chunkPath;
+}
+
+/**
+ * Collect plugin entries from discovered plugins
+ */
+function collectPluginEntries(
+  repoRoot: string,
+  outputRoot: string,
+  plugins: PluginEntry[]
+): Array<{ id: string; path: string; bundleId: string }> {
+  const pluginEntries: Array<{ id: string; path: string; bundleId: string }> = [];
+
+  // Add core
+  const coreEntry = createCoreEntry(repoRoot, outputRoot);
+  const coreEntryPath = findEntry(coreEntry.contextDir);
+  if (coreEntryPath) {
+    pluginEntries.push({ id: 'core', path: coreEntryPath, bundleId: 'entry/core/public' });
+  }
+
+  // Add plugins
+  for (const plugin of plugins) {
+    const entryPath = findEntry(plugin.contextDir);
+    if (entryPath) {
+      pluginEntries.push({
+        id: plugin.id,
+        path: entryPath,
+        bundleId: `plugin/${plugin.id}/public`,
+      });
+    }
+  }
+
+  return pluginEntries;
 }
 
 /**
@@ -684,10 +716,13 @@ ${exports}
 class PluginWatchPlugin {
   private pluginManifests: string[];
   private options: SingleCompileConfigOptions;
+  private wrapperDir: string;
+  private lastPluginHash: string = '';
 
-  constructor(pluginManifests: string[], options: SingleCompileConfigOptions) {
+  constructor(pluginManifests: string[], options: SingleCompileConfigOptions, wrapperDir: string) {
     this.pluginManifests = pluginManifests;
     this.options = options;
+    this.wrapperDir = wrapperDir;
   }
 
   apply(compiler: Compiler) {
@@ -711,10 +746,36 @@ class PluginWatchPlugin {
           filter: this.options.filter,
         });
 
-        // Update manifest list for next run
-        this.pluginManifests = currentPlugins.map((p) =>
-          Path.join(p.contextDir, 'kibana.jsonc')
+        // Collect plugin entries
+        const pluginEntries = collectPluginEntries(
+          this.options.repoRoot,
+          this.options.outputRoot || this.options.repoRoot,
+          currentPlugins
         );
+
+        // Create hash of current plugin list
+        const currentHash = crypto
+          .createHash('md5')
+          .update(pluginEntries.map((e) => `${e.id}:${e.path}`).join('\n'))
+          .digest('hex');
+
+        // If plugin list changed, regenerate the unified entry
+        if (currentHash !== this.lastPluginHash) {
+          this.lastPluginHash = currentHash;
+
+          // Regenerate unified entry (will update zone chunks too)
+          createUnifiedEntry(this.wrapperDir, pluginEntries);
+
+          // Update manifest list for watching
+          this.pluginManifests = currentPlugins.map((p) =>
+            Path.join(p.contextDir, 'kibana.jsonc')
+          );
+
+          // Log the change
+          if (this.options.log) {
+            this.options.log.info(`Plugin list changed, regenerating entry (${pluginEntries.length} bundles)`);
+          }
+        }
 
         callback();
       } catch (err) {
