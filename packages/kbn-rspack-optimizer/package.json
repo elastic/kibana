@@ -4,25 +4,5 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "dependencies": {
-    "@rspack/core": "^1.3.0",
-    "babel-loader": "*",
-    "css-loader": "*",
-    "sass-embedded": "*",
-    "sass-loader": "*",
-    "style-loader": "*"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0"
-  },
-  "peerDependencies": {
-    "@kbn/node-libs-browser-webpack-plugin": "link:../kbn-node-libs-browser-webpack-plugin",
-    "@kbn/peggy-loader": "link:../kbn-peggy-loader",
-    "@kbn/repo-info": "link:../kbn-repo-info",
-    "@kbn/repo-packages": "link:../kbn-repo-packages",
-    "@kbn/tooling-log": "link:../kbn-tooling-log",
-    "getopts": "*",
-    "rxjs": "^7.0.0"
-  }
+  "types": "./src/index.ts"
 }

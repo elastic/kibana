@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { discoverPlugins, createCoreEntry, type PluginEntry } from './plugin_discovery';
-export { collectBundleMetrics, formatMetricsTable, type BundleMetric } from './metrics';
+export { discoverPlugins, type PluginEntry } from './plugin_discovery';

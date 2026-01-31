@@ -18,6 +18,7 @@ import {
   getSharedModuleRules,
   getSharedIgnoreWarnings,
 } from './shared_config';
+import type { ThemeTag } from '../types';
 
 export interface ExternalPluginConfigOptions {
   /** Path to the Kibana repository root */
@@ -34,6 +35,8 @@ export interface ExternalPluginConfigOptions {
   watch?: boolean;
   /** Enable caching */
   cache?: boolean;
+  /** Theme tags to compile (default: borealislight, borealisdark) */
+  themeTags?: ThemeTag[];
 }
 
 /**
@@ -60,6 +63,7 @@ export async function createExternalPluginConfig(
     dist = false,
     watch = false,
     cache = true,
+    themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
   } = options;
 
   // Find entry point
@@ -96,7 +100,10 @@ export async function createExternalPluginConfig(
     output: {
       path: outputDir,
       filename: `${pluginId}.plugin.js`,
-      chunkFilename: `${pluginId}.[contenthash:8].chunk.js`,
+      // Short hash names in production, descriptive names in development
+      chunkFilename: dist
+        ? `${pluginId}.[contenthash:8].js`
+        : `${pluginId}.[name].[contenthash:8].js`,
       publicPath: 'auto',
       clean: !watch,
     },
@@ -118,7 +125,7 @@ export async function createExternalPluginConfig(
 
     module: {
       // Use shared module rules (same loaders as main build)
-      rules: getSharedModuleRules(repoRoot, dist),
+      rules: getSharedModuleRules(repoRoot, dist, themeTags, `plugin-${pluginId}`),
     },
 
     optimization: {

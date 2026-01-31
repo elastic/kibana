@@ -55,7 +55,7 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
-    themeTags: _themeTags = ['borealislight', 'borealisdark'],
+    themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
     plugins: targetPlugins,
     filter,
   } = options;
@@ -138,8 +138,10 @@ export async function createSingleCompileConfig(
       path: Path.resolve(outputRoot, 'target/public/bundles'),
       // Single unified bundle
       filename: 'kibana.bundle.js',
-      // Async chunks get content hash for caching
-      chunkFilename: 'chunks/[name].[contenthash:8].js',
+      // Async chunks: short hash names in production, descriptive names in development
+      chunkFilename: dist
+        ? 'chunks/[contenthash:8].js'
+        : 'chunks/[name].[contenthash:8].js',
       // Use 'auto' to dynamically resolve publicPath at runtime based on document.currentScript
       publicPath: 'auto',
       clean: !watch,
@@ -181,7 +183,7 @@ export async function createSingleCompileConfig(
       // Use shared module rules (same loaders as external plugins)
       // Plus additional rules specific to main build
       rules: [
-        ...getSharedModuleRules(repoRoot, dist),
+        ...getSharedModuleRules(repoRoot, dist, themeTags, 'kibana'),
         // URL imports (?asUrl query) - specific to main build
         {
           resourceQuery: /asUrl/,

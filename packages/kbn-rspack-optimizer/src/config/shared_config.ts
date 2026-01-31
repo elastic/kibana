@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import type { RuleSetRule, Configuration } from '@rspack/core';
+import type { ThemeTag } from '../types';
 
 /**
  * Shared resolve configuration for all RSPack builds.
@@ -96,16 +97,102 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
 }
 
 /**
- * Get SCSS loader rule with EUI globals.
- * Includes all necessary paths for @elastic/eui-theme-borealis resolution.
+ * Get the sass-loader chain for a specific theme.
+ * Each theme uses different globals (light vs dark colors/shadows).
  */
-export function getScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule {
-  // Paths for SCSS imports - need to include node_modules for @elastic packages
+function getSassLoaderChain(
+  repoRoot: string,
+  theme: ThemeTag,
+  dist: boolean
+): RuleSetRule['use'] {
+  const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
+  const globalsPath = Path.resolve(
+    repoRoot,
+    `src/core/public/styles/core_app/_globals_${theme}.scss`
+  ).replace(/\\/g, '/');
+
+  return [
+    { loader: require.resolve('style-loader') },
+    {
+      loader: require.resolve('css-loader'),
+      options: { sourceMap: !dist },
+    },
+    {
+      loader: require.resolve('sass-loader'),
+      options: {
+        additionalData: `@import "${globalsPath}";\n`,
+        implementation: require('sass-embedded'),
+        sassOptions: {
+          outputStyle: dist ? 'compressed' : 'expanded',
+          includePaths: [
+            nodeModulesPath,
+            Path.resolve(repoRoot, 'src/core/public/styles'),
+            Path.resolve(repoRoot, 'packages'),
+          ],
+          loadPaths: [
+            nodeModulesPath,
+            Path.resolve(repoRoot, 'src/core/public/styles'),
+          ],
+          quietDeps: true,
+          silenceDeprecations: ['color-functions', 'import', 'global-builtin', 'legacy-js-api'],
+        },
+      },
+    },
+  ];
+}
+
+/**
+ * Get SCSS loader rule with compile-time theme support.
+ *
+ * This generates a `oneOf` rule set that:
+ * 1. For each theme, matches `*.scss?{theme}` and compiles with that theme's globals
+ * 2. For plain `*.scss` imports, uses the theme_loader to generate a runtime switch
+ *
+ * At runtime, `window.__kbnThemeTag__` determines which compiled stylesheet to use.
+ */
+export function getScssLoaderRule(
+  repoRoot: string,
+  dist: boolean,
+  themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
+  bundleId: string = 'kibana'
+): RuleSetRule {
+  return {
+    test: /\.scss$/,
+    exclude: /node_modules/,
+    type: 'javascript/auto',
+    oneOf: [
+      // For each theme, handle ?{theme} query with theme-specific compilation
+      ...themeTags.map((theme) => ({
+        resourceQuery: new RegExp(`\\?${theme}$`),
+        use: getSassLoaderChain(repoRoot, theme, dist),
+      })),
+      // For plain .scss imports (no query), use theme_loader to generate switch
+      {
+        use: [
+          {
+            loader: require.resolve('../loaders/theme_loader'),
+            options: {
+              bundleId,
+              themeTags,
+            },
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Get SCSS loader rule for node_modules (no theme switching).
+ * Node modules SCSS is compiled with light theme globals only.
+ */
+export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule {
   const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
 
   return {
     test: /\.scss$/,
-    type: 'javascript/auto', // Use loader chain, not native CSS parsing
+    include: /node_modules/,
+    type: 'javascript/auto',
     use: [
       { loader: require.resolve('style-loader') },
       {
@@ -122,14 +209,11 @@ export function getScssLoaderRule(repoRoot: string, dist: boolean): RuleSetRule 
           implementation: require('sass-embedded'),
           sassOptions: {
             outputStyle: dist ? 'compressed' : 'expanded',
-            // Include paths for resolving @elastic/eui-theme-borealis and other packages
             includePaths: [
               nodeModulesPath,
               Path.resolve(repoRoot, 'src/core/public/styles'),
-              // Also add the packages directory for local package resolution
               Path.resolve(repoRoot, 'packages'),
             ],
-            // Load paths for sass-embedded (modern Sass API)
             loadPaths: [
               nodeModulesPath,
               Path.resolve(repoRoot, 'src/core/public/styles'),
@@ -205,11 +289,17 @@ export function getPeggyLoaderRule(): RuleSetRule {
  * Get all shared module rules.
  * These rules are used by both main build and external plugins.
  */
-export function getSharedModuleRules(repoRoot: string, dist: boolean): RuleSetRule[] {
+export function getSharedModuleRules(
+  repoRoot: string,
+  dist: boolean,
+  themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
+  bundleId: string = 'kibana'
+): RuleSetRule[] {
   return [
     getBabelLoaderRule(dist),
     getCssLoaderRule(dist),
-    getScssLoaderRule(repoRoot, dist),
+    getScssLoaderRule(repoRoot, dist, themeTags, bundleId),
+    getNodeModulesScssLoaderRule(repoRoot, dist),
     getImageLoaderRule(),
     getFontLoaderRule(),
     getTextLoaderRule(),
