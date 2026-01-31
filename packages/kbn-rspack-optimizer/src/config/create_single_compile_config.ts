@@ -240,14 +240,25 @@ export async function createSingleCompileConfig(
             enforce: true,
             reuseExistingChunk: true,
           },
-          // Heavy vendors - large npm packages that should be cached separately
+          // Heavy vendors NOT in ui-shared-deps - large npm packages for separate caching
+          // NOTE: Monaco is in ui-shared-deps, don't include here
+          // NOTE: Prettier is dev-only, should never be in browser bundles
           vendorsHeavy: {
-            test: /[\\/]node_modules[\\/](monaco-editor|maplibre-gl|@xyflow|ace-builds|prettier)/,
+            test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds)/,
             name: 'vendors-heavy',
             priority: 30,
             reuseExistingChunk: true,
           },
-          // Default for other shared async code
+          // Shared vendors - npm packages used by 2+ async chunks
+          // Consolidates things like zod, date-fns, etc. into one chunk
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: 20,
+            minChunks: 2, // Only if shared by 2+ chunks
+            reuseExistingChunk: true,
+          },
+          // Default for other shared async code (non-vendor)
           default: {
             minChunks: 2,
             priority: -20,
