@@ -39,6 +39,44 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
   'Application/SaaS',
 ];
 
+// Helper function to convert category array to selection map
+const getMapFromCategories = (selected: CategoryOption[]): CategorySelectionMap => {
+  const map: CategorySelectionMap = {} as CategorySelectionMap;
+  CATEGORY_OPTIONS.forEach((category) => {
+    map[category] = selected.includes(category);
+  });
+  return map;
+};
+
+// Category labels for i18n
+const CATEGORY_LABELS: Record<CategoryOption, string> = {
+  Endpoint: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.configuration.endpointLabel',
+    { defaultMessage: 'Endpoint' }
+  ),
+  Identity: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.configuration.identityLabel',
+    { defaultMessage: 'Identity' }
+  ),
+  Network: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.configuration.networkLabel',
+    { defaultMessage: 'Network' }
+  ),
+  Cloud: i18n.translate('xpack.securitySolution.siemReadiness.coverage.configuration.cloudLabel', {
+    defaultMessage: 'Cloud',
+  }),
+  'Application/SaaS': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.configuration.applicationSaaSLabel',
+    { defaultMessage: 'Application/SaaS' }
+  ),
+};
+
+// Split categories into rows for layout
+const CATEGORY_ROWS: CategoryOption[][] = [
+  ['Endpoint', 'Identity', 'Network'],
+  ['Cloud', 'Application/SaaS'],
+];
+
 interface CategoryConfigurationPanelProps {
   selectedCategories?: CategoryOption[];
   onSelectionChange?: (selectedCategories: CategoryOption[]) => void;
@@ -53,46 +91,22 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
   onClose,
 }) => {
   // Convert array to checkbox group format
-  const [idToSelectedMap, setIdToSelectedMap] = useState<CategorySelectionMap>(() => {
-    const initialMap: CategorySelectionMap = {} as CategorySelectionMap;
-    CATEGORY_OPTIONS.forEach((category) => {
-      initialMap[category] = selectedCategories.includes(category);
-    });
-    return initialMap;
-  });
-
-  // Update checkbox state when selectedCategories prop changes
-  useEffect(() => {
-    const newMap: CategorySelectionMap = {} as CategorySelectionMap;
-    CATEGORY_OPTIONS.forEach((category) => {
-      newMap[category] = selectedCategories.includes(category);
-    });
-    setIdToSelectedMap(newMap);
-  }, [selectedCategories]);
-
-  // Handle checkbox changes with validation
-  const handleCheckboxChange = useCallback(
-    (optionId: CategoryOption) => {
-      const currentlySelected = idToSelectedMap[optionId] || false;
-      const wouldBeSelected = !currentlySelected;
-
-      // If we're trying to uncheck and it would leave us with no selections, prevent it
-      if (!wouldBeSelected) {
-        const currentSelectedCount = Object.values(idToSelectedMap).filter(Boolean).length;
-        if (currentSelectedCount <= 1) {
-          return; // Don't allow unchecking the last item
-        }
-      }
-
-      const newIdToSelectedMap = {
-        ...idToSelectedMap,
-        [optionId]: wouldBeSelected,
-      };
-
-      setIdToSelectedMap(newIdToSelectedMap);
-    },
-    [idToSelectedMap]
+  const [idToSelectedMap, setIdToSelectedMap] = useState<CategorySelectionMap>(() =>
+    getMapFromCategories(selectedCategories)
   );
+
+  // Reset checkbox state when selectedCategories prop changes or modal opens
+  useEffect(() => {
+    setIdToSelectedMap(getMapFromCategories(selectedCategories));
+  }, [selectedCategories, isVisible]);
+
+  // Handle checkbox changes using functional update to avoid stale closure
+  const handleCheckboxChange = useCallback((optionId: CategoryOption) => {
+    setIdToSelectedMap((prev) => ({
+      ...prev,
+      [optionId]: !prev[optionId],
+    }));
+  }, []);
 
   const handleApply = useCallback(() => {
     if (onSelectionChange) {
@@ -158,88 +172,28 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
 
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="m">
-            {/* First row: Endpoint, Identity, Network */}
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="m" alignItems="center">
-                <EuiFlexItem grow={false} style={{ minWidth: '150px' }}>
-                  <EuiCheckbox
-                    id="Endpoint"
-                    label={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.coverage.configuration.endpointLabel',
-                      {
-                        defaultMessage: 'Endpoint',
-                      }
-                    )}
-                    checked={idToSelectedMap.Endpoint || false}
-                    onChange={() => handleCheckboxChange('Endpoint')}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ minWidth: '150px' }}>
-                  <EuiCheckbox
-                    id="Identity"
-                    label={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.coverage.configuration.identityLabel',
-                      {
-                        defaultMessage: 'Identity',
-                      }
-                    )}
-                    checked={idToSelectedMap.Identity || false}
-                    onChange={() => handleCheckboxChange('Identity')}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ minWidth: '150px' }}>
-                  <EuiCheckbox
-                    id="Network"
-                    label={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.coverage.configuration.networkLabel',
-                      {
-                        defaultMessage: 'Network',
-                      }
-                    )}
-                    checked={idToSelectedMap.Network || false}
-                    onChange={() => handleCheckboxChange('Network')}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-
-            {/* Second row: Cloud, Application/SaaS */}
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="m" alignItems="center">
-                <EuiFlexItem grow={false} style={{ minWidth: '150px' }}>
-                  <EuiCheckbox
-                    id="Cloud"
-                    label={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.coverage.configuration.cloudLabel',
-                      {
-                        defaultMessage: 'Cloud',
-                      }
-                    )}
-                    checked={idToSelectedMap.Cloud || false}
-                    onChange={() => handleCheckboxChange('Cloud')}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ minWidth: '150px' }}>
-                  <EuiCheckbox
-                    id="Application/SaaS"
-                    label={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.coverage.configuration.applicationSaaSLabel',
-                      {
-                        defaultMessage: 'Application/SaaS',
-                      }
-                    )}
-                    checked={idToSelectedMap['Application/SaaS'] || false}
-                    onChange={() => handleCheckboxChange('Application/SaaS')}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} />
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {CATEGORY_ROWS.map((row, rowIndex) => (
+              <EuiFlexItem key={rowIndex}>
+                <EuiFlexGroup gutterSize="m" alignItems="center">
+                  {row.map((category) => (
+                    <EuiFlexItem key={category} grow={false} style={{ minWidth: '150px' }}>
+                      <EuiCheckbox
+                        id={category}
+                        label={CATEGORY_LABELS[category]}
+                        checked={idToSelectedMap[category] || false}
+                        onChange={() => handleCheckboxChange(category)}
+                      />
+                    </EuiFlexItem>
+                  ))}
+                  {row.length < 3 && <EuiFlexItem grow={false} />}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
           <EuiSpacer size="xxl" />
           <EuiSpacer size="xxl" />
           <EuiSpacer size="xxl" />
-          {selectedCount === 1 && (
+          {selectedCount === 0 && (
             <>
               <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -282,7 +236,12 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
             }
           )}
         </EuiButtonEmpty>
-        <EuiButton onClick={handleApply} fill data-test-subj="configurationModalSaveButton">
+        <EuiButton
+          onClick={handleApply}
+          fill
+          data-test-subj="configurationModalSaveButton"
+          disabled={selectedCount === 0}
+        >
           {i18n.translate(
             'xpack.securitySolution.siemReadiness.coverage.configuration.modalSaveButton',
             {
