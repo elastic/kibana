@@ -149,7 +149,7 @@ export function useDataCascadeRowExpansionHandlers({
   >(
     ({ row, nodePath, nodePathMap }) => {
       return cascadedDocumentsFetcher.fetchCascadedDocuments({
-        rowId: row.id,
+        nodeId: row.id,
         nodeType: 'group',
         nodePath,
         nodePathMap,
@@ -186,7 +186,7 @@ export function useDataCascadeRowExpansionHandlers({
   >(
     ({ row, nodePath, nodePathMap }) => {
       return cascadedDocumentsFetcher.fetchCascadedDocuments({
-        rowId: row.id,
+        nodeId: row.id,
         nodeType: 'leaf',
         nodePath,
         nodePathMap,
