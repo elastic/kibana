@@ -890,6 +890,11 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     Data type: `int`
     Default: `10000`
+    
+    :::{note}
+    :applies_to: serverless:
+    In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured.
+    :::
 
 `xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as a number and a time unit (`s`, `m`, `h`, or `d`). For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`.
