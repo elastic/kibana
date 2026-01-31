@@ -196,6 +196,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         packagePolicy: newPackagePolicy,
         agentPolicy,
         policyName: data.name,
+        packageInfo: pkgInfo,
         soClient: this.soClient,
         esClient: this.esClient,
         logger: this.logger,
