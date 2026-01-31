@@ -18,7 +18,7 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - delete', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('dashboards - delete', { tag: tags.ESS_ONLY }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
