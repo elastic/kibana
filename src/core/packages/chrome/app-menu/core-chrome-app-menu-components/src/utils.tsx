@@ -220,6 +220,7 @@ export const getPopoverPanels = ({
   secondaryActionItem,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
+  rootPopoverTestId,
   onClose,
   onCloseOverflowButton,
 }: {
@@ -228,11 +229,11 @@ export const getPopoverPanels = ({
   secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
   rootPanelWidth?: number;
+  rootPopoverTestId?: string;
   onClose?: () => void;
   onCloseOverflowButton?: () => void;
-}): { panels: EuiContextMenuPanelDescriptor[]; panelIdToTestId: Record<string, string> } => {
+}): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
-  const panelIdToTestId: Record<string, string> = {};
   const hasActionItems = Boolean(primaryActionItem || secondaryActionItem);
   let currentPanelId = startPanelId;
 
@@ -250,10 +251,6 @@ export const getPopoverPanels = ({
     parentPopoverWidth?: number;
   }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
-
-    if (parentPopoverTestId) {
-      panelIdToTestId[String(panelId)] = parentPopoverTestId;
-    }
 
     const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
 
@@ -291,6 +288,7 @@ export const getPopoverPanels = ({
     panels.push({
       id: panelId,
       ...(parentTitle && { title: upperFirst(parentTitle) }),
+      ...(parentPopoverTestId && { 'data-test-subj': parentPopoverTestId }),
       ...(parentPopoverWidth && { width: parentPopoverWidth }),
       items: panelItems,
     });
@@ -299,6 +297,7 @@ export const getPopoverPanels = ({
   processItems({
     itemsToProcess: items,
     panelId: startPanelId,
+    parentPopoverTestId: rootPopoverTestId,
     parentPopoverWidth: rootPanelWidth,
   });
 
@@ -309,7 +308,7 @@ export const getPopoverPanels = ({
   if (hasActionItems) {
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
-    if (!mainPanel) return { panels, panelIdToTestId };
+    if (!mainPanel) return panels;
 
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
@@ -319,10 +318,10 @@ export const getPopoverPanels = ({
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
 
-    return { panels, panelIdToTestId };
+    return panels;
   }
 
-  return { panels, panelIdToTestId };
+  return panels;
 };
 
 /**
