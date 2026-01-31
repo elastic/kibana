@@ -21,6 +21,8 @@
 
 ## Testing
 
+- After changes, run `scripts/llm.sh` and resolve failures
+
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`
 
