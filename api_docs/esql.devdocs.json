@@ -97,7 +97,7 @@
         "label": "DataErrorsControl",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -110,7 +110,7 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -126,7 +126,7 @@
               "(value: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +142,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "lineNumber": 34,
+                "lineNumber": 23,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -191,7 +191,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1440,
+        "lineNumber": 1449,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

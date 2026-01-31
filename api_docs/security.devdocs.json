@@ -6472,7 +6472,7 @@
         }
       ],
       "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-      "lineNumber": 71,
+      "lineNumber": 72,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -6494,7 +6494,7 @@
             " | null; }"
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 75,
+          "lineNumber": 76,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6528,7 +6528,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 81,
+          "lineNumber": 82,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6767,6 +6767,10 @@
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "entityStore",
+              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
             }
           ]
         },

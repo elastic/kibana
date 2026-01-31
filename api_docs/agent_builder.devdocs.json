@@ -75,7 +75,7 @@
       "label": "AgentBuilderPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 69,
+      "lineNumber": 71,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -93,7 +93,7 @@
         "\nPublic start contract for the browser-side agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-      "lineNumber": 71,
+      "lineNumber": 73,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -117,7 +117,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 75,
+          "lineNumber": 77,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -141,7 +141,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 79,
+          "lineNumber": 81,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -165,7 +165,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 83,
+          "lineNumber": 85,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -189,7 +189,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 87,
+          "lineNumber": 89,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -210,7 +210,7 @@
             "OpenConversationFlyoutReturn"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 91,
+          "lineNumber": 93,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -229,7 +229,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 108,
+              "lineNumber": 110,
               "columnNumber": 28,
               "deprecated": false,
               "trackAdoption": false,
@@ -255,7 +255,7 @@
             " | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 109,
+          "lineNumber": 111,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -272,7 +272,7 @@
                 " | undefined"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 114,
+              "lineNumber": 116,
               "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
@@ -294,7 +294,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 115,
+          "lineNumber": 117,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -310,7 +310,7 @@
                 "EmbeddableConversationProps"
               ],
               "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-              "lineNumber": 115,
+              "lineNumber": 117,
               "columnNumber": 39,
               "deprecated": false,
               "trackAdoption": false,
@@ -330,7 +330,7 @@
             "() => void"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
-          "lineNumber": 116,
+          "lineNumber": 118,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
