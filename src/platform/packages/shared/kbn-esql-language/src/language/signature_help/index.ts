@@ -6,19 +6,29 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Parser } from '../../parser';
 import { within, Walker } from '../../ast';
-import type { ESQLFunction } from '../../types';
+import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
 } from '../../commands/definitions/utils';
+import { getFormattedPromqlFunctionSignature } from '../../commands/definitions/utils/hover/functions';
+import { getPromqlFunctionDefinition } from '../../commands/definitions/utils/promql';
+import { PromQLParser } from '../../promql/parser/parser';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { findSubquery } from '../shared/subqueries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import { correctQuerySyntax } from '../shared/query_syntax_helpers';
-import { getArgumentToHighlightIndex, getParameterList } from './helpers';
+import {
+  calculatePromqlArgIndex,
+  extractPromqlText,
+  findPromqlFunctionAtOffset,
+  getArgumentToHighlightIndex,
+  getParameterList,
+} from './helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 const MAX_PARAM_TYPES_TO_SHOW = 3;
@@ -46,6 +56,15 @@ export async function getSignatureHelp(
   // Corrects the query to be able to work with incomplete syntax
   const correctedQuery = correctQuerySyntax(fullText, offset);
   const { root } = Parser.parse(correctedQuery);
+
+  // Check if cursor is inside a PROMQL command
+  const promqlCommand = root.commands.find(
+    (cmd): cmd is ESQLAstPromqlCommand => cmd.name === 'promql' && offset >= cmd.location.min
+  );
+
+  if (promqlCommand) {
+    return getPromqlSignatureHelp(promqlCommand, fullText, offset);
+  }
 
   // Find the function node that contains the cursor
   let fnNode: ESQLFunction | undefined;
@@ -119,6 +138,59 @@ export async function getSignatureHelp(
     signatures: [signature],
     activeSignature: 0,
     // Math.min for the variadic functions, that can have more arguments than the defined parameters
+    activeParameter: Math.min(currentArgIndex, parameters.length - 1),
+  };
+}
+
+function getPromqlSignatureHelp(
+  command: ESQLAstPromqlCommand,
+  fullText: string,
+  offset: number
+): SignatureHelpItem | undefined {
+  const extracted = extractPromqlText(command.query, fullText);
+  if (!extracted) {
+    return undefined;
+  }
+
+  const { text, start } = extracted;
+  if (offset < start || offset > start + text.length) {
+    return undefined;
+  }
+
+  const { root } = PromQLParser.parse(text, { offset: start });
+
+  const functionNode = root.expression
+    ? findPromqlFunctionAtOffset(root.expression, offset, fullText)
+    : undefined;
+
+  if (!functionNode) {
+    return undefined;
+  }
+
+  const fnDefinition = getPromqlFunctionDefinition(functionNode.name);
+  if (!fnDefinition) {
+    return undefined;
+  }
+
+  const currentArgIndex = calculatePromqlArgIndex(fullText, functionNode, offset);
+  const formattedSignature = getFormattedPromqlFunctionSignature(fnDefinition);
+  const parameters = getParameterList(formattedSignature);
+
+  return {
+    signatures: [
+      {
+        label: formattedSignature,
+        documentation: fnDefinition.description,
+        parameters: parameters.map((param) => ({
+          label: param,
+          documentation:
+            fnDefinition.signatures
+              ?.flatMap((sig) => sig.params)
+              .find((p) => param.startsWith(p.name))?.description ?? '',
+        })),
+      },
+    ],
+    activeSignature: 0,
     activeParameter: Math.min(currentArgIndex, parameters.length - 1),
   };
 }

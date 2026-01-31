@@ -13,7 +13,7 @@ import { getExpressionType } from '..';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';
 import type { ESQLFunction } from '../../../../types';
-import type { FunctionDefinition } from '../../types';
+import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
 import { getMatchingSignatures } from '../expressions';
 
 /**
@@ -184,4 +184,24 @@ function getFilteredSignatures(
   }
 
   return signatures;
+}
+
+// ============================================================================
+// PromQL Functions
+// ============================================================================
+
+/* Formats a PromQL function signature in a readable format. */
+export function getFormattedPromqlFunctionSignature(fnDef: PromQLFunctionDefinition): string {
+  if (!fnDef.signatures || fnDef.signatures.length === 0) {
+    return `${fnDef.name}()`;
+  }
+
+  const signature = fnDef.signatures[0];
+
+  const formattedParams = signature.params.map(({ name, type, optional }) => {
+    const optionalMarker = optional ? '?' : '';
+    return `${name}${optionalMarker}: ${type}`;
+  });
+
+  return `${fnDef.name}(${formattedParams.join(', ')}) → ${signature.returnType}`;
 }
