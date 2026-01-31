@@ -29,8 +29,10 @@ export const FeedbackContainer = ({ core, hideFeedbackContainer }: Props) => {
   const [allowEmailContact, setAllowEmailContact] = useState(false);
   const [email, setEmail] = useState('');
 
-  // TODO: If custom questions exist - at least one of them should be required
-  const isSendFeedbackButtonDisabled = !selectedCsatOptionId;
+  const isSendFeedbackButtonDisabled =
+    !selectedCsatOptionId &&
+    experienceFeedbackText.trim().length === 0 &&
+    generalFeedbackText.trim().length === 0;
 
   const handleChangeCsatOptionId = (optionId: string) => {
     setSelectedCsatOptionId(optionId);

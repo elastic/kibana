@@ -10,8 +10,6 @@
 import type { Plugin } from '@kbn/core/server';
 
 export class FeedbackPlugin implements Plugin {
-  constructor() {}
-
   public setup() {
     return {};
   }

@@ -21,5 +21,6 @@ export const EmailInput = ({ email, handleChangeEmail }: Props) => {
     handleChangeEmail(e);
   };
 
+  // TODO: Prefill from user profile if available
   return <EuiFieldText onChange={handleChange} type="email" value={email} compressed />;
 };

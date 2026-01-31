@@ -53,11 +53,11 @@ export const FeedbackBody = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem css={bodyCss} data-test-subj="feedbackFormBody">
+      <EuiFlexItem css={bodyCss} data-test-subj="feedbackBody">
         <EuiForm component="form">
           <CsatButtons
             core={core}
-            selectedOptionId={selectedCsatOptionId}
+            selectedCsatOptionId={selectedCsatOptionId}
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
           <EuiSpacer size="m" />
@@ -71,9 +71,13 @@ export const FeedbackBody = ({
             placeholder={i18n.translate('feedback.body.experienceFeedbackTextArea.placeholder', {
               defaultMessage: 'Describe your experience',
             })}
+            testId="feedbackExperienceTextArea"
           />
           <EuiSpacer size="l" />
           <FeedbackTextArea
+            label={i18n.translate('feedback.body.additionalFeedback.label', {
+              defaultMessage: 'Anything else you would like to share about Elastic overall?',
+            })}
             value={generalFeedbackText}
             handleChangeValue={handleChangeGeneralFeedbackText}
             ariaLabel={i18n.translate('feedback.body.additionalFeedback.ariaLabel', {

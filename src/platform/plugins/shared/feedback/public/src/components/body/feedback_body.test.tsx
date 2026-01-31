@@ -16,7 +16,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 const coreStartMock = coreMock.createStart();
 
 const propsMock = {
-  handleChangeFeedbackText: jest.fn(),
   handleChangeCsatOptionId: jest.fn(),
   handleChangeExperienceFeedbackText: jest.fn(),
   handleChangeGeneralFeedbackText: jest.fn(),
@@ -40,7 +39,7 @@ describe('FeedbackBody', () => {
       renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const body = screen.getByTestId('feedbackFormBody');
+    const body = screen.getByTestId('feedbackBody');
 
     expect(body).toBeInTheDocument();
   });
@@ -50,11 +49,11 @@ describe('FeedbackBody', () => {
       renderWithI18n(<FeedbackBody {...propsMock} experienceFeedbackText="Test feedback" />);
     });
 
-    const body = screen.getByTestId('feedbackFormBody');
+    const body = screen.getByTestId('feedbackBody');
 
     expect(body).toBeInTheDocument();
 
-    const feedbackTextarea = screen.getByTestId('feedbackFormTextArea');
+    const feedbackTextarea = screen.getByTestId('feedbackExperienceTextArea');
 
     expect(feedbackTextarea).toBeInTheDocument();
     expect(feedbackTextarea).toHaveValue('Test feedback');
@@ -65,7 +64,7 @@ describe('FeedbackBody', () => {
       renderWithI18n(<FeedbackBody {...propsMock} />);
     });
 
-    const feedbackTextarea = screen.getByTestId('feedbackFormTextArea');
+    const feedbackTextarea = screen.getByTestId('feedbackExperienceTextArea');
 
     expect(feedbackTextarea).toBeInTheDocument();
 
@@ -73,6 +72,6 @@ describe('FeedbackBody', () => {
       target: { value: 'Test feedback' },
     });
 
-    expect(propsMock.handleChangeFeedbackText).toHaveBeenCalledTimes(1);
+    expect(propsMock.handleChangeExperienceFeedbackText).toHaveBeenCalledTimes(1);
   });
 });

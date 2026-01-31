@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
@@ -22,14 +23,24 @@ export const SendFeedbackButton = ({ isSendFeedbackButtonDisabled, submitFeedbac
   };
 
   return (
-    <EuiButton
-      fill
-      color="primary"
-      data-test-subj="feedbackFooterSendFeedbackButton"
-      disabled={isSendFeedbackButtonDisabled}
-      onClick={handleSubmit}
+    <EuiToolTip
+      content={
+        isSendFeedbackButtonDisabled
+          ? i18n.translate('feedback.footer.sendFeedbackButton.tooltip', {
+              defaultMessage: 'Answer at least one of the questions in order to send feedback.',
+            })
+          : undefined
+      }
     >
-      <FormattedMessage id="feedback.footer.sendFeedbackButton" defaultMessage="Send" />
-    </EuiButton>
+      <EuiButton
+        fill
+        color="primary"
+        data-test-subj="feedbackFooterSendFeedbackButton"
+        disabled={isSendFeedbackButtonDisabled}
+        onClick={handleSubmit}
+      >
+        <FormattedMessage id="feedback.footer.sendFeedbackButton" defaultMessage="Send" />
+      </EuiButton>
+    </EuiToolTip>
   );
 };

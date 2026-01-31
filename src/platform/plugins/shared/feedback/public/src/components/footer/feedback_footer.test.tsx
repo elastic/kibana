@@ -19,13 +19,11 @@ const mockProps = {
 };
 
 describe('FeedbackFooter', () => {
-  const submitFeedback = jest.fn();
-
   it('should render feedback footer', () => {
     renderWithI18n(<FeedbackFooter {...mockProps} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
-    const sendButton = screen.getByTestId('feedbackSendFeedbackButton');
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
 
     expect(sendButton).toBeEnabled();
   });
@@ -34,7 +32,7 @@ describe('FeedbackFooter', () => {
     renderWithI18n(<FeedbackFooter {...mockProps} isSendFeedbackButtonDisabled={true} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
-    const sendButton = screen.getByTestId('feedbackSendFeedbackButton');
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
 
     expect(sendButton).toBeDisabled();
   });
@@ -43,10 +41,10 @@ describe('FeedbackFooter', () => {
     renderWithI18n(<FeedbackFooter {...mockProps} />);
     expect(screen.getByTestId('feedbackFooter')).toBeInTheDocument();
 
-    const sendButton = screen.getByTestId('feedbackSendFeedbackButton');
+    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
 
     fireEvent.click(sendButton);
 
-    expect(submitFeedback).toHaveBeenCalledTimes(1);
+    expect(mockProps.submitFeedback).toHaveBeenCalledTimes(1);
   });
 });

@@ -53,11 +53,11 @@ const options = ({ htmlId }: { htmlId: string }) => [
 
 interface Props {
   core: CoreStart;
-  selectedOptionId: string;
+  selectedCsatOptionId: string;
   handleChangeCsatOptionId: (optionId: string) => void;
 }
 
-export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }: Props) => {
+export const CsatButtons = ({ core, selectedCsatOptionId, handleChangeCsatOptionId }: Props) => {
   const { euiTheme } = useEuiTheme();
   const basicButtonGroupPrefix = useGeneratedHtmlId({
     prefix: 'csat',
@@ -91,7 +91,7 @@ export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }
           })}
           type="single"
           onChange={handleChangeCsatOptionId}
-          idSelected={selectedOptionId}
+          idSelected={selectedCsatOptionId}
           isFullWidth={true}
           buttonSize="compressed"
         />

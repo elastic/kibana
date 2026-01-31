@@ -10,22 +10,40 @@
 import React, { useEffect, useState } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { canSendTelemetry } from '../utils';
 
 interface Props {
-  analytics: AnalyticsServiceStart;
-  handleShowFeedbackContainer: () => void;
+  core: CoreStart;
 }
 
-export const FeedbackTriggerButton = ({ analytics, handleShowFeedbackContainer }: Props) => {
+export const FeedbackTriggerButton = ({ core }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
+
+  const handleShowFeedbackContainer = () => {
+    // Only load the feedback container if we know the user can send telemetry
+    Promise.all([import('./feedback_container'), import('@kbn/react-kibana-mount')]).then(
+      ([{ FeedbackContainer }, { toMountPoint }]) => {
+        const feedbackContainer = core.overlays.openModal(
+          toMountPoint(
+            <FeedbackContainer
+              core={core}
+              hideFeedbackContainer={() => {
+                feedbackContainer?.close();
+              }}
+            />,
+            core.rendering
+          )
+        );
+      }
+    );
+  };
 
   useEffect(() => {
     setIsLoading(true);
 
-    canSendTelemetry(analytics)
+    canSendTelemetry(core.analytics)
       .then((canSend) => {
         if (canSend) {
           setEnabledFeedbackButton(true);
@@ -37,13 +55,13 @@ export const FeedbackTriggerButton = ({ analytics, handleShowFeedbackContainer }
       .finally(() => {
         setIsLoading(false);
       });
-  }, [analytics]);
+  }, [core.analytics]);
 
   return (
     <EuiHeaderSectionItemButton
-      data-test-subj="feedbackButton"
+      data-test-subj="feedbackTriggerButton"
       aria-haspopup="dialog"
-      aria-label={i18n.translate('feedback.button.ariaLabel', {
+      aria-label={i18n.translate('feedback.triggerButton.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
       onClick={handleShowFeedbackContainer}

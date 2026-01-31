@@ -9,53 +9,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart, OverlayRef, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { FeedbackTriggerButton, FeedbackContainer } from './src';
+import { FeedbackTriggerButton } from './src';
 
 interface FeedbackPluginStartDependencies {
   licensing: LicensingPluginStart;
 }
 
 export class FeedbackPlugin implements Plugin {
-  private feedbackContainer?: OverlayRef;
-
-  constructor() {}
-
   public setup() {
     return {};
   }
 
   public start(core: CoreStart, { licensing }: FeedbackPluginStartDependencies) {
-    const handleShowFeedbackContainer = () => {
-      this.feedbackContainer?.close();
-
-      this.feedbackContainer = core.overlays.openModal(
-        toMountPoint(
-          <FeedbackContainer
-            core={core}
-            hideFeedbackContainer={() => {
-              this.feedbackContainer?.close();
-              this.feedbackContainer = undefined;
-            }}
-          />,
-          core.rendering
-        )
-      );
-    };
-
+    // TODO: Hide if hideFeedback global settings is disabled
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (element) => {
-        ReactDOM.render(
-          <FeedbackTriggerButton
-            handleShowFeedbackContainer={handleShowFeedbackContainer}
-            analytics={core.analytics}
-          />,
-          element
-        );
-
+        ReactDOM.render(<FeedbackTriggerButton core={core} />, element);
         return () => {
           ReactDOM.unmountComponentAtNode(element);
         };
@@ -65,10 +37,5 @@ export class FeedbackPlugin implements Plugin {
     return {};
   }
 
-  public stop() {
-    if (this.feedbackContainer) {
-      this.feedbackContainer.close();
-      this.feedbackContainer = undefined;
-    }
-  }
+  public stop() {}
 }

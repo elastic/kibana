@@ -11,20 +11,19 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { FeedbackTriggerButton } from './feedback_trigger_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
+const coreStartMock = coreMock.createStart();
 
 const propsMock = {
-  handleShowFeedbackContainer: jest.fn(),
-  analytics: mockAnalytics,
+  core: coreStartMock,
 };
 
 describe('FeedbackButton', () => {
-  it('should render feedback button', () => {
+  it('should render feedback trigger button', () => {
     renderWithI18n(<FeedbackTriggerButton {...propsMock} />);
 
-    const feedbackButton = screen.getByTestId('feedbackButton');
+    const feedbackButton = screen.getByTestId('feedbackTriggerButton');
     expect(feedbackButton).toBeInTheDocument();
   });
 });

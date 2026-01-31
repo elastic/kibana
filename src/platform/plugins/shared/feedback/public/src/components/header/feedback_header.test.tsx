@@ -13,10 +13,10 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { FeedbackHeader } from './feedback_header';
 
 describe('FeedbackHeader', () => {
-  it('should render the feedback form header', () => {
+  it('should render the feedback header', () => {
     renderWithI18n(<FeedbackHeader />);
 
-    const header = screen.getByTestId('feedbackFormHeader');
+    const header = screen.getByTestId('feedbackHeader');
 
     expect(header).toBeInTheDocument();
   });

@@ -30,12 +30,12 @@ export const EmailSection = ({
   const { euiTheme } = useEuiTheme();
 
   const sectionCss = css`
-    height: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xxxl};
   `;
 
   return (
     <EuiFormRow fullWidth css={sectionCss}>
-      <EuiFlexGroup direction="row" gutterSize="s">
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EmailConsentCheck
             allowEmailContact={allowEmailContact}
