@@ -9,7 +9,7 @@
 
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
 import type { Logger } from '../../lib/utils/create_logger';
-import { getApiKeyHeader } from './get_api_key_header';
+import { getApiKeyHeader, getBasicAuthHeader } from './get_auth_header';
 
 export function getKibanaClient({
   target,
@@ -24,15 +24,12 @@ export function getKibanaClient({
   apiKey?: string;
   logger: Logger;
 }) {
-  const url = new URL(target);
-  if (username && password) {
-    url.username = username;
-    url.password = password;
-  }
-
   const kibanaClient = new KibanaClient({
-    target: url.toString(),
-    headers: getApiKeyHeader(apiKey),
+    target,
+    headers: {
+      ...getBasicAuthHeader(username, password),
+      ...getApiKeyHeader(apiKey),
+    },
   });
 
   return kibanaClient;
