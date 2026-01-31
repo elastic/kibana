@@ -11,6 +11,8 @@
 export {
   createSingleCompileConfig,
   type SingleCompileConfigOptions,
+  signalShutdown,
+  resetShutdown,
 } from './config/create_single_compile_config';
 
 // External plugin support (for kbn-plugin-helpers)

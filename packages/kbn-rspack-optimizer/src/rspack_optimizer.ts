@@ -8,8 +8,8 @@
  */
 
 import * as Rx from 'rxjs';
+import { fork, type ChildProcess } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { runHybridBuild } from './run_hybrid_build';
 import type { ThemeTag } from './types';
 
 export type OptimizerPhase = 'initializing' | 'running' | 'success' | 'issue' | 'error' | 'idle';
@@ -27,13 +27,23 @@ export interface RspackOptimizerOptions {
   log: ToolingLog;
 }
 
+interface WorkerMessage {
+  type: 'ready' | 'log' | 'done';
+  level?: 'info' | 'error' | 'warning' | 'success' | 'debug';
+  message?: string;
+  success?: boolean;
+  errors?: string[];
+}
+
 /**
  * RSPack-based optimizer for use with kbn-cli-dev-mode
  *
- * This builds plugins using RSPack (faster than webpack) while
- * reusing the existing webpack-built @kbn/ui-shared-deps bundles.
+ * This runs RSPack in a separate child process, similar to how @kbn/optimizer
+ * runs webpack in worker threads. This allows clean termination when the user
+ * presses Ctrl+C - we can simply kill the worker process.
  *
  * Benefits:
+ * - Clean shutdown on Ctrl+C (no EPIPE errors, no lingering logs)
  * - RSPack's faster build speed for plugins
  * - No changes to Kibana's bootstrap or bundle serving
  * - Shared deps are already built and cached
@@ -42,6 +52,8 @@ export class RspackOptimizer {
   private readonly ready$ = new Rx.ReplaySubject<boolean>(1);
   private readonly phase$ = new Rx.ReplaySubject<OptimizerPhase>(1);
   private readonly options: RspackOptimizerOptions;
+  private worker?: ChildProcess;
+  private isShuttingDown = false;
 
   constructor(options: RspackOptimizerOptions) {
     this.options = options;
@@ -57,56 +69,161 @@ export class RspackOptimizer {
     this.phase$.next('initializing');
     log.info('Starting RSPack build (using existing @kbn/ui-shared-deps)...');
 
-    try {
-      this.phase$.next('running');
-
-      const result = await runHybridBuild({
-        repoRoot: this.options.repoRoot,
-        outputRoot: this.options.repoRoot,
-        watch: this.options.watch,
-        cache: this.options.cache,
-        dist: this.options.dist,
-        examples: this.options.examples,
-        themeTags: this.options.themeTags ?? ['borealislight', 'borealisdark'],
-        log,
+    return new Promise<void>((resolve, reject) => {
+      // Spawn worker process
+      // Use require.resolve to find the worker file
+      const workerPath = require.resolve('./worker');
+      
+      // Use @kbn/babel-register to enable TypeScript support in the worker
+      // This is exactly how @kbn/optimizer does it (see observe_worker.ts)
+      this.worker = fork(workerPath, [], {
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+        execArgv: ['--require=@kbn/babel-register/install'],
+        env: {
+          ...process.env,
+        },
       });
 
-      if (result.success) {
-        this.phase$.next('success');
-        this.ready$.next(true);
-        log.success(`RSPack build completed in ${result.duration?.toFixed(2)}s`);
+      // Pipe worker stdout/stderr to our log
+      this.worker.stdout?.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n').filter(Boolean);
+        for (const line of lines) {
+          log.info(line);
+        }
+      });
 
-        // In watch mode, the build runner handles watching internally
-        if (this.options.watch) {
-          log.info('Watching for changes...');
+      this.worker.stderr?.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n').filter(Boolean);
+        for (const line of lines) {
+          // Filter out noisy warnings
+          if (!line.includes('[BABEL] Note:')) {
+            log.error(line);
+          }
         }
-      } else {
+      });
+
+      // Handle messages from worker
+      this.worker.on('message', (message: WorkerMessage) => {
+        if (this.isShuttingDown) return;
+
+        switch (message.type) {
+          case 'ready':
+            // Worker is ready, send start command
+            this.phase$.next('running');
+            this.worker?.send({
+              type: 'start',
+              options: {
+                repoRoot: this.options.repoRoot,
+                outputRoot: this.options.repoRoot,
+                watch: this.options.watch,
+                cache: this.options.cache,
+                dist: this.options.dist,
+                examples: this.options.examples,
+                themeTags: this.options.themeTags ?? ['borealislight', 'borealisdark'],
+              },
+            });
+            break;
+
+          case 'log':
+            // Forward log messages
+            if (message.level && message.message) {
+              switch (message.level) {
+                case 'info':
+                  log.info(message.message);
+                  break;
+                case 'error':
+                  log.error(message.message);
+                  break;
+                case 'warning':
+                  log.warning(message.message);
+                  break;
+                case 'success':
+                  log.success(message.message);
+                  break;
+                case 'debug':
+                  log.debug(message.message);
+                  break;
+              }
+            }
+            break;
+
+          case 'done':
+            if (message.success) {
+              this.phase$.next('success');
+              this.ready$.next(true);
+              log.success('RSPack build completed');
+
+              if (this.options.watch) {
+                log.info('Watching for changes...');
+              }
+            } else {
+              this.phase$.next('error');
+              this.ready$.next(false);
+              log.error('Build errors:');
+              for (const error of message.errors ?? []) {
+                log.error(error);
+              }
+
+              if (this.options.watch) {
+                log.info('Waiting for changes to fix errors...');
+              }
+            }
+
+            // In non-watch mode, resolve when done
+            if (!this.options.watch) {
+              resolve();
+            }
+            break;
+        }
+      });
+
+      // Handle worker exit
+      this.worker.on('exit', (code) => {
+        if (this.isShuttingDown) {
+          resolve();
+          return;
+        }
+
+        if (code !== 0) {
+          this.phase$.next('error');
+          this.ready$.next(false);
+          reject(new Error(`RSPack worker exited with code ${code}`));
+        } else {
+          resolve();
+        }
+      });
+
+      // Handle worker errors
+      this.worker.on('error', (err) => {
+        if (this.isShuttingDown) {
+          resolve();
+          return;
+        }
+
         this.phase$.next('error');
-        // DO NOT signal ready if there are errors - Kibana should not start
         this.ready$.next(false);
-        log.error('Build errors:');
-        for (const error of result.errors ?? []) {
-          log.error(error);
-        }
-        // In watch mode, keep waiting for changes to fix the errors
-        if (this.options.watch) {
-          log.info('Waiting for changes to fix errors...');
-        }
-      }
-    } catch (err: any) {
-      this.phase$.next('error');
-      this.ready$.next(false);
-      log.error('RSPack build failed:', err.message);
-      throw err;
-    }
+        log.error(`RSPack worker error: ${err.message}`);
+        reject(err);
+      });
+    });
   }
 
   /**
    * Stop the optimizer (cleanup)
+   * Called by cli-dev-mode when SIGINT is received
    */
-  stop(): Promise<void> {
-    // Hybrid build handles cleanup internally
-    return Promise.resolve();
+  async stop(): Promise<void> {
+    if (this.isShuttingDown) {
+      return;
+    }
+    this.isShuttingDown = true;
+
+    // Kill the worker process immediately
+    // This is clean because the worker is a separate process
+    if (this.worker) {
+      this.worker.kill('SIGKILL');
+      this.worker = undefined;
+    }
   }
 
   /**

@@ -10,8 +10,9 @@
 import Path from 'path';
 import Fs from 'fs';
 import crypto from 'crypto';
-import { rspack, type Configuration, type Compiler } from '@rspack/core';
+import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { discoverPlugins, createCoreEntry } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
 import {
@@ -21,6 +22,106 @@ import {
   getSharedIgnoreWarnings,
 } from './shared_config';
 import type { ThemeTag } from '../types';
+
+/**
+ * Global shutdown flag - when set to true, RSPack logging will stop immediately.
+ * This is used to prevent log output after Ctrl+C while RSPack finishes its current work.
+ */
+let isShuttingDown = false;
+
+/**
+ * Signal the RSPack optimizer to stop all logging immediately.
+ * Call this when SIGINT/SIGTERM is received.
+ */
+export function signalShutdown(): void {
+  isShuttingDown = true;
+}
+
+/**
+ * Reset the shutdown flag (for testing or restart scenarios).
+ */
+export function resetShutdown(): void {
+  isShuttingDown = false;
+}
+
+/**
+ * Create a log-based progress plugin that doesn't use dynamic terminal updates.
+ * This avoids terminal state issues when pressing Ctrl+C.
+ *
+ * Logging strategy:
+ * - Logs at 10% intervals (0%, 10%, 20%, ..., 100%)
+ * - Shows current stage (building, sealing, emitting, etc.)
+ * - Shows elapsed time
+ * - Immediately stops logging when shutdown is signaled
+ *
+ * @param log - ToolingLog instance for consistent formatting with Kibana's dev mode
+ */
+function createLogProgressPlugin(log?: ToolingLog): RspackPluginInstance {
+  let lastLoggedPercent = -10;
+  let startTime = Date.now();
+
+  // Fallback logger if no ToolingLog provided
+  const logInfo = (message: string) => {
+    if (isShuttingDown) return; // Don't log during shutdown
+    if (log) {
+      log.info(message);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`[rspack] ${message}`);
+    }
+  };
+
+  const logError = (message: string) => {
+    if (isShuttingDown) return; // Don't log during shutdown
+    if (log) {
+      log.error(message);
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`[rspack] ${message}`);
+    }
+  };
+
+  return {
+    apply(compiler: Compiler) {
+      compiler.hooks.compile.tap('LogProgressPlugin', () => {
+        if (isShuttingDown) return;
+        startTime = Date.now();
+        lastLoggedPercent = -10;
+        logInfo('Starting compilation...');
+      });
+
+      // Use RSPack's built-in progress tracking
+      new rspack.ProgressPlugin({
+        handler(percent, msg) {
+          if (isShuttingDown) return; // Don't log during shutdown
+
+          const percentInt = Math.floor(percent * 100);
+
+          // Log at every 10% milestone (0%, 10%, 20%, ..., 100%)
+          if (percentInt >= lastLoggedPercent + 10) {
+            lastLoggedPercent = Math.floor(percentInt / 10) * 10;
+
+            // Extract just the stage name (first word), ignore file paths
+            const stage = msg.split(' ')[0] || 'processing';
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+            logInfo(`${percentInt}% ${stage} [${elapsed}s]`);
+          }
+        },
+      }).apply(compiler);
+
+      compiler.hooks.done.tap('LogProgressPlugin', (stats) => {
+        if (isShuttingDown) return; // Don't log during shutdown
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        if (stats.hasErrors()) {
+          logError(`Compilation failed [${elapsed}s]`);
+        } else {
+          logInfo(`Compilation complete [${elapsed}s]`);
+        }
+      });
+    },
+  };
+}
 
 export interface SingleCompileConfigOptions {
   repoRoot: string;
@@ -33,6 +134,8 @@ export interface SingleCompileConfigOptions {
   themeTags?: ThemeTag[];
   plugins?: string[];
   filter?: string[];
+  /** ToolingLog instance for consistent logging with Kibana's dev mode */
+  log?: ToolingLog;
 }
 
 /**
@@ -57,6 +160,7 @@ export async function createSingleCompileConfig(
     testPlugins = false,
     themeTags = ['borealislight', 'borealisdark'] as ThemeTag[],
     plugins: targetPlugins,
+    log,
     filter,
   } = options;
 
@@ -107,8 +211,9 @@ export async function createSingleCompileConfig(
   // Create unified entry that imports and registers all plugins
   const unifiedEntryPath = createUnifiedEntry(wrapperDir, pluginEntries);
 
-  // eslint-disable-next-line no-console
-  console.log(`[rspack] Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
+  if (log) {
+    log.info(`Unified compilation: ${pluginEntries.length} bundles (core + ${plugins.length} plugins)`);
+  }
 
   // Collect plugin manifest paths for watching
   const pluginManifests = plugins.map((p) => Path.join(p.contextDir, 'kibana.jsonc'));
@@ -317,10 +422,9 @@ export async function createSingleCompileConfig(
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
       }),
 
-      // Progress reporting
-      new rspack.ProgressPlugin({
-        prefix: 'rspack',
-      }),
+      // Progress reporting - use log-based progress instead of dynamic terminal updates
+      // This avoids terminal state issues on Ctrl+C
+      createLogProgressPlugin(log),
 
       // Watch plugin manifests and regenerate entry when plugins are added/removed
       ...(watch ? [new PluginWatchPlugin(pluginManifests, options)] : []),
@@ -431,9 +535,6 @@ function createUnifiedEntry(
 
   // Categorize plugins by zone
   const categorized = categorizePlugins(pluginEntries);
-
-  // eslint-disable-next-line no-console
-  console.log(`[rspack] Progressive entry: core(${categorized.core.length}) + platform(${categorized.platform.length}) + solutions(sec:${categorized.solutions.security.length}, o11y:${categorized.solutions.observability.length}, search:${categorized.solutions.search.length}, other:${categorized.solutions.other.length})`);
 
   // Create separate chunk files for each zone
   const platformChunkPath = createZoneChunk(wrapperDir, 'platform', categorized.platform);

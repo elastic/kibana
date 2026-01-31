@@ -33,6 +33,10 @@ export interface HybridBuildResult {
   errors?: string[];
   warnings?: string[];
   duration?: number;
+  /** Function to close the watcher (only set in watch mode) */
+  close?: () => Promise<void>;
+  /** True if build was interrupted by SIGINT/SIGTERM */
+  interrupted?: boolean;
 }
 
 /**
@@ -75,6 +79,7 @@ export async function runHybridBuild(options: HybridBuildOptions): Promise<Hybri
       themeTags,
       plugins: targetPlugins,
       filter,
+      log,
     });
 
     log?.info('Starting RSPack compilation...');
@@ -155,6 +160,26 @@ async function runWatchBuild(
   return new Promise((resolve) => {
     let isFirstBuild = true;
     let hasResolvedFirstBuild = false;
+    let isShuttingDown = false;
+
+    // Create close function that can be called externally
+    const closeWatcher = (): Promise<void> => {
+      if (isShuttingDown) {
+        return Promise.resolve();
+      }
+      isShuttingDown = true;
+
+      log?.info('Stopping RSPack watch mode...');
+
+      // Start closing the watcher (don't wait - it waits for compilation to finish)
+      watching.close(() => {
+        log?.info('RSPack watch mode stopped.');
+      });
+      
+      // Return immediately - don't wait for close to complete
+      // The process will exit and clean up
+      return Promise.resolve();
+    };
 
     const watching = compiler.watch(
       {
@@ -162,6 +187,11 @@ async function runWatchBuild(
         ignored: /node_modules/,
       },
       (err, stats) => {
+        // Ignore callbacks during shutdown
+        if (isShuttingDown) {
+          return;
+        }
+
         const duration = (Date.now() - startTime) / 1000;
 
         if (err) {
@@ -172,6 +202,7 @@ async function runWatchBuild(
               success: false,
               errors: [err.message],
               duration,
+              close: closeWatcher,
             });
           }
           return;
@@ -185,6 +216,7 @@ async function runWatchBuild(
               success: false,
               errors: ['No stats returned from compilation'],
               duration,
+              close: closeWatcher,
             });
           }
           return;
@@ -203,7 +235,10 @@ async function runWatchBuild(
             log?.info('Watching for changes... (Ctrl+C to stop)');
           }
 
-          resolve(result);
+          resolve({
+            ...result,
+            close: closeWatcher,
+          });
           return;
         }
 
@@ -217,17 +252,7 @@ async function runWatchBuild(
       }
     );
 
-    const shutdown = () => {
-      log?.info('Stopping watch mode...');
-      watching.close(() => {
-        if (!hasResolvedFirstBuild) {
-          resolve({ success: false, errors: ['Build interrupted'] });
-        }
-      });
-    };
-
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+    // Store watcher reference for external cleanup via close function
   });
 }
 

@@ -50,18 +50,15 @@ function useRspackOptimizer(): boolean {
 }
 
 /**
- * Determine which RSPack build mode to use:
- * - 'single': All plugins in ONE compilation (fastest, default)
- * - 'mf': Module Federation (independent bundles, slower)
+ * Determine which RSPack build mode to use.
+ * Currently only 'single' is supported (all plugins in ONE compilation).
  */
-function getRspackMode(): 'single' | 'mf' {
-  if (process.env.KBN_USE_MODULE_FEDERATION === 'true') {
-    return 'mf';
-  }
+function getRspackMode(): 'single' {
+  // Only single mode is supported now
   return 'single';
 }
 
-export type OptimizerPhase = OptimizerUpdate['state']['phase'] | 'running' | 'idle';
+export type OptimizerPhase = OptimizerUpdate['state']['phase'] | 'running' | 'idle' | 'error';
 
 export class Optimizer {
   public readonly run$: Rx.Observable<void>;
@@ -132,6 +129,8 @@ export class Optimizer {
     const mode = getRspackMode();
 
     return new Rx.Observable<void>((subscriber) => {
+      let rspackOptimizerInstance: { stop: () => Promise<void> } | undefined;
+
       // Dynamically import rspack optimizer to avoid loading it when not needed
       import('@kbn/rspack-optimizer')
         .then(async ({ RspackOptimizer }) => {
@@ -141,9 +140,12 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
-            mode, // 'single' (fastest) or 'mf' (Module Federation)
+            mode, // 'single' mode - all plugins in one compilation
             log,
           });
+
+          // Store reference for cleanup
+          rspackOptimizerInstance = rspackOptimizer;
 
           // Subscribe to phase updates
           const phaseSub = rspackOptimizer.getPhase$().subscribe({
@@ -166,15 +168,20 @@ export class Optimizer {
           }
         })
         .catch((error) => {
-          log.error('Failed to load @kbn/rspack-optimizer:', error.message);
+          log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
           log.warning('Falling back to @kbn/optimizer...');
 
           // Fallback to webpack optimizer
           this.createWebpackRun$(options).subscribe(subscriber);
         });
 
-      // complete state subjects when run$ completes
+      // Cleanup when run$ completes or is unsubscribed (e.g., on SIGINT)
       subscriber.add(() => {
+        // Stop the RSPack optimizer if it's running
+        // This kills the worker process immediately (SIGKILL)
+        if (rspackOptimizerInstance) {
+          rspackOptimizerInstance.stop().catch(() => {});
+        }
         this.phase$.complete();
         this.ready$.complete();
       });
