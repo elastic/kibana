@@ -7,6 +7,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ECS_OS_TYPE_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
+import { SUPPORTED_HOST_OS_TYPE } from '../../../../common/endpoint/constants';
 import type { AlertAgent, AlertsAction, AlertWithAgent } from './types';
 import type { ProcessesParams } from '../../../../common/api/detection_engine';
 
@@ -128,3 +131,40 @@ export const getIsolateAlerts = (alerts: AlertWithAgent[]): Record<string, Alert
       },
     };
   }, {});
+
+interface ResponseActionDataFromAlert {
+  hostName: string;
+  hostOsType: SupportedHostOsType | undefined;
+  agentId: string;
+  alertId: string;
+  ruleId: string;
+  ruleName: string;
+}
+
+/**
+ * Gets common data used in submitting response actions from an given alert
+ * @param alert
+ */
+export const getResponseActionDataFromAlert = (
+  alert: AlertWithAgent
+): ResponseActionDataFromAlert => {
+  let hostOsType: ResponseActionDataFromAlert['hostOsType'];
+
+  for (const fieldPath of ECS_OS_TYPE_FIELDS) {
+    const os = (get(alert, fieldPath) ?? '').toLowerCase();
+
+    if (SUPPORTED_HOST_OS_TYPE.includes(os)) {
+      hostOsType = os as SupportedHostOsType;
+      break;
+    }
+  }
+
+  return {
+    hostName: alert.host?.name ?? '',
+    hostOsType,
+    agentId: alert.agent.id ?? '',
+    alertId: alert._id,
+    ruleId: alert.kibana.alert?.rule.uuid ?? '',
+    ruleName: alert.kibana.alert?.rule.name ?? '',
+  };
+};

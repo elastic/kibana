@@ -560,7 +560,12 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript) {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsEndpointRunScript ||
+      (this.options.isAutomated &&
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointAutomatedRunScript)
+    ) {
       throw new ResponseActionsClientError(
         'Elastic Defend runscript operation is not enabled',
         400

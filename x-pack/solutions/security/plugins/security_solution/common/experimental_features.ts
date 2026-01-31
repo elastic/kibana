@@ -56,6 +56,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointRunScript: false,
 
   /**
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
+   */
+  responseActionsEndpointAutomatedRunScript: false,
+
+  /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
