@@ -161,7 +161,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
     load([
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
-    ], function () {
+    ], async function () {
+      // RSPack progressive loading: wait for async plugin chunks to load
+      if (window.__kbnPluginsLoaded) {
+        await window.__kbnPluginsLoaded;
+      }
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
   }

@@ -193,13 +193,61 @@ export async function createSingleCompileConfig(
     optimization: {
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
-      // Only split async chunks, NOT initial entry chunks
-      // We load plugins via <script> tags so entries must be self-contained
-      // Async imports (import()) will still be split into separate chunks
+      // Progressive loading via dynamic imports creates natural chunk boundaries
+      // The entry file uses import() for platform and solutions, creating async chunks
       splitChunks: {
-        chunks: 'async', // Only split dynamically imported chunks
+        chunks: 'async',
+        minSize: 10000, // 10KB minimum
+        maxAsyncRequests: 30,
         cacheGroups: {
-          // Default cache groups for async chunks
+          // Platform - src/platform/* code
+          platform: {
+            test: /[\\/]src[\\/]platform[\\/]/,
+            name: 'platform',
+            priority: 100,
+            enforce: true,
+            reuseExistingChunk: true,
+          },
+          // x-pack platform - x-pack/platform/* code (licensing, alerting, etc.)
+          xpackPlatform: {
+            test: /[\\/]x-pack[\\/]platform[\\/]/,
+            name: 'xpack-platform',
+            priority: 95,
+            enforce: true,
+            reuseExistingChunk: true,
+          },
+          // Security solution
+          solutionSecurity: {
+            test: /[\\/]x-pack[\\/]solutions[\\/]security[\\/]/,
+            name: 'solution-security',
+            priority: 90,
+            enforce: true,
+            reuseExistingChunk: true,
+          },
+          // Observability solution
+          solutionObservability: {
+            test: /[\\/]x-pack[\\/]solutions[\\/]observability[\\/]/,
+            name: 'solution-observability',
+            priority: 90,
+            enforce: true,
+            reuseExistingChunk: true,
+          },
+          // Search solution
+          solutionSearch: {
+            test: /[\\/]x-pack[\\/]solutions[\\/]search[\\/]/,
+            name: 'solution-search',
+            priority: 90,
+            enforce: true,
+            reuseExistingChunk: true,
+          },
+          // Heavy vendors - large npm packages that should be cached separately
+          vendorsHeavy: {
+            test: /[\\/]node_modules[\\/](monaco-editor|maplibre-gl|@xyflow|ace-builds|prettier)/,
+            name: 'vendors-heavy',
+            priority: 30,
+            reuseExistingChunk: true,
+          },
+          // Default for other shared async code
           default: {
             minChunks: 2,
             priority: -20,
@@ -207,7 +255,7 @@ export async function createSingleCompileConfig(
           },
         },
       },
-      // Each entry contains its own runtime - no shared runtime chunk
+      // Each entry contains its own runtime
       runtimeChunk: false,
       minimize: dist,
       minimizer: dist
@@ -230,7 +278,7 @@ export async function createSingleCompileConfig(
     // Enable in-memory caching
     cache,
 
-    // Experimental features including persistent disk cache
+    // Experimental features
     experiments: {
       // Persistent cache for faster rebuilds between restarts
       cache: cache
@@ -242,7 +290,7 @@ export async function createSingleCompileConfig(
               Path.resolve(repoRoot, 'package.json'),
             ],
             // Version string to invalidate cache when config changes
-            version: `v2-${dist ? 'prod' : 'dev'}`,
+            version: `v3-${dist ? 'prod' : 'dev'}`,
           }
         : false,
     },
@@ -290,15 +338,62 @@ function findEntry(contextDir: string): string | null {
 }
 
 /**
- * Create a unified entry module that:
- * 1. Imports ALL plugin entry modules
- * 2. Registers each with __kbnBundles__ using the bundleRequire pattern
+ * Categorize plugins by zone for progressive loading.
+ */
+function categorizePlugins(
+  pluginEntries: Array<{ id: string; path: string; bundleId: string }>
+): {
+  core: Array<{ id: string; path: string; bundleId: string }>;
+  platform: Array<{ id: string; path: string; bundleId: string }>;
+  solutions: {
+    security: Array<{ id: string; path: string; bundleId: string }>;
+    observability: Array<{ id: string; path: string; bundleId: string }>;
+    search: Array<{ id: string; path: string; bundleId: string }>;
+    other: Array<{ id: string; path: string; bundleId: string }>;
+  };
+} {
+  const result = {
+    core: [] as Array<{ id: string; path: string; bundleId: string }>,
+    platform: [] as Array<{ id: string; path: string; bundleId: string }>,
+    solutions: {
+      security: [] as Array<{ id: string; path: string; bundleId: string }>,
+      observability: [] as Array<{ id: string; path: string; bundleId: string }>,
+      search: [] as Array<{ id: string; path: string; bundleId: string }>,
+      other: [] as Array<{ id: string; path: string; bundleId: string }>,
+    },
+  };
+
+  for (const entry of pluginEntries) {
+    const normalizedPath = entry.path.replace(/\\/g, '/');
+
+    if (entry.id === 'core' || normalizedPath.includes('/src/core/')) {
+      result.core.push(entry);
+    } else if (normalizedPath.includes('/src/platform/')) {
+      result.platform.push(entry);
+    } else if (normalizedPath.includes('/solutions/security/')) {
+      result.solutions.security.push(entry);
+    } else if (normalizedPath.includes('/solutions/observability/')) {
+      result.solutions.observability.push(entry);
+    } else if (normalizedPath.includes('/solutions/search/')) {
+      result.solutions.search.push(entry);
+    } else {
+      // x-pack plugins not in solutions go to "other"
+      result.solutions.other.push(entry);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Create a unified entry module with PROGRESSIVE LOADING:
  *
- * This ensures RSPack can deduplicate all shared modules across plugins
- * while maintaining the __kbnBundles__ registration pattern.
+ * Phase 1 (Sync): Core - always needed, loads first
+ * Phase 2 (Async): Platform - base functionality, separate chunk
+ * Phase 3 (Async): Solutions - per-solution chunks, loaded in parallel
  *
- * The entry file includes a hash of all plugin paths so it can detect
- * when plugins are added/removed and regenerate accordingly.
+ * This creates natural chunk boundaries via dynamic imports while
+ * ensuring all plugins are registered before the app starts.
  */
 function createUnifiedEntry(
   wrapperDir: string,
@@ -317,57 +412,138 @@ function createUnifiedEntry(
     const existingContent = Fs.readFileSync(unifiedEntryPath, 'utf-8');
     const hashMatch = existingContent.match(/\/\/ Plugin list hash: ([a-f0-9]+)/);
     if (hashMatch && hashMatch[1] === pluginListHash) {
-      // Plugin list hasn't changed, skip regeneration
       return unifiedEntryPath;
     }
   }
 
-  // eslint-disable-next-line no-console
-  console.log(`[rspack] Regenerating unified entry (${pluginEntries.length} bundles)`);
+  // Categorize plugins by zone
+  const categorized = categorizePlugins(pluginEntries);
 
-  // Generate imports for all plugins
-  const imports = pluginEntries.map((entry, i) => {
-    return `import * as plugin_${i} from ${JSON.stringify(entry.path)};`;
+  // eslint-disable-next-line no-console
+  console.log(`[rspack] Progressive entry: core(${categorized.core.length}) + platform(${categorized.platform.length}) + solutions(sec:${categorized.solutions.security.length}, o11y:${categorized.solutions.observability.length}, search:${categorized.solutions.search.length}, other:${categorized.solutions.other.length})`);
+
+  // Create separate chunk files for each zone
+  const platformChunkPath = createZoneChunk(wrapperDir, 'platform', categorized.platform);
+  const securityChunkPath = createZoneChunk(wrapperDir, 'solution-security', categorized.solutions.security);
+  const o11yChunkPath = createZoneChunk(wrapperDir, 'solution-observability', categorized.solutions.observability);
+  const searchChunkPath = createZoneChunk(wrapperDir, 'solution-search', categorized.solutions.search);
+  const otherChunkPath = createZoneChunk(wrapperDir, 'solution-other', categorized.solutions.other);
+
+  // Generate SYNC imports for core (always needed first)
+  const coreImports = categorized.core.map((entry, i) => {
+    return `import * as core_${i} from ${JSON.stringify(entry.path)};`;
   }).join('\n');
 
-  // Generate registrations for all plugins
-  // Use the same pattern as kbn-optimizer: bundleRequire function + module key
-  const registrations = pluginEntries.map((entry, i) => {
-    return `
-// Register ${entry.id}
-(function() {
-  var moduleExports = plugin_${i};
-  __kbnBundles__.define(
-    '${entry.bundleId}',
-    function bundleRequire(key) {
-      // Return the module exports when requested
-      return moduleExports;
-    },
-    '${entry.bundleId}'
-  );
-})();`;
+  const coreRegistrations = categorized.core.map((entry, i) => {
+    return `registerPlugin('${entry.bundleId}', core_${i});`;
   }).join('\n');
 
   const content = `// Auto-generated unified entry for Kibana RSPack build
 // Plugin list hash: ${pluginListHash}
 // Generated at: ${new Date().toISOString()}
-// This file imports ALL plugins and registers them with __kbnBundles__
+//
+// PROGRESSIVE LOADING STRATEGY:
+// 1. Core loads synchronously (always needed)
+// 2. Platform + Solutions load async via Promise
+// 3. Bootstrap waits for __kbnPluginsLoaded before starting
 
-${imports}
-
-// Wait for __kbnBundles__ to be available (should be defined in bootstrap template)
+// Verify __kbnBundles__ is available
 if (typeof __kbnBundles__ === 'undefined' || typeof __kbnBundles__.define !== 'function') {
-  throw new Error('__kbnBundles__ is not defined. Make sure the bootstrap template runs before loading bundles.');
+  throw new Error('__kbnBundles__ is not defined');
 }
 
-${registrations}
+// Helper to register a plugin
+function registerPlugin(bundleId, moduleExports) {
+  __kbnBundles__.define(bundleId, () => moduleExports, bundleId);
+}
 
-// Export core for the bootstrap to call __kbnBootstrap__
-export { plugin_0 as core };
+// Helper to register plugins from a chunk
+function registerChunkPlugins(chunkModule) {
+  if (chunkModule && chunkModule.plugins) {
+    for (const [bundleId, mod] of Object.entries(chunkModule.plugins)) {
+      registerPlugin(bundleId, mod);
+    }
+  }
+}
+
+// ============================================
+// PHASE 1: Core (synchronous - always needed)
+// ============================================
+${coreImports}
+${coreRegistrations}
+
+// ============================================
+// PHASE 2 & 3: Platform + Solutions (async)
+// ============================================
+// Create a global promise that bootstrap can wait for
+window.__kbnPluginsLoaded = (async function loadAllPlugins() {
+  try {
+    // Load platform first
+    const platformChunk = await import(${JSON.stringify(platformChunkPath)});
+    registerChunkPlugins(platformChunk);
+
+    // Load all solutions in parallel
+    const [securityChunk, o11yChunk, searchChunk, otherChunk] = await Promise.all([
+      import(${JSON.stringify(securityChunkPath)}),
+      import(${JSON.stringify(o11yChunkPath)}),
+      import(${JSON.stringify(searchChunkPath)}),
+      import(${JSON.stringify(otherChunkPath)}),
+    ]);
+
+    registerChunkPlugins(securityChunk);
+    registerChunkPlugins(o11yChunk);
+    registerChunkPlugins(searchChunk);
+    registerChunkPlugins(otherChunk);
+
+    console.log('[rspack] All plugins loaded');
+  } catch (err) {
+    console.error('[rspack] Failed to load plugins:', err);
+    throw err;
+  }
+})();
+
+// Export core for compatibility
+export { core_0 as core };
 `;
 
   Fs.writeFileSync(unifiedEntryPath, content);
   return unifiedEntryPath;
+}
+
+/**
+ * Create a zone-specific chunk file that exports all plugins in that zone.
+ */
+function createZoneChunk(
+  wrapperDir: string,
+  zoneName: string,
+  plugins: Array<{ id: string; path: string; bundleId: string }>
+): string {
+  const chunkPath = Path.join(wrapperDir, `${zoneName}-chunk.js`);
+
+  if (plugins.length === 0) {
+    // Empty chunk
+    Fs.writeFileSync(chunkPath, `// Empty ${zoneName} chunk\nexport const plugins = {};\n`);
+    return chunkPath;
+  }
+
+  const imports = plugins.map((entry, i) => {
+    return `import * as plugin_${i} from ${JSON.stringify(entry.path)};`;
+  }).join('\n');
+
+  const exports = plugins.map((entry, i) => {
+    return `  '${entry.bundleId}': plugin_${i},`;
+  }).join('\n');
+
+  const content = `// Auto-generated ${zoneName} chunk
+${imports}
+
+export const plugins = {
+${exports}
+};
+`;
+
+  Fs.writeFileSync(chunkPath, content);
+  return chunkPath;
 }
 
 /**

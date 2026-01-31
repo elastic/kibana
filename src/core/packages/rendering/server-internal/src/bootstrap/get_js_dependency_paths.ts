@@ -33,17 +33,17 @@ export const getJsDependencyPaths = (
  * 1. Webpack shared deps (kbn-ui-shared-deps) - for npm externals
  * 2. Single unified Kibana bundle - contains core + all plugins
  *
- * The unified bundle registers all plugins with __kbnBundles__ so they can
- * be accessed via the same API as before.
+ * Async chunks (solution-specific code) are loaded on demand via import().
  */
 export const getRspackDependencyPaths = (
   regularBundlePath: string,
   _bundlePaths: Map<string, PluginInfo>
 ) => {
   return [
-    // 1. Shared deps are still built by webpack (for npm externals)
+    // 1. Shared deps built by webpack (for npm externals like React, lodash)
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
+
     // 2. Single unified bundle containing core + all plugins
     `${regularBundlePath}/kibana.bundle.js`,
   ];
