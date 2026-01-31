@@ -86,5 +86,5 @@ export const usePackageIconType = ({
   }
 
   // Avoid blinking
-  return CACHED_ICONS.get(cacheKey) ?? iconType;
+  return CACHED_ICONS.get(cacheKey) ?? 'package';
 };
