@@ -19,13 +19,13 @@ import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
 interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
-  rowId: string;
+  nodeId: string;
   timeRange: TimeRange | undefined;
 }
 
 export interface CascadedDocumentsStateManager {
-  getCascadedDocuments(rowId: string): DataTableRecord[] | undefined;
-  setCascadedDocuments(rowId: string, records: DataTableRecord[]): void;
+  getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
+  setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
 }
 
 export class CascadedDocumentsFetcher {
@@ -38,7 +38,7 @@ export class CascadedDocumentsFetcher {
   ) {}
 
   async fetchCascadedDocuments({
-    rowId,
+    nodeId,
     nodeType,
     nodePath,
     nodePathMap,
@@ -47,9 +47,9 @@ export class CascadedDocumentsFetcher {
     dataView,
     timeRange,
   }: FetchCascadedDocumentsParams) {
-    this.cancelFetch(rowId);
+    this.cancelFetch(nodeId);
 
-    const existingRecords = this.stateManager.getCascadedDocuments(rowId);
+    const existingRecords = this.stateManager.getCascadedDocuments(nodeId);
 
     if (existingRecords) {
       return existingRecords;
@@ -57,7 +57,7 @@ export class CascadedDocumentsFetcher {
 
     const abortController = new AbortController();
 
-    this.abortControllers.set(rowId, abortController);
+    this.abortControllers.set(nodeId, abortController);
 
     let records: DataTableRecord[] = [];
 
@@ -99,24 +99,24 @@ export class CascadedDocumentsFetcher {
         },
       }));
 
-      this.stateManager.setCascadedDocuments(rowId, records);
+      this.stateManager.setCascadedDocuments(nodeId, records);
     } catch (error) {
       if (error.name !== 'AbortError') {
         throw error;
       }
     } finally {
-      this.abortControllers.delete(rowId);
+      this.abortControllers.delete(nodeId);
     }
 
     return records;
   }
 
-  cancelFetch(rowId: string, reason: AbortReason = AbortReason.CANCELED) {
-    const abortController = this.abortControllers.get(rowId);
+  cancelFetch(nodeId: string, reason: AbortReason = AbortReason.CANCELED) {
+    const abortController = this.abortControllers.get(nodeId);
 
     if (abortController) {
       abortController.abort(reason);
-      this.abortControllers.delete(rowId);
+      this.abortControllers.delete(nodeId);
     }
   }
 

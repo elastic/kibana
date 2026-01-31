@@ -45,7 +45,6 @@ import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import type { CascadedDocumentsStateManager } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -53,7 +52,7 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services }
+    { runtimeStateManager, tabsStorageManager, services, getCascadedDocumentsStateManager }
   ) {
     const previousState = getState();
     const discoverSessionChanged =
@@ -86,32 +85,9 @@ export const setTabs: InternalStateThunkActionCreator<
     }
 
     for (const tab of addedTabs) {
-      const cascadedDocumentsStateManager: CascadedDocumentsStateManager = {
-        getCascadedDocuments: (rowId) => {
-          const currentTab = selectTab(getState(), tab.id);
-          return currentTab.cascadedDocumentsState.cascadedDocumentsMap[rowId];
-        },
-        setCascadedDocuments: (rowId, records) => {
-          const currentTab = selectTab(getState(), tab.id);
-          const cascadedDocumentsState = currentTab.cascadedDocumentsState;
-          dispatch(
-            internalStateSlice.actions.setCascadedDocumentsState({
-              tabId: tab.id,
-              cascadedDocumentsState: {
-                ...cascadedDocumentsState,
-                cascadedDocumentsMap: {
-                  ...cascadedDocumentsState.cascadedDocumentsMap,
-                  [rowId]: records,
-                },
-              },
-            })
-          );
-        },
-      };
-
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         services,
-        cascadedDocumentsStateManager,
+        cascadedDocumentsStateManager: getCascadedDocumentsStateManager(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
