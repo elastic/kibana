@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, firstValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
-import type { DataDocuments$, DiscoverDataStateContainer } from './discover_data_state_container';
+import type { DataDocuments$ } from './discover_data_state_container';
 import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
@@ -305,29 +305,21 @@ describe('test getDataStateContainer', () => {
         })
       );
 
-      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
 
-      const stateContainer = selectTabRuntimeState(
-        toolkit.runtimeStateManager,
-        toolkit.getCurrentTab().id
-      ).stateContainer$.getValue()!;
-      const dataState = stateContainer.dataState;
-
-      return { toolkit, dataState };
+      return { toolkit };
     };
 
-    const waitForFetchStatus = (dataState: DiscoverDataStateContainer, status: FetchStatus) =>
-      firstValueFrom(
-        dataState.data$.main$.pipe(filter(({ fetchStatus }) => fetchStatus === status))
-      );
-
     it('should update available and selected cascade groups after fetching', async () => {
-      const { toolkit, dataState } = await setup();
+      const { toolkit } = await setup();
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
       expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
 
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colA',
@@ -339,21 +331,21 @@ describe('test getDataStateContainer', () => {
     });
 
     it('should not update cascade groups if feature flag is disabled', async () => {
-      const { toolkit, dataState } = await setup({ featureFlagEnabled: false });
+      const { toolkit } = await setup({ featureFlagEnabled: false });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
       expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
 
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
       expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
     });
 
     it('should reset selected cascade groups when available groups change', async () => {
-      const { toolkit, dataState } = await setup();
+      const { toolkit } = await setup();
 
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colA',
@@ -374,8 +366,7 @@ describe('test getDataStateContainer', () => {
         })
       );
 
-      await waitForFetchStatus(dataState, FetchStatus.LOADING);
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colC',
@@ -387,9 +378,9 @@ describe('test getDataStateContainer', () => {
     });
 
     it('should keep selected cascade groups when available groups do not change', async () => {
-      const { toolkit, dataState } = await setup();
+      const { toolkit } = await setup();
 
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colA',
@@ -410,8 +401,7 @@ describe('test getDataStateContainer', () => {
         })
       );
 
-      await waitForFetchStatus(dataState, FetchStatus.LOADING);
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colB',
@@ -423,9 +413,9 @@ describe('test getDataStateContainer', () => {
     });
 
     it('should clear cascade groups when query is not ES|QL', async () => {
-      const { toolkit, dataState } = await setup();
+      const { toolkit } = await setup();
 
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([
         'colA',
@@ -447,8 +437,7 @@ describe('test getDataStateContainer', () => {
         })
       );
 
-      await waitForFetchStatus(dataState, FetchStatus.LOADING);
-      await waitForFetchStatus(dataState, FetchStatus.COMPLETE);
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
       expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
