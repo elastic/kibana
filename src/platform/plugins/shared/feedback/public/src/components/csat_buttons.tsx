@@ -65,7 +65,7 @@ export const CsatButtons = ({ core, selectedOptionId, handleChangeCsatOptionId }
     prefix: 'csat',
   });
 
-  const appTitle = getCurrentAppTitle(core.application);
+  const appTitle = getCurrentAppTitle(core);
 
   const labelsCss = css`
     color: ${euiTheme.colors.textSubdued};
