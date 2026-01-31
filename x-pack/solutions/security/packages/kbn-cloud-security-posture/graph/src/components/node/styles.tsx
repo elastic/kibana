@@ -113,13 +113,13 @@ export const LabelShape = styled(EuiText, {
   min-width: 100%;
 
   ${({ shadow }) => `
-    /* Apply shadow when node is selected */
-    .react-flow__node.selected & {
+    /* Apply shadow when node is selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive).selected & {
       ${shadow};
     }
 
-    /* Apply shadow when node is pressed but still not selected */
-    .react-flow__node:active:not(.selected) & {
+    /* Apply shadow when node is pressed but still not selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive):active:not(.selected) & {
       ${shadow};
     }
 
@@ -157,12 +157,13 @@ export const LabelShapeOnHover = styled.div`
   width: calc(100% + 12px);
   height: calc(100% + 12px);
 
-  ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
-  .react-flow__node:focus:focus-visible & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    opacity: 1; /* Show on focus */
   }
 `;
 
@@ -228,13 +229,13 @@ export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   }}
 
   ${({ shadow }) => `
-    /* Apply shadow when node is selected */
-    .react-flow__node.selected & {
+    /* Apply shadow when node is selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive).selected & {
       ${shadow};
     }
 
-    /* Apply shadow when node is pressed but still not selected */
-    .react-flow__node:active:not(.selected) & {
+    /* Apply shadow when node is pressed but still not selected (only for interactive nodes) */
+    .react-flow__node:not(.non-interactive):active:not(.selected) & {
       ${shadow};
     }
 
@@ -293,7 +294,9 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
     opacity: 1;
   }
 
-  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
@@ -301,7 +304,7 @@ export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerPro
     opacity: 1; /* Show when button is active */
   }
 
-  .react-flow__node:focus:focus-visible & {
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
     opacity: 1; /* Show on node focus */
   }
 `;
@@ -310,17 +313,23 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
 
-  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
+  /* Only show hover effects for interactive nodes */
+  .react-flow__node:not(.non-interactive) ${NodeShapeContainer}:hover &,
+  .react-flow__node:not(.non-interactive) ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
-  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive)
+    ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled)
+    &,
+  .react-flow__node:not(.non-interactive)
+    ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled)
+    & {
+    opacity: 1; /* Show when expand button is toggled */
   }
 
-  .react-flow__node:focus:focus-visible & {
-    opacity: 1; /* Show on hover */
+  .react-flow__node:not(.non-interactive):focus:focus-visible & {
+    opacity: 1; /* Show on focus */
   }
 `;
 
