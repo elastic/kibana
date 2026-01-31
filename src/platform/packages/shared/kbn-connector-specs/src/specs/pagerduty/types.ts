@@ -104,10 +104,37 @@ export interface TransformedIncidentsResponse {
   more?: boolean;
 }
 
+export interface PagerDutyUser {
+  id: string;
+  type?: string;
+  summary?: string;
+  name?: string;
+  email?: string;
+  time_zone?: string;
+  [key: string]: unknown;
+}
+
+export interface TransformedUser {
+  id: string;
+  summary?: string;
+  email?: string;
+  timezone?: string;
+}
+
 export interface PagerDutyTeam {
   id: string;
   name?: string;
   summary?: string;
+  description?: string;
+  type?: string;
+  [key: string]: unknown;
+}
+
+export interface TransformedTeam {
+  id: string;
+  summary?: string;
+  name?: string;
+  description?: string;
 }
 
 export interface PagerDutyServiceReference {
@@ -278,6 +305,17 @@ export interface TransformedOnCall {
   end?: string;
 }
 
+/** Base pagination fields for list responses (single item or array) */
+export interface PagerDutyListResponseBase {
+  limit?: number;
+  offset?: number;
+  total?: number;
+  more?: boolean;
+}
+
+/** Data shape for normalizeListResponse (arbitrary keys + pagination) */
+export type PagerDutyListResponseData = Record<string, unknown> & PagerDutyListResponseBase;
+
 // =============================================================================
 // Action input types (handler parameters)
 // =============================================================================
@@ -350,4 +388,30 @@ export interface ListOnCallsInput {
   until?: string;
   include?: string;
   timeZone?: string;
+}
+
+export interface ListUsersInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  query?: string;
+  include?: string;
+}
+
+export interface GetUserInput {
+  id: string;
+  include?: string;
+}
+
+export interface ListTeamsInput {
+  limit?: number;
+  offset?: number;
+  total?: boolean;
+  query?: string;
+  include?: string;
+}
+
+export interface GetTeamInput {
+  id: string;
+  include?: string;
 }

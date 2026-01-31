@@ -54,22 +54,16 @@ export const PagerDutyConnector: ConnectorSpec = {
           params: queryParams,
         });
 
-        const data = response.data;
-        if (data.escalation_policy) {
-          return {
-            escalation_policy: transformEscalationPolicy(data.escalation_policy),
-          };
-        }
-        if (data.escalation_policies) {
-          return {
-            limit: data.limit,
-            offset: data.offset,
-            total: data.total,
-            more: data.more,
-            escalation_policies: data.escalation_policies.map(transformEscalationPolicy),
-          };
-        }
-        return data;
+        const data = response.data as PD.PagerDutyListResponseData & {
+          escalation_policies: PD.PagerDutyEscalationPolicy[];
+        };
+        return {
+          limit: data.limit ?? 0,
+          offset: data.offset ?? 0,
+          total: data.total ?? 0,
+          more: data.more ?? false,
+          escalation_policies: data.escalation_policies.map(transformEscalationPolicy),
+        };
       },
     },
 
@@ -225,7 +219,8 @@ export const PagerDutyConnector: ConnectorSpec = {
         const response = await ctx.client.get(`https://api.pagerduty.com/incidents/${input.id}`, {
           params: queryParams,
         });
-        const result = transformIncidentsResponse(response.data);
+        const data = response.data as { incident: PD.PagerDutyIncident };
+        const result = { incident: transformIncident(data.incident) };
 
         // Merge the additional data into the result
         return {
@@ -310,7 +305,16 @@ export const PagerDutyConnector: ConnectorSpec = {
         const response = await ctx.client.get('https://api.pagerduty.com/schedules', {
           params: queryParams,
         });
-        return transformScheduleResponse(response.data);
+        const data = response.data as PD.PagerDutyListResponseData & {
+          schedules: PD.PagerDutySchedule[];
+        };
+        return {
+          limit: data.limit ?? 0,
+          offset: data.offset ?? 0,
+          total: data.total ?? 0,
+          more: data.more ?? false,
+          schedules: data.schedules.map(transformSchedule),
+        };
       },
     },
 
@@ -331,7 +335,8 @@ export const PagerDutyConnector: ConnectorSpec = {
         const response = await ctx.client.get(`https://api.pagerduty.com/schedules/${input.id}`, {
           params: queryParams,
         });
-        return transformScheduleResponse(response.data);
+        const data = response.data as { schedule: PD.PagerDutySchedule };
+        return { schedule: transformSchedule(data.schedule) };
       },
     },
 
@@ -418,6 +423,104 @@ export const PagerDutyConnector: ConnectorSpec = {
         return data;
       },
     },
+
+    // https://developer.pagerduty.com/api-reference/c32c2042fb6ac-list-users
+    listUsers: {
+      isTool: false,
+      input: z.object({
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+        total: z.boolean().optional(),
+        query: z.string().optional(),
+        include: z.string().optional(),
+      }),
+      handler: async (ctx, input: PD.ListUsersInput) => {
+        const queryParams = buildPaginationParams(input);
+        if (input.query) {
+          queryParams.query = input.query;
+        }
+
+        const response = await ctx.client.get('https://api.pagerduty.com/users', {
+          params: queryParams,
+        });
+
+        const data = response.data as PD.PagerDutyListResponseData & {
+          users: PD.PagerDutyUser[];
+        };
+        return {
+          limit: data.limit ?? 0,
+          offset: data.offset ?? 0,
+          total: data.total ?? 0,
+          more: data.more ?? false,
+          users: data.users.map(transformUser),
+        };
+      },
+    },
+
+    // https://developer.pagerduty.com/api-reference/c32c2042fb6ac-get-a-user
+    getUser: {
+      isTool: false,
+      input: z.object({
+        id: z.string(),
+        include: z.string().optional(),
+      }),
+      handler: async (ctx, input: PD.GetUserInput) => {
+        const queryParams = buildPaginationParams(input);
+        const response = await ctx.client.get(`https://api.pagerduty.com/users/${input.id}`, {
+          params: queryParams,
+        });
+        return response.data;
+      },
+    },
+
+    // https://developer.pagerduty.com/api-reference/9d0b4b12e36f9-list-teams
+    listTeams: {
+      isTool: false,
+      input: z.object({
+        limit: z.number().optional(),
+        offset: z.number().optional(),
+        total: z.boolean().optional(),
+        query: z.string().optional(),
+        include: z.string().optional(),
+      }),
+      handler: async (ctx, input: PD.ListTeamsInput) => {
+        const queryParams = buildPaginationParams(input);
+        if (input.query) {
+          queryParams.query = input.query;
+        }
+
+        const response = await ctx.client.get('https://api.pagerduty.com/teams', {
+          params: queryParams,
+        });
+
+        const data = response.data as PD.PagerDutyListResponseData & {
+          teams: PD.PagerDutyTeam[];
+        };
+        return {
+          limit: data.limit ?? 0,
+          offset: data.offset ?? 0,
+          total: data.total ?? 0,
+          more: data.more ?? false,
+          teams: data.teams.map(transformTeam),
+        };
+      },
+    },
+
+    // https://developer.pagerduty.com/api-reference/9d0b4b12e36f9-get-a-team
+    getTeam: {
+      isTool: false,
+      input: z.object({
+        id: z.string(),
+        include: z.string().optional(),
+      }),
+      handler: async (ctx, input: PD.GetTeamInput) => {
+        const queryParams = buildPaginationParams(input);
+        const response = await ctx.client.get(`https://api.pagerduty.com/teams/${input.id}`, {
+          params: queryParams,
+        });
+        return response.data;
+      },
+    },
   },
 
   test: {
@@ -476,8 +579,7 @@ async function listAlertsForIncidentHandler(
   );
 
   const data = response.data as {
-    alert?: PD.PagerDutyAlert;
-    alerts?: PD.PagerDutyAlert[];
+    alerts: PD.PagerDutyAlert[];
     limit?: number;
     offset?: number;
     total?: number;
@@ -505,21 +607,13 @@ async function listAlertsForIncidentHandler(
       : undefined,
   });
 
-  if (data.alert) {
-    return {
-      alert: transformAlert(data.alert),
-    };
-  }
-  if (data.alerts) {
-    return {
-      limit: data.limit,
-      offset: data.offset,
-      total: data.total,
-      more: data.more,
-      alerts: data.alerts.map(transformAlert),
-    };
-  }
-  return data;
+  return {
+    limit: data.limit,
+    offset: data.offset,
+    total: data.total,
+    more: data.more,
+    alerts: data.alerts.map(transformAlert),
+  };
 }
 
 /**
@@ -538,8 +632,7 @@ async function listNotesForIncidentHandler(
   );
 
   const data = response.data as {
-    note?: PD.PagerDutyNote;
-    notes?: PD.PagerDutyNote[];
+    notes: PD.PagerDutyNote[];
     limit?: number;
     offset?: number;
     total?: number;
@@ -557,21 +650,13 @@ async function listNotesForIncidentHandler(
       : undefined,
   });
 
-  if (data.note) {
-    return {
-      note: transformNote(data.note),
-    };
-  }
-  if (data.notes) {
-    return {
-      limit: data.limit,
-      offset: data.offset,
-      total: data.total,
-      more: data.more,
-      notes: data.notes.map(transformNote),
-    };
-  }
-  return data;
+  return {
+    limit: data.limit,
+    offset: data.offset,
+    total: data.total,
+    more: data.more,
+    notes: data.notes.map(transformNote),
+  };
 }
 
 /**
@@ -684,6 +769,30 @@ function transformIncident(incident: PD.PagerDutyIncident): PD.TransformedIncide
 }
 
 /**
+ * Transform user to id, summary, email, timezone
+ */
+function transformUser(user: PD.PagerDutyUser): PD.TransformedUser {
+  return {
+    id: user.id,
+    summary: user.summary,
+    email: user.email,
+    timezone: user.time_zone,
+  };
+}
+
+/**
+ * Transform team to id, summary, name, description
+ */
+function transformTeam(team: PD.PagerDutyTeam): PD.TransformedTeam {
+  return {
+    id: team.id,
+    summary: team.summary,
+    name: team.name,
+    description: team.description,
+  };
+}
+
+/**
  * Transform escalation policy response to include only essential fields
  */
 function transformEscalationPolicy(
@@ -747,50 +856,16 @@ function transformSchedule(schedule: PD.PagerDutySchedule): PD.TransformedSchedu
 }
 
 /**
- * Transform schedule(s) API response (single schedule or list)
- */
-function transformScheduleResponse(data: {
-  schedule?: PD.PagerDutySchedule;
-  schedules?: PD.PagerDutySchedule[];
-  limit?: number;
-  offset?: number;
-  total?: number;
-  more?: boolean;
-}) {
-  if (data.schedule) {
-    return { schedule: transformSchedule(data.schedule) };
-  }
-  if (data.schedules) {
-    return {
-      limit: data.limit,
-      offset: data.offset,
-      total: data.total,
-      more: data.more,
-      schedules: data.schedules.map(transformSchedule),
-    };
-  }
-  return data;
-}
-
-/**
- * Transform incidents list response
+ * Transform incidents list response. incidents is always present (array, may be empty).
  */
 function transformIncidentsResponse(
-  data: PD.PagerDutyIncidentsResponse
+  data: PD.PagerDutyIncidentsResponse & { incidents: PD.PagerDutyIncident[] }
 ): PD.TransformedIncidentsResponse {
-  if (data.incident) {
-    return {
-      incident: transformIncident(data.incident),
-    };
-  }
-  if (data.incidents) {
-    return {
-      limit: data.limit,
-      offset: data.offset,
-      total: data.total,
-      more: data.more,
-      incidents: data.incidents.map(transformIncident),
-    };
-  }
-  return data as PD.TransformedIncidentsResponse;
+  return {
+    limit: data.limit ?? 0,
+    offset: data.offset ?? 0,
+    total: data.total ?? 0,
+    more: data.more ?? false,
+    incidents: data.incidents.map(transformIncident),
+  };
 }

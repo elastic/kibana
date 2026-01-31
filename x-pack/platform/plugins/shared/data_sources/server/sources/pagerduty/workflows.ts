@@ -41,7 +41,7 @@ steps:
 export function generateGetItemWorkflow(stackConnectorId: string): string {
   return `version: "1"
 name: sources.pagerduty.get_item
-description: Get a PagerDuty item by ID (schedule, incident, or escalation policy)
+description: Get a PagerDuty item by ID (schedule, incident, escalation policy, user, or team). Returns full payload for user and team.
 enabled: true
 triggers:
   - type: manual
@@ -52,7 +52,7 @@ inputs:
       description: The ID of the item to retrieve
     item_type:
       type: string
-      description: 'The type of item to retrieve, one of: schedule, incident, escalation_policy)'
+      description: 'The type of item to retrieve, one of: schedule, incident, escalation_policy, user, team'
     include:
       type: string
       description: |
@@ -60,6 +60,7 @@ inputs:
             schedule - N/A
             incident - past (get past instances of this incident), related (get related incidents), alerts (triggered by the incident), notes (notes attached to the incident), acknowledgers, assignees, priorities, services, teams, users
             escalation_policy - services, teams, targets
+            user, team - N/A
     time_zone:
       type: string
       description: Time zone in which dates in the result will be rendered (IANA time zone database name)
@@ -86,22 +87,42 @@ steps:
         steps:
           - name: get-incident
             type: pagerduty-v2.getIncident
-            if: "\${{inputs.item_type == 'incident'}}"
             connector-id: ${stackConnectorId}
             with:
               id: "\${{inputs.id}}"
               include: "\${{inputs.include}}"
+        else:
           - name: if-escalation-policy
             type: if
             condition: "\${{ inputs.item_type == 'escalation_policy' }}"
             steps:
               - name: get-escalation-policy
                 type: pagerduty-v2.getEscalationPolicy
-                if: "\${{inputs.item_type == 'escalation_policy'}}"
                 connector-id: ${stackConnectorId}
                 with:
                   id: "\${{inputs.id}}"
                   include: "\${{inputs.include}}"
+            else:
+              - name: if-user
+                type: if
+                condition: "\${{ inputs.item_type == 'user' }}"
+                steps:
+                  - name: get-user
+                    type: pagerduty-v2.getUser
+                    connector-id: ${stackConnectorId}
+                    with:
+                      id: "\${{inputs.id}}"
+                      include: "\${{inputs.include}}"
+              - name: if-team
+                type: if
+                condition: "\${{ inputs.item_type == 'team' }}"
+                steps:
+                  - name: get-team
+                    type: pagerduty-v2.getTeam
+                    connector-id: ${stackConnectorId}
+                    with:
+                      id: "\${{inputs.id}}"
+                      include: "\${{inputs.include}}"
 `;
 }
 
@@ -202,7 +223,7 @@ steps:
 export function generateSearchWorkflow(stackConnectorId: string): string {
   return `version: "1"
 name: sources.pagerduty.search
-description: List PagerDuty items by type (schedules, escalation_policies) with query. Uses common params limit, offset, total, query, include.
+description: List PagerDuty items by type (schedules, escalation_policies, users, teams) with query. Uses common params limit, offset, total, query, include.
 enabled: true
 triggers:
   - type: manual
@@ -210,7 +231,7 @@ inputs:
   properties:
     item_type:
       type: string
-      description: 'The type of items to list, one of: schedules, escalation_policies'
+      description: 'The type of items to list, one of: schedules, escalation_policies, users, teams'
     limit:
       type: number
       description: Maximum number of items to return
@@ -222,13 +243,14 @@ inputs:
       description: If true, include total count in the response
     query:
       type: string
-      description: 'Free-text search across name and description fields'
+      description: 'Free-text search across name and description fields (users: name, email; teams: name, description)'
     include:
       type: string
       description: |
         Comma-separated list of related resources to include.  Valid values by type:
             schedules - N/A (list response includes schedule_layers, users)
             escalation_policies - services, teams, targets
+            users, teams - N/A
   required:
     - item_type
   additionalProperties: false
@@ -247,15 +269,46 @@ steps:
           query: "\${{inputs.query}}"
           include: "\${{inputs.include}}"
     else:
-      - name: list-escalation-policies
-        type: pagerduty-v2.listEscalationPolicies
-        connector-id: ${stackConnectorId}
-        with:
-          limit: \${{inputs.limit}}
-          offset: \${{inputs.offset}}
-          total: \${{inputs.total}}
-          query: "\${{inputs.query}}"
-          include: "\${{inputs.include}}"
+      - name: if-escalation-policies
+        type: if
+        condition: "\${{inputs.item_type == 'escalation_policies'}}"
+        steps:
+          - name: list-escalation-policies
+            type: pagerduty-v2.listEscalationPolicies
+            connector-id: ${stackConnectorId}
+            with:
+              limit: \${{inputs.limit}}
+              offset: \${{inputs.offset}}
+              total: \${{inputs.total}}
+              query: "\${{inputs.query}}"
+              include: "\${{inputs.include}}"
+        else:
+          - name: if-users
+            type: if
+            condition: "\${{inputs.item_type == 'users'}}"
+            steps:
+              - name: list-users
+                type: pagerduty-v2.listUsers
+                connector-id: ${stackConnectorId}
+                with:
+                  limit: \${{inputs.limit}}
+                  offset: \${{inputs.offset}}
+                  total: \${{inputs.total}}
+                  query: "\${{inputs.query}}"
+                  include: "\${{inputs.include}}"
+          - name: if-teams
+            type: if
+            condition: "\${{inputs.item_type == 'teams'}}"
+            steps:
+              - name: list-teams
+                type: pagerduty-v2.listTeams
+                connector-id: ${stackConnectorId}
+                with:
+                  limit: \${{inputs.limit}}
+                  offset: \${{inputs.offset}}
+                  total: \${{inputs.total}}
+                  query: "\${{inputs.query}}"
+                  include: "\${{inputs.include}}"
 `;
 }
 
