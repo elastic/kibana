@@ -28,6 +28,7 @@ import useAsync from 'react-use/lib/useAsync';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -134,6 +135,8 @@ function ActionMenuSections({
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
   const {
     query: { rangeFrom, rangeTo, environment },
   } = useAnyOfApmParams(
@@ -157,6 +160,7 @@ function ActionMenuSections({
     logsLocator,
     dataViewId: dataView?.id,
     assetDetailsLocator,
+    discoverLocator,
   });
 
   const externalMenuItems = useAsync(() => {

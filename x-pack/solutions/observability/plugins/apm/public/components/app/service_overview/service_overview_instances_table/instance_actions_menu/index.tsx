@@ -20,6 +20,7 @@ import {
   ASSET_DETAILS_LOCATOR_ID,
   type AssetDetailsLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -55,6 +56,7 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
   const logsLocator = getLogsLocatorFromUrlService(share.url)!;
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
   if (isPending(status)) {
     return (
@@ -95,6 +97,7 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
     metricsHref,
     logsLocator,
     assetDetailsLocator,
+    discoverLocator,
   });
 
   return (

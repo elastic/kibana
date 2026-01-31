@@ -34,6 +34,13 @@ const mockAssetDetailsLocator = {
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
+const mockDiscoverLocator = {
+  getRedirectUrl: jest.fn().mockImplementation((params: any) => {
+    const query = params.query?.query || '';
+    return `/app/discover#/?_g=(time:(from:'${params.timeRange.from}',to:'${params.timeRange.to}'))&_a=(query:(language:kuery,query:'${query}'))`;
+  }),
+} as unknown as ReturnType<typeof sharePluginMock.createLocator>;
+
 const expectLogsLocatorToBeCalled = () => {
   expect(logsLocatorMock.getRedirectUrl).toBeCalledTimes(4);
 };
@@ -188,6 +195,45 @@ describe('Transaction action menu', () => {
     ]);
     expectUptimeLocatorToBeCalled();
     expectLogsLocatorToBeCalled();
+  });
+
+  it('shows Discover link for OTel-observed K8s pods instead of Infra UI', () => {
+    const transaction = {
+      kubernetes: { pod: { uid: '123' } },
+      agent: { name: 'otlp/nodejs' },
+      timestamp,
+      trace: { id: '123' },
+      transaction: { id: '123' },
+      '@timestamp': date,
+    } as unknown as Transaction;
+    const sections = getSections({
+      transaction,
+      basePath,
+      location,
+      apmRouter,
+      uptimeLocator,
+      logsLocator: logsLocatorMock,
+      infraLinksAvailable: true,
+      rangeFrom: 'now-24h',
+      rangeTo: 'now',
+      environment: 'ENVIRONMENT_ALL',
+      dataViewId: 'apm_static_data_view_id_default',
+      assetDetailsLocator: mockAssetDetailsLocator,
+      discoverLocator: mockDiscoverLocator,
+    });
+
+    const podDetailsSection = sections[0]?.find((section) => section.key === 'podDetails');
+    const podMetricsAction = podDetailsSection?.actions.find(
+      (action) => action.key === 'podMetrics'
+    );
+
+    expect(podMetricsAction).toBeDefined();
+    expect(podMetricsAction?.condition).toBe(true);
+    // Should use Discover link, not Infra UI link
+    expect(podMetricsAction?.href).toContain('/app/discover');
+    expect(podMetricsAction?.href).toContain('kubernetes.pod.uid');
+    expect(mockAssetDetailsLocator.getRedirectUrl).not.toHaveBeenCalled();
+    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalled();
   });
 
   it('shows host and required sections only', () => {

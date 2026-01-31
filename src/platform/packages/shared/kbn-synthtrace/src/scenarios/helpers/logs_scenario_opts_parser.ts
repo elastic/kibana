@@ -10,7 +10,7 @@
 export const parseStringToBoolean = (value: string, defaultValue?: boolean): boolean => {
   if (!value) return defaultValue ?? false;
 
-  switch (value.trim().toLowerCase()) {
+  switch (value.toString().trim().toLowerCase()) {
     case 'true':
       return true;
     case 'false':
