@@ -90,10 +90,12 @@ dependsOn:
   - '@kbn/apm-data-access-plugin'
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-saved-objects-api-server'
   - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/serverless'
   - '@kbn/elastic-agent-utils'
   - '@kbn/dashboard-plugin'
+  - '@kbn/shared-svg'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/search-types'
   - '@kbn/alerting-comparators'
@@ -117,6 +119,7 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/response-ops-rule-form'
   - '@kbn/fields-metadata-plugin'
+  - '@kbn/deeplinks-analytics'
   - '@kbn/core-chrome-browser'
   - '@kbn/object-utils'
   - '@kbn/coloring'
@@ -134,6 +137,7 @@ dependsOn:
   - '@kbn/esql-composer'
   - '@kbn/fleet-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod

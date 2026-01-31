@@ -74,12 +74,19 @@ export const useGroupedCascadeData = ({
             ...value?.reduce((derivedColumns, datum) => {
               queryMeta.appliedFunctions.forEach(({ identifier }) => {
                 if (datum.flattened[identifier]) {
-                  derivedColumns[identifier] =
-                    (derivedColumns[identifier] ?? 0) + Number(datum.flattened[identifier]);
+                  if (Number(datum.flattened[identifier])) {
+                    derivedColumns[identifier] =
+                      Number(derivedColumns[identifier] ?? 0) + Number(datum.flattened[identifier]);
+                  } else if (Array.isArray(datum.flattened[identifier])) {
+                    derivedColumns[identifier] = ([] as Array<string | number>).concat(
+                      derivedColumns[identifier] || [],
+                      datum.flattened[identifier]
+                    );
+                  }
                 }
               });
               return derivedColumns;
-            }, {} as Record<string, number>),
+            }, {} as Record<string, number | Array<string | number>>),
           };
 
           if (levelIdx === 0) {

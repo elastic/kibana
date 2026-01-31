@@ -292,7 +292,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             query={localQuery}
             onTextLangQueryChange={onTextLangQueryChange}
             onTextLangQuerySubmit={onTextLangQuerySubmit}
-            detectedTimestamp={currentDataView?.timeFieldName}
             hideRunQueryText={false}
             isLoading={queryHistoryStatus ?? false}
             displayDocumentationAsFlyout
