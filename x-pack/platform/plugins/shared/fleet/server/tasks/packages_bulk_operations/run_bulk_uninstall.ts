@@ -6,7 +6,7 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import { removeInstallation } from '../../services/epm/packages';
 import { appContextService } from '../../services';
@@ -70,7 +70,12 @@ export async function _runBulkUninstallTask({
 
 export async function scheduleBulkUninstall(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: Omit<BulkUninstallTaskParams, 'type'>
+  taskParams: Omit<BulkUninstallTaskParams, 'type'>,
+  request: KibanaRequest
 ) {
-  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_uninstall' });
+  return scheduleBulkOperationTask(
+    taskManagerStart,
+    { ...taskParams, type: 'bulk_uninstall' },
+    request
+  );
 }
