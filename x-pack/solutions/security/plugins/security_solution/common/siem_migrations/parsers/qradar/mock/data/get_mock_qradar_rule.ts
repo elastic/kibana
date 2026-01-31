@@ -9,8 +9,11 @@ const getRandomNumberId = () => Math.floor(Math.random() * 1000000);
 
 const getMockQRadarRuleDataXml = (ruleName: string, isBuildingBlock: boolean = false) => {
   const id = getRandomNumberId();
+  const bbCategoryDefinition = isBuildingBlock
+    ? 'name="BB:CategoryDefinition: Authentication Success"'
+    : '';
   return {
-    normal: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+    normal: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" ${bbCategoryDefinition} origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
@@ -32,7 +35,7 @@ const getMockQRadarRuleDataXml = (ruleName: string, isBuildingBlock: boolean = f
   </responses>
 </rule>
 `,
-    sanitized: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+    sanitized: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" ${bbCategoryDefinition} origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
