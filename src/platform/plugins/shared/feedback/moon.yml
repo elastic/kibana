@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core'
   - '@kbn/i18n'
-  - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-chrome-browser-internal'
 tags:
   - plugin
