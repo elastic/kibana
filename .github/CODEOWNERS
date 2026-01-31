@@ -780,6 +780,7 @@ src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations
+src/platform/plugins/shared/feedback @elastic/appex-sharedux
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
