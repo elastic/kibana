@@ -33,34 +33,23 @@ export interface EvaluationTableOptions {
   evaluatorDisplayGroups?: EvaluatorDisplayGroup[];
 }
 
-/**
- * Gets display options for an evaluator, supporting pattern matching.
- * For example, if options has "Precision@K" as a key, it will match "Precision@5", "Precision@10", etc.
- */
+/** Gets display options for an evaluator, supporting @K pattern matching */
 function getEvaluatorDisplayOptions(
   evaluatorName: string,
   evaluatorFormats: Map<string, EvaluatorDisplayOptions>
 ): EvaluatorDisplayOptions {
-  // First try exact match
   const exactMatch = evaluatorFormats.get(evaluatorName);
-  if (exactMatch) {
-    return exactMatch;
-  }
+  if (exactMatch) return exactMatch;
 
-  // Then try pattern matching
   for (const [pattern, options] of evaluatorFormats.entries()) {
     if (matchesEvaluatorPattern(evaluatorName, pattern)) {
       return options;
     }
   }
-
   return {};
 }
 
-/**
- * Groups evaluator scores, supporting pattern-based matching.
- * Patterns like "Precision@K" will match all evaluators like "Precision@5", "Precision@10", etc.
- */
+/** Groups evaluator scores, expanding @K patterns to actual evaluator names */
 function groupEvaluatorScores(
   evaluatorNames: string[],
   evaluatorScoreGroups: EvaluatorDisplayGroup[]
@@ -71,21 +60,16 @@ function groupEvaluatorScores(
   const groupMapping = new Map<string, EvaluatorDisplayGroup>();
   const grouped = new Set<string>();
 
-  evaluatorScoreGroups.forEach((group) => {
-    // Expand patterns to actual evaluator names
+  for (const group of evaluatorScoreGroups) {
     const expandedNames = expandPatternsToEvaluators(group.evaluatorNames, evaluatorNames);
-
-    // Only create group if at least one evaluator matched
     if (expandedNames.length > 0) {
-      // Create a new group with expanded names
-      const expandedGroup: EvaluatorDisplayGroup = {
+      groupMapping.set(group.combinedColumnName, {
         evaluatorNames: expandedNames,
         combinedColumnName: group.combinedColumnName,
-      };
-      groupMapping.set(group.combinedColumnName, expandedGroup);
+      });
       expandedNames.forEach((name) => grouped.add(name));
     }
-  });
+  }
 
   return {
     columnNames: [...evaluatorNames.filter((name) => !grouped.has(name)), ...groupMapping.keys()],

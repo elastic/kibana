@@ -8,13 +8,10 @@
 import type { Evaluator, Example, TaskOutput } from '../types';
 import { isKSpecificRagEvaluator, matchesEvaluatorPattern } from './patterns';
 
-/** Matches evaluator name against selected pattern. Supports exact match and @K patterns. */
 function matchesSelectedEvaluator(evaluatorName: string, selectedPattern: string): boolean {
-  // K-specific names like "Precision@10" are not allowed in SELECTED_EVALUATORS
   if (isKSpecificRagEvaluator(selectedPattern)) {
     return false;
   }
-
   return matchesEvaluatorPattern(evaluatorName, selectedPattern);
 }
 
