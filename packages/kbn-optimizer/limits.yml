@@ -26,7 +26,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
+  core: 556319
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -208,5 +208,5 @@ pageLoadAssetSize:
   visualizations: 38375
   watcher: 10485
   workflowsExtensions: 76765
-  workflowsManagement: 8497
+  workflowsManagement: 21318
   workplaceAIApp: 65731
