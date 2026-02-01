@@ -19,7 +19,7 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * Scope:
  * - Evaluating concurrency group keys from static strings or template expressions
  * - Enforcing concurrency limits per group
- * - Implementing collision strategies (queue, drop, cancel-in-progress)
+ * - Implementing collision strategies (drop, cancel-in-progress)
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
@@ -112,7 +112,7 @@ export class ConcurrencyManager {
       return true;
     }
 
-    const strategy = concurrencySettings.strategy; // ?? 'queue'; TBD
+    const strategy = concurrencySettings.strategy;
     const maxConcurrency = concurrencySettings.max ?? 1;
 
     // Query for non-terminal execution IDs in the same concurrency group
@@ -173,7 +173,6 @@ export class ConcurrencyManager {
       return true; // Execution can proceed after cancelling old ones
     }
 
-    // For 'queue' strategy (TBD) or unknown strategies, allow execution to proceed
     return true;
   }
 }

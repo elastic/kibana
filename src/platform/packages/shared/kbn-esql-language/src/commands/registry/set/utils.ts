@@ -15,6 +15,7 @@ import { getCommandMapExpressionSuggestions } from '../../definitions/utils/auto
 import { settings } from '../../definitions/generated/settings';
 import { confidenceLevelValueItems, numOfRowsValueItems } from '../complete_items';
 import { parseMapParams } from '../../definitions/utils/maps';
+import { Settings } from '../../definitions/keywords';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -67,15 +68,16 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
-    {
-      label: UnmappedFieldsStrategy.LOAD,
-      text: UnmappedFieldsStrategy.LOAD,
-      kind: 'Value',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
-        defaultMessage: 'Attempts to load the fields from the source',
-      }),
-      category: SuggestionCategory.CONSTANT_VALUE,
-    },
+    // Hiding LOAD option as it's partially supported at the moment.
+    // {
+    //   label: UnmappedFieldsStrategy.LOAD,
+    //   text: UnmappedFieldsStrategy.LOAD,
+    //   kind: 'Value',
+    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+    //     defaultMessage: 'Attempts to load the fields from the source',
+    //   }),
+    //  category: SuggestionCategory.CONSTANT_VALUE,
+    // },
   ];
 };
 
@@ -85,7 +87,9 @@ const getApproximateCompletionItems = (
   settingRightSide: ESQLAstItem | null
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
-    const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
+    const approximateSetting = settings.find(
+      (s) => s.name === Settings.APPROXIMATE
+    ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
@@ -96,7 +100,7 @@ const getApproximateCompletionItems = (
   return [
     {
       label: 'false',
-      text: 'false;',
+      text: 'false',
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
@@ -108,7 +112,7 @@ const getApproximateCompletionItems = (
     },
     {
       label: 'true',
-      text: 'true;',
+      text: 'true',
       kind: 'Value',
       category: SuggestionCategory.VALUE,
       detail: i18n.translate(
@@ -125,7 +129,7 @@ const getApproximateCompletionItems = (
           defaultMessage: 'Approximate with parameters',
         }
       ),
-      text: '{ $0 };',
+      text: '{ $0 }',
       asSnippet: true,
       kind: 'Reference',
       detail: i18n.translate(
@@ -139,9 +143,9 @@ const getApproximateCompletionItems = (
 };
 
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
-  project_routing: getProjectRoutingCommonCompletionItems,
-  unmapped_fields: getUnmappedFieldsCompletionItems,
-  approximate: getApproximateCompletionItems,
+  [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
+  [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
+  [Settings.APPROXIMATE]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (

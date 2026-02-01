@@ -14,7 +14,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export interface GlobalRuleEventLogListProps {
-  setHeaderActions?: RuleEventLogListCommonProps['setHeaderActions'];
   localStorageKey?: RuleEventLogListCommonProps['localStorageKey'];
   filteredRuleTypes?: RuleEventLogListCommonProps['filteredRuleTypes'];
   getRuleDetailsRoute?: RuleEventLogListCommonProps['getRuleDetailsRoute'];
@@ -33,7 +32,7 @@ const REFRESH_TOKEN = {
 };
 
 export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
-  const { setHeaderActions, localStorageKey, filteredRuleTypes, getRuleDetailsRoute } = props;
+  const { localStorageKey, filteredRuleTypes, getRuleDetailsRoute } = props;
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,7 +51,6 @@ export const GlobalRuleEventLogList = (props: GlobalRuleEventLogListProps) => {
         hasAllSpaceSwitch={true}
         localStorageKey={localStorageKey || GLOBAL_EVENT_LOG_LIST_STORAGE_KEY}
         filteredRuleTypes={filteredRuleTypes}
-        setHeaderActions={setHeaderActions}
         getRuleDetailsRoute={getRuleDetailsRoute}
       />
     </SpacesContextWrapper>

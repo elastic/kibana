@@ -169,6 +169,34 @@ describe('data_fetching related hooks', () => {
       expect(result.current[0].sum).toBe(150);
     });
 
+    it('should aggregate multiple applied functions with array values', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, ext: ['css', 'js'] },
+        { category: 'A', count: 5, ext: ['deb', 'rpm'] },
+      ]);
+
+      const queryMetaWithMultipleFunctions: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'ext', aggregation: 'ext' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          cascadeConfig: defaultCascadeConfig,
+          rows: mockRows,
+          queryMeta: queryMetaWithMultipleFunctions,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current).toHaveLength(1);
+      expect(result.current[0].count).toBe(15);
+      expect(result.current[0].ext).toEqual(['css', 'js', 'deb', 'rpm']);
+    });
+
     it('should resolve esql variable for group key', () => {
       const mockRows = createMockRows([
         { actualField: 'X', count: 10 },

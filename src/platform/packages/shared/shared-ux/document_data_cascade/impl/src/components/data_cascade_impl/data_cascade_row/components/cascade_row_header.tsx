@@ -111,17 +111,6 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
 
   const onCascadeSecondaryExpansion = useCallback(() => {}, []);
 
-  useEffect(
-    () => () => {
-      onCascadeGroupNodeCollapsed?.({
-        row: rowInstance.original,
-        nodePath,
-        nodePathMap,
-      });
-    },
-    [onCascadeGroupNodeCollapsed, nodePath, nodePathMap, rowInstance.original]
-  );
-
   useEffect(() => {
     // fetch the data for the sub-rows
     if (isGroupNode && rowIsExpanded && !Boolean(rowChildrenCount)) {
@@ -132,6 +121,23 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
     }
   }, [rowIsExpanded, rowChildrenCount, isGroupNode, fetchGroupNodeData]);
 
+  useEffect(() => {
+    if (!rowIsExpanded && isGroupNode) {
+      onCascadeGroupNodeCollapsed?.({
+        row: rowInstance.original,
+        nodePath,
+        nodePathMap,
+      });
+    }
+  }, [
+    onCascadeGroupNodeCollapsed,
+    nodePath,
+    nodePathMap,
+    rowInstance.original,
+    rowIsExpanded,
+    isGroupNode,
+  ]);
+
   return (
     <React.Fragment>
       <React.Fragment>
@@ -140,6 +146,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         )}
       </React.Fragment>
       <EuiFlexGroup
+        data-test-subj={`${rowId}-row-header`}
         gutterSize={size}
         direction="row"
         alignItems="center"
@@ -218,10 +225,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 <React.Fragment>
                   {Boolean(headerMetaSlots?.length) && (
                     <EuiFlexItem css={flexHelper} grow>
-                      <CascadeRowHeaderSlotsRenderer
-                        headerMetaSlots={headerMetaSlots!}
-                        size={size}
-                      />
+                      <CascadeRowHeaderSlotsRenderer headerMetaSlots={headerMetaSlots!} />
                     </EuiFlexItem>
                   )}
                 </React.Fragment>

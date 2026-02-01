@@ -88,7 +88,7 @@ describe('helpers', () => {
 
     expectedDetected.forEach((tactic) => {
       it(`sets the detected property to true for the '${tactic}' tactic`, () => {
-        const result = getTacticMetadata(mockAttackDiscovery);
+        const result = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics);
         const metadata = result.find(({ name }) => name === tactic);
 
         expect(metadata?.detected).toBe(true);
@@ -96,7 +96,7 @@ describe('helpers', () => {
     });
 
     it('sets the detected property to false for all tactics that were not detected', () => {
-      const result = getTacticMetadata(mockAttackDiscovery);
+      const result = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics);
       const filtered = result.filter(({ name }) => !expectedDetected.includes(name));
 
       filtered.forEach((metadata) => {
@@ -105,7 +105,7 @@ describe('helpers', () => {
     });
 
     it('sets the expected "index" property for each tactic', () => {
-      const result = getTacticMetadata(mockAttackDiscovery);
+      const result = getTacticMetadata(mockAttackDiscovery.mitreAttackTactics);
 
       result.forEach((metadata, i) => {
         expect(metadata.index).toBe(i);

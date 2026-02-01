@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { PackageCardPreview } from './package_card_preview';
+import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import { MAX_LOGO_SIZE_BYTES } from '../../forms/constants';
 import * as i18n from './translations';
 
@@ -105,14 +106,6 @@ export const IntegrationDetails = React.memo(() => {
     </EuiText>
   );
 
-  const getStyledLabel = (text: string) => {
-    return (
-      <EuiText size="xs">
-        <strong>{text}</strong>
-      </EuiText>
-    );
-  };
-
   return (
     <EuiFlexGroup direction="column" alignItems="center">
       <EuiFlexItem css={styles.container}>
@@ -139,7 +132,7 @@ export const IntegrationDetails = React.memo(() => {
                 <UseField path="title">
                   {(field) => (
                     <EuiFormRow
-                      label={getStyledLabel(i18n.TITLE_LABEL)}
+                      label={<FormStyledLabel text={i18n.TITLE_LABEL} />}
                       isInvalid={field.errors.length > 0}
                       error={field.errors.map((e) => e.message)}
                       fullWidth
@@ -160,7 +153,7 @@ export const IntegrationDetails = React.memo(() => {
                 <UseField path="description">
                   {(field) => (
                     <EuiFormRow
-                      label={getStyledLabel(i18n.DESCRIPTION_LABEL)}
+                      label={<FormStyledLabel text={i18n.DESCRIPTION_LABEL} />}
                       isInvalid={field.errors.length > 0}
                       error={field.errors.map((e) => e.message)}
                       fullWidth
@@ -181,7 +174,7 @@ export const IntegrationDetails = React.memo(() => {
                 <UseField<string | undefined> path="logo">
                   {(field) => (
                     <EuiFormRow
-                      label={getStyledLabel(i18n.LOGO_LABEL)}
+                      label={<FormStyledLabel text={i18n.LOGO_LABEL} />}
                       fullWidth
                       isInvalid={!!logoError}
                       error={logoError}
