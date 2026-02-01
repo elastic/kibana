@@ -24,7 +24,6 @@ import {
 } from './test_ids';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
  * Displays the rule description of a signal document.

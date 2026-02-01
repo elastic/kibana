@@ -9,7 +9,7 @@
 export const APP_ID = 'securitySolution' as const;
 export const SERVER_APP_ID = 'siem' as const;
 
-export const SECURITY_FEATURE_ID_V1 = SERVER_APP_ID
+export const SECURITY_FEATURE_ID_V1 = SERVER_APP_ID;
 
 // New version created in 8.18. It was previously `SERVER_APP_ID`.
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
