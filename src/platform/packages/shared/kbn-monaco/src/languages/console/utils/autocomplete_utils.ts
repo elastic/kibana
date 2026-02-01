@@ -20,6 +20,69 @@ export const checkForTripleQuotesAndEsqlQuery = (
   insideEsqlQuery: boolean;
   esqlQueryIndex: number;
 } => {
+  const tripleQuotes = '"""';
+
+  const isWhitespace = (ch: string | undefined) =>
+    ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r';
+
+  /**
+   * Checks whether `text[i]` (the opening quote character of either `"` or `"""`) is the start of
+   * the JSON value for the `"query"` key, i.e. the preceding text ends with `"query"\s*:\s*`.
+   *
+   * This is intentionally implemented without regexes or substring creation in the hot path.
+   */
+  const isQueryValueStart = (i: number): boolean => {
+    let j = i - 1;
+    while (j >= 0 && isWhitespace(text[j])) {
+      j--;
+    }
+    if (j < 0 || text[j] !== ':') {
+      return false;
+    }
+    j--;
+    while (j >= 0 && isWhitespace(text[j])) {
+      j--;
+    }
+    // We expect the key to end with: "query"
+    if (j < 6) {
+      return false;
+    }
+    return text.slice(j - 6, j + 1) === '"query"';
+  };
+
+  const isLineStart = (i: number): boolean => i === 0 || text[i - 1] === '\n';
+
+  const isRequestMethodAt = (i: number): boolean => {
+    const ch = text[i];
+    if (!ch) return false;
+    // Fast-path: methods always start with letters. Avoid work for most characters.
+    const code = ch.charCodeAt(0);
+    const isAlpha = (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    if (!isAlpha) return false;
+
+    // Case-insensitive check for supported methods.
+    const upper = (idx: number) => (text[idx] ?? '').toUpperCase();
+    const matches = (word: string) =>
+      word.split('').every((c, k) => upper(i + k) === c) &&
+      // ensure we don't match a larger identifier
+      !/[A-Z]/i.test(text[i + word.length] ?? '');
+
+    return (
+      matches('GET') ||
+      matches('POST') ||
+      matches('PUT') ||
+      matches('DELETE') ||
+      matches('HEAD') ||
+      matches('PATCH')
+    );
+  };
+
+  const isEsqlQueryRequestLine = (line: string): boolean => {
+    // Mirrors previous behavior:
+    // POST <spaces> /?_query(/async)? followed by newline/space/?/end
+    return /^post\s+\/?_query(?:\/async)?(?:\s|\?|$)/i.test(line);
+  };
+
   let insideSingleQuotes = false;
   let insideTripleQuotes = false;
 
@@ -31,49 +94,69 @@ export const checkForTripleQuotesAndEsqlQuery = (
   let currentQueryStartIndex = -1;
   let i = 0;
 
-  while (i < text.length) {
-    const textBefore = text.slice(0, i);
-    const textFromIndex = text.slice(i);
-    if (text.startsWith('"""', i)) {
-      insideTripleQuotes = !insideTripleQuotes;
-      if (insideTripleQuotes) {
-        insideTripleQuotesQuery = /.*"query"\s*:\s*$/.test(textBefore);
-        if (insideTripleQuotesQuery) {
-          currentQueryStartIndex = i + 3;
-        }
-      } else {
-        insideTripleQuotesQuery = false;
-        currentQueryStartIndex = -1;
+  const updateQueryStateOnQuoteToggle = (
+    isNowInsideQuotes: boolean,
+    quoteStartIndex: number,
+    quoteLen: 1 | 3
+  ): boolean => {
+    if (isNowInsideQuotes) {
+      const isQuery = isQueryValueStart(quoteStartIndex);
+      if (isQuery) {
+        currentQueryStartIndex = quoteStartIndex + quoteLen;
       }
-      i += 3; // Skip the triple quotes
-    } else if (text.at(i) === '"' && text.at(i - 1) !== '\\') {
-      insideSingleQuotes = !insideSingleQuotes;
-      if (insideSingleQuotes) {
-        insideSingleQuotesQuery = /.*"query"\s*:\s*$/.test(textBefore);
-        if (insideSingleQuotesQuery) {
-          currentQueryStartIndex = i + 1;
-        }
-      } else {
-        insideSingleQuotesQuery = false;
-        currentQueryStartIndex = -1;
-      }
-      i++;
-    } else if (/^(GET|POST|PUT|DELETE|HEAD|PATCH)/i.test(textFromIndex)) {
-      // If this is the start of a new request, check if it is a _query API request
-      insideEsqlQueryRequest = /^(P|p)(O|o)(S|s)(T|t)\s+\/?_query(\/async)?(\n|\s|\?)/.test(
-        textFromIndex
-      );
-      // Move the index past the current line that contains request method and endpoint.
-      const newlineIndex = text.indexOf('\n', i);
-      if (newlineIndex === -1) {
-        // No newline after the request line; advance to end to avoid infinite loop.
-        i = text.length;
-      } else {
-        i = newlineIndex + 1; // Position at start of next line
-      }
-    } else {
-      i++;
+      return isQuery;
     }
+
+    currentQueryStartIndex = -1;
+    return false;
+  };
+
+  const scanRequestLineFrom = (lineStartIndex: number): number | undefined => {
+    // Skip leading spaces/tabs on the request line.
+    let k = lineStartIndex;
+    while (k < text.length && (text[k] === ' ' || text[k] === '\t')) {
+      k++;
+    }
+
+    if (k >= text.length || !isRequestMethodAt(k)) {
+      return;
+    }
+
+    const newlineIndex = text.indexOf('\n', k);
+    const lineEnd = newlineIndex === -1 ? text.length : newlineIndex;
+    // The request line is typically short; substring allocation here is bounded.
+    const line = text.slice(k, lineEnd);
+    insideEsqlQueryRequest = isEsqlQueryRequestLine(line);
+
+    // Move the index past the current request line.
+    return newlineIndex === -1 ? text.length : newlineIndex + 1;
+  };
+
+  while (i < text.length) {
+    // Detect request boundaries (only meaningful outside quoted regions).
+    if (!insideSingleQuotes && !insideTripleQuotes && isLineStart(i)) {
+      const nextIndex = scanRequestLineFrom(i);
+      if (nextIndex !== undefined) {
+        i = nextIndex;
+        continue;
+      }
+    }
+
+    if (!insideSingleQuotes && text.startsWith(tripleQuotes, i)) {
+      insideTripleQuotes = !insideTripleQuotes;
+      insideTripleQuotesQuery = updateQueryStateOnQuoteToggle(insideTripleQuotes, i, 3);
+      i += 3; // Skip the triple quotes
+      continue;
+    }
+
+    if (!insideTripleQuotes && text[i] === '"' && text[i - 1] !== '\\') {
+      insideSingleQuotes = !insideSingleQuotes;
+      insideSingleQuotesQuery = updateQueryStateOnQuoteToggle(insideSingleQuotes, i, 1);
+      i++;
+      continue;
+    }
+
+    i++;
   }
 
   return {
