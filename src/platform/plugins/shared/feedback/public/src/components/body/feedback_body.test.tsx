@@ -34,7 +34,7 @@ describe('FeedbackBody', () => {
     jest.clearAllMocks();
   });
 
-  it('should render flyout body', async () => {
+  it('should render', async () => {
     await act(async () => {
       renderWithI18n(<FeedbackBody {...propsMock} />);
     });
@@ -59,7 +59,7 @@ describe('FeedbackBody', () => {
     expect(feedbackTextarea).toHaveValue('Test feedback');
   });
 
-  it('should call handleChangeFeedbackText when feedback text is changed', async () => {
+  it('should call handleChangeExperienceFeedbackText when feedback text is changed', async () => {
     await act(async () => {
       renderWithI18n(<FeedbackBody {...propsMock} />);
     });

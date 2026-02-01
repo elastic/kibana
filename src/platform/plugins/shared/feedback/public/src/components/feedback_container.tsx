@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ChangeEvent, useState } from 'react';
+import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -38,20 +38,20 @@ export const FeedbackContainer = ({ core, hideFeedbackContainer }: Props) => {
     setSelectedCsatOptionId(optionId);
   };
 
-  const handleChangeExperienceFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setExperienceFeedbackText(e.target.value);
+  const handleChangeExperienceFeedbackText = (feedback: string) => {
+    setExperienceFeedbackText(feedback);
   };
 
-  const handleChangeGeneralFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setGeneralFeedbackText(e.target.value);
+  const handleChangeGeneralFeedbackText = (feedback: string) => {
+    setGeneralFeedbackText(feedback);
   };
 
-  const handleChangeAllowEmailContact = (e: ChangeEvent<HTMLInputElement>) => {
-    setAllowEmailContact(e.target.checked);
+  const handleChangeAllowEmailContact = (allow: boolean) => {
+    setAllowEmailContact(allow);
   };
 
-  const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  const handleChangeEmail = (emailValue: string) => {
+    setEmail(emailValue);
   };
 
   const submitFeedback = async () => {

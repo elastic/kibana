@@ -18,7 +18,7 @@ export const SessionInfoDisclaimer = () => (
       defaultMessage="Your session information is included along with your input and email. If you need assistance, <supportLink>submit a support request</supportLink> instead."
       values={{
         supportLink: (linkText) => (
-          <EuiLink href="https://support.elastic.co/home" target="_blank">
+          <EuiLink href="https://support.elastic.co" target="_blank">
             {linkText}
           </EuiLink>
         ),

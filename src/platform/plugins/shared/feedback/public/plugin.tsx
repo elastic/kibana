@@ -11,7 +11,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { FeedbackTriggerButton } from './src';
 
 interface FeedbackPluginStartDependencies {
   licensing: LicensingPluginStart;
@@ -23,11 +22,19 @@ export class FeedbackPlugin implements Plugin {
   }
 
   public start(core: CoreStart, { licensing }: FeedbackPluginStartDependencies) {
-    // TODO: Hide if hideFeedback global settings is disabled
+    const isFeedbackEnabled = core.notifications.feedback.isEnabled();
+
+    if (!isFeedbackEnabled) {
+      return {};
+    }
+
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (element) => {
-        ReactDOM.render(<FeedbackTriggerButton core={core} />, element);
+        import('./src/components/feedback_trigger_button').then(({ FeedbackTriggerButton }) => {
+          ReactDOM.render(<FeedbackTriggerButton core={core} />, element);
+        });
+
         return () => {
           ReactDOM.unmountComponentAtNode(element);
         };

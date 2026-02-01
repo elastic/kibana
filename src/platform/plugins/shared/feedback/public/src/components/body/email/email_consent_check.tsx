@@ -14,12 +14,12 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   allowEmailContact: boolean;
-  handleChangeAllowEmailContact: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleChangeAllowEmailContact: (allow: boolean) => void;
 }
 
 export const EmailConsentCheck = ({ allowEmailContact, handleChangeAllowEmailContact }: Props) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleChangeAllowEmailContact(e);
+    handleChangeAllowEmailContact(e.target.checked);
   };
 
   return (

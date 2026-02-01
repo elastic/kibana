@@ -8,22 +8,24 @@
  */
 
 import React from 'react';
-import type { ChangeEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { SecurityServiceStart } from '@kbn/core/public';
 import { EmailInput } from './email_input';
 import { EmailConsentCheck } from './email_consent_check';
 
 interface Props {
   email: string;
   allowEmailContact: boolean;
-  handleChangeAllowEmailContact: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
+  security?: SecurityServiceStart;
+  handleChangeAllowEmailContact: (allow: boolean) => void;
+  handleChangeEmail: (email: string) => void;
 }
 
 export const EmailSection = ({
   email,
   allowEmailContact,
+  security,
   handleChangeAllowEmailContact,
   handleChangeEmail,
 }: Props) => {
@@ -44,7 +46,7 @@ export const EmailSection = ({
         </EuiFlexItem>
         {allowEmailContact && (
           <EuiFlexItem>
-            <EmailInput email={email} handleChangeEmail={handleChangeEmail} />
+            <EmailInput email={email} security={security} handleChangeEmail={handleChangeEmail} />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

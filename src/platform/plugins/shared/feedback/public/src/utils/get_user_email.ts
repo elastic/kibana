@@ -10,6 +10,10 @@
 import type { SecurityServiceStart } from '@kbn/core/public';
 
 export const getUserEmail = async (security: SecurityServiceStart) => {
-  const user = await security.authc.getCurrentUser();
-  return user?.email;
+  try {
+    const user = await security.authc.getCurrentUser();
+    return user?.email;
+  } catch {
+    return undefined;
+  }
 };

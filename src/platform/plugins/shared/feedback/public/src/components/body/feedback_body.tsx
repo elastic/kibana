@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { ChangeEvent } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,10 +25,10 @@ interface Props {
   allowEmailContact: boolean;
   email: string;
   handleChangeCsatOptionId: (optionId: string) => void;
-  handleChangeExperienceFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  handleChangeGeneralFeedbackText: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  handleChangeAllowEmailContact: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleChangeEmail: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleChangeExperienceFeedbackText: (feedback: string) => void;
+  handleChangeGeneralFeedbackText: (feedback: string) => void;
+  handleChangeAllowEmailContact: (allow: boolean) => void;
+  handleChangeEmail: (email: string) => void;
 }
 export const FeedbackBody = ({
   core,
@@ -61,7 +60,7 @@ export const FeedbackBody = ({
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
           <EuiSpacer size="m" />
-          {/* TODO: Both forms are replaced with custom questions if present */}
+          {/* TODO: Both forms should be replaced with custom questions if present */}
           <FeedbackTextArea
             value={experienceFeedbackText}
             aria-label={i18n.translate('feedback.body.experienceFeedbackTextArea.ariaLabel', {
@@ -87,6 +86,7 @@ export const FeedbackBody = ({
           <EmailSection
             allowEmailContact={allowEmailContact}
             email={email}
+            security={core?.security}
             handleChangeAllowEmailContact={handleChangeAllowEmailContact}
             handleChangeEmail={handleChangeEmail}
           />

@@ -13,11 +13,11 @@ import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 interface Props {
   value: string;
-  handleChangeValue: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   label?: string;
   testId?: string;
   ariaLabel?: string;
   placeholder?: string;
+  handleChangeValue: (feedback: string) => void;
 }
 
 export const FeedbackTextArea = ({
@@ -29,7 +29,7 @@ export const FeedbackTextArea = ({
   handleChangeValue,
 }: Props) => {
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    handleChangeValue(e);
+    handleChangeValue(e.target.value);
   };
 
   return (
