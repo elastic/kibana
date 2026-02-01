@@ -7910,6 +7910,10 @@
                         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
                       },
                       {
+                        "plugin": "streamsApp",
+                        "path": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/page_objects/streams_app.ts"
+                      },
+                      {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"
                       }

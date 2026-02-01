@@ -98,7 +98,7 @@
           " | null; }"
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/use_get_detection_rules_by_integration.ts",
-        "lineNumber": 72,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -114,7 +114,7 @@
               "string | string[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/use_get_detection_rules_by_integration.ts",
-            "lineNumber": 72,
+            "lineNumber": 69,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -181,10 +181,20 @@
             "section": "def-public.RelatedIntegrationRuleResponse",
             "text": "RelatedIntegrationRuleResponse"
           },
-          "[]; }, unknown>; }"
+          "[]; }, unknown>; getIndexQualityResultsLatest: ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/siem-readiness",
+            "scope": "public",
+            "docId": "kibKbnSiemReadinessPluginApi",
+            "section": "def-public.DataQualityResultDocument",
+            "text": "DataQualityResultDocument"
+          },
+          "[], unknown>; }"
         ],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/use_siem_readiness_api.ts",
-        "lineNumber": 22,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -310,6 +320,370 @@
       },
       {
         "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.DataQualityResultDocument",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataQualityResultDocument",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.indexPattern",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.checkedBy",
+            "type": "string",
+            "tags": [],
+            "label": "checkedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.indexId",
+            "type": "string",
+            "tags": [],
+            "label": "indexId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.ilmPhase",
+            "type": "string",
+            "tags": [],
+            "label": "ilmPhase",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.batchId",
+            "type": "string",
+            "tags": [],
+            "label": "batchId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.isCheckAll",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCheckAll",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.checkedAt",
+            "type": "number",
+            "tags": [],
+            "label": "checkedAt",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.docsCount",
+            "type": "number",
+            "tags": [],
+            "label": "docsCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.totalFieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalFieldCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.ecsFieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "ecsFieldCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.customFieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "customFieldCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.incompatibleFieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "incompatibleFieldCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.incompatibleFieldMappingItems",
+            "type": "Array",
+            "tags": [],
+            "label": "incompatibleFieldMappingItems",
+            "description": [],
+            "signature": [
+              "{ fieldName: string; expectedValue: string; actualValue: string; description: string; }[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.incompatibleFieldValueItems",
+            "type": "Array",
+            "tags": [],
+            "label": "incompatibleFieldValueItems",
+            "description": [],
+            "signature": [
+              "{ fieldName: string; expectedValues: string[]; actualValues: { name: string; count: number; }[]; description: string; }[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.sameFamilyFieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "sameFamilyFieldCount",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.sameFamilyFields",
+            "type": "Array",
+            "tags": [],
+            "label": "sameFamilyFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.sameFamilyFieldItems",
+            "type": "Array",
+            "tags": [],
+            "label": "sameFamilyFieldItems",
+            "description": [],
+            "signature": [
+              "{ fieldName: string; expectedValue: string; actualValue: string; description: string; }[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.unallowedMappingFields",
+            "type": "Array",
+            "tags": [],
+            "label": "unallowedMappingFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.unallowedValueFields",
+            "type": "Array",
+            "tags": [],
+            "label": "unallowedValueFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.sizeInBytes",
+            "type": "number",
+            "tags": [],
+            "label": "sizeInBytes",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.markdownComments",
+            "type": "Array",
+            "tags": [],
+            "label": "markdownComments",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.ecsVersion",
+            "type": "string",
+            "tags": [],
+            "label": "ecsVersion",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.DataQualityResultDocument.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
         "id": "def-public.IndexInfo",
         "type": "Interface",
         "tags": [],
@@ -352,13 +726,74 @@
       },
       {
         "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.RelatedIntegration",
+        "type": "Interface",
+        "tags": [],
+        "label": "RelatedIntegration",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.RelatedIntegration.package",
+            "type": "string",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.RelatedIntegration.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.RelatedIntegration.integration",
+            "type": "string",
+            "tags": [],
+            "label": "integration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/siem-readiness",
         "id": "def-public.RelatedIntegrationRuleResponse",
         "type": "Interface",
         "tags": [],
         "label": "RelatedIntegrationRuleResponse",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -371,10 +806,17 @@
             "label": "related_integrations",
             "description": [],
             "signature": [
-              "{ package: string; version?: string | undefined; integration?: string | undefined; }[] | undefined"
+              {
+                "pluginId": "@kbn/siem-readiness",
+                "scope": "public",
+                "docId": "kibKbnSiemReadinessPluginApi",
+                "section": "def-public.RelatedIntegration",
+                "text": "RelatedIntegration"
+              },
+              "[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -481,7 +923,14 @@
             "label": "relatedIntegrations",
             "description": [],
             "signature": [
-              "{ package: string; version?: string | undefined; integration?: string | undefined; }[]"
+              {
+                "pluginId": "@kbn/siem-readiness",
+                "scope": "public",
+                "docId": "kibKbnSiemReadinessPluginApi",
+                "section": "def-public.RelatedIntegration",
+                "text": "RelatedIntegration"
+              },
+              "[]"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/use_get_detection_rules_by_integration.ts",
             "lineNumber": 17,
@@ -500,7 +949,7 @@
         "label": "SiemReadinessPackageInfo",
         "description": [],
         "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -513,7 +962,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -526,7 +975,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -539,7 +988,7 @@
             "label": "title",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -552,7 +1001,7 @@
             "label": "version",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -565,7 +1014,23 @@
             "label": "status",
             "description": [],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/siem-readiness",
+            "id": "def-public.SiemReadinessPackageInfo.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/siem-readiness/src/types.ts",
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -576,6 +1041,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/siem-readiness",
+        "id": "def-public.GET_INDEX_RESULTS_LATEST_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_INDEX_RESULTS_LATEST_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/ecs_data_quality_dashboard/results_latest\""
+        ],
+        "path": "x-pack/solutions/security/packages/siem-readiness/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/siem-readiness",
         "id": "def-public.GET_SIEM_READINESS_CATEGORIES_API_PATH",

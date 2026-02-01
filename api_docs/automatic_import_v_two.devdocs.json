@@ -15,7 +15,7 @@
       "label": "AutomaticImportPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
-      "lineNumber": 14,
+      "lineNumber": 15,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -35,7 +35,26 @@
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "automaticImportVTwo",
+          "id": "def-public.AutomaticImportPluginStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ useGetIntegrationById: (integrationId: string | undefined) => ",
+            "UseGetIntegrationByIdResult",
+            "; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/automatic_import_v2/public/types.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
