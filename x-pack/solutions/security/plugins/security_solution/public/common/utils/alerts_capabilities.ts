@@ -41,10 +41,12 @@ export const extractAlertsCapabilities = (capabilities: Capabilities): AlertsUIC
     SECURITY_FEATURE_ID_V3,
     SECURITY_FEATURE_ID_V4,
     RULES_FEATURE_ID_V1,
-    RULES_FEATURE_ID_V2
-  ]
-  
-  const legacyUpdate = deprecatedFeatures.some(feature => capabilities[feature]?.[ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE])
+    RULES_FEATURE_ID_V2,
+  ];
+
+  const legacyUpdate = deprecatedFeatures.some(
+    (feature) => capabilities[feature]?.[ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE]
+  );
 
   return {
     alerts: { read: readAlerts, edit: editAlerts, legacyUpdate },
