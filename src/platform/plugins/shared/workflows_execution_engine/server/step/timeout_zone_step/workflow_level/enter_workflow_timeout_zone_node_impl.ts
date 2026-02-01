@@ -35,6 +35,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
 
     if (currentStepDuration > timeoutMs) {
       const timeoutError = new Error('Failed due to workflow timeout');
+      timeoutError.name = 'TimeoutError';
       monitoredStepExecutionRuntime.abortController.abort();
       monitoredStepExecutionRuntime.failStep(timeoutError);
 
