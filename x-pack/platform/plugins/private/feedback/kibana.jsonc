@@ -8,9 +8,9 @@
   "plugin": {
     "id": "feedback",
     "browser": true,
-    "server": true,
-    "requiredPlugins": [
-      "licensing"
-    ],
+    "server": false,
+    "optionalPlugins": [
+      "cloud"
+    ]
   }
 }

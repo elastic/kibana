@@ -16,8 +16,9 @@ export interface FeedbackRegistryEntry {
    * Unique identifier for the feedback entry.
    */
   id: string;
+  question: string;
   /**
-   * Represents the label shown above the feedback text area. Equivalent to the question asked.
+   * Represents the label shown above the feedback text area.
    */
   label?: {
     i18nId: string;

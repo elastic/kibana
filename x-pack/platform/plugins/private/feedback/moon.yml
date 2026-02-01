@@ -20,12 +20,12 @@ project:
 dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/i18n-react'
-  - '@kbn/licensing-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/core-chrome-browser-internal'
   - '@kbn/feedback-registry'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
@@ -35,7 +35,6 @@ tags:
 fileGroups:
   src:
     - public/**/*
-    - server/**/*
     - '!target/**/*'
 tasks:
   jest:

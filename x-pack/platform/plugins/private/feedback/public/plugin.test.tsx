@@ -6,11 +6,11 @@
  */
 
 import { FeedbackPlugin } from './plugin';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const coreStartMock = coreMock.createStart();
-const licensingStartMock = licensingMock.createStart();
+const cloudStartMock = cloudMock.createStart();
 const plugin = new FeedbackPlugin();
 
 describe('Feedback Plugin', () => {
@@ -21,18 +21,18 @@ describe('Feedback Plugin', () => {
 
     it('should register feedback button when feedback is enabled', () => {
       coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
-      plugin.start(coreStartMock, { licensing: licensingStartMock });
+      plugin.start(coreStartMock, { cloud: cloudStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();
       expect(coreStartMock.chrome.navControls.registerRight).toHaveBeenCalledWith({
-        order: 1000,
+        order: 1001,
         mount: expect.any(Function),
       });
     });
 
     it('should not register feedback button when feedback is disabled', () => {
       coreStartMock.notifications.feedback.isEnabled.mockReturnValue(false);
-      plugin.start(coreStartMock, { licensing: licensingStartMock });
+      plugin.start(coreStartMock, { cloud: cloudStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();
       expect(coreStartMock.chrome.navControls.registerRight).not.toHaveBeenCalled();

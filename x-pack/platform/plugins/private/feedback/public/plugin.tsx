@@ -7,19 +7,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart, Plugin } from '@kbn/core/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { feedbackSubmittedEventType } from './src/telemetry/feedback_events';
 
 interface FeedbackPluginStartDependencies {
-  licensing: LicensingPluginStart;
+  cloud?: CloudStart;
 }
 
 export class FeedbackPlugin implements Plugin {
-  public setup() {
+  public setup(core: CoreSetup) {
+    core.analytics.registerEventType(feedbackSubmittedEventType);
     return {};
   }
 
-  public start(core: CoreStart, { licensing }: FeedbackPluginStartDependencies) {
+  public start(core: CoreStart, { cloud }: FeedbackPluginStartDependencies) {
     const isFeedbackEnabled = core.notifications.feedback.isEnabled();
 
     if (!isFeedbackEnabled) {
@@ -30,7 +32,7 @@ export class FeedbackPlugin implements Plugin {
       order: 1001,
       mount: (element) => {
         import('./src/components/feedback_trigger_button').then(({ FeedbackTriggerButton }) => {
-          ReactDOM.render(<FeedbackTriggerButton core={core} />, element);
+          ReactDOM.render(<FeedbackTriggerButton core={core} cloud={cloud} />, element);
         });
 
         return () => {

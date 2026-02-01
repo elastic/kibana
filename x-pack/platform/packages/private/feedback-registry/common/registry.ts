@@ -26,6 +26,7 @@ export const feedbackRegistry: FeedbackRegistry = new Map([
           i18nId: 'xpack.feedbackRegistry.defaultExperienceAriaLabel',
           defaultMessage: 'Describe your experience',
         },
+        question: 'Describe your experience',
       },
       {
         id: DEFAULT_GENERAL_QUESTION_ID,
@@ -37,6 +38,7 @@ export const feedbackRegistry: FeedbackRegistry = new Map([
           i18nId: 'xpack.feedbackRegistry.defaultGeneralAriaLabel',
           defaultMessage: 'Additional feedback about Elastic',
         },
+        question: 'Anything else you would like to share about Elastic overall?',
       },
     ],
   ],

@@ -10,6 +10,7 @@ import { screen, act, fireEvent } from '@testing-library/react';
 import { FeedbackBody } from './feedback_body';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
+import { DEFAULT_REGISTRY_ID, feedbackRegistry } from '@kbn/feedback-registry/common';
 
 const coreStartMock = coreMock.createStart();
 
@@ -20,6 +21,7 @@ const propsMock = {
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
   email: '',
+  questions: feedbackRegistry.get(DEFAULT_REGISTRY_ID) || [],
   allowEmailContact: false,
   selectedCsatOptionId: '',
   experienceFeedbackText: '',
@@ -59,7 +61,7 @@ describe('FeedbackBody', () => {
 
   it('should call handleChangeExperienceFeedbackText when feedback text is changed', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...propsMock} questions={[]} />);
     });
 
     const feedbackTextarea = screen.getByTestId('feedbackExperienceTextArea');

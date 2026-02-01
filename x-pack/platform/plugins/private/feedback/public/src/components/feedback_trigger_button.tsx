@@ -9,13 +9,15 @@ import React, { useEffect, useState } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { canSendTelemetry } from '../utils';
 
 interface Props {
   core: CoreStart;
+  cloud?: CloudStart;
 }
 
-export const FeedbackTriggerButton = ({ core }: Props) => {
+export const FeedbackTriggerButton = ({ core, cloud }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
 
@@ -27,6 +29,7 @@ export const FeedbackTriggerButton = ({ core }: Props) => {
           toMountPoint(
             <FeedbackContainer
               core={core}
+              cloud={cloud}
               hideFeedbackContainer={() => {
                 feedbackContainer?.close();
               }}

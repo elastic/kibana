@@ -14,36 +14,30 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-const options = ({ htmlId }: { htmlId: string }) => [
+const options = [
   {
-    id: `${htmlId}_1`,
+    id: '1',
     label: '1',
-    value: 1,
   },
   {
-    id: `${htmlId}_2`,
+    id: '2',
     label: '2',
-    value: 2,
   },
   {
-    id: `${htmlId}_3`,
+    id: '3',
     label: '3',
-    value: 3,
   },
   {
-    id: `${htmlId}_4`,
+    id: '4',
     label: '4',
-    value: 4,
   },
   {
-    id: `${htmlId}_5`,
+    id: '5',
     label: '5',
-    value: 5,
   },
 ];
 
@@ -59,9 +53,6 @@ export const CsatButtons = ({
   handleChangeCsatOptionId,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const basicButtonGroupPrefix = useGeneratedHtmlId({
-    prefix: 'csat',
-  });
 
   const labelsCss = css`
     color: ${euiTheme.colors.textSubdued};
@@ -83,7 +74,7 @@ export const CsatButtons = ({
     >
       <>
         <EuiButtonGroup
-          options={options({ htmlId: basicButtonGroupPrefix })}
+          options={options}
           legend={i18n.translate('feedback.body.csatButtons.legend', {
             defaultMessage: 'Customer satisfaction rating',
           })}

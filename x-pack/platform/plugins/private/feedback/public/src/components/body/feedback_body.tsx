@@ -10,11 +10,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-registry/common';
 import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
 import { SessionInfoDisclaimer } from './session_info_disclaimer';
 import { CsatButtons } from './csat_buttons';
-import { getCurrentAppTitleAndId, getQuestions } from '../../utils';
 
 interface Props {
   core: CoreStart;
@@ -23,6 +23,8 @@ interface Props {
   generalFeedbackText: string;
   allowEmailContact: boolean;
   email: string;
+  questions: FeedbackRegistryEntry[];
+  appTitle?: string;
   handleChangeCsatOptionId: (optionId: string) => void;
   handleChangeExperienceFeedbackText: (feedback: string) => void;
   handleChangeGeneralFeedbackText: (feedback: string) => void;
@@ -36,6 +38,8 @@ export const FeedbackBody = ({
   generalFeedbackText,
   allowEmailContact,
   email,
+  questions: [firstQuestion, secondQuestion],
+  appTitle,
   handleChangeCsatOptionId,
   handleChangeExperienceFeedbackText,
   handleChangeGeneralFeedbackText,
@@ -43,12 +47,6 @@ export const FeedbackBody = ({
   handleChangeEmail,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-
-  const appDetails = getCurrentAppTitleAndId(core);
-
-  const questions = getQuestions(appDetails?.id);
-
-  const [firstQuestion, secondQuestion] = questions;
 
   const bodyCss = css`
     padding-top: ${euiTheme.size.m};
@@ -60,7 +58,7 @@ export const FeedbackBody = ({
       <EuiFlexItem css={bodyCss} data-test-subj="feedbackBody">
         <EuiForm component="form">
           <CsatButtons
-            appTitle={appDetails?.title}
+            appTitle={appTitle}
             selectedCsatOptionId={selectedCsatOptionId}
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
@@ -77,7 +75,7 @@ export const FeedbackBody = ({
                 : undefined
             }
             aria-label={
-              firstQuestion.ariaLabel
+              firstQuestion?.ariaLabel
                 ? i18n.translate(firstQuestion.ariaLabel.i18nId, {
                     defaultMessage: firstQuestion.ariaLabel.defaultMessage,
                   })
@@ -104,7 +102,7 @@ export const FeedbackBody = ({
                 : undefined
             }
             aria-label={
-              secondQuestion.ariaLabel
+              secondQuestion?.ariaLabel
                 ? i18n.translate(secondQuestion.ariaLabel.i18nId, {
                     defaultMessage: secondQuestion.ariaLabel.defaultMessage,
                   })
