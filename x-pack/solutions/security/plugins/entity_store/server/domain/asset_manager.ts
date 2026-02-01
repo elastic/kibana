@@ -37,6 +37,7 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   namespace: string;
+  isServerless: boolean;
 }
 
 export class AssetManager {
@@ -45,7 +46,7 @@ export class AssetManager {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly namespace: string;
-  private readonly isServerless = false;
+  private readonly isServerless: boolean;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -53,6 +54,7 @@ export class AssetManager {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.namespace = deps.namespace;
+    this.isServerless = deps.isServerless;
   }
 
   public async initEntity(
@@ -141,17 +143,22 @@ export class AssetManager {
   }
 
   public async getStatus(withComponents: boolean = false) {
-    const engines = await this.engineDescriptorClient.getAll();
-    const status = this.calculateEntityStoreStatus(engines);
+    try {
+      const engines = await this.engineDescriptorClient.getAll();
+      const status = this.calculateEntityStoreStatus(engines);
 
-    if (withComponents) {
-      const enginesWithComponents = await Promise.all(
-        engines.map((engine) => this.getEngineWithComponents(engine))
-      );
-      return { status, engines: enginesWithComponents };
+      if (withComponents) {
+        const enginesWithComponents = await Promise.all(
+          engines.map((engine) => this.getEngineWithComponents(engine))
+        );
+        return { status, engines: enginesWithComponents };
+      }
+
+      return { status, engines };
+    } catch (error) {
+      this.logger.error(`Error getting status: ${error}`);
+      throw error;
     }
-
-    return { status, engines };
   }
 
   private async getEngineWithComponents(

@@ -23,6 +23,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
+  isServerless: boolean;
 }
 
 export async function createRequestHandlerContext({
@@ -30,6 +31,7 @@ export async function createRequestHandlerContext({
   context,
   coreSetup,
   request,
+  isServerless
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
@@ -53,9 +55,10 @@ export async function createRequestHandlerContext({
       engineDescriptorClient: new EngineDescriptorClient(
         core.savedObjects.client,
         namespace,
-        logger
+        logger,
       ),
       namespace,
+      isServerless
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient: new LogsExtractionClient(
