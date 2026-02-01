@@ -9,7 +9,6 @@ import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import {
   CLOSE_ALERT_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
-  OPEN_ALERT_BTN,
   ALERT_ASSIGN_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   TAKE_ACTION_POPOVER_BTN,
@@ -31,10 +30,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { loginWithUser } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import {
-  createUsersAndRoles,
-  deleteUsersAndRoles,
-} from '../../../../tasks/privileges';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../tasks/privileges';
 import { assertSuccessToast } from '../../../../screens/common/toast';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
