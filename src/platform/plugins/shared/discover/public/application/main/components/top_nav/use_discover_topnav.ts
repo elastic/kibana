@@ -10,7 +10,6 @@
 import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
-import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
@@ -32,7 +31,6 @@ export const useDiscoverTopNav = ({
   persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
-  const topNavCustomization = useDiscoverCustomization('top_nav');
   const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
   const isMobile = useIsWithinBreakpoints(['xs']);
 
@@ -63,7 +61,6 @@ export const useDiscoverTopNav = ({
     hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
-    topNavCustomization,
     hasShareIntegration,
     persistedDiscoverSession,
   });

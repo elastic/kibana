@@ -116,12 +116,75 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
       from: 'Sep 20, 2023 @ 00:00:00.000',
       to: 'Sep 20, 2023 @ 00:30:00.000',
     };
-    // Change date picker
     await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
     // Go to Streams main page
-    await pageObjects.streams.clickRootBreadcrumb();
+    await pageObjects.streams.clickStreamsBreadcrumb();
     await pageObjects.streams.verifyDatePickerTimeRange(dataQualityTimeRange);
+  });
+
+  test('time range should persist after page refresh on Data Quality tab', async ({
+    page,
+    pageObjects,
+  }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+    // Set time range
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
+
+    // Refresh the page
+    await page.reload();
+
+    // Verify time range persisted after refresh
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+  });
+
+  test('time range should persist after page refresh on Retention tab', async ({
+    page,
+    pageObjects,
+  }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+    // Go to Retention tab
+    await pageObjects.streams.clickRetentionTab();
+
+    await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+
+    // Verify time range is displayed correctly on Retention tab
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+
+    // Refresh the page
+    await page.reload();
+
+    // Verify time range persisted after refresh
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+  });
+
+  test('time range should be globally synced across all tabs', async ({ pageObjects }) => {
+    const timeRange = {
+      from: 'Sep 20, 2023 @ 00:00:00.000',
+      to: 'Sep 20, 2023 @ 00:30:00.000',
+    };
+
+    // Set time on Data Quality tab
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
+
+    // Verify on Retention tab
+    await pageObjects.streams.clickRetentionTab();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+
+    // Verify on Main page
+    await pageObjects.streams.clickStreamsBreadcrumb();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
+
+    // Navigate to a different stream and verify time persists
+    await pageObjects.streams.clickStreamNameLink('logs.nginx');
+    await pageObjects.streams.clickDataQualityTab();
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
   });
 
   test('should toggle between degraded and failed docs quality issues charts', async ({ page }) => {

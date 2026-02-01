@@ -213,6 +213,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.infrastructureTabAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.infraUiAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.migrationToFleetAvailable (boolean?|true?)',
+        'xpack.apm.featureFlags.serviceMapUseReactFlow (boolean?)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.storageExplorerAvailable (boolean?|true?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904

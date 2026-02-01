@@ -256,6 +256,12 @@ export const SimulateWatchResultsFlyout = ({
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulateResults.actionsTableCaption',
+                {
+                  defaultMessage: 'Simulation action results',
+                }
+              )}
               columns={columns}
               items={actionsTableData}
               data-test-subj="simulateResultsTable"

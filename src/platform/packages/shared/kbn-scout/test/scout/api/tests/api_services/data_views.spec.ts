@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, expect } from '../../../../../src/playwright';
+import { apiTest } from '../../../../../src/playwright';
+import { expect } from '../../../../../api';
 
 apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, () => {
   let dataViewId: string;
@@ -144,7 +145,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
         );
 
         expect(status).toBe(200);
-        expect(foundDataViews.length).toBeGreaterThanOrEqual(1);
+        expect(foundDataViews.length).toBeGreaterThan(0);
 
         const matchingDataView = foundDataViews.find((dv) => dv.id === id1);
         expect(matchingDataView).toBeDefined();
@@ -299,7 +300,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const { data: filteredDataViews } = await apiServices.dataViews.find((dv) =>
         dv.title.includes('multi-test')
       );
-      expect(filteredDataViews.length).toBeGreaterThanOrEqual(3);
+      expect(filteredDataViews.length).toBeGreaterThan(2);
 
       // Delete one by ID
       const { status: deleteStatus } = await apiServices.dataViews.delete(createdIds[0]);

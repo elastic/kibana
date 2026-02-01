@@ -145,7 +145,11 @@ export const MigrationSection: React.FC = () => {
               paddingSize="l"
               layout="horizontal"
               title={benefit.title}
-              description={benefit.description}
+              description={
+                <EuiText size="s" color="subdued">
+                  {benefit.description}
+                </EuiText>
+              }
               titleSize="xs"
               css={css`
                 box-shadow: none !important;
