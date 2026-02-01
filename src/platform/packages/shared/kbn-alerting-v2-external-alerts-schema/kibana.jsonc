@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/alerting-v2-external-alerts-schema",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

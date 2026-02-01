@@ -17,6 +17,7 @@ import {
   createConnectorFormSerializer,
   createConnectorFormDeserializer,
 } from './connector_form_serializers';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
@@ -50,7 +51,17 @@ export function registerConnectorTypesFromSpecs({
       './generate_schema'
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
+    const externalAlertConnectorIds = ['.datadog'];
+    const isExternalAlertConnectorsOn = ExperimentalFeaturesService.get().externalAlertConnectorsOn;
+
     for (const spec of Object.values(connectorsSpecs)) {
+      // Filter external alert connectors if the feature flag is disabled
+      const isExternalAlertConnector = externalAlertConnectorIds.includes(spec.metadata.id);
+
+      if (isExternalAlertConnector && !isExternalAlertConnectorsOn) {
+        continue;
+      }
+
       connectorTypeRegistry.register(
         createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema)
       );
@@ -72,6 +83,7 @@ const createConnectorTypeFromSpec = (
     source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
+    isExperimental: spec.metadata.isExperimental ?? false,
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
     getHideInUi: () => {
       if (

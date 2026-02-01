@@ -59,7 +59,10 @@ export class StackConnectorsPlugin
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {
-      registerConnectorTypesFromSpecs({ actions });
+      registerConnectorTypesFromSpecs({
+        actions,
+        experimentalFeatures: this.experimentalFeatures,
+      });
     }
 
     if (plugins.usageCollection) {

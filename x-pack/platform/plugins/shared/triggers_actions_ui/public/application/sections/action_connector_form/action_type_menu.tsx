@@ -108,7 +108,11 @@ export const ActionTypeMenu = ({
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
-      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      // Only include connectors that are registered in the client-side registry
+      if (!actionTypeRegistry.has(id)) {
+        return false;
+      }
+      const actionTypeModel = actionTypeRegistry.get(id);
       const shouldHideInUi = actionTypeModel?.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
@@ -116,13 +120,13 @@ export const ActionTypeMenu = ({
       return details.enabledInConfig === true && !shouldHideInUi;
     })
     .map(([id, actionType]) => {
-      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        isExperimental: actionTypeModel.isExperimental,
+        isExperimental: actionTypeModel?.isExperimental,
         isDeprecated: actionType.isDeprecated,
       };
     });

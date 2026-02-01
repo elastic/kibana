@@ -67,6 +67,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
   >;
+  isExperimental?: boolean;
 }
 
 // ============================================================================
