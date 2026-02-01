@@ -14,8 +14,7 @@ import * as AgentService from '../agents';
 import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
-
-export const AGENT_POLICY_VERSION_SEPARATOR = '#';
+import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
 
 export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {
   const commonVersions = [];

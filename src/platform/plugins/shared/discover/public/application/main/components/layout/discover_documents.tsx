@@ -66,9 +66,7 @@ import {
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
-import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
-import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -457,14 +455,11 @@ function DiscoverDocumentsComponent({
     [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
-  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
-
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers(cellRendererParams);
-  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
+  }, [cellRendererParams, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -580,7 +575,6 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
