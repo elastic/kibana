@@ -124,7 +124,7 @@ export class AssetManager {
 
       return definition;
     } catch (error) {
-      this.logger.error(`Error installing assets for entity type ${type}: ${error}`);
+      this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
   }
@@ -146,7 +146,7 @@ export class AssetManager {
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
     } catch (error) {
-      this.logger.get(type).error(`Error uninstalling assets for entity type ${type}: ${error}`);
+      this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
       throw error;
     }
   }
@@ -165,7 +165,7 @@ export class AssetManager {
 
       return { status, engines };
     } catch (error) {
-      this.logger.error(`Error getting status: ${error}`);
+      this.logger.error('Error getting status', { error });
       throw error;
     }
   }
@@ -192,7 +192,7 @@ export class AssetManager {
     ] = await Promise.all([
       this.getEntityDefinitionComponent(definition),
       this.getIndexTemplateComponents(definition),
-      this.getIndexComponents(type, definition),
+      this.getIndexComponents(type),
       this.getComponentTemplateComponents(definition),
       this.getIlmPolicyComponents(),
       this.getExtractEntityTaskComponent(type),
@@ -236,7 +236,6 @@ export class AssetManager {
 
   private async getIndexComponents(
     type: EntityType,
-    definition: ManagedEntityDefinition
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
