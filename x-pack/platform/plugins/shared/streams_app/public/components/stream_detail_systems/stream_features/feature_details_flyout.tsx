@@ -63,6 +63,7 @@ export function FeatureDetailsFlyout({
     showDeleteModal();
   };
 
+  const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
   const formattedValue = Object.values(feature.value).join(', ');
 
   const generalInfoItems = [
@@ -147,7 +148,7 @@ export function FeatureDetailsFlyout({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2 id={flyoutTitleId}>{formattedValue}</h2>
+              <h2 id={flyoutTitleId}>{displayTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
