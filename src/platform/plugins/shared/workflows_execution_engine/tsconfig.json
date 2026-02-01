@@ -28,6 +28,7 @@
     "@kbn/es-mappings",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*"
