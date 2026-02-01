@@ -30,7 +30,6 @@ import {
 } from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
 
-
 interface ConnectorEdges {
   source: string;
   target: string;
