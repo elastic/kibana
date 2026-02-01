@@ -59,7 +59,6 @@ export class QueryService implements QueryServiceContract {
 
       return response;
     } catch (error) {
-      console.log(error);
       this.logger.error({
         error,
         code: 'ESQL_QUERY_ERROR',

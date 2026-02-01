@@ -14,19 +14,13 @@ import { createLoggerService } from '../services/logger_service/logger_service.m
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { alertEpisodeStatus } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
+import type { LatestAlertEventState } from './queries';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
 }));
 
-function createLatestStateResponse(
-  records: Array<{
-    last_status: string;
-    last_episode_id: string | null;
-    last_episode_status: string | null;
-    group_hash: string;
-  }>
-) {
+function createLatestAlertEventStateResponse(records: Array<LatestAlertEventState>) {
   return createEsqlResponse(
     [
       { name: 'last_status', type: 'keyword' },
@@ -67,10 +61,14 @@ describe('DirectorService', () => {
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
-    it('enriches alert events with episode data for new alerts', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'breached' });
+    it('sets alerts to pending if there is no previous alert event state', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
 
-      mockEsClient.esql.query.mockResolvedValue(createLatestStateResponse([]));
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
 
       const result = await directorService.run({
         ruleId: 'rule-1',
@@ -78,20 +76,56 @@ describe('DirectorService', () => {
       });
 
       expect(result).toHaveLength(1);
+
       expect(result[0].episode).toEqual({
         id: 'mocked-uuid',
         status: alertEpisodeStatus.pending,
       });
     });
 
-    it('transitions from inactive to pending on first breach', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'breached' });
+    it('sets alerts to pending if the previous alert event state has no episode status', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
-            last_status: 'recovered',
-            last_episode_id: 'old-episode',
+            last_status: 'breached',
+            last_episode_id: 'episode-1',
+            last_episode_status: null,
+            group_hash: 'hash-1',
+          },
+        ])
+      );
+
+      const result = await directorService.run({
+        ruleId: 'rule-1',
+        alertEvents: [alertEvent],
+      });
+
+      expect(result).toHaveLength(1);
+
+      expect(result[0].episode).toEqual({
+        id: 'mocked-uuid',
+        status: alertEpisodeStatus.pending,
+      });
+    });
+
+    it('transitions from inactive to pending', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
+
+      mockEsClient.esql.query.mockResolvedValue(
+        createLatestAlertEventStateResponse([
+          {
+            last_status: 'breached',
+            last_episode_id: 'existing-episode-1',
             last_episode_status: 'inactive',
             group_hash: 'hash-1',
           },
@@ -109,11 +143,15 @@ describe('DirectorService', () => {
       });
     });
 
-    it('transitions from pending to active on continued breach', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'breached' });
+    it('transitions from pending to active', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'breached',
             last_episode_id: 'existing-episode',
@@ -134,11 +172,15 @@ describe('DirectorService', () => {
       });
     });
 
-    it('transitions from active to recovering on recovery', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'recovered' });
+    it('transitions from active to recovering ', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'recovered',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'breached',
             last_episode_id: 'existing-episode',
@@ -159,11 +201,15 @@ describe('DirectorService', () => {
       });
     });
 
-    it('transitions from recovering to inactive on continued recovery', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'recovered' });
+    it('transitions from recovering to inactive', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'recovered',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'recovered',
             last_episode_id: 'existing-episode',
@@ -186,12 +232,12 @@ describe('DirectorService', () => {
 
     it('processes multiple alert events correctly', async () => {
       const alertEvents = [
-        createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
-        createAlertEvent({ group_hash: 'hash-2', status: 'recovered' }),
+        createAlertEvent({ group_hash: 'hash-1', status: 'breached', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-2', status: 'recovered', episode: undefined }),
       ];
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'breached',
             last_episode_id: 'episode-1',
@@ -213,10 +259,12 @@ describe('DirectorService', () => {
       });
 
       expect(result).toHaveLength(2);
+
       expect(result[0].episode).toEqual({
         id: 'episode-1',
         status: alertEpisodeStatus.active,
       });
+
       expect(result[1].episode).toEqual({
         id: 'episode-2',
         status: alertEpisodeStatus.recovering,
@@ -224,10 +272,14 @@ describe('DirectorService', () => {
     });
 
     it('generates new episode ID when transitioning from inactive', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'breached' });
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'recovered',
             last_episode_id: 'old-episode',
@@ -247,14 +299,18 @@ describe('DirectorService', () => {
     });
 
     it('preserves episode ID when not transitioning from inactive', async () => {
-      const alertEvent = createAlertEvent({ group_hash: 'hash-1', status: 'breached' });
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'breached',
+        episode: undefined,
+      });
 
       mockEsClient.esql.query.mockResolvedValue(
-        createLatestStateResponse([
+        createLatestAlertEventStateResponse([
           {
             last_status: 'breached',
             last_episode_id: 'existing-episode',
-            last_episode_status: 'pending',
+            last_episode_status: alertEpisodeStatus.active,
             group_hash: 'hash-1',
           },
         ])

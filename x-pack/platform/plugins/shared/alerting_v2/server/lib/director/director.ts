@@ -29,6 +29,11 @@ interface CalculateNextStateParams {
   strategy: ITransitionStrategy;
 }
 
+interface ResolveEpisodeIdParams {
+  previousAlertEvent?: LatestAlertEventState;
+  nextStatus: AlertEpisodeStatus;
+}
+
 @injectable()
 export class DirectorService {
   constructor(
@@ -44,13 +49,13 @@ export class DirectorService {
     }
 
     const strategy = this.strategyResolver.resolve();
-    const groupHashes = alertEvents.map((event) => event.group_hash);
-    const stateByGroupHash = await this.fetchLatestStateByGroupHash(ruleId, groupHashes);
+    const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
+    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
 
     const enrichedEvents = alertEvents.map((currentAlertEvent) =>
       this.calculateNextState({
         currentAlertEvent,
-        previousAlertEvent: stateByGroupHash.get(currentAlertEvent.group_hash),
+        previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
         strategy,
       })
     );
@@ -58,14 +63,16 @@ export class DirectorService {
     return enrichedEvents;
   }
 
-  private async fetchLatestStateByGroupHash(
+  private async fetchLatestAlertStateByGroupHash(
     ruleId: string,
     groupHashes: string[]
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
     const response = await this.queryService.executeQuery({
       query: request.query,
+      // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
+      // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       filter: request.filter,
     });
 
@@ -79,17 +86,23 @@ export class DirectorService {
     previousAlertEvent,
     strategy,
   }: CalculateNextStateParams): AlertEvent {
-    const currentStatus = previousAlertEvent?.last_episode_status ?? alertEpisodeStatus.inactive;
+    const currentStatus = previousAlertEvent?.last_episode_status;
+
     const nextStatus = strategy.getNextState({
       currentAlertEpisodeStatus: currentStatus,
       alertEventStatus: currentAlertEvent.status,
     });
 
-    const episodeId = this.resolveEpisodeId(previousAlertEvent, nextStatus);
+    const episodeId = this.resolveEpisodeId({
+      previousAlertEvent,
+      nextStatus,
+    });
 
     if (currentStatus !== nextStatus) {
       this.logger.debug({
-        message: `State Transition [${currentAlertEvent.group_hash}]: ${currentStatus} -> ${nextStatus} (Episode: ${episodeId})`,
+        message: `State Transition [${currentAlertEvent.group_hash}]: ${
+          currentStatus ?? 'unknown'
+        } -> ${nextStatus} (Episode: ${episodeId})`,
       });
     }
 
@@ -102,19 +115,26 @@ export class DirectorService {
     };
   }
 
-  private resolveEpisodeId(
-    previousAlertEvent: LatestAlertEventState | undefined,
-    nextStatus: AlertEpisodeStatus
-  ): string {
-    const wasInactive =
-      !previousAlertEvent || previousAlertEvent.last_episode_status === alertEpisodeStatus.inactive;
-
-    const isNowInactive = nextStatus === alertEpisodeStatus.inactive;
-
-    if (wasInactive && !isNowInactive) {
+  private resolveEpisodeId({ previousAlertEvent, nextStatus }: ResolveEpisodeIdParams): string {
+    if (!previousAlertEvent) {
       return uuidV4();
     }
 
-    return previousAlertEvent?.last_episode_id ?? uuidV4();
+    const currentEpisodeStatus = previousAlertEvent.last_episode_status;
+    const currentEpisodeId = previousAlertEvent.last_episode_id;
+
+    if (currentEpisodeStatus == null) {
+      return uuidV4();
+    }
+
+    const isNewLifecycle =
+      currentEpisodeStatus === alertEpisodeStatus.inactive &&
+      nextStatus !== alertEpisodeStatus.inactive;
+
+    if (isNewLifecycle) {
+      return uuidV4();
+    }
+
+    return currentEpisodeId ?? uuidV4();
   }
 }

@@ -14,7 +14,7 @@ interface GetLatestAlertEventStateQueryParams {
   groupHashes: string[];
 }
 
-export interface LatestAlertEventState extends Record<string, unknown> {
+export interface LatestAlertEventState {
   last_status: AlertEventStatus;
   last_episode_id: string | null;
   last_episode_status: AlertEpisodeStatus | null;
@@ -25,11 +25,13 @@ export const getLatestAlertEventStateQuery = ({
   ruleId,
   groupHashes,
 }: GetLatestAlertEventStateQueryParams): ComposerQuery => {
-  const groupHashList = groupHashes.map((hash) => `"${hash}"`).join(', ');
+  const groupHashList = groupHashes.map((hash) => `${hash}`).join(', ');
 
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
-  query = query.where`rule.id == "${{ ruleId }}" AND group_hash IN (${groupHashList})`;
+  query = query.where`rule.id == ${{
+    ruleId,
+  }} AND group_hash IN (${{ groupHashList }})`;
 
   query = query.pipe`STATS 
       last_status = LAST(status, @timestamp), 

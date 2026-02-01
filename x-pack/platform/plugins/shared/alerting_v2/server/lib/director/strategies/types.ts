@@ -8,7 +8,7 @@
 import type { AlertEventStatus, AlertEpisodeStatus } from '../../../resources/alert_events';
 
 export interface TransitionContext {
-  currentAlertEpisodeStatus: AlertEpisodeStatus;
+  currentAlertEpisodeStatus?: AlertEpisodeStatus | null;
   alertEventStatus: AlertEventStatus;
 }
 

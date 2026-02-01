@@ -19,6 +19,26 @@ describe('BasicTransitionStrategy', () => {
     expect(strategy.name).toBe('basic');
   });
 
+  describe('no event status', () => {
+    it('returns pending when theres in no current alerte episode status', () => {
+      const result = strategy.getNextState({
+        currentAlertEpisodeStatus: null,
+        alertEventStatus: alertEventStatus.breached,
+      });
+
+      expect(result).toBe(alertEpisodeStatus.pending);
+    });
+
+    it('returns pending when the current state is unknown', () => {
+      const result = strategy.getNextState({
+        // @ts-expect-error - unknown state testing
+        currentAlertEpisodeStatus: 'unknown_state',
+        alertEventStatus: alertEventStatus.breached,
+      });
+      expect(result).toBe(alertEpisodeStatus.pending);
+    });
+  });
+
   describe('state transitions from inactive', () => {
     const currentState = alertEpisodeStatus.inactive;
 
@@ -139,7 +159,7 @@ describe('BasicTransitionStrategy', () => {
         alertEventStatus: alertEventStatus.breached,
       });
 
-      expect(result).toBe(alertEpisodeStatus.inactive);
+      expect(result).toBe(alertEpisodeStatus.pending);
     });
 
     it('returns current state for unknown event status', () => {

@@ -44,14 +44,18 @@ export class BasicTransitionStrategy implements ITransitionStrategy {
     currentAlertEpisodeStatus,
     alertEventStatus,
   }: TransitionContext): AlertEpisodeStatus {
+    if (!currentAlertEpisodeStatus) {
+      return alertEpisodeStatus.pending;
+    }
+
     const stateRules = this.stateMachine[currentAlertEpisodeStatus];
 
     if (!stateRules) {
-      return alertEpisodeStatus.inactive;
+      return alertEpisodeStatus.pending;
     }
 
     const nextState = stateRules[alertEventStatus];
 
-    return nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.inactive;
+    return nextState ?? currentAlertEpisodeStatus ?? alertEpisodeStatus.pending;
   }
 }
