@@ -41,6 +41,7 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   ALERTS_FEATURE_ID,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -163,7 +164,7 @@ export const getRulesBaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ],
+      ui: [RULES_UI_READ, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
       api: [
         RULES_API_READ,
         ALERTS_API_READ,
