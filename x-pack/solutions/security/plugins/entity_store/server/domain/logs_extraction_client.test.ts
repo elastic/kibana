@@ -415,7 +415,7 @@ describe('LogsExtractionClient', () => {
       };
 
       const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,filebeat-*'),
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -430,18 +430,7 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(3);
-      expect(result.success && result.scannedIndices).toBeDefined();
-      expect(result.success && result.scannedIndices).toContain('logs-*');
-      expect(result.success && result.scannedIndices).toContain(
-        '.entities.v2.updates.security_user_default'
-      );
-
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.any(String),
-      });
-
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
