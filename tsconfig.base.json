@@ -1138,6 +1138,8 @@
       "@kbn/fec-alerts-test-plugin/*": ["x-pack/platform/test/functional_execution_context/plugins/alerts/*"],
       "@kbn/feedback-plugin": ["x-pack/platform/plugins/private/feedback"],
       "@kbn/feedback-plugin/*": ["x-pack/platform/plugins/private/feedback/*"],
+      "@kbn/feedback-registry": ["x-pack/platform/packages/private/feedback-registry"],
+      "@kbn/feedback-registry/*": ["x-pack/platform/packages/private/feedback-registry/*"],
       "@kbn/field-formats-common": ["src/platform/packages/shared/kbn-field-formats-common"],
       "@kbn/field-formats-common/*": ["src/platform/packages/shared/kbn-field-formats-common/*"],
       "@kbn/field-formats-example-plugin": ["examples/field_formats_example"],

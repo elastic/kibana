@@ -6957,6 +6957,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/feedback-registry@link:x-pack/platform/packages/private/feedback-registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
   version "0.0.0"
   uid ""

@@ -14,6 +14,7 @@ import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
 import { SessionInfoDisclaimer } from './session_info_disclaimer';
 import { CsatButtons } from './csat_buttons';
+import { getCurrentAppTitleAndId, getQuestions } from '../../utils';
 
 interface Props {
   core: CoreStart;
@@ -43,6 +44,12 @@ export const FeedbackBody = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
+  const appDetails = getCurrentAppTitleAndId(core);
+
+  const questions = getQuestions(appDetails?.id);
+
+  const [firstQuestion, secondQuestion] = questions;
+
   const bodyCss = css`
     padding-top: ${euiTheme.size.m};
     width: 600px;
@@ -53,33 +60,63 @@ export const FeedbackBody = ({
       <EuiFlexItem css={bodyCss} data-test-subj="feedbackBody">
         <EuiForm component="form">
           <CsatButtons
-            core={core}
+            appTitle={appDetails?.title}
             selectedCsatOptionId={selectedCsatOptionId}
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
           <EuiSpacer size="m" />
-          {/* TODO: Both forms should be replaced with custom questions if present */}
           <FeedbackTextArea
             value={experienceFeedbackText}
-            aria-label={i18n.translate('feedback.body.experienceFeedbackTextArea.ariaLabel', {
-              defaultMessage: 'Describe your experience',
-            })}
             handleChangeValue={handleChangeExperienceFeedbackText}
-            placeholder={i18n.translate('feedback.body.experienceFeedbackTextArea.placeholder', {
-              defaultMessage: 'Describe your experience',
-            })}
             testId="feedbackExperienceTextArea"
+            label={
+              firstQuestion?.label
+                ? i18n.translate(firstQuestion.label.i18nId, {
+                    defaultMessage: firstQuestion.label.defaultMessage,
+                  })
+                : undefined
+            }
+            aria-label={
+              firstQuestion.ariaLabel
+                ? i18n.translate(firstQuestion.ariaLabel.i18nId, {
+                    defaultMessage: firstQuestion.ariaLabel.defaultMessage,
+                  })
+                : undefined
+            }
+            placeholder={
+              firstQuestion?.placeholder
+                ? i18n.translate(firstQuestion.placeholder.i18nId, {
+                    defaultMessage: firstQuestion.placeholder.defaultMessage,
+                  })
+                : undefined
+            }
           />
           <EuiSpacer size="l" />
           <FeedbackTextArea
-            label={i18n.translate('feedback.body.additionalFeedback.label', {
-              defaultMessage: 'Anything else you would like to share about Elastic overall?',
-            })}
             value={generalFeedbackText}
             handleChangeValue={handleChangeGeneralFeedbackText}
-            ariaLabel={i18n.translate('feedback.body.additionalFeedback.ariaLabel', {
-              defaultMessage: 'Additional feedback about Elastic',
-            })}
+            testId="feedbackGeneralTextArea"
+            label={
+              secondQuestion?.label
+                ? i18n.translate(secondQuestion.label.i18nId, {
+                    defaultMessage: secondQuestion.label.defaultMessage,
+                  })
+                : undefined
+            }
+            aria-label={
+              secondQuestion.ariaLabel
+                ? i18n.translate(secondQuestion.ariaLabel.i18nId, {
+                    defaultMessage: secondQuestion.ariaLabel.defaultMessage,
+                  })
+                : undefined
+            }
+            placeholder={
+              secondQuestion?.placeholder
+                ? i18n.translate(secondQuestion.placeholder.i18nId, {
+                    defaultMessage: secondQuestion.placeholder.defaultMessage,
+                  })
+                : undefined
+            }
           />
           <EmailSection
             allowEmailContact={allowEmailContact}

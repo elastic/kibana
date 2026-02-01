@@ -27,7 +27,7 @@ export class FeedbackPlugin implements Plugin {
     }
 
     core.chrome.navControls.registerRight({
-      order: 1000,
+      order: 1001,
       mount: (element) => {
         import('./src/components/feedback_trigger_button').then(({ FeedbackTriggerButton }) => {
           ReactDOM.render(<FeedbackTriggerButton core={core} />, element);

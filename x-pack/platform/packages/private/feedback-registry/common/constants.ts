@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { getUserEmail } from './get_user_email';
-export { getCurrentAppTitleAndId } from './get_current_app_title_and_id';
-export { canSendTelemetry } from './can_send_telemetry';
-export { getQuestions } from './get_questions';
+export const DEFAULT_REGISTRY_ID = 'default';
+export const DEFAULT_EXPERIENCE_QUESTION_ID = 'default_experience';
+export const DEFAULT_GENERAL_QUESTION_ID = 'general_feedback';

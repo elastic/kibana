@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { getUserEmail } from './get_user_email';
-export { getCurrentAppTitleAndId } from './get_current_app_title_and_id';
-export { canSendTelemetry } from './can_send_telemetry';
-export { getQuestions } from './get_questions';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/private/feedback-registry'],
+};

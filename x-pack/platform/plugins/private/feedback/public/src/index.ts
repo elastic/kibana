@@ -25,5 +25,6 @@ export { FeedbackFooter } from './components';
 export { FeedbackContainer } from './components';
 
 export { getUserEmail } from './utils';
-export { getCurrentAppTitle } from './utils';
+export { getCurrentAppTitleAndId } from './utils';
 export { canSendTelemetry } from './utils';
+export { getQuestions } from './utils';

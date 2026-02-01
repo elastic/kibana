@@ -15,7 +15,7 @@ const stripHashAndQueryParams = (url: string) => {
   return stripQueryParams(withoutHash);
 };
 
-export const getCurrentAppTitle = (core: CoreStart): string | undefined => {
+export const getCurrentAppTitleAndId = (core: CoreStart) => {
   let location: string | undefined;
 
   core.application.currentLocation$.subscribe((loc) => (location = loc)).unsubscribe();
@@ -47,14 +47,19 @@ export const getCurrentAppTitle = (core: CoreStart): string | undefined => {
   // Pick the longest URL match, then the deepest nested link
   const matchingLink = matches.length > 0 ? matches[matches.length - 1]?.[0] : undefined;
 
-  if (!matchingLink?.title) {
+  if (!matchingLink) {
     return undefined;
   }
 
+  let title = matchingLink?.title;
+
   const category = matchingLink.category;
   if (category && category.id !== 'kibana' && category.id !== 'management') {
-    return `[${category.label}] ${matchingLink.title}`;
+    title = `[${category.label}] ${matchingLink.title}`;
   }
 
-  return matchingLink.title;
+  return {
+    title,
+    id: matchingLink.id,
+  };
 };

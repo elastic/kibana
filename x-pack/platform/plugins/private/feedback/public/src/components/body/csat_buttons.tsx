@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -19,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getCurrentAppTitle } from '../../utils/get_current_app_title';
 
 const options = ({ htmlId }: { htmlId: string }) => [
   {
@@ -50,18 +48,20 @@ const options = ({ htmlId }: { htmlId: string }) => [
 ];
 
 interface Props {
-  core: CoreStart;
   selectedCsatOptionId: string;
+  appTitle?: string;
   handleChangeCsatOptionId: (optionId: string) => void;
 }
 
-export const CsatButtons = ({ core, selectedCsatOptionId, handleChangeCsatOptionId }: Props) => {
+export const CsatButtons = ({
+  selectedCsatOptionId,
+  appTitle,
+  handleChangeCsatOptionId,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const basicButtonGroupPrefix = useGeneratedHtmlId({
     prefix: 'csat',
   });
-
-  const appTitle = getCurrentAppTitle(core);
 
   const labelsCss = css`
     color: ${euiTheme.colors.textSubdued};

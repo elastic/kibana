@@ -875,6 +875,8 @@ x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-generative-ai
 x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
 x-pack/performance @elastic/appex-qa
+x-pack/platform/packages/private/feedback-registry @elastic/appex-sharedux
+x-pack/platform/packages/private/feedback-registry/common/registry.ts @elastic/appex-sharedux @alexmarhaba
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 x-pack/platform/packages/private/kbn-data-quality @elastic/obs-onboarding-team
 x-pack/platform/packages/private/kbn-infra-forge @elastic/actionable-obs-team

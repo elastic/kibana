@@ -15,6 +15,7 @@
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/core-chrome-browser-internal",
+    "@kbn/feedback-registry"
   ],
   "exclude": [
     "target/**/*",
