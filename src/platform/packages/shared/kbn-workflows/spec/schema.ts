@@ -20,6 +20,9 @@ export const RetryPolicySchema = z.object({
   'timeout-seconds': z.number().int().min(1).optional(),
 });
 
+export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
+export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
+
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
@@ -27,6 +30,14 @@ export const WorkflowRetrySchema = z.object({
     .string()
     .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
     .optional(), // e.g., '5s', '1m', '2h' (default: no delay)
+  /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
+  strategy: RetryDelayStrategySchema.optional(),
+  /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
+  multiplier: z.number().min(1).optional(),
+  /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
+  'max-delay': DurationSchema.optional(),
+  /** Add jitter to delay to avoid thundering herd. Default: false. */
+  jitter: z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 

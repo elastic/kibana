@@ -199,6 +199,38 @@ describe('EnterRetryNodeImpl', () => {
         expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
       });
     });
+
+    describe('when exponential backoff is configured', () => {
+      beforeEach(() => {
+        node.configuration = {
+          'max-attempts': 3,
+          delay: '1s',
+          strategy: 'exponential',
+          multiplier: 2,
+        };
+        (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
+        stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(true);
+      });
+
+      it('should call tryEnterWaitUntil with a date (exponential delay for attempt 1 = 2s)', async () => {
+        const now = Date.now();
+        await underTest.run();
+        expect(stepExecutionRuntime.tryEnterWaitUntil).toHaveBeenCalledTimes(1);
+        const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as jest.Mock).mock.calls[0];
+        expect(resumeDate).toBeInstanceOf(Date);
+        const expectedMin = now + 1900;
+        const expectedMax = now + 2100;
+        expect(resumeDate.getTime()).toBeGreaterThanOrEqual(expectedMin);
+        expect(resumeDate.getTime()).toBeLessThanOrEqual(expectedMax);
+      });
+
+      it('should log debug message with delay ms and attempt', async () => {
+        await underTest.run();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          `Delaying retry for 2000ms (attempt 2).`
+        );
+      });
+    });
   });
 
   describe('catchError', () => {
