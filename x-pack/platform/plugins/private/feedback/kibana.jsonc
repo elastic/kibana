@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/feedback-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Universal way of giving feedback about Elastic in Kibana",
+  "plugin": {
+    "id": "feedback",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "licensing"
+    ],
+  }
+}

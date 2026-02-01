@@ -6953,7 +6953,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/feedback-plugin@link:src/platform/plugins/shared/feedback":
+"@kbn/feedback-plugin@link:x-pack/platform/plugins/private/feedback":
   version "0.0.0"
   uid ""
 

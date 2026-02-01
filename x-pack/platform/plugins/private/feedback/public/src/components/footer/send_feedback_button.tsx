@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+
+interface Props {
+  isSendFeedbackButtonDisabled: boolean;
+  submitFeedback: () => Promise<void>;
+}
+
+export const SendFeedbackButton = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
+  const handleSubmit = async () => {
+    await submitFeedback();
+  };
+
+  return (
+    <EuiToolTip
+      content={
+        isSendFeedbackButtonDisabled
+          ? i18n.translate('feedback.footer.sendFeedbackButton.tooltip', {
+              defaultMessage: 'Answer at least one of the questions in order to send feedback.',
+            })
+          : undefined
+      }
+    >
+      <EuiButton
+        fill
+        color="primary"
+        data-test-subj="feedbackFooterSendFeedbackButton"
+        disabled={isSendFeedbackButtonDisabled}
+        onClick={handleSubmit}
+      >
+        <FormattedMessage id="feedback.footer.sendFeedbackButton" defaultMessage="Send" />
+      </EuiButton>
+    </EuiToolTip>
+  );
+};
