@@ -25,7 +25,7 @@ export interface DiscoverPluginsOptions {
 }
 
 // Directories to scan for plugins
-const PLUGIN_DIRS = [
+export const PLUGIN_DIRS = [
   'src/platform/plugins',
   'x-pack/platform/plugins',
   'x-pack/solutions',
@@ -33,7 +33,7 @@ const PLUGIN_DIRS = [
   'x-pack/plugins', // legacy location
 ];
 
-const EXAMPLE_DIRS = ['examples'];
+export const EXAMPLE_DIRS = ['examples'];
 
 /**
  * Discover all Kibana plugins with UI bundles by scanning directories

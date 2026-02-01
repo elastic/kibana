@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import { rspack, type Configuration, type Compiler, type RspackPluginInstance } from '@rspack/core';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { discoverPlugins, createCoreEntry, type PluginEntry } from '../utils/plugin_discovery';
+import { discoverPlugins, createCoreEntry, type PluginEntry, PLUGIN_DIRS, EXAMPLE_DIRS } from '../utils/plugin_discovery';
 import { getExternals } from './externals';
 import {
   getSharedResolveConfig,
@@ -726,10 +726,35 @@ class PluginWatchPlugin {
   }
 
   apply(compiler: Compiler) {
-    // Add plugin manifest files as context dependencies so RSPack watches them
+    // Add plugin directories as context dependencies so RSPack watches them
     compiler.hooks.afterCompile.tap('PluginWatchPlugin', (compilation) => {
+      // Watch existing plugin directories
       for (const manifest of this.pluginManifests) {
         compilation.contextDependencies.add(Path.dirname(manifest));
+      }
+
+      // Watch parent plugin directories to detect NEW plugins being added
+      const dirsToWatch = [...PLUGIN_DIRS];
+      if (this.options.examples) {
+        dirsToWatch.push(...EXAMPLE_DIRS);
+      }
+
+      for (const dir of dirsToWatch) {
+        const fullDir = Path.resolve(this.options.repoRoot, dir);
+        if (Fs.existsSync(fullDir)) {
+          compilation.contextDependencies.add(fullDir);
+          // Also watch immediate subdirectories (for nested structures like x-pack/solutions/security)
+          try {
+            const entries = Fs.readdirSync(fullDir, { withFileTypes: true });
+            for (const entry of entries) {
+              if (entry.isDirectory()) {
+                compilation.contextDependencies.add(Path.join(fullDir, entry.name));
+              }
+            }
+          } catch {
+            // Ignore errors reading directories
+          }
+        }
       }
     });
 
