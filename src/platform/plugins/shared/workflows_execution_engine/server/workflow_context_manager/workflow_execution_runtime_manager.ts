@@ -472,12 +472,7 @@ export class WorkflowExecutionRuntimeManager {
     workflowExecutionUpdate: Partial<EsWorkflowExecution>
   ): void {
     const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
-    if (
-      !this.telemetryClient ||
-      this.telemetryReported ||
-      !isTerminalStatus(finalStatus) ||
-      isTerminalStatus(workflowExecution.status)
-    ) {
+    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
       return;
     }
 

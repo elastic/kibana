@@ -33,10 +33,6 @@ export interface WorkflowExecutionTelemetryMetadata {
    */
   skippedStepCount: number;
   /**
-   * Array of step types that were actually executed
-   */
-  executedStepTypes: string[];
-  /**
    * Array of connector types that were actually used in execution
    */
   executedConnectorTypes: string[];
@@ -80,6 +76,15 @@ export interface WorkflowExecutionTelemetryMetadata {
    * How much the timeout was exceeded by in milliseconds
    */
   timeoutExceededByMs?: number;
+  /**
+   * Array of step durations with step identification
+   * Each entry contains stepId, stepType, and duration in milliseconds
+   */
+  stepDurations?: Array<{
+    stepId: string;
+    stepType?: string;
+    duration: number;
+  }>;
 }
 
 /**
@@ -146,14 +151,12 @@ export function extractExecutionMetadata(
   const failedStepCount = stepExecutions.filter((step) => step.status === 'failed').length;
   const skippedStepCount = stepExecutions.filter((step) => step.status === 'skipped').length;
 
-  // Extract unique step types and connector types from executed steps
-  const executedStepTypesSet = new Set<string>();
+  // Extract connector types from executed steps
   const executedConnectorTypesSet = new Set<string>();
   const uniqueStepIdsSet = new Set<string>();
 
   for (const stepExecution of stepExecutions) {
     if (stepExecution.stepType) {
-      executedStepTypesSet.add(stepExecution.stepType);
       // Extract connector type if it's a connector step (step type contains a dot)
       if (stepExecution.stepType.includes('.')) {
         const connectorName = stepExecution.stepType.split('.')[0];
@@ -195,12 +198,14 @@ export function extractExecutionMetadata(
   // Extract timeout information
   const timeoutInfo = extractTimeoutInfo(workflowExecution, workflowExecution.workflowDefinition);
 
+  // Extract step durations
+  const stepDurations = extractStepDurations(stepExecutions);
+
   return {
     executedStepCount,
     successfulStepCount,
     failedStepCount,
     skippedStepCount,
-    executedStepTypes: Array.from(executedStepTypesSet),
     executedConnectorTypes: Array.from(executedConnectorTypesSet),
     maxExecutionDepth,
     hasRetries,
@@ -214,6 +219,7 @@ export function extractExecutionMetadata(
     ...(timeoutInfo.timeoutExceededByMs !== undefined && {
       timeoutExceededByMs: timeoutInfo.timeoutExceededByMs,
     }),
+    ...(stepDurations.length > 0 && { stepDurations }),
   };
 }
 
@@ -315,4 +321,40 @@ export function extractQueueDelayMs(workflowExecution: EsWorkflowExecution): num
   }
 
   return undefined;
+}
+
+/**
+ * Extracts step durations from step executions.
+ * Only includes steps that have executionTimeMs set.
+ *
+ * @param stepExecutions - Array of step executions
+ * @returns Array of step durations with step identification
+ */
+function extractStepDurations(stepExecutions: EsWorkflowStepExecution[]): Array<{
+  stepId: string;
+  stepType?: string;
+  duration: number;
+}> {
+  const durations: Array<{
+    stepId: string;
+    stepType?: string;
+    duration: number;
+  }> = [];
+
+  for (const stepExecution of stepExecutions) {
+    // Only include steps that have valid executionTimeMs
+    if (
+      stepExecution.executionTimeMs !== undefined &&
+      stepExecution.executionTimeMs !== null &&
+      stepExecution.executionTimeMs >= 0
+    ) {
+      durations.push({
+        stepId: stepExecution.stepId,
+        ...(stepExecution.stepType && { stepType: stepExecution.stepType }),
+        duration: stepExecution.executionTimeMs,
+      });
+    }
+  }
+
+  return durations;
 }

@@ -73,6 +73,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       status: ExecutionStatus.COMPLETED,
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:00:30.000Z',
+      executionTimeMs: 30000,
       topologicalIndex: 0,
       globalExecutionIndex: 0,
       stepExecutionIndex: 0,
@@ -112,11 +113,17 @@ describe('WorkflowExecutionTelemetryClient', () => {
           stepId: 'step1',
           status: ExecutionStatus.COMPLETED,
           startedAt: '2024-01-01T00:00:01.000Z', // 1 second after workflow started
+          finishedAt: '2024-01-01T00:00:05.000Z', // 4 seconds duration
+          executionTimeMs: 4000,
+          stepType: 'slack.postMessage',
         }),
         createMockStepExecution({
           stepId: 'step2',
           status: ExecutionStatus.COMPLETED,
           startedAt: '2024-01-01T00:00:02.000Z', // 2 seconds after workflow started
+          finishedAt: '2024-01-01T00:00:08.000Z', // 6 seconds duration
+          executionTimeMs: 6000,
+          stepType: 'http.post',
         }),
       ];
 
@@ -161,6 +168,18 @@ describe('WorkflowExecutionTelemetryClient', () => {
         queueDelayMs: 500,
         timedOut: false,
         timeoutMs: 300000, // 5 minutes in ms
+        stepDurations: [
+          {
+            stepId: 'step1',
+            stepType: 'slack.postMessage',
+            duration: 4000, // 4 seconds (from 00:00:01 to 00:00:05)
+          },
+          {
+            stepId: 'step2',
+            stepType: 'http.post',
+            duration: 6000, // 6 seconds (from 00:00:02 to 00:00:08)
+          },
+        ],
       });
     });
 
@@ -249,11 +268,19 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const stepExecutions = [
-        createMockStepExecution({ stepId: 'step1', status: ExecutionStatus.COMPLETED }),
+        createMockStepExecution({
+          stepId: 'step1',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2024-01-01T00:00:01.000Z',
+          finishedAt: '2024-01-01T00:00:05.000Z',
+          stepType: 'slack.postMessage',
+        }),
         createMockStepExecution({
           stepId: 'step2',
           status: ExecutionStatus.FAILED,
           stepType: 'http.post',
+          startedAt: '2024-01-01T00:00:06.000Z',
+          finishedAt: '2024-01-01T00:00:10.000Z',
         }),
       ];
 
@@ -402,7 +429,6 @@ describe('WorkflowExecutionTelemetryClient', () => {
       expect(eventData).toMatchObject({
         executedStepCount: 2,
         successfulStepCount: 2,
-        executedStepTypes: ['slack.postMessage'],
         executedConnectorTypes: ['slack'],
         maxExecutionDepth: 2,
         hasRetries: true, // Same step ID executed twice

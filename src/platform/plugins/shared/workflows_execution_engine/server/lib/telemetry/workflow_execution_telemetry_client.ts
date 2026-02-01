@@ -143,7 +143,6 @@ export class WorkflowExecutionTelemetryClient {
       successfulStepCount: executionMetadata.successfulStepCount,
       failedStepCount: executionMetadata.failedStepCount,
       skippedStepCount: executionMetadata.skippedStepCount,
-      executedStepTypes: executionMetadata.executedStepTypes,
       executedConnectorTypes: executionMetadata.executedConnectorTypes,
       maxExecutionDepth: executionMetadata.maxExecutionDepth,
       hasRetries: executionMetadata.hasRetries,
@@ -157,6 +156,10 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
         timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
       }),
+      ...(executionMetadata.stepDurations &&
+        executionMetadata.stepDurations.length > 0 && {
+          stepDurations: executionMetadata.stepDurations,
+        }),
     };
 
     this.reportEvent(
@@ -223,7 +226,6 @@ export class WorkflowExecutionTelemetryClient {
       ...(failedStep?.stepType && { failedStepType: failedStep.stepType }),
       executedStepCount: executionMetadata.executedStepCount,
       successfulStepCount: executionMetadata.successfulStepCount,
-      executedStepTypes: executionMetadata.executedStepTypes,
       executedConnectorTypes: executionMetadata.executedConnectorTypes,
       maxExecutionDepth: executionMetadata.maxExecutionDepth,
       hasRetries: executionMetadata.hasRetries,
@@ -238,6 +240,10 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
         timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
       }),
+      ...(executionMetadata.stepDurations &&
+        executionMetadata.stepDurations.length > 0 && {
+          stepDurations: executionMetadata.stepDurations,
+        }),
     };
 
     this.reportEvent(
@@ -297,7 +303,6 @@ export class WorkflowExecutionTelemetryClient {
       }),
       executedStepCount: executionMetadata.executedStepCount,
       successfulStepCount: executionMetadata.successfulStepCount,
-      executedStepTypes: executionMetadata.executedStepTypes,
       executedConnectorTypes: executionMetadata.executedConnectorTypes,
       maxExecutionDepth: executionMetadata.maxExecutionDepth,
       hasRetries: executionMetadata.hasRetries,
@@ -311,6 +316,10 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
         timeoutExceededByMs: executionMetadata.timeoutExceededByMs,
       }),
+      ...(executionMetadata.stepDurations &&
+        executionMetadata.stepDurations.length > 0 && {
+          stepDurations: executionMetadata.stepDurations,
+        }),
     };
 
     this.reportEvent(

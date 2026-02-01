@@ -125,10 +125,6 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
    */
   skippedStepCount: number;
   /**
-   * Array of step types that were actually executed
-   */
-  executedStepTypes: string[];
-  /**
    * Array of connector types that were actually used in execution
    */
   executedConnectorTypes: string[];
@@ -165,6 +161,16 @@ export interface WorkflowExecutionCompletedParams extends BaseWorkflowExecutionT
    * How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.
    */
   timeoutExceededByMs?: number;
+  /**
+   * Array of step durations with step identification.
+   * Each entry contains stepId, stepType (if available), and duration in milliseconds.
+   * Only includes steps that have completed (have both startedAt and finishedAt).
+   */
+  stepDurations?: Array<{
+    stepId: string;
+    stepType?: string;
+    duration: number;
+  }>;
 }
 
 /**
@@ -249,10 +255,6 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
    */
   errorHandled: boolean;
   /**
-   * Array of step types that were actually executed
-   */
-  executedStepTypes: string[];
-  /**
    * Array of connector types that were actually used in execution
    */
   executedConnectorTypes: string[];
@@ -289,6 +291,16 @@ export interface WorkflowExecutionFailedParams extends BaseWorkflowExecutionTele
    * How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.
    */
   timeoutExceededByMs?: number;
+  /**
+   * Array of step durations with step identification.
+   * Each entry contains stepId, stepType (if available), and duration in milliseconds.
+   * Only includes steps that have completed (have both startedAt and finishedAt).
+   */
+  stepDurations?: Array<{
+    stepId: string;
+    stepType?: string;
+    duration: number;
+  }>;
 }
 
 /**
@@ -361,10 +373,6 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
    */
   successfulStepCount: number;
   /**
-   * Array of step types that were actually executed
-   */
-  executedStepTypes: string[];
-  /**
    * Array of connector types that were actually used in execution
    */
   executedConnectorTypes: string[];
@@ -401,6 +409,16 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
    * How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.
    */
   timeoutExceededByMs?: number;
+  /**
+   * Array of step durations with step identification.
+   * Each entry contains stepId, stepType (if available), and duration in milliseconds.
+   * Only includes steps that have completed (have both startedAt and finishedAt).
+   */
+  stepDurations?: Array<{
+    stepId: string;
+    stepType?: string;
+    duration: number;
+  }>;
 }
 
 /**

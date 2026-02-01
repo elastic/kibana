@@ -212,19 +212,6 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: false,
     },
   },
-  executedStepTypes: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: {
-        description: 'Step type that was executed',
-      },
-    },
-    _meta: {
-      description: 'Array of step types that were actually executed',
-      optional: false,
-    },
-  },
   executedConnectorTypes: {
     type: 'array',
     items: {
@@ -293,6 +280,20 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
     _meta: {
       description:
         'How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.',
+      optional: true,
+    },
+  },
+  stepDurations: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Step duration entry with stepId, stepType (optional), and duration',
+      },
+    },
+    _meta: {
+      description:
+        'Array of step durations with step identification. Only includes steps that have completed (have both startedAt and finishedAt).',
       optional: true,
     },
   },
@@ -447,19 +448,6 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: false,
     },
   },
-  executedStepTypes: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: {
-        description: 'Step type that was executed',
-      },
-    },
-    _meta: {
-      description: 'Array of step types that were actually executed',
-      optional: false,
-    },
-  },
   executedConnectorTypes: {
     type: 'array',
     items: {
@@ -528,6 +516,20 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
     _meta: {
       description:
         'How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.',
+      optional: true,
+    },
+  },
+  stepDurations: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Step duration entry with stepId, stepType (optional), and duration',
+      },
+    },
+    _meta: {
+      description:
+        'Array of step durations with step identification. Only includes steps that have completed (have both startedAt and finishedAt).',
       optional: true,
     },
   },
@@ -660,19 +662,6 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: false,
     },
   },
-  executedStepTypes: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: {
-        description: 'Step type that was executed',
-      },
-    },
-    _meta: {
-      description: 'Array of step types that were actually executed',
-      optional: false,
-    },
-  },
   executedConnectorTypes: {
     type: 'array',
     items: {
@@ -741,6 +730,20 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
     _meta: {
       description:
         'How much the timeout was exceeded by in milliseconds. Only present when workflow timed out.',
+      optional: true,
+    },
+  },
+  stepDurations: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Step duration entry with stepId, stepType (optional), and duration',
+      },
+    },
+    _meta: {
+      description:
+        'Array of step durations with step identification. Only includes steps that have completed (have both startedAt and finishedAt).',
       optional: true,
     },
   },
