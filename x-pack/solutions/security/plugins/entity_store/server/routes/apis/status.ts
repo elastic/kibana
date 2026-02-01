@@ -48,19 +48,21 @@ export function registerStatus(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
-        logger.debug('Status API invoked');
-        const withComponents = req.query.include_components;
-        const { status, engines } = await assetManager.getStatus(withComponents);
+      wrapMiddlewares(
+        async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { logger, assetManager } = entityStoreCtx;
+          logger.debug('Status API invoked');
+          const withComponents = req.query.include_components;
+          const { status, engines } = await assetManager.getStatus(withComponents);
 
-        return res.ok({
-          body: {
-            status,
-            engines: engines.map(toPublicEngine),
-          },
-        });
-      })
+          return res.ok({
+            body: {
+              status,
+              engines: engines.map(toPublicEngine),
+            },
+          });
+        }
+      )
     );
 }

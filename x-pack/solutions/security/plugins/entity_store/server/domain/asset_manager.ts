@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getEntityDefinition } from './definitions/registry';
 import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
@@ -34,8 +35,7 @@ import {
   getUpdatesComponentTemplateName,
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { LogsExtractionClient } from './logs_extraction_client';
+import type { LogsExtractionClient } from './logs_extraction_client';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -208,9 +208,7 @@ export class AssetManager {
     ];
   }
 
-  private getEntityDefinitionComponent(
-    definition: ManagedEntityDefinition
-  ): EngineComponentStatus {
+  private getEntityDefinitionComponent(definition: ManagedEntityDefinition): EngineComponentStatus {
     return {
       id: definition.id,
       installed: true,
@@ -234,9 +232,7 @@ export class AssetManager {
     ];
   }
 
-  private async getIndexComponents(
-    type: EntityType,
-  ): Promise<EngineComponentStatus[]> {
+  private async getIndexComponents(type: EntityType): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(type, this.namespace);
@@ -293,7 +289,7 @@ export class AssetManager {
         status: task.state?.status,
         remainingLogsToExtract: countResult.success ? countResult.count : 0,
         runs: task.state?.runs ?? 0,
-        lastError: task.state?.lastError ?? null
+        lastError: task.state?.lastError ?? null,
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {

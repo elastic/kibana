@@ -31,7 +31,7 @@ export async function createRequestHandlerContext({
   context,
   coreSetup,
   request,
-  isServerless
+  isServerless,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
@@ -69,7 +69,7 @@ export async function createRequestHandlerContext({
       engineDescriptorClient,
       namespace,
       isServerless,
-      logsExtractionClient
+      logsExtractionClient,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,

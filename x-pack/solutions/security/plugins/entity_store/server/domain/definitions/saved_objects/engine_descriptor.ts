@@ -21,7 +21,7 @@ export class EngineDescriptorClient {
     private readonly soClient: SavedObjectsClientContract,
     private readonly namespace: string,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   async find(entityType: EntityType): Promise<SavedObjectsFindResponse<EngineDescriptor>> {
     return this.soClient.find<EngineDescriptor>({
@@ -34,7 +34,7 @@ export class EngineDescriptorClient {
   async getAll(): Promise<EngineDescriptor[]> {
     const { saved_objects } = await this.soClient.find<EngineDescriptor>({
       type: EngineDescriptorTypeName,
-      namespaces: [this.namespace]
+      namespaces: [this.namespace],
     });
 
     return saved_objects.map((engine) => engine.attributes);

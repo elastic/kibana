@@ -45,12 +45,12 @@ export class EntityStorePlugin
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) =>
-        createRequestHandlerContext({ 
-          context, 
-          coreSetup: core, 
-          logger: this.logger, 
-          request, 
-          isServerless: this.isServerless
+        createRequestHandlerContext({
+          context,
+          coreSetup: core,
+          logger: this.logger,
+          request,
+          isServerless: this.isServerless,
         })
     );
 
