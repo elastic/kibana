@@ -28,3 +28,4 @@ export * from './bulk_delete';
 export * from './find_instances';
 export * from './repair';
 export * from './slo_templates';
+export * from './get_grouped_stats';

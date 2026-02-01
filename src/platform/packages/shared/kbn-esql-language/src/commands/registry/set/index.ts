@@ -26,7 +26,7 @@ export const setCommand = {
       defaultMessage: 'Sets a query setting',
     }),
     declaration: `SET <setting> = <value>`,
-    examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias: *";'],
+    examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias:*";'],
     hidden: process.env.NODE_ENV === 'test' ? false : true, // Temporary until making it GA
     preview: true,
     name: 'set',

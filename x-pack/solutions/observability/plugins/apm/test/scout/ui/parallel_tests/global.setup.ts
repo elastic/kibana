@@ -22,8 +22,13 @@ globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
+  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient, kbnClient }) => {
     const startTime = Date.now();
+
+    // disable solution tour on ECH
+    if (config.isCloud && !config.serverless) {
+      await kbnClient.uiSettings.update({ showSpaceSolutionTour: false });
+    }
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');

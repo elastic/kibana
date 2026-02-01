@@ -43,6 +43,7 @@ export async function registerObservabilityAgent({
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
+        ${getKqlInstructions()}
       `),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
@@ -81,5 +82,18 @@ function getFieldDiscoveryInstructions() {
     ### FIELD DISCOVERY
     Before using field names in \`groupBy\`, \`kqlFilter\`, or \`aggregation.field\` parameters, call \`${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID}\` first.
     Clusters use different naming conventions (ECS vs OpenTelemetry) - discovering fields first prevents errors.
+  `);
+}
+
+function getKqlInstructions() {
+  return dedent(`
+    ### KQL (Kibana Query Language)
+    Use KQL syntax for \`kqlFilter\` parameters:
+    - Match: \`field: value\`, \`field: (a OR b OR c)\`
+    - Range: \`field > 100\`, \`field >= 10 AND field <= 20\`
+    - Wildcards: \`field: prefix*\` (trailing only)
+    - Negation: \`NOT field: value\`
+    - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
+    - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
   `);
 }

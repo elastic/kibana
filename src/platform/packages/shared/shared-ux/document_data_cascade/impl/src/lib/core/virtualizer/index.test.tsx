@@ -168,9 +168,8 @@ describe('virtualizer', () => {
           activeStickyIndex={null}
           // @ts-expect-error -- we're only interested in testing the rowRenderer prop here
           getVirtualItems={getVirtualItems}
-        >
-          {rowRenderer}
-        </VirtualizedCascadeRowList>
+          listItemRenderer={rowRenderer}
+        />
       );
 
       expect(rowRenderer).toHaveBeenCalledTimes(mockVirtualItems.length);

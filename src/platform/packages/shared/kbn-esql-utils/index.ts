@@ -52,6 +52,8 @@ export {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
   appendFilteringWhereClauseForCascadeLayout,
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
   getESQLSources,
   getEsqlColumns,
   getEsqlPolicies,

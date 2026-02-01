@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Streams, System } from '@kbn/streams-schema';
+import { omit } from 'lodash';
+import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -35,6 +36,7 @@ interface Query {
 export async function generateSignificantEvents({
   stream,
   system,
+  features,
   start,
   end,
   esClient,
@@ -46,6 +48,7 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   system?: System;
+  features: Feature[];
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -81,6 +84,9 @@ export async function generateSignificantEvents({
         name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
         description: system?.description || stream.description,
+        features: JSON.stringify(
+          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+        ),
       },
       maxSteps: 4,
       prompt,

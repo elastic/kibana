@@ -31,9 +31,9 @@ const getTraceMetricsSchema = z.object({
     ),
   groupBy: z
     .string()
-    .optional()
+    .default('service.name')
     .describe(
-      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields where possible for meaningful aggregations. If not specified, results are grouped by service.name.'
+      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
     ),
 });
 
@@ -86,7 +86,6 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
     },
     handler: async ({ start, end, kqlFilter, groupBy }, context) => {
       const { request } = context;
-      const groupByField = groupBy || 'service.name';
 
       try {
         const { items } = await getToolHandler({
@@ -97,7 +96,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           start,
           end,
           kqlFilter,
-          groupBy: groupByField,
+          groupBy,
         });
 
         return {

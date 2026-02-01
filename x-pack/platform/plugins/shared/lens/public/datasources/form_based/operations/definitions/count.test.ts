@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { from, stats } from '@kbn/esql-composer';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
 import type { FormBasedLayer } from '../../../..';
@@ -124,8 +125,8 @@ describe('count operation', () => {
   });
 
   describe('toESQL', () => {
-    const callToESQL = (column: unknown) =>
-      operationDefinitionMap.count.toESQL!(
+    const callToESQL = (column: unknown) => {
+      const esqlExpr = operationDefinitionMap.count.toESQL!(
         column as unknown as FormBasedLayer['columns'][0],
         '1',
         {
@@ -137,6 +138,18 @@ describe('count operation', () => {
         {} as unknown as IUiSettingsClient,
         {} as unknown as DateRange
       );
+
+      if (!esqlExpr) {
+        return undefined;
+      }
+
+      // Output format: "FROM _\n  | STATS result = <expression>"
+      // We then just split on ' = ' to get the expression part
+      return from('_')
+        .pipe(stats(`result = ${esqlExpr.template}`, esqlExpr.params))
+        .toString()
+        .split(' = ')[1];
+    };
 
     test('doesnt support timeShift', () => {
       const esql = callToESQL({
@@ -159,7 +172,7 @@ describe('count operation', () => {
         sourceField: 'bytes',
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(`bytes`)');
+      expect(esql).toBe('COUNT(bytes)');
     });
   });
 });

@@ -45,10 +45,17 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   stream_type: StreamType;
 }
 
+interface StreamsInsightsGeneratedProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  cached_tokens_used?: number;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsSystemIdentificationIdentifiedProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
+  type StreamsInsightsGeneratedProps,
 };

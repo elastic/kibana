@@ -10,6 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
+import { css } from '@emotion/react';
 
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
@@ -32,6 +33,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
 import type { ControlsRendererParentApi, ControlsLayout } from './types';
+import { apiPublishesFocusedPanelId } from './utils';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -39,6 +41,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
     controlPanelRefs.current = { ...controlPanelRefs.current, [id]: ref };
   }, []);
 
+  const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
 
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
@@ -65,6 +68,15 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
     return () => {
       layoutSubscription.unsubscribe();
     };
+  }, [parentApi]);
+
+  useEffect(() => {
+    if (parentApi && apiPublishesFocusedPanelId(parentApi)) {
+      const focusedPanelIdSubscription = parentApi.focusedPanelId$
+        .pipe(distinctUntilChanged())
+        .subscribe((focusId) => setIsEditFlyoutOpen(Boolean(focusId)));
+      return () => focusedPanelIdSubscription.unsubscribe();
+    }
   }, [parentApi]);
 
   /** Handle drag and drop */
@@ -115,7 +127,8 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
         <EuiFlexGroup
           component="ul"
-          className="controlGroup"
+          className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
+          css={controlsGroupStyles.controlsGroup}
           alignItems="center"
           gutterSize="s"
           wrap={true}
@@ -143,4 +156,12 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
       </DragOverlay>
     </DndContext>
   );
+};
+
+const controlsGroupStyles = {
+  controlsGroup: css({
+    '&.controlsGroup--editing .controlFrameFloatingActions': {
+      visibility: 'hidden !important' as 'hidden',
+    },
+  }),
 };

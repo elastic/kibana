@@ -74,6 +74,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       }}
                       scopedHistory={appMountParams.history}
                       customizationCallbacks={[this.customizationCallback]}
+                      customizationContext={{ displayMode: 'standalone' }}
                     />
                   </Route>
                 </Routes>

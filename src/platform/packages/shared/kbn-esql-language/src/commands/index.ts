@@ -15,6 +15,7 @@ export type { ESQLCommandSummary } from './registry/types';
 export * from './definitions/constants';
 export * from './definitions/types';
 export * from './definitions/all_operators';
+export * from './definitions/utils/promql';
 
 // Utilities from definitions
 export { METADATA_FIELDS } from './registry/options/metadata';

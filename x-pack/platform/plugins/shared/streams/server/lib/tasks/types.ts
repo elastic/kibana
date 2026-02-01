@@ -27,7 +27,6 @@ interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
   type: string;
   status: Exclude<TaskStatus, TaskStatus.Stale>;
-  stream: string;
   space: string;
   created_at: string;
   task: {

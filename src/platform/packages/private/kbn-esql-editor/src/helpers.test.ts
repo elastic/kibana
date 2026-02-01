@@ -12,6 +12,7 @@ import {
   filterOutWarningsOverlappingWithErrors,
   parseErrors,
   parseWarning,
+  filterDuplicatedWarnings,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -319,6 +320,30 @@ describe('helpers', function () {
 
       const result = filterOutWarningsOverlappingWithErrors(errors, warnings);
       expect(result).toHaveLength(shouldFilter ? 0 : 1);
+    });
+  });
+
+  describe('filterDuplicatedUnmappedColumnWarnings', function () {
+    const createMessage = (code: string, message: string): MonacoMessage & { code: string } => ({
+      message,
+      code,
+      severity: 1,
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 1,
+    });
+
+    it('should filter duplicated warning messages', function () {
+      const warnings = [
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ];
+      expect(filterDuplicatedWarnings(warnings)).toEqual([
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ]);
     });
   });
 });

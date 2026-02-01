@@ -26,14 +26,16 @@ const getMetricChangePointsSchema = z.object({
   index: z.string().describe('The index or index pattern to find the metrics').optional(),
   kqlFilter: z
     .string()
-    .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
+    .describe(
+      "A KQL filter to filter the metric documents. Examples: 'service.name: \"my-service\"', 'my_field: foo'."
+    )
     .optional(),
   aggregation: z
     .object({
       field: z
         .string()
         .describe(
-          `Numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us').`
+          `Numeric field to aggregate and observe for changes. Example: "transaction.duration.us".`
         ),
       type: z
         .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])
@@ -42,13 +44,10 @@ const getMetricChangePointsSchema = z.object({
     .optional(),
   groupBy: z
     .array(z.string())
+    .default([])
     .describe(
-      `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
-Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.
-Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone']
-`
-    )
-    .optional(),
+      `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
+    ),
 });
 
 export function createGetMetricChangePointsTool({
@@ -76,7 +75,7 @@ When to use:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
+    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 

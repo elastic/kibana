@@ -2558,6 +2558,9 @@ exports[`LoginForm renders as expected 1`] = `
               loginAssistanceMessage=""
               notifications={
                 Object {
+                  "feedback": Object {
+                    "isEnabled": [MockFunction],
+                  },
                   "showErrorDialog": [MockFunction],
                   "toasts": Object {
                     "add": [MockFunction],
@@ -2568,6 +2571,9 @@ exports[`LoginForm renders as expected 1`] = `
                     "addWarning": [MockFunction],
                     "get$": [MockFunction],
                     "remove": [MockFunction],
+                  },
+                  "tours": Object {
+                    "isEnabled": [MockFunction],
                   },
                 }
               }

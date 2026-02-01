@@ -900,10 +900,12 @@ describe('UnifiedDataTable', () => {
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
 
+      const setExpandedDocMock = jest.fn();
+
       const component = await getComponent({
         ...getProps(),
         expandedDoc,
-        setExpandedDoc: jest.fn(),
+        setExpandedDoc: setExpandedDocMock,
         columnsMeta: columnsMetaOverride,
         renderDocumentView: renderDocumentViewMock,
         externalControlColumns: [testLeadingControlColumn],
@@ -915,6 +917,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
+        setExpandedDocMock,
         columnsMetaOverride
       );
     },

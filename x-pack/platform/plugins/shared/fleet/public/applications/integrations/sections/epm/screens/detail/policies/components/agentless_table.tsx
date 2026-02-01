@@ -332,6 +332,12 @@ export const AgentlessPackagePoliciesTable = ({
             },
           },
         ]}
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
+          {
+            defaultMessage: 'Agentless integration policies',
+          }
+        )}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
         pagination={{

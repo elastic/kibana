@@ -25,11 +25,11 @@ import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type {
   YamlValidationErrorSeverity,
   YamlValidationResult,
 } from '../../../features/validate_workflow_yaml/model/types';
-import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 const severityOrder = ['error', 'warning', 'info'];

@@ -31,6 +31,8 @@ import type { WaffleStateESQL, WaffleStateNoESQL } from './charts/waffle';
 import { waffleStateSchema } from './charts/waffle';
 import type { RegionMapState } from './charts/region_map';
 import { regionMapStateSchema } from './charts/region_map';
+import type { DatatableState } from './charts/datatable';
+import { datatableStateSchema } from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
@@ -75,6 +77,7 @@ export const _lensApiStateSchema: any = schema.oneOf([
   // TODO: enabled once transformations are available
   // partitionStateSchema,
   regionMapStateSchema,
+  datatableStateSchema,
 ]);
 
 export type LensApiState =
@@ -84,7 +87,8 @@ export type LensApiState =
   | XYState
   | HeatmapState
   | TagcloudState
-  | RegionMapState;
+  | RegionMapState
+  | DatatableState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
@@ -95,8 +99,10 @@ export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
+export type { DatatableState, DatatableStateNoESQL, DatatableStateESQL } from './charts/datatable';
 export { tagcloudStateSchema } from './charts/tagcloud';
 export { regionMapStateSchema } from './charts/region_map';
+export { datatableStateSchema } from './charts/datatable';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

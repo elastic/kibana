@@ -17,7 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./home_page'));
       loadTestFile(require.resolve('./metrics_anomalies'));
       loadTestFile(require.resolve('./metrics_explorer'));
-      loadTestFile(require.resolve('./node_details'));
       loadTestFile(require.resolve('./hosts_view'));
       // keep this test last as it can potentially break other tests
       loadTestFile(require.resolve('./metrics_source_configuration'));

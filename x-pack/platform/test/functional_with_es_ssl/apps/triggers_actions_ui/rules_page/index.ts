@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService, loadTestFile }: FtrProviderContext
     });
 
     loadTestFile(require.resolve('./create_rule_flow'));
+    loadTestFile(require.resolve('./edit_rule_flow'));
     loadTestFile(require.resolve('./page_navigation_and_loading'));
     loadTestFile(require.resolve('./tab_functionality'));
   });

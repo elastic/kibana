@@ -300,7 +300,7 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | INLINE STATS unique_visitors = COUNT_DISTINCT(clientip), total_visits = SUM(visits_per_client), p95_bytes_url = PERCENTILE(p95_bytes_client, 95), median_bytes_url = MEDIAN(median_bytes_client) BY url.keyword | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
+            'FROM kibana_sample_data_logs | INLINE STATS visits_per_client = COUNT(), p95_bytes_client = PERCENTILE(bytes, 95), median_bytes_client = MEDIAN(bytes) BY url.keyword, clientip | INLINE STATS unique_visitors = COUNT_DISTINCT(clientip), total_visits = SUM(visits_per_client), p95_bytes_url = PERCENTILE(p95_bytes_client, 95), median_bytes_url = MEDIAN(median_bytes_client) BY url.keyword | WHERE `url.keyword` == "https://www.elastic.co/downloads/beats/metricbeat"'
           );
         });
 
@@ -372,7 +372,7 @@ describe('cascaded documents helpers utils', () => {
           const nodePath = ['tags'];
           const nodePathMap = { tags: 'some random pattern' };
 
-          // only apply this mock for this test
+          // apply this mock only for this test
           jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
             esTypes: ['text', 'keyword'],
             aggregatable: false,
@@ -783,6 +783,22 @@ describe('cascaded documents helpers utils', () => {
           )
         ).toBe(
           'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
+        );
+      });
+
+      it('handles the case where the operating stats command references a field from another stats command in its aggregation', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(*) BY agent.keyword, extension.keyword | STATS avg = AVG(count) BY agent.keyword',
+            [],
+            dataViewMock,
+            'agent.keyword',
+            'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | WHERE `agent.keyword` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(*) BY agent.keyword, extension.keyword | STATS avg = AVG(count) BY agent.keyword'
         );
       });
     });

@@ -126,7 +126,7 @@ export async function incrementVersionAndUpdate(
 
   assetsMap.set(
     `${pkgName}-${data.version}/docs/README.md`,
-    data.readme ? Buffer.from(data.readme) : undefined
+    data.readme ? Buffer.from(data.readme) : Buffer.from('')
   );
 
   // update the changelog asset as well by adding an entry

@@ -139,26 +139,28 @@ export function QuickSearchVisor({
         <EuiFlexItem grow={false} css={styles.separator} />
         <EuiFlexItem css={styles.searchWrapper}>
           <div ref={kqlInputRef}>
-            <KQLComponent
-              iconType="search"
-              disableLanguageSwitcher={true}
-              indexPatterns={selectedSources.map((source) => source.label)}
-              bubbleSubmitEvent={false}
-              query={{
-                query: searchValue,
-                language: 'kuery',
-              }}
-              disableAutoFocus={false}
-              placeholder={searchPlaceholder}
-              onChange={(newQuery) => {
-                onKqlValueChange(newQuery.query as string);
-              }}
-              onSubmit={(newQuery) => {
-                onKqlSubmit(newQuery.query as string);
-              }}
-              appName="esqlEditorVisor"
-              dataTestSubj="esqlVisorKQLQueryInput"
-            />
+            {isVisible && (
+              <KQLComponent
+                iconType="search"
+                disableLanguageSwitcher={true}
+                indexPatterns={selectedSources.map((source) => source.label)}
+                bubbleSubmitEvent={false}
+                query={{
+                  query: searchValue,
+                  language: 'kuery',
+                }}
+                disableAutoFocus={false}
+                placeholder={searchPlaceholder}
+                onChange={(newQuery) => {
+                  onKqlValueChange(newQuery.query as string);
+                }}
+                onSubmit={(newQuery) => {
+                  onKqlSubmit(newQuery.query as string);
+                }}
+                appName="esqlEditorVisor"
+                dataTestSubj="esqlVisorKQLQueryInput"
+              />
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClient } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -40,7 +40,7 @@ export class BulkActionsResolver {
         const [coreStart] = await core.getStartServices();
         return {
           esClient: coreStart.elasticsearch.client.asInternalUser,
-          soClient: new SavedObjectsClient(coreStart.savedObjects.createInternalRepository()),
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         };
       };
 
@@ -60,7 +60,7 @@ export class BulkActionsResolver {
         getDeps,
         async (
           esClient: ElasticsearchClient,
-          soClient: SavedObjectsClient,
+          soClient: SavedObjectsClientContract,
           actionParams: ActionParams,
           retryParams: RetryParams
         ) =>
@@ -129,10 +129,10 @@ export class BulkActionsResolver {
 
 export function createRetryTask(
   taskInstance: ConcreteTaskInstance,
-  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClient }>,
+  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }>,
   doRetry: (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     actionParams: ActionParams,
     retryParams: RetryParams
   ) => void

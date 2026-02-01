@@ -392,6 +392,38 @@ Expected one of:
         ),
         type: 'error',
       };
+    case 'invalidSettingValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
+          defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
+          values: {
+            value: out.value,
+            setting: out.setting,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unknownMapParameterName':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
+          defaultMessage: 'Unknown parameter "{paramName}".',
+          values: { paramName: out.paramName },
+        }),
+        type: 'error',
+      };
+    case 'invalidMapParameterValueType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
+          defaultMessage:
+            'Invalid type for parameter "{paramName}". Expected type: {expectedType}. Received: {actualType}.',
+          values: {
+            paramName: out.paramName,
+            expectedType: out.expectedType,
+            actualType: out.actualType,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }

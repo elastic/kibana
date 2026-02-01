@@ -192,13 +192,14 @@ export const getAttachmentSystemPrompt = (presentation: AttachmentPresentation):
   if (presentation.mode === 'inline') {
     return `## Conversation Attachments
 
-The user has ${presentation.activeCount} attachment(s) in this conversation. The full content is shown above in XML format.
+The user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown above in XML format.
 
 You can:
+- Read attachments using attachment_read(id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-Since the content is shown inline, you don't need to read it - just reference it directly.`;
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
   }
 
   return `## Conversation Attachments

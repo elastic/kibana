@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { getObservabilityAgentBuilderAiInsightsRouteRepository } from './ai_insights/route';
 
-export function getGlobalObservabilityAgentBuilderServerRouteRepository() {
+export function getGlobalObservabilityAgentBuilderServerRouteRepository(): ServerRouteRepository {
   return {
     ...getObservabilityAgentBuilderAiInsightsRouteRepository(),
   };

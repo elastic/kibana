@@ -12,8 +12,6 @@ import type {
   SavedObject,
   SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
   SavedObjectsServiceSetup,
   SavedObjectsClient,
   ElasticsearchClient,
@@ -33,9 +31,10 @@ import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import type { DataStreamTaskParams } from './task_manager/task_manager_service';
 import { TaskManagerService } from './task_manager/task_manager_service';
-import type { CreateDataStreamParams, CreateIntegrationParams } from '../routes/types';
+import type { CreateDataStreamParams, CreateUpdateIntegrationParams } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
+import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
 
 export class AutomaticImportService {
@@ -77,22 +76,41 @@ export class AutomaticImportService {
     this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
   }
 
-  public async createIntegration(params: CreateIntegrationParams): Promise<void> {
+  public async createUpdateIntegration(params: CreateUpdateIntegrationParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, integrationParams } = params;
-    await this.savedObjectService.insertIntegration(integrationParams, authenticatedUser);
-  }
 
-  public async updateIntegration(
-    data: IntegrationAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<IntegrationAttributes>
-  ): Promise<SavedObjectsUpdateResponse<IntegrationAttributes>> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
+    const { authenticatedUser, integrationParams } = params;
+
+    try {
+      await this.savedObjectService.insertIntegration(integrationParams, authenticatedUser);
+    } catch (error) {
+      if (ErrorUtils.isIntegrationAlreadyExistsError(error)) {
+        // Build a full IntegrationAttributes object for the saved objects update API
+        const existing = await this.savedObjectService.getIntegration(
+          integrationParams.integrationId
+        );
+        const expectedVersion = existing.metadata?.version || '0.0.0';
+
+        const updateData: IntegrationAttributes = {
+          ...existing,
+          status: TASK_STATUSES.pending,
+          last_updated_by: authenticatedUser.username,
+          last_updated_at: new Date().toISOString(),
+          metadata: {
+            ...existing.metadata,
+            ...(integrationParams.title ? { title: integrationParams.title } : {}),
+            ...(integrationParams.description
+              ? { description: integrationParams.description }
+              : {}),
+            ...(integrationParams.logo ? { logo: integrationParams.logo } : {}),
+          },
+        };
+
+        await this.savedObjectService.updateIntegration(updateData, expectedVersion);
+      } else {
+        throw error;
+      }
     }
-    return this.savedObjectService.updateIntegration(data, expectedVersion, versionUpdate, options);
   }
 
   public async getIntegrationById(integrationId: string): Promise<IntegrationResponse> {
@@ -254,7 +272,7 @@ export class AutomaticImportService {
       esClient
     );
     // Delete the data stream from the saved objects
-    await this.savedObjectService.deleteDataStream(integrationId, dataStreamId, options);
+    await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
 
   public async addSamplesToDataStream(

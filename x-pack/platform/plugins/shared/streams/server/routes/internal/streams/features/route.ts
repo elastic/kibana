@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { baseFeatureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
+import { baseFeatureSchema, type Feature } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -119,7 +119,6 @@ export const listFeaturesRoute = createServerRoute({
     path: z.object({ name: z.string() }),
     query: z.optional(
       z.object({
-        status: featureStatusSchema.optional(),
         type: z.string().optional(),
       })
     ),
@@ -139,7 +138,6 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
-      status: params.query?.status ? [params.query.status] : [],
     });
 
     return {
@@ -250,7 +248,6 @@ export const featuresTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
               taskId,
-              streamName: name,
               params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connector_id,
@@ -261,6 +258,7 @@ export const featuresTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
+                  streamName: name,
                 };
               })(),
               request,
