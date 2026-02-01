@@ -43,6 +43,7 @@ import {
   ALERTS_FEATURE_ID,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
   ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
+  EXCEPTIONS_SUBFEATURE_ALL,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
@@ -104,7 +105,7 @@ export const getRulesV2BaseKibanaFeature = (
         minimal: [
           {
             feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_all'],
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
