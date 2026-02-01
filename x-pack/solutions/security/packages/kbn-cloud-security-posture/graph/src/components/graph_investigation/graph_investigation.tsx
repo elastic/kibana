@@ -43,12 +43,16 @@ const useGraphPopovers = ({
   setSearchFilters,
   nodeDetailsClickHandler,
   onOpenNetworkPreview,
+  expandedEntityIds,
+  onToggleEntityRelationships,
 }: {
   dataViewId: string;
   searchFilters: Filter[];
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   nodeDetailsClickHandler?: (node: NodeProps) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
+  expandedEntityIds: Set<string>;
+  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -60,7 +64,9 @@ const useGraphPopovers = ({
     setSearchFilters,
     dataViewId,
     searchFilters,
-    nodeDetailsClickHandler
+    nodeDetailsClickHandler,
+    expandedEntityIds,
+    onToggleEntityRelationships
   );
   const labelExpandPopover = useLabelNodeExpandPopover(
     setSearchFilters,
@@ -260,6 +266,32 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
+    // Track which entities have their relationships expanded
+    const [expandedEntityIds, setExpandedEntityIds] = useState<Set<string>>(() => new Set());
+
+    // Convert expandedEntityIds Set to API format
+    const entityIdsForApi = useMemo(() => {
+      if (expandedEntityIds.size === 0) return undefined;
+
+      return Array.from(expandedEntityIds).map((id) => ({
+        id,
+        isOrigin: false, // User-expanded entities are not the graph origin
+      }));
+    }, [expandedEntityIds]);
+
+    // Toggle handler for entity relationships
+    const onToggleEntityRelationships = useCallback((node: NodeProps, action: 'show' | 'hide') => {
+      setExpandedEntityIds((prev) => {
+        const next = new Set(prev);
+        if (action === 'show') {
+          next.add(node.id);
+        } else {
+          next.delete(node.id);
+        }
+        return next;
+      });
+    }, []);
+
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
 
@@ -315,6 +347,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
+          entityIds: entityIdsForApi,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -354,6 +387,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       setSearchFilters,
       nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
       onOpenNetworkPreview,
+      expandedEntityIds,
+      onToggleEntityRelationships,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
