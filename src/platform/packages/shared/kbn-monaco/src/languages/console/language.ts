@@ -32,6 +32,40 @@ import { foldingRangeProvider } from './folding_range_provider';
 
 export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
 
+const requestMethodRe = /^\s*(GET|POST|PUT|DELETE|HEAD|PATCH)\b/i;
+const esqlRequestLineRe = /^\s*post\s+\/?_query(?:\/async)?(?:\s|\?|$)/i;
+const maxLookbackLines = 2000;
+
+const findEsqlRequestLineNumber = (
+  model: monaco.editor.ITextModel,
+  positionLineNumber: number
+): number | undefined => {
+  for (
+    let lineNumber = positionLineNumber, lookedBack = 0;
+    lineNumber >= 1 && lookedBack < maxLookbackLines;
+    lineNumber--, lookedBack++
+  ) {
+    const line = model.getLineContent(lineNumber);
+    if (requestMethodRe.test(line)) {
+      // Only treat this as an ES|QL request if the request line matches POST _query(/async)?...
+      return esqlRequestLineRe.test(line) ? lineNumber : undefined;
+    }
+  }
+};
+
+const getRequestTextBeforeCursor = (
+  model: monaco.editor.ITextModel,
+  requestLineNumber: number,
+  position: monaco.Position
+): string => {
+  return model.getValueInRange({
+    startLineNumber: requestLineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+};
+
 /**
  * @description This language definition is used for the console input panel
  */
@@ -46,8 +80,10 @@ export const ConsoleLang: LangModuleType = {
   },
   languageThemeResolver: buildConsoleTheme,
   getSuggestionProvider: (
-    esqlCallbacks: Pick<ESQLCallbacks, 'getSources' | 'getPolicies'>,
-    actionsProvider: MutableRefObject<any>
+    esqlCallbacks: Pick<ESQLCallbacks, 'getSources' | 'getPolicies'> | undefined,
+    actionsProvider: MutableRefObject<{
+      provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+    } | null>
   ): monaco.languages.CompletionItemProvider => {
     return {
       // force suggestions when these characters are used
@@ -55,15 +91,35 @@ export const ConsoleLang: LangModuleType = {
       provideCompletionItems: async (
         model: monaco.editor.ITextModel,
         position: monaco.Position,
-        context: monaco.languages.CompletionContext
+        context: monaco.languages.CompletionContext,
+        token: monaco.CancellationToken
       ) => {
-        const fullText = model.getValue();
-        const cursorOffset = model.getOffsetAt(position);
-        const textBeforeCursor = fullText.slice(0, cursorOffset);
+        // NOTE: `model.getValue()` can be very expensive for large inputs (e.g. pasted JSON with
+        // huge string fields). We only do ES|QL context detection for POST /_query requests.
+        const delegateToActionsProvider = () => {
+          const actions = actionsProvider.current;
+          return (
+            actions?.provideCompletionItems(model, position, context, token) ?? {
+              suggestions: [],
+            }
+          );
+        };
+
+        const requestLineNumber = findEsqlRequestLineNumber(model, position.lineNumber);
+        if (!requestLineNumber) {
+          return delegateToActionsProvider();
+        }
+
+        const requestTextBeforeCursor = getRequestTextBeforeCursor(
+          model,
+          requestLineNumber,
+          position
+        );
         const { insideTripleQuotes, insideEsqlQuery, esqlQueryIndex } =
-          checkForTripleQuotesAndEsqlQuery(textBeforeCursor);
+          checkForTripleQuotesAndEsqlQuery(requestTextBeforeCursor);
+
         if (esqlCallbacks && insideEsqlQuery) {
-          const queryText = textBeforeCursor.slice(esqlQueryIndex, cursorOffset);
+          const queryText = requestTextBeforeCursor.slice(esqlQueryIndex);
           const unescapedQuery = unescapeInvalidChars(queryText);
           const esqlSuggestions = await suggest(
             unescapedQuery,
@@ -77,12 +133,8 @@ export const ConsoleLang: LangModuleType = {
             !insideTripleQuotes,
             true
           );
-        } else if (actionsProvider.current) {
-          return actionsProvider.current?.provideCompletionItems(model, position, context);
         }
-        return {
-          suggestions: [],
-        };
+        return delegateToActionsProvider();
       },
     };
   },

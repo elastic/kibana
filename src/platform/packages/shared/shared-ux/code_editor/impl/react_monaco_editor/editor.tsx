@@ -128,6 +128,21 @@ export interface MonacoEditorProps {
   overflowWidgetsContainerZIndexOverride?: number;
 }
 
+const applyModelContentChanges = (
+  prevValue: string,
+  changes: monacoEditor.editor.IModelContentChange[]
+): string => {
+  // Apply in descending order of offset so earlier edits don't shift later offsets.
+  const sortedChanges = [...changes].sort((a, b) => b.rangeOffset - a.rangeOffset);
+  let nextValue = prevValue;
+  for (const change of sortedChanges) {
+    const start = change.rangeOffset;
+    const end = change.rangeOffset + change.rangeLength;
+    nextValue = nextValue.slice(0, start) + change.text + nextValue.slice(end);
+  }
+  return nextValue;
+};
+
 // initialize supported languages
 initializeSupportedLanguages();
 
@@ -172,6 +187,18 @@ export function MonacoEditor({
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  /**
+   * For large models, `editor.getValue()` can be very expensive because it materializes the
+   * full buffer. Keep a shadow copy of the latest value so we can apply incremental edits
+   * using `IModelContentChangedEvent` without forcing a full `getValue()` on every keystroke.
+   */
+  const lastKnownValueRef = useRef<string>(value ?? defaultValue);
+  useEffect(() => {
+    if (typeof value === 'string') {
+      lastKnownValueRef.current = value;
+    }
+  }, [value]);
+
   const style = useMemo(
     () => ({
       width: fixedWidth,
@@ -190,7 +217,15 @@ export function MonacoEditor({
 
     _subscription.current = editor.current!.onDidChangeModelContent((event) => {
       if (!__preventTriggerChangeEvent.current) {
-        onChangeRef.current?.(editor.current!.getValue(), event);
+        const onChangeHandler = onChangeRef.current;
+        if (!onChangeHandler) {
+          return;
+        }
+
+        // Apply incremental changes to the shadow value (avoid `editor.getValue()` in hot path).
+        const nextValue = applyModelContentChanges(lastKnownValueRef.current, event.changes);
+        lastKnownValueRef.current = nextValue;
+        onChangeHandler(nextValue, event);
       }
     });
   };
@@ -291,7 +326,9 @@ export function MonacoEditor({
   // useLayoutEffect instead of useEffect to mitigate https://github.com/facebook/react/issues/31023 in React@18 Legacy Mode
   useLayoutEffect(() => {
     if (editor.current) {
-      if (value === editor.current.getValue()) {
+      // In controlled mode, `value` changes on every keystroke. Avoid calling `editor.getValue()`
+      // (which materializes the full model) by comparing against our shadow copy first.
+      if (typeof value !== 'string' || value === lastKnownValueRef.current) {
         return;
       }
 
@@ -312,6 +349,9 @@ export function MonacoEditor({
       );
       editor.current.pushUndoStop();
       __preventTriggerChangeEvent.current = false;
+
+      // Keep shadow state in sync for programmatic updates where we suppress onDidChangeModelContent.
+      lastKnownValueRef.current = value;
     }
   }, [value]);
 
