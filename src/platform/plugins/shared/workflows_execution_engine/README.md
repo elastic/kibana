@@ -294,14 +294,13 @@ For each step in workflow definition:
 
 ### 4. Error Handling
 
-```
-If step fails:
-  1. Log error details
-  2. Check step-level retry configuration
-  3. Retry step or fail workflow
-  4. Update execution status
-  5. Emit error events
-```
+Errors are captured at step boundaries, propagated through the scope stack, and handled by on-failure nodes (retry, fallback, continue) in order. Retry supports fixed delay or exponential backoff with optional jitter.
+
+- **Retry:** condition-based retries with configurable attempts and delay (fixed or exponential).
+- **Fallback:** alternative steps when the primary step fails (after retries exhausted if retry is configured).
+- **Continue:** condition-based continuation despite step failure.
+
+See [On-Failure Configuration](server/step/on_failure/README.md) for recovery patterns, which errors to retry, and graceful degradation (fallback + continue).
 
 ---
 
