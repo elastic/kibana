@@ -1617,3 +1617,75 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "rel-hierarchy-event-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T12:45:00.789Z",
+      "user": {
+        "name": "Hierarchy Root User",
+        "entity": {
+          "id": "rel-hierarchy-root-user"
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": "rel-hierarchy-host-1"
+          }
+        }
+      },
+      "entity": {
+        "target": {
+          "id": "rel-hierarchy-identity-1"
+        }
+      },
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account"
+        },
+        "provider": "gcp",
+        "region": "us-east1"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.iam.admin.v1.UpdatePolicy",
+        "agent_id_status": "missing",
+        "category": [
+          "iam"
+        ],
+        "id": "rel-hierarchy-event-id-12345",
+        "ingested": "2024-10-07T17:49:00Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "gcp",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "INFO",
+        "logger": "gcp"
+      },
+      "related": {
+        "user": [
+          "rel-hierarchy-root-user"
+        ]
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "gcloud",
+        "original": "gcloud/450.0.0"
+      }
+    }
+  }
+}

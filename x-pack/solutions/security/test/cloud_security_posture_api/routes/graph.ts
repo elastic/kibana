@@ -19,6 +19,7 @@ import type {
   EntityNodeDataModel,
   LabelNodeDataModel,
   EdgeDataModel,
+  RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -1890,7 +1891,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 23,
+              expectedCount: 34,
             });
           });
 
@@ -2335,6 +2336,239 @@ export default function (providerContext: FtrProviderContext) {
                   }),
                 })
               );
+            });
+
+            it('should return hierarchical relationships with grouped targets and events', async () => {
+              // Test scenario:
+              // - Root user owns 3 entities (Host, Service, Identity) - each with different type
+              // - Each of those 3 entities communicates_with 2 entities of the same type
+              // - Identity-1 is also supervised_by a supervisor entity (different type: User)
+              // - Root user also performs an action (event) targeting host-1 and identity-1
+              // Expected:
+              // - 8 entity nodes: root + 3 intermediate + 3 grouped targets + 1 supervisor
+              // - 5 relationship nodes: 1 Owns + 3 Communicates_with + 1 Supervised_by
+              // - 1 label node: for the event action
+              // - 15 edges (12 for relationships + 3 for event)
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'rel-hierarchy-event-id-12345', isAlert: false }],
+                    start: '2024-09-01T12:00:00.000Z',
+                    end: '2024-09-01T13:00:00.000Z',
+                    entityIds: [
+                      { id: 'rel-hierarchy-root-user', isOrigin: true },
+                      { id: 'rel-hierarchy-host-1', isOrigin: false },
+                      { id: 'rel-hierarchy-service-1', isOrigin: false },
+                      { id: 'rel-hierarchy-identity-1', isOrigin: false },
+                    ],
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200, logger));
+
+              // Verify label nodes count (1 event action)
+              const labelNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'label'
+              );
+              expect(labelNodes.length).to.equal(1);
+
+              // Verify the label node properties
+              const actionLabelNode = labelNodes[0] as LabelNodeDataModel;
+              expect(actionLabelNode.label).to.equal('google.iam.admin.v1.UpdatePolicy');
+              expect(actionLabelNode.color).to.equal('primary');
+              expect(actionLabelNode.shape).to.equal('label');
+
+              // Verify entity nodes count
+              const entityNodes = response.body.nodes.filter(
+                (node: NodeDataModel) =>
+                  node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
+              );
+              // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 supervisor = 8
+              expect(entityNodes.length).to.equal(8);
+
+              // Verify relationship nodes count
+              const relationshipNodes = response.body.nodes.filter(
+                (node: NodeDataModel) => node.shape === 'relationship'
+              );
+              // 1 Owns + 3 Communicates_with + 1 Supervised_by = 5
+              expect(relationshipNodes.length).to.equal(5);
+
+              // Total nodes: 8 entity + 5 relationship + 1 label = 14
+              expect(response.body).to.have.property('nodes').length(14);
+
+              // Edges: 15 total
+              // root -> Owns -> (host, service, identity) = 4 edges
+              // host -> Communicates_with -> storage_grouped = 2 edges
+              // service -> Communicates_with -> database_grouped = 2 edges
+              // identity -> Communicates_with -> network_grouped = 2 edges
+              // identity -> Supervised_by -> supervisor = 2 edges
+              // root -> label -> host, identity = 3 edges
+              expect(response.body).to.have.property('edges').length(15);
+
+              // Verify root user node
+              const rootNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-root-user'
+              ) as EntityNodeDataModel;
+              expect(rootNode).not.to.be(undefined);
+              expect(rootNode.label).to.equal('Hierarchy Root User');
+              expect(rootNode.shape).to.equal('ellipse');
+              expect(rootNode.tag).to.equal('Identity');
+              expect(rootNode.icon).to.equal('user');
+              expect(rootNode.documentsData!.length).to.equal(1);
+              expectExpect(rootNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-root-user',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Root User',
+                    type: 'Identity',
+                    sub_type: 'AWS IAM User',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Verify intermediate host node
+              const hostNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-host-1'
+              ) as EntityNodeDataModel;
+              expect(hostNode).not.to.be(undefined);
+              expect(hostNode.label).to.equal('Hierarchy Host 1');
+              expect(hostNode.shape).to.equal('hexagon');
+              expect(hostNode.tag).to.equal('Host');
+              expect(hostNode.icon).to.equal('storage');
+              expect(hostNode.count).to.be(undefined); // Single entity, no count
+
+              // Verify intermediate service node
+              const serviceNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-service-1'
+              ) as EntityNodeDataModel;
+              expect(serviceNode).not.to.be(undefined);
+              expect(serviceNode.label).to.equal('Hierarchy Service 1');
+              expect(serviceNode.shape).to.equal('rectangle');
+              expect(serviceNode.tag).to.equal('Service');
+              expect(serviceNode.icon).to.equal('cloudStormy');
+              expect(serviceNode.count).to.be(undefined);
+
+              // Verify intermediate identity node (different from root - AWS IAM Role)
+              const identityNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-identity-1'
+              ) as EntityNodeDataModel;
+              expect(identityNode).not.to.be(undefined);
+              expect(identityNode.label).to.equal('Hierarchy Identity 1');
+              expect(identityNode.shape).to.equal('ellipse');
+              expect(identityNode.tag).to.equal('Identity');
+              expect(identityNode.icon).to.equal('user');
+              expect(identityNode.count).to.be(undefined);
+
+              // Verify grouped storage target (2 S3 buckets with same type/subtype)
+              const storageGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Storage' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(storageGroupedNode).not.to.be(undefined);
+              expect(storageGroupedNode.label).to.equal('AWS S3 Bucket'); // Shows sub_type for grouped
+              expect(storageGroupedNode.shape).to.equal('rectangle');
+              expect(storageGroupedNode.documentsData!.length).to.equal(2);
+              expectExpect(storageGroupedNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-storage-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Storage Bucket 1',
+                    type: 'Storage',
+                    sub_type: 'AWS S3 Bucket',
+                  }),
+                })
+              );
+              expectExpect(storageGroupedNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-storage-2',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Storage Bucket 2',
+                    type: 'Storage',
+                    sub_type: 'AWS S3 Bucket',
+                  }),
+                })
+              );
+
+              // Verify grouped database target (2 RDS instances with same type/subtype)
+              const databaseGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Database' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(databaseGroupedNode).not.to.be(undefined);
+              expect(databaseGroupedNode.label).to.equal('AWS RDS Instance');
+              expect(databaseGroupedNode.shape).to.equal('rectangle');
+              expect(databaseGroupedNode.documentsData!.length).to.equal(2);
+
+              // Verify grouped network target (2 VPCs with same type/subtype)
+              const networkGroupedNode = entityNodes.find(
+                (node: EntityNodeDataModel) => node.tag === 'Networking' && node.count === 2
+              ) as EntityNodeDataModel;
+              expect(networkGroupedNode).not.to.be(undefined);
+              expect(networkGroupedNode.label).to.equal('AWS VPC');
+              expect(networkGroupedNode.shape).to.equal('rectangle');
+              expect(networkGroupedNode.icon).to.equal('globe');
+
+              expect(networkGroupedNode.documentsData!.length).to.equal(2);
+
+              // Verify supervisor node (different type: User, sub_type: AWS Organizations Admin)
+              const supervisorNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-supervisor-1'
+              ) as EntityNodeDataModel;
+              expect(supervisorNode).not.to.be(undefined);
+              expect(supervisorNode.label).to.equal('Hierarchy Supervisor Admin');
+              expect(supervisorNode.shape).to.equal('ellipse');
+              expect(supervisorNode.tag).to.equal('User');
+              expect(supervisorNode.icon).to.equal('user');
+              expect(supervisorNode.count).to.be(undefined); // Single entity
+              expect(supervisorNode.documentsData!.length).to.equal(1);
+              expectExpect(supervisorNode.documentsData).toContainEqual(
+                expectExpect.objectContaining({
+                  id: 'rel-hierarchy-supervisor-1',
+                  type: 'entity',
+                  entity: expectExpect.objectContaining({
+                    name: 'Hierarchy Supervisor Admin',
+                    type: 'User',
+                    sub_type: 'AWS Organizations Admin',
+                    availableInEntityStore: true,
+                  }),
+                })
+              );
+
+              // Verify Owns relationship node (1 node connecting root to 3 different target types)
+              const ownsNodes = relationshipNodes.filter(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Owns'
+              );
+              expect(ownsNodes.length).to.equal(1);
+              expect(ownsNodes[0].shape).to.equal('relationship');
+
+              // Verify Communicates_with relationship nodes (3 nodes - one per intermediate entity)
+              const communicatesWithNodes = relationshipNodes.filter(
+                (node: NodeDataModel) =>
+                  (node as RelationshipNodeDataModel).label === 'Communicates with'
+              );
+              expect(communicatesWithNodes.length).to.equal(3);
+              communicatesWithNodes.forEach((node: NodeDataModel) => {
+                expect(node.shape).to.equal('relationship');
+              });
+
+              // Verify Supervised_by relationship node (1 node connecting identity-1 to supervisor)
+              const supervisedByNodes = relationshipNodes.filter(
+                (node: NodeDataModel) =>
+                  (node as RelationshipNodeDataModel).label === 'Supervised by'
+              );
+              expect(supervisedByNodes.length).to.equal(1);
+              expect(supervisedByNodes[0].shape).to.equal('relationship');
+
+              // Verify edges
+              response.body.edges.forEach((edge: EdgeDataModel) => {
+                expect(edge).to.have.property('color');
+                expect(edge.color).equal('subdued');
+                expect(edge.type).equal('solid');
+              });
             });
           });
         });

@@ -519,7 +519,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 25,
+            expectedCount: 36,
           });
         });
 
@@ -636,6 +636,78 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               serviceTargetNodeId,
               'GCP Service Account'
             );
+          });
+
+          it('expanded flyout - hierarchical relationships with grouped targets and event', async () => {
+            // Test scenario matching the API integration test:
+            // - Root user owns 3 entities (Host, Service, Identity) - each with different type
+            // - Each of those 3 entities communicates_with 2 entities of the same type (grouped)
+            // - Identity-1 is also supervised_by a supervisor entity (different type: User)
+            // - Root user performs an action (event) targeting host-1 and identity-1
+
+            // Navigate to the event
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('rel-hierarchy-event-ftr-1')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+
+            // Expected nodes:
+            // - 8 entity nodes: root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 supervisor
+            // - 5 relationship nodes: 1 Owns + 3 Communicates_with + 1 Supervised_by
+            // - 1 label node: for the event action (google.iam.admin.v1.UpdatePolicy)
+            // Total: 14 nodes
+            const expectedTotalNodes = 14;
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedTotalNodes);
+
+            // Verify root user (actor) node
+            const rootNodeId = 'rel-hierarchy-root-user';
+            await expandedFlyoutGraph.assertNodeEntityTag(rootNodeId, 'Identity');
+            await expandedFlyoutGraph.assertNodeEntityDetails(rootNodeId, 'AWS IAM User');
+
+            // Verify intermediate host node
+            const hostNodeId = 'rel-hierarchy-host-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(hostNodeId, 'Host');
+            await expandedFlyoutGraph.assertNodeEntityDetails(hostNodeId, 'AWS EC2 Instance');
+
+            // Verify intermediate service node
+            const serviceNodeId = 'rel-hierarchy-service-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
+            await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'AWS Lambda Function');
+
+            // Verify intermediate identity node (different from root - AWS IAM Role)
+            const identityNodeId = 'rel-hierarchy-identity-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(identityNodeId, 'Identity');
+            await expandedFlyoutGraph.assertNodeEntityDetails(identityNodeId, 'AWS IAM Role');
+
+            // Verify supervisor node (different type: User)
+            const supervisorNodeId = 'rel-hierarchy-supervisor-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(supervisorNodeId, 'User');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              supervisorNodeId,
+              'AWS Organizations Admin'
+            );
+
+            // Verify 3 grouped entity nodes exist (Storage, Database, Networking)
+            await expandedFlyoutGraph.assertGraphGroupNodesNumber(3);
+            // Click on first grouped node to open preview panel
+            // TODO: fix id passed to showEntityDetails
+            await expandedFlyoutGraph.showEntityDetails('rel-hierarchy-storage-1');
+            await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
+
+            // The preview panel should show 2 linked entity items
+            // (each grouped target contains 2 entities of the same type)
+            await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+
+            await expandedFlyoutGraph.closePreviewSection();
           });
         });
       });

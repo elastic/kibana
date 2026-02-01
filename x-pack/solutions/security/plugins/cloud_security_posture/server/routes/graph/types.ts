@@ -64,6 +64,7 @@ export interface GraphEdge {
  */
 export interface RelationshipEdge {
   relationship: string; // "Owns", "Supervised_by", "Depends_on", etc.
+  relationshipNodeId: string; // Unique ID for deduplication (sourceId-relationship)
   count: number; // Count of relationships
   // Source entity grouping (like actors in events)
   sourceNodeId: string; // Grouped source node ID (single ID or MD5 hash)

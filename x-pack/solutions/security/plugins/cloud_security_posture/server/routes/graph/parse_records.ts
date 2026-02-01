@@ -37,13 +37,12 @@ interface ConnectorEdges {
 }
 
 /**
- * Relationship connector edges - supports multiple sources for consolidated relationship nodes.
- * When multiple entities have the same relationship with the same target, they share a single
- * relationship node with edges from all sources to that node.
+ * Relationship connector edges - supports multiple sources and targets for consolidated relationship nodes.
+ * Each source+relationship combination gets one node that connects to all targets.
  */
 interface RelationshipConnectorEdges {
   sources: string[]; // Multiple sources can connect to the same relationship node
-  target: string;
+  targets: string[]; // All targets for this source+relationship combination
   edgeType: EdgeDataModel['type'];
 }
 
@@ -410,15 +409,15 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
 
 /**
  * Creates a relationship node for static/configuration-based relationships.
- * The node ID is based on relationship + targetId to consolidate nodes when
- * multiple sources have the same relationship with the same target.
+ * The node ID is based on relationshipNodeId (source + relationship) to ensure
+ * one relationship node per source+relationship combination.
  */
 const createRelationshipNode = (
-  relationship: string,
-  targetId: string
+  relationshipNodeId: string,
+  relationship: string
 ): RelationshipNodeDataModel => {
   return {
-    id: `rel(${relationship})-target(${targetId})`,
+    id: `rel(${relationshipNodeId})`,
     label: relationship.replace(/_/g, ' '), // "Depends_on" -> "Depends on"
     shape: 'relationship',
   };
@@ -426,32 +425,38 @@ const createRelationshipNode = (
 
 /**
  * Processes relationship nodes with consolidation.
- * Multiple sources with the same relationship to the same target share a single node.
+ * Each source+relationship combination gets one node that connects to all targets.
  */
 const processRelationshipNodes = (
   context: ParseContext,
   nodeData: {
     sourceId: string;
-    targetId: string;
+    targetIds: string[]; // All targets for this source+relationship
     relationshipNode: RelationshipNodeDataModel;
   }
 ) => {
   const { nodesMap, relationshipEdges } = context;
-  const { sourceId, targetId, relationshipNode } = nodeData;
+  const { sourceId, targetIds, relationshipNode } = nodeData;
 
-  // Check if this relationship node already exists (consolidation)
+  // Check if this relationship node already exists
   const existingEdges = relationshipEdges[relationshipNode.id];
   if (existingEdges) {
-    // Add this source to the existing node's sources if not already present
+    // Add this source if not already present
     if (!existingEdges.sources.includes(sourceId)) {
       existingEdges.sources.push(sourceId);
     }
+    // Add any new targets
+    targetIds.forEach((targetId) => {
+      if (!existingEdges.targets.includes(targetId)) {
+        existingEdges.targets.push(targetId);
+      }
+    });
   } else {
     // Create new relationship node
     nodesMap[relationshipNode.id] = relationshipNode;
     relationshipEdges[relationshipNode.id] = {
       sources: [sourceId],
-      target: targetId,
+      targets: targetIds,
       edgeType: 'solid',
     };
   }
@@ -563,7 +568,7 @@ const createRelationshipNodes = (
       }
     }
 
-    // Create or update target entity node (may be grouped)
+    // Create or update target entity node (may be grouped by type/subtype)
     // Use targetNodeId for the node key (can be a single ID or MD5 hash for grouped entities)
     const targetNodeId = record.targetNodeId;
 
@@ -615,13 +620,13 @@ const createRelationshipNodes = (
       }
     }
 
-    // Create relationship node - ID is based on relationship + targetNodeId
-    // so multiple sources with the same relationship to the same target share a node
-    const relationshipNode = createRelationshipNode(record.relationship, targetNodeId);
+    // Create relationship node - ID is based on source + relationship (relationshipNodeId)
+    // so each source+relationship combination gets one node that connects to all target groups
+    const relationshipNode = createRelationshipNode(record.relationshipNodeId, record.relationship);
 
     processRelationshipNodes(context, {
       sourceId: sourceNodeId,
-      targetId: targetNodeId,
+      targetIds: [targetNodeId], // Pass the grouped targetNodeId
       relationshipNode,
     });
   }
@@ -725,18 +730,18 @@ const createEdgesAndGroups = (context: ParseContext) => {
     processConnectorGroup(edgeId, edgeLabelsIds, labelEdges, edgesMap, nodesMap, 'label');
   });
 
-  // Process relationship nodes - each relationship node can have multiple sources
+  // Process relationship nodes - each relationship node can have multiple sources and targets
   Object.entries(relationshipEdges).forEach(([relationshipNodeId, edges]) => {
-    // Create edges from all sources to the relationship node, and from the node to the target
+    // Create edges from all sources to the relationship node
     edges.sources.forEach((sourceId) => {
-      connectEntitiesAndConnectorNode(
-        edgesMap,
-        nodesMap,
-        sourceId,
-        relationshipNodeId,
-        edges.target,
-        edges.edgeType
-      );
+      const edge = connectNodes(nodesMap, sourceId, relationshipNodeId, edges.edgeType);
+      edgesMap[edge.id] = edge;
+    });
+
+    // Create edges from the relationship node to all targets
+    edges.targets.forEach((targetId) => {
+      const edge = connectNodes(nodesMap, relationshipNodeId, targetId, edges.edgeType);
+      edgesMap[edge.id] = edge;
     });
   });
 };

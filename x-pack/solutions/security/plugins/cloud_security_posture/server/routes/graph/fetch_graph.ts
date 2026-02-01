@@ -168,6 +168,15 @@ export const fetchGraph = async ({
 
   // Optionally fetch relationships in parallel when entityIds are provided
   const hasEntityIds = entityIds && entityIds.length > 0;
+  // const relationshipsPromise = true
+  //   ? fetchEntityRelationships({
+  //       esClient,
+  //       logger,
+  //       entityIds:[{id: 'asd1', isOrigin: false},{id: 'asd4', isOrigin: false}, {id: 'asd7', isOrigin: false}, {id: 'asd8', isOrigin: false}],
+  //       spaceId,
+  //     })
+  //   : Promise.resolve([]);
+
   const relationshipsPromise = hasEntityIds
     ? fetchEntityRelationships({
         esClient,
@@ -629,7 +638,8 @@ ${enrichmentSection}
     "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
   "}}")
-// Group by source entity type/subtype and relationship (like events group by actor type)
+// Group by source entity, relationship, and target type/subtype (for target grouping)
+// This ensures targets with the same type are grouped together
 | STATS count = COUNT(*),
   // Source entity grouping
   sourceIds = VALUES(entity.id),
@@ -639,7 +649,9 @@ ${enrichmentSection}
   ),
   sourceIdsCount = COUNT_DISTINCT(entity.id),
   sourceDocData = VALUES(sourceDocData),
-  // Target entity grouping
+  sourceEntityType = VALUES(entity.type),
+  sourceEntitySubType = VALUES(entity.sub_type),
+  // Target entity grouping - targets with same type/subtype are grouped
   targetIds = VALUES(_target_id),
   targetNodeId = CASE(
     MV_COUNT(VALUES(_target_id)) == 1, TO_STRING(VALUES(_target_id)),
@@ -647,7 +659,10 @@ ${enrichmentSection}
   ),
   targetIdsCount = COUNT_DISTINCT(_target_id),
   targetDocData = VALUES(targetDocData)
-    BY sourceEntityType = entity.type, sourceEntitySubType = entity.sub_type, targetEntityType = _target_type, targetEntitySubType = _target_sub_type, relationship`;
+    BY entity.id, relationship, targetEntityType = _target_type, targetEntitySubType = _target_sub_type
+// Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
+// Multiple records with different target types share the same relationshipNodeId
+| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)`;
 };
 
 /**

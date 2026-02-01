@@ -10,6 +10,7 @@ import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/gra
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, EntityId, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
+import { inspect } from 'util';
 
 interface GraphContextServices {
   logger: Logger;
@@ -57,6 +58,9 @@ export const getGraph = async ({
     esQuery,
     entityIds,
   });
+
+    console.log('events1 ', inspect(events, false, null, true));
+    console.log('relationships1 ', inspect(relationships, false, null, true));
 
   return parseRecords(logger, events, relationships, nodesLimit);
 };
