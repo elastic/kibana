@@ -5,11 +5,31 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy } from '../../types';
+import type { NewPackagePolicy, PackageInfo } from '../../types';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants/cloud_connector';
 
 import { extractAccountType, validateAccountType } from './integration_helpers';
+
+// Mock PackageInfo for input-level storage mode (no package-level vars defined)
+const mockPackageInfo = {
+  name: 'test-package',
+  title: 'Test Package',
+  version: '1.0.0',
+  description: 'Test package',
+  type: 'integration',
+  categories: [],
+  conditions: {},
+  icons: [],
+  assets: {
+    kibana: undefined,
+    elasticsearch: undefined,
+  },
+  policy_templates: [],
+  data_streams: [],
+  owner: { github: 'elastic' },
+  screenshots: [],
+} as unknown as PackageInfo;
 
 describe('cloud connector integration helpers', () => {
   describe('validateAccountType', () => {
@@ -68,7 +88,7 @@ describe('cloud connector integration helpers', () => {
           'aws.account_type': { value: SINGLE_ACCOUNT },
         });
 
-        expect(extractAccountType('aws', packagePolicy)).toBe(SINGLE_ACCOUNT);
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(SINGLE_ACCOUNT);
       });
 
       it('should extract and validate AWS organization-account', () => {
@@ -76,13 +96,15 @@ describe('cloud connector integration helpers', () => {
           'aws.account_type': { value: ORGANIZATION_ACCOUNT },
         });
 
-        expect(extractAccountType('aws', packagePolicy)).toBe(ORGANIZATION_ACCOUNT);
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBe(
+          ORGANIZATION_ACCOUNT
+        );
       });
 
       it('should return undefined when aws.account_type is not present', () => {
         const packagePolicy = createMockPackagePolicy({});
 
-        expect(extractAccountType('aws', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
     });
 
@@ -92,7 +114,7 @@ describe('cloud connector integration helpers', () => {
           'azure.account_type': { value: SINGLE_ACCOUNT },
         });
 
-        expect(extractAccountType('azure', packagePolicy)).toBe(SINGLE_ACCOUNT);
+        expect(extractAccountType('azure', packagePolicy, mockPackageInfo)).toBe(SINGLE_ACCOUNT);
       });
 
       it('should extract and validate Azure organization-account', () => {
@@ -100,13 +122,15 @@ describe('cloud connector integration helpers', () => {
           'azure.account_type': { value: ORGANIZATION_ACCOUNT },
         });
 
-        expect(extractAccountType('azure', packagePolicy)).toBe(ORGANIZATION_ACCOUNT);
+        expect(extractAccountType('azure', packagePolicy, mockPackageInfo)).toBe(
+          ORGANIZATION_ACCOUNT
+        );
       });
 
       it('should return undefined when azure.account_type is not present', () => {
         const packagePolicy = createMockPackagePolicy({});
 
-        expect(extractAccountType('azure', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('azure', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
     });
 
@@ -116,7 +140,7 @@ describe('cloud connector integration helpers', () => {
           'gcp.account_type': { value: 'single-project' },
         });
 
-        expect(extractAccountType('gcp', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
     });
 
@@ -130,7 +154,7 @@ describe('cloud connector integration helpers', () => {
           inputs: [],
         };
 
-        expect(extractAccountType('aws', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
 
       it('should return undefined when no enabled input exists', () => {
@@ -154,7 +178,7 @@ describe('cloud connector integration helpers', () => {
           ],
         };
 
-        expect(extractAccountType('aws', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
 
       it('should return undefined when streams have no vars', () => {
@@ -177,7 +201,7 @@ describe('cloud connector integration helpers', () => {
           ],
         };
 
-        expect(extractAccountType('aws', packagePolicy)).toBeUndefined();
+        expect(extractAccountType('aws', packagePolicy, mockPackageInfo)).toBeUndefined();
       });
     });
   });
