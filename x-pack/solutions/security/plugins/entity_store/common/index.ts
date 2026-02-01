@@ -31,3 +31,7 @@ export const euid = {
 };
 
 export type { EntityType } from './domain/definitions/entity_schema';
+export const ENTITY_STORE_ROUTES = {
+  INSTALL: '/internal/security/entity-store/install',
+  UNINSTALL: '/internal/security/entity-store/uninstall',
+} as const satisfies Record<string, string>;
