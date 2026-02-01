@@ -11,10 +11,23 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
+import type { EntityStoreStatus, GetStatusResult } from '../../domain/types';
+
+type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'>;
+
+interface EntityStoreStatusResponseBody {
+  status: EntityStoreStatus;
+  engines: StatusEngine[];
+}
 
 const querySchema = z.object({
   include_components: BooleanFromString.optional().default(false),
 });
+
+function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngine {
+  const { versionState, ...rest } = engine;
+  return rest;
+}
 
 export function registerStatus(router: EntityStorePluginRouter) {
   router.versioned
@@ -35,7 +48,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
           },
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse<EntityStoreStatusResponseBody>> => {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, assetManager } = entityStoreCtx;
         logger.debug('Status API invoked');
@@ -45,7 +58,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
         return res.ok({
           body: {
             status,
-            engines,
+            engines: engines.map(toPublicEngine),
           },
         });
       })

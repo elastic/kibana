@@ -51,6 +51,14 @@ export async function createRequestHandlerContext({
     logger
   );
 
+  const logsExtractionClient = new LogsExtractionClient(
+    logger,
+    namespace,
+    core.elasticsearch.client.asCurrentUser,
+    dataViewsService,
+    engineDescriptorClient
+  );
+
   return {
     core,
     logger,
@@ -60,15 +68,10 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       namespace,
-      isServerless
+      isServerless,
+      logsExtractionClient
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
-    logsExtractionClient: new LogsExtractionClient(
-      logger,
-      namespace,
-      core.elasticsearch.client.asCurrentUser,
-      dataViewsService,
-      engineDescriptorClient
-    ),
+    logsExtractionClient,
   };
 }

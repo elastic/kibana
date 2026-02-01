@@ -38,6 +38,7 @@ interface LogsExtractionOptions {
     toDateISO: string;
   };
   abortController?: AbortController;
+  countOnly?: boolean;
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -95,8 +96,7 @@ export class LogsExtractionClient {
         scannedIndices: indexPatterns,
       };
 
-      // With specific window, we don't need to update the pagination timestamp
-      if (opts?.specificWindow) {
+      if (opts?.specificWindow || opts?.countOnly) {
         return operationResult;
       }
 
@@ -159,15 +159,17 @@ export class LogsExtractionClient {
       abortController: opts?.abortController,
     });
 
-    this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-    await ingestEntities({
-      esClient: this.esClient,
-      esqlResponse,
-      esIdField: HASHED_ID,
-      targetIndex: latestIndex,
-      logger: this.logger,
-      abortController: opts?.abortController,
-    });
+    if (!opts?.countOnly) {
+      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      await ingestEntities({
+        esClient: this.esClient,
+        esqlResponse,
+        esIdField: HASHED_ID,
+        targetIndex: latestIndex,
+        logger: this.logger,
+        abortController: opts?.abortController,
+      });
+    }
 
     return { esqlResponse, indexPatterns };
   }

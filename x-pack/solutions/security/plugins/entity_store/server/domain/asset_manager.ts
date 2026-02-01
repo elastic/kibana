@@ -19,7 +19,12 @@ import type {
 } from './definitions/saved_objects';
 import type { LogExtractionBodyParams } from '../routes/constants';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
-import type { EntityStoreStatus, EngineComponentStatus, EngineComponentResource } from './types';
+import type {
+  EntityStoreStatus,
+  EngineComponentStatus,
+  EngineComponentResource,
+  GetStatusResult,
+} from './types';
 import { getExtractEntityTaskId } from '../tasks/extract_entity_task';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { getLatestIndexTemplateId } from './assets/latest_index_template';
@@ -30,6 +35,7 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { LogsExtractionClient } from './logs_extraction_client';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -38,6 +44,7 @@ interface AssetManagerDependencies {
   engineDescriptorClient: EngineDescriptorClient;
   namespace: string;
   isServerless: boolean;
+  logsExtractionClient: LogsExtractionClient;
 }
 
 export class AssetManager {
@@ -47,6 +54,7 @@ export class AssetManager {
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
+  private readonly logsExtractionClient: LogsExtractionClient;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -55,6 +63,7 @@ export class AssetManager {
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
+    this.logsExtractionClient = deps.logsExtractionClient;
   }
 
   public async initEntity(
@@ -142,7 +151,7 @@ export class AssetManager {
     }
   }
 
-  public async getStatus(withComponents: boolean = false) {
+  public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
       const engines = await this.engineDescriptorClient.getAll();
       const status = this.calculateEntityStoreStatus(engines);
@@ -277,23 +286,15 @@ export class AssetManager {
     const taskId = getExtractEntityTaskId(type, this.namespace);
     try {
       const task = await this.taskManager.get(taskId);
-      const state = task.state as {
-        namespace?: string;
-        lastExecutionTimestamp?: string;
-        runs?: number;
-        lastError?: string;
-        entityType?: string;
-        status?: string;
-      };
+      const countResult = await this.logsExtractionClient.extractLogs(type, { countOnly: true });
       return {
         id: taskId,
         installed: true,
         resource: 'task',
-        enabled: task.enabled ?? true,
-        status: task.status,
-        lastExecutionTimestamp: state?.lastExecutionTimestamp,
-        runs: state?.runs,
-        lastError: state?.lastError,
+        status: task.state?.status,
+        remainingLogsToExtract: countResult.success ? countResult.count : 0,
+        runs: task.state?.runs ?? 0,
+        lastError: task.state?.lastError ?? null
       };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {

@@ -5,6 +5,7 @@
  */
 
 import { z } from '@kbn/zod';
+import type { EngineDescriptor } from './definitions/saved_objects';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
@@ -32,7 +33,15 @@ export const EngineComponentStatus = z.object({
   resource: EngineComponentResource,
   enabled: z.boolean().optional(),
   status: z.string().optional(),
+  remainingLogsToExtract: z.number().optional(),
   lastExecutionTimestamp: z.string().optional(),
   runs: z.number().optional(),
   lastError: z.string().optional(),
 });
+
+export interface GetStatusResult {
+  status: EntityStoreStatus;
+  engines: Array<
+    EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })
+  >;
+}

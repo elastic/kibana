@@ -85,6 +85,7 @@ async function runTask({
       runs: runs + 1,
       entityType,
       lastExtractionSuccess: extractionResult.success,
+      status: 'success'
     };
 
     return {
