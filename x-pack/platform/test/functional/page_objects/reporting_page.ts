@@ -132,7 +132,18 @@ export class ReportingPageObject extends FtrService {
 
   async openExportPopover() {
     this.log.debug('open export popover');
-    await this.exports.clickExportTopNavButton();
+
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      await this.exports.clickExportTopNavButton();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      await this.exports.clickExportTopNavButton();
+    }
   }
 
   async selectExportItem(label: string) {

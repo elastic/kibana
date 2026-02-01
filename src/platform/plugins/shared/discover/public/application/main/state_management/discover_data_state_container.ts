@@ -24,7 +24,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
@@ -85,7 +84,8 @@ export interface DiscoverLatestFetchDetails {
 
 export interface DiscoverDataStateContainer {
   /**
-   * Implicitly starting fetching data from ES
+   * Implicitly starting fetching data from ES,
+   * optionally with a new query (otherwise the current one from app state is used)
    */
   fetch: () => void;
   /**
@@ -130,7 +130,11 @@ export interface DiscoverDataStateContainer {
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
-  inspectorAdapters: { requests: RequestAdapter; lensRequests?: RequestAdapter };
+  inspectorAdapters: {
+    requests: RequestAdapter;
+    lensRequests?: RequestAdapter;
+    cascadeRequests?: RequestAdapter;
+  };
   /**
    * Return the initial fetch status
    *  UNINITIALIZED: data is not fetched initially, without user triggering it
@@ -150,7 +154,6 @@ export function getDataStateContainer({
   internalState,
   runtimeStateManager,
   savedSearchContainer,
-  setDataView,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -159,7 +162,6 @@ export function getDataStateContainer({
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
-  setDataView: (dataView: DataView) => void;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -456,7 +458,9 @@ export function getDataStateContainer({
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
-        setDataView(nextDataView);
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
+        );
       }
     }
 

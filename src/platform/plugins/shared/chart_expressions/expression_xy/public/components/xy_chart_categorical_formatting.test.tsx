@@ -303,12 +303,12 @@ describe('XY categorical formatting', () => {
     ]);
     // 5 series
     expect(debugState?.bars?.map((b) => b.name)).toEqual([
-      `${EMPTY_LABEL} - Sub A`,
-      `${EMPTY_LABEL} - Sub B`,
-      `${MISSING_BUCKET_LABEL} - Sub A`,
-      `${MISSING_BUCKET_LABEL} - Sub  B`,
-      `${OTHER_BUCKET_LABEL} - Sub A`,
-      `${OTHER_BUCKET_LABEL} - Sub B`,
+      `${EMPTY_LABEL} › Sub A`,
+      `${EMPTY_LABEL} › Sub B`,
+      `${MISSING_BUCKET_LABEL} › Sub A`,
+      `${MISSING_BUCKET_LABEL} › Sub  B`,
+      `${OTHER_BUCKET_LABEL} › Sub A`,
+      `${OTHER_BUCKET_LABEL} › Sub B`,
     ]);
   });
 
@@ -431,13 +431,13 @@ describe('XY categorical formatting', () => {
     expect(debugState?.axes?.x[0]?.labels).toEqual(['A', EMPTY_LABEL, NULL_LABEL, 'B']);
     // two series
     expect(debugState?.bars?.map((b) => b.name)).toEqual([
-      'Group A - Sub A',
-      'Group A - Sub B',
-      `${EMPTY_LABEL} - Sub A`,
-      `${EMPTY_LABEL} - Sub B`,
+      'Group A › Sub A',
+      'Group A › Sub B',
+      `${EMPTY_LABEL} › Sub A`,
+      `${EMPTY_LABEL} › Sub B`,
       // These two are not right, these labels should be also converted
-      `${NULL_LABEL} - Sub A`,
-      `${NULL_LABEL} - Sub B`,
+      `${NULL_LABEL} › Sub A`,
+      `${NULL_LABEL} › Sub B`,
     ]);
   });
 });

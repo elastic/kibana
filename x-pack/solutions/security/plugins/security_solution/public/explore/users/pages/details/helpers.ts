@@ -12,32 +12,44 @@ import type { Filter } from '@kbn/es-query';
  * Priority order: user.entity.id > user.id > user.email > user.name
  */
 export const getUsersDetailsPageFilters = (entityIdentifiers: Record<string, string>): Filter[] => {
+  // eslint-disable-next-line no-console
+  console.log('getUsersDetailsPageFilters - entityIdentifiers:', entityIdentifiers);
   const filters: Filter[] = [];
 
   // Priority 1: user.entity.id
   if (entityIdentifiers['user.entity.id']) {
     filters.push(createFilter('user.entity.id', entityIdentifiers['user.entity.id']));
+    // eslint-disable-next-line no-console
+    console.log('getUsersDetailsPageFilters - returning filters for user.entity.id:', filters);
     return filters;
   }
 
   // Priority 2: user.id
   if (entityIdentifiers['user.id']) {
     filters.push(createFilter('user.id', entityIdentifiers['user.id']));
+    // eslint-disable-next-line no-console
+    console.log('getUsersDetailsPageFilters - returning filters for user.id:', filters);
     return filters;
   }
 
   // Priority 3: user.email
   if (entityIdentifiers['user.email']) {
     filters.push(createFilter('user.email', entityIdentifiers['user.email']));
+    // eslint-disable-next-line no-console
+    console.log('getUsersDetailsPageFilters - returning filters for user.email:', filters);
     return filters;
   }
 
   // Priority 4: user.name
   if (entityIdentifiers['user.name']) {
     filters.push(createFilter('user.name', entityIdentifiers['user.name']));
+    // eslint-disable-next-line no-console
+    console.log('getUsersDetailsPageFilters - returning filters for user.name:', filters);
     return filters;
   }
 
+  // eslint-disable-next-line no-console
+  console.log('getUsersDetailsPageFilters - no matching identifier, returning empty filters');
   return filters;
 };
 

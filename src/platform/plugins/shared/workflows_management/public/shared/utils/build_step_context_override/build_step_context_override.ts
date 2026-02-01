@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { StepContext, WorkflowInput } from '@kbn/workflows';
+import type { JsonModelSchemaType, LegacyWorkflowInput, StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {
   extractSchemaPropertyPaths,
@@ -17,6 +17,10 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {
@@ -28,8 +32,9 @@ export interface StaticContextData extends Pick<StepContext, 'consts' | 'workflo
   /**
    * Workflow inputs definition with their default values.
    * Used to pre-populate input fields in the test step modal.
+   * Can be either legacy array format (LegacyWorkflowInput[]) or JSON Schema format.
    */
-  inputsDefinition?: WorkflowInput[];
+  inputsDefinition?: LegacyWorkflowInput[] | JsonModelSchemaType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
@@ -68,22 +73,28 @@ function readPropertyRecursive(
 /**
  * Build inputs object from workflow input definitions with their default values.
  * This allows the test step modal to pre-populate input fields with defined defaults.
+ * Supports both legacy array format and new JSON Schema format.
+ * Uses the same logic as the exec modal to ensure consistency.
  */
 function buildInputsFromDefinition(
-  inputsDefinition: WorkflowInput[] | undefined
+  inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
 ): Record<string, unknown> | undefined {
-  if (!inputsDefinition || inputsDefinition.length === 0) {
+  if (!inputsDefinition) {
     return undefined;
   }
 
-  const inputs: Record<string, unknown> = {};
-  for (const input of inputsDefinition) {
-    if (input.default !== undefined) {
-      inputs[input.name] = input.default;
-    }
+  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
+
+  if (!normalizedInputs) {
+    return undefined;
   }
 
-  return Object.keys(inputs).length > 0 ? inputs : undefined;
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  return defaults;
 }
 
 export function buildContextOverride(

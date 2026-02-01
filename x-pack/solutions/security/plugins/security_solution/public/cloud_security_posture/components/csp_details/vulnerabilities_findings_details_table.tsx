@@ -371,9 +371,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.caption',
+              'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',
               {
-                defaultMessage: 'Vulnerabilities findings table',
+                defaultMessage: 'List of vulnerability findings',
               }
             )}
           />

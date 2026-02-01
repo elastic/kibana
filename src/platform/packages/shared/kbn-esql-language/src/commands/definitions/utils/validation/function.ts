@@ -68,7 +68,9 @@ class FunctionValidator {
     for (const _arg of this.fn.args) {
       const arg = Array.isArray(_arg) ? _arg[0] : _arg; // for some reason, some args are wrapped in an array, for example named params
 
-      this.argTypes.push(getExpressionType(arg, this.context.columns));
+      this.argTypes.push(
+        getExpressionType(arg, this.context.columns, this.context.unmappedFieldsStrategy)
+      );
       this.argLiteralsMask.push(isLiteral(arg));
     }
   }

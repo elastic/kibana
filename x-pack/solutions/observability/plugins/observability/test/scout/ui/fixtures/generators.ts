@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout-oblt';
-import type { ApmFields, LogDocument } from '@kbn/synthtrace-client';
+import type { ApmFields, InfraDocument, LogDocument } from '@kbn/synthtrace-client';
 import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
-import { apm, log, timerange } from '@kbn/synthtrace-client';
+import { apm, infra, log, timerange } from '@kbn/synthtrace-client';
 import { AxiosError } from 'axios';
 
 export const TEST_START_DATE = '2024-01-01T00:00:00.000Z';
@@ -123,6 +123,55 @@ export async function generateRulesData(apiServices: ApiServicesFixture) {
       actions: [],
     });
   }
+}
+
+/**
+ * Generate synthetic metrics data for testing
+ */
+export async function generateMetricsData({
+  from,
+  to,
+  client,
+  metricName = 'system.diskio.write.bytes',
+  hostName = 'test-host',
+}: {
+  from: number;
+  to: number;
+  client: Pick<SynthtraceEsClient<InfraDocument>, 'index'>;
+  metricName?: string;
+  hostName?: string;
+  cpuValue?: number;
+  memoryUsedPct?: number;
+}): Promise<void> {
+  const range = timerange(from, to);
+
+  const THRESHOLD = 48 * 1024 * 1024; // 48MB
+  const distributionPattern = [
+    THRESHOLD - 1_000_000, // < 48M (47M approx)
+    THRESHOLD - 500_000, // < 48M (47.5M approx)
+    THRESHOLD + 1_000_000, // > 48M (49M approx)
+  ];
+
+  let index = 0;
+
+  const generator = range
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp) => {
+      const writeBytes = distributionPattern[index % distributionPattern.length];
+      index++;
+
+      return [
+        infra
+          .host(hostName)
+          .diskio({
+            [metricName]: writeBytes,
+          })
+          .timestamp(timestamp),
+      ];
+    });
+
+  await client.index(generator);
 }
 
 /**

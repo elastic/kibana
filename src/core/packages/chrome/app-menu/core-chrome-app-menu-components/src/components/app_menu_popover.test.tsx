@@ -92,14 +92,14 @@ describe('AppMenuPopover', () => {
     expect(anchorButton.closest('.euiToolTipAnchor')).not.toBeInTheDocument();
   });
 
-  it('should apply popoverWidth to the panel style', async () => {
+  it('should apply popoverWidth to the context menu', async () => {
     const { baseElement } = render(
       <AppMenuPopover {...defaultProps} isOpen={true} popoverWidth={300} />
     );
 
     await waitFor(() => {
-      const popoverPanel = baseElement.querySelector('.euiPanel');
-      expect(popoverPanel).toHaveStyle({ width: '300px' });
+      const contextMenu = baseElement.querySelector('.euiContextMenu');
+      expect(contextMenu).toHaveStyle({ width: '300px' });
     });
   });
 });

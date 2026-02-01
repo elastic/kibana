@@ -84,5 +84,10 @@ describe('getIndexPatternFromESQLQuery', () => {
       'FROM index1, (FROM index2, index3 | WHERE field >0), (FROM index4, index3 | STATS BY field2)'
     );
     expect(idxPattern22).toBe('index1,index2,index3,index4');
+
+    const idxPattern23 = getIndexPatternFromESQLQuery(
+      'PROMQL index = kibana_sample_data_logstsdb step="5m" start=?_tstart end=?_tend avg(bytes)'
+    );
+    expect(idxPattern23).toBe('kibana_sample_data_logstsdb');
   });
 });

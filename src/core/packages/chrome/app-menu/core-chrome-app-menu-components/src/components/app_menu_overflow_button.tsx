@@ -80,7 +80,6 @@ export const AppMenuOverflowButton = ({
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
-      popoverWidth={200}
       primaryActionItem={primaryActionItem}
       secondaryActionItem={secondaryActionItem}
       onClose={onPopoverClose}

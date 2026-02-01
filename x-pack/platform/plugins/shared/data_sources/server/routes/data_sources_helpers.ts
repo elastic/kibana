@@ -119,8 +119,12 @@ export async function createDataSourceAndRelatedResources(
     workflowIds.push(workflow.id);
 
     if (workflowInfo.shouldGenerateABTool) {
+      // e.g., "sources.github.search_issues" -> "search_issues"
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+
+      // Tool ID structure: type.data_source_name.workflow_base_name
       const tool = await toolRegistry.create({
-        id: `${type}.${slugify(workflow.name)}`,
+        id: `${type}.${slugify(name)}.${workflowBaseName}`,
         type: ToolType.workflow,
         description: `Workflow tool for ${type} data source`,
         tags: ['data-source', type],

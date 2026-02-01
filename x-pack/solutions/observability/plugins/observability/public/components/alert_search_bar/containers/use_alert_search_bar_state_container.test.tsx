@@ -11,13 +11,13 @@ import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_co
 import { useContainer } from './state_container';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 
 const MOCK_DEFAULT_STATE = {
   rangeFrom: 'now-30m',
   rangeTo: 'now',
   kuery: '',
-  status: 'all' as AlertStatus,
+  status: 'all' as PublicAlertStatus,
   filters: [],
   controlConfigs: [],
   groupings: [],

@@ -46,9 +46,10 @@ describe('reducer', () => {
     const response: PrivmonBulkUploadUsersCSVResponse = {
       errors: [],
       stats: {
-        total: 10,
-        successful: 10,
-        failed: 0,
+        totalOperations: 10,
+        successfulOperations: 10,
+        uploaded: 10,
+        failedOperations: 0,
       },
     };
     const state: ValidationStepState = {

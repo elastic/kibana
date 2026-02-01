@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  useCurrentEuiBreakpoint,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
+import { ACTION_TYPE_MODAL_TITLE } from '../translations';
+import { RuleActionsConnectorsBody } from './rule_actions_connectors_body';
+import { useRuleFormScreenContext } from '../hooks';
+
+export const RuleActionsConnectorsModal = () => {
+  const { euiTheme } = useEuiTheme();
+  const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
+  const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);
+  const inLineContainerCss = css`
+    container-type: inline-size;
+    background-color: transparent;
+  `;
+
+  const responsiveHeight = isFullscreenPortrait ? 'initial' : '80vh';
+  const responsiveOverflow = isFullscreenPortrait ? 'auto' : 'hidden';
+
+  const { setIsConnectorsScreenVisible } = useRuleFormScreenContext();
+  const onClose = useCallback(() => {
+    setIsConnectorsScreenVisible(false);
+  }, [setIsConnectorsScreenVisible]);
+
+  return (
+    <EuiModal
+      onClose={onClose}
+      maxWidth={euiTheme.breakpoint[currentBreakpoint]}
+      style={{
+        width: euiTheme.breakpoint[currentBreakpoint],
+        maxHeight: responsiveHeight,
+        height: responsiveHeight,
+        overflow: responsiveOverflow,
+      }}
+      data-test-subj="ruleActionsConnectorsModal"
+      aria-label={ACTION_TYPE_MODAL_TITLE}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody css={inLineContainerCss}>
+        <RuleActionsConnectorsBody
+          responsiveOverflow={responsiveOverflow}
+          onSelectConnector={onClose}
+        />
+      </EuiModalBody>
+    </EuiModal>
+  );
+};

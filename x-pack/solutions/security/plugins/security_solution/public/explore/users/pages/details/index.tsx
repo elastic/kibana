@@ -105,7 +105,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   } = useKibana();
 
   const usersDetailsPageFilters: Filter[] = useMemo(
-    () => getUsersDetailsPageFilters(entityIdentifiers),
+    () => {
+      // eslint-disable-next-line no-console
+      console.log('UsersDetails - entityIdentifiers received:', entityIdentifiers);
+      const filters = getUsersDetailsPageFilters(entityIdentifiers);
+      // eslint-disable-next-line no-console
+      console.log('UsersDetails - usersDetailsPageFilters created:', filters);
+      return filters;
+    },
     [entityIdentifiers]
   );
 

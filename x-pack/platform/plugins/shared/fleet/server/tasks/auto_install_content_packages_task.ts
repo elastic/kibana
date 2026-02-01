@@ -5,12 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import {
-  type CoreSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -150,7 +145,7 @@ export class AutoInstallContentPackagesTask {
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const packageClient = packageService.asInternalUser;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const prerelease = await getPrereleaseFromSettings(soClient);
 

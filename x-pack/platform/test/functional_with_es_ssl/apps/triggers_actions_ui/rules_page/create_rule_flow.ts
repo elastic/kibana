@@ -161,8 +161,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
         const url = await browser.getCurrentUrl();
-        if (!url.includes(`/app/rules/rule/${ruleId}`)) {
-          throw new Error(`Expected URL to contain '/app/rules/rule/${ruleId}' but got: ${url}`);
+        if (!url.includes(`/app/rules/${ruleId}`)) {
+          throw new Error(`Expected URL to contain '/app/rules/${ruleId}' but got: ${url}`);
         }
       });
 
@@ -173,7 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Verify the URL contains the rule details path
       const url = await browser.getCurrentUrl();
-      expect(url).to.contain(`/app/rules/rule/${ruleId}`);
+      expect(url).to.contain(`/app/rules/${ruleId}`);
     });
   });
 };

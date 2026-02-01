@@ -32,6 +32,9 @@ describe('Attachment Routes', () => {
       conversations: {
         getScopedClient: jest.MockedFunction<() => Promise<typeof mockConversationsClient>>;
       };
+      attachments: {
+        getTypeDefinition: jest.MockedFunction<(type: string) => any>;
+      };
     }
   >;
   let mockResponse: {
@@ -91,6 +94,13 @@ describe('Attachment Routes', () => {
     mockGetInternalServices = jest.fn().mockReturnValue({
       conversations: {
         getScopedClient: jest.fn().mockResolvedValue(mockConversationsClient),
+      },
+      attachments: {
+        getTypeDefinition: jest.fn().mockImplementation((type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        })),
       },
     });
 

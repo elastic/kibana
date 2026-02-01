@@ -13,10 +13,8 @@ import { ActiveSourcesTable } from './active_sources_table';
 import { ConfirmDeleteActiveSourceModal } from './confirm_delete_active_source_modal';
 import { useActiveSources } from '../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../hooks/use_delete_active_source';
-import { useCloneActiveSource } from '../hooks/use_clone_active_source';
-import { useAddConnectorFlyout } from '../hooks/use_add_connector_flyout';
 import { useEditActiveSourceFlyout } from '../hooks/use_edit_active_source_flyout';
-import { toStackConnectorType } from '../../utils';
+import { useCloneActiveSourceFlyout } from '../hooks/use_clone_active_source_flyout';
 import type { ActiveSource } from '../../types/connector';
 
 export const ActiveSourcesView: React.FC = () => {
@@ -34,13 +32,8 @@ export const ActiveSourcesView: React.FC = () => {
   const { mutate: deleteActiveSource, isLoading: isDeleting } =
     useDeleteActiveSource(handleCancelDelete);
 
-  const { getCloneName } = useCloneActiveSource();
-
-  // Setup clone flyout with suggested name
-  const clonedName = sourceToClone ? getCloneName(sourceToClone) : undefined;
-  const { openFlyout: openCloneFlyout, flyout: cloneFlyout } = useAddConnectorFlyout({
-    dataSourceType: sourceToClone?.type,
-    suggestedName: clonedName,
+  const { openFlyout: openCloneFlyout, flyout: cloneFlyout } = useCloneActiveSourceFlyout({
+    sourceToClone,
     onConnectorCreated: () => {
       setSourceToClone(null);
     },
@@ -68,7 +61,7 @@ export const ActiveSourcesView: React.FC = () => {
       setSourceToClone(source);
       // Open the add connector flyout with pre-selected type
       // User will need to select/create credentials (no secrets cloned)
-      openCloneFlyout(toStackConnectorType(source.type));
+      openCloneFlyout();
     },
     [openCloneFlyout]
   );

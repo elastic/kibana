@@ -46,7 +46,6 @@ export function registerToolsRoutes({
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -85,7 +84,6 @@ export function registerToolsRoutes({
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -131,7 +129,6 @@ export function registerToolsRoutes({
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -207,7 +204,6 @@ export function registerToolsRoutes({
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -279,7 +275,6 @@ export function registerToolsRoutes({
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -328,7 +323,6 @@ export function registerToolsRoutes({
         },
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

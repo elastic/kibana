@@ -15,7 +15,7 @@
         "label": "notificationServiceMock",
         "description": [],
         "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
-        "lineNumber": 54,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -33,7 +33,7 @@
               ">"
             ],
             "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
-            "lineNumber": 55,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,7 +61,7 @@
               ">"
             ],
             "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -89,7 +89,7 @@
               ">"
             ],
             "path": "src/core/packages/notifications/browser-mocks/src/notifications_service.mock.ts",
-            "lineNumber": 57,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

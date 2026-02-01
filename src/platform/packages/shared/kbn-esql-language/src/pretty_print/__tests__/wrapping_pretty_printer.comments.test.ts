@@ -827,6 +827,67 @@ ROW
         assertReprint(src);
       });
     });
+
+    describe('assignment representation', () => {
+      test('basic assignment, no comments', () => {
+        assertReprint('PROMQL index = my_index bytes[5m]');
+      });
+
+      test('leading comment before assignment entry', () => {
+        assertReprint('PROMQL /* cmt */ index = my_index bytes[5m]');
+      });
+
+      test('trailing comment after assignment entry', () => {
+        assertReprint('PROMQL index = my_index /* cmt */ bytes[5m]');
+      });
+
+      test('comment before key', () => {
+        assertReprint('PROMQL /* before key */ index = my_index bytes[5m]');
+      });
+
+      test('comment after key', () => {
+        assertReprint('PROMQL index /* after key */ = my_index bytes[5m]');
+      });
+
+      test('comment before value', () => {
+        assertReprint('PROMQL index = /* before value */ my_index bytes[5m]');
+      });
+
+      test('comment after value', () => {
+        assertReprint('PROMQL index = my_index /* after value */ bytes[5m]');
+      });
+
+      test('multiple assignment entries with comments', () => {
+        assertReprint(
+          'PROMQL /* 1 */ index = my_index /* 2 */ /* 3 */ offset = `5m` /* 4 */ bytes[5m]'
+        );
+      });
+
+      test('single-line comment over assignment', () => {
+        const src = `PROMQL
+    // this is the index:
+    index =
+      my_index
+  bytes[5m]`;
+        assertReprint(src);
+      });
+
+      test('single-line comment after assignment', () => {
+        const src = `PROMQL
+    index =
+      my_index // this is the index
+  bytes[5m]`;
+        assertReprint(src);
+      });
+
+      test('comments around assignment operator', () => {
+        assertReprint('PROMQL index /* before */ = /* after */ my_index bytes[5m]');
+      });
+
+      test('multiple comments in assignment', () => {
+        assertReprint('PROMQL /* a */ index /* b */ = /* c */ my_index /* d */ bytes[5m]');
+      });
+    });
   });
 
   describe('header commands', () => {

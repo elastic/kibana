@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/file-upload-plugin'
   - '@kbn/discover-utils'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

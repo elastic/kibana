@@ -89,7 +89,7 @@ export async function getAxiosInstance(
       );
     }
 
-    const spaceId = spaces && spaces.getSpaceId(request);
+    const spaceId = context.spaceId ?? (spaces && spaces.getSpaceId(request));
     const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
       'action',
       connectorId,

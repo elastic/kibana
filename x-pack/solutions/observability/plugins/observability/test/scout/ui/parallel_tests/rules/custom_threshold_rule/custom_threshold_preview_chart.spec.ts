@@ -7,8 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../../fixtures';
 
-// FLAKY: https://github.com/elastic/kibana/issues/247632
-test.describe.skip('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Custom threshold preview chart', { tag: ['@ess', '@svlOblt'] }, () => {
   const previewChartDataTestSubj = 'thresholdRulePreviewChart';
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -27,25 +26,29 @@ test.describe.skip('Custom threshold preview chart', { tag: ['@ess', '@svlOblt']
   });
 
   test('should handle the error message correctly', async ({ page }) => {
-    const customEquationField = page.testSubj.locator('thresholdRuleCustomEquationEditorFieldText');
+    await expect(async () => {
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
 
-    // Introduce an error in the equation
-    await page.testSubj.click('customEquation');
-    await customEquationField.click();
-    await customEquationField.fill('A +');
-    await page.testSubj.click('o11yClosablePopoverTitleButton');
+      // Introduce an error in the equation
+      await page.testSubj.click('customEquation');
+      await customEquationField.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-    const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-    await expect(lensFailure).toBeVisible();
-    await expect(lensFailure).toContainText('An error occurred while rendering the chart');
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
+      await expect(lensFailure).toBeVisible();
+      await expect(lensFailure).toContainText('An error occurred while rendering the chart');
 
-    // Fix the introduced error
-    await page.testSubj.click('customEquation');
-    await customEquationField.click();
-    await customEquationField.fill('A');
-    await page.testSubj.click('o11yClosablePopoverTitleButton');
+      // Fix the introduced error
+      await page.testSubj.click('customEquation');
+      await customEquationField.click();
+      await customEquationField.fill('A');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-    // Wait for the chart to re-render after fixing the equation
-    await expect(lensFailure).toBeHidden({ timeout: 15000 });
+      // Wait for the chart to re-render after fixing the equation
+      await expect(lensFailure).toBeHidden();
+    }).toPass({ timeout: 15_000, intervals: [1000] });
   });
 });

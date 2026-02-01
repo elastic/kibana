@@ -138,6 +138,8 @@ const FormattedFieldValueComponent: React.FC<{
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
     const hostEntityIdentifiers = data ? getHostEntityIdentifiersFromTimelineData(data) : undefined;
+    console.log('hostEntityIdentifiers', hostEntityIdentifiers);
+    console.log('data', data);
     return (
       <HostName
         Component={Component}
@@ -151,6 +153,7 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
     const userEntityIdentifiers = data ? getUserEntityIdentifiersFromTimelineData(data) : undefined;
+    console.log('userEntityIdentifiers', userEntityIdentifiers);
     return (
       <UserName
         Component={Component}
