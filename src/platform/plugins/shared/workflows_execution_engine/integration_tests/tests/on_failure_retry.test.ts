@@ -285,5 +285,76 @@ steps:
         });
       }
     );
+
+    describe('exponential backoff', () => {
+      beforeAll(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: constantlyFailingStep
+    type: ${FakeConnectors.constantlyFailing.actionTypeId}
+    connector-id: ${FakeConnectors.constantlyFailing.name}
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: "1s"
+        strategy: exponential
+        multiplier: 2
+        max-delay: "5s"
+    with:
+      message: 'Hi there!'
+
+  - name: finalStep
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Final message!'
+`,
+        });
+      });
+
+      it('should fail workflow after exhausting retries', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
+        expect(workflowExecutionDoc?.error?.type).toBe('Error');
+      });
+
+      it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter(
+          (se) =>
+            se.stepId === 'constantlyFailingStep' &&
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+        );
+        expect(stepExecutions.length).toBe(3);
+      });
+
+      it('should observe at least first exponential delay (1s) between first and second attempt', async () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter(
+          (se) =>
+            se.stepId === 'constantlyFailingStep' &&
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+        );
+        expect(stepExecutions.length).toBe(3);
+        const firstToSecondDelay =
+          new Date(stepExecutions[1].startedAt).getTime() -
+          new Date(stepExecutions[0].finishedAt!).getTime();
+        expect(firstToSecondDelay).toBeGreaterThanOrEqual(999);
+      });
+
+      it('should not execute finalStep', async () => {
+        const finalStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'finalStep');
+        expect(finalStepExecutions.length).toBe(0);
+      });
+    });
   });
 });
