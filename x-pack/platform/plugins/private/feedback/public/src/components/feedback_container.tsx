@@ -10,7 +10,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { getCurrentAppTitleAndId, getQuestions } from '../utils';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
@@ -33,6 +32,7 @@ export const FeedbackContainer = ({ core, cloud, hideFeedbackContainer }: Props)
   const [solutionView, setSolutionView] = useState<string | null>(null);
 
   const appDetails = getCurrentAppTitleAndId(core);
+
   const questions = getQuestions(appDetails?.id);
 
   const [firstQuestion, secondQuestion] = questions;

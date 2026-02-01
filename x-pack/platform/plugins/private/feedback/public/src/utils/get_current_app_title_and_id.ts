@@ -5,61 +5,50 @@
  * 2.0.
  */
 
-import { stripQueryParams } from '@kbn/core-chrome-browser-internal/src/project_navigation/utils';
 import type { CoreStart } from '@kbn/core/public';
 
-const stripHashAndQueryParams = (url: string) => {
-  // Strip hash first (navLink URLs don't include hashes)
-  const hashIndex = url.indexOf('#');
-  const withoutHash = hashIndex !== -1 ? url.slice(0, hashIndex) : url;
-  return stripQueryParams(withoutHash);
-};
-
 export const getCurrentAppTitleAndId = (core: CoreStart) => {
-  let location: string | undefined;
+  /**
+   * Clear previous context to get the latest app info
+   */
+  core.executionContext.clear();
 
-  core.application.currentLocation$.subscribe((loc) => (location = loc)).unsubscribe();
-
-  if (!location) {
-    return undefined;
-  }
-
+  const executionContext = core.executionContext.get();
   const navLinks = core.chrome.navLinks.getAll();
-  // NavLink URLs don't include hashes, so strip hash from location for matching
-  const locationSanitized = stripHashAndQueryParams(location);
 
-  // Same matching logic as findActiveNodes: group by URL path length, then sort by ID depth
-  const matches: Array<Array<(typeof navLinks)[number]>> = [];
+  /**
+   * Try to match by url first (exact match)
+   */
+  let match = navLinks.find((link) => link.url === executionContext.url);
 
-  for (const link of navLinks) {
-    const linkPath = stripHashAndQueryParams(core.http.basePath.remove(link.url));
-    if (locationSanitized.startsWith(linkPath)) {
-      const { length } = linkPath;
-      if (!matches[length]) {
-        matches[length] = [];
-      }
-      matches[length].push(link);
-      // Sort by ID length (deeper nesting = more colons = longer ID)
-      matches[length].sort((a, b) => b.id.length - a.id.length);
-    }
+  /**
+   * If no exact match, check if executionContext.url starts with any navLink.url
+   * This handles cases where executionContext is more specific.
+   * Sort by URL length descending to get the most specific match first.
+   */
+  if (!match && executionContext.url) {
+    const matches = navLinks
+      .filter((link) => executionContext.url?.startsWith(link.url))
+      .sort((a, b) => b.url.length - a.url.length);
+    match = matches[0];
   }
 
-  // Pick the longest URL match, then the deepest nested link
-  const matchingLink = matches.length > 0 ? matches[matches.length - 1]?.[0] : undefined;
-
-  if (!matchingLink) {
-    return undefined;
+  /**
+   * Fallback to matching by name
+   */
+  if (!match) {
+    match = navLinks.find((link) => link.id === executionContext.name);
   }
 
-  let title = matchingLink?.title;
+  let title = match?.title;
+  const category = match?.category;
 
-  const category = matchingLink.category;
-  if (category && category.id !== 'kibana' && category.id !== 'management') {
-    title = `[${category.label}] ${matchingLink.title}`;
+  if (category) {
+    title = `[${category.label}] ${match?.title}`;
   }
 
   return {
     title,
-    id: matchingLink.id,
+    id: match?.id,
   };
 };
