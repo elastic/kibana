@@ -15,6 +15,7 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { identifySystemsWithDescription } from '../../streams/system/identify_systems';
+import { withRateLimitRetry, RateLimitTimeoutError } from '../rate_limit_retry';
 
 export interface SystemIdentificationTaskParams {
   connectorId: string;
@@ -71,19 +72,26 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                 const { descriptionPromptOverride, systemsPromptOverride } =
                   await promptsConfigService.getPrompt();
 
-                const { systems, tokensUsed } = await identifySystemsWithDescription({
-                  start,
-                  end,
-                  esClient,
-                  inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('system_identification'),
-                  stream,
-                  systems: currentSystems,
-                  signal: runContext.abortController.signal,
-                  descriptionPrompt: descriptionPromptOverride,
-                  systemsPrompt: systemsPromptOverride,
-                  dropUnmapped: true,
-                });
+                const { systems, tokensUsed } = await withRateLimitRetry(
+                  () =>
+                    identifySystemsWithDescription({
+                      start,
+                      end,
+                      esClient,
+                      inferenceClient: boundInferenceClient,
+                      logger: taskContext.logger.get('system_identification'),
+                      stream,
+                      systems: currentSystems,
+                      signal: runContext.abortController.signal,
+                      descriptionPrompt: descriptionPromptOverride,
+                      systemsPrompt: systemsPromptOverride,
+                      dropUnmapped: true,
+                    }),
+                  {
+                    signal: runContext.abortController.signal,
+                    logger: taskContext.logger,
+                  }
+                );
 
                 taskContext.telemetry.trackSystemsIdentified({
                   count: systems.length,
@@ -98,6 +106,26 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   Pick<IdentifySystemsResult, 'systems'>
                 >(_task, { connectorId, start, end, streamName }, { systems });
               } catch (error) {
+                // Handle rate limit timeout by rescheduling or failing
+                if (error instanceof RateLimitTimeoutError) {
+                  taskContext.logger.warn(
+                    `Task ${runContext.taskInstance.id} hit rate limit timeout, attempting reschedule`
+                  );
+                  const rescheduled = await taskClient.reschedule(
+                    _task,
+                    { connectorId, start, end, streamName },
+                    runContext.fakeRequest!
+                  );
+                  if (!rescheduled) {
+                    await taskClient.fail<SystemIdentificationTaskParams>(
+                      _task,
+                      { connectorId, start, end, streamName },
+                      'Rate limit exceeded: max reschedule retries reached'
+                    );
+                  }
+                  return;
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 

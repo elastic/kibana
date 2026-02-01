@@ -16,10 +16,20 @@ import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
 import { TaskNotFoundError } from '../streams/errors/task_not_found_error';
 import { isStale } from './is_stale';
 
+/**
+ * Maximum number of times a task can be rescheduled due to rate limiting.
+ */
+export const MAX_RESCHEDULE_RETRIES = 5;
+
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
   params: TParams;
   request: KibanaRequest;
+  /**
+   * Number of times this task has been rescheduled due to rate limiting.
+   * Used internally by reschedule() - callers typically don't need to set this.
+   */
+  retryCount?: number;
 }
 
 export class TaskClient<TaskType extends string> {
@@ -95,6 +105,7 @@ export class TaskClient<TaskType extends string> {
     task,
     params,
     request,
+    retryCount,
   }: TaskRequest<TaskType, TParams>) {
     const storedTask = await this.get(task.id);
     if (storedTask.status === TaskStatus.BeingCanceled) {
@@ -105,6 +116,7 @@ export class TaskClient<TaskType extends string> {
       ...task,
       task: {
         params,
+        ...(retryCount !== undefined && { retry_count: retryCount }),
       },
       status: TaskStatus.InProgress,
       created_at: new Date().toISOString(),
@@ -143,6 +155,55 @@ export class TaskClient<TaskType extends string> {
         throw error;
       }
     }
+  }
+
+  /**
+   * Reschedules a task for retry after a rate limit timeout.
+   * This method is called when a task exhausts its rate limit retry budget (5 minutes)
+   * but hasn't exceeded the maximum number of reschedule attempts.
+   *
+   * @param currentTask - The current persisted task state
+   * @param params - The task parameters to reschedule with
+   * @param request - The Kibana request (typically runContext.fakeRequest from task runner)
+   * @returns true if the task was rescheduled, false if max retries exceeded
+   * @throws Error if task is being canceled
+   */
+  public async reschedule<TParams extends {} = {}>(
+    currentTask: PersistedTask,
+    params: TParams,
+    request: KibanaRequest
+  ): Promise<boolean> {
+    const currentRetryCount = currentTask.task.retry_count ?? 0;
+
+    if (currentRetryCount >= MAX_RESCHEDULE_RETRIES) {
+      this.logger.warn(
+        `Task ${currentTask.id} has exceeded max reschedule retries (${MAX_RESCHEDULE_RETRIES})`
+      );
+      return false;
+    }
+
+    const newRetryCount = currentRetryCount + 1;
+
+    this.logger.info(
+      `Rescheduling task ${currentTask.id} (retry ${newRetryCount}/${MAX_RESCHEDULE_RETRIES})`
+    );
+
+    await this.schedule({
+      task: {
+        id: currentTask.id,
+        type: currentTask.type as TaskType,
+        space: currentTask.space,
+        last_completed_at: currentTask.last_completed_at,
+        last_acknowledged_at: currentTask.last_acknowledged_at,
+        last_canceled_at: currentTask.last_canceled_at,
+        last_failed_at: currentTask.last_failed_at,
+      },
+      params,
+      request,
+      retryCount: newRetryCount,
+    });
+
+    return true;
   }
 
   public async cancel(id: string) {

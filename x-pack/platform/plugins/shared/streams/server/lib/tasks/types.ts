@@ -35,6 +35,11 @@ interface PersistedTaskBase<TParams extends {} = {}> {
   last_failed_at?: string;
   task: {
     params: TParams;
+    /**
+     * Number of times this task has been rescheduled due to rate limiting.
+     * Used to limit retries (max 5) before failing permanently.
+     */
+    retry_count?: number;
   };
 }
 

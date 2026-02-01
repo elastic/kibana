@@ -19,6 +19,7 @@ import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { generateSignificantEventDefinitions } from '../../significant_events/generate_significant_events';
+import { withRateLimitRetry, RateLimitTimeoutError } from '../rate_limit_retry';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
   connectorId: string;
@@ -83,22 +84,29 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 const resultsArray = await Promise.all(
                   systemsToProcess.map((system) =>
                     limiter(() =>
-                      generateSignificantEventDefinitions(
+                      withRateLimitRetry(
+                        () =>
+                          generateSignificantEventDefinitions(
+                            {
+                              definition: stream,
+                              connectorId,
+                              start,
+                              end,
+                              system,
+                              sampleDocsSize,
+                              features,
+                              systemPrompt: significantEventsPromptOverride,
+                            },
+                            {
+                              inferenceClient,
+                              esClient,
+                              logger: taskContext.logger.get('significant_events_generation'),
+                              signal: runContext.abortController.signal,
+                            }
+                          ),
                         {
-                          definition: stream,
-                          connectorId,
-                          start,
-                          end,
-                          system,
-                          sampleDocsSize,
-                          features,
-                          systemPrompt: significantEventsPromptOverride,
-                        },
-                        {
-                          inferenceClient,
-                          esClient,
-                          logger: taskContext.logger.get('significant_events_generation'),
                           signal: runContext.abortController.signal,
+                          logger: taskContext.logger,
                         }
                       )
                     )
@@ -135,6 +143,26 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   combinedResults
                 );
               } catch (error) {
+                // Handle rate limit timeout by rescheduling or failing
+                if (error instanceof RateLimitTimeoutError) {
+                  taskContext.logger.warn(
+                    `Task ${runContext.taskInstance.id} hit rate limit timeout, attempting reschedule`
+                  );
+                  const rescheduled = await taskClient.reschedule(
+                    _task,
+                    { connectorId, start, end, systems, sampleDocsSize, streamName },
+                    runContext.fakeRequest!
+                  );
+                  if (!rescheduled) {
+                    await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
+                      _task,
+                      { connectorId, start, end, systems, sampleDocsSize, streamName },
+                      'Rate limit exceeded: max reschedule retries reached'
+                    );
+                  }
+                  return;
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
