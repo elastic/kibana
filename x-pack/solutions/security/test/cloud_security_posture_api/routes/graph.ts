@@ -91,7 +91,6 @@ export default function (providerContext: FtrProviderContext) {
     describe('Validation', () => {
       it('should return 400 when missing `originEventIds` field', async () => {
         await postGraph(supertest, {
-          // @ts-expect-error ignore error for testing
           query: {
             start: 'now-1d/d',
             end: 'now/d',

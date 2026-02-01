@@ -397,7 +397,6 @@ const createNodes = (records: GraphEdge[], context: ParseContext) => {
 
     const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
     const { labelNodeId } = record;
-
     const labelNode = createLabelNode(record);
 
     processLabelNodes(context, {
@@ -469,7 +468,6 @@ const parseEntityDocData = (
   let entityData: NodeDocumentDataModel | undefined;
   let label = targetId;
   let entityType: string | undefined;
-  let entitySubType: string | undefined;
 
   if (targetDocDataJson) {
     try {
@@ -479,7 +477,6 @@ const parseEntityDocData = (
         label = entityData.entity.name;
       }
       entityType = entityData?.entity?.type;
-      entitySubType = entityData?.entity?.sub_type;
     } catch {
       // If parsing fails, use targetId as label
     }
@@ -658,14 +655,20 @@ const processConnectorGroup = (
 ) => {
   if (connectorIds.length === 1) {
     const connectorId = connectorIds[0];
-    connectEntitiesAndConnectorNode(
-      edgesMap,
-      nodesMap,
-      connectorEdgesMap[connectorId][0].source,
-      connectorId,
-      connectorEdgesMap[connectorId][0].target,
-      connectorEdgesMap[connectorId][0].edgeType
-    );
+    const edges = connectorEdgesMap[connectorId];
+
+    // A single label can fan out to multiple targets (e.g., one action affecting multiple entities)
+    // Create edges for all source-target pairs
+    edges.forEach((edge) => {
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        edge.source,
+        connectorId,
+        edge.target,
+        edge.edgeType
+      );
+    });
   } else {
     // Create group node for multiple connectors
     const groupNode: GroupNodeDataModel = {
@@ -676,17 +679,21 @@ const processConnectorGroup = (
 
     let groupEdgesColor: EdgeColor = 'subdued';
 
+    // Get all unique source-target pairs from all labels in this group
+    const firstConnectorEdges = connectorEdgesMap[connectorIds[0]];
+
     // Order of creation matters when using dagre layout, first create edges to the group node,
     // then connect the group node to the connector nodes
-    connectEntitiesAndConnectorNode(
-      edgesMap,
-      nodesMap,
-      connectorEdgesMap[connectorIds[0]][0].source,
-      groupNode.id,
-      connectorEdgesMap[connectorIds[0]][0].target,
-      'solid',
-      groupEdgesColor
-    );
+    firstConnectorEdges.forEach((edge) => {
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        edge.source,
+        groupNode.id,
+        edge.target,
+        edge.edgeType
+      );
+    });
 
     connectorIds.forEach((connectorId) => {
       const node = nodesMap[connectorId];
