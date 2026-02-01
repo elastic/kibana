@@ -52,6 +52,8 @@ export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
 export const GRAPH_MINIMAP_LABEL_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapLabelNode` as const;
+export const GRAPH_MINIMAP_RELATIONSHIP_NODE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}MinimapRelationshipNode` as const;
 export const GRAPH_MINIMAP_UNKNOWN_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapUnknownNode` as const;
 

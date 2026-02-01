@@ -30,9 +30,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LensLayerType } from '@kbn/lens-common';
+import type { OriginalColumn } from '../../../../common/types';
 import { layerTypes } from '../../..';
 
 type LayerType = Exclude<LensLayerType, 'metricTrendline'>;
+
+/**
+ * Conversion data from generateEsqlQuery.
+ */
+export interface EsqlConversionData {
+  esAggsIdMap: Record<string, OriginalColumn[]>;
+  partialRows: boolean;
+}
 
 export interface ConvertibleLayer {
   id: string;
@@ -41,6 +50,7 @@ export interface ConvertibleLayer {
   type: LayerType;
   query: string;
   isConvertibleToEsql: boolean;
+  conversionData: EsqlConversionData;
 }
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
@@ -66,9 +76,8 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   onCancel: EuiConfirmModalProps['onCancel'];
   /**
    * Callback invoked when user confirms the conversion.
-   * @param params - Object containing array of layer IDs selected for conversion
    */
-  onConfirm: (params: { layersToConvert: string[] }) => void;
+  onConfirm: () => void;
 }> = ({ layers, onCancel, onConfirm }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -210,15 +219,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
         defaultMessage: 'Cancel',
       })}
-      onConfirm={() => {
-        let layersToConvert: string[] = [];
-        if (layers.length === 1 && layers[0].isConvertibleToEsql) {
-          layersToConvert = [layers[0].id];
-        } else if (layers.length > 1 && selectedItems.length > 0) {
-          layersToConvert = selectedItems.map((layer) => layer.id);
-        }
-        onConfirm({ layersToConvert });
-      }}
+      onConfirm={onConfirm}
       confirmButtonText={i18n.translate('xpack.lens.config.switchToQueryModeButtonLabel', {
         defaultMessage: 'Switch to query mode',
       })}

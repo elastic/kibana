@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import type { Url } from 'url';
 import { format, parse } from 'url';
 import { readKibanaConfig } from './read_kibana_config';
@@ -19,9 +18,9 @@ import { getApiKeyHeader } from './get_api_key_header';
 async function getFetchStatus(url: string, apiKey?: string) {
   try {
     const response = await fetch(url, {
-      agent: getFetchAgent(url),
+      dispatcher: getFetchAgent(url),
       headers: getApiKeyHeader(apiKey),
-    });
+    } as RequestInit);
     return response.status;
   } catch (error) {
     return 0;
@@ -87,10 +86,9 @@ async function getKibanaUrl({
 
     const unredirectedResponse = await fetch(targetKibanaUrl, {
       method: 'HEAD',
-      follow: 1,
       redirect: 'manual',
-      agent: getFetchAgent(targetKibanaUrl),
-    });
+      dispatcher: getFetchAgent(targetKibanaUrl),
+    } as RequestInit);
 
     const discoveredKibanaUrl =
       unredirectedResponse.headers
@@ -105,8 +103,8 @@ async function getKibanaUrl({
 
     const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
       method: 'HEAD',
-      agent: getFetchAgent(discoveredKibanaUrlWithAuth),
-    });
+      dispatcher: getFetchAgent(discoveredKibanaUrlWithAuth),
+    } as RequestInit);
 
     if (redirectedResponse.status !== 200) {
       throw new Error(

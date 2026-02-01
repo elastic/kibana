@@ -135,10 +135,33 @@ export const Graph = memo<GraphProps>(
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
-    const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
+    const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
+
+    // Sync isGraphInteractive with interactive prop and re-process nodes when it changes
+    useEffect(() => {
+      setIsGraphInteractive(interactive);
+
+      // Re-process graph with new interactive state if nodes exist
+      if (currNodesRef.current.length > 0) {
+        const { initialNodes, initialEdges } = processGraph(
+          currNodesRef.current,
+          currEdgesRef.current,
+          interactive
+        );
+        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
+
+        // Force ReactFlow to remount to apply new className
+        setReactFlowKey((prev) => prev + 1);
+
+        setTimeout(() => {
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+        }, 0);
+      }
+    }, [interactive, setNodes, setEdges]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -147,7 +170,7 @@ export const Graph = memo<GraphProps>(
     );
 
     useEffect(() => {
-      // On nodes or edges changes reset the graph and re-layout
+      // On nodes or edges changes, or interactive state changes, reset the graph and re-layout
       if (
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
@@ -160,7 +183,6 @@ export const Graph = memo<GraphProps>(
 
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
-
         // Force ReactFlow to remount by changing the key first
         setReactFlowKey((prev) => prev + 1);
 
@@ -325,6 +347,7 @@ const processGraph = (
       type: nodeData.shape,
       data: { ...nodeData, interactive },
       position: { x: 0, y: 0 }, // Default position, should be updated later
+      className: interactive ? undefined : 'non-interactive',
     };
 
     if (node.type === 'group' && nodeData.shape === 'group') {

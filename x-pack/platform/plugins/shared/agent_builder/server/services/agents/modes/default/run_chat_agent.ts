@@ -88,6 +88,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
+  // Only clear access tracking for a brand new round; keep it when resuming (HITL).
+  if (!pendingRound) {
+    context.attachmentStateManager.clearAccessTracking();
+  }
+
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
@@ -97,7 +102,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
