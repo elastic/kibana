@@ -691,7 +691,8 @@ const processConnectorGroup = (
         edge.source,
         groupNode.id,
         edge.target,
-        edge.edgeType
+        edge.edgeType,
+        groupEdgesColor
       );
     });
 
