@@ -14,25 +14,19 @@ import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
 
 // TODO: clintandrewhall - pull from config.
-import { URL_DEMO_ENV, METRIC_CLICK_DEMO_ENV_BUTTON } from './constants';
-import { useServices } from './services';
+import { URL_DEMO_ENV } from './constants';
 
 /**
  * The content for the Sample Data Tab in the `home` plugin.
  */
 export const SampleDataTab = () => {
-  const { logClick } = useServices();
-  const onClick = () => {
-    logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
-  };
-
   return (
     <>
       <SampleDataCards />
       <EuiSpacer size="xl" />
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
-      <DemoEnvironmentPanel demoUrl={URL_DEMO_ENV} {...{ onClick }} />
+      <DemoEnvironmentPanel demoUrl={URL_DEMO_ENV} />
     </>
   );
 };
