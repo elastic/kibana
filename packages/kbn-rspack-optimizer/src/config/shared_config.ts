@@ -314,13 +314,11 @@ export function getSharedModuleRules(
  */
 export function getSharedIgnoreWarnings(): RegExp[] {
   return [
-    /Can't resolve 'fs'/,
-    /Can't resolve 'path'/,
-    /Can't resolve 'child_process'/,
-    /Can't resolve 'crypto'/,
-    /Critical dependency/,
-    // Third-party package export issues (not our code)
-    /ESModulesLinkingWarning.*@elastic\/ems-client/,
-    /export.*was not found in/,
+    // Same as legacy webpack optimizer (STATS_WARNINGS_FILTER)
+    /export .* was not found in/,
+    /chunk .* \[mini-css-extract-plugin\].*Conflicting order between/,
+    // RSPack-specific: Node.js globals mocking (webpack silently mocks these)
+    /__dirname.*is used and has been mocked/,
+    /__filename.*is used and has been mocked/,
   ];
 }
