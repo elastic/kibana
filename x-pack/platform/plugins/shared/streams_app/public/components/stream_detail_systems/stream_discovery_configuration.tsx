@@ -109,7 +109,6 @@ export function StreamDiscoveryConfiguration({
             </>
           )}
         </EuiFlexGroup>
-
       </EuiPanel>
     </EuiPanel>
   );
