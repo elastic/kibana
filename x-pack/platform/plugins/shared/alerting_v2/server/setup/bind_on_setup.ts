@@ -11,7 +11,10 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { registerDispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { registerRuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { TaskRunnerFactoryToken } from '../lib/services/task_run_scope_service/create_task_runner';
+import {
+  TaskRunnerFactoryBisToken,
+  TaskRunnerFactoryToken,
+} from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -37,7 +40,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerDispatcherTaskDefinition({
       taskManager,
-      taskRunnerFactory: container.get(TaskRunnerFactoryToken),
+      taskRunnerFactory: container.get(TaskRunnerFactoryBisToken),
     });
   });
 }

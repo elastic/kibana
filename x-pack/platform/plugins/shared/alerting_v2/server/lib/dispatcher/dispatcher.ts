@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { EsServiceScopedToken } from '../services/es_service/tokens';
+import { EsServiceInternalToken } from '../services/es_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -28,7 +28,7 @@ export interface DispatcherServiceContract {
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
   constructor(
-    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient,
+    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
@@ -38,6 +38,14 @@ export class DispatcherService implements DispatcherServiceContract {
     abortController,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    const lookback = moment(previousStartedAt)
+      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+      .toISOString();
+
+    this.logger.debug({
+      message: () => `Dispatcher started. Looking for alert episodes since ${lookback}`,
+    });
+
     const { query } = getDispatchableAlertEventsQuery();
 
     // TODO: Use QueryService as soon as it uses esClient instead of data plugin client
@@ -47,9 +55,7 @@ export class DispatcherService implements DispatcherServiceContract {
         filter: {
           range: {
             '@timestamp': {
-              gte: moment(previousStartedAt)
-                .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-                .toISOString(),
+              gte: lookback,
             },
           },
         },

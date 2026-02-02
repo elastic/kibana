@@ -13,11 +13,12 @@ import type {
   DispatcherExecutionResult,
   DispatcherTaskState,
 } from './types';
+import type { AlertingTaskRunner } from '../services/task_run_scope_service/create_task_runner';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
-export class DispatcherTaskRunner {
+export class DispatcherTaskRunner implements AlertingTaskRunner {
   constructor(
     @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
   ) {}

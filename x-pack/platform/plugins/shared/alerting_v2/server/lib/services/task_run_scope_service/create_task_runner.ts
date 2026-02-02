@@ -64,3 +64,29 @@ export function createTaskRunnerFactory({
     });
   };
 }
+
+export const TaskRunnerFactoryBisToken = Symbol.for(
+  'alerting_v2.TaskRunnerFactoryBis'
+) as ServiceIdentifier<TaskRunnerFactory>;
+
+export function createTaskRunnerFactoryBis({
+  getInjection,
+}: {
+  getInjection: () => CoreDiServiceStart;
+}): TaskRunnerFactory {
+  return ({ taskRunnerClass }) => {
+    return ({ taskInstance, abortController }: RunContext) => ({
+      run: async () => {
+        const scope = getInjection().fork();
+        scope.bind(taskRunnerClass).toSelf().inSingletonScope();
+
+        try {
+          const runner = scope.get(taskRunnerClass);
+          return await runner.run({ taskInstance, abortController });
+        } finally {
+          await scope.unbindAll();
+        }
+      },
+    });
+  };
+}

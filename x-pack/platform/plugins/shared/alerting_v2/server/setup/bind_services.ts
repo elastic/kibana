@@ -25,6 +25,8 @@ import {
 } from '../lib/services/storage_service/tokens';
 import {
   createTaskRunnerFactory,
+  createTaskRunnerFactoryBis,
+  TaskRunnerFactoryBisToken,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerStartDependencies } from '../types';
@@ -59,6 +61,12 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       getInjection: () => context.get(CoreStart('injection')),
     })
   );
+  bind(TaskRunnerFactoryBisToken).toFactory((context) =>
+    createTaskRunnerFactoryBis({
+      getInjection: () => context.get(CoreStart('injection')),
+    })
+  );
+
   bind(RulesSavedObjectService).toSelf().inRequestScope();
 
   bind(QueryService)
