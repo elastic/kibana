@@ -3,8 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["index.d.ts"],
-  "exclude": [
-    "target/**/*",
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["target/**/*"]
 }
