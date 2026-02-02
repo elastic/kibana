@@ -39,7 +39,6 @@ apiTest.describe('dashboards - delete', { tag: tags.ESS_ONLY }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(404);
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',

@@ -10,20 +10,14 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
+import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
 import snapshot from '../fixtures/schema_snapshot.json';
 
 apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
-    await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
-    await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
   });
 
   /**

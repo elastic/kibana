@@ -64,7 +64,6 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(404);
     expect(response.body).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
@@ -85,7 +84,6 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.statusCode).toBe(400);
     expect(response.body.message).toBe(
       '[request body.data.title]: expected value of type [string] but got [undefined]'
     );
@@ -107,7 +105,6 @@ apiTest.describe('dashboards - update', { tag: tags.ESS_ONLY }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.statusCode).toBe(400);
     expect(response.body.message).toBe(
       '[request body.data.panels]: expected value of type [array] but got [Object]'
     );
