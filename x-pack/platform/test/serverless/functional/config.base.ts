@@ -39,6 +39,8 @@ export function createTestConfig<
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
+          // Disable tours globally for all tests
+          '--uiSettings.globalOverrides.hideAnnouncements=true',
         ],
       },
       testFiles: options.testFiles,

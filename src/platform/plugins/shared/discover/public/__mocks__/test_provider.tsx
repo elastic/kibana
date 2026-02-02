@@ -26,7 +26,7 @@ import { createDiscoverServicesMock } from './services';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ScopedDiscoverEBTManager } from '../ebt_manager';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 

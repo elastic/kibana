@@ -11,8 +11,19 @@ import type {
   IngestPipelineDissectProcessor,
   IngestPipelineGrokProcessor,
   IngestPipelineManualIngestPipelineProcessor,
+  IngestPipelineMathProcessor,
   IngestPipelineRenameProcessor,
   IngestPipelineSetProcessor,
+  IngestPipelineConvertProcessor,
+  IngestPipelineRemoveByPrefixProcessor,
+  IngestPipelineRemoveProcessor,
+  IngestPipelineDropProcessor,
+  IngestPipelineReplaceProcessor,
+  IngestPipelineUppercaseProcessor,
+  IngestPipelineLowercaseProcessor,
+  IngestPipelineTrimProcessor,
+  IngestPipelineJoinProcessor,
+  IngestPipelineConcatProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -21,8 +32,19 @@ export interface ActionToIngestType {
   grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
   dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
   date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
+  math: WithOptionalTracingTag<IngestPipelineMathProcessor>;
   rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
   set: WithOptionalTracingTag<IngestPipelineSetProcessor>;
   append: WithOptionalTracingTag<IngestPipelineAppendProcessor>;
+  convert: WithOptionalTracingTag<IngestPipelineConvertProcessor>;
+  remove_by_prefix: WithOptionalTracingTag<IngestPipelineRemoveByPrefixProcessor>;
+  remove: WithOptionalTracingTag<IngestPipelineRemoveProcessor>;
+  drop_document: WithOptionalTracingTag<IngestPipelineDropProcessor>;
+  uppercase: WithOptionalTracingTag<IngestPipelineUppercaseProcessor>;
+  lowercase: WithOptionalTracingTag<IngestPipelineLowercaseProcessor>;
+  trim: WithOptionalTracingTag<IngestPipelineTrimProcessor>;
+  join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
+  replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
+  concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

@@ -51,9 +51,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(FleetProxySchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -82,9 +84,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -114,9 +118,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PutFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -146,9 +152,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => FleetProxyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -178,12 +186,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneFleetProxyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   id: schema.string(),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

@@ -1,7 +1,9 @@
 # @kbn-doc-linker partial
-
 oneOf:
-  - title: Count
+  - title: Log threshold count
+    description: >
+      The parameters for a log threshold rule that counts the number of log entries that match the criteria.
+      These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
     type: object
     required:
       - count
@@ -78,9 +80,11 @@ oneOf:
         type: array
         items:
           type: string
-        
-      
-  - title: Ratio
+          
+  - title: Log threshold ratio
+    description: >
+      The parameters for a log threshold rule that calculates the ratio of log entries that match the criteria.
+      These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
     type: object
     required:
       - count

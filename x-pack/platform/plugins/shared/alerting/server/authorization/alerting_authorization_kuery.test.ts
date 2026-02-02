@@ -674,11 +674,11 @@ describe('ensureFieldIsSafeForQuery', () => {
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
-      `expected id not to include invalid character: <=`
+      `expected id not to include invalid characters: <, =`
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
-      `expected id not to include invalid character: >=`
+      `expected id not to include invalid characters: >, =`
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
@@ -691,6 +691,13 @@ describe('ensureFieldIsSafeForQuery', () => {
 
     expect(() => ensureFieldIsSafeForQuery('id', 'some space')).toThrowError(
       `expected id not to include whitespace`
+    );
+  });
+
+  test('throws if field length exceeds MAX_LENGTH', () => {
+    const invalidValue = 'a'.repeat(1001);
+    expect(() => ensureFieldIsSafeForQuery('id', invalidValue)).toThrow(
+      'Input exceeds maximum allowed length of 1000 characters'
     );
   });
 

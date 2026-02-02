@@ -21,7 +21,6 @@ import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { LinksEmbeddableState } from '../common';
 import {
   APP_ICON,
@@ -72,12 +71,12 @@ export class LinksPlugin
             {
               panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                savedObjectId: savedObject.id,
               },
             },
-            true
+            {
+              displaySuccessMessage: true,
+            }
           );
         },
         savedObjectType: LINKS_SAVED_OBJECT_TYPE,
@@ -149,9 +148,9 @@ export class LinksPlugin
       }
     );
 
-    plugins.dashboard.registerDashboardPanelSettings(
+    plugins.presentationUtil.registerPanelPlacementSettings(
       LINKS_EMBEDDABLE_TYPE,
-      async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
+      async (serializedState?: LinksEmbeddableState) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
         const placementSettings = await getPanelPlacement(serializedState);
         return { placementSettings };

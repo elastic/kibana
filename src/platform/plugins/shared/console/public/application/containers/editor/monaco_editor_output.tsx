@@ -234,7 +234,6 @@ export const MonacoEditorOutput: FunctionComponent = () => {
               aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to copy to clipboard',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>

@@ -10,8 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -21,10 +20,17 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     await apiServices.streams.updateStreamProcessors('logs-generic-default', {
       steps: [
         {
-          where: {
+          condition: {
             field: 'test_field',
             contains: 'logs',
-            steps: [{ action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] }],
+            steps: [
+              {
+                action: 'grok',
+                from: 'message',
+                patterns: ['%{CUSTOM_WORD:attributes.method}'],
+                pattern_definitions: { CUSTOM_WORD: '%{WORD}' },
+              },
+            ],
           },
         },
       ],
@@ -33,20 +39,21 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should edit an existing processor', async ({ page, pageObjects }) => {
-    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe(
+      '%{CUSTOM_WORD:attributes.method}'
+    );
     await pageObjects.streams.clickEditProcessor(0);
 
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.hostname}');
     await pageObjects.streams.clickSaveProcessor();
     await pageObjects.streams.saveStepsListChanges();
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    await expect(page.getByText('%{WORD:attributes.hostname}')).toBeVisible();
+    await expect(page.getByText('%{CUSTOM_WORD:attributes.hostname}')).toBeVisible();
   });
 
   test('should edit an existing condition', async ({ page, pageObjects }) => {
@@ -71,17 +78,22 @@ test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlObl
   });
 
   test('should cancel editing a processor', async ({ pageObjects }) => {
-    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe(
+      '%{CUSTOM_WORD:attributes.method}'
+    );
     await pageObjects.streams.clickEditProcessor(0);
 
-    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.hostname}');
+    await pageObjects.streams.fillGrokPatternInput('%{CUSTOM_WORD:attributes.hostname}');
+    await pageObjects.streams.fillGrokPatternDefinitionsInput('{"CUSTOM_WORD": "%{WORD}"}');
 
     // Cancel the changes and confirm discard
     await pageObjects.streams.clickCancelProcessorChanges();
     await pageObjects.streams.confirmDiscardInModal();
 
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
-    expect(await pageObjects.streams.getProcessorPatternText()).toBe('%{WORD:attributes.method}');
+    expect(await pageObjects.streams.getProcessorPatternText()).toBe(
+      '%{CUSTOM_WORD:attributes.method}'
+    );
   });
 
   test('should remove a processor with confirmation', async ({ page, pageObjects }) => {

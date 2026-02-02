@@ -13,6 +13,7 @@ import {
   type SolutionSideNavItem,
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
+import { ATTACKS_ALERTS_ALIGNMENT_ENABLED } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import type { NavigationLink } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
@@ -22,7 +23,7 @@ import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
-import { CATEGORIES } from './categories';
+import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
 
 export const EUI_HEADER_HEIGHT = '93px';
@@ -134,10 +135,19 @@ const usePanelBottomOffset = (): string | undefined => {
  * It takes the links to render from the generic application `links` configs.
  */
 export const SecuritySideNav: React.FC = () => {
+  const { featureFlags } = useKibana().services;
   const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
+
+  const categories = useMemo(() => {
+    const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
+      ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+      false
+    );
+    return getNavCategories(attacksAlertsAlignmentEnabled);
+  }, [featureFlags]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
@@ -146,7 +156,7 @@ export const SecuritySideNav: React.FC = () => {
   return (
     <SolutionSideNav
       items={items}
-      categories={CATEGORIES}
+      categories={categories}
       selectedId={selectedId}
       panelTopOffset={panelTopOffset}
       panelBottomOffset={panelBottomOffset}

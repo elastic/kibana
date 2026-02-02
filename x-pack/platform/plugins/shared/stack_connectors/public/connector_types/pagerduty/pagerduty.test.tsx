@@ -47,7 +47,7 @@ describe('pagerduty action params validation', () => {
       links: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -73,7 +73,7 @@ describe('pagerduty action params validation', () => {
 
     const expected = [expect.stringMatching(/^Timestamp must be a valid date/)];
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -99,7 +99,7 @@ describe('pagerduty action params validation', () => {
       links: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -125,7 +125,7 @@ describe('pagerduty action params validation', () => {
       links: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -151,7 +151,7 @@ describe('pagerduty action params validation', () => {
       links: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -177,7 +177,7 @@ describe('pagerduty action params validation', () => {
       links: [],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -203,7 +203,7 @@ describe('pagerduty action params validation', () => {
       links: [{ href: '', text: 'foobar' }],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -229,7 +229,7 @@ describe('pagerduty action params validation', () => {
       links: [{ href: 'foobar', text: '' }],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],
@@ -259,7 +259,7 @@ describe('pagerduty action params validation', () => {
       ],
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         dedupKey: [],
         summary: [],

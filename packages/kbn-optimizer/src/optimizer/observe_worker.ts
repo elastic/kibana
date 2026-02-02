@@ -75,6 +75,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
           // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
           // That can be done in the worker/run_compilers file.
           WATCHPACK_WATCHER_LIMIT: '4000',
+          ...process.env,
         },
       });
 

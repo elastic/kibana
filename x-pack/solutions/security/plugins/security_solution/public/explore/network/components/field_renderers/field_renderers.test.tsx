@@ -24,7 +24,7 @@ import type { AutonomousSystem } from '../../../../../common/search_strategy';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { PageScope } from '../../../../data_view_manager/constants';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');
@@ -38,12 +38,16 @@ jest.mock('../../../../common/hooks/use_get_field_spec');
 const mockHost: HostEcs = mockData.complete.host as HostEcs;
 
 describe('Field Renderers', () => {
-  const scopeId = SourcererScopeName.default;
+  const scopeId = PageScope.default;
 
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        locationRenderer(['source.geo.city_name', 'source.geo.region_name'], mockData.complete),
+        locationRenderer(
+          ['source.geo.city_name', 'source.geo.region_name'],
+          mockData.complete,
+          scopeId
+        ),
         { wrapper: TestProviders }
       );
 
@@ -51,14 +55,14 @@ describe('Field Renderers', () => {
     });
 
     test('it renders emptyTagValue when no fields provided', () => {
-      render(<TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>);
+      render(<TestProviders>{locationRenderer([], mockData.complete, scopeId)}</TestProviders>);
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when invalid fields provided', () => {
       render(
         <TestProviders>
-          {locationRenderer(['source.geo.my_house'], mockData.complete)}
+          {locationRenderer(['source.geo.my_house'], mockData.complete, scopeId)}
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -71,7 +75,11 @@ describe('Field Renderers', () => {
 
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        autonomousSystemRenderer(mockData.complete.source!.autonomousSystem!, FlowTarget.source),
+        autonomousSystemRenderer(
+          mockData.complete.source!.autonomousSystem!,
+          FlowTarget.source,
+          scopeId
+        ),
         { wrapper: TestProviders }
       );
 
@@ -80,14 +88,18 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-string field provided', () => {
       render(
-        <TestProviders>{autonomousSystemRenderer(halfEmptyMock, FlowTarget.source)}</TestProviders>
+        <TestProviders>
+          {autonomousSystemRenderer(halfEmptyMock, FlowTarget.source, scopeId)}
+        </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
       render(
-        <TestProviders>{autonomousSystemRenderer(emptyMock, FlowTarget.source)}</TestProviders>
+        <TestProviders>
+          {autonomousSystemRenderer(emptyMock, FlowTarget.source, scopeId)}
+        </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });

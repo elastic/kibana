@@ -53,6 +53,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const isDisabled = !authz.fleet.allAgentPolicies || isLoading;
@@ -162,7 +163,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             disabled={!newAgentPolicy.name}
             onClick={() => createAgentPolicy()}
             isLoading={isLoading}
-            isDisabled={isDisabled}
+            isDisabled={isDisabled || Object.keys(validation).length > 0 || hasInvalidSpaceError}
             data-test-subj={isFleetServerPolicy ? 'createFleetServerPolicyBtn' : 'createPolicyBtn'}
           >
             <FormattedMessage
@@ -198,6 +199,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             agentPolicy={newAgentPolicy}
             updateAgentPolicy={updateNewAgentPolicy}
             validation={validation}
+            setInvalidSpaceError={setInvalidSpaceError}
           />
         </StyledEuiAccordion>
       </>

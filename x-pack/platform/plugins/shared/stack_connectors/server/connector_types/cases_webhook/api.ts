@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Incident } from '@kbn/connector-schemas/cases_webhook';
 import type {
   ExternalServiceApi,
-  Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,
 } from './types';

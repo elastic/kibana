@@ -6,8 +6,12 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
-import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
+import type {
+  TableSuggestionColumn,
+  VisualizationSuggestion,
+  TableSuggestion,
+} from '@kbn/lens-common';
+import type { XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from './types';
 import { visualizationSubtypes } from './types';
 import { generateId } from '../../id_generator';
 import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
@@ -77,13 +81,49 @@ describe('xy_suggestions', () => {
     };
   }
 
+  function ipCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'ip',
+        label: `Top ${columnId}`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
+  function geoPointCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'geo_point',
+        label: `Top ${columnId}`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
+  function gaugeCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'gauge',
+        label: `${columnId} gauge`,
+        isBucketed: true,
+        scale: 'ordinal',
+      },
+    };
+  }
+
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
-  function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
+  function suggestionSubset(suggestion: VisualizationSuggestion<XYState>) {
     return (suggestion.state.layers as XYDataLayerConfig[]).map(
-      ({ seriesType, splitAccessor, xAccessor, accessors }) => ({
+      ({ seriesType, splitAccessors, xAccessor, accessors }) => ({
         seriesType,
-        splitAccessor,
+        splitAccessors,
         x: xAccessor,
         y: accessors,
       })
@@ -208,14 +248,14 @@ describe('xy_suggestions', () => {
             layerType: LayerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
           {
             layerId: 'second',
             layerType: LayerTypes.DATA,
             seriesType: 'bar',
             accessors: ['bytes'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
         ],
       },
@@ -315,7 +355,7 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
         ],
       },
@@ -357,7 +397,7 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
           {
             layerId: 'second',
@@ -365,7 +405,7 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             xAccessor: undefined,
             accessors: [],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
         ],
       },
@@ -420,7 +460,7 @@ describe('xy_suggestions', () => {
             seriesType: 'bar',
             xAccessor: 'date',
             accessors: ['bytes'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
           {
             layerId: 'second',
@@ -428,7 +468,7 @@ describe('xy_suggestions', () => {
             seriesType: 'line',
             xAccessor: undefined,
             accessors: [],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           },
         ],
       },
@@ -478,7 +518,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": undefined,
+          "splitAccessors": undefined,
           "x": "date",
           "y": Array [
             "bytes",
@@ -505,7 +545,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": undefined,
+          "splitAccessors": undefined,
           "x": "duration",
           "y": Array [
             "bytes",
@@ -515,7 +555,7 @@ describe('xy_suggestions', () => {
     `);
   });
 
-  test('does not suggest multiple splits', () => {
+  test('Does not suggest multiple splits in formBased', () => {
     const suggestions = getSuggestions({
       table: {
         isMultiRow: true,
@@ -534,6 +574,62 @@ describe('xy_suggestions', () => {
 
     expect(suggestions).toHaveLength(0);
   });
+  test('Suggest multiple splits in textBased', () => {
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('price'),
+          numCol('quantity'),
+          dateCol('date'),
+          strCol('product'),
+          strCol('city'),
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+    });
+
+    expect(suggestions).toHaveLength(10);
+  });
+
+  test('textBased suggestions retain bucket order for textBased data sources', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [
+          numCol('price'),
+          dateCol('date'),
+          geoPointCol('origin'),
+          gaugeCol('status'),
+          ipCol('client'),
+        ],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      datasourceId: 'textBased',
+    });
+
+    expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "seriesType": "bar_stacked",
+          "splitAccessors": Array [
+            "origin",
+            "status",
+            "client",
+          ],
+          "x": "date",
+          "y": Array [
+            "price",
+          ],
+        },
+      ]
+    `);
+  });
 
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
@@ -551,7 +647,9 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": "product",
+          "splitAccessors": Array [
+            "product",
+          ],
           "x": "date",
           "y": Array [
             "price",
@@ -599,7 +697,7 @@ describe('xy_suggestions', () => {
             seriesType: 'bar_stacked',
             xAccessor: 'date',
             accessors: ['price'],
-            splitAccessor: undefined,
+            splitAccessors: undefined,
           }),
         ],
       })
@@ -635,7 +733,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'product',
+          splitAccessors: ['product'],
           xAccessor: 'date',
         },
         annotationLayer,
@@ -694,7 +792,7 @@ describe('xy_suggestions', () => {
           seriesType: 'bar',
           layerType: LayerTypes.DATA,
           xAccessor: 'date',
-          splitAccessor: 'price2',
+          splitAccessors: ['price2'],
         },
         annotationLayer,
       ],
@@ -771,7 +869,7 @@ describe('xy_suggestions', () => {
             layerId: 'first',
             layerType: LayerTypes.DATA,
             seriesType: 'bar',
-            splitAccessor: 'product',
+            splitAccessors: ['product'],
             xAccessor: 'date',
           },
         ],
@@ -826,7 +924,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: '',
         },
       ],
@@ -861,7 +959,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar_stacked',
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: '',
         },
       ],
@@ -900,7 +998,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: undefined,
+          splitAccessors: undefined,
           xAccessor: 'date',
         },
       ],
@@ -949,7 +1047,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'product',
+          splitAccessors: ['product'],
           xAccessor: 'date',
         },
       ],
@@ -1005,7 +1103,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessors: ['dummyCol'],
           xAccessor: 'product',
         },
       ],
@@ -1043,7 +1141,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'date',
+          splitAccessors: ['date'],
           xAccessor: 'product',
         },
       ],
@@ -1084,7 +1182,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessors: ['dummyCol'],
           xAccessor: 'product',
         },
       ],
@@ -1107,7 +1205,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           xAccessor: 'product',
-          splitAccessor: 'category',
+          splitAccessors: ['category'],
           colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
@@ -1130,7 +1228,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'category',
+          splitAccessors: ['category'],
           xAccessor: 'product',
         },
       ],
@@ -1153,7 +1251,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           xAccessor: 'category',
-          splitAccessor: 'product',
+          splitAccessors: ['product'],
           colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
@@ -1177,7 +1275,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           layerType: LayerTypes.DATA,
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessors: ['dummyCol'],
           xAccessor: 'product',
         },
       ],
@@ -1200,7 +1298,7 @@ describe('xy_suggestions', () => {
         {
           ...currentState.layers[0],
           xAccessor: 'timestamp',
-          splitAccessor: 'product',
+          splitAccessors: ['product'],
           colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
         },
       ],
@@ -1223,7 +1321,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": undefined,
+          "splitAccessors": undefined,
           "x": undefined,
           "y": Array [
             "quantity",
@@ -1261,7 +1359,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": undefined,
+          "splitAccessors": undefined,
           "x": "myip",
           "y": Array [
             "quantity",
@@ -1297,7 +1395,7 @@ describe('xy_suggestions', () => {
       Array [
         Object {
           "seriesType": "bar_stacked",
-          "splitAccessor": undefined,
+          "splitAccessors": undefined,
           "x": "mybool",
           "y": Array [
             "num votes",
@@ -1319,7 +1417,7 @@ describe('xy_suggestions', () => {
           seriesType: 'bar_stacked',
           xAccessor: 'date',
           accessors: ['bytes'],
-          splitAccessor: undefined,
+          splitAccessors: undefined,
         },
       ],
     };
@@ -1363,7 +1461,7 @@ describe('xy_suggestions', () => {
           seriesType: 'line',
           xAccessor: 'date',
           accessors: ['bytes'],
-          splitAccessor: undefined,
+          splitAccessors: undefined,
         },
       ],
     };

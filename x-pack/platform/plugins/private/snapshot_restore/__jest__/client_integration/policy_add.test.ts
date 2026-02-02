@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-// import helpers first, this also sets up the mocks
-import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
+import './helpers/mocks';
 
-import { act } from 'react-dom/test-utils';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 
-import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';
 import { API_BASE_PATH } from '../../common';
-
-import type { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
-
-const { setup } = pageHelpers.policyAdd;
+import { getRandomString } from '@kbn/test-jest-helpers';
+import { setupEnvironment } from './helpers/setup_environment';
+import { renderApp } from './helpers/render_app';
 
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';
@@ -28,234 +25,235 @@ const EXPIRE_AFTER_VALUE = '30';
 const repository = fixtures.getRepository({ name: `a${getRandomString()}`, type: 'fs' });
 
 describe('<PolicyAdd />', () => {
-  let testBed: PolicyFormTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+
+  const setupPage = async ({
+    indices = ['my_index'],
+    dataStreams = ['my_data_stream', 'my_other_data_stream'],
+  }: { indices?: string[]; dataStreams?: string[] } = {}) => {
+    httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repository] });
+    httpRequestsMockHelpers.setLoadIndicesResponse({ indices, dataStreams });
+    httpRequestsMockHelpers.setLoadFeaturesResponse({
+      features: [{ name: 'kibana' }, { name: 'tasks' }],
+    });
+
+    const { history } = renderApp(httpSetup, { initialEntries: ['/add_policy'] });
+    // Prevent route transitions during submit (not under test here).
+    jest.spyOn(history, 'push').mockImplementation(() => {});
+
+    // Wait for initial mount-time requests/effects to settle to avoid act warnings.
+    await screen.findByTestId('nameInput');
+  };
+
+  const fillStep1AndGoNext = async () => {
+    await screen.findByTestId('nameInput');
+    fireEvent.change(screen.getByTestId('nameInput'), { target: { value: POLICY_NAME } });
+    fireEvent.change(screen.getByTestId('snapshotNameInput'), { target: { value: SNAPSHOT_NAME } });
+    fireEvent.blur(screen.getByTestId('snapshotNameInput'));
+
+    await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('nextButton'));
+    await screen.findByTestId('allIndicesToggle');
+  };
+
+  const goToReviewStep = async () => {
+    // Step 2 -> Step 3
+    await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('nextButton'));
+    await screen.findByTestId('expireAfterValueInput');
+
+    // Step 3 -> Step 4
+    await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+    fireEvent.click(screen.getByTestId('nextButton'));
+
+    await screen.findByTestId('submitButton');
+  };
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repository] });
-      httpRequestsMockHelpers.setLoadIndicesResponse({
-        indices: ['my_index'],
-        dataStreams: ['my_data_stream', 'my_other_data_stream'],
-      });
-      httpRequestsMockHelpers.setLoadFeaturesResponse({
-        features: [{ name: 'kibana' }, { name: 'tasks' }],
-      });
-
-      testBed = await setup(httpSetup);
-      testBed.component.update();
+      jest.clearAllMocks();
+      await setupPage();
     });
 
-    test('should set the correct page title', () => {
-      const { exists, find } = testBed;
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create policy');
+    test('should set the correct page title', async () => {
+      const title = await screen.findByTestId('pageTitle');
+      expect(title).toHaveTextContent('Create policy');
     });
 
-    test('should not let the user go to the next step if required fields are missing', () => {
-      const { find } = testBed;
-
-      expect(find('nextButton').props().disabled).toBe(true);
+    test('should not let the user go to the next step if required fields are missing', async () => {
+      const nextButton = await screen.findByTestId('nextButton');
+      expect(nextButton).toBeDisabled();
     });
 
-    test('should not show repository-not-found warning', () => {
-      const { exists } = testBed;
-      expect(exists('repositoryNotFoundWarning')).toBe(false);
+    test('should not show repository-not-found warning', async () => {
+      await screen.findByTestId('nameInput');
+      expect(screen.queryByTestId('repositoryNotFoundWarning')).not.toBeInTheDocument();
     });
 
     describe('form validation', () => {
       describe('logistics (step 1)', () => {
         test('should require a policy name', async () => {
-          const { form, find } = testBed;
+          await screen.findByTestId('nameInput');
 
-          // Verify required validation
-          form.setInputValue('nameInput', '');
-          find('nameInput').simulate('blur');
-          expect(form.getErrorsMessages()).toEqual(['Policy name is required.']);
+          fireEvent.change(screen.getByTestId('nameInput'), { target: { value: '' } });
+          fireEvent.blur(screen.getByTestId('nameInput'));
+          expect(screen.getAllByText('Policy name is required.').length).toBeGreaterThan(0);
 
-          // Enter valid policy name and verify no error messages
-          form.setInputValue('nameInput', 'my_policy');
-          find('nameInput').simulate('blur');
-
-          expect(form.getErrorsMessages()).toEqual([]);
+          fireEvent.change(screen.getByTestId('nameInput'), { target: { value: POLICY_NAME } });
+          fireEvent.blur(screen.getByTestId('nameInput'));
+          expect(screen.queryByText('Policy name is required.')).not.toBeInTheDocument();
         });
 
-        test('should require a snapshot name that is lowercase', () => {
-          const { form, find } = testBed;
+        test('should require a snapshot name that is lowercase', async () => {
+          await screen.findByTestId('snapshotNameInput');
 
-          // Verify required validation
-          form.setInputValue('snapshotNameInput', '');
-          find('snapshotNameInput').simulate('blur');
-          expect(form.getErrorsMessages()).toEqual(['Snapshot name is required.']);
+          fireEvent.change(screen.getByTestId('snapshotNameInput'), { target: { value: '' } });
+          fireEvent.blur(screen.getByTestId('snapshotNameInput'));
+          expect(screen.getAllByText('Snapshot name is required.').length).toBeGreaterThan(0);
 
-          // Verify lowercase validation
-          form.setInputValue('snapshotNameInput', 'MY_SNAPSHOT');
-          find('snapshotNameInput').simulate('blur');
-          expect(form.getErrorsMessages()).toEqual(['Snapshot name needs to be lowercase.']);
+          fireEvent.change(screen.getByTestId('snapshotNameInput'), {
+            target: { value: 'MY_SNAPSHOT' },
+          });
+          fireEvent.blur(screen.getByTestId('snapshotNameInput'));
+          expect(
+            screen.getAllByText('Snapshot name needs to be lowercase.').length
+          ).toBeGreaterThan(0);
 
-          // Enter valid snapshot name and verify no error messages
-          form.setInputValue('snapshotNameInput', 'my_snapshot');
-          find('snapshotNameInput').simulate('blur');
-
-          expect(form.getErrorsMessages()).toEqual([]);
+          fireEvent.change(screen.getByTestId('snapshotNameInput'), {
+            target: { value: SNAPSHOT_NAME },
+          });
+          fireEvent.blur(screen.getByTestId('snapshotNameInput'));
+          expect(screen.queryByText('Snapshot name is required.')).not.toBeInTheDocument();
+          expect(
+            screen.queryByText('Snapshot name needs to be lowercase.')
+          ).not.toBeInTheDocument();
         });
 
-        it('should require a schedule', () => {
-          const { form, find } = testBed;
+        test('should require a schedule', async () => {
+          await screen.findByTestId('showAdvancedCronLink');
+          fireEvent.click(screen.getByTestId('showAdvancedCronLink'));
 
-          // Verify required validation
-          find('showAdvancedCronLink').simulate('click');
-          form.setInputValue('advancedCronInput', '');
-          find('advancedCronInput').simulate('blur');
-          expect(form.getErrorsMessages()).toEqual(['Schedule is required.']);
+          await screen.findByTestId('advancedCronInput');
+          fireEvent.change(screen.getByTestId('advancedCronInput'), { target: { value: '' } });
+          fireEvent.blur(screen.getByTestId('advancedCronInput'));
+          expect(screen.getAllByText('Schedule is required.').length).toBeGreaterThan(0);
 
-          // Enter valid schedule and verify no error messages
-          form.setInputValue('advancedCronInput', '0 30 1 * * ?');
-          find('advancedCronInput').simulate('blur');
-          expect(form.getErrorsMessages()).toEqual([]);
+          fireEvent.change(screen.getByTestId('advancedCronInput'), {
+            target: { value: '0 30 1 * * ?' },
+          });
+          fireEvent.blur(screen.getByTestId('advancedCronInput'));
+          expect(screen.queryByText('Schedule is required.')).not.toBeInTheDocument();
         });
       });
 
       describe('snapshot settings (step 2)', () => {
-        beforeEach(() => {
-          const { form, actions } = testBed;
-          // Complete step 1
-          form.setInputValue('nameInput', POLICY_NAME);
-          form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
-          actions.clickNextButton();
+        beforeEach(async () => {
+          await fillStep1AndGoNext();
         });
 
         test('should require at least one index if no data streams are provided', async () => {
-          const { find, form, component } = testBed;
+          fireEvent.click(screen.getByTestId('allIndicesToggle'));
+          await screen.findByTestId('deselectIndicesLink');
 
-          await act(async () => {
-            // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle');
-          });
-          component.update();
-
-          // Deselect all indices from list
-          find('deselectIndicesLink').simulate('click');
-
-          expect(form.getErrorsMessages()).toEqual([
-            'You must select at least one data stream or index.',
-          ]);
+          fireEvent.click(screen.getByTestId('deselectIndicesLink'));
+          expect(
+            screen.getAllByText('You must select at least one data stream or index.').length
+          ).toBeGreaterThan(0);
         });
 
         test('should correctly indicate data streams with a badge', async () => {
-          const { find, component, form } = testBed;
-
-          await act(async () => {
-            // Toggle "All indices" switch
-            form.toggleEuiSwitch('allIndicesToggle');
-          });
-          component.update();
-
-          expect(find('dataStreamBadge').length).toBe(2);
+          fireEvent.click(screen.getByTestId('allIndicesToggle'));
+          await waitFor(() => expect(screen.getAllByTestId('dataStreamBadge')).toHaveLength(2));
         });
       });
 
       describe('retention (step 3)', () => {
-        beforeEach(() => {
-          const { form, actions } = testBed;
-          // Complete step 1
-          form.setInputValue('nameInput', POLICY_NAME);
-          form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
-          actions.clickNextButton();
+        beforeEach(async () => {
+          await fillStep1AndGoNext();
 
-          // Complete step 2
-          actions.clickNextButton();
+          // Step 2 -> Step 3
+          await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+          fireEvent.click(screen.getByTestId('nextButton'));
+          await screen.findByTestId('expireAfterValueInput');
         });
 
-        test('should not allow the minimum count be greater than the maximum count', () => {
-          const { find, form } = testBed;
+        test('should not allow the minimum count be greater than the maximum count', async () => {
+          fireEvent.change(screen.getByTestId('minCountInput'), {
+            target: { value: `${Number(MAX_COUNT) + 1}` },
+          });
+          fireEvent.blur(screen.getByTestId('minCountInput'));
 
-          form.setInputValue('minCountInput', MAX_COUNT + 1);
-          find('minCountInput').simulate('blur');
+          fireEvent.change(screen.getByTestId('maxCountInput'), { target: { value: MAX_COUNT } });
+          fireEvent.blur(screen.getByTestId('maxCountInput'));
 
-          form.setInputValue('maxCountInput', MAX_COUNT);
-          find('maxCountInput').simulate('blur');
-
-          expect(form.getErrorsMessages()).toEqual([
-            'Minimum count cannot be greater than maximum count.',
-          ]);
+          expect(
+            screen.getAllByText('Minimum count cannot be greater than maximum count.').length
+          ).toBeGreaterThan(0);
         });
 
-        test('should not allow negative values for the delete after, minimum and maximum counts', () => {
-          const { find, form } = testBed;
+        test('should not allow negative values for the delete after, minimum and maximum counts', async () => {
+          fireEvent.change(screen.getByTestId('expireAfterValueInput'), {
+            target: { value: '-1' },
+          });
+          fireEvent.blur(screen.getByTestId('expireAfterValueInput'));
 
-          form.setInputValue('expireAfterValueInput', '-1');
-          find('expireAfterValueInput').simulate('blur');
+          fireEvent.change(screen.getByTestId('minCountInput'), { target: { value: '-1' } });
+          fireEvent.blur(screen.getByTestId('minCountInput'));
 
-          form.setInputValue('minCountInput', '-1');
-          find('minCountInput').simulate('blur');
+          fireEvent.change(screen.getByTestId('maxCountInput'), { target: { value: '-1' } });
+          fireEvent.blur(screen.getByTestId('maxCountInput'));
 
-          form.setInputValue('maxCountInput', '-1');
-          find('maxCountInput').simulate('blur');
-
-          expect(form.getErrorsMessages()).toEqual([
-            'Delete after cannot be negative.',
-            'Minimum count cannot be negative.',
-            'Maximum count cannot be negative.',
-          ]);
+          expect(screen.getAllByText('Delete after cannot be negative.').length).toBeGreaterThan(0);
+          expect(screen.getAllByText('Minimum count cannot be negative.').length).toBeGreaterThan(
+            0
+          );
+          expect(screen.getAllByText('Maximum count cannot be negative.').length).toBeGreaterThan(
+            0
+          );
         });
       });
     });
 
     describe('feature states', () => {
       beforeEach(async () => {
-        const { actions, form, component } = testBed;
-
-        // Complete step 1
-        form.setInputValue('nameInput', POLICY_NAME);
-        form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
-        actions.clickNextButton();
-
-        component.update();
+        await fillStep1AndGoNext();
       });
 
       test('Enabling include global state enables include feature state', async () => {
-        const { find, component, form } = testBed;
+        await screen.findByTestId('globalStateToggle');
 
-        // By default includeGlobalState is enabled, so we need to toogle twice
-        await act(async () => {
-          form.toggleEuiSwitch('globalStateToggle');
-          form.toggleEuiSwitch('globalStateToggle');
-        });
-        component.update();
+        // Include global state is enabled by default; toggle twice to exercise enablement.
+        fireEvent.click(screen.getByTestId('globalStateToggle'));
+        fireEvent.click(screen.getByTestId('globalStateToggle'));
 
-        expect(find('featureStatesToggle').props().disabled).toBeUndefined();
+        expect(screen.getByTestId('featureStatesToggle')).not.toBeDisabled();
       });
 
       test('feature states dropdown is only shown when include feature states is enabled', async () => {
-        const { exists, component, form } = testBed;
+        await screen.findByTestId('featureStatesToggle');
 
         // By default the toggle is enabled
-        expect(exists('featureStatesDropdown')).toBe(true);
+        expect(screen.getByTestId('featureStatesDropdown')).toBeInTheDocument();
 
-        await act(async () => {
-          form.toggleEuiSwitch('featureStatesToggle');
-        });
-        component.update();
-
-        expect(exists('featureStatesDropdown')).toBe(false);
+        fireEvent.click(screen.getByTestId('featureStatesToggle'));
+        expect(screen.queryByTestId('featureStatesDropdown')).not.toBeInTheDocument();
       });
 
       test('include all features by default', async () => {
-        const { actions } = testBed;
+        await goToReviewStep();
 
-        // Complete step 2
-        actions.clickNextButton();
-        // Complete step 3
-        actions.clickNextButton();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        await act(async () => {
-          actions.clickSubmitButton();
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenCalled();
         });
 
-        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
-        const [requestUrl, requestBody] = lastReq;
-        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+        const lastCall = httpSetup.post.mock.calls.at(-1);
+        if (!lastCall) {
+          throw new Error('Expected httpSetup.post to have been called');
+        }
+        const [requestUrl, requestOptions] = lastCall as unknown as [string, { body: string }];
+        const parsedReqBody = JSON.parse(requestOptions.body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
@@ -265,22 +263,25 @@ describe('<PolicyAdd />', () => {
       });
 
       test('include some features', async () => {
-        const { actions, form } = testBed;
+        const combo = await screen.findByTestId('featureStatesDropdown');
+        const input = within(combo).getByRole('combobox');
 
-        form.setComboBoxValue('featureStatesDropdown', 'kibana');
+        fireEvent.change(input, { target: { value: 'kibana' } });
+        fireEvent.click(await screen.findByText('kibana'));
 
-        // Complete step 2
-        actions.clickNextButton();
-        // Complete step 3
-        actions.clickNextButton();
+        await goToReviewStep();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        await act(async () => {
-          actions.clickSubmitButton();
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenCalled();
         });
 
-        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
-        const [requestUrl, requestBody] = lastReq;
-        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+        const lastCall = httpSetup.post.mock.calls.at(-1);
+        if (!lastCall) {
+          throw new Error('Expected httpSetup.post to have been called');
+        }
+        const [requestUrl, requestOptions] = lastCall as unknown as [string, { body: string }];
+        const parsedReqBody = JSON.parse(requestOptions.body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
@@ -290,26 +291,24 @@ describe('<PolicyAdd />', () => {
       });
 
       test('include no features', async () => {
-        const { actions, form, component } = testBed;
+        await screen.findByTestId('featureStatesToggle');
 
         // Disable all features
-        await act(async () => {
-          form.toggleEuiSwitch('featureStatesToggle');
-        });
-        component.update();
+        fireEvent.click(screen.getByTestId('featureStatesToggle'));
 
-        // Complete step 2
-        actions.clickNextButton();
-        // Complete step 3
-        actions.clickNextButton();
+        await goToReviewStep();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        await act(async () => {
-          actions.clickSubmitButton();
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenCalled();
         });
 
-        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
-        const [requestUrl, requestBody] = lastReq;
-        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+        const lastCall = httpSetup.post.mock.calls.at(-1);
+        if (!lastCall) {
+          throw new Error('Expected httpSetup.post to have been called');
+        }
+        const [requestUrl, requestOptions] = lastCall as unknown as [string, { body: string }];
+        const parsedReqBody = JSON.parse(requestOptions.body);
 
         expect(requestUrl).toBe(`${API_BASE_PATH}policies`);
         expect(parsedReqBody.config).toEqual({
@@ -321,54 +320,52 @@ describe('<PolicyAdd />', () => {
 
     describe('form payload & api errors', () => {
       beforeEach(async () => {
-        const { actions, form } = testBed;
+        await fillStep1AndGoNext();
 
-        // Complete step 1
-        form.setInputValue('nameInput', POLICY_NAME);
-        form.setInputValue('snapshotNameInput', SNAPSHOT_NAME);
-        actions.clickNextButton();
+        // Step 2 -> Step 3
+        await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('expireAfterValueInput');
 
-        // Complete step 2
-        actions.clickNextButton();
-
-        // Complete step 3
-        form.setInputValue('expireAfterValueInput', EXPIRE_AFTER_VALUE);
-        form.setInputValue('minCountInput', MIN_COUNT);
-        form.setInputValue('maxCountInput', MAX_COUNT);
-        actions.clickNextButton();
-      });
-
-      it('should send the correct payload', async () => {
-        const { actions } = testBed;
-
-        await act(async () => {
-          actions.clickSubmitButton();
+        fireEvent.change(screen.getByTestId('expireAfterValueInput'), {
+          target: { value: EXPIRE_AFTER_VALUE },
         });
+        fireEvent.change(screen.getByTestId('minCountInput'), { target: { value: MIN_COUNT } });
+        fireEvent.change(screen.getByTestId('maxCountInput'), { target: { value: MAX_COUNT } });
 
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}policies`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: POLICY_NAME,
-              snapshotName: SNAPSHOT_NAME,
-              schedule: DEFAULT_POLICY_SCHEDULE,
-              repository: repository.name,
-              config: { featureStates: [], includeGlobalState: true },
-              retention: {
-                expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-                expireAfterUnit: 'd', // default
-                maxCount: Number(MAX_COUNT),
-                minCount: Number(MIN_COUNT),
-              },
-              isManagedPolicy: false,
-            }),
-          })
-        );
+        // Step 3 -> Step 4
+        await waitFor(() => expect(screen.getByTestId('nextButton')).not.toBeDisabled());
+        fireEvent.click(screen.getByTestId('nextButton'));
+        await screen.findByTestId('submitButton');
       });
 
-      it('should surface the API errors from the put HTTP request', async () => {
-        const { component, actions, find, exists } = testBed;
+      test('should send the correct payload', async () => {
+        fireEvent.click(screen.getByTestId('submitButton'));
 
+        await waitFor(() => {
+          expect(httpSetup.post).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}policies`,
+            expect.objectContaining({
+              body: JSON.stringify({
+                name: POLICY_NAME,
+                snapshotName: SNAPSHOT_NAME,
+                schedule: DEFAULT_POLICY_SCHEDULE,
+                repository: repository.name,
+                config: { featureStates: [], includeGlobalState: true },
+                retention: {
+                  expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+                  expireAfterUnit: 'd',
+                  maxCount: Number(MAX_COUNT),
+                  minCount: Number(MIN_COUNT),
+                },
+                isManagedPolicy: false,
+              }),
+            })
+          );
+        });
+      });
+
+      test('should surface the API errors from the put HTTP request', async () => {
         const error = {
           statusCode: 409,
           error: 'Conflict',
@@ -377,13 +374,10 @@ describe('<PolicyAdd />', () => {
 
         httpRequestsMockHelpers.setAddPolicyResponse(undefined, error);
 
-        await act(async () => {
-          actions.clickSubmitButton();
-        });
-        component.update();
+        fireEvent.click(screen.getByTestId('submitButton'));
 
-        expect(exists('savePolicyApiError')).toBe(true);
-        expect(find('savePolicyApiError').text()).toContain(error.message);
+        const callout = await screen.findByTestId('savePolicyApiError');
+        expect(callout).toHaveTextContent(error.message);
       });
     });
   });

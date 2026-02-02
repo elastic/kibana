@@ -14,8 +14,8 @@ import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
+import type { StateSetter, DatasourceDataPanelProps, FramePublicAPI } from '@kbn/lens-common';
 import { Easteregg } from './easteregg';
-import type { StateSetter, DatasourceDataPanelProps, FramePublicAPI } from '../../types';
 import {
   useLensDispatch,
   updateDatasourceState,

@@ -34,10 +34,9 @@ export const SearchGettingStartedPageTemplate = ({
   return (
     <KibanaPageTemplate
       offset={0}
-      restrictWidth={false}
+      restrictWidth
       data-test-subj="search-getting-started"
       grow={false}
-      panelled={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       {...props}
     >

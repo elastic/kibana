@@ -55,7 +55,7 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             <FormattedMessage
               id="xpack.uptime.monitorList.drawer.missingLocation"
               defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."

@@ -6,8 +6,8 @@
  */
 
 import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import { mergeSampleDocumentsWithFieldCaps, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
+import { formatDocumentAnalysis, mergeSampleDocumentsWithFieldCaps } from '@kbn/ai-tools';
 import { getFlattenedObject } from '@kbn/std';
 import { dbscan } from './dbscan';
 
@@ -45,7 +45,7 @@ interface ClusterDocsResponse {
   clusters: Array<{
     count: number;
     samples: SearchHit[];
-    analysis: TruncatedDocumentAnalysis;
+    analysis: FormattedDocumentAnalysis;
   }>;
 }
 
@@ -262,7 +262,7 @@ export function clusterSampleDocs({
       return {
         count: cluster.length,
         samples,
-        analysis: sortAndTruncateAnalyzedFields(
+        analysis: formatDocumentAnalysis(
           mergeSampleDocumentsWithFieldCaps({
             total: samples.length,
             hits: samples,

@@ -1,0 +1,29 @@
+# MATCH_PHRASE
+
+The MATCH_PHRASE function performs a phrase match query on a specified field, returning true if the provided query matches the row. It is equivalent to the match_phrase query in the Elasticsearch Query DSL and can be used on text fields, as well as keyword, boolean, or date types. Additional options can be specified using function named parameters.
+
+## Syntax
+
+`MATCH_PHRASE(field, query, options)`
+
+### Parameters
+
+#### field
+
+The field that the query will target.
+
+#### query
+
+The value to find in the provided field.
+
+#### options
+
+Optional. Additional options for the match_phrase query, provided as function named parameters.
+
+## Examples
+
+```esql
+FROM books
+| WHERE MATCH_PHRASE(author, "William Faulkner")
+```
+This example filters rows in the books index where the author field contains the exact phrase "William Faulkner".

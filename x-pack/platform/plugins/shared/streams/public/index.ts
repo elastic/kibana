@@ -11,7 +11,19 @@ import type { StreamsPluginSetup, StreamsPluginStart } from './types';
 
 export type { StreamsPluginSetup, StreamsPluginStart };
 
-export { STREAMS_API_PRIVILEGES, STREAMS_UI_PRIVILEGES } from '../common/constants';
+export {
+  STREAMS_API_PRIVILEGES,
+  STREAMS_UI_PRIVILEGES,
+  MAX_STREAM_NAME_LENGTH,
+} from '../common/constants';
+
+export {
+  excludeFrozenQuery,
+  kqlQuery,
+  rangeQuery,
+  isKqlQueryValid,
+  buildEsqlFilter,
+} from '../common/query_helpers';
 
 export const plugin: PluginInitializer<StreamsPluginSetup, StreamsPluginStart> = (
   context: PluginInitializerContext

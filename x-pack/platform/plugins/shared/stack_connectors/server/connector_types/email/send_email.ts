@@ -13,21 +13,17 @@ import { default as MarkdownIt } from 'markdown-it';
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import {
-  getNodeSSLOptions,
-  getSSLSettingsFromConfig,
-} from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from '@kbn/actions-utils';
 import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
-  ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
-import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
+import type { Attachment } from '@kbn/connector-schemas/email';
+import { getDeleteTokenAxiosInterceptor } from '@kbn/actions-plugin/server/lib';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -147,7 +143,7 @@ export async function sendEmailWithExchange(
     Authorization: accessToken,
   };
 
-  const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
+  const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
     connectorTokenClient,
     connectorId,
   });

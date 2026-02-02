@@ -75,14 +75,14 @@ const createCloudFormationUrl = (
     template url has `&param_ElasticAgentVersion=KIBANA_VERSION` part. KIBANA_VERSION is used for templating as agent version used to match Kibana version, but now it's not necessarily the case
    */
   cloudFormationUrl = templateURL
-    .replace('FLEET_ENROLLMENT_TOKEN', enrollmentToken)
-    .replace('FLEET_URL', fleetUrl)
-    .replace('KIBANA_VERSION', agentVersion);
+    .replace('FLEET_ENROLLMENT_TOKEN', encodeURIComponent(enrollmentToken))
+    .replace('FLEET_URL', encodeURIComponent(fleetUrl))
+    .replace('KIBANA_VERSION', encodeURIComponent(agentVersion));
 
   if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
     cloudFormationUrl = cloudFormationUrl.replace(
       'ACCOUNT_TYPE',
-      getAwsAccountType(awsAccountType)
+      encodeURIComponent(getAwsAccountType(awsAccountType))
     );
   }
 

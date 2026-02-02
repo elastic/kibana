@@ -82,6 +82,7 @@ export function getFunctionDefinition({
             disableWarningToasts: (disableWarningToasts || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
+            projectRouting: get(input, 'projectRouting', undefined),
           });
         })
       );

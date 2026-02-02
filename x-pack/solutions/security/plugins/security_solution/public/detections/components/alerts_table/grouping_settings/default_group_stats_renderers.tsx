@@ -9,6 +9,7 @@ import { EuiIcon } from '@elastic/eui';
 import React, { memo } from 'react';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import type { GenericBuckets } from '@kbn/grouping/src';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { DEFAULT_GROUP_STATS_RENDERER } from '../alerts_grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
@@ -150,6 +151,8 @@ export const defaultGroupStatsRenderer = (
     case 'user.name':
     case 'source.ip':
       return [...severityComponent, hostsBadge, rulesBadge, ...defaultBadges];
+    case ALERT_ATTACK_IDS:
+      return defaultBadges;
   }
   return [...severityComponent, rulesBadge, ...defaultBadges];
 };

@@ -10,7 +10,7 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_value
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateMobileData, SERVICE_VERSIONS } from './generate_mobile_data';
 

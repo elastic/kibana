@@ -227,6 +227,7 @@ export const TextStylePicker: FC<Props> = ({
 };
 
 TextStylePicker.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   family: PropTypes.string,
   size: PropTypes.number,
   align: PropTypes.oneOf(['left', 'center', 'right']),

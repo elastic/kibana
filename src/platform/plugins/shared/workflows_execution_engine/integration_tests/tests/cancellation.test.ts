@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('when cancellation requested', () => {
@@ -27,7 +27,7 @@ consts:
   outerForeachArray: '${JSON.stringify(outerArray)}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StaticValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { StaticValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiStaticValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';

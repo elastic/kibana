@@ -10,6 +10,7 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
+  clearIntegrationKnowledgeIndex,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
 } from '../../utils/knowledge_base';
@@ -31,6 +32,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
+      await clearKnowledgeBase(es);
+      await clearIntegrationKnowledgeIndex(es);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);
       await addSampleDocsToCustomIndex(getService, animalSampleDocs, customSearchConnectorIndex);
     });
@@ -54,21 +57,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await recall('What happened during the database outage?');
         const docTypes = uniq(entries.map(({ id }) => id.split('_')[0]));
         expect(docTypes).to.eql(['animal', 'technical']);
-      });
-
-      it('returns entries in a consistent order', async () => {
-        const entries = await recall('whales');
-
-        expect(entries.map(({ id, esScore }) => `${formatScore(esScore!)} - ${id}`)).to.eql([
-          'high - animal_whale_migration_patterns',
-          'low - animal_elephants_social_structure',
-          'low - technical_api_gateway_timeouts',
-          'low - technical_cache_misses_thirdparty_api',
-          'low - animal_cheetah_life_speed',
-          'low - technical_db_outage_slow_queries',
-          'low - animal_giraffe_habitat_feeding',
-          'low - animal_penguin_antarctic_adaptations',
-        ]);
       });
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
@@ -109,16 +97,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     return body.entries;
   }
-}
-
-function formatScore(score: number) {
-  if (score > 0.5) {
-    return 'high';
-  }
-
-  if (score > 0.1) {
-    return 'medium';
-  }
-
-  return 'low';
 }

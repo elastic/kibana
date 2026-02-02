@@ -39,14 +39,18 @@ export function createCleanupBeforeExit(proc: NodeJS.Process) {
     proc.once('SIGINT', cleanup);
     proc.once('SIGTERM', cleanup);
 
+    function quit(...args: any[]) {
+      originalProcessExit(...args);
+    }
+
     // @ts-expect-error
-    proc.exit = once((exitCode) => {
+    proc.exit = once((...args: any[]) => {
       if (cleanupHandlers.filter((handler) => handler.blockExit).length === 0) {
-        originalProcessExit(exitCode);
+        quit(...args);
       } else {
         processExitController.abort();
         cleanup().finally(() => {
-          originalProcessExit(exitCode);
+          quit(...args);
         });
       }
     });

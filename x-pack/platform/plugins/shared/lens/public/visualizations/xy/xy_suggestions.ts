@@ -16,14 +16,14 @@ import type {
   TableSuggestionColumn,
   TableSuggestion,
   TableChangeType,
-} from '../../types';
+} from '@kbn/lens-common';
 import { getColorMappingDefaults } from '../../utils';
-import type { State, XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
+import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
 import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
-const columnSortOrder = {
+const COLUMN_SORT_ORDER = {
   document: 0,
   date: 1,
   string: 2,
@@ -51,12 +51,13 @@ export function getSuggestions({
   mainPalette,
   isFromContext,
   allowMixed,
-}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+  datasourceId,
+}: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
   const incompleteTable =
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !Object.hasOwn(columnSortOrder, col.operation.dataType));
+    table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));
 
   if (
     (incompleteTable && state && !subVisualizationId) ||
@@ -76,7 +77,8 @@ export function getSuggestions({
     state,
     subVisualizationId as SeriesType | undefined,
     mainPalette,
-    allowMixed
+    allowMixed,
+    datasourceId
   );
 
   if (Array.isArray(suggestions)) {
@@ -89,11 +91,12 @@ export function getSuggestions({
 function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
-  currentState?: State,
+  currentState?: XYState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
-  allowMixed?: boolean
-): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
+  allowMixed?: boolean,
+  datasourceId?: string
+): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
     layerId: table.layerId,
@@ -106,38 +109,41 @@ function getSuggestionForColumns(
     allowMixed,
   };
 
-  if (buckets.length === 1 || buckets.length === 2) {
-    const [xValue, splitBy] = getBucketMappings(table, currentState);
+  const isEsql = datasourceId === 'textBased';
+  // we have 2 different suggestion: with DSL we can split by only when we have a max of 2 buckets (one for the X and the other for the breakdown)
+  // in ESQL we instead suggest split by with more then 1 buckets always.
+  const whenToSuggestSplitBy = isEsql
+    ? buckets.length >= 1
+    : buckets.length === 1 || buckets.length === 2;
+  if (whenToSuggestSplitBy) {
+    const [xValue, ...splitBy] = getBucketMappings(table, isEsql, currentState);
     return getSuggestionsForLayer({
       ...sharedArgs,
       xValue,
       yValues: values,
-      splitBy,
+      splitByColumns: splitBy,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
-      prioritizeColumns(values),
+      prioritizeColumns(values, isEsql),
       (col) => col.operation.dataType === 'number' && !col.operation.isBucketed
     );
     return getSuggestionsForLayer({
       ...sharedArgs,
       xValue,
       yValues,
-      splitBy,
+      splitByColumns: splitBy ? [splitBy] : undefined,
     });
   }
 }
 
-function getBucketMappings(table: TableSuggestion, currentState?: State) {
+function getBucketMappings(table: TableSuggestion, isEsql: boolean, currentState?: XYState) {
   const currentLayer =
     currentState &&
     getDataLayers(currentState.layers).find(({ layerId }) => layerId === table.layerId);
 
   const buckets = table.columns.filter((col) => col.operation.isBucketed);
-  // reverse the buckets before prioritization to always use the most inner
-  // bucket of the highest-prioritized group as x value (don't use nested
-  // buckets as split series)
-  const prioritizedBuckets = prioritizeColumns([...buckets].reverse());
+  const prioritizedBuckets = prioritizeColumns(buckets, isEsql);
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
@@ -162,23 +168,29 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
     prioritizedBuckets.unshift(x);
   }
 
-  const currentSplitColumnIndex = prioritizedBuckets.findIndex(
-    ({ columnId }) => columnId === currentLayer.splitAccessor
-  );
-  if (currentSplitColumnIndex > -1) {
-    const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
-    prioritizedBuckets.push(splitBy);
-  }
+  (currentLayer.splitAccessors ?? []).forEach((splitAccessor) => {
+    const currentSplitColumnIndex = prioritizedBuckets.findIndex(
+      ({ columnId }) => columnId === splitAccessor
+    );
+    if (currentSplitColumnIndex > -1) {
+      const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
+      prioritizedBuckets.push(splitBy);
+    }
+  });
 
   return prioritizedBuckets;
 }
 
 // This shuffles columns around so that the left-most column defualts to:
 // date, string, boolean, then number, in that priority. We then use this
-// order to pluck out the x column, and the split / stack column.
-function prioritizeColumns(columns: TableSuggestionColumn[]) {
-  return [...columns].sort(
-    (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
+// order to pluck out the x column, and the split / stack columns.
+// don't sort buckets in ESQL mode
+function prioritizeColumns(columns: TableSuggestionColumn[], isEsql: boolean) {
+  if (isEsql) {
+    return columns;
+  }
+  return columns.toSorted(
+    (a, b) => COLUMN_SORT_ORDER[a.operation.dataType] - COLUMN_SORT_ORDER[b.operation.dataType]
   );
 }
 
@@ -187,7 +199,7 @@ function getSuggestionsForLayer({
   changeType,
   xValue,
   yValues,
-  splitBy,
+  splitByColumns,
   currentState,
   tableLabel,
   keptLayerIds,
@@ -199,17 +211,19 @@ function getSuggestionsForLayer({
   changeType: TableChangeType;
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
-  splitBy?: TableSuggestionColumn;
-  currentState?: State;
+  splitByColumns?: TableSuggestionColumn[];
+  currentState?: XYState;
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
-}): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
+}): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
     requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+
+  const splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
   const options = {
     currentState,
@@ -217,7 +231,7 @@ function getSuggestionsForLayer({
     layerId,
     title,
     yValues,
-    splitBy,
+    splitByColumns,
     changeType,
     xValue,
     keptLayerIds,
@@ -250,7 +264,7 @@ function getSuggestionsForLayer({
   }
 
   // Suggestions are either changing the data, or changing the way the data is used
-  const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
+  const sameStateSuggestions: Array<VisualizationSuggestion<XYState>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
   if (seriesType.includes('bar') && (!xValue || xValue.operation.scale === 'ordinal')) {
@@ -292,8 +306,11 @@ function getSuggestionsForLayer({
     !seriesType.includes('percentage')
   ) {
     const percentageOptions = { ...options };
-    if (percentageOptions.xValue?.operation.scale === 'ordinal' && !percentageOptions.splitBy) {
-      percentageOptions.splitBy = percentageOptions.xValue;
+    if (
+      percentageOptions.xValue?.operation.scale === 'ordinal' &&
+      !percentageOptions.splitByColumns
+    ) {
+      percentageOptions.splitByColumns = [percentageOptions.xValue];
       delete percentageOptions.xValue;
     }
     const suggestedSeriesType = asPercentageSeriesType(seriesType);
@@ -302,7 +319,7 @@ function getSuggestionsForLayer({
       buildSuggestion({
         ...options,
         // hide the suggestion if split by is missing
-        hide: !percentageOptions.splitBy,
+        hide: !percentageOptions.splitByColumns,
         seriesType: suggestedSeriesType,
         title: seriesTypeLabels(suggestedSeriesType),
       })
@@ -481,7 +498,7 @@ function buildSuggestion({
   layerId,
   title,
   yValues,
-  splitBy,
+  splitByColumns,
   changeType,
   xValue,
   keptLayerIds,
@@ -494,7 +511,7 @@ function buildSuggestion({
   title: string;
   yValues: TableSuggestionColumn[];
   xValue?: TableSuggestionColumn;
-  splitBy: TableSuggestionColumn | undefined;
+  splitByColumns?: TableSuggestionColumn[];
   layerId: string;
   changeType: TableChangeType;
   keptLayerIds: string[];
@@ -502,8 +519,10 @@ function buildSuggestion({
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
 }) {
+  let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
+
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
-    splitBy = xValue;
+    splitBy = [xValue];
     xValue = undefined;
   }
   const existingLayer = getExistingLayer(currentState, layerId) || null;
@@ -519,7 +538,7 @@ function buildSuggestion({
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
-    splitAccessor: splitBy?.columnId,
+    splitAccessors: splitBy?.map((s) => s.columnId),
     accessors,
     yConfig:
       existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
@@ -558,7 +577,7 @@ function buildSuggestion({
         )
     : [];
 
-  const state: State = {
+  const state: XYState = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
@@ -622,7 +641,7 @@ function buildSuggestion({
 
 function getScore(
   yValues: TableSuggestionColumn[],
-  splitBy: TableSuggestionColumn | undefined,
+  splitBy: TableSuggestionColumn[] | undefined,
   changeType: TableChangeType
 ) {
   // Unchanged table suggestions half the score because the underlying data doesn't change

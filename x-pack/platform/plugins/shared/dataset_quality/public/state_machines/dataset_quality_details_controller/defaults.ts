@@ -46,4 +46,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   selectedFields: [],
   qualityIssuesChart: 'degraded' as QualityIssueType,
   view: 'dataQuality',
+  streamDefinition: undefined,
 };

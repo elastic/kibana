@@ -14,10 +14,17 @@ export interface BaseSettings {
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
   };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
+  };
+  integration_knowledge_enabled?: boolean;
 }
 
 export interface Settings extends BaseSettings {

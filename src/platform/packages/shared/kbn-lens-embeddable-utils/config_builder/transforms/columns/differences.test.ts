@@ -8,7 +8,7 @@
  */
 
 import { fromDifferencesAPItoLensState, fromDifferencesLensStateToAPI } from './differences';
-import type { DerivativeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DerivativeIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiDifferencesOperation,
   LensApiFieldMetricOperations,

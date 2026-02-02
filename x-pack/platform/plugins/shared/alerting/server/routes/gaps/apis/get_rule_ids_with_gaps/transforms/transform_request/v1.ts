@@ -6,13 +6,15 @@
  */
 
 import type { GetRuleIdsWithGapBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_rules_with_gaps';
-import type { GetRuleIdsWithGapsParams } from '../../../../../../application/rule/methods/get_rule_ids_with_gaps/types';
+import type { GetRuleIdsWithGapsParams } from '../../../../../../application/gaps/methods/get_rule_ids_with_gaps/types';
 
 export const transformRequest = (request: GetRuleIdsWithGapBodyV1): GetRuleIdsWithGapsParams => ({
   start: request.start,
   end: request.end,
   statuses: request.statuses,
+  highestPriorityGapFillStatuses: request.highest_priority_gap_fill_statuses,
   hasUnfilledIntervals: request.has_unfilled_intervals,
   hasInProgressIntervals: request.has_in_progress_intervals,
   hasFilledIntervals: request.has_filled_intervals,
+  sortOrder: request.sort_order,
 });

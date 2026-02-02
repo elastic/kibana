@@ -38,33 +38,19 @@ exports[`AddData render 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <RedirectAppLinks
-            coreStart={
-              Object {
-                "application": Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "integrations": true,
-                    },
-                  },
-                },
-              }
-            }
+          <EuiButton
+            data-test-subj="homeAddData"
+            fill={true}
+            fullWidth={true}
+            href="/app/integrations/browse"
+            iconType="plusInCircle"
+            onClick={[Function]}
           >
-            <EuiButton
-              data-test-subj="homeAddData"
-              fill={true}
-              fullWidth={true}
-              href="/app/integrations/browse"
-              iconType="plusInCircle"
-              onClick={[Function]}
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Add integrations"
-                id="home.addData.addDataButtonLabel"
-              />
-            </EuiButton>
-          </RedirectAppLinks>
+            <MemoizedFormattedMessage
+              defaultMessage="Add integrations"
+              id="home.addData.addDataButtonLabel"
+            />
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}

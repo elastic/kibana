@@ -21,7 +21,7 @@ The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic
 
 ## Set up an AI connector
 
-1. Use the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search) to find the **Connectors** page. 
+1. Use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) to find the **Connectors** page.
 2. Click **+ Create connector**. Select **AI Connector**.
 3. Name your connector and select which LLM service to use. 
 4. In the **Settings** section, specify which model to use for this connector. You may need to refer to your selected LLM service's list of models. Model names and other model parameters must be exact.

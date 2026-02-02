@@ -5,84 +5,59 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const DATE_TYPE = 'date';
 
 describe('Processor: Date', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
-    const {
-      actions: { addProcessor, addProcessorType },
-    } = testBed;
-    // Open the processor flyout
-    addProcessor();
 
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(DATE_TYPE);
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: DATE_TYPE },
+    });
+
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission when field and format fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "field" and "value" are required parameters
-    expect(form.getErrorsMessages()).toEqual([
-      'A field value is required.',
-      'A value for formats is required.',
-    ]);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
+    expect(screen.getByText('A value for formats is required.')).toBeInTheDocument();
   });
 
   test('saves with required field and formats parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      find,
-      component,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
-
-    await act(async () => {
-      find('formatsValueField.input').simulate('change', [{ label: 'ISO8601' }]);
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
     });
-    component.update();
+    fireEvent.change(within(screen.getByTestId('formatsValueField')).getByTestId('input'), {
+      target: { value: 'ISO8601' },
+    });
 
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date).toEqual({
       field: 'field_1',
       formats: ['ISO8601'],
@@ -90,31 +65,33 @@ describe('Processor: Date', () => {
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      find,
-      component,
-    } = testBed;
-
     // Set required parameters
-    form.setInputValue('fieldNameField.input', 'field_1');
-
-    await act(async () => {
-      find('formatsValueField.input').simulate('change', [{ label: 'ISO8601' }]);
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field_1' },
     });
-    component.update();
+    fireEvent.change(within(screen.getByTestId('formatsValueField')).getByTestId('input'), {
+      target: { value: 'ISO8601' },
+    });
 
     // Set optional parameters
-    form.setInputValue('targetField.input', 'target_field');
-    form.setInputValue('localeField.input', 'SPANISH');
-    form.setInputValue('timezoneField.input', 'EST');
-    form.setInputValue('outputFormatField.input', 'yyyy-MM-dd');
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'target_field' },
+    });
+    fireEvent.change(within(screen.getByTestId('localeField')).getByTestId('input'), {
+      target: { value: 'SPANISH' },
+    });
+    fireEvent.change(within(screen.getByTestId('timezoneField')).getByTestId('input'), {
+      target: { value: 'EST' },
+    });
+    fireEvent.change(within(screen.getByTestId('outputFormatField')).getByTestId('input'), {
+      target: { value: 'yyyy-MM-dd' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DATE_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0].date).toEqual({
       field: 'field_1',
       formats: ['ISO8601'],

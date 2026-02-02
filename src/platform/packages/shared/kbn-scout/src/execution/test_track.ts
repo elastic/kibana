@@ -8,7 +8,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export class TestTrackError extends Error {
   // Base exception for test track errors
@@ -17,22 +17,22 @@ export class TestTrackError extends Error {
 export const TestTrackSpecSchema = z.object({
   stats: z.object({
     lane: z.object({
-      count: z.number().int(),
+      count: z.int(),
       saturationPercent: z.number(),
       longestEstimate: z.number(),
       shortestEstimate: z.number(),
     }),
     combinedRuntime: z.object({
-      target: z.number().int(),
-      expected: z.number().int(),
-      unused: z.number().int(),
-      overflow: z.number().int(),
+      target: z.int(),
+      expected: z.int(),
+      unused: z.int(),
+      overflow: z.int(),
     }),
   }),
   lanes: z.array(
     z.object({
-      number: z.number().int(),
-      runtimeTarget: z.number().int(),
+      number: z.int(),
+      runtimeTarget: z.int(),
       runtimeEstimate: z.number(),
       availableCapacity: z.number(),
       status: z.enum(['open', 'closed']),
@@ -50,14 +50,14 @@ export type TestTrackLaneStatus = z.infer<
 export const TestTrackLoadSchema = z.object({
   id: z.string(),
   stats: z.object({
-    runCount: z.number().int(),
+    runCount: z.int(),
     runtime: z.object({
-      avg: z.number().int(),
-      median: z.number().int(),
-      pc95th: z.number().int(),
-      pc99th: z.number().int(),
-      max: z.number().int(),
-      estimate: z.number().int(),
+      avg: z.int(),
+      median: z.int(),
+      pc95th: z.int(),
+      pc99th: z.int(),
+      max: z.int(),
+      estimate: z.int(),
     }),
   }),
 });

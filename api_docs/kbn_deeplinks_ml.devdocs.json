@@ -33,6 +33,8 @@
           "\"ml\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -45,9 +47,11 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"ml\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\""
+          "\"ml\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -60,9 +64,11 @@
         "label": "LinkId",
         "description": [],
         "signature": [
-          "\"notifications\" | \"nodes\" | \"overview\" | \"memoryUsage\" | \"settings\" | \"dataVisualizer\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"singleMetricViewer\" | \"anomalyDetection\" | \"anomalyExplorer\" | \"dataDrift\" | \"dataFrameAnalytics\" | \"resultExplorer\" | \"analyticsMap\" | \"aiOps\" | \"changePointDetections\" | \"modelManagement\" | \"nodesOverview\" | \"esqlDataVisualizer\" | \"fileUpload\" | \"indexDataVisualizer\" | \"calendarSettings\" | \"filterListsSettings\" | \"suppliedConfigurations\""
+          "\"notifications\" | \"nodes\" | \"overview\" | \"memoryUsage\" | \"settings\" | \"dataVisualizer\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"singleMetricViewer\" | \"anomalyDetection\" | \"anomalyExplorer\" | \"dataDrift\" | \"dataDriftPage\" | \"dataFrameAnalytics\" | \"resultExplorer\" | \"analyticsMap\" | \"aiOps\" | \"logRateAnalysisPage\" | \"logPatternAnalysisPage\" | \"changePointDetections\" | \"changePointDetectionsPage\" | \"modelManagement\" | \"nodesOverview\" | \"esqlDataVisualizer\" | \"fileUpload\" | \"indexDataVisualizer\" | \"indexDataVisualizerPage\" | \"calendarSettings\" | \"filterListsSettings\" | \"suppliedConfigurations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

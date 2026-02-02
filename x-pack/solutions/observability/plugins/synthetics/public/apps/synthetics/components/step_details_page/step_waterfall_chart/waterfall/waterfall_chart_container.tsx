@@ -81,6 +81,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       )}
       {waterfallLoaded && hasEvents && !isWaterfallSupported && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.title"

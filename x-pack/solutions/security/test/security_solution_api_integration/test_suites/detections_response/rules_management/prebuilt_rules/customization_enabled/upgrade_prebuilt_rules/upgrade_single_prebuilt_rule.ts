@@ -8,7 +8,7 @@
 import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   DEFAULT_TEST_RULE_ID,
   setUpRuleUpgrade,

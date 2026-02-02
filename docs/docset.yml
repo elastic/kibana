@@ -38,6 +38,8 @@ subs:
   elastic-sec:   "Elastic Security"
   es:   "Elasticsearch"
   esql:   "ES|QL"
+  infer: "inference"
+  infer-cap: "Inference"
   kib:   "Kibana"
   ls:   "Logstash"
   security-features:   "security features"
@@ -63,3 +65,4 @@ subs:
   observability:   "Observability"
   kib-repo:   "https://github.com/elastic/kibana/"
   kib-pull: "https://github.com/elastic/kibana/pull/"
+  jsm:   "Jira Service Management"

@@ -10,6 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { Node, Edge } from '@xyflow/react';
 import { Position } from '@xyflow/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
@@ -65,9 +70,15 @@ export const getNodeDocumentMode = (
   }
 
   // Single alert contains both event's document data and alert's document data.
-  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length <= 2) {
+  if (
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) &&
+    node.documentsData.length <= 1
+  ) {
     return 'single-alert';
-  } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
+  } else if (
+    node.documentsData.length === 1 &&
+    node.documentsData[0].type === DOCUMENT_TYPE_EVENT
+  ) {
     return 'single-event';
   } else if (isEntityNode(node) && node.documentsData.length === 1) {
     return 'single-entity';
@@ -78,6 +89,26 @@ export const getNodeDocumentMode = (
   }
 
   return 'na';
+};
+
+/**
+ * Checks if a node has entity store enrichment.
+ * Only relevant for single-entity mode - returns false for all other modes.
+ * For single-entity nodes, checks if at least one document has entity.availableInEntityStore === true.
+ */
+export const isEntityNodeEnriched = (node: NodeViewModel): boolean => {
+  const docMode = getNodeDocumentMode(node);
+
+  if (docMode !== 'single-entity') {
+    return false;
+  }
+
+  return (
+    'documentsData' in node &&
+    Array.isArray(node.documentsData) &&
+    node.documentsData.length > 0 &&
+    node.documentsData.some((doc) => doc.entity?.availableInEntityStore === true)
+  );
 };
 
 /**
@@ -97,13 +128,13 @@ export const getSingleDocumentData = (
 
   // For single-entity mode, prioritize finding the entity document
   if (mode === 'single-entity') {
-    return node.documentsData.find((doc) => doc.type === 'entity');
+    return node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ENTITY);
   }
 
   // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
-    node.documentsData.find((doc) => doc.type === 'alert') ??
-    node.documentsData.find((doc) => doc.type === 'event');
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_ALERT) ??
+    node.documentsData.find((doc) => doc.type === DOCUMENT_TYPE_EVENT);
 
   return documentData;
 };

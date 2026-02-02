@@ -7,9 +7,8 @@
 
 import { convertToRawColorMappings, isDeprecatedColorMapping } from './converter';
 import type { DeprecatedColorMappingConfig } from './types';
-import type { DataType } from '../../../types';
+import type { DataType, GenericIndexPatternColumn } from '@kbn/lens-common';
 import type { ColorMapping } from '@kbn/coloring';
-import type { GenericIndexPatternColumn } from '../../../async_services';
 import type { SerializedRangeKey } from '@kbn/data-plugin/common/search';
 
 type OldAssignment = DeprecatedColorMappingConfig['assignments'][number];

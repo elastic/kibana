@@ -35,6 +35,8 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -52,6 +54,8 @@
           "\"logs_essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -69,6 +73,8 @@
           "\"oblt\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -86,6 +92,8 @@
           "\"observability\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,6 +111,8 @@
           "\"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -120,6 +130,8 @@
           "\"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,6 +149,8 @@
           "\"search\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -154,6 +168,8 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -171,6 +187,8 @@
           "\"essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -188,6 +206,8 @@
           "\"security\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -205,6 +225,8 @@
           "\"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -222,6 +244,8 @@
           "\"security\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -236,9 +260,11 @@
           "\nConstant for the Kibana Workplace AI serverless project type."
         ],
         "signature": [
-          "\"workplace_ai\""
+          "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -253,9 +279,11 @@
           "\nConstant for the Kibana Workplace AI solution."
         ],
         "signature": [
-          "\"workplace_ai\""
+          "\"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -270,9 +298,11 @@
           "\nA type that defines the existing groups (platform + solutions)."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\" | \"platform\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -290,6 +320,8 @@
           "\"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -304,9 +336,11 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"workplace_ai\" | \"oblt\" | \"es\""
+          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -321,9 +355,11 @@
           "\nA type that defines the existing solutions."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -338,9 +374,11 @@
           "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplace_ai\" | \"platform\" | \"common\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -358,6 +396,8 @@
           "\"shared\" | \"private\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -374,9 +414,11 @@
           "\nA list of all Kibana groups (platform + solutions)."
         ],
         "signature": [
-          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplace_ai\"]"
+          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -391,9 +433,11 @@
           "\nPossible product tiers for Kibana solutions."
         ],
         "signature": [
-          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplace_ai: readonly []; }"
+          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplaceai: readonly []; }"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -408,9 +452,11 @@
           "\nA list of all Kibana serverless project types."
         ],
         "signature": [
-          "readonly [\"oblt\", \"security\", \"es\", \"workplace_ai\"]"
+          "readonly [\"oblt\", \"security\", \"es\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -425,9 +471,11 @@
           "\nA list of all Kibana solutions."
         ],
         "signature": [
-          "readonly [\"observability\", \"security\", \"search\", \"workplace_ai\"]"
+          "readonly [\"observability\", \"security\", \"search\", \"workplaceai\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

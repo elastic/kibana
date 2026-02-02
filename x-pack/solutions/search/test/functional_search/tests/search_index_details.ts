@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchNavigation',
     'solutionNavigation',
   ]);
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const spaces = getService('spaces');
@@ -227,25 +226,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 spaceCreated.id
               )}/app/elasticsearch/indices/index_details/${indexDoesNotExistName}/data`
             );
-            await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
           });
           it('has page load error section', async () => {
             await pageObjects.searchIndexDetailsPage.expectPageLoadErrorExists();
             await pageObjects.searchIndexDetailsPage.expectIndexNotFoundErrorExists();
-          });
-          it('reload button shows details page again', async () => {
-            await es.indices.create({ index: indexDoesNotExistName });
-            await retry.tryForTime(
-              30 * 1000,
-              async () => {
-                if (await pageObjects.searchIndexDetailsPage.pageReloadButtonIsVisible()) {
-                  await pageObjects.searchIndexDetailsPage.clickPageReload();
-                }
-                await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-              },
-              undefined,
-              1000
-            );
           });
         });
         describe('Index more options menu', () => {

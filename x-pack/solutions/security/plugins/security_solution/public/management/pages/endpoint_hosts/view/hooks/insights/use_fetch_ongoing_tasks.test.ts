@@ -25,11 +25,11 @@ jest.mock('../../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
 }));
 
-const mockUseQuery = jest.requireMock('@tanstack/react-query').useQuery;
+const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery;
 
 describe('useFetchLatestScan', () => {
   const mockOnSuccess = jest.fn();

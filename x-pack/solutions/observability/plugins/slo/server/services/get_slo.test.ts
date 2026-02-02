@@ -10,22 +10,22 @@ import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SloDefinitionClient } from './slo_definition_client';
+import { SLODefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
-  let defintionClient: SloDefinitionClient;
+  let defintionClient: SLODefinitionClient;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockSummaryClient = createSummaryClientMock();
-    defintionClient = new SloDefinitionClient(
+    defintionClient = new SLODefinitionClient(
       mockRepository,
       elasticsearchServiceMock.createElasticsearchClient(),
       loggerMock.create()

@@ -22,6 +22,72 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/tracing-config",
+        "id": "def-common.OTLPExportConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OTLPExportConfig",
+        "description": [
+          "\nConfiguration schema for the OTLP exporter (gRPC or HTTP)."
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.OTLPExportConfig.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "\nThe URL for OTLP receiver endpoint."
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.OTLPExportConfig.headers",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "\nOptional headers for authentication or metadata."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.OTLPExportConfig.scheduled_delay",
+            "type": "number",
+            "tags": [],
+            "label": "scheduled_delay",
+            "description": [
+              "\nThe delay in milliseconds before the exporter sends another\nbatch of spans."
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-config",
         "id": "def-common.TracingConfig",
         "type": "Interface",
         "tags": [],
@@ -30,6 +96,8 @@
           "\nConfiguration for OpenTelemetry tracing"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +111,8 @@
               "\nWhether OpenTelemetry tracing is enabled."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +126,8 @@
               "\nAt which rate spans get sampled if a sampling decision\nneeds to be made. Should be between 0-1."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,12 +141,26 @@
               "\nOTLP exporters for tracing data"
             ],
             "signature": [
-              "InferenceTracingExportConfig",
+              {
+                "pluginId": "@kbn/tracing-config",
+                "scope": "common",
+                "docId": "kibKbnTracingConfigPluginApi",
+                "section": "def-common.TracingExporterConfig",
+                "text": "TracingExporterConfig"
+              },
               " | ",
-              "InferenceTracingExportConfig",
+              {
+                "pluginId": "@kbn/tracing-config",
+                "scope": "common",
+                "docId": "kibKbnTracingConfigPluginApi",
+                "section": "def-common.TracingExporterConfig",
+                "text": "TracingExporterConfig"
+              },
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -94,25 +180,28 @@
           "\nAllowed configurations for OTLP tracing exporters"
         ],
         "signature": [
-          "{ langfuse: ",
+          "InferenceTracingExportConfig",
+          " | { grpc: ",
           {
-            "pluginId": "@kbn/inference-tracing-config",
+            "pluginId": "@kbn/tracing-config",
             "scope": "common",
-            "docId": "kibKbnInferenceTracingConfigPluginApi",
-            "section": "def-common.InferenceTracingLangfuseExportConfig",
-            "text": "InferenceTracingLangfuseExportConfig"
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.OTLPExportConfig",
+            "text": "OTLPExportConfig"
           },
-          "; } | { phoenix: ",
+          "; } | { http: ",
           {
-            "pluginId": "@kbn/inference-tracing-config",
+            "pluginId": "@kbn/tracing-config",
             "scope": "common",
-            "docId": "kibKbnInferenceTracingConfigPluginApi",
-            "section": "def-common.InferenceTracingPhoenixExportConfig",
-            "text": "InferenceTracingPhoenixExportConfig"
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.OTLPExportConfig",
+            "text": "OTLPExportConfig"
           },
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -147,6 +236,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/schema.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

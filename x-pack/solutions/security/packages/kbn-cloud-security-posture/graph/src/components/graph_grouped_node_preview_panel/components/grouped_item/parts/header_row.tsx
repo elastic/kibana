@@ -6,11 +6,37 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiLink, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GROUPED_ITEM_TITLE_TEST_ID } from '../../../test_ids';
+import { i18n } from '@kbn/i18n';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
+} from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
+import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
+
+const entityUnavailableTooltip = i18n.translate(
+  'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
+  {
+    defaultMessage: 'Entity unavailable in entity store',
+  }
+);
 
 export interface HeaderRowProps {
   item: EntityOrEventItem;
@@ -18,25 +44,29 @@ export interface HeaderRowProps {
 
 export const HeaderRow = ({ item }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
-
   const title = useMemo(() => {
     switch (item.itemType) {
-      case 'event':
-      case 'alert':
+      case DOCUMENT_TYPE_EVENT:
+      case DOCUMENT_TYPE_ALERT:
         return displayEventName(item);
-      case 'entity':
+      case DOCUMENT_TYPE_ENTITY:
         return displayEntityName(item);
     }
   }, [item]);
 
+  const isClickable =
+    item.itemType === DOCUMENT_TYPE_EVENT ||
+    item.itemType === DOCUMENT_TYPE_ALERT ||
+    (item.itemType === DOCUMENT_TYPE_ENTITY && item.availableInEntityStore);
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {item.itemType === 'alert' && (
+      {item.itemType === DOCUMENT_TYPE_ALERT && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="warningFilled" size="m" color="danger" />
         </EuiFlexItem>
       )}
-      {item.itemType === 'entity' && item.icon && (
+      {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={item.icon}
@@ -55,10 +85,12 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
           min-width: 0;
         `}
       >
-        {/* truncated title */}
-        <EuiToolTip content={title}>
+        {isClickable ? (
           <EuiLink
-            href="#" // TODO Wire up entity/event details link
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.preventDefault();
+              emitGroupedItemClick(item);
+            }}
             color="primary"
             css={css`
               display: block;
@@ -68,11 +100,29 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
               font-weight: ${euiTheme.font.weight.semiBold};
               width: 100%;
             `}
-            data-test-subj={GROUPED_ITEM_TITLE_TEST_ID}
+            data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_LINK}
           >
             {title}
           </EuiLink>
-        </EuiToolTip>
+        ) : (
+          <EuiToolTip
+            content={entityUnavailableTooltip}
+            position="left"
+            data-test-subj={GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID}
+          >
+            <EuiText
+              size="s"
+              color="text"
+              tabIndex={0}
+              data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+              `}
+            >
+              {title}
+            </EuiText>
+          </EuiToolTip>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

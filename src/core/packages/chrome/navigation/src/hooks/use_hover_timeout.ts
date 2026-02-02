@@ -10,27 +10,33 @@
 import { useRef, useCallback, useEffect } from 'react';
 
 /**
- * Hook for managing hover timeouts
+ * Hook for managing hover timeouts.
+ *
+ * @returns an object containing:
+ * - `setHoverTimeout` - a function to set a hover timeout.
+ * - `clearHoverTimeout` - a function to clear the hover timeout.
  */
 export const useHoverTimeout = () => {
   const timeoutRef = useRef<number | null>(null);
 
-  const clearTimeout = useCallback(() => {
-    if (timeoutRef.current) {
+  const clearHoverTimeout = useCallback(() => {
+    if (typeof window !== 'undefined' && timeoutRef.current !== null) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
   }, []);
 
-  const setTimeout = useCallback(
+  const setHoverTimeout = useCallback(
     (callback: () => void, delay: number) => {
-      clearTimeout();
-      timeoutRef.current = window.setTimeout(callback, delay);
+      clearHoverTimeout();
+      if (typeof window !== 'undefined') {
+        timeoutRef.current = window.setTimeout(callback, delay);
+      }
     },
-    [clearTimeout]
+    [clearHoverTimeout]
   );
 
-  useEffect(() => clearTimeout, [clearTimeout]);
+  useEffect(() => clearHoverTimeout, [clearHoverTimeout]);
 
-  return { setTimeout, clearTimeout };
+  return { setHoverTimeout, clearHoverTimeout };
 };

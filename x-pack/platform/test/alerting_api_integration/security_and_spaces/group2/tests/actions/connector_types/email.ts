@@ -14,6 +14,7 @@ import {
 import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
+import { EmailMaximumBodyLength } from '../../../config';
 
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -240,8 +241,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type config: [from]: expected value of type [string] but got [undefined]',
+            message: `error validating connector type config: Field \"from\": Required`,
           });
         });
     });
@@ -268,7 +268,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
+              "error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration",
           });
         });
 
@@ -294,7 +294,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              "error validating action type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
+              "error validating connector type config: [host] value 'stmp.gmail.com' is not in the allowedHosts configuration",
           });
         });
     });
@@ -609,6 +609,58 @@ export default function emailTest({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
+    });
+
+    it('should trim large message parameters', async () => {
+      const longLength = EmailMaximumBodyLength * 2;
+      const longString = ''.padEnd(longLength, 'x');
+      await supertest
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: longString,
+          },
+        })
+        .expect(200)
+        .then(async (resp: any) => {
+          const { text, html } = resp.body.data.message;
+          expect(text.length).lessThan(longLength);
+          expect(html.length).lessThan(longLength);
+          const startMessageRegExpText =
+            /^Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
+          const startMessageRegExpHtml =
+            /^<p>Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
+          expect(text).match(startMessageRegExpText);
+          expect(html).match(startMessageRegExpHtml);
+        });
+    });
+
+    it('should trim large messageHTML parameters', async () => {
+      const longLength = EmailMaximumBodyLength * 2;
+      const longString = ''.padEnd(longLength, 'x');
+      await supertest
+        .post(`/api/alerts_fixture/${createdActionId}/_execute_connector_as_notification`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'email-subject',
+            message: 'hallo',
+            messageHTML: longString,
+          },
+        })
+        .expect(200)
+        .then(async (resp: any) => {
+          const { text, html } = resp.body.data.message;
+          expect(text).to.match(/^hallo/);
+          expect(`${html}`.length).to.be.lessThan(longLength);
+          const startMessageRegExpHtml =
+            /^Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector /;
+          expect(html).to.match(startMessageRegExpHtml);
+        });
     });
   });
 }

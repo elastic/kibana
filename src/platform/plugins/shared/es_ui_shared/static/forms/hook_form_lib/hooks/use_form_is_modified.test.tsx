@@ -8,9 +8,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed } from '../shared_imports';
 import { useForm } from './use_form';
 import { useFormIsModified } from './use_form_is_modified';
 import { Form } from '../components/form';
@@ -67,63 +67,60 @@ describe('useFormIsModified()', () => {
   const isFormModified = () =>
     onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
 
-  const setup = registerTestBed(TestComp, {
-    defaultProps: { onIsModifiedChange },
-    memoryRouter: { wrapComponent: false },
-  });
-
   test('should return true **only** when the field value differs from its initial value', async () => {
-    const { form } = await setup();
+    const user = userEvent.setup();
+    render(<TestComp onIsModifiedChange={onIsModifiedChange} />);
 
     expect(isFormModified()).toBe(false);
 
-    await act(async () => {
-      form.setInputValue('nameField', 'changed');
-    });
+    const nameField = screen.getByTestId('nameField');
+    await user.clear(nameField);
+    await user.type(nameField, 'changed');
 
     expect(isFormModified()).toBe(true);
 
     // Put back to the initial value --> isModified should be false
-    await act(async () => {
-      form.setInputValue('nameField', 'initialValue');
-    });
+    await user.clear(nameField);
+    await user.type(nameField, 'initialValue');
+
     expect(isFormModified()).toBe(false);
   });
 
   test('should accepts a list of field to discard', async () => {
-    const { form } = await setup({ discard: ['toDiscard'] });
+    const user = userEvent.setup();
+    render(<TestComp onIsModifiedChange={onIsModifiedChange} discard={['toDiscard']} />);
 
     expect(isFormModified()).toBe(false);
 
-    await act(async () => {
-      form.setInputValue('toDiscardField', 'changed');
-    });
+    const toDiscardField = screen.getByTestId('toDiscardField');
+    await user.clear(toDiscardField);
+    await user.type(toDiscardField, 'changed');
 
     // It should still not be modififed
     expect(isFormModified()).toBe(false);
   });
 
   test('should take into account if a field is removed from the DOM **and** it existed on the form "defaultValue"', async () => {
-    const { find } = await setup();
+    const user = userEvent.setup();
+    render(<TestComp onIsModifiedChange={onIsModifiedChange} />);
 
     expect(isFormModified()).toBe(false);
 
-    await act(async () => {
-      find('hideNameButton').simulate('click');
-    });
+    const hideNameButton = screen.getByTestId('hideNameButton');
+    await user.click(hideNameButton);
+
     expect(isFormModified()).toBe(true);
 
     // Put back the name
-    await act(async () => {
-      find('hideNameButton').simulate('click');
-    });
+    await user.click(hideNameButton);
+
     expect(isFormModified()).toBe(false);
 
     // Hide the lastname which is **not** in the form defaultValue
     // this it won't set the form isModified to true
-    await act(async () => {
-      find('hideLastNameButton').simulate('click');
-    });
+    const hideLastNameButton = screen.getByTestId('hideLastNameButton');
+    await user.click(hideLastNameButton);
+
     expect(isFormModified()).toBe(false);
   });
 });

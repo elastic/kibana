@@ -5,55 +5,43 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
-
+import { screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { setupEnvironment } from '../../helpers';
-import { initTestBed } from '../init_test_bed';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
 
 describe('<EditPolicy /> frozen phase', () => {
-  let testBed: TestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
-
-    await act(async () => {
-      testBed = await initTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
   });
 
   describe('on non-enterprise license', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
-      await act(async () => {
-        testBed = await initTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'basic' } }),
-          },
-        });
+      renderEditPolicy(httpSetup, {
+        appServicesContext: {
+          license: licensingMock.createLicense({ license: { type: 'basic' } }),
+        },
       });
 
-      const { component } = testBed;
-      component.update();
+      await screen.findByTestId('savePolicyButton');
     });
 
-    test('should not be available', async () => {
-      const { exists } = testBed;
-      expect(exists('frozen-phase')).toBe(false);
+    test('should not be available', () => {
+      expect(screen.queryByTestId('frozen-phase')).not.toBeInTheDocument();
     });
   });
 });

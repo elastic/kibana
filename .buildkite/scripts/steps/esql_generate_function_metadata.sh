@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-ast"
+VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-language"
 EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 

@@ -24,6 +24,8 @@ import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { useAbortController } from '@kbn/react-hooks';
+import { isNoSuggestionsError } from '../utils/no_suggestions_error';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
@@ -32,6 +34,7 @@ import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
+import { registerGrokSuggestion, clearGrokSuggestion } from '../../../../dev_console_helpers';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -52,9 +55,10 @@ export const GrokPatternAISuggestions = ({
     selectPreviewRecords(snapshot.context)
   );
 
-  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
+  const abortController = useAbortController();
+  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -63,6 +67,79 @@ export const GrokPatternAISuggestions = ({
         )
     );
   }, [previewDocuments, fieldValue]);
+
+  // Register/clear suggestion in dev console helper
+  React.useEffect(() => {
+    if (suggestionsState.value) {
+      registerGrokSuggestion({
+        grokProcessor: suggestionsState.value.grokProcessor,
+        simulationResult: suggestionsState.value.simulationResult,
+      });
+    } else {
+      clearGrokSuggestion();
+    }
+
+    return () => {
+      clearGrokSuggestion();
+    };
+  }, [suggestionsState.value]);
+
+  // Show inline message when LLM couldn't generate suggestions
+  if (
+    suggestionsState.error &&
+    isNoSuggestionsError(suggestionsState.error) &&
+    !suggestionsState.loading
+  ) {
+    return (
+      <>
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.noSuggestionsTitle',
+            { defaultMessage: 'Could not generate suggestions' }
+          )}
+          color="primary"
+          size="s"
+          onDismiss={() => refreshSuggestions(null)}
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.noSuggestionsDescription',
+              {
+                defaultMessage:
+                  'The AI assistant was unable to generate pattern suggestions for your data. You can try again.',
+              }
+            )}
+          </p>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                iconType="refresh"
+                size="s"
+                onClick={(connectorId) => {
+                  refreshSuggestions({
+                    connectorId,
+                    streamName: stream.name,
+                    fieldName: fieldValue,
+                  });
+                }}
+                isLoading={false}
+                isDisabled={!isValidField}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.tryAgain',
+                  { defaultMessage: 'Try again' }
+                )}
+              </GenerateSuggestionButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
 
   if (suggestionsState.value) {
     return (
@@ -76,6 +153,11 @@ export const GrokPatternAISuggestions = ({
               suggestionsState.value.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
               ),
+              { shouldValidate: true }
+            );
+            setValue(
+              'pattern_definitions',
+              suggestionsState.value.grokProcessor.pattern_definitions,
               { shouldValidate: true }
             );
           }
@@ -128,6 +210,7 @@ export const GrokPatternAISuggestions = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&
+        aiFeatures.enabled &&
         aiFeatures.isManagedAIConnector &&
         !aiFeatures.hasAcknowledgedAdditionalCharges && (
           <>
@@ -200,7 +283,14 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+          <EuiButton
+            iconType="check"
+            onClick={onAccept}
+            color="primary"
+            size="s"
+            fill
+            data-test-subj="streamsAppGrokSuggestionAcceptButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {

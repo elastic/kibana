@@ -59,7 +59,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
 
   return alert && alertState ? (
     <Fragment>
-      <EuiCallOut title={`Rule "${alert.name}"`} iconType="search">
+      <EuiCallOut announceOnMount title={`Rule "${alert.name}"`} iconType="search">
         <p>
           This is a specific view for all
           <EuiTextColor color="accent"> example.people-in-space </EuiTextColor> Rules created by the
@@ -72,7 +72,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
         <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alerts) ? (
-        <EuiCallOut title="No Alerts!" color="warning" iconType="question">
+        <EuiCallOut announceOnMount title="No Alerts!" color="warning" iconType="question">
           <p>
             The people in {alert.params.craft as string} at the moment <b>are not</b>{' '}
             {alert.params.op as string} {alert.params.outerSpaceCapacity as string}
@@ -80,7 +80,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
         </EuiCallOut>
       ) : (
         <Fragment>
-          <EuiCallOut title="Active State" color="success" iconType="user">
+          <EuiCallOut announceOnMount title="Active State" color="success" iconType="user">
             <p>
               The rule has been triggered because the people in {alert.params.craft as string} at
               the moment {alert.params.op as string} {alert.params.outerSpaceCapacity as string}

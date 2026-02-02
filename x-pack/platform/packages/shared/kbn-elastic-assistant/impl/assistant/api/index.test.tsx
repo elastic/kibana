@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 
 import type { FetchConnectorExecuteAction } from '.';
 import { fetchConnectorExecuteAction } from '.';

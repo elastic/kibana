@@ -68,26 +68,6 @@ export function errorResultUnexpectedNullResponse(
   };
 }
 
-export function errorInvalidParamsForMethod(
-  actionId: string,
-  methodString: string
-): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate(
-    'xpack.stackConnectors.webhook.invalidParamsForMethodErrorMessage',
-    {
-      defaultMessage: 'error calling webhook, {methodString} operation should not define a body',
-      values: {
-        methodString,
-      },
-    }
-  );
-  return {
-    status: 'error',
-    message: errMessage,
-    actionId,
-  };
-}
-
 export function retryResult(
   actionId: string,
   serviceMessage: string

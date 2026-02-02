@@ -10,6 +10,14 @@
 import { has } from 'lodash';
 import type { DashboardQuery } from '../server';
 
+/**
+ * Migrates legacy query formats to the current {@link DashboardQuery} format.
+ * Queries without a `language` property are assumed to be Lucene queries,
+ * since Lucene was the only option in earlier versions.
+ *
+ * @param query - The query to migrate, which can be a {@link DashboardQuery}, a legacy object, or a string.
+ * @returns The migrated {@link DashboardQuery}.
+ */
 export function migrateLegacyQuery(
   query: DashboardQuery | { [key: string]: any } | string
 ): DashboardQuery {

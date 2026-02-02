@@ -57,8 +57,8 @@ const mockUseQuery = jest.fn(() => ({
   error: null as unknown,
 }));
 
-jest.mock('@tanstack/react-query', () => {
-  const actual = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const actual = jest.requireActual('@kbn/react-query');
   return {
     ...actual,
     useQuery: () => mockUseQuery(),

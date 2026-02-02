@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 
 import { ConnectorTypes } from '../../../common/types/domain';
 import { ConnectorCard } from './card';
-import { createQueryWithMarkup } from '../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../common/test_utils';
 
 describe('ConnectorCard ', () => {
   it('does not throw when accessing the icon if the connector type is not registered', () => {
@@ -68,38 +68,40 @@ describe('ConnectorCard ', () => {
       />
     );
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = listItems.map((item) => [item.title, item.description]);
 
-    for (const item of listItems) {
-      expect(getByTextWithMarkup(`${item.title}: ${item.description}`)).toBeInTheDocument();
-    }
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 
-  it('shows a codeblock when applicable', async () => {
+  it('does not throw for unexpected values', () => {
+    const listItems = [
+      { title: 'item 1 title', description: { testing: true } },
+      { title: 'item 2 title', description: ['item 2 desc'] },
+      { title: 'item 3 title', description: true },
+      { title: 'item 4 title', description: null },
+    ];
+
     render(
       <ConnectorCard
         connectorType={ConnectorTypes.none}
         title="My connector"
-        listItems={[{ title: 'some title', description: 'some code', displayAsCodeBlock: true }]}
+        // @ts-expect-error testing unexpected values
+        // since the values come from third-party services
+        // it's better to check for unexpected values as well
+        listItems={listItems}
         isLoading={false}
       />
     );
 
-    expect(await screen.findByTestId('card-list-item')).toBeInTheDocument();
-    expect(await screen.findByTestId('card-list-code-block')).toBeInTheDocument();
-  });
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [
+      ['item 1 title', '{"testing":true}'],
+      ['item 2 title', 'item 2 desc'],
+      ['item 3 title', 'true'],
+      ['item 4 title', 'null'],
+    ];
 
-  it('does not show a codeblock when not necessary', async () => {
-    render(
-      <ConnectorCard
-        connectorType={ConnectorTypes.none}
-        title="My connector"
-        listItems={[{ title: 'some title', description: 'some code' }]}
-        isLoading={false}
-      />
-    );
-
-    expect(await screen.findByTestId('card-list-item')).toBeInTheDocument();
-    expect(screen.queryByTestId('card-list-code-block')).not.toBeInTheDocument();
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

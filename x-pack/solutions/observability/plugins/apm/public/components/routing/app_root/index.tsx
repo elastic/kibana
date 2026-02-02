@@ -55,7 +55,7 @@ export function ApmAppRoot({
   const i18nCore = core.i18n;
 
   return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="apmMainContainer" role="main">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="apmMainContainer">
       <RedirectAppLinks
         coreStart={{
           application: core.application,

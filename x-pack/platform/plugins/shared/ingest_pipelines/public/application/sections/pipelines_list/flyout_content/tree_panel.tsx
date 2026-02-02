@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
 import { PipelineStructureTree } from '@kbn/ingest-pipelines-shared';
 import React, { useCallback } from 'react';
-import { useKibana } from '../../../../shared_imports';
 
 interface Props {
   pipelineTree: PipelineTreeNode;
@@ -23,9 +21,7 @@ interface Props {
 
 export const TreePanel = React.memo(
   ({ pipelineTree, selectedPipeline, clickTreeNode, setTreeRootStack, isExtension }: Props) => {
-    const {
-      services: { documentation },
-    } = useKibana();
+    const { euiTheme } = useEuiTheme();
 
     const pushTreeStack = useCallback(
       (name: string) => {
@@ -46,7 +42,13 @@ export const TreePanel = React.memo(
       <EuiSplitPanel.Inner
         color="subdued"
         data-test-subj="pipelineTreePanel"
-        style={{ overflowY: 'auto' }}
+        style={{
+          overflowY: 'auto',
+          borderRight: euiTheme.border.thin,
+          maxWidth: '460px',
+          minWidth: '460px',
+        }}
+        paddingSize="l"
       >
         <EuiTitle id="pipelineTreeTitle">
           <h2>
@@ -56,24 +58,14 @@ export const TreePanel = React.memo(
           </h2>
         </EuiTitle>
 
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
 
-        <FormattedMessage
-          id="xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description"
-          defaultMessage="A tree visualization of your ingest pipeline, showing how {pipelineProcessorsLink} are invoking other pipelines"
-          values={{
-            pipelineProcessorsLink: (
-              <EuiLink href={documentation.getDocLinks()?.links.ingest.pipeline} target="_blank">
-                {i18n.translate(
-                  'xpack.ingestPipelines.list.pipelineDetails.pipelineTree.pipelineProcessorsDocsLink',
-                  {
-                    defaultMessage: 'pipeline processors',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiText color="subdued" size="s">
+          {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description', {
+            defaultMessage:
+              'A tree visualization of your ingest pipeline, showing how pipeline processors are invoking other pipelines',
+          })}
+        </EuiText>
 
         <EuiSpacer size="s" />
 

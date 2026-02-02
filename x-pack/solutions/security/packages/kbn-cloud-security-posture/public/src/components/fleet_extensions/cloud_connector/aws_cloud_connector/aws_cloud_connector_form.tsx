@@ -9,18 +9,22 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import { type AWSCloudConnectorFormProps } from '../types';
+import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
+import { type CloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
   updatePolicyWithAwsCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
+  isAwsCredentials,
+  type AwsCloudConnectorFieldNames,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
+import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 
-export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
+export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
   newPolicy,
   packageInfo,
@@ -39,6 +43,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
           cloud,
           packageInfo,
           templateName,
+          provider: AWS_PROVIDER,
         })
       : undefined;
   const inputVars = input.streams.find((i) => i.enabled)?.vars;
@@ -52,6 +57,19 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
 
   return (
     <>
+      <CloudConnectorNameField
+        value={credentials?.name || ''}
+        onChange={(name, isValid, error) => {
+          if (credentials && setCredentials) {
+            setCredentials({
+              ...credentials,
+              name,
+            });
+          }
+        }}
+        data-test-subj={CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ}
+      />
+      <EuiSpacer size="m" />
       <EuiAccordion
         id="cloudFormationAccordianInstructions"
         data-test-subj={''}
@@ -81,7 +99,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
           packageInfo={packageInfo}
           onChange={(key, value) => {
             // Update local credentials state if available
-            if (credentials) {
+            if (credentials && isAwsCredentials(credentials) && setCredentials) {
               const updatedCredentials = { ...credentials };
               if (
                 key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||
@@ -100,7 +118,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
               updatePolicy({
                 updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
                   [key]: value,
-                }),
+                } as Record<AwsCloudConnectorFieldNames, string | undefined>),
               });
             }
           }}

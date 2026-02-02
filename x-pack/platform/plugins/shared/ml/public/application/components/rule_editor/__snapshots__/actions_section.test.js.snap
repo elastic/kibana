@@ -47,6 +47,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -95,6 +96,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -156,6 +158,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -205,6 +208,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -266,6 +270,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -314,6 +319,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"

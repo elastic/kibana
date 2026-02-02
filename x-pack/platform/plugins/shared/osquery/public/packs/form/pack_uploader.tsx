@@ -117,6 +117,10 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     [handleFileChosen]
   );
 
+  const filePickerLabel = i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
+    defaultMessage: 'Select or drag and drop osquery pack config file',
+  });
+
   return (
     <>
       <EuiSpacer size="xl" />
@@ -129,9 +133,8 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         <EuiFilePicker
           ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           id="osquery_pack_picker"
-          initialPromptText={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
-            defaultMessage: 'Select or drag and drop osquery pack config file',
-          })}
+          initialPromptText={filePickerLabel}
+          aria-label={filePickerLabel}
           onChange={handleInputChange}
           display="large"
           fullWidth

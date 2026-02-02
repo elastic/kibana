@@ -31,15 +31,15 @@ import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
+import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
+import { getFullPath } from '../..';
 
 import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
@@ -193,9 +193,7 @@ export const getTopNavConfig = (
                 {
                   type: VISUALIZE_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      savedObjectId: id,
-                    },
+                    savedObjectId: id,
                   },
                   embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                   searchSessionId: data.search.session.getSessionId(),

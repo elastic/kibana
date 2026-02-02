@@ -59,5 +59,5 @@ export function getReadableInterval(freq: number, interval: number): string {
 }
 
 function pluralize(count: number, singularText: string, pluralText?: string) {
-  return count === 1 ? singularText : !pluralText ? singularText + 's' : pluralText;
+  return count === 1 ? singularText : !pluralText ? `${singularText}s` : pluralText;
 }

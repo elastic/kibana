@@ -19,9 +19,10 @@ import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-se
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
+import type { VisParams } from '@kbn/visualizations-common';
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
-import type { VisParams, SerializedVis } from '../common';
+import type { SerializedVis } from '../common';
 
 export type StartServices = Pick<
   CoreStart,

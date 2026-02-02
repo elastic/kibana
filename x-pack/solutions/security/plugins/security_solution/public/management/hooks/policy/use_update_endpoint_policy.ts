@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import type { UseMutationOptions, UseMutationResult } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 import { useHttp } from '../../../common/lib/kibana';

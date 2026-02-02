@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import { generateAttackDiscoveries } from './generate_discoveries';
 import { invokeAttackDiscoveryGraph } from '../public/post/helpers/invoke_attack_discovery_graph';

@@ -42,7 +42,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   onSuccess,
   query,
   savedQueryId,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
   queryField,
   ecsMappingField,

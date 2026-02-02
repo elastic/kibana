@@ -16,7 +16,11 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, useGeneratedHtmlId } from '@
 interface DeleteFilterConfirmationModalProps {
   filterToDeleteValue: string;
   onCancelConfirmationModal: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
+    event?:
+      | React.KeyboardEvent<HTMLDivElement>
+      | React.MouseEvent<HTMLButtonElement>
+      | MouseEvent
+      | TouchEvent
   ) => void;
   onDeleteFilter: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }

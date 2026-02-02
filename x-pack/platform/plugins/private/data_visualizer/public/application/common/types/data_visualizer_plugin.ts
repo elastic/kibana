@@ -30,18 +30,18 @@ export interface DataVisualizerSetupDependencies {
 }
 export interface DataVisualizerStartDependencies {
   analytics: AnalyticsServiceStart;
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  fileUpload: FileUploadPluginStart;
-  maps: MapsStartApi;
-  embeddable: EmbeddableStart;
-  share: SharePluginStart;
-  lens?: LensPublicStart;
   charts: ChartsPluginStart;
-  dataViewFieldEditor?: IndexPatternFieldEditorStart;
-  fieldFormats: FieldFormatsStart;
-  uiActions?: UiActionsStart;
   cloud?: CloudStart;
+  data: DataPublicPluginStart;
+  dataViewFieldEditor?: IndexPatternFieldEditorStart;
+  embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
+  fileUpload: FileUploadPluginStart;
+  lens?: LensPublicStart;
+  maps: MapsStartApi;
   savedSearch: SavedSearchPublicPluginStart;
+  share: SharePluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }

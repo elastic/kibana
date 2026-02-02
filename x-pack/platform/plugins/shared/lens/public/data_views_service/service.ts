@@ -13,9 +13,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import type { IndexPattern, IndexPatternMap } from '../types';
+import type { IndexPattern, IndexPatternMap, DataViewsState } from '@kbn/lens-common';
 import { ensureIndexPattern, loadIndexPatterns } from './loader';
-import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {

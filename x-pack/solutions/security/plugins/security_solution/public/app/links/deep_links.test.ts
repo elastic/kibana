@@ -24,7 +24,7 @@ describe('solutionFormatter', () => {
   it('should convert a flat navItem using normalizedLinks', () => {
     const id = 'page-1' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id }],
+      body: [{ id }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -46,10 +46,7 @@ describe('solutionFormatter', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -71,10 +68,7 @@ describe('solutionFormatter', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -97,10 +91,7 @@ describe('solutionFormatter', () => {
     const id = 'page-1' as SecurityPageName;
     const id2 = 'page-2' as SecurityPageName;
     const tree: NavigationTreeDefinition = {
-      body: [
-        { type: 'navItem', id },
-        { type: 'navItem', id: id2 },
-      ],
+      body: [{ id }, { id: id2 }],
     };
 
     const normalizedLinks: NormalizedLinks = {
@@ -130,7 +121,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           id: 'group-1',
           children: [{ id }],
         },
@@ -159,7 +149,6 @@ describe('solutionFormatter', () => {
         {
           // No id — should recurse into children
           title: 'Group 1',
-          type: 'navGroup',
           children: [{ id }],
         },
       ],
@@ -187,7 +176,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: groupId,
@@ -224,7 +212,6 @@ describe('solutionFormatter', () => {
     const tree: NavigationTreeDefinition = {
       body: [
         {
-          type: 'navGroup',
           children: [
             {
               id: parentId,
@@ -275,7 +262,7 @@ describe('solutionFormatter', () => {
 
   it('should skip nodes that are not in normalizedLinks or SecurityLinkGroup', () => {
     const tree: NavigationTreeDefinition = {
-      body: [{ type: 'navItem', id: 'unknown-id' }],
+      body: [{ id: 'unknown-id' }],
     };
 
     const normalizedLinks: NormalizedLinks = {};

@@ -12,7 +12,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-plugin/common';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type {
   DataDocuments$,
@@ -37,6 +36,7 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
 
 const mountComponent = async ({
   hideChart = false,
@@ -88,18 +88,27 @@ const mountComponent = async ({
     totalHits$,
   };
   stateContainer.dataState.data$ = savedSearchData$;
-  const dataView = stateContainer.savedSearchState
-    .getState()
-    .searchSource.getField('index') as DataView;
-  stateContainer.appState.update({
-    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
-    interval: 'auto',
-    hideChart,
-    columns: [],
-  });
+  const dataView = selectTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    stateContainer.getCurrentTab().id
+  ).currentDataView$.getValue()!;
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: {
+        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        interval: 'auto',
+        hideChart,
+        columns: [],
+      },
+    })
+  );
 
   if (isEsqlMode) {
-    stateContainer.appState.update({ query: { esql: 'from * ' } });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+        appState: { query: { esql: 'from * ' } },
+      })
+    );
   }
 
   const props: DiscoverMainContentProps = {

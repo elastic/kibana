@@ -9,14 +9,14 @@ import React, { useContext, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { TimelineContext } from '../../timeline/context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
-  SecurityCellActions,
   CellActionsMode,
+  SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 
@@ -61,7 +61,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   showActionTooltips
                   triggerId={SecurityCellActionsTrigger.DEFAULT}
                   data={{ value, field: fieldName }}
-                  sourcererScopeId={sourcererScopeId ?? SourcererScopeName.default}
+                  sourcererScopeId={sourcererScopeId ?? PageScope.default}
                   metadata={{ scopeId: defaultedScopeId ?? undefined }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>

@@ -9,7 +9,7 @@ import { decodeCreateAlert, isPartialCreateAlertSchema } from './schema';
 import {
   JiraServiceManagementCreateAlertExample,
   ValidCreateAlertSchema,
-} from '../../../../server/connector_types/jira-service-management/test_schema';
+} from '@kbn/connector-schemas/jira-service-management/schemas/test_schema';
 
 describe('schema', () => {
   describe('decodeCreateAlert', () => {

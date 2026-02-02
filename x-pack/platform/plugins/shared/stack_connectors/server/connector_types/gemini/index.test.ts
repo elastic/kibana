@@ -8,10 +8,10 @@
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
-import { configValidator, getConnectorType } from '.';
-import type { Config, Secrets } from '../../../common/gemini/types';
+import { configValidator, getConnectorType, secretsValidator } from '.';
+import type { Config, Secrets } from '@kbn/connector-schemas/gemini';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
+import { DEFAULT_MODEL } from '@kbn/connector-schemas/gemini';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -41,8 +41,8 @@ describe('Gemini Connector', () => {
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
       const config: Config = {
-        apiUrl: `https://us-central1-aiplatform.googleapis.com/v1/projects/test-gcpProject/locations/us-central-1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
-        defaultModel: DEFAULT_GEMINI_MODEL,
+        apiUrl: `https://us-central1-aiplatform.googleapis.com/v1/projects/test-gcpProject/locations/us-central-1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
+        defaultModel: DEFAULT_MODEL,
         gcpRegion: 'us-central-1',
         gcpProjectID: 'test-gcpProject',
       };
@@ -53,7 +53,7 @@ describe('Gemini Connector', () => {
     test('config validation failed when a url is invalid', () => {
       const config: Config = {
         apiUrl: 'example.com/do-something',
-        defaultModel: DEFAULT_GEMINI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         gcpRegion: 'us-central-1',
         gcpProjectID: 'test-gcpProject',
       };
@@ -74,7 +74,7 @@ describe('Gemini Connector', () => {
 
       const config: Config = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
-        defaultModel: DEFAULT_GEMINI_MODEL,
+        defaultModel: DEFAULT_MODEL,
         gcpRegion: 'us-central-1',
         gcpProjectID: 'test-gcpProject',
       };
@@ -83,6 +83,60 @@ describe('Gemini Connector', () => {
         configValidator(config, { configurationUtilities: configUtils });
       }).toThrowErrorMatchingInlineSnapshot(
         `"Error configuring Google Gemini action: Error: error validating url: target url is not present in allowedHosts"`
+      );
+    });
+  });
+
+  describe('secrets validation', () => {
+    test('secrets validation passes when valid service_account credentials are provided', () => {
+      const secrets: Secrets = {
+        credentialsJson: JSON.stringify({
+          type: 'service_account',
+          project_id: 'test-project',
+        }),
+      };
+
+      expect(secretsValidator(secrets, { configurationUtilities })).toEqual(secrets);
+    });
+
+    test('secrets validation fails when external_account credentials are provided', () => {
+      const secrets: Secrets = {
+        credentialsJson: JSON.stringify({
+          type: 'external_account',
+          credential_source: {
+            file: '/etc/passwd',
+          },
+        }),
+      };
+
+      expect(() => {
+        secretsValidator(secrets, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Error configuring Google Gemini secrets: Error: Invalid credential type. Only \\"service_account\\" credentials are supported. Type was \\"external_account\\"."`
+      );
+    });
+
+    test('secrets validation fails when invalid JSON is provided', () => {
+      const secrets: Secrets = {
+        credentialsJson: '{ invalid json }',
+      };
+
+      expect(() => {
+        secretsValidator(secrets, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Error configuring Google Gemini secrets: Error: Invalid JSON format for credentials."`
+      );
+    });
+
+    test('secrets validation fails when credentialsJson is missing', () => {
+      const secrets: Secrets = {
+        credentialsJson: '',
+      };
+
+      expect(() => {
+        secretsValidator(secrets, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Error configuring Google Gemini secrets: Error: Google Service Account credentials JSON is required."`
       );
     });
   });

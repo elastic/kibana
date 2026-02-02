@@ -8,15 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteDependencies } from './types';
-import { ADMIN_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetStepExecutionRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
     {
       path: '/api/workflowExecutions/{executionId}/steps/{id}',
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
       validate: {
         params: schema.object({
           executionId: schema.string(),
@@ -24,7 +25,7 @@ export function registerGetStepExecutionRoute({ router, api, logger, spaces }: R
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { executionId, id } = request.params;
         const stepExecution = await api.getStepExecution(
@@ -40,6 +41,6 @@ export function registerGetStepExecutionRoute({ router, api, logger, spaces }: R
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

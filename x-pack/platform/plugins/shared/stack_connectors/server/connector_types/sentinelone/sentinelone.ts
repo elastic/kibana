@@ -22,8 +22,16 @@ import type {
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
   SentinelOneExecuteScriptParams,
-} from '../../../common/sentinelone/types';
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
+  SentinelOneGetRemoteScriptStatusApiResponse,
+} from '@kbn/connector-schemas/sentinelone';
 import {
+  SUB_ACTION,
   SentinelOneExecuteScriptParamsSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
@@ -45,17 +53,7 @@ import {
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsResponseSchema,
   SentinelOneApiDoNotValidateResponsesSchema,
-} from '../../../common/sentinelone/schema';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import type {
-  SentinelOneFetchAgentFilesParams,
-  SentinelOneDownloadAgentFileParams,
-  SentinelOneGetActivitiesParams,
-  SentinelOneGetRemoteScriptResultsParams,
-  SentinelOneDownloadRemoteScriptResultsParams,
-  SentinelOneGetRemoteScriptResultsApiResponse,
-  SentinelOneGetRemoteScriptStatusApiResponse,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 
 export const API_PATH = '/web/api/v2.1';
 

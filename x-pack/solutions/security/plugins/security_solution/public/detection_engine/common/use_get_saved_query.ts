@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 

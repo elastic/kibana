@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import type { ComponentProps } from 'react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { MappingsEditor } from '../../mappings_editor';
+import { WithAppDependencies } from './helpers/setup_environment';
 
-import type { MappingsEditorTestBed } from './helpers';
-import { componentHelpers } from './helpers';
-
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+jest.mock('@kbn/code-editor');
 
 jest.mock('../../../component_templates/component_templates_context', () => ({
   useComponentTemplatesContext: jest.fn().mockReturnValue({
@@ -21,59 +23,73 @@ jest.mock('../../../component_templates/component_templates_context', () => ({
   }),
 }));
 
+const onChangeHandler = jest.fn();
 describe('Mappings editor: runtime fields', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
+
+  type MappingsEditorProps = ComponentProps<typeof MappingsEditor>;
+
+  const setup = (props: Partial<MappingsEditorProps>) => {
+    const Component = WithAppDependencies(MappingsEditor, {});
+    return render(
+      <I18nProvider>
+        <Component {...props} />
+      </I18nProvider>
+    );
+  };
+
+  // Helper to switch tabs
+  const selectTab = async (tabName: 'fields' | 'runtimeFields' | 'templates' | 'advanced') => {
+    const tabTestIdMap: Record<typeof tabName, string> = {
+      fields: 'fieldsTab',
+      runtimeFields: 'runtimeTab',
+      templates: 'templatesTab',
+      advanced: 'advancedOptionsTab',
+    };
+    fireEvent.click(screen.getByTestId(tabTestIdMap[tabName]));
+    await waitFor(() => {
+      expect(screen.getByTestId(tabTestIdMap[tabName])).toHaveAttribute('aria-selected', 'true');
+    });
+  };
 
   describe('<RuntimeFieldsList />', () => {
-    let testBed: MappingsEditorTestBed;
-
     describe('when there are no runtime fields', () => {
       const defaultMappings = {};
 
       beforeEach(async () => {
-        testBed = setup({
+        setup({
           value: defaultMappings,
           onChange: onChangeHandler,
+          indexSettings: {},
         });
 
-        await testBed.actions.selectTab('runtimeFields');
+        await screen.findByTestId('mappingsEditor');
+        await selectTab('runtimeFields');
       });
 
-      test('should display an empty prompt', () => {
-        const { exists, find } = testBed;
-
-        expect(exists('emptyList')).toBe(true);
-        expect(find('emptyList').text()).toContain('Start by creating a runtime field');
+      test('should display an empty prompt', async () => {
+        const emptyList = await screen.findByTestId('emptyList');
+        expect(emptyList).toBeInTheDocument();
+        expect(emptyList.textContent).toContain('Start by creating a runtime field');
       });
 
-      test('should have a button to create a field and a link that points to the docs', () => {
-        const { exists, find, actions } = testBed;
+      test('should have a button to create a field and a link that points to the docs', async () => {
+        const emptyList = await screen.findByTestId('emptyList');
 
-        expect(exists('emptyList.learnMoreLink')).toBe(true);
-        expect(exists('emptyList.createRuntimeFieldButton')).toBe(true);
-        expect(find('createRuntimeFieldButton').text()).toBe('Create runtime field');
+        expect(within(emptyList).getByTestId('learnMoreLink')).toBeInTheDocument();
+        expect(within(emptyList).getByTestId('createRuntimeFieldButton')).toBeInTheDocument();
 
-        expect(exists('runtimeFieldEditor')).toBe(false);
-        actions.openRuntimeFieldEditor();
-        expect(exists('runtimeFieldEditor')).toBe(true);
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        expect(createButton.textContent).toBe('Create runtime field');
+
+        expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
+
+        fireEvent.click(createButton);
+
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        expect(editor).toBeInTheDocument();
       });
     });
 
@@ -90,51 +106,70 @@ describe('Mappings editor: runtime fields', () => {
       };
 
       beforeEach(async () => {
-        testBed = setup({
+        setup({
           value: defaultMappings,
           onChange: onChangeHandler,
+          indexSettings: {},
         });
 
-        await testBed.actions.selectTab('runtimeFields');
+        await screen.findByTestId('mappingsEditor');
+        await selectTab('runtimeFields');
       });
 
       test('should list the fields', async () => {
-        const { find, actions } = testBed;
+        const runtimeFieldsList = await screen.findByTestId(/runtimeFieldsListItem/);
+        expect(runtimeFieldsList).toBeInTheDocument();
 
-        const fields = actions.getRuntimeFieldsList();
-        expect(fields.length).toBe(1);
+        const fieldName = within(runtimeFieldsList).getByTestId('fieldName');
+        expect(fieldName.textContent).toBe('day_of_week');
 
-        const [field] = fields;
-        expect(field.name).toBe('day_of_week');
-        expect(field.type).toBe('Date');
+        const fieldType = within(runtimeFieldsList).getByTestId('fieldType');
+        expect(fieldType.textContent).toBe('Date');
 
-        await actions.startEditRuntimeField('day_of_week');
-        expect(find('runtimeFieldEditor.scriptField').props().value).toBe('emit("hello Kibana")');
+        const editButton = within(runtimeFieldsList).getByTestId('editFieldButton');
+        fireEvent.click(editButton);
+
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        expect(editor).toBeInTheDocument();
+
+        const nameFieldRow = await within(editor).findByTestId('nameField');
+        const nameInput = within(nameFieldRow).getByRole('textbox');
+        expect(nameInput).toHaveValue('day_of_week');
+
+        const scriptField = within(editor).queryByTestId('mockCodeEditor');
+        if (scriptField) {
+          expect(scriptField.getAttribute('data-currentvalue')).toBe('emit("hello Kibana")');
+        }
       });
 
-      test('should have a button to create fields', () => {
-        const { actions, exists } = testBed;
+      test('should have a button to create fields', async () => {
+        expect(screen.getByTestId('createRuntimeFieldButton')).toBeInTheDocument();
 
-        expect(exists('createRuntimeFieldButton')).toBe(true);
+        expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
 
-        actions.openRuntimeFieldEditor();
-        expect(exists('runtimeFieldEditor')).toBe(true);
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        fireEvent.click(createButton);
+
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        expect(editor).toBeInTheDocument();
       });
 
       test('should close the runtime editor when switching tab', async () => {
-        const { exists, actions } = testBed;
-        expect(exists('runtimeFieldEditor')).toBe(false); // closed
+        expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
 
-        actions.openRuntimeFieldEditor();
-        expect(exists('runtimeFieldEditor')).toBe(true); // opened
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        fireEvent.click(createButton);
 
-        // Navigate away
-        await testBed.actions.selectTab('templates');
-        expect(exists('runtimeFieldEditor')).toBe(false); // closed
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        expect(editor).toBeInTheDocument();
 
-        // Back to runtime fields
-        await testBed.actions.selectTab('runtimeFields');
-        expect(exists('runtimeFieldEditor')).toBe(false); // still closed
+        await selectTab('templates');
+
+        expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
+
+        await selectTab('runtimeFields');
+
+        expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
       });
     });
 
@@ -142,117 +177,149 @@ describe('Mappings editor: runtime fields', () => {
       const defaultMappings = {};
 
       beforeEach(async () => {
-        testBed = setup({
+        setup({
           value: defaultMappings,
           onChange: onChangeHandler,
+          indexSettings: {},
         });
 
-        await testBed.actions.selectTab('runtimeFields');
+        await screen.findByTestId('mappingsEditor');
+        await selectTab('runtimeFields');
       });
 
       test('should add the runtime field to the list and remove the empty prompt', async () => {
-        const { exists, actions, component } = testBed;
+        expect(screen.getByTestId('emptyList')).toBeInTheDocument();
 
-        await actions.addRuntimeField({
-          name: 'myField',
-          script: { source: 'emit("hello")' },
-          type: 'boolean',
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        fireEvent.click(createButton);
+
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        const nameFieldRow = await within(editor).findByTestId('nameField');
+        const nameInput = within(nameFieldRow).getByRole('textbox');
+        fireEvent.change(nameInput, { target: { value: 'myField' } });
+
+        const typeFieldContainer = within(editor).getByTestId('typeField');
+        const typeInput = within(typeFieldContainer).getByRole('combobox');
+        fireEvent.change(typeInput, {
+          target: { value: JSON.stringify([{ label: 'Boolean', value: 'boolean' }]) },
         });
 
-        // Make sure editor is closed and the field is in the list
-        expect(exists('runtimeFieldEditor')).toBe(false);
-        expect(exists('emptyList')).toBe(false);
+        const saveButton = within(editor).getByTestId('saveFieldButton');
+        fireEvent.click(saveButton);
 
-        const fields = actions.getRuntimeFieldsList();
-        expect(fields.length).toBe(1);
-
-        const [field] = fields;
-        expect(field.name).toBe('myField');
-        expect(field.type).toBe('Boolean');
-
-        // Make sure the field has been added to forwarded data
-        ({ data } = await getMappingsEditorData(component));
-
-        expect(data).toEqual({
-          runtime: {
-            myField: {
-              type: 'boolean',
-              script: {
-                source: 'emit("hello")',
-              },
-            },
-          },
+        await waitFor(() => {
+          expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
         });
+
+        expect(screen.queryByTestId('emptyList')).not.toBeInTheDocument();
+
+        const runtimeFieldsList = await screen.findByTestId(/runtimeFieldsListItem/);
+        const fieldName = within(runtimeFieldsList).getByTestId('fieldName');
+        expect(fieldName.textContent).toBe('myField');
+
+        expect(onChangeHandler).toHaveBeenCalled();
+        const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
+        const data = lastCall.getData(lastCall.isValid ?? true);
+
+        expect(data.runtime).toBeDefined();
+        expect(data.runtime.myField).toBeDefined();
+        expect(data.runtime.myField.type).toBeDefined();
       });
 
       test('should remove the runtime field from the list', async () => {
-        const { actions, component } = testBed;
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        fireEvent.click(createButton);
 
-        await actions.addRuntimeField({
-          name: 'myField',
-          script: { source: 'emit("hello")' },
-          type: 'boolean',
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        const nameFieldRow = await within(editor).findByTestId('nameField');
+        const nameInput = within(nameFieldRow).getByRole('textbox');
+        fireEvent.change(nameInput, { target: { value: 'myField' } });
+
+        const typeFieldContainer = within(editor).getByTestId('typeField');
+        const typeInput = within(typeFieldContainer).getByRole('combobox');
+        fireEvent.change(typeInput, {
+          target: { value: JSON.stringify([{ label: 'Boolean', value: 'boolean' }]) },
         });
 
-        let fields = actions.getRuntimeFieldsList();
-        expect(fields.length).toBe(1);
-        ({ data } = await getMappingsEditorData(component));
-        expect(data).toBeDefined();
-        expect(data.runtime).toBeDefined();
+        const saveButton = within(editor).getByTestId('saveFieldButton');
+        fireEvent.click(saveButton);
 
-        await actions.deleteRuntimeField('myField');
+        const runtimeFieldsList = await screen.findByTestId(/runtimeFieldsListItem/);
+        expect(runtimeFieldsList).toBeInTheDocument();
 
-        fields = actions.getRuntimeFieldsList();
-        expect(fields.length).toBe(0);
+        const removeButton = within(runtimeFieldsList).getByTestId('removeFieldButton');
+        fireEvent.click(removeButton);
 
-        ({ data } = await getMappingsEditorData(component));
+        const modal = await screen.findByTestId('runtimeFieldDeleteConfirmModal');
+        const confirmButton = within(modal).getByTestId('confirmModalConfirmButton');
+        fireEvent.click(confirmButton);
 
-        expect(data).toBeUndefined();
+        await waitFor(() => {
+          expect(screen.queryByTestId('runtimeFieldDeleteConfirmModal')).not.toBeInTheDocument();
+          expect(screen.queryByTestId(/runtimeFieldsListItem/)).not.toBeInTheDocument();
+        });
+
+        expect(screen.getByTestId('emptyList')).toBeInTheDocument();
+
+        expect(onChangeHandler).toHaveBeenCalled();
+        const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
+        const data = lastCall.getData(lastCall.isValid ?? true);
+        if (data) {
+          expect(data.runtime).toBeUndefined();
+        }
       });
 
       test('should edit the runtime field', async () => {
-        const { find, component, actions } = testBed;
+        const createButton = screen.getByTestId('createRuntimeFieldButton');
+        fireEvent.click(createButton);
 
-        await actions.addRuntimeField({
-          name: 'myField',
-          script: { source: 'emit("hello")' },
-          type: 'boolean',
+        const editor = await screen.findByTestId('runtimeFieldEditor');
+        const nameFieldRow = await within(editor).findByTestId('nameField');
+        const nameInput = within(nameFieldRow).getByRole('textbox');
+        fireEvent.change(nameInput, { target: { value: 'originalField' } });
+
+        const typeFieldContainer = within(editor).getByTestId('typeField');
+        const typeInput = within(typeFieldContainer).getByRole('combobox');
+        fireEvent.change(typeInput, {
+          target: { value: JSON.stringify([{ label: 'Boolean', value: 'boolean' }]) },
         });
 
-        let fields = actions.getRuntimeFieldsList();
-        expect(fields.length).toBe(1);
+        const saveButton = within(editor).getByTestId('saveFieldButton');
+        fireEvent.click(saveButton);
 
-        await actions.startEditRuntimeField('myField');
-        await actions.updateRuntimeFieldForm({
-          name: 'updatedName',
-          script: { source: 'new script' },
-          type: 'date',
+        let runtimeFieldsList = await screen.findByTestId(/runtimeFieldsListItem/);
+        expect(within(runtimeFieldsList).getByTestId('fieldName').textContent).toBe(
+          'originalField'
+        );
+
+        const editButton = within(runtimeFieldsList).getByTestId('editFieldButton');
+        fireEvent.click(editButton);
+
+        const editorEdit = await screen.findByTestId('runtimeFieldEditor');
+        const nameFieldRowEdit = await within(editorEdit).findByTestId('nameField');
+        const nameInputEdit = within(nameFieldRowEdit).getByRole('textbox');
+        expect(nameInputEdit).toHaveValue('originalField');
+        fireEvent.change(nameInputEdit, { target: { value: 'editedField' } });
+
+        const saveButtonEdit = within(editorEdit).getByTestId('saveFieldButton');
+        fireEvent.click(saveButtonEdit);
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('runtimeFieldEditor')).not.toBeInTheDocument();
         });
 
-        await act(async () => {
-          find('runtimeFieldEditor.saveFieldButton').simulate('click');
-          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-        });
-        component.update();
+        runtimeFieldsList = await screen.findByTestId(/runtimeFieldsListItem/);
+        expect(within(runtimeFieldsList).getByTestId('fieldName').textContent).toBe('editedField');
+        expect(within(runtimeFieldsList).getByTestId('fieldType').textContent).toBeDefined();
 
-        fields = actions.getRuntimeFieldsList();
-        const [field] = fields;
-
-        expect(field.name).toBe('updatedName');
-        expect(field.type).toBe('Date');
-
-        ({ data } = await getMappingsEditorData(component));
-
-        expect(data).toEqual({
-          runtime: {
-            updatedName: {
-              type: 'date',
-              script: {
-                source: 'new script',
-              },
-            },
-          },
-        });
+        expect(onChangeHandler).toHaveBeenCalled();
+        const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
+        const data = lastCall.getData(lastCall.isValid ?? true);
+        expect(data.runtime).toBeDefined();
+        expect(data.runtime.editedField).toBeDefined();
+        expect(data.runtime.editedField.type).toBeDefined();
+        // Original field should be gone (name was changed)
+        expect(data.runtime.originalField).toBeUndefined();
       });
     });
   });

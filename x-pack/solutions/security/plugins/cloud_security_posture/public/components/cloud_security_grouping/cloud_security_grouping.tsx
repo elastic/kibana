@@ -43,13 +43,12 @@ export const CloudSecurityGroupingLoading = ({
           unitsCount: { value: 1 },
         },
         groupingLevel: 0,
-        inspectButton: undefined,
+        additionalToolbarControls: undefined,
         isLoading: true,
         itemsPerPage: pageSize,
         renderChildComponent: () => <></>,
         onGroupClose: () => {},
         selectedGroup: '',
-        takeActionItems: () => ({ items: [], panels: [] }),
       })}
     </div>
   );
@@ -106,14 +105,13 @@ export const CloudSecurityGrouping = ({
           data,
           groupingLevel,
           selectedGroup,
-          inspectButton: undefined,
+          additionalToolbarControls: undefined,
           isLoading: isFetching,
           itemsPerPage: pageSize,
           onChangeGroupsItemsPerPage,
           onChangeGroupsPage,
           renderChildComponent,
           onGroupClose: () => {},
-          takeActionItems: () => ({ items: [], panels: [] }),
         })}
       </div>
     </div>

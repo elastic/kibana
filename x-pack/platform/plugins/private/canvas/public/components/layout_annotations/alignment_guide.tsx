@@ -34,6 +34,7 @@ export const AlignmentGuide: FC<Props> = ({ transformMatrix, width, height }) =>
 
 AlignmentGuide.propTypes = {
   height: PropTypes.number.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
 };

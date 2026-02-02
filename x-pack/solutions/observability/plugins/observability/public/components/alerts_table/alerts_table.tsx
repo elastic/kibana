@@ -9,6 +9,7 @@ import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { AlertsTableExpandedAlertView } from '../alerts_flyout/alerts_table_expanded_alert_view';
 import type { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
@@ -22,7 +23,6 @@ import type {
 import { AlertsTableCellValue } from './common/cell_value';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 
 const columns = getColumns({ showRuleName: true });
 const initialSort = [

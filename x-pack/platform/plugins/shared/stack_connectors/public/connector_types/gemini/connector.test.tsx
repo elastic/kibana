@@ -11,7 +11,7 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
+import { DEFAULT_MODEL } from '@kbn/connector-schemas/gemini/constants';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
@@ -32,7 +32,7 @@ const geminiConnector = {
   id: '123',
   config: {
     apiUrl: 'https://geminiurl.com',
-    defaultModel: DEFAULT_GEMINI_MODEL,
+    defaultModel: DEFAULT_MODEL,
     gcpRegion: 'us-central-1',
     gcpProjectID: 'test-project',
   },

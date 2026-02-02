@@ -117,6 +117,7 @@ export const CreateIntegrationUpload = React.memo(() => {
           </KibanaPageTemplate.Section>
           <ButtonsFooter
             isNextDisabled={file == null}
+            isNextLoading={isLoading}
             nextButtonText={i18n.INSTALL_BUTTON}
             onBack={onBack}
             onNext={onConfirm}

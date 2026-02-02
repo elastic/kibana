@@ -31,13 +31,27 @@ import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 
+/**
+ * Props for the {@link DashboardRenderer} component.
+ */
 export interface DashboardRendererProps {
+  /** Optional locator for dashboard navigation and URL generation. */
   locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  /** The ID of the saved dashboard to load. If not provided, creates a new dashboard. */
   savedObjectId?: string;
+  /** Whether to show a plain spinner instead of the Elastic loading animation. */
   showPlainSpinner?: boolean;
+  /** Callback for redirecting within the dashboard application. */
   dashboardRedirect?: DashboardRedirect;
+  /** Function that returns the creation options for the dashboard. */
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  onApiAvailable?: (api: DashboardApi) => void;
+  /**
+   * Callback invoked when the dashboard API becomes available.
+   *
+   * @param api - The {@link DashboardApi} instance.
+   * @param internalApi - The {@link DashboardInternalApi} instance.
+   */
+  onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
 }
 
 export function DashboardRenderer({
@@ -88,7 +102,7 @@ export function DashboardRenderer({
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
-        onApiAvailable?.(results.api);
+        onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
         if (!canceled) setError(err);

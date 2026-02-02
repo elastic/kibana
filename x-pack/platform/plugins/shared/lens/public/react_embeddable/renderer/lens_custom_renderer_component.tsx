@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type { LensApi, LensRendererProps, LensSerializedState } from '../types';
+import type { LensRendererProps, LensSerializedState } from '@kbn/lens-common';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { createEmptyLensState } from '../helper';
+import { createEmptyLensState, transformToApiConfig } from '../helper';
+import type { LensParentApi } from './types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change
@@ -38,6 +42,7 @@ type PanelProps = Pick<
   | 'hideHeader'
   | 'hideInspector'
   | 'getActions'
+  | 'titleHighlight'
 >;
 
 /**
@@ -63,6 +68,7 @@ export function LensRenderer({
   forceDSL,
   hidePanelTitles,
   lastReloadRequestTime,
+  titleHighlight,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -127,6 +133,7 @@ export function LensRenderer({
       showNotifications: false,
       showShadow: false,
       showBadges: false,
+      titleHighlight,
       getActions: async (triggerId, context) => {
         const actions = withDefaultActions
           ? await lensApi?.getTriggerCompatibleActions(triggerId, context)
@@ -135,36 +142,32 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
-    <EmbeddableRenderer<LensSerializedState, LensApi>
+    <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
-      // TODO type this ParentApi, all these are untyped and some unused
-      getParentApi={() => ({
-        // forward the Lens components to the embeddable
-        ...props,
-        // forward the unified search context
-        ...searchApi,
-        searchSessionId$,
-        disabledActionIds$,
-        setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
-        viewMode$,
-        // pass the sync* settings with the unified settings interface
-        settings,
-        // make sure to provide the initial state (useful for the comparison check)
-        getSerializedStateForChild: () => ({ rawState: initialStateRef.current, references: [] }),
-        // update the runtime state on changes
-        getRuntimeStateForChild: () => ({
-          ...initialStateRef.current,
-          attributes: props.attributes,
-        }),
-        forceDSL,
-        esqlVariables$,
-        hideTitle$,
-        reload$, // trigger a reload (replacement for deprepcated searchSessionId)
-      })}
+      getParentApi={() =>
+        ({
+          // forward the Lens components to the embeddable
+          ...props,
+          // forward the unified search context
+          ...searchApi,
+          searchSessionId$,
+          disabledActionIds$,
+          setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
+          viewMode$,
+          // pass the sync* settings with the unified settings interface
+          settings,
+          // make sure to provide the initial state (useful for the comparison check)
+          getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
+          forceDSL,
+          esqlVariables$,
+          hideTitle$,
+          reload$, // trigger a reload (replacement for deprecated searchSessionId)
+        } satisfies LensParentApi)
+      }
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
       panelProps={panelProps}

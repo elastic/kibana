@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
+import type { FormBasedPrivateState, FormBasedLayer } from '@kbn/lens-common';
 
 export function mergeLayer({
   state,

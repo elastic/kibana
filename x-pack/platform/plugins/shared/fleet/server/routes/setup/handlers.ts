@@ -11,7 +11,11 @@ import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import type { FleetRequestHandler } from '../../types';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import { isActionSecretStorageEnabled, isSecretStorageEnabled } from '../../services/secrets';
+import {
+  isActionSecretStorageEnabled,
+  isSecretStorageEnabled,
+  isSSLSecretStorageEnabled,
+} from '../../services/secrets';
 import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
@@ -27,11 +31,13 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     useSecretsStorage,
     isSpaceAwarenessEnabledRes,
     isActionSecretStorageEnabledRes,
+    useSSLSecretsStorage,
   ] = await Promise.all([
     hasFleetServers(esClient, soClient),
     isSecretStorageEnabled(esClient, soClient),
     isSpaceAwarenessEnabled(),
     isActionSecretStorageEnabled(esClient, soClient),
+    isSSLSecretStorageEnabled(esClient, soClient),
   ]);
 
   const isFleetServerMissing = !hasFleetServersRes;
@@ -59,6 +65,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
     missing_optional_features: missingOptionalFeatures,
     is_secrets_storage_enabled: useSecretsStorage,
     is_space_awareness_enabled: isSpaceAwarenessEnabledRes,
+    is_ssl_secrets_storage_enabled: useSSLSecretsStorage,
     is_action_secrets_storage_enabled: isActionSecretStorageEnabledRes,
   };
 

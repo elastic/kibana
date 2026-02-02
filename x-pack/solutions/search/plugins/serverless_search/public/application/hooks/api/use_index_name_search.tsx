@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useIndexNameSearch = (query: string) => {

@@ -12,6 +12,8 @@
         "label": "CategorizedFields",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/settings/types/category.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               ", string | number | boolean | (string | number)[] | null | undefined>[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/category.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -50,6 +54,8 @@
         "label": "CategoryCounts",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/settings/types/category.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,6 +70,8 @@
               "[category: string]:  number"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/category.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -90,6 +98,8 @@
           "<T, V>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,6 +116,8 @@
               "{ ariaLabel: string; ariaDescribedBy?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,6 +134,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +152,8 @@
               "V | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -151,6 +167,8 @@
               "The text-based display of the default value, for use in the UI."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +188,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,6 +206,8 @@
               "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -199,6 +221,8 @@
               "The name of the field suitable for display in the UX."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -212,6 +236,8 @@
               "The grouping identifier for the field."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,6 +251,8 @@
               "The unique identifier of the field, typically separated by `:`"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -238,6 +266,8 @@
               "True if the field is a custom setting, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,6 +281,8 @@
               "True if the current saved setting matches the default setting."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,6 +296,8 @@
               "True if the setting is overridden in Kibana, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -277,6 +311,8 @@
               "True if the setting is read-only, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,6 +329,8 @@
               "{ name?: string | undefined; type?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +344,8 @@
               "The name of the field suitable for use in the UX."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -322,6 +362,8 @@
               "{ values: string[] | number[]; labels: Record<string, string>; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -338,6 +380,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,6 +395,8 @@
               "True if the browser must be reloaded for the setting to take effect, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -367,6 +413,8 @@
               "V | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,6 +433,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -398,6 +448,8 @@
               "An identifier of the field when it has an unsaved change."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,6 +469,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -436,6 +490,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -470,6 +526,8 @@
           "<\"select\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 149,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -486,6 +544,8 @@
               "{ values: string[] | number[]; labels: Record<string, string>; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -500,6 +560,8 @@
         "label": "SettingsCapabilities",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,6 +576,8 @@
               "SettingCapability"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -528,6 +592,8 @@
               "SettingCapability"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -542,6 +608,8 @@
               "FilterCapability"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/capabilities.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -556,6 +624,8 @@
         "label": "SettingsTabs",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/settings/types/tab.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -596,6 +666,8 @@
               "[]; isSavingEnabled: boolean; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/tab.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -630,6 +702,8 @@
           "<V>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -648,6 +722,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -664,6 +740,8 @@
               "V | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -680,6 +758,8 @@
               "V | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -706,6 +786,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -724,6 +806,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,6 +824,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,6 +842,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,6 +867,8 @@
               "<T> | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -796,6 +886,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,6 +904,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -841,6 +935,8 @@
           "<\"array\", (string | number)[] | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -858,6 +954,8 @@
           "\"array\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -882,6 +980,8 @@
           "<\"array\", (string | number)[] | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -906,6 +1006,8 @@
           "<\"array\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -930,6 +1032,8 @@
           "<\"boolean\", boolean | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -947,6 +1051,8 @@
           "\"boolean\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -971,6 +1077,8 @@
           "<\"boolean\", boolean | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -995,6 +1103,8 @@
           "<\"boolean\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1019,6 +1129,8 @@
           "<\"color\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1043,6 +1155,8 @@
           "<\"color\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1067,6 +1181,8 @@
           "<\"color\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1091,6 +1207,8 @@
           "<\"image\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 125,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1115,6 +1233,8 @@
           "<\"image\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1139,6 +1259,8 @@
           "<\"image\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1163,6 +1285,8 @@
           "<\"json\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1187,6 +1311,8 @@
           "<\"json\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1211,6 +1337,8 @@
           "<\"json\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1308,6 +1436,8 @@
           " : never"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1325,6 +1455,8 @@
           "T extends \"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\" ? string : T extends \"boolean\" ? boolean : T extends \"number\" | \"bigint\" ? number : T extends \"array\" ? (string | number)[] : T extends \"undefined\" ? undefined : never"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1349,6 +1481,8 @@
           "<\"markdown\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1373,6 +1507,8 @@
           "<\"markdown\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1397,6 +1533,8 @@
           "<\"markdown\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1421,6 +1559,8 @@
           "<\"number\", number | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1438,6 +1578,8 @@
           "\"number\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1462,6 +1604,8 @@
           "<\"number\", number | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1486,6 +1630,8 @@
           "<\"number\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1511,6 +1657,8 @@
           "<T> | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1525,6 +1673,8 @@
               "A unique id corresponding to the particular setting being changed."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1548,6 +1698,8 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1575,6 +1727,8 @@
           "<T> | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1599,6 +1753,8 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1618,6 +1774,8 @@
           "{ reset: () => void; } | null"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1642,6 +1800,8 @@
           "<\"select\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1666,6 +1826,8 @@
           "<\"select\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1683,6 +1845,8 @@
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"array\" | \"json\" | \"markdown\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1707,6 +1871,8 @@
           "<\"string\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1724,6 +1890,8 @@
           "\"string\" | \"color\" | \"select\" | \"image\" | \"json\" | \"markdown\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1748,6 +1916,8 @@
           "<\"string\", string | null>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1772,6 +1942,8 @@
           "<\"string\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1792,6 +1964,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1816,6 +1990,8 @@
           "<\"undefined\", null | undefined>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
+        "lineNumber": 169,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1833,6 +2009,8 @@
           "\"undefined\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1857,6 +2035,8 @@
           "<\"undefined\", null | undefined>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/metadata.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1881,6 +2061,8 @@
           "<\"undefined\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1906,6 +2088,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/unsaved_change.ts",
+        "lineNumber": 135,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1923,6 +2107,8 @@
           "string | number | boolean | (string | number)[] | null | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

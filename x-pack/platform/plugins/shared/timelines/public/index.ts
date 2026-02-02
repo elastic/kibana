@@ -27,7 +27,6 @@ export {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
-  arrayIndexToAriaIndex,
   elementOrChildrenHasFocus,
   isArrowDownOrArrowUp,
   isArrowUp,
@@ -35,12 +34,9 @@ export {
   isTab,
   focusColumn,
   getFocusedAriaColindexCell,
-  getFocusedDataColindexCell,
-  getNotesContainerClassName,
   getRowRendererClassName,
   getTableSkipFocus,
   handleSkipFocus,
-  onKeyDownFocusHandler,
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
 

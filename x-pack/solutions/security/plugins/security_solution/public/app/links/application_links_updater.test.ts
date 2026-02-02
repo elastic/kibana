@@ -13,7 +13,7 @@ import type { AppLinkItems, LinkItem } from '../../common/links/types';
 import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
-import type { ILicense } from '@kbn/licensing-types';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 jest.mock('../../common/lib/capabilities', () => ({
@@ -85,6 +85,21 @@ describe('ApplicationLinksUpdater', () => {
       const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
       const params = createMockParams({
+        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([expect.objectContaining({ ...link, unavailable: true })]);
+    });
+
+    it('should mark link as unavailable when license is insufficient and it is upsellable', () => {
+      const links: AppLinkItems = [
+        { ...link, licenseType: 'enterprise' as LicenseType, capabilities: ['advanced_access'] },
+      ];
+
+      const params = createMockParams({
+        license: { hasAtLeast: jest.fn(() => false) } as unknown as ILicense,
         upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
       });
 

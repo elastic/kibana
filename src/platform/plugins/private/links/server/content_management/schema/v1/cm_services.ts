@@ -16,6 +16,7 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-plugin/server';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -38,28 +39,7 @@ export const dashboardLinkSchema = schema.object({
     meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.boolean({
-          meta: {
-            description: 'Whether to open this link in a new tab when clicked',
-          },
-        }),
-        useCurrentFilters: schema.boolean({
-          meta: {
-            description: 'Whether to use the filters and query from the origin dashboard',
-          },
-        }),
-        useCurrentDateRange: schema.boolean({
-          meta: {
-            description: 'Whether to use the date range from the origin dashboard',
-          },
-        }),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: schema.maybe(dashboardNavigationOptionsSchema),
 });
 
 export const externalLinkSchema = schema.object({
@@ -69,39 +49,49 @@ export const externalLinkSchema = schema.object({
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.boolean({
-          meta: {
-            description: 'Whether to open this link in a new tab when clicked',
-          },
-        }),
-        encodeUrl: schema.boolean({
-          meta: {
-            description: 'Whether to escape the URL with percent encoding',
-          },
-        }),
+        openInNewTab: schema.maybe(
+          schema.boolean({
+            meta: {
+              description: 'Whether to open this link in a new tab when clicked',
+            },
+          })
+        ),
+        encodeUrl: schema.maybe(
+          schema.boolean({
+            meta: {
+              description: 'Whether to escape the URL with percent encoding',
+            },
+          })
+        ),
       },
       { unknowns: 'forbid' }
     )
   ),
 });
 
+// Shared schema for links array - used by both saved objects and embeddables
+export const linksArraySchema = schema.arrayOf(
+  schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
+  {
+    meta: { description: 'The list of links to display' },
+  }
+);
+
+// Shared schema for layout - used by both saved objects and embeddables
+export const layoutSchema = schema.maybe(
+  schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)], {
+    meta: {
+      description: 'Denote whether to display the links in a horizontal or vertical layout',
+    },
+  })
+);
+
 export const linksSchema = schema.object(
   {
     title: schema.string({ meta: { description: 'A human-readable title' } }),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
-      meta: { description: 'The list of links to display' },
-    }),
-    layout: schema.maybe(
-      schema.oneOf(
-        [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
-        {
-          meta: {
-            description: 'Denote whether to display the links in a horizontal or vertical layout',
-          },
-        }
-      )
-    ),
+    links: linksArraySchema,
+    layout: layoutSchema,
   },
   { unknowns: 'forbid' }
 );

@@ -28,6 +28,7 @@ import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item/metric_item';
 import type { OverviewView } from '../../../../../state';
 import { MonitorsTable } from '../compact_view/components/monitors_table';
+import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -47,6 +48,7 @@ const GroupGridCardContent = ({
     activePage * rowSize * PER_ROW,
     (activePage + 1) * rowSize * PER_ROW
   );
+  useOverviewTrendsRequests(visibleMonitors);
 
   const totalEntries = groupMonitors.length / PER_ROW;
 

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import { checkForTripleQuotesAndQueries } from '@kbn/monaco/src/languages/console/utils';
+import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -60,9 +60,12 @@ export class MonacoEditorActionsProvider {
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
-    private highlightedLinesClassName: string
+    private highlightedLinesClassName: string,
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
-    this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
+    // Use custom provider if provided, otherwise fallback to default
+    this.parsedRequestsProvider =
+      customParsedRequestsProvider || getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(
@@ -350,7 +353,12 @@ export class MonacoEditorActionsProvider {
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
       const selectedHost = settings.getSelectedHost();
-      const results = await sendRequest({ http, requests, host: selectedHost || undefined });
+      const results = await sendRequest({
+        http,
+        requests,
+        host: selectedHost || undefined,
+        isPackagedEnvironment: context.config.isPackagedEnvironment,
+      });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();
@@ -781,7 +789,7 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideQuery: boolean }> {
+  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -796,21 +804,21 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        const { insideTripleQuotes, insideSingleQuotesQuery, insideTripleQuotesQuery } =
-          checkForTripleQuotesAndQueries(requestContentBefore);
+        const { insideTripleQuotes, insideEsqlQuery } =
+          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
         return {
           insideTripleQuotes,
-          insideQuery: insideSingleQuotesQuery || insideTripleQuotesQuery,
+          insideEsqlQuery,
         };
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideQuery: false };
+        return { insideTripleQuotes: false, insideEsqlQuery: false };
       }
     }
 
     // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideQuery: false };
+    return { insideTripleQuotes: false, insideEsqlQuery: false };
   }
 
   private triggerSuggestions() {
@@ -820,8 +828,8 @@ export class MonacoEditorActionsProvider {
       return;
     }
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
-      ({ insideTripleQuotes, insideQuery }) => {
-        if (insideTripleQuotes && !insideQuery) {
+      ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (insideTripleQuotes && !insideEsqlQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;
         }
@@ -835,11 +843,11 @@ export class MonacoEditorActionsProvider {
         // Trigger suggestions if the line:
         // - is empty
         // - matches specified regex
-        // - is inside a query
+        // - is inside an ESQL query
         if (
           !lineContentBefore.trim() ||
           shouldTriggerSuggestions(lineContentBefore) ||
-          insideQuery
+          insideEsqlQuery
         ) {
           this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
         }
@@ -871,8 +879,8 @@ export class MonacoEditorActionsProvider {
    */
   public async appendRequestToEditor(
     req: RequestToRestore,
-    dispatch: Dispatch<Actions>,
-    context: ContextValue
+    dispatch?: Dispatch<Actions>,
+    context?: ContextValue
   ) {
     const model = this.editor.getModel();
 
@@ -897,30 +905,25 @@ export class MonacoEditorActionsProvider {
 
     // 2 - Since we add two new lines, the cursor should be at the beginning of the new request
     const beginningOfNewReq = lastLineNumber + 2;
-    const selectedRequests = await this.getRequestsBetweenLines(
-      model,
-      beginningOfNewReq,
-      beginningOfNewReq
-    );
-    // We can assume that there is only one request given that we only add one
-    // request at a time.
-    const restoredRequest = selectedRequests[0];
 
     // 3 - Set the cursor to the beginning of the new request,
     this.editor.setSelection({
-      startLineNumber: restoredRequest.startLineNumber,
+      startLineNumber: beginningOfNewReq,
       startColumn: 1,
-      endLineNumber: restoredRequest.startLineNumber,
+      endLineNumber: beginningOfNewReq,
       endColumn: 1,
     });
 
     // 4 - Scroll to the beginning of the new request
     this.editor.setScrollPosition({
-      scrollTop: this.editor.getTopForLineNumber(restoredRequest.startLineNumber),
+      scrollTop: this.editor.getTopForLineNumber(beginningOfNewReq),
     });
 
+    // Focus on the editor so that the selection is highlighted
+    this.editor.focus();
+
     // 5 - Optionally send the request
-    if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
+    if (dispatch && context && req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
       this.sendRequests(dispatch, context);
     }
   }

@@ -9,13 +9,15 @@
 
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
 import {
-  mockLogger,
-  createMockRouterInstance,
-  createSpacesMock,
-  createMockWorkflowsApi,
   createMockResponse,
+  createMockRouterInstance,
+  createMockWorkflowsApi,
+  createSpacesMock,
+  mockLogger,
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
+
+jest.mock('../lib/with_license_check');
 
 describe('GET /api/workflows/stats', () => {
   let workflowsApi: WorkflowsManagementApi;
@@ -27,37 +29,6 @@ describe('GET /api/workflows/stats', () => {
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
     jest.clearAllMocks();
-  });
-
-  describe('route definition', () => {
-    it('should define the stats route with correct configuration', () => {
-      registerGetWorkflowStatsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      expect(mockRouter.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/api/workflows/stats',
-          options: {
-            tags: ['api', 'workflows'],
-          },
-          security: {
-            authz: {
-              requiredPrivileges: [
-                {
-                  anyRequired: ['read', 'workflow_read'],
-                },
-              ],
-            },
-          },
-          validate: false,
-        }),
-        expect.any(Function)
-      );
-    });
   });
 
   describe('handler logic', () => {

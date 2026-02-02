@@ -6,4 +6,4 @@
  */
 
 export type { Intercept } from './intercept_display_manager';
-export { InterceptDisplayManager } from './intercept_display_manager';
+export { InterceptDisplayManagerMemoized } from './intercept_display_manager';

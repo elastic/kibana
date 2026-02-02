@@ -18,7 +18,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
 import type { FleetServerHost, PostHealthCheckResponse } from '../../../types';
@@ -157,7 +157,7 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
       {error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
+          <EuiCallOut announceOnMount title="Error" color="danger">
             {error?.message ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.healthCheckPanel.fetchError"

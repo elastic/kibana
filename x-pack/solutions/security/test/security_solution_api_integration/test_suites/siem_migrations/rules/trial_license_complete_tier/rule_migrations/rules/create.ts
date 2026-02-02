@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body).toEqual({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request body]: 0.vendor: Invalid literal value, expected "splunk"',
+          message: '[request body]: 0.vendor: Required',
         });
       });
 

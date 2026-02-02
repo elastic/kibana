@@ -10,7 +10,10 @@
 import { metricStateSchema } from '../../schema/charts/metric';
 import { validateConverter } from '../validate';
 import { simpleMetricAttributes } from './simple.mock';
-import { breakdownMetricAttributes } from './breakdown.mock';
+import {
+  breakdownMetricAttributes,
+  breakdownMetricWithFormulaRefColumnsAttributes,
+} from './breakdown.mock';
 import { complexMetricAttributes } from './complex.mock';
 
 describe('Metric', () => {
@@ -18,11 +21,16 @@ describe('Metric', () => {
     validateConverter(simpleMetricAttributes, metricStateSchema);
   });
 
-  it.skip('should convert a complex metric', () => {
+  it('should convert a complex metric', () => {
     validateConverter(complexMetricAttributes, metricStateSchema);
   });
 
-  it.skip('should convert a breakdown-by metric', () => {
+  it('should convert a breakdown-by metric', () => {
     validateConverter(breakdownMetricAttributes, metricStateSchema);
+  });
+
+  // TODO: This test should succeed once this https://github.com/elastic/kibana/pull/247119 is merged
+  it.skip('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
+    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
   });
 });

@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
-import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { type ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import moment from 'moment';
-import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtracePipelines } from '@kbn/synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 

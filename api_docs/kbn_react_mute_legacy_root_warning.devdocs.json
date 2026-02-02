@@ -32,6 +32,8 @@
           "() => () => void"
         ],
         "path": "src/platform/packages/private/kbn-react-mute-legacy-root-warning/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

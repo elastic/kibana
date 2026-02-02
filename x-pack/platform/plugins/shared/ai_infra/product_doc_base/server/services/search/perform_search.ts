@@ -96,3 +96,83 @@ export const performSearch = async ({
 
   return results.hits.hits;
 };
+
+interface SecurityLabsAttributes {
+  title: string;
+  slug: string;
+  // semantic_text can be returned as string (normal mode) or object (legacy mode)
+  content?: string | { text: string };
+  description?: string | { text: string };
+  authors?: string;
+  categories?: string[];
+  date?: string;
+  resource_type?: string;
+}
+
+export const performSecurityLabsSearch = async ({
+  searchQuery,
+  size,
+  highlights,
+  index,
+  client,
+}: {
+  searchQuery: string;
+  size: number;
+  highlights: number;
+  index: string;
+  client: ElasticsearchClient;
+}) => {
+  const results = await client.search<SecurityLabsAttributes>({
+    index,
+    size,
+    query: {
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query: searchQuery,
+              minimum_should_match: '1<-1 3<49%',
+              type: 'cross_fields',
+              fields: ['title', 'content.text', 'description.text', 'authors', 'categories'],
+            },
+          },
+          {
+            multi_match: {
+              query: searchQuery,
+              type: 'phrase',
+              boost: 3,
+              slop: 0,
+              fields: ['title.stem', 'content.stem', 'description.stem'],
+            },
+          },
+          {
+            semantic: {
+              field: 'content',
+              query: searchQuery,
+            },
+          },
+          {
+            semantic: {
+              field: 'description',
+              query: searchQuery,
+            },
+          },
+        ],
+      },
+    },
+    ...(highlights > 0
+      ? {
+          highlight: {
+            fields: {
+              content: {
+                type: 'semantic',
+                number_of_fragments: highlights,
+              },
+            },
+          },
+        }
+      : {}),
+  });
+
+  return results.hits.hits;
+};

@@ -6,33 +6,27 @@
  */
 
 import React, { memo, useState, useMemo, useCallback } from 'react';
-import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
+import { EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
-import {
-  isAgentEligibleForMigration,
-  isAgentEligibleForPrivilegeLevelChange,
-  isAgentRequestDiagnosticsSupported,
-} from '../../../../../../../common/services';
-import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
-
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLicense } from '../../../../hooks';
-import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
   AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
+  HierarchicalActionsMenu,
 } from '../../components';
+import { useSingleAgentMenuItems } from '../../hooks/use_single_agent_menu_items';
+import type { SingleAgentMenuCallbacks } from '../../hooks/use_single_agent_menu_items';
 import { useAgentRefresh } from '../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
-import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
+import { policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import {
   AgentMigrateFlyout,
   ChangeAgentPrivilegeLevelFlyout,
 } from '../../agent_list_page/components';
+import { UninstallCommandFlyout } from '../../../../components';
+import { AgentRollbackModal } from '../../components/agent_rollback_modal';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
@@ -50,11 +44,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     agentPolicy,
     onAddRemoveTagsClick,
   }) => {
-    const authz = useAuthz();
-    const licenseService = useLicense();
-    const hasFleetAllPrivileges = authz.fleet.allAgents;
     const refreshAgent = useAgentRefresh();
 
+    // Modal/flyout state
     const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
     const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -62,20 +54,16 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
     const [isAgentMigrateFlyoutOpen, setIsAgentMigrateFlyoutOpen] = useState(false);
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
-    const isUnenrolling = agent.status === 'unenrolling';
-    const isAgentUpdating = isStuckInUpdating(agent);
-    const agentPrivilegeLevelChangeEnabled =
-      ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+    const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+    const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
 
-    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-    const onContextMenuChange = useCallback(
-      (open: boolean) => {
-        setIsContextMenuOpen(open);
-      },
-      [setIsContextMenuOpen]
-    );
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const onMenuToggle = useCallback((open: boolean) => {
+      setIsMenuOpen(open);
+    }, []);
 
     const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
+    const isUnenrolling = agent.status === 'unenrolling';
 
     const onClose = useMemo(() => {
       if (onCancelReassign) {
@@ -85,167 +73,30 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       }
     }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
-    const menuItems = [
-      ...(hasFleetAllPrivileges && !agentPolicy?.is_managed
-        ? [
-            <EuiContextMenuItem
-              icon="tag"
-              onClick={(event) => {
-                onAddRemoveTagsClick((event.target as Element).closest('button')!);
-              }}
-              disabled={!agent.active}
-              key="addRemoveTags"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.addRemoveTagsActionText"
-                defaultMessage="Add / remove tags"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="pencil"
-              onClick={() => {
-                setIsReassignFlyoutOpen(true);
-              }}
-              disabled={(!agent.active && !agentPolicy) || agentPolicy?.supports_agentless === true}
-              key="reassignPolicy"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.reassignActionText"
-                defaultMessage="Assign to new policy"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              icon="refresh"
-              disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
-              onClick={() => {
-                setIsUpgradeModalOpen(true);
-              }}
-              key="upgradeAgent"
-              data-test-subj="upgradeBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.upgradeOneButton"
-                defaultMessage="Upgrade agent"
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-      ...(hasFleetAllPrivileges && isAgentUpdating
-        ? [
-            <EuiContextMenuItem
-              icon="refresh"
-              onClick={() => {
-                setIsUpgradeModalOpen(true);
-              }}
-              key="restartUpgradeAgent"
-              data-test-subj="restartUpgradeBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.restartUpgradeOneButton"
-                defaultMessage="Restart upgrade"
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-      <EuiContextMenuItem
-        icon="inspect"
-        onClick={() => {
-          setIsContextMenuOpen(false);
-          setIsAgentDetailsJsonFlyoutOpen(!isAgentDetailsJsonFlyoutOpen);
-        }}
-        key="agentDetailsJson"
-        data-test-subj="viewAgentDetailsJsonBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.viewAgentDetailsJsonText"
-          defaultMessage="View agent JSON"
-        />
-      </EuiContextMenuItem>,
-      ...(authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)
-        ? [
-            <EuiContextMenuItem
-              icon="cluster"
-              onClick={() => {
-                setIsContextMenuOpen(false);
-                setIsAgentMigrateFlyoutOpen(!isAgentMigrateFlyoutOpen);
-              }}
-              disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
-              key="migrateAgent"
-              data-test-subj="migrateAgentBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.migrateAgentActionText"
-                defaultMessage="Migrate agent"
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-      ...(authz.fleet.allAgents &&
-      isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
-      agentPrivilegeLevelChangeEnabled
-        ? [
-            <EuiContextMenuItem
-              icon="lock"
-              onClick={() => {
-                setIsContextMenuOpen(false);
-                setIsChangePrivilegeLevelFlyoutOpen(!isChangePrivilegeLevelFlyoutOpen);
-              }}
-              disabled={!agent.active}
-              key="changeAgentPrivilegeLevel"
-              data-test-subj="changeAgentPrivilegeLevelBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
-                defaultMessage="Remove root privilege"
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-      ...(authz.fleet.readAgents
-        ? [
-            <EuiContextMenuItem
-              icon="download"
-              disabled={!isAgentRequestDiagnosticsSupported(agent)}
-              onClick={() => {
-                setIsRequestDiagnosticsModalOpen(true);
-              }}
-              data-test-subj="requestAgentDiagnosticsBtn"
-              key="requestDiagnostics"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentList.diagnosticsOneButton"
-                defaultMessage="Request diagnostics .zip"
-              />
-            </EuiContextMenuItem>,
-          ]
-        : []),
-      ...(hasFleetAllPrivileges && !agentPolicy?.is_managed
-        ? [
-            <EuiContextMenuItem
-              icon="trash"
-              disabled={
-                !hasFleetAllPrivileges || !agent.active || agentPolicy?.supports_agentless === true
-              }
-              onClick={() => {
-                setIsUnenrollModalOpen(true);
-              }}
-              key="unenrollAgent"
-            >
-              {isUnenrolling ? (
-                <FormattedMessage
-                  id="xpack.fleet.agentList.forceUnenrollOneButton"
-                  defaultMessage="Force unenroll"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll agent"
-                />
-              )}
-            </EuiContextMenuItem>,
-          ]
-        : []),
-    ];
+    // Build callbacks for the shared hook
+    const callbacks: SingleAgentMenuCallbacks = useMemo(
+      () => ({
+        // No onViewAgentClick - we're already on agent details page
+        onAddRemoveTagsClick,
+        onReassignClick: () => setIsReassignFlyoutOpen(true),
+        onUpgradeClick: () => setIsUpgradeModalOpen(true),
+        onViewAgentJsonClick: () => setIsAgentDetailsJsonFlyoutOpen(true),
+        onMigrateAgentClick: () => setIsAgentMigrateFlyoutOpen(true),
+        onRequestDiagnosticsClick: () => setIsRequestDiagnosticsModalOpen(true),
+        onChangeAgentPrivilegeLevelClick: () => setIsChangePrivilegeLevelFlyoutOpen(true),
+        onUnenrollClick: () => setIsUnenrollModalOpen(true),
+        onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
+        onRollbackClick: () => setIsRollbackModalOpen(true),
+      }),
+      [onAddRemoveTagsClick]
+    );
+
+    // Use the shared hook for menu items
+    const menuItems = useSingleAgentMenuItems({
+      agent,
+      agentPolicy,
+      callbacks,
+    });
 
     return (
       <>
@@ -277,7 +128,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
                 setIsUpgradeModalOpen(false);
                 refreshAgent();
               }}
-              isUpdating={isAgentUpdating}
             />
           </EuiPortal>
         )}
@@ -330,11 +180,37 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiPortal>
         )}
-        <ContextMenuActions
-          isOpen={isContextMenuOpen}
-          onChange={onContextMenuChange}
+        {isUninstallCommandFlyoutOpen && agent.policy_id && (
+          <EuiPortal>
+            <UninstallCommandFlyout
+              target="agent"
+              policyId={agent.policy_id}
+              onClose={() => {
+                setIsUninstallCommandFlyoutOpen(false);
+              }}
+            />
+          </EuiPortal>
+        )}
+        {isRollbackModalOpen && (
+          <EuiPortal>
+            <AgentRollbackModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => setIsRollbackModalOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        <HierarchicalActionsMenu
+          items={menuItems}
+          isOpen={isMenuOpen}
+          onToggle={onMenuToggle}
+          anchorPosition="downLeft"
           button={{
-            props: { iconType: 'arrowDown', iconSide: 'right', color: 'primary' },
+            props: {
+              iconType: 'arrowDown',
+              iconSide: 'right',
+              color: 'primary',
+            },
             children: (
               <FormattedMessage
                 id="xpack.fleet.agentDetails.actionsButton"
@@ -342,7 +218,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               />
             ),
           }}
-          items={menuItems}
+          data-test-subj="agentActionsBtn"
         />
       </>
     );

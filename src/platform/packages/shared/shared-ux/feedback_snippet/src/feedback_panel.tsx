@@ -88,7 +88,7 @@ export const FeedbackPanel = ({
   const closePanelIcon = (
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
-        data-test-subj="feedbackSnippetPanelDismiss"
+        data-test-subj={`${feedbackSnippetId}PanelDismiss`}
         iconType="cross"
         color="text"
         onClick={handleDismissPanel}
@@ -105,24 +105,28 @@ export const FeedbackPanel = ({
 
   const promptFooter = (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbDown`}
           onClick={handleNegativeFeedback}
           id={`${feedbackSnippetId}PanelThumbDown`}
-          color="danger"
+          color="text"
           size="s"
+          fullWidth={true}
         >
-          <EuiIcon type="thumbDown" aria-label={thumbDownIconLabel} />
+          <EuiIcon type="thumbDown" aria-label={thumbDownIconLabel} color="danger" />
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
         <EuiButton
+          data-test-subj={`${feedbackSnippetId}PanelThumbUp`}
           onClick={handlePositiveFeedback}
           id={`${feedbackSnippetId}PanelThumbUp`}
-          color="success"
+          color="text"
           size="s"
+          fullWidth={true}
         >
-          <EuiIcon type="thumbUp" aria-label={thumbUpIconLabel} />
+          <EuiIcon type="thumbUp" aria-label={thumbUpIconLabel} color="success" />
         </EuiButton>
       </EuiFlexItem>
     </>
@@ -142,6 +146,7 @@ export const FeedbackPanel = ({
 
   const negativeFooter = (
     <EuiButton
+      data-test-subj={`${feedbackSnippetId}PanelSurveyLink`}
       onClick={handleOpenSurveyAndDismissPanel}
       fill
       fullWidth
@@ -173,10 +178,12 @@ export const FeedbackPanel = ({
     <EuiPanel
       data-test-subj="feedbackSnippetPanel"
       grow={false}
-      hasShadow
+      hasShadow={false}
+      paddingSize="none"
       css={css`
-        margin: ${euiTheme.size.m};
+        margin: ${euiTheme.size.base} ${euiTheme.size.m};
       `}
+      color="transparent"
     >
       <EuiFlexGroup
         gutterSize="s"
@@ -191,7 +198,13 @@ export const FeedbackPanel = ({
         {feedbackView !== 'positive' && closePanelIcon}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s" justifyContent="center">
+      <EuiFlexGroup
+        gutterSize="none"
+        justifyContent="center"
+        css={css`
+          gap: ${euiTheme.size.s};
+        `}
+      >
         {panelFooter[feedbackView]}
       </EuiFlexGroup>
       {feedbackView === 'positive' && <Confetti />}

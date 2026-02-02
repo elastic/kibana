@@ -8,6 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NumericField } from '../../../../../../shared_imports';
 
@@ -27,13 +28,15 @@ export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
   return (
     <DescribedFormRow
       title={<h3>{i18nTexts.editPolicy.replicasLabel}</h3>}
-      description={i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription',
-        {
-          defaultMessage:
-            'Set the number of replicas. Remains the same as the previous phase by default.',
-        }
-      )}
+      description={
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription"
+          defaultMessage="Set the number of replicas. Remains the same as the previous phase by default, unless {convertToFullyMountedIndex} is enabled."
+          values={{
+            convertToFullyMountedIndex: <b>Convert to fully-mounted index</b>,
+          }}
+        />
+      }
       switchProps={{
         'data-test-subj': `${phase}-setReplicasSwitch`,
         label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel', {

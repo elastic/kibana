@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { type QueryClient, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useQueryClient } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';

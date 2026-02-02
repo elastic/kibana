@@ -281,7 +281,6 @@ describe('CoreUsageDataService', () => {
                 "healthCheckDelayMs": 2500,
                 "logQueries": false,
                 "numberOfHostsConfigured": 1,
-                "pingTimeoutMs": 30000,
                 "principal": "unknown",
                 "requestHeadersWhitelistConfigured": false,
                 "requestTimeoutMs": 30000,

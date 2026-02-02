@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
 import { extname } from 'path';
@@ -133,11 +134,31 @@ class YamlLintCheck extends PrecommitCheck {
   }
 }
 
+class SemverRangesCheck extends PrecommitCheck {
+  constructor() {
+    super('Semver Ranges');
+  }
+
+  async execute(log, files, options) {
+    log.verbose('Checking for semver ranges in package.json');
+
+    try {
+      const result = checkSemverRanges({ fix: options.fix });
+      if (result.totalFixes > 0) {
+        log.info(`Fixed ${result.totalFixes} semver ranges in package.json`);
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
 const PRECOMMIT_CHECKS = [
   new FileCasingCheck(),
   new LinterCheck('ESLint', Eslint),
   new LinterCheck('StyleLint', Stylelint),
   new YamlLintCheck(),
+  new SemverRangesCheck(),
 ];
 
 run(

@@ -11,16 +11,20 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
+import {
+  SUB_ACTION,
+  CloseAlertParamsSchema,
+  CreateAlertParamsSchema,
+  Response,
+} from '@kbn/connector-schemas/jira-service-management';
 import type {
   CloseAlertParams,
   Config,
   CreateAlertParams,
   FailureResponseType,
   Secrets,
-} from './types';
+} from '@kbn/connector-schemas/jira-service-management';
 import * as i18n from './translations';
-import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
 
 const INTEGRATION_API_BASE_PATH = 'jsm/ops/integration/v2';
 
@@ -30,13 +34,13 @@ export class JiraServiceManagementConnector extends SubActionConnector<Config, S
 
     this.registerSubAction({
       method: this.createAlert.name,
-      name: JiraServiceManagementSubActions.CreateAlert,
+      name: SUB_ACTION.CreateAlert,
       schema: CreateAlertParamsSchema,
     });
 
     this.registerSubAction({
       method: this.closeAlert.name,
-      name: JiraServiceManagementSubActions.CloseAlert,
+      name: SUB_ACTION.CloseAlert,
       schema: CloseAlertParamsSchema,
     });
   }

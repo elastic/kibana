@@ -8,9 +8,9 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { sourcererSelectors, sourcererActions } from '../store';
+import { PageScope } from '../../data_view_manager/constants';
+import { sourcererActions, sourcererSelectors } from '../store';
 import { useSourcererDataView } from '.';
-import { SourcererScopeName } from '../store/model';
 import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
@@ -27,9 +27,7 @@ export const useSignalHelpers = (): {
 } => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(PageScope.alerts);
 
   const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
@@ -49,9 +47,7 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView, status } = useDataView(
-    SourcererScopeName.detections
-  );
+  const { dataView: experimentalDefaultDataView, status } = useDataView(PageScope.alerts);
   const dataViewId = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.id ?? null
     : oldDataViewId;
@@ -77,10 +73,12 @@ export const useSignalHelpers = (): {
       abortCtrl.current = new AbortController();
       try {
         const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataViewPattern.split(',') },
-          signal: abortCtrl.current.signal,
-          dataViewId,
           dataViewService: dataViews,
+          defaultDetails: {
+            dataViewId,
+            patternList: defaultDataViewPattern.split(','),
+          },
+          alertDetails: {},
         });
 
         if (

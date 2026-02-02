@@ -14,7 +14,7 @@ import type {
 } from '@kbn/shared-ux-page-kibana-template-types';
 import { getNoDataConfigPageServicesMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 
-export const getServicesMock = () => {
+export const getServicesMock = (): KibanaPageTemplateServices => {
   const services: KibanaPageTemplateServices = {
     ...getNoDataConfigPageServicesMock(),
   };
@@ -22,7 +22,7 @@ export const getServicesMock = () => {
   return services;
 };
 
-export const getKibanaDependenciesMock = () => {
+export const getKibanaDependenciesMock = (): KibanaPageTemplateKibanaDependencies => {
   const dependencies: KibanaPageTemplateKibanaDependencies = {
     ...getNoDataCardKibanaDependenciesMock(),
   };

@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -43,6 +39,7 @@ import {
   extractAndWriteDownloadSourcesSecrets,
   extractAndUpdateDownloadSourceSecrets,
 } from './secrets';
+import { isSSLSecretStorageEnabled } from './secrets';
 
 function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>) {
   const { ssl, source_id: sourceId, ...attributes } = so.attributes;
@@ -53,23 +50,10 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
+
 class DownloadSourceService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {
@@ -165,7 +149,7 @@ class DownloadSourceService {
       data.ssl = JSON.stringify(downloadSource.ssl);
     }
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
       const { downloadSource: downloadSourceWithSecrets } =
         await extractAndWriteDownloadSourcesSecrets({
           downloadSource,
@@ -207,7 +191,7 @@ class DownloadSourceService {
     let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
-    logger.debug(`Updating download source ${id} with ${newData}`);
+    logger.debug(`Updating download source ${id}`);
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {

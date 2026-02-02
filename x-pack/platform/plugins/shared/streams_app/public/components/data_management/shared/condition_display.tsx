@@ -6,8 +6,17 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
-import type { Condition, FilterCondition } from '@kbn/streamlang';
+import {
+  useEuiTheme,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { Condition, FilterCondition, RangeCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
   getFilterValue,
@@ -69,6 +78,7 @@ interface ConditionDisplayProps {
   showKeyword?: boolean;
   keyword?: string;
   keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+  prefix?: string;
 }
 
 export const ConditionDisplay = ({
@@ -76,9 +86,11 @@ export const ConditionDisplay = ({
   showKeyword = false,
   keyword = 'WHERE',
   keywordWrapper = (children: React.ReactNode) => children,
+  prefix,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+      {prefix}
       {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
@@ -92,18 +104,50 @@ const FilterBadges = ({ condition }: { condition: FilterCondition }) => {
   const operatorText =
     operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap];
 
+  let displayText = value?.toString() ?? '';
+
+  if (operator === 'range' && typeof value === 'object' && value !== null) {
+    const rangeValue = value as RangeCondition;
+    const { gte, gt, lte, lt } = rangeValue;
+
+    const parts: string[] = [];
+
+    if (gte !== undefined) {
+      parts.push(`≥ ${gte}`);
+    } else if (gt !== undefined) {
+      parts.push(`> ${gt}`);
+    }
+
+    if (lte !== undefined) {
+      parts.push(`≤ ${lte}`);
+    } else if (lt !== undefined) {
+      parts.push(`< ${lt}`);
+    }
+
+    displayText =
+      parts.length > 0
+        ? parts.join(
+            i18n.translate('xpack.streams.conditionDisplay.rangeSeparator', {
+              defaultMessage: ' to ',
+            })
+          )
+        : '-';
+  }
+
   return (
     <>
-      <BadgeItem text={field} />
-      <OperatorText operator={operatorText} subdued />
-      <BadgeItem text={value?.toString() ?? ''} />
+      <BadgeItem text={field} testSubj="streamsAppConditionDisplayField" />
+      <OperatorText operator={operatorText} subdued testSubj="streamsAppConditionDisplayOperator" />
+      <BadgeItem text={displayText} testSubj="streamsAppConditionDisplayValue" />
     </>
   );
 };
 
-const BadgeItem = ({ text }: { text: string }) => (
+const BadgeItem = ({ text, testSubj }: { text: string; testSubj?: string }) => (
   <EuiFlexItem grow={false}>
-    <EuiBadge color="hollow">{text}</EuiBadge>
+    <EuiBadge color="hollow" data-test-subj={testSubj}>
+      {text}
+    </EuiBadge>
   </EuiFlexItem>
 );
 
@@ -166,7 +210,17 @@ const RecursiveConditionDisplay = ({
     }
 
     // Fallback for any unknown condition types
-    return <BadgeItem text={JSON.stringify(condition)} />;
+    const jsonStringifiedCondition = JSON.stringify(condition);
+    return (
+      <EuiToolTip
+        content={jsonStringifiedCondition}
+        anchorClassName={css`
+          max-width: 100%;
+        `}
+      >
+        <BadgeItem text={jsonStringifiedCondition} />
+      </EuiToolTip>
+    );
   };
 
   return (
@@ -182,10 +236,12 @@ const OperatorText = ({
   operator,
   bold,
   subdued,
+  testSubj,
 }: {
   operator: string;
   bold?: boolean;
   subdued?: boolean;
+  testSubj?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -194,6 +250,7 @@ const OperatorText = ({
         size="s"
         color={subdued ? 'subdued' : 'default'}
         style={{ fontWeight: bold ? euiTheme.font.weight.bold : euiTheme.font.weight.regular }}
+        data-test-subj={testSubj}
       >
         {operator}
       </EuiText>

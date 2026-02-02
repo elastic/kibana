@@ -26,7 +26,7 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '../../types';
+import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '@kbn/lens-common';
 
 /**
  * Returns array of colors for provided palette or colorMapping

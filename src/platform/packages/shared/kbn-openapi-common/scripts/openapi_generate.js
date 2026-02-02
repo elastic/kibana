@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../../../../../setup_node_env');
+require('@kbn/setup-node-env');
 const { resolve } = require('path');
 const { generate } = require('@kbn/openapi-generator');
 

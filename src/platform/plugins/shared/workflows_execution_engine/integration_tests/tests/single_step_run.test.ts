@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('single step run tests', () => {
@@ -37,11 +37,11 @@ steps:
       message: '${JSON.stringify(inferenceResponse)}'
 
   - name: outerForeachStep
-    foreach: steps.step1.output[0].result
+    foreach: '{{steps.step1.output[0].result}}'
     type: foreach
     steps:
       - name: innerForeachStep
-        foreach: foreach.item
+        foreach: '{{foreach.item}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep

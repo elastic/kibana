@@ -9,32 +9,33 @@
 
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
-  EuiSelectable,
-  EuiHighlight,
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
-  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
   euiFontSize,
-  useEuiTheme,
+  EuiHighlight,
   EuiIcon,
+  EuiSelectable,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import {
+  type ActionOptionData,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
   isActionOption,
-  type ActionOptionData,
 } from '../types';
-import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
@@ -44,26 +45,31 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
-  const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
+  const { workflowsExtensions } = useKibana().services;
+  const defaultOptions = useMemo(
+    () => getActionOptions(euiTheme, workflowsExtensions),
+    [euiTheme, workflowsExtensions]
+  );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
   const renderActionOption = (option: ActionOptionData, searchValue: string) => {
+    const shouldUseGroupStyle = isActionGroup(option);
     return (
       <EuiFlexGroup alignItems="center" css={styles.actionOption}>
         <EuiFlexItem
           grow={false}
           css={[
             styles.iconOuter,
-            isActionGroup(option) ? styles.groupIconOuter : styles.actionIconOuter,
+            shouldUseGroupStyle ? styles.groupIconOuter : styles.actionIconOuter,
           ]}
         >
-          <span css={isActionGroup(option) ? styles.groupIconInner : styles.actionIconInner}>
+          <span css={shouldUseGroupStyle ? styles.groupIconInner : styles.actionIconInner}>
             {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
               <StepIcon
                 stepType={getBaseConnectorType(option.connectorType)}
-                executionStatus={null}
+                executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
               <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
@@ -93,6 +99,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (isActionGroup(selectedOption)) {
       setCurrentPath([...currentPath, selectedOption.id]);
@@ -225,24 +232,19 @@ const componentStyles = {
   actionOption: css({
     gap: '12px',
   }),
-  iconOuter: css({
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  groupIconOuter: ({ euiTheme }: UseEuiTheme) =>
+  iconOuter: ({ euiTheme }: UseEuiTheme) =>
     css({
+      width: '40px',
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
       border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       borderRadius: euiTheme.border.radius.medium,
     }),
-  actionIconOuter: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      borderRadius: '100%',
-    }),
+  groupIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
+  actionIconOuter: ({ euiTheme }: UseEuiTheme) => css({}),
   groupIconInner: ({ euiTheme }: UseEuiTheme) => css({}),
   actionIconInner: ({ euiTheme }: UseEuiTheme) =>
     css({

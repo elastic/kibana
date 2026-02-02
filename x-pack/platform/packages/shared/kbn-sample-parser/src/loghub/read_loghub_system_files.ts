@@ -10,6 +10,7 @@ import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { LOGHUB_DIR } from './constants';
 import { getFileOrThrow } from '../utils';
+import { listLoghubSystemDirs } from './list_loghub_system_dirs';
 
 export interface LoghubSystem {
   name: string;
@@ -28,15 +29,11 @@ function toLines(contents: string) {
 export async function readLoghubSystemFiles({ log }: { log: ToolingLog }): Promise<LoghubSystem[]> {
   log.debug(`Reading loghub files from ${LOGHUB_DIR}`);
 
-  const systemFolders = await Fs.readdir(LOGHUB_DIR, { withFileTypes: true });
+  const systemFolders = await listLoghubSystemDirs({ log });
 
   const systems = await Promise.all(
     systemFolders.flatMap(async (dir): Promise<LoghubSystem[]> => {
-      if (!dir.isDirectory() || dir.name.startsWith('.')) {
-        return [];
-      }
-
-      const dirName = Path.join(LOGHUB_DIR, dir.name);
+      const dirName = Path.join(LOGHUB_DIR, dir);
 
       const fileNames = await Fs.readdir(dirName);
       const readmeFileName = fileNames.find((fileName) => fileName.toLowerCase() === 'readme.md');
@@ -44,11 +41,11 @@ export async function readLoghubSystemFiles({ log }: { log: ToolingLog }): Promi
       const templateFileName = fileNames.find((fileName) => fileName.endsWith('_templates.csv'));
 
       if (!logFileName) {
-        throw new Error(`Could not find log file in ${dir.name}`);
+        throw new Error(`Could not find log file in ${dir}`);
       }
 
       if (!templateFileName) {
-        throw new Error(`Could not find template file in ${dir.name}`);
+        throw new Error(`Could not find template file in ${dir}`);
       }
 
       const [readmeFile, logFile, templateFile] = await Promise.all(
@@ -62,7 +59,7 @@ export async function readLoghubSystemFiles({ log }: { log: ToolingLog }): Promi
 
       return [
         {
-          name: dir.name,
+          name: dir,
           logLines: toLines(logFile),
           readme: readmeFile,
           templates: toLines(templateFile),

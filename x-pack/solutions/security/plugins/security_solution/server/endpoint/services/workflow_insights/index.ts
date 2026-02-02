@@ -310,11 +310,6 @@ class SecurityWorkflowInsightsService {
     request: KibanaRequest,
     agentIds: string[] = []
   ): Promise<void> {
-    const { endpointManagementSpaceAwarenessEnabled } = this.endpointContext.experimentalFeatures;
-    if (!endpointManagementSpaceAwarenessEnabled) {
-      return;
-    }
-
     const { id: spaceId } = await this.endpointContext.getActiveSpace(request);
     const fleetServices = this.endpointContext.getInternalFleetServices(spaceId);
     await fleetServices.ensureInCurrentSpace({ agentIds });

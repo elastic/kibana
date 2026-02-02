@@ -9,7 +9,7 @@
       "preference": "",
       "realtime": "__flag__",
       "refresh": "__flag__",
-      "routing": "",
+      "routing": [],
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],

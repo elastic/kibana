@@ -128,6 +128,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
               <>
                 <EuiSpacer size="m" />
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
                     defaultMessage: 'Current snapshot',

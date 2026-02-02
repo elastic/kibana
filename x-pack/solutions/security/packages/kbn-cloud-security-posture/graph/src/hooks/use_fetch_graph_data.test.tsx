@@ -15,7 +15,7 @@ const mockUseQuery = jest.fn((...args: unknown[]) => ({
   isFetching: true,
 }));
 
-jest.mock('@tanstack/react-query', () => {
+jest.mock('@kbn/react-query', () => {
   return {
     useQuery: (...args: unknown[]) => mockUseQuery(...args),
     useQueryClient: jest.fn(),

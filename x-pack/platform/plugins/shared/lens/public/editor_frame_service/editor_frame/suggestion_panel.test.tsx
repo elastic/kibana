@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import type { DatasourceMap, Visualization, VisualizationMap, Suggestion } from '../../types';
+import type {
+  Visualization,
+  Suggestion,
+  VisualizationMap,
+  DatasourceMap,
+  LensAppState,
+  PreviewState,
+  VisualizationState,
+} from '@kbn/lens-common';
 import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
@@ -26,7 +34,6 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithReduxStore } from '../../mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
-import type { LensAppState, PreviewState, VisualizationState } from '../../state_management';
 import { applyChanges, setState, setToggleFullscreen } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 import { userEvent } from '@testing-library/user-event';
@@ -93,6 +100,7 @@ describe('suggestion_panel', () => {
       visualization: {
         activeId: 'testVis',
         state: {},
+        selectedLayerId: null,
       },
       activeDatasourceId: 'testDatasource',
     };
@@ -210,6 +218,7 @@ describe('suggestion_panel', () => {
         visualization: {
           activeId: 'vis2',
           state: {},
+          selectedLayerId: null,
         },
       };
 

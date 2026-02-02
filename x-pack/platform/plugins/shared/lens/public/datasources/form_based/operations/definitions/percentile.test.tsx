@@ -8,19 +8,22 @@
 import React from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
-import type { LastValueIndexPatternColumn } from '.';
+import type {
+  LastValueIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  TermsIndexPatternColumn,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { percentileOperation } from '.';
-import type { FormBasedLayer } from '../../types';
-import type { PercentileIndexPatternColumn } from './percentile';
-import type { TermsIndexPatternColumn } from './terms';
 import type { ExpressionAstExpressionBuilder } from '@kbn/expressions-plugin/public';
 import {
   buildExpressionFunction,
@@ -28,7 +31,6 @@ import {
   parseExpression,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
-import type { IndexPattern } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -38,7 +40,7 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {

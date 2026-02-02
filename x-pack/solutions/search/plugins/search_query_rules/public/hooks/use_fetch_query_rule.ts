@@ -9,7 +9,7 @@ import type {
   QueryRulesQueryRule,
   QueryRulesQueryRuleset,
 } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { QUERY_RULES_QUERY_RULE_FETCH_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';

@@ -224,6 +224,7 @@ export function DataPreviewChart({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.moreThan100', {

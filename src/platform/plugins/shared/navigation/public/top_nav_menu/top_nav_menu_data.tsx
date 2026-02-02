@@ -9,9 +9,16 @@
 
 import type { EuiButtonProps, EuiBetaBadgeProps, IconType } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
+import type { SplitButtonProps } from '@kbn/split-button';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface TopNavMenuData {
   id?: string;
   htmlId?: string;
@@ -22,6 +29,7 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
+  tooltipTitle?: string;
   badge?: EuiBetaBadgeProps;
   emphasize?: boolean;
   fill?: boolean;
@@ -33,8 +41,14 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   intl?: InjectedIntl;
+  splitButtonProps?: SplitButtonProps & {
+    run: TopNavMenuAction;
+  };
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;
 }

@@ -8,7 +8,12 @@
 import {
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
+  INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH,
 } from '@kbn/alerting-plugin/common';
+import type { GapAutoFillSchedulerResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import { DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX } from '@kbn/security-solution-plugin/public/detection_engine/rule_gaps/constants';
+import { rootRequest } from './common';
+import { getSpaceUrl } from '../space';
 
 export const interceptGetRuleGapsNoData = () => {
   cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_FIND_API_PATH}*`, {
@@ -188,3 +193,30 @@ export const interceptBulkFillRulesGaps = ({
     }
   ).as('bulkFillRulesGaps');
 };
+
+const getSchedulerId = (spaceId = 'default') =>
+  `${DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX}-${spaceId}`;
+
+const getSchedulerUrl = (spaceId = 'default') =>
+  getSpaceUrl(
+    spaceId,
+    `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${getSchedulerId(spaceId)}`
+  );
+
+export const deleteGapAutoFillScheduler = () =>
+  cy.currentSpace().then((spaceId) =>
+    rootRequest({
+      method: 'DELETE',
+      url: getSchedulerUrl(spaceId),
+      failOnStatusCode: false,
+    })
+  );
+
+export const getGapAutoFillSchedulerApi = () =>
+  cy.currentSpace().then((spaceId) =>
+    rootRequest<GapAutoFillSchedulerResponseBodyV1>({
+      method: 'GET',
+      url: getSchedulerUrl(spaceId),
+      failOnStatusCode: false,
+    })
+  );

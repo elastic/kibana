@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from 'expect';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -14,6 +12,11 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import {
   fetchRule,
   createExceptionList,
@@ -24,11 +27,6 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   SAMPLE_PREBUILT_RULES,
 } from '../../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

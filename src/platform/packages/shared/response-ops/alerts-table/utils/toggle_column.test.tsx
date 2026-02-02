@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toggleColumn } from './toggle_column';
+import { toggleColumn, toggleVisibleColumn } from './toggle_column';
 
 describe('toggleColumn', () => {
   const columns = [{ id: 'test-column' }];
@@ -126,5 +126,45 @@ describe('toggleVisibleColumn', () => {
         defaultColumns: [{ id: 'another-column' }, { id: 'test-column' }, { id: 'last-column' }],
       }).map(({ id }) => id)
     ).toEqual(['first-column', 'new-column', 'another-column']);
+  });
+
+  it('should restore a previously hidden and disabled column to visible when re-enabled', async () => {
+    const defaultColumns = [{ id: 'test-column' }, { id: 'other-column' }];
+    const defaultVisibleColumns = defaultColumns.map((col) => col.id);
+
+    // column is initially enabled
+    let columns = [...defaultColumns];
+    let visibleColumnsMock = [...defaultVisibleColumns];
+
+    // hide the column
+    visibleColumnsMock = visibleColumnsMock.filter((id) => id !== 'test-column');
+
+    // disable the column
+    columns = toggleColumn({
+      columnId: 'test-column',
+      columns,
+      defaultColumns,
+    });
+
+    expect(columns).toEqual([{ id: 'other-column' }]);
+
+    // re-enable the column
+    columns = toggleColumn({
+      columnId: 'test-column',
+      columns,
+      defaultColumns,
+    });
+
+    expect(columns).toEqual([{ id: 'test-column' }, { id: 'other-column' }]);
+
+    // check if the column is included in the visibleColumns
+    expect(
+      toggleVisibleColumn({
+        columnId: 'test-column',
+        visibleColumns: visibleColumnsMock,
+        defaultVisibleColumns,
+        columns,
+      })
+    ).toEqual(['test-column', 'other-column']);
   });
 });

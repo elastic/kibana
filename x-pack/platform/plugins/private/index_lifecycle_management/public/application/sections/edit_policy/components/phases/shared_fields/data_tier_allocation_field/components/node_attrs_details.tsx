@@ -40,6 +40,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
     const { statusCode, message } = error;
     content = (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsLoadingFailedTitle"
@@ -85,6 +86,10 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         ]}
         pagination={true}
         sorting={true}
+        tableCaption={i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.tableCaption', {
+          defaultMessage: 'Nodes that contain the attribute {selectedNodeAttrs}',
+          values: { selectedNodeAttrs },
+        })}
       />
     );
   }

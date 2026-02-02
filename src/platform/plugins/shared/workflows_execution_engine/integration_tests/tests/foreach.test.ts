@@ -7,28 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonObject } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin_mock';
+import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with foreach', () => {
   let workflowRunFixture: WorkflowRunFixture;
-  let outerArray: string[];
+  let outerArrayExpression: string;
   let innerArray: string[];
 
   beforeEach(async () => {
     workflowRunFixture = new WorkflowRunFixture();
-    outerArray = ['outer1', 'outer2'];
-    innerArray = ['inner1', 'inner2', 'inner3'];
   });
 
   function buildYaml() {
     return `
 consts:
-  outerForeachArray: '${JSON.stringify(outerArray)}'
+  outerForeachArray: '${outerArrayExpression}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep
@@ -37,7 +36,7 @@ steps:
         with:
           message: 'Foreach item: {{foreach.item}}; Foreach index: {{foreach.index}}; Foreach total: {{foreach.total}}'
       - name: innerForeachStep
-        foreach: inputs.innerArray
+        foreach: '{{inputs.innerArray}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep
@@ -49,6 +48,8 @@ steps:
   }
 
   it('should successfully execute workflow', async () => {
+    outerArrayExpression = JSON.stringify(['outer1', 'outer2']);
+    innerArray = ['inner1', 'inner2', 'inner3'];
     await workflowRunFixture.runWorkflow({
       workflowYaml: buildYaml(),
       inputs: { innerArray },
@@ -63,6 +64,14 @@ steps:
   });
 
   describe('outer foreach checks', () => {
+    let outerArray: string[];
+
+    beforeEach(() => {
+      outerArray = ['outer1', 'outer2'];
+      outerArrayExpression = JSON.stringify(outerArray);
+      innerArray = ['inner1', 'inner2', 'inner3'];
+    });
+
     it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -73,7 +82,7 @@ steps:
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(2);
       outerArray.forEach((item, index) => {
-        expect(outerForeachChildConnectorStepExecutions[index].input?.message).toBe(
+        expect((outerForeachChildConnectorStepExecutions[index].input as JsonObject).message).toBe(
           `Foreach item: ${item}; Foreach index: ${index}; Foreach total: 2`
         );
         expect(outerForeachChildConnectorStepExecutions[index].status).toBe(
@@ -101,6 +110,14 @@ steps:
   });
 
   describe('inner foreach checks', () => {
+    let outerArray: string[];
+
+    beforeEach(() => {
+      outerArray = ['outer1', 'outer2'];
+      outerArrayExpression = JSON.stringify(outerArray);
+      innerArray = ['inner1', 'inner2', 'inner3'];
+    });
+
     it('should have correct amount of innerForeachChildConnectorStep executions', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -143,4 +160,38 @@ steps:
       });
     });
   });
+
+  describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(
+    'when invalid array is provided to foreach (%s)',
+    (outerArrayTestCase) => {
+      beforeEach(async () => {
+        outerArrayExpression = outerArrayTestCase;
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: buildYaml(),
+          inputs: { innerArray },
+        });
+      });
+
+      it('should fail the workflow with appropriate error message', async () => {
+        const workflowExecution =
+          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        const error =
+          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          )?.error;
+        expect(error).toBeDefined();
+        expect(workflowExecution?.status).toBe(ExecutionStatus.FAILED);
+      });
+
+      it('should have only one step execution for outerForeachStep with failed status', async () => {
+        const outerForeachStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'outerForeachStep');
+        expect(outerForeachStepExecutions.length).toBe(1);
+        expect(outerForeachStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
+      });
+    }
+  );
 });

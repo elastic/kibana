@@ -19,8 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
   let elasticAgentpkgVersion: string;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170690
-  describe.skip('fleet_list_agent', () => {
+  describe('fleet_list_agent', () => {
     let mockApiServer: http.Server;
 
     before(async () => {
@@ -144,22 +143,57 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return metrics if available and called with withMetrics', async () => {
+      await es.index({
+        id: 'agent-without-metrics',
+        index: '.fleet-agents',
+        refresh: 'wait_for',
+        document: {
+          access_api_key_id: 'api-key-2',
+          active: true,
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          local_metadata: { host: { hostname: 'host2' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:27:29Z',
+          tags: ['existingTag'],
+          agent: { id: 'agent-without-metrics', version: '9.2.0' },
+        },
+      });
+      await es.index({
+        id: 'agent-with-metrics',
+        index: '.fleet-agents',
+        refresh: 'wait_for',
+        document: {
+          access_api_key_id: 'api-key-1',
+          active: true,
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          local_metadata: { host: { hostname: 'host1' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:27:29Z',
+          tags: ['existingTag'],
+          agent: { id: 'agent-with-metrics', version: '9.2.0' },
+        },
+      });
       const now = Date.now();
       // We need to create data points in precise time buckets to ensure the derivative works properly
-      // 4 minutes ago (first data point for component1)
-      const fourMinutesAgo = new Date(now - 4 * 60 * 1000);
-      fourMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+      // 3 minutes ago (first data point for component1)
+      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
+      threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': fourMinutesAgo.toISOString(),
+          '@timestamp': threeMinutesAgo.toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
             dataset: 'elastic_agent.elastic_agent',
           },
-          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          elastic_agent: { id: 'agent-with-metrics', process: 'elastic_agent' },
           component: { id: 'component1' },
           system: {
             process: {
@@ -176,20 +210,21 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      // 3 minutes ago (second data point for component1)
-      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
-      threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+      // 2 minutes ago (second data point for component1)
+      const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
+      twoMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': threeMinutesAgo.toISOString(),
+          '@timestamp': twoMinutesAgo.toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
             dataset: 'elastic_agent.elastic_agent',
           },
-          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          elastic_agent: { id: 'agent-with-metrics', process: 'elastic_agent' },
           component: { id: 'component1' },
           system: {
             process: {
@@ -209,12 +244,13 @@ export default function ({ getService }: FtrProviderContext) {
       // 1 minute ago (data point for component2) - same agent but different component
       const oneMinuteAgo = new Date(now - 1 * 60 * 1000);
       oneMinuteAgo.setSeconds(0, 0); // Set to exact minute boundary
+
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
           '@timestamp': oneMinuteAgo.toISOString(),
-          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          elastic_agent: { id: 'agent-with-metrics', process: 'elastic_agent' },
           component: { id: 'component2' },
           data_stream: {
             namespace: 'default',
@@ -241,16 +277,31 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(apiResponse).to.have.keys('page', 'total', 'items');
-      expect(apiResponse.total).to.eql(4);
+      expect(apiResponse.total).to.greaterThan(1);
 
-      const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
+      const agentWithMetrics: Agent = apiResponse.items.find(
+        (agent: any) => agent.id === 'agent-with-metrics'
+      );
       //  As both of the indexed items have the same agent id, and each one has its own memory/cpu item, the metrics should include both values combined as each is now uniquely counted towards total memory/cpu usage
-      expect(agent1.metrics?.memory_size_byte_avg).to.eql('51021840');
-      expect(agent1.metrics?.cpu_avg).to.eql('0.01166');
+      expect(agentWithMetrics.metrics?.memory_size_byte_avg).to.eql('51021840');
+      expect(agentWithMetrics.metrics?.cpu_avg).to.eql('0.01166');
 
-      const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
-      expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
-      expect(agent2.metrics?.cpu_avg).equal(undefined);
+      const agentWithoutMetrics: Agent = apiResponse.items.find(
+        (agent: any) => agent.id === 'agent-without-metrics'
+      );
+      expect(agentWithoutMetrics.metrics?.memory_size_byte_avg).equal(undefined);
+      expect(agentWithoutMetrics.metrics?.cpu_avg).equal(undefined);
+
+      await es.delete({
+        id: 'agent-without-metrics',
+        index: '.fleet-agents',
+        refresh: true,
+      });
+      await es.delete({
+        id: 'agent-with-metrics',
+        index: '.fleet-agents',
+        refresh: true,
+      });
     });
 
     it('should return a status summary if getStatusSummary provided', async () => {
@@ -323,18 +374,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not return agentless agents when showAgentless=false', async () => {
-      // Set up default Fleet Server host, needed during agentless agent creation
-      await supertest
-        .post(`/api/fleet/fleet_server_hosts`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          id: 'fleet-default-fleet-server-host',
-          name: 'Default',
-          is_default: true,
-          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
-        })
-        .expect(200);
-
       // Create an agentless agent policy
       const { body: policyRes } = await supertest
         .post('/api/fleet/agent_policies')

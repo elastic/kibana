@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import type {
   RuleCreateProps,

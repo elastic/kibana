@@ -6,11 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { AnyDataStreamDefinition } from './types';
 
-import type { DataStreamClientArgs } from './client';
-
-export function validateClientArgs(args: DataStreamClientArgs<any, any>) {
-  if (args.dataStreams.version <= 0) {
+export function validateClientArgs(args: { dataStream: AnyDataStreamDefinition }) {
+  if (args.dataStream.version <= 0) {
     throw new Error('Template version must be greater than 0');
   }
 }

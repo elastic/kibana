@@ -65,21 +65,26 @@ export function TransactionFlyout({
 
   const isLoading = isPending(status);
 
+  const transactionDetailsTitle = i18n.translate(
+    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
+    {
+      defaultMessage: 'Transaction details',
+    }
+  );
+
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} ownFocus={true} maxWidth={false}>
+      <ResponsiveFlyout
+        onClose={onClose}
+        ownFocus={true}
+        maxWidth={false}
+        aria-label={transactionDetailsTitle}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h4>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
-                    {
-                      defaultMessage: 'Transaction details',
-                    }
-                  )}
-                </h4>
+                <h2>{transactionDetailsTitle}</h2>
               </EuiTitle>
             </EuiFlexItem>
 

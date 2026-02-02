@@ -25,9 +25,13 @@ import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type {
+  TableInspectorAdapter,
+  Datasource,
+  DatasourcePublicAPI,
+  IndexPatternMap,
+} from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../lens_ui_errors';
-import type { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
 import type { Visualization } from '..';
 
 function getLayerType(visualization: Visualization, state: unknown, layerId: string) {

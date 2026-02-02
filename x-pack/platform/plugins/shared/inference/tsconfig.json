@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,12 +18,8 @@
     ".storybook/**/*.js"
   ],
   "kbn_references": [
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/babel-register",
@@ -45,6 +41,8 @@
     "@kbn/sse-utils-client",
     "@kbn/zod",
     "@kbn/inference-tracing",
-    "@kbn/core-ui-settings-common"
+    "@kbn/core-ui-settings-common",
+    "@kbn/setup-node-env",
+    "@kbn/es-errors"
   ]
 }

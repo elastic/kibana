@@ -59,6 +59,10 @@ let coreContext: CoreContext;
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 let mockConfig$: BehaviorSubject<any>;
 let setupDeps: SetupDeps;
+const nodesInfoResponse = {
+  cluster_name: 'cluster-name',
+  nodes: {},
+};
 
 beforeEach(() => {
   setupDeps = {
@@ -76,6 +80,7 @@ beforeEach(() => {
     healthCheck: {
       delay: duration(TICK),
       startupDelay: duration(TICK),
+      retry: 1,
     },
     ssl: {
       verificationMode: 'none',
@@ -190,6 +195,7 @@ describe('#preboot', () => {
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
+          "healthCheckRetry": 1,
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
@@ -224,9 +230,7 @@ describe('#setup', () => {
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
@@ -239,14 +243,12 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
     await firstValueFrom(setupContract.esNodesCompatibility$);
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2); // shares the last value
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
@@ -459,22 +461,23 @@ describe('#start', () => {
       const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
-        Object {
-          "healthCheckDelay": "PT0.01S",
-          "healthCheckStartupDelay": "PT0.01S",
-          "hosts": Array [
-            "http://8.8.8.8",
-          ],
-          "logQueries": true,
-          "requestHeadersWhitelist": Array [
-            undefined,
-          ],
-          "ssl": Object {
-            "certificate": "certificate-value",
-            "verificationMode": "none",
-          },
-        }
-      `);
+      Object {
+        "healthCheckDelay": "PT0.01S",
+        "healthCheckRetry": 1,
+        "healthCheckStartupDelay": "PT0.01S",
+        "hosts": Array [
+          "http://8.8.8.8",
+        ],
+        "logQueries": true,
+        "requestHeadersWhitelist": Array [
+          undefined,
+        ],
+        "ssl": Object {
+          "certificate": "certificate-value",
+          "verificationMode": "none",
+        },
+      }
+    `);
     });
   });
 });
@@ -492,9 +495,7 @@ describe('#stop', () => {
     expect.assertions(3);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 

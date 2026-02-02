@@ -112,8 +112,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+            message: `error validating connector type secrets: Field \"routingKey\": Required`,
           });
         });
     });
@@ -133,7 +132,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
+              'error validating connector type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not added to the Kibana config xpack.actions.allowedHosts',
           });
         });
     });

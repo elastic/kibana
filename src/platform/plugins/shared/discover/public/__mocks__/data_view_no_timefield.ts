@@ -50,6 +50,6 @@ const fields = [
 ] as DataView['fields'];
 
 export const dataViewWithNoTimefieldMock = buildDataViewMock({
-  name: 'index-pattern-with-timefield',
+  name: 'index-pattern-with-no-timefield',
   fields,
 });

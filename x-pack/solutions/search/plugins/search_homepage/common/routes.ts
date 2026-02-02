@@ -8,3 +8,4 @@
 export const GET_STATUS_ROUTE = '/internal/search_homepage/status';
 export const GET_USER_PRIVILEGES_ROUTE = '/internal/search_homepage/start_privileges/{indexName}';
 export const GET_API_KEYS_ROUTE = '/internal/search_homepage/api_keys';
+export const GET_STATS_ROUTE = '/internal/search_homepage/stats';

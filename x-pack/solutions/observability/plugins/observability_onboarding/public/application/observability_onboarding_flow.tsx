@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';

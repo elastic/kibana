@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { visit, type Document, isPair, isScalar, type LineCounter } from 'yaml';
+import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { ConnectorIdItem } from '../model/types';
-import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
 
 export function collectAllConnectorIds(
   yamlDocument: Document,
@@ -51,7 +51,7 @@ export function collectAllConnectorIds(
         const ancestor = ancestors[i];
         if (ancestor && typeof ancestor === 'object' && 'items' in ancestor) {
           // Check if this node has both 'type' and 'connector-id' properties
-          const items = (ancestor as any).items;
+          const items = (ancestor as any).items; // eslint-disable-line @typescript-eslint/no-explicit-any
           if (Array.isArray(items)) {
             let hasType = false;
             let hasConnectorId = false;

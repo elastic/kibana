@@ -1,0 +1,413 @@
+{
+  "lastModified": "2025-12-11T14:13:09.162Z",
+  "sha1": "c37509b7c77fcf8e6690753c5954b1f5df51db15",
+  "tests": [
+    {
+      "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 14,
+        "column": 16
+      }
+    },
+    {
+      "id": "4918e092a0b8903-d077d1deb960c5c",
+      "title": "Service Groups When navigating to service groups",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-c9e5c18b97827e4",
+      "title": "Service inventory renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 19,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-4b430080d829f58",
+      "title": "Service inventory loads the service overview for a service when clicking on it",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-b2261999afe14e2",
+      "title": "Service inventory shows the correct environment when changing the environment",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "0d134541f1c6605-eb4017d5ced9479",
+      "title": "Service inventory shows the filtered services when using the service name fast filter",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-93d765a7c716612",
+      "title": "Agent Configuration Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-09b8159d2323da0",
+      "title": "Agent Configuration APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "89c8ff66ee766e0-9ba74430ee8ac12",
+      "title": "Agent Configuration Privileged user should be able to configure, create and delete an agent configuration with all services and production environment",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-2c7791699f57a60",
+      "title": "Agent Explorer Viewer should be able to view the agent list",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-b66f5a8295933ce",
+      "title": "Agent Explorer Editor should be able to access agent explorer",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-a96eed7edb57f36",
+      "title": "Agent Explorer APM Read Privileges With Write Settings should be able to access agent explorer",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "df2473acd821008-be4130d8df990d7",
+      "title": "Agent Explorer APM All Privileges Without Write Settings should be able to view agent explorer but with limited functionality",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "f43f55c4b87ada1-d4bc402fe5eb1ce",
+      "title": "Agent Keys Viewer should see missing privileges message",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "f43f55c4b87ada1-71dabd3e9acc532",
+      "title": "Agent Keys Admin User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-b5f438e39d8d665",
+      "title": "Anomaly Detection Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-33d6a15705dd230",
+      "title": "Anomaly Detection Privileged User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-c5bb5d1bcaddc75",
+      "title": "Anomaly Detection Admin should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-9785a7919050c13",
+      "title": "Anomaly Detection APM Read Privileges With Write Settings should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "01ea78763124721-46465c39e998aa3",
+      "title": "Anomaly Detection APM All Privileges Without Write Settings should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
+        "line": 78,
+        "column": 7
+      }
+    },
+    {
+      "id": "a2babb42e998789-794ce71f366cded",
+      "title": "Custom links Viewer should show disabled create button and no edit button",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "a2babb42e998789-c6e98077141d93f",
+      "title": "Custom links Privileged User should be able to create custom link and delete the created custom link",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7e8e912f1cfcc9-75b6a16cd11bf3c",
+      "title": "General Settings Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "d7e8e912f1cfcc9-aeec9b7497f090c",
+      "title": "General Settings Privileged User should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbc57c9a34f643a-b116664ca4ec8e6",
+      "title": "Indices Viewer should not be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
+        "line": 12,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbc57c9a34f643a-606d5d75c14092e",
+      "title": "Indices Privileged user should be able to modify settings",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-11cea7a9a84eac7",
+      "title": "Settings - Serverless Privileged User: The indices settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": ["@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-baeeb2b04e9cbc0",
+      "title": "Settings - Serverless Viewer: The agent configuration settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": ["@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "cde77c8f7532390-54b857ae9939d83",
+      "title": "Settings - Serverless Privileged User: The agent configuration settings page is not available in serverless",
+      "expectedStatus": "passed",
+      "tags": ["@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-820ffa8139e87c1",
+      "title": "Service map renders page with selected date range",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-9d4b191090eb231",
+      "title": "Service map shows a detailed service map",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "bb77c5fe685c994-bebd132799161c0",
+      "title": "Service map shows empty state when there is no data",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/sevice_map/service_map.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "b823835fc8ed203-c0d7ecffab644e9",
+      "title": "Storage Explorer - Admin User user navigates and explores storage explorer functionality",
+      "expectedStatus": "passed",
+      "tags": ["@ess"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "c3f1c3da077a5f2-53f098b0f4c049f",
+      "title": "Storage Explorer - Viewer (No Permissions) displays permission denied message",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-025e43f8799c8ae",
+      "title": "Transaction details Renders the page with expected content",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-32f26083c909a43",
+      "title": "Transaction details Trace samples navigation persists across page reloads",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-a7c84b743868348",
+      "title": "Transaction details Trace samples waterfall should not become stuck on loading state after page reload with empty data",
+      "expectedStatus": "passed",
+      "tags": ["@ess", "@svlOblt"],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    }
+  ]
+}

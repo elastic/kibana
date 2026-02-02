@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiNotificationBadge,
   EuiProgress,
   EuiSpacer,
@@ -24,9 +25,17 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
-import { DataSourcesList } from './data_sources_list';
+import type { SchemaEditorField } from '../schema_editor/types';
+import { DataSourcesControls } from './data_sources_controls';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectWhetherThereAreOutdatedDocumentsInSimulation } from './state_management/stream_enrichment_state_machine/selectors';
 
-export const SimulationPlayground = () => {
+export const SimulationPlayground = ({
+  schemaEditorFields,
+}: {
+  schemaEditorFields: SchemaEditorField[];
+}) => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
     useStreamEnrichmentEvents();
 
@@ -41,6 +50,20 @@ export const SimulationPlayground = () => {
     })
   );
 
+  const activeDataSourceRef = useStreamEnrichmentSelector((state) =>
+    getActiveDataSourceRef(state.context.dataSourcesRefs)
+  );
+
+  const isDataSourceLoading = useDataSourceSelector(activeDataSourceRef, (state) =>
+    state ? state.matches({ enabled: 'loadingData' }) : false
+  );
+
+  const dataSourceContext = useDataSourceSelector(activeDataSourceRef, (state) => state?.context);
+
+  const hasOutdatedDocuments = useStreamEnrichmentSelector((state) =>
+    selectWhetherThereAreOutdatedDocumentsInSimulation(state.context, dataSourceContext)
+  );
+
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
 
   return (
@@ -53,14 +76,34 @@ export const SimulationPlayground = () => {
                 isSelected={isViewingDataPreview}
                 onClick={viewSimulationPreviewData}
                 append={
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    onClick={refreshSimulation}
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
-                      { defaultMessage: 'Refresh data preview' }
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiButtonIcon
+                        iconType="refresh"
+                        onClick={refreshSimulation}
+                        isLoading={isDataSourceLoading}
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
+                          { defaultMessage: 'Refresh data preview' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                    {hasOutdatedDocuments && (
+                      <EuiFlexItem data-test-subj="streamsAppProcessingOutdatedDocumentsTipAnchor">
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.outdatedDocumentsTooltip.content',
+                            {
+                              defaultMessage:
+                                'Some documents are older than the most recent stream changes. Refresh to update simulation samples.',
+                            }
+                          )}
+                          type="warning"
+                          color="warning"
+                        />
+                      </EuiFlexItem>
                     )}
-                  />
+                  </EuiFlexGroup>
                 }
               >
                 {i18n.translate(
@@ -73,26 +116,28 @@ export const SimulationPlayground = () => {
                 onClick={viewSimulationDetectedFields}
                 append={
                   detectedFields.length > 0 ? (
-                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                    <EuiNotificationBadge size="m" data-test-subj="streamsAppModifiedFieldsBadge">
+                      {detectedFields.length}
+                    </EuiNotificationBadge>
                   ) : undefined
                 }
               >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                  { defaultMessage: 'Detected fields' }
+                  { defaultMessage: 'Modified fields' }
                 )}
               </EuiTab>
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DataSourcesList />
+            <DataSourcesControls />
           </EuiFlexItem>
           <ProgressBar />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
+      {isViewingDetectedFields && <DetectedFieldsEditor schemaEditorFields={schemaEditorFields} />}
     </>
   );
 };

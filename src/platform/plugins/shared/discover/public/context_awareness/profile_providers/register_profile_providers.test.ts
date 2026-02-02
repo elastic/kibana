@@ -9,7 +9,7 @@
 
 import { uniq } from 'lodash';
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { createContextAwarenessMocks } from '../__mocks__';
+import { createContextAwarenessMocks, createProfileProviderSharedServicesMock } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
@@ -50,15 +50,12 @@ describe('registerProfileProviders', () => {
   });
 
   it('should register enabled experimental profile providers', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      documentProfileServiceMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    await registerProfileProviders({
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
@@ -67,6 +64,7 @@ describe('registerProfileProviders', () => {
         exampleDataSourceProfileProvider.profileId,
         exampleDocumentProfileProvider.profileId,
       ],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
@@ -90,19 +88,17 @@ describe('registerProfileProviders', () => {
   });
 
   it('should not register disabled experimental profile providers', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      documentProfileServiceMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    await registerProfileProviders({
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
     const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
@@ -128,19 +124,17 @@ describe('registerProfileProviders', () => {
   it('all profile ids should be unique', async () => {
     expect(mockAllCollectedProfiles.length).toBe(0);
 
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      documentProfileServiceMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    await registerProfileProviders({
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
 
@@ -153,19 +147,17 @@ describe('registerProfileProviders', () => {
   it('all profile ids should be named appropriate to their context level', async () => {
     expect(mockAllCollectedProfiles.length).toBe(0);
 
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      documentProfileServiceMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    await registerProfileProviders({
+    const profileProviderServices = createProfileProviderSharedServicesMock();
+    const { rootProfileServiceMock, dataSourceProfileServiceMock, documentProfileServiceMock } =
+      createContextAwarenessMocks({
+        shouldRegisterProviders: false,
+      });
+    registerProfileProviders({
       rootProfileService: rootProfileServiceMock,
       dataSourceProfileService: dataSourceProfileServiceMock,
       documentProfileService: documentProfileServiceMock,
       enabledExperimentalProfileIds: [],
+      sharedServices: profileProviderServices,
       services: profileProviderServices,
     });
 

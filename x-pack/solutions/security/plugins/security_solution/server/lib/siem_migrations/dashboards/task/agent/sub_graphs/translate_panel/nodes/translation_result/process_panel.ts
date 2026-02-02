@@ -106,8 +106,8 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
         fieldName: columnName,
         meta: { type: 'string' },
       });
-      columnNames.push(columnName);
     }
+    columnNames.push(columnName);
   });
 
   return { columnList, columns: columnNames };
@@ -236,14 +236,14 @@ function configureStackedProperties(
 ): void {
   if ((vizType.includes('stacked') || vizType.includes('line')) && columns.length > 2) {
     if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
+      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
         columns[columns.length - 2];
     }
   }
 
   if (vizType.includes('stacked') && columns.length === 2) {
     if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
+      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessors[0] =
         columns[columns.length - 1];
     }
   }

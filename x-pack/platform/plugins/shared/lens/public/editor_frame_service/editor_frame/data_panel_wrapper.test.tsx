@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
+import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '@kbn/lens-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';

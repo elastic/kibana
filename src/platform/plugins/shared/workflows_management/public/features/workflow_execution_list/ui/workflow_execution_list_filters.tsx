@@ -21,12 +21,11 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ExecutionType } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { getStatusLabel } from '../../../shared/translations';
 
 interface ExecutionListFiltersProps {

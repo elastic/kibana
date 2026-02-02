@@ -8,14 +8,14 @@
 import { entries, findLastIndex, isNil } from 'lodash';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { ESQLCommandOption } from '@kbn/esql-ast';
+import type { ESQLCommandOption } from '@kbn/esql-language';
 import {
   type ESQLAstCommand,
   Parser,
   isOptionNode,
   isColumn,
   isFunctionExpression,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
 import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';

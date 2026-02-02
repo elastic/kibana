@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FiltersIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFiltersOperation } from '../../schema/bucket_ops';
 import { DEFAULT_FILTER, fromFilterLensStateToAPI } from './filter';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
@@ -24,10 +24,13 @@ export function fromFiltersLensApiToLensState(
     operationType: 'filters',
     ...shared,
     params: {
-      filters: (filters ?? []).map((filter) => ({
-        input: filter.filter,
-        label: filter.label ?? 'Filter',
-      })),
+      filters: (filters ?? [])
+        // do not propagate advanced filters within dimensions
+        .filter((filter) => filter.filter.language != null)
+        .map((filter) => ({
+          input: filter.filter,
+          label: filter.label ?? 'Filter',
+        })),
     },
   };
 }

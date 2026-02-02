@@ -32,7 +32,7 @@ import {
   LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
   LabelPositions,

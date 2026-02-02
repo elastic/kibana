@@ -15,16 +15,26 @@ import {
 import { getRuleExecutionEventsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 import type { GetExecutionEventsArgs } from '../../../logic/rule_execution_log';
 import { getRuleExecutionEventsRoute } from './get_rule_execution_events_route';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
 
 describe('getRuleExecutionEventsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
     getRuleExecutionEventsRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const getRuleExecutionEventsRequest = () =>

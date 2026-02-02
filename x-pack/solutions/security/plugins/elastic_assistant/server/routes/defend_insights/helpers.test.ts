@@ -15,7 +15,7 @@ import {
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 
 import {
   DEFEND_INSIGHT_ERROR_EVENT,

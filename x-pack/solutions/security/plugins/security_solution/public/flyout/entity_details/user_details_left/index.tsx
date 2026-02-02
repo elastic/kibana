@@ -10,7 +10,6 @@ import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
@@ -45,7 +44,7 @@ export const UserDetailsPanel = ({
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
 }: UserDetailsPanelProps) => {
-  const managedUser = useManagedUser(user.name, user.email);
+  const managedUser = useManagedUser();
   const tabs = useTabs(
     managedUser.data,
     user.name,
@@ -60,11 +59,10 @@ export const UserDetailsPanel = ({
     user,
     tabs,
     path,
+    scopeId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts
   );
-
-  if (managedUser.isLoading) return <FlyoutLoading />;
 
   if (!selectedTabId) {
     return null;
@@ -87,6 +85,7 @@ const useSelectedTab = (
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
+  scopeId: string,
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean
 ) => {
@@ -110,6 +109,7 @@ const useSelectedTab = (
         path: {
           tab: tabId,
         },
+        scopeId,
       },
     });
   };

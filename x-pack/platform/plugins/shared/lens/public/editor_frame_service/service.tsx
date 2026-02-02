@@ -25,14 +25,14 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import type { LensDocument } from '../persistence';
 import type {
+  LensDocument,
   Datasource,
   Visualization,
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
-} from '../types';
+} from '@kbn/lens-common';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;

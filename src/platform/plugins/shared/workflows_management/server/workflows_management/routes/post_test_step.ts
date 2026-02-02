@@ -8,17 +8,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { ADMIN_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
+import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerPostTestStepRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
     {
       path: '/api/workflows/testStep',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTE_SECURITY,
       validate: {
         body: schema.object({
           stepId: schema.string(),
@@ -27,7 +28,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
 
@@ -47,6 +48,6 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

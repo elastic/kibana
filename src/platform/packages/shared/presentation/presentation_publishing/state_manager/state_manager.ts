@@ -28,7 +28,7 @@ type KeyToSubjectMap<StateType extends object> = {
  * @param comparators - Optional StateComparators. When provided, subject will only emit when value changes.
  */
 export const initializeStateManager = <StateType extends object>(
-  initialState: StateType,
+  initialState: Partial<StateType>,
   defaultState: WithAllKeys<StateType>,
   comparators?: StateComparators<StateType>
 ): StateManager<StateType> => {

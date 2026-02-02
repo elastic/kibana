@@ -66,7 +66,7 @@ describe('ruleActionsConnectorsBody', () => {
     jest.clearAllMocks();
   });
 
-  test('should call onSelectConnector when connector is clicked', async () => {
+  it('should call onSelectConnector when connector is clicked', async () => {
     render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
 
     await userEvent.click(screen.getByText('connector-1'));
@@ -100,7 +100,7 @@ describe('ruleActionsConnectorsBody', () => {
     );
   });
 
-  test('filters out when no connector matched action type id', async () => {
+  it('filters out when no connector matched action type id', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
 
@@ -140,7 +140,7 @@ describe('ruleActionsConnectorsBody', () => {
     expect(await screen.findByText('connector-1')).toBeInTheDocument();
   });
 
-  test('filters out when connector should be hidden in UI', async () => {
+  it('filters out when connector should be hidden in UI', async () => {
     const connectorTypes = [
       { id: '.slack', name: 'Slack', enabledInConfig: false },
       { id: '.slack_api', name: 'Slack API', enabledInConfig: true },
@@ -207,5 +207,69 @@ describe('ruleActionsConnectorsBody', () => {
     expect(filterButtons[0]).toHaveTextContent('All');
     expect(filterButtons[1]).toHaveTextContent('Cases');
     expect(filterButtons[2]).toHaveTextContent('Slack API');
+  });
+
+  it('should not allow selecting system actions more that once if allowMultipleSystemActions=false', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(
+      getActionTypeModel('2', { isSystemActionType: true, id: 'actionType-2' })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        // simulate that a system action of type actionType-2 is already selected
+        actions: [{ actionTypeId: 'actionType-2' }],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [getActionType('1'), getActionType('2', { isSystemActionType: true })],
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    const connector2 = await screen.findByText('connector-2');
+    expect(connector2).toBeDisabled();
+  });
+
+  it('should allow selecting system actions more that once if allowMultipleSystemActions=true', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+    actionTypeRegistry.register(
+      getActionTypeModel('2', { isSystemActionType: true, id: 'actionType-2' })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        // simulate that a system action of type actionType-2 is already selected
+        actions: [{ actionTypeId: 'actionType-2' }],
+      },
+      connectors: mockConnectors,
+      connectorTypes: [
+        getActionType('1'),
+        getActionType('2', { allowMultipleSystemActions: true, isSystemActionType: true }),
+      ],
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    const connector2 = await screen.findByText('connector-2');
+    expect(connector2).not.toBeDisabled();
   });
 });

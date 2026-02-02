@@ -7,25 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  euiFontSize,
   EuiModal,
+  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
   useGeneratedHtmlId,
-  euiFontSize,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { z } from '@kbn/zod/v4';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 export function TestStepModal({
   initialcontextOverride,
@@ -38,6 +44,7 @@ export function TestStepModal({
 }) {
   const [overflowWidgetsDomNode, setOverflowWidgetsDomNode] = useState<HTMLDivElement | null>(null);
   const styles = useMemoCss(componentStyles);
+  useWorkflowsMonacoTheme();
   const [inputsJson, setInputsJson] = React.useState<string>(
     JSON.stringify(initialcontextOverride.stepContext, null, 2)
   );
@@ -46,8 +53,8 @@ export function TestStepModal({
   const id = 'json-editor-schema';
 
   const jsonSchema = useMemo(() => {
-    return zodToJsonSchema(initialcontextOverride.schema, {
-      $refStrategy: 'none',
+    return z.toJSONSchema(initialcontextOverride.schema, {
+      target: 'draft-7',
     });
   }, [initialcontextOverride.schema]);
 
@@ -167,7 +174,7 @@ export function TestStepModal({
                 language: 'json',
                 overflowWidgetsDomNode,
                 fixedOverflowWidgets: true,
-                theme: 'workflows-subdued',
+                theme: WORKFLOWS_MONACO_EDITOR_THEME,
                 automaticLayout: true,
                 fontSize: 12,
                 minimap: {
@@ -190,6 +197,7 @@ export function TestStepModal({
               color="success"
               iconType="play"
               size="s"
+              data-test-subj="submit-step-run"
             >
               <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
             </EuiButton>

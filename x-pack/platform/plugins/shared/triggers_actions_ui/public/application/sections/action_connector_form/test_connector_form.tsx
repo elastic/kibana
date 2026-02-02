@@ -33,7 +33,7 @@ export interface TestConnectorFormProps {
   connector: ActionConnector;
   executeEnabled: boolean;
   isExecutingAction: boolean;
-  setActionParams: (params: Record<string, unknown>) => void;
+  onEditAction: (field: string, value: unknown) => void;
   actionParams: Record<string, unknown>;
   onExecutionAction: () => Promise<void>;
   executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
@@ -45,7 +45,7 @@ export const TestConnectorForm = ({
   executeEnabled,
   executionResult,
   actionParams,
-  setActionParams,
+  onEditAction,
   onExecutionAction,
   isExecutingAction,
   actionTypeRegistry,
@@ -57,11 +57,16 @@ export const TestConnectorForm = ({
 
   useEffect(() => {
     (async () => {
-      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      const res = (
+        await actionTypeModel?.validateParams(
+          actionParams,
+          connector && 'config' in connector ? connector.config : undefined
+        )
+      ).errors as IErrorObject;
       setActionErrors({ ...res });
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
-  }, [actionTypeModel, actionParams]);
+  }, [actionTypeModel, actionParams, connector]);
 
   const steps = [
     {
@@ -86,12 +91,7 @@ export const TestConnectorForm = ({
               actionParams={actionParams}
               index={0}
               errors={actionErrors}
-              editAction={(field, value) =>
-                setActionParams({
-                  ...actionParams,
-                  [field]: value,
-                })
-              }
+              editAction={onEditAction}
               messageVariables={[]}
               actionConnector={connector}
               executionMode={ActionConnectorMode.Test}
@@ -117,7 +117,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="warning" color="warning">
+              <EuiCallOut announceOnMount iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."

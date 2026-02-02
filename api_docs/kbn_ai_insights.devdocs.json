@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/ai-insights",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-insights",
+        "id": "def-public.AiInsight",
+        "type": "Function",
+        "tags": [],
+        "label": "AiInsight",
+        "description": [],
+        "signature": [
+          "({\n  title,\n  description,\n  content,\n  license,\n  onStartConversation,\n  onOpen,\n  isLoading,\n  error,\n}: ",
+          "AiInsightProps",
+          ") => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-insights/src/components/ai_insight.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-insights",
+            "id": "def-public.AiInsight.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  description,\n  content,\n  license,\n  onStartConversation,\n  onOpen,\n  isLoading,\n  error,\n}",
+            "description": [],
+            "signature": [
+              "AiInsightProps"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-insights/src/components/ai_insight.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

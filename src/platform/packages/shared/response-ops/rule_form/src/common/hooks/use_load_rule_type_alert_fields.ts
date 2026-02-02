@@ -11,7 +11,7 @@ import type { ActionVariable } from '@kbn/alerting-types';
 import { useRef } from 'react';
 import { isEmpty } from 'lodash';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { fetchRuleTypeAlertFields, getDescription } from '@kbn/alerts-ui-shared/src/common/apis';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 

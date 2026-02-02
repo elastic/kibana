@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { prepareLogTable } from './prepare_log_table';
-export type { Dimension, LayerDimension } from './prepare_log_table';
-export {
-  findAccessor,
-  findAccessorOrFail,
-  getAccessorByDimension,
-  validateAccessor,
-  getColumnByAccessor,
-  isVisDimension,
-  getAccessor,
-  getFormatByAccessor,
-} from './accessors';
 export { getStopsWithColorsFromRanges } from './palette';
 export type { PaletteConfig } from './palette';

@@ -325,76 +325,71 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async clearFieldTypeFilter(type: string) {
+  async isOptionChecked(option: string) {
+    const element = await this.testSubjects.find(`selectable-option-${option}`);
+    const ariaChecked = await element.getAttribute('aria-checked');
+    return ariaChecked === 'true';
+  }
+
+  async clearSelectableOption(triggerTestSubj: string, selectableTestSubj: string, option: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
-      );
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(triggerTestSubj);
+      await this.testSubjects.find(selectableTestSubj);
     });
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    });
-    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+
+    expect(await this.isOptionChecked(option)).to.be(true);
+    await this.testSubjects.click(`selectable-option-${option}`);
+    expect(await this.isOptionChecked(option)).to.be(false);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async setSelectableOption(triggerTestSubj: string, selectableTestSubj: string, option: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(triggerTestSubj);
+      await this.testSubjects.find(selectableTestSubj);
+    });
+
+    expect(await this.isOptionChecked(option)).to.be(false);
+    await this.testSubjects.click(`selectable-option-${option}`);
+    expect(await this.isOptionChecked(option)).to.be(true);
+
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async clearFieldTypeFilter(type: string) {
+    await this.clearSelectableOption(
+      'indexedFieldTypeFilterDropdown',
+      'indexedFieldTypeSelectable',
+      type
+    );
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
-      );
-    });
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.setSelectableOption(
+      'indexedFieldTypeFilterDropdown',
+      'indexedFieldTypeSelectable',
+      type
+    );
   }
 
   async setSchemaFieldTypeFilter(type: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('schemaFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="schemaFieldTypeFilterDropdown-popover"]'
-      );
-    });
-    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.click(`schemaFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.setSelectableOption('schemaFieldTypeFilterDropdown', 'schemaTypeSelectable', type);
   }
 
   async clearScriptedFieldLanguageFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('scriptedFieldLanguageFilterDropdown');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    });
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(
-        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
-      );
-    });
-    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
-    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.clearSelectableOption(
+      'scriptedFieldLanguageFilterDropdown',
+      'scriptedFieldLanguageSelectable',
+      type
+    );
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry(
-        'scriptedFieldLanguageFilterDropdown'
-      );
-      return await this.find.byCssSelector('div.euiPopover__panel[data-popover-open]');
-    });
-    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
-    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
-    await this.testSubjects.existOrFail(
-      `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
+    await this.setSelectableOption(
+      'scriptedFieldLanguageFilterDropdown',
+      'scriptedFieldLanguageSelectable',
+      language
     );
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async filterField(name: string) {
@@ -872,7 +867,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
-    await this.testSubjects.click('closeFlyoutButton');
+    await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
     if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {

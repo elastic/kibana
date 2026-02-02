@@ -120,6 +120,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
             <EuiSpacer size="s" />
             {pipelineCreated === true && pipelineError === undefined ? (
               <EuiCallOut
+                announceOnMount
                 data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout"
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage',
@@ -170,6 +171,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
             ) : null}
             {pipelineError !== undefined ? (
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage',
                   {

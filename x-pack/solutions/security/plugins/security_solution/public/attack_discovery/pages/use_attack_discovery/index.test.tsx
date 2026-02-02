@@ -6,11 +6,7 @@
  */
 
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_INTERNAL,
-  ATTACK_DISCOVERY_GENERATE,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATE } from '@kbn/elastic-assistant-common';
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 
@@ -59,13 +55,6 @@ jest.mock('@kbn/elastic-assistant', () => ({
   })),
 }));
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const setLoadingConnectorId = jest.fn();
 
 const SIZE = 20;
@@ -95,116 +84,56 @@ describe('useAttackDiscovery', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is false', () => {
-    beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+  it('calls POST with the public API route', async () => {
+    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    const { result } = renderHook(
+      () =>
+        useAttackDiscovery({
+          connectorId: 'test-id',
+          setLoadingConnectorId,
+          size: 20,
+        }),
+      {
+        wrapper: queryWrapper,
+      }
+    );
+
+    await act(async () => {
+      await result.current.fetchAttackDiscoveries();
     });
 
-    it('calls POST with the internal API route', async () => {
-      const { result } = renderHook(
-        () =>
-          useAttackDiscovery({
-            connectorId: 'test-id',
-            setLoadingConnectorId,
-            size: 20,
-          }),
-        {
-          wrapper: queryWrapper,
-        }
-      );
-
-      await act(async () => {
-        await result.current.fetchAttackDiscoveries();
-      });
-
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_INTERNAL,
-        expect.any(Object)
-      );
-    });
-
-    it('calls POST with the internal API version', async () => {
-      const { result } = renderHook(
-        () =>
-          useAttackDiscovery({
-            connectorId: 'test-id',
-            setLoadingConnectorId,
-            size: SIZE,
-          }),
-        {
-          wrapper: queryWrapper,
-        }
-      );
-
-      await act(async () => {
-        await result.current.fetchAttackDiscoveries();
-      });
-
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          version: API_VERSIONS.internal.v1,
-        })
-      );
-    });
+    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      ATTACK_DISCOVERY_GENERATE,
+      expect.objectContaining({
+        version: API_VERSIONS.public.v1,
+      })
+    );
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true });
-      (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+  it('calls POST using the public API version', async () => {
+    (mockedUseKibana.services.http.post as jest.Mock).mockResolvedValue({});
+    const { result } = renderHook(
+      () =>
+        useAttackDiscovery({
+          connectorId: 'test-id',
+          setLoadingConnectorId,
+          size: SIZE,
+        }),
+      {
+        wrapper: queryWrapper,
+      }
+    );
+
+    await act(async () => {
+      await result.current.fetchAttackDiscoveries();
     });
 
-    it('calls POST with the public API route', async () => {
-      const { result } = renderHook(
-        () =>
-          useAttackDiscovery({
-            connectorId: 'test-id',
-            setLoadingConnectorId,
-            size: 20,
-          }),
-        {
-          wrapper: queryWrapper,
-        }
-      );
-
-      await act(async () => {
-        await result.current.fetchAttackDiscoveries();
-      });
-
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
-        ATTACK_DISCOVERY_GENERATE,
-        expect.objectContaining({
-          version: API_VERSIONS.public.v1,
-        })
-      );
-    });
-
-    it('calls POST using the public API version', async () => {
-      const { result } = renderHook(
-        () =>
-          useAttackDiscovery({
-            connectorId: 'test-id',
-            setLoadingConnectorId,
-            size: SIZE,
-          }),
-        {
-          wrapper: queryWrapper,
-        }
-      );
-
-      await act(async () => {
-        await result.current.fetchAttackDiscoveries();
-      });
-
-      expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          version: API_VERSIONS.public.v1,
-        })
-      );
-    });
+    expect(mockedUseKibana.services.http.post as jest.Mock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        version: API_VERSIONS.public.v1,
+      })
+    );
   });
 
   it('handles fetch errors correctly', async () => {

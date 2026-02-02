@@ -189,6 +189,7 @@ async function execute({ data: { layout, logo, title, content } }: GeneratePdfRe
         },
       },
     };
+    // @ts-expect-error upgrade typescript v5.9.3
     port.postMessage(successResponse, [buffer.buffer /* Transfer buffer instead of copying */]);
   } catch (error) {
     const errorResponse: GeneratePdfResponse = {

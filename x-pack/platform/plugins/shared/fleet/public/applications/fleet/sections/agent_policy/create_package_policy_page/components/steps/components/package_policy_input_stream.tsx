@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import {
   DATASET_VAR_NAME,
@@ -173,7 +173,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     return (
       <>
-        <EuiFlexGrid columns={2} data-test-subj="streamOptions.inputStreams">
+        <EuiFlexGrid
+          columns={2}
+          data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
+        >
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">

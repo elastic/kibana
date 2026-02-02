@@ -9,11 +9,11 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
-import { SUB_ACTION } from '../../../common/thehive/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/thehive/constants';
 import type {
   ExecutorParams,
   ExecutorSubActionCreateAlertParams,
-} from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
 import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 

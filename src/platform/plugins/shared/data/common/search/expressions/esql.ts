@@ -21,8 +21,14 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+  isComputedColumn,
+  getQuerySummary,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
@@ -272,7 +278,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY, sessionId: getSearchSessionId() }
+            {
+              abortSignal,
+              strategy: ESQL_ASYNC_SEARCH_STRATEGY,
+              sessionId: getSearchSessionId(),
+              projectRouting: input?.projectRouting,
+            }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
@@ -358,8 +369,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             ? []
             : body.values;
 
+          // Get query summary to identify computed columns
+          const querySummary = getQuerySummary(query);
+
           const allColumns =
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
@@ -389,6 +402,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
+                isComputedColumn: isComputedColumn(name, querySummary),
               };
             }) ?? [];
 

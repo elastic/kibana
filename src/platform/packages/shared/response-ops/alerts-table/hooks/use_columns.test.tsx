@@ -11,7 +11,7 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { BrowserFields } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -139,12 +139,13 @@ describe('useColumns', () => {
     it('should restore the columns to their default value', () => {
       let columns = [...defaultColumns];
       let visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn((newColumns) => {
-        columns = newColumns;
+      const setColumns = jest.fn((updater) => {
+        columns = typeof updater === 'function' ? updater(columns) : updater;
       });
       const setVisibleColumns = jest.fn((updater) => {
         visibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
       });
+
       const { result } = renderHook(
         () =>
           useColumns({
@@ -166,6 +167,7 @@ describe('useColumns', () => {
       act(() => {
         result.current.onToggleColumn(defaultColumns[0].id);
       });
+
       expect(visibleColumns).not.toContain('event.action');
       act(() => {
         result.current.onResetColumns();

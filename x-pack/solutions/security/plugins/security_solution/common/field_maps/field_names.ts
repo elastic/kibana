@@ -65,3 +65,5 @@ export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as c
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
 export const ALERT_RULE_TIMESTAMP_OVERRIDE = `${ALERT_RULE_NAMESPACE}.timestamp_override` as const;
 export const ALERT_RULE_INDICES = `${ALERT_RULE_NAMESPACE}.indices` as const;
+
+export const ALERT_ATTACK_IDS = `${ALERT_NAMESPACE}.attack_ids` as const;

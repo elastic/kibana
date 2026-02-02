@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowsEmptyState } from './workflows_empty_state';
 
 // Mock useKibana hook

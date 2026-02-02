@@ -12,21 +12,16 @@ import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
 const LazyIconEntityAnalytics = lazy(() =>
-  import('./v2_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
+  import('./custom_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
     default: iconEntityAnalytics,
   }))
 );
 
-export const createEntityAnalyticsNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.entityAnalytics,
-  iconV2: LazyIconEntityAnalytics,
+  icon: LazyIconEntityAnalytics,
   title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
   renderAs: 'panelOpener',
-  sideNavVersion,
   children: [
     {
       id: SecurityPageName.entityAnalyticsOverview,
@@ -35,6 +30,10 @@ export const createEntityAnalyticsNavigationTree = (
     {
       id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
+    },
+    {
+      id: SecurityPageName.entityAnalyticsThreatHunting,
+      link: securityLink(SecurityPageName.entityAnalyticsThreatHunting),
     },
   ],
 });

@@ -7,10 +7,7 @@
 import expect from 'expect';
 import { BulkRevertSkipReasonEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  deleteAllRules,
-  waitForRulePartialFailure,
-} from '../../../../../../config/services/detections_response';
+import { deleteAllRules, waitForRulePartialFailure } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,

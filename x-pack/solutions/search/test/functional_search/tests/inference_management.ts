@@ -49,6 +49,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
       });
 
+      it('displays model column with model ids', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectModelColumnToBeDisplayed();
+      });
+
+      it('can search by model name', async () => {
+        await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectSearchByModelName();
+      });
+
       it('preconfigured endpoints can not be deleted', async () => {
         await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectPreconfiguredEndpointsCannotBeDeleted();
       });
@@ -63,6 +71,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('create inference flyout', () => {
       it('renders successfully', async () => {
         await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
+      });
+      it('renders successfully with custom headers', async () => {
+        await pageObjects.searchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToAllowCustomHeaders();
       });
     });
 

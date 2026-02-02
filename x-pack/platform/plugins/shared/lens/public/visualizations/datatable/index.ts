@@ -10,7 +10,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
-import type { EditorFrameSetup } from '../../types';
+import type { EditorFrameSetup } from '@kbn/lens-common';
 
 interface DatatableVisualizationPluginStartPlugins {
   data: DataPublicPluginStart;

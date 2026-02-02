@@ -15,6 +15,8 @@
       "label": "ObservabilityAIAssistantAppPublicSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "ObservabilityAIAssistantAppPublicStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -45,6 +49,8 @@
             "[] | undefined; completeInBackground: boolean; onStartAnalysisClick: () => void; onStopAnalysisClick: () => void; onResetAnalysisClick: () => void; onClearAnalysisClick: () => void; onCompleteInBackgroundClick: () => void; loading: boolean; error?: Error | undefined; }>"
           ],
           "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -60,6 +66,8 @@
                 "P"
               ],
               "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 630,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -85,6 +93,8 @@
       "label": "ObservabilityAIAssistantAppServerStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "lineNumber": 42,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -99,6 +109,8 @@
       "label": "ObservabilityAIAssistantAppServerSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

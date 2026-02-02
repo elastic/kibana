@@ -37,6 +37,10 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 label=""
+                aria-label={i18n.translate(
+                  'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
+                  { defaultMessage: 'Technical Preview' }
+                )}
                 iconType="beaker"
                 size="m"
                 color="hollow"
@@ -113,6 +117,10 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
           />{' '}
           <EuiBetaBadge
             label=""
+            aria-label={i18n.translate(
+              'xpack.ml.datavisualizer.selector.technicalPreviewBetaBadgeLabel',
+              { defaultMessage: 'Technical Preview' }
+            )}
             iconType="beaker"
             size="m"
             color="hollow"

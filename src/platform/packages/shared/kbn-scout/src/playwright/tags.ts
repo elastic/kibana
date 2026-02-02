@@ -9,6 +9,8 @@
 
 const SERVERLESS_ONLY = [
   '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -19,6 +21,8 @@ const ESS_ONLY = ['@ess'];
 const DEPLOYMENT_AGNOSTIC = [
   '@ess',
   '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -35,10 +39,12 @@ export const tags = {
 export const tagsByMode = {
   stateful: '@ess',
   serverless: {
-    workplace_ai: '@svlWorkplaceAI',
+    workplaceai: '@svlWorkplaceAI',
     es: '@svlSearch',
     oblt: '@svlOblt',
     'oblt-logs-essentials': '@svlLogsEssentials',
     security: '@svlSecurity',
+    'security-essentials': '@svlSecurityEssentials',
+    'security-ease': '@svlSecurityEase',
   },
 };

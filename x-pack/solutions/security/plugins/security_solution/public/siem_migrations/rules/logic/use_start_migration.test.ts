@@ -8,6 +8,9 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useStartMigration } from './use_start_migration';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type { RuleMigrationStats } from '../types';
+import { MigrationSource } from '../../common/types';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 
 jest.mock('../../../common/lib/kibana/kibana_react');
 
@@ -15,6 +18,15 @@ describe('useStartMigration', () => {
   const mockStartRuleMigration = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const migrationStats: RuleMigrationStats = {
+    id: 'test-migration-1',
+    name: 'test-migration',
+    vendor: MigrationSource.SPLUNK,
+    status: SiemMigrationTaskStatus.READY,
+    items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+    created_at: '2025-01-01T00:00:00Z',
+    last_updated_at: '2025-01-01T01:00:00Z',
+  };
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
@@ -44,14 +56,19 @@ describe('useStartMigration', () => {
     const { result } = renderHook(() => useStartMigration(onSuccess));
 
     act(() => {
-      result.current.startMigration('test-migration-1');
+      result.current.startMigration(migrationStats);
     });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(mockStartRuleMigration).toHaveBeenCalledWith('test-migration-1', undefined, undefined);
+    expect(mockStartRuleMigration).toHaveBeenCalledWith({
+      migrationId: migrationStats.id,
+      vendor: migrationStats.vendor,
+      retry: undefined,
+      settings: undefined,
+    });
     expect(mockAddSuccess).toHaveBeenCalledWith('Migration started successfully.');
     expect(onSuccess).toHaveBeenCalled();
   });
@@ -62,7 +79,7 @@ describe('useStartMigration', () => {
     const { result } = renderHook(() => useStartMigration());
 
     act(() => {
-      result.current.startMigration('test-migration-1');
+      result.current.startMigration(migrationStats);
     });
 
     await waitFor(() => {

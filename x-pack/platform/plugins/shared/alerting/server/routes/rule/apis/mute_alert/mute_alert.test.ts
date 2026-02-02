@@ -43,6 +43,7 @@ describe('muteAlertRoute', () => {
           rule_id: '1',
           alert_id: '2',
         },
+        query: {},
       },
       ['noContent']
     );
@@ -53,8 +54,13 @@ describe('muteAlertRoute', () => {
     expect(rulesClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "alertId": "1",
-          "alertInstanceId": "2",
+          "params": Object {
+            "alertId": "1",
+            "alertInstanceId": "2",
+          },
+          "query": Object {
+            "validateAlertsExistence": true,
+          },
         },
       ]
     `);
@@ -74,7 +80,7 @@ describe('muteAlertRoute', () => {
       new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, query: {} }, [
       'ok',
       'forbidden',
     ]);

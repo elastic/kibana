@@ -25,6 +25,7 @@ import {
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { AbsoluteTimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SparkPlot } from '../../../spark_plot';
@@ -41,6 +42,7 @@ export function PreviewDataSparkPlot({
   hideAxis = false,
   height,
   noOfBuckets,
+  timeRange,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
@@ -50,26 +52,31 @@ export function PreviewDataSparkPlot({
   hideAxis?: boolean;
   height?: number;
   noOfBuckets?: number;
+  timeRange?: AbsoluteTimeRange;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
+  const effectiveTimeRange = timeRange ?? timeState.asAbsoluteTimeRange;
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
     feature: query.feature,
     kqlQuery: query.kql.query,
-    timeState,
+    timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
+    return niceTimeFormatter([
+      new Date(effectiveTimeRange.from).getTime(),
+      new Date(effectiveTimeRange.to).getTime(),
+    ]);
+  }, [effectiveTimeRange.from, effectiveTimeRange.to]);
 
   const sparkPlotData = useSparkplotDataFromSigEvents({
     previewFetch,
-    queryValues: query,
+    query,
     xFormatter,
   });
 
@@ -183,6 +190,7 @@ export function PreviewDataSparkPlot({
                 iconType="discoverApp"
                 href={discoverLink}
                 target="_blank"
+                data-test-subj="significant_events_preview_open_in_discover_button"
               >
                 {openInDiscoverLabel}
               </EuiButtonEmpty>

@@ -14,6 +14,7 @@ import {
   newTelemetryLogger,
   createUsageCounterLabel,
   safeValue,
+  withErrorMessage,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -124,8 +125,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         log.debug('Task executed', { length: detectionRuleExceptionsJson.length } as LogMeta);
 
         return detectionRuleExceptionsJson.length;
-      } catch (err) {
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn('Error running detection rule task', withErrorMessage(error));
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

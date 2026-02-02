@@ -7,7 +7,7 @@
 
 export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
-export { LegendSettingsPopover } from './legend/legend_settings_popover';
+export { LegendSettingsPopover, LegendSettings } from './legend/legend_settings';
 export { PalettePicker } from './palette_picker';
 export { ChangeIndexPattern, fieldContainsData } from './dataview_picker';
 export { RangeInputField } from './range_input_field';

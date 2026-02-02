@@ -20,6 +20,7 @@ import type {
   nodeDocumentDataSchema,
   entitySchema,
 } from '../../schema/graph/v1';
+import { REACHED_NODES_LIMIT } from '../../schema/graph/v1';
 
 export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
 
@@ -36,7 +37,8 @@ export type NodeColor = typeof nodeColorSchema.type;
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
 
 export enum ApiMessageCode {
-  ReachedNodesLimit = 'REACHED_NODES_LIMIT',
+  // @ts-expect-error upgrade typescript v5.9.3
+  ReachedNodesLimit = REACHED_NODES_LIMIT,
 }
 
 export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;

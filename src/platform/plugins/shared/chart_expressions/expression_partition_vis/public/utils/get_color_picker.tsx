@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import { ColorPicker } from '@kbn/charts-plugin/public';
 import type { BucketColumns } from '../../common/types';
 

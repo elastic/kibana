@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Download script file schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library/{script_id}/download:
+    get:
+      summary: Download a script file
+      operationId: EndpointScriptLibraryDownloadScript
+      description: Download a script file
+      x-codegen-enabled: false
+      x-labels: []
+      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+      #      x-labels: [ ess, serverless ]
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          description: The ID of the script entry.
+          example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+          schema:
+            type: string
+            description: The ID of the script entry.
+            example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+
+      responses:
+        '200':
+          description: Download script file response.
+          content:
+            application/octet-stream:
+              schema:
+                type: object
+                format: binary
+                description: A download stream is returned.
+              examples:
+                response:
+                  summary: Download script file response example.
+                  value:

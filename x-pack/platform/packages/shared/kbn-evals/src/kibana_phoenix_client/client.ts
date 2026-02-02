@@ -83,15 +83,41 @@ export class KibanaPhoenixClient {
     return { datasetId: storedDataset.id };
   }
 
+  async getDatasetByName(name: string): Promise<DatasetInfo> {
+    const response = await this.phoenixClient.GET('/v1/datasets', {
+      params: {
+        query: {
+          name,
+        },
+      },
+    });
+
+    const datasets = response.data?.data ?? [];
+
+    if (datasets.length === 0) {
+      throw new Error(`Phoenix dataset not found: ${name}`);
+    }
+
+    if (datasets.length > 1) {
+      throw new Error(
+        `Multiple Phoenix datasets found for name: ${name}. Please ensure dataset names are unique.`
+      );
+    }
+
+    return datasets[0];
+  }
+
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
-    {
-      dataset,
-      metadata,
-      task,
-    }: {
+    options: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+      concurrency?: number;
+      /**
+       * If true, the dataset is assumed to already exist in Phoenix and we will
+       * use its id (resolved by name) instead of creating/upserting it from code.
+       */
+      trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;
@@ -101,15 +127,27 @@ export class KibanaPhoenixClient {
       dataset,
       task,
       metadata: experimentMetadata,
+      concurrency,
+      trustUpstreamDataset,
     }: {
       dataset: EvaluationDataset;
       task: ExperimentTask<Example, TaskOutput>;
       metadata?: Record<string, unknown>;
+      concurrency?: number;
+      trustUpstreamDataset?: boolean;
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
     return withInferenceContext(async () => {
-      const { datasetId } = await this.syncDataSet(dataset);
+      const datasetId = trustUpstreamDataset
+        ? (await this.getDatasetByName(dataset.name)).id
+        : (
+            await this.syncDataSet({
+              name: dataset.name,
+              description: dataset.description,
+              examples: dataset.examples,
+            })
+          ).datasetId;
 
       const experiments = await import('@arizeai/phoenix-client/experiments');
 
@@ -143,6 +181,7 @@ export class KibanaPhoenixClient {
           log: this.options.log.info.bind(this.options.log),
         },
         repetitions: this.options.repetitions ?? 1,
+        concurrency,
       });
 
       this.experiments.push(ranExperiment);

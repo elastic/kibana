@@ -13,11 +13,15 @@ import { useKibana, useNavigation } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 
 const mockNavigateTo = jest.fn();
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
+}));
+jest.mock('../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: jest.fn(),
 }));
 
 describe('AISettings', () => {
@@ -36,6 +40,9 @@ describe('AISettings', () => {
     });
     (useNavigation as jest.Mock).mockReturnValue({
       navigateTo: mockNavigateTo,
+    });
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentChatExperienceEnabled: false,
     });
   });
 
@@ -89,5 +96,23 @@ describe('AISettings', () => {
     );
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('home');
+  });
+
+  it('navigates to integrations when isAgentChatExperienceEnabled is true', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentChatExperienceEnabled: true,
+    });
+
+    render(
+      <MemoryRouter>
+        <TestProviders>
+          <AISettings />
+        </TestProviders>
+      </MemoryRouter>
+    );
+
+    expect(mockNavigateTo).toHaveBeenCalledWith({
+      deepLinkId: SecurityPageName.configurationsIntegrations,
+    });
   });
 });

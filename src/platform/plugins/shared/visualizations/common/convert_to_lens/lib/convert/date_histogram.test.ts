@@ -11,7 +11,7 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import type { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import { convertToDateHistogramColumn } from './date_histogram';
 import type { DateHistogramColumn } from './types';
-import type { DataType } from '../../types';
+import type { DataType } from '@kbn/lens-common';
 
 describe('convertToDateHistogramColumn', () => {
   const aggId = `some-id`;

@@ -24,6 +24,7 @@ export interface LocalSamlSessionParams {
   username: string;
   fullname: string;
   role: string;
+  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
   log: ToolingLog;
 }
 

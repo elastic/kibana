@@ -16,6 +16,7 @@ import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/util
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { AlertTypeInitializer } from './types';
+import { getDescriptionFields } from './get_description_fields';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
@@ -51,4 +52,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
       }),
     };
   },
+  getDescriptionFields,
 });

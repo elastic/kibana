@@ -129,6 +129,7 @@ export const requestEventAnnotations = (
           timeFields,
           filters: ignoreGlobalFilters ? undefined : input?.filters,
           query: ignoreGlobalFilters ? undefined : (input?.query as any),
+          projectRouting: input?.projectRouting,
           timeRange: input?.timeRange,
           abortSignal,
           inspectorAdapters,

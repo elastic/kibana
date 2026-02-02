@@ -11,7 +11,7 @@ import moment from 'moment';
 import { contextMiddleware } from '.';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { applyChanges, initialState } from '../lens_slice';
-import type { LensAppState } from '../types';
+import type { LensAppState } from '@kbn/lens-common';
 import { mockDataPlugin, mockStoreDeps } from '../../mocks';
 
 const storeDeps = mockStoreDeps();
@@ -62,6 +62,7 @@ describe('contextMiddleware', () => {
           visualization: {
             state: {},
             activeId: 'id2',
+            selectedLayerId: null,
           },
         },
       };
@@ -97,6 +98,7 @@ describe('contextMiddleware', () => {
           visualization: {
             state: {},
             activeId: 'id2',
+            selectedLayerId: null,
           },
         },
       };
@@ -141,6 +143,7 @@ describe('contextMiddleware', () => {
             visualization: {
               state: {},
               activeId: 'id2',
+              selectedLayerId: null,
             },
           },
         };
@@ -176,6 +179,7 @@ describe('contextMiddleware', () => {
           visualization: {
             state: {},
             activeId: 'id2',
+            selectedLayerId: null,
           },
         },
       };
@@ -201,6 +205,7 @@ describe('contextMiddleware', () => {
           visualization: {
             state: {},
             activeId: 'id2',
+            selectedLayerId: null,
           },
           searchSessionId: 'searchSessionId',
         },

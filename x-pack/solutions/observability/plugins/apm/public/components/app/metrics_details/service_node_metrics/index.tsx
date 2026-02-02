@@ -122,6 +122,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
     <>
       {isAggregatedData ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate(
             'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningTitle',
             {

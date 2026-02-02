@@ -14,24 +14,23 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type {
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkDeleteResponse,
-} from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
 import {
-  errorContent,
-  getBulkOperationError,
-  getExpectedVersionProperties,
   isLeft,
-  isMgetDoc,
-  rawDocExistsInNamespace,
   isRight,
   left,
   right,
+  type SavedObjectsBulkDeleteObject,
+  type SavedObjectsBulkDeleteOptions,
+  type SavedObjectsBulkDeleteResponse,
+} from '@kbn/core-saved-objects-api-server';
+import { DEFAULT_REFRESH_SETTING, MAX_CONCURRENT_ALIAS_DELETIONS } from '../constants';
+import {
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  isMgetDoc,
+  rawDocExistsInNamespace,
 } from './utils';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
@@ -85,56 +84,70 @@ export const performBulkDelete = async <T>(
   });
 
   // First round of filtering (Left: object doesn't exist/doesn't exist in namespace, Right: good to proceed)
-  const expectedBulkDeleteMultiNamespaceDocsResults =
-    getExpectedBulkDeleteMultiNamespaceDocsResults(
-      {
-        expectedBulkGetResults,
-        multiNamespaceDocsResponse,
-        namespace,
-        force,
-      },
-      registry
-    );
+  const expectedMultiNamespaceResults = getExpectedBulkDeleteMultiNamespaceDocsResults(
+    {
+      expectedBulkGetResults,
+      multiNamespaceDocsResponse,
+      namespace,
+      force,
+    },
+    registry
+  );
+
+  let expectedResults: ExpectedBulkDeleteResult[];
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
-    const authObjects: AuthorizeUpdateObject[] = expectedBulkDeleteMultiNamespaceDocsResults.map(
-      (element) => {
-        const index = (element.value as { esRequestIndex: number }).esRequestIndex;
-        const { type, id } = element.value;
-        const preflightResult =
-          index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+    const authObjects: AuthorizeUpdateObject[] = expectedMultiNamespaceResults.map((element) => {
+      const index = (element.value as { esRequestIndex: number }).esRequestIndex;
+      const { type, id } = element.value;
+      const preflightResult =
+        index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
-        const name = preflightResult
-          ? SavedObjectsUtils.getName(
-              registry.getNameAttribute(type),
-              // @ts-expect-error MultiGetHit._source is optional
-              { attributes: preflightResult?._source?.[type] }
-            )
-          : undefined;
+      // @ts-expect-error MultiGetHit._source is optional
+      const accessControl = preflightResult?._source?.accessControl;
+      const name = preflightResult
+        ? SavedObjectsUtils.getName(
+            registry.getNameAttribute(type),
+            // @ts-expect-error MultiGetHit._source is optional
+            { attributes: preflightResult?._source?.[type] }
+          )
+        : undefined;
 
-        return {
-          type,
-          id,
-          name,
-          // @ts-expect-error MultiGetHit._source is optional
-          existingNamespaces: preflightResult?._source?.namespaces ?? [],
-        };
-      }
+      return {
+        type,
+        id,
+        name,
+        ...(accessControl ? { accessControl } : {}),
+        // @ts-expect-error MultiGetHit._source is optional
+        existingNamespaces: preflightResult?._source?.namespaces ?? [],
+      };
+    });
+
+    const authorizationResult = await securityExtension.authorizeBulkDelete({
+      namespace,
+      objects: authObjects,
+    });
+
+    const inaccessibleObjects = authorizationResult?.inaccessibleObjects
+      ? Array.from(authorizationResult.inaccessibleObjects)
+      : [];
+
+    expectedResults = await securityExtension.filterInaccessibleObjectsForBulkAction(
+      expectedMultiNamespaceResults,
+      inaccessibleObjects,
+      'bulk_delete',
+      true // reindex of esRequestIndex field needed to map subsequent bulk delete results below
     );
-
-    await securityExtension.authorizeBulkDelete({ namespace, objects: authObjects });
-  }
+  } else expectedResults = expectedMultiNamespaceResults;
 
   // Filter valid objects
-  const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
+  const validObjects = expectedResults.filter(isRight);
   if (validObjects.length === 0) {
-    // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
-    const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults
-      .filter(isLeft)
-      .map((expectedResult) => {
-        return { ...expectedResult.value, success: false };
-      });
+    // We only have error results; return early.
+    const savedObjects = expectedResults.map((expectedResult) => {
+      return { ...expectedResult.value, success: false };
+    });
     return { statuses: [...savedObjects] };
   }
 
@@ -166,10 +179,11 @@ export const performBulkDelete = async <T>(
   let errorResult: BulkDeleteItemErrorResult;
   const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
 
-  const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
+  const savedObjects = expectedResults.map((expectedResult) => {
     if (isLeft(expectedResult)) {
       return { ...expectedResult.value, success: false };
     }
+
     const { type, id, namespaces, esRequestIndex: esBulkDeleteRequestIndex } = expectedResult.value;
     // we assume this wouldn't happen but is needed to ensure type consistency
     if (bulkDeleteResponse === undefined) {
@@ -284,7 +298,12 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
       if (isLeft(expectedBulkGetResult)) {
         return { ...expectedBulkGetResult };
       }
-      const { esRequestIndex: esBulkGetRequestIndex, id, type } = expectedBulkGetResult.value;
+      const {
+        esRequestIndex: esBulkGetRequestIndex,
+        id,
+        type,
+        accessControl,
+      } = expectedBulkGetResult.value;
 
       let namespaces;
 
@@ -338,6 +357,7 @@ function getExpectedBulkDeleteMultiNamespaceDocsResults(
         type,
         id,
         namespaces,
+        ...(accessControl ? { accessControl } : {}),
         esRequestIndex: indexCounter++,
       };
 

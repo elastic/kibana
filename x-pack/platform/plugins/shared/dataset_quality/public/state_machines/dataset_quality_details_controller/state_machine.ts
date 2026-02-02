@@ -9,6 +9,8 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
 import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine, raise } from 'xstate';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { omit } from 'lodash';
 import type {
   Dashboard,
   DataStreamDetails,
@@ -833,6 +835,8 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   plugins: DatasetQualityStartDeps;
   toasts: IToasts;
   dataStreamDetailsClient: IDataStreamDetailsClient;
+  streamsRepositoryClient?: StreamsRepositoryClient; // Optional streams client for classic/wired views
+  refreshDefinition?: () => void; // Optional callback to refresh stream definition
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -840,6 +844,8 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   plugins,
   toasts,
   dataStreamDetailsClient,
+  streamsRepositoryClient,
+  refreshDefinition,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -1004,20 +1010,55 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
           dataStream: context.dataStream,
         });
       },
-      updateFailureStore: (context) => {
-        if (
-          'dataStreamDetails' in context &&
-          context.dataStreamDetails &&
-          context.dataStreamDetails.hasFailureStore !== undefined
-        ) {
+      updateFailureStore: async (context) => {
+        if (!('dataStreamDetails' in context) || !context.dataStreamDetails) {
+          return Promise.resolve();
+        }
+
+        if (context.view === 'dataQuality') {
+          const { failureStoreDataQualityConfig } = context.dataStreamDetails;
+          if (!failureStoreDataQualityConfig) {
+            return Promise.resolve();
+          }
+          const { failureStoreEnabled, customRetentionPeriod } = failureStoreDataQualityConfig;
+
           return dataStreamDetailsClient.updateFailureStore({
             dataStream: context.dataStream,
-            failureStoreEnabled: context.dataStreamDetails.hasFailureStore,
-            customRetentionPeriod: context.dataStreamDetails.customRetentionPeriod,
+            failureStoreEnabled,
+            customRetentionPeriod,
           });
         }
 
-        return Promise.resolve();
+        const { failureStoreStreamConfig } = context.dataStreamDetails;
+        if (!failureStoreStreamConfig || !streamsRepositoryClient || !context.streamDefinition) {
+          return Promise.resolve();
+        }
+
+        // For stream views, failureStoreConfig is of type FailureStore
+        // Use streams API for classic/wired streams
+        const result = await streamsRepositoryClient.fetch(
+          'PUT /api/streams/{name}/_ingest 2023-10-31',
+          {
+            signal: null,
+            params: {
+              path: { name: context.dataStream },
+              body: {
+                ingest: {
+                  ...context.streamDefinition.stream.ingest,
+                  processing: omit(context.streamDefinition.stream.ingest.processing, 'updated_at'),
+                  failure_store: failureStoreStreamConfig,
+                },
+              },
+            },
+          }
+        );
+
+        // Refresh the stream definition to get the latest data
+        if (refreshDefinition) {
+          refreshDefinition();
+        }
+
+        return result;
       },
     },
   });

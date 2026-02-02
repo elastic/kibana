@@ -34,12 +34,28 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.enabled=true',
       ],
     },
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--uiSettings.overrides.eisPromotionalTour:enabled=false`,
+      ],
+    },
     testFiles: [require.resolve('.')],
     screenshots: { directory: resolve(__dirname, '../screenshots') },
     apps: {
       ...functionalConfig.get('apps'),
       searchInferenceEndpoints: {
         pathname: '/app/elasticsearch/relevance/inference_endpoints',
+      },
+      searchOverview: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      searchHomepage: {
+        pathname: '/app/elasticsearch/home',
+      },
+      searchGettingStarted: {
+        pathname: '/app/elasticsearch/getting_started',
       },
     },
   };

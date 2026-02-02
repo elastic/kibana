@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-
 import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
 import { requestContextMock } from '../__mocks__/request_context';
 import { requestMock, serverMock } from '../__mocks__/server';
@@ -15,11 +13,9 @@ import { getAlertFieldsByRuleTypeIds } from './get_alert_fields_by_rule_type_ids
 describe('getAlertFieldsByRuleTypeIds', () => {
   let server: ReturnType<typeof serverMock.create>;
   const { context } = requestContextMock.createTools();
-  let getFieldsForWildcardMock: jest.Mock;
 
   beforeEach(async () => {
     server = serverMock.create();
-    IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     getAlertFieldsByRuleTypeIds(server.router);
   });
 

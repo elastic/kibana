@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';
@@ -21,6 +21,36 @@ import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL, CASES_URL } from '../../../../urls/navigation';
 import { selectPageFilterValue, waitForAlerts, waitForPageFilters } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+
+const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    persist: true,
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
 
 describe(
   `Alerts page filters - url and localstorage interactions`,

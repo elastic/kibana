@@ -7,20 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
-import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
-
 import { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
 import { default as borealisDark } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
-export type Theme = typeof v8Light;
+export type Theme = typeof borealisLight;
 
 // in the Kibana app we can rely on this global being defined, but in
 // some cases (like jest) the global is undefined
 /** @deprecated theme can be dynamic now, access is discouraged */
-export const tag: string = globals.__kbnThemeTag__ || 'v8light';
+export const tag: string = globals.__kbnThemeTag__ || 'borealislight';
 /** @deprecated theme can be dynamic now, access is discouraged */
 export const version = 8;
 /** @deprecated theme can be dynamic now, access is discouraged */
@@ -32,16 +29,9 @@ export const _setDarkMode = (mode: boolean) => {
 };
 
 const getThemeVars = (): { light: Theme; dark: Theme } => {
-  if (globals?.__kbnThemeTag__?.includes('borealis')) {
-    return {
-      light: borealisLight,
-      dark: borealisDark,
-    };
-  }
-
   return {
-    light: v8Light,
-    dark: v8Dark,
+    light: borealisLight,
+    dark: borealisDark,
   };
 };
 
@@ -65,8 +55,5 @@ export const euiThemeVars: Theme = new Proxy(
 );
 
 export function getEuiThemeVars(theme: { name: string; darkMode: boolean }) {
-  if (theme.name === `borealis`) {
-    return theme.darkMode ? borealisDark : borealisLight;
-  }
-  return theme.darkMode ? v8Dark : v8Light;
+  return theme.darkMode ? borealisDark : borealisLight;
 }

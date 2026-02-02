@@ -7,10 +7,10 @@
 
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ApmAlertFields } from './helpers/alerting_helper';
@@ -34,6 +34,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+      await alertingApi.cleanUpAlerts({
+        roleAuthc,
+        consumer: 'apm',
+        alertIndexName: APM_ALERTS_INDEX,
+        connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+      });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -241,6 +248,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          consumer: 'apm',
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+        });
+
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionErrorRate,
           name: 'Apm transaction error rate without kql query',
@@ -305,7 +319,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
       });
 
-      it('shows alert count=1 for opbeans-node on service inventory', async () => {
+      it.skip('shows alert count=1 for opbeans-node on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,

@@ -126,6 +126,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           ) && (
             <Fragment>
               <EuiCallOut
+                announceOnMount
                 color="warning"
                 iconType="warning"
                 data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
@@ -198,6 +199,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <>
             <EuiFormRow fullWidth>
               <EuiCallOut
+                announceOnMount
                 color="primary"
                 iconType="info"
                 size="s"

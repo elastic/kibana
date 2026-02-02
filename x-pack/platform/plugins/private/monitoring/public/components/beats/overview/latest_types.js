@@ -8,10 +8,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiBasicTable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function LatestTypes({ latestTypes }) {
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.monitoring.beats.overview.latestType.tableCaption', {
+        defaultMessage: 'Latest types',
+      })}
       items={latestTypes}
       columns={[
         {

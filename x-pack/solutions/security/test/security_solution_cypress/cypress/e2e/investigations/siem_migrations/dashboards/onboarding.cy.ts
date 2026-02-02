@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  DASHBOARD_MIGRATIONS_GROUP_PANEL,
   DASHBOARD_MIGRATION_PROGRESS_BAR,
+  DASHBOARD_MIGRATIONS_GROUP_PANEL,
   MIGRATION_PANEL_NAME,
   ONBOARDING_SIEM_MIGRATIONS_LIST,
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
@@ -16,13 +16,13 @@ import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanDashboardsMigrationData } from '../../../../tasks/api_calls/siem_migrations';
 import { visit } from '../../../../tasks/navigation';
 import {
-  selectMigrationConnector,
-  saveDefaultMigrationName,
-  renameMigration,
   openUploadDashboardsFlyout,
+  renameMigration,
+  saveDefaultMigrationName,
+  selectMigrationConnector,
+  startDashboardMigrationFromFlyout,
   toggleMigrateDashboardsCard,
   uploadDashboards,
-  startDashboardMigrationFromFlyout,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
@@ -78,18 +78,7 @@ let bedrockConnectorId: string | null = null;
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
 describe(
   'Dashboards Migrations - Basic Workflow',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automaticDashboardsMigration',
-          ])}`,
-        ],
-      },
-    },
-  },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
 
   () => {
     before(() => {

@@ -9,3 +9,4 @@ import { z } from '@kbn/zod';
 import { EntityType } from '../../../../entity_analytics/types';
 
 export const riskScoreEntity = z.nativeEnum(EntityType);
+export const riskScoreEntityArray = z.array(z.nativeEnum(EntityType));

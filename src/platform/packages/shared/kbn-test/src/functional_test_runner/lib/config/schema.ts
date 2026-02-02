@@ -71,6 +71,7 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
+      preferCached: Joi.boolean().optional(),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
@@ -236,6 +237,7 @@ export const schema = Joi.object()
       .keys({
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
+        uiam: Joi.boolean().default(false),
       })
       .default(),
 
@@ -355,5 +357,13 @@ export const schema = Joi.object()
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
+
+    // refresh_interval to be used on existing system indices (eg .kibana*), existing common indices (eg logs*)
+    // and all templates created during tests.
+    // defaults to 50ms if not overriden, otherwise accepts a duration (eg '50ms', '1s') or false to opt out the optimization.
+    indexRefreshInterval: Joi.alternatives()
+      .optional()
+      .try(Joi.string(), Joi.boolean().valid(false))
+      .default('50ms'),
   })
   .default();

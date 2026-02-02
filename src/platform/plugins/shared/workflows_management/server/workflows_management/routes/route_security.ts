@@ -7,82 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RouteSecurity } from '@kbn/core-http-server';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
+
 /**
- * Security configuration objects for workflow management routes
+ * Security configuration objects ready to be used in route definitions
  */
-
-export const WORKFLOW_READ_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['read', 'workflow_read'],
-      },
-    ],
-  },
+export const WORKFLOW_READ_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.read] },
 };
-
-export const WORKFLOW_CREATE_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['all', 'workflow_create'],
-      },
-    ],
-  },
+export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.create] },
 };
-
-export const WORKFLOW_UPDATE_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['all', 'workflow_update'],
-      },
-    ],
-  },
+export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.update] },
 };
-
-export const WORKFLOW_DELETE_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['all', 'workflow_delete'],
-      },
-    ],
-  },
+export const WORKFLOW_DELETE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.delete] },
 };
-
-export const WORKFLOW_EXECUTE_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['all', 'workflow_execute', 'workflow_execution_create'],
-      },
-    ],
-  },
+export const WORKFLOW_EXECUTE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.execute] },
 };
-
-export const WORKFLOW_EXECUTION_READ_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['read', 'workflow_execution_read'],
-      },
-    ],
-  },
+export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.readExecution] },
 };
-
-export const WORKFLOW_EXECUTION_CANCEL_SECURITY = {
-  authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: ['read', 'workflow_execution_cancel'],
-      },
-    ],
-  },
-};
-
-export const ADMIN_SECURITY = {
-  authz: {
-    requiredPrivileges: ['all'],
-  },
+export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [WorkflowsManagementApiActions.cancelExecution] },
 };

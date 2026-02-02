@@ -54,6 +54,7 @@ const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
     active: 10,
   },
   flapping: {
+    enabled: true,
     lookBackWindow: 10,
     statusChangeThreshold: 10,
   },
@@ -104,6 +105,7 @@ describe('transformUpdateRuleBody', () => {
       tags: [],
       throttle: null,
       flapping: {
+        enabled: true,
         look_back_window: 10,
         status_change_threshold: 10,
       },

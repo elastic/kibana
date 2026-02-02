@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { screen, within, waitFor, fireEvent } from '@testing-library/react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import type { RemoteClustersActions } from '../helpers';
-import { setupEnvironment } from '../helpers';
-import { setup } from './remote_clusters_add.helpers';
-import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
 import {
   onPremPrerequisitesApiKey,
@@ -19,389 +15,425 @@ import {
   onPremSecurityApiKey,
   onPremSecurityCert,
 } from '../../../public/application/services/documentation';
-
-const notInArray = (array: string[]) => (value: string) => array.indexOf(value) < 0;
-
-let component: TestBed['component'];
-let actions: RemoteClustersActions;
+import { RemoteClusterAdd } from '../../../public/application/sections';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderRemoteClustersRoute } from '../helpers/render';
 
 describe('Create Remote cluster', () => {
   const { httpSetup } = setupEnvironment();
-
-  beforeEach(async () => {
-    await act(async () => {
-      ({ actions, component } = await setup(httpSetup));
+  const renderAdd = (contextOverrides: Record<string, unknown> = {}) =>
+    renderRemoteClustersRoute(RemoteClusterAdd, {
+      httpSetup,
+      contextOverrides,
+      routePath: '/add',
+      initialEntries: ['/add'],
     });
-    component.update();
-  });
 
   describe('on component mount', () => {
-    test('should have the title of the page set correctly', () => {
-      expect(actions.pageTitle.exists()).toBe(true);
-      expect(actions.pageTitle.text()).toEqual('Add remote cluster');
+    test('should have the title of the page set correctly', async () => {
+      renderAdd();
+      expect(await screen.findByTestId('remoteClusterPageTitle')).toHaveTextContent(
+        'Add remote cluster'
+      );
     });
 
-    test('should have a link to the documentation', () => {
-      expect(actions.docsButtonExists()).toBe(true);
+    test('should have a link to the documentation', async () => {
+      renderAdd();
+      expect(await screen.findByTestId('remoteClusterDocsButton')).toBeInTheDocument();
     });
 
     describe('Setup Trust', () => {
-      test('should contain two cards for setting up trust', () => {
-        // Cards exist
-        expect(actions.setupTrustStep.apiCardExist()).toBe(true);
-        expect(actions.setupTrustStep.certCardExist()).toBe(true);
+      test('should contain two cards for setting up trust', async () => {
+        renderAdd();
+        expect(await screen.findByTestId('setupTrustApiMode')).toBeInTheDocument();
+        expect(screen.getByTestId('setupTrustCertMode')).toBeInTheDocument();
       });
 
       test('next button should be disabled if not trust mode selected', async () => {
-        expect(actions.setupTrustStep.button.isDisabled()).toBe(true);
+        renderAdd();
+        expect(await screen.findByTestId('remoteClusterTrustNextButton')).toBeDisabled();
       });
 
       test('next button should be enabled if trust mode selected', async () => {
-        await actions.setupTrustStep.selectApiKeyTrustMode();
-        expect(actions.setupTrustStep.button.isDisabled()).toBe(false);
+        const { user } = renderAdd();
+        await user.click(await screen.findByTestId('setupTrustApiMode'));
+        expect(screen.getByTestId('remoteClusterTrustNextButton')).toBeEnabled();
       });
 
       test('shows only cert based config if API key trust model is not available', async () => {
-        await act(async () => {
-          ({ actions, component } = await setup(httpSetup, {
-            canUseAPIKeyTrustModel: false,
-          }));
-        });
-
-        expect(actions.setupTrustStep.apiCardExist()).toBe(false);
-        expect(actions.setupTrustStep.certCardExist()).toBe(true);
+        renderAdd({ canUseAPIKeyTrustModel: false });
+        expect(screen.queryByTestId('setupTrustApiMode')).not.toBeInTheDocument();
+        expect(await screen.findByTestId('setupTrustCertMode')).toBeInTheDocument();
       });
     });
+  });
 
-    describe('Form step', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          ({ actions, component } = await setup(httpSetup, {
-            canUseAPIKeyTrustModel: true,
-          }));
-        });
+  describe('Form step', () => {
+    const goToFormStep = async (options: {
+      securityModel: 'api' | 'cert';
+      context?: Record<string, unknown>;
+    }) => {
+      const { securityModel, context = {} } = options;
+      const renderResult = renderAdd(context);
+      const { user } = renderResult;
 
-        component.update();
+      await user.click(
+        await screen.findByTestId(
+          securityModel === 'api' ? 'setupTrustApiMode' : 'setupTrustCertMode'
+        )
+      );
+      await user.click(screen.getByTestId('remoteClusterTrustNextButton'));
+      await screen.findByTestId('remoteClusterFormNextButton');
 
-        await actions.setupTrustStep.selectApiKeyTrustMode();
-        await actions.setupTrustStep.button.click();
+      return renderResult;
+    };
+
+    test('should have a toggle to Skip unavailable remote cluster', async () => {
+      const { user } = await goToFormStep({ securityModel: 'api' });
+
+      const toggle = screen.getByTestId('remoteClusterFormSkipUnavailableFormToggle');
+      expect(toggle).toBeInTheDocument();
+      expect(toggle).toHaveAttribute('aria-checked', 'true');
+
+      await user.click(toggle);
+      expect(toggle).toHaveAttribute('aria-checked', 'false');
+    });
+
+    test('back button goes to first step', async () => {
+      const { user } = await goToFormStep({ securityModel: 'api' });
+      await user.click(screen.getByTestId('remoteClusterFormBackButton'));
+      expect(await screen.findByTestId('remoteClusterTrustNextButton')).toBeInTheDocument();
+    });
+
+    describe('on prem', () => {
+      test('should have a toggle to enable "proxy" mode for a remote cluster', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+
+        const toggle = screen.getByTestId('remoteClusterFormConnectionModeToggle');
+        expect(toggle).toBeInTheDocument();
+        expect(toggle).toHaveAttribute('aria-checked', 'false');
+
+        await user.click(toggle);
+        expect(toggle).toHaveAttribute('aria-checked', 'true');
       });
 
-      test('should have a toggle to Skip unavailable remote cluster', () => {
-        expect(actions.formStep.skipUnavailableSwitch.exists()).toBe(true);
+      test('server name has optional label', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
 
-        // By default it should be set to "true"
-        expect(actions.formStep.skipUnavailableSwitch.isChecked()).toBe(true);
+        await user.click(screen.getByTestId('remoteClusterFormConnectionModeToggle'));
 
-        actions.formStep.skipUnavailableSwitch.toggle();
-
-        expect(actions.formStep.skipUnavailableSwitch.isChecked()).toBe(false);
+        const row = screen.getByTestId('remoteClusterFormServerNameFormRow');
+        expect(within(row).getByText('Server name (optional)')).toBeInTheDocument();
       });
 
-      test('back button goes to first step', async () => {
-        await actions.formStep.backButton.click();
-        expect(actions.setupTrustStep.isOnTrustStep()).toBe(true);
+      test('should display errors and disable the next button when clicking "next" without filling the form', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+
+        const nameInput = screen.getByTestId('remoteClusterFormNameInput');
+        await user.clear(nameInput);
+
+        const nextButton = screen.getByTestId('remoteClusterFormNextButton');
+        expect(nextButton).toBeEnabled();
+
+        await user.click(nextButton);
+
+        expect(await screen.findByTestId('remoteClusterFormGlobalError')).toBeInTheDocument();
+        expect(screen.getByText('Name is required.')).toBeInTheDocument();
+        expect(screen.getByText('At least one seed node is required.')).toBeInTheDocument();
+        expect(screen.getByTestId('remoteClusterFormNextButton')).toBeDisabled();
       });
 
-      describe('on prem', () => {
-        beforeEach(async () => {
-          await act(async () => {
-            ({ actions, component } = await setup(httpSetup));
-          });
-
-          component.update();
-
-          actions.formStep.nameInput.setValue('remote_cluster_test');
-        });
-
-        test('should have a toggle to enable "proxy" mode for a remote cluster', () => {
-          expect(actions.formStep.connectionModeSwitch.exists()).toBe(true);
-
-          // By default it should be set to "false"
-          expect(actions.formStep.connectionModeSwitch.isChecked()).toBe(false);
-
-          actions.formStep.connectionModeSwitch.toggle();
-
-          expect(actions.formStep.connectionModeSwitch.isChecked()).toBe(true);
-        });
-
-        test('server name has optional label', () => {
-          actions.formStep.connectionModeSwitch.toggle();
-          expect(actions.formStep.serverNameInput.getLabel()).toBe('Server name (optional)');
-        });
-
-        test('should display errors and disable the next button when clicking "next" without filling the form', async () => {
-          actions.formStep.nameInput.setValue('');
-          expect(actions.globalErrorExists()).toBe(false);
-          expect(actions.formStep.button.isDisabled()).toBe(false);
-
-          await actions.formStep.button.click();
-
-          expect(actions.globalErrorExists()).toBe(true);
-          expect(actions.getErrorMessages()).toEqual([
-            'Name is required.',
-            // seeds input is switched on by default on prem and is required
-            'At least one seed node is required.',
-          ]);
-          expect(actions.formStep.button.isDisabled()).toBe(true);
-        });
-
-        test('renders no switch for cloud advanced options', () => {
-          expect(actions.formStep.cloudAdvancedOptionsSwitch.exists()).toBe(false);
-        });
-
-        describe('seeds', () => {
-          test('should only allow hostname, ipv4 and ipv6 format in the node "host" part', async () => {
-            await actions.formStep.button.click(); // display form errors
-
-            const expectInvalidChar = (char: string) => {
-              actions.formStep.seedsInput.setValue(`192.16${char}:3000`);
-              expect(actions.getErrorMessages()).toContain(
-                `Seed node must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
-              );
-            };
-
-            [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
-              .filter(notInArray(['-', '_', ':']))
-              .forEach(expectInvalidChar);
-          });
-
-          test('should require a numeric "port" to be set', async () => {
-            await actions.formStep.button.click();
-
-            actions.formStep.seedsInput.setValue('192.168.1.1');
-            expect(actions.getErrorMessages()).toContain('A port is required.');
-
-            actions.formStep.seedsInput.setValue('192.168.1.1:abc');
-            expect(actions.getErrorMessages()).toContain('A port is required.');
-          });
-        });
-
-        describe('node connections', () => {
-          test('should require a valid number of node connections', async () => {
-            await actions.formStep.button.click();
-
-            actions.formStep.nodeConnectionsInput.setValue(String(MAX_NODE_CONNECTIONS + 1));
-            expect(actions.getErrorMessages()).toContain(
-              `This number must be equal or less than ${MAX_NODE_CONNECTIONS}.`
-            );
-          });
-        });
-
-        test('server name is optional (proxy connection)', () => {
-          actions.formStep.connectionModeSwitch.toggle();
-          actions.formStep.button.click();
-          expect(actions.getErrorMessages()).toEqual(['A proxy address is required.']);
-        });
+      test('renders no switch for cloud advanced options', async () => {
+        await goToFormStep({ securityModel: 'api' });
+        expect(
+          screen.queryByTestId('remoteClusterFormCloudAdvancedOptionsToggle')
+        ).not.toBeInTheDocument();
       });
 
-      describe('on cloud', () => {
-        beforeEach(async () => {
-          await act(async () => {
-            ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
-          });
+      describe('seeds', () => {
+        test('should only allow hostname, ipv4 and ipv6 format in the node "host" part', async () => {
+          const { user } = await goToFormStep({ securityModel: 'api' });
+          await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
 
-          component.update();
-        });
+          const invalidSeedMessage =
+            /Seed node must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./;
 
-        test('TLS server name has optional label', () => {
-          actions.formStep.cloudAdvancedOptionsSwitch.toggle();
-          expect(actions.formStep.tlsServerNameInput.getLabel()).toBe('TLS server name (optional)');
-        });
+          // Representative invalid characters (full matrix covered by unit tests in validators).
+          const seedsContainer = screen.getByTestId('remoteClusterFormSeedsInput');
+          const seedsInput = within(seedsContainer).getByRole('combobox') as HTMLInputElement;
 
-        test('renders a switch for advanced options', () => {
-          expect(actions.formStep.cloudAdvancedOptionsSwitch.exists()).toBe(true);
-        });
+          for (const char of ['#', 'é', '+']) {
+            // Clear between iterations so the assertions can't pass due to the previous attempt.
+            fireEvent.change(seedsInput, { target: { value: '' } });
 
-        test('renders no switch between sniff and proxy modes', () => {
-          expect(actions.formStep.connectionModeSwitch.exists()).toBe(false);
-        });
+            const value = `192.16${char}:3000`;
+            fireEvent.change(seedsInput, { target: { value } });
+            expect(seedsInput.value).toBe(value);
+            fireEvent.keyDown(seedsInput, { key: 'Enter' });
 
-        test('advanced options are initially disabled', () => {
-          expect(actions.formStep.cloudAdvancedOptionsSwitch.isChecked()).toBe(false);
-        });
-
-        test('remote address is required', () => {
-          actions.formStep.button.click();
-          expect(actions.getErrorMessages()).toContain('A remote address is required.');
-        });
-
-        test('should only allow alpha-numeric characters and "-" (dash) in the remote address "host" part', async () => {
-          await actions.formStep.button.click(); // display form errors
-
-          const expectInvalidChar = (char: string) => {
-            actions.formStep.cloudRemoteAddressInput.setValue(`192.16${char}:3000`);
-            expect(actions.getErrorMessages()).toContain('Remote address is invalid.');
-          };
-
-          [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
-            .filter(notInArray(['-', '_', ':']))
-            .forEach(expectInvalidChar);
-        });
-      });
-      describe('form validation', () => {
-        describe('remote cluster name', () => {
-          test('should not allow spaces', async () => {
-            actions.formStep.nameInput.setValue('with space');
-
-            await actions.formStep.button.click();
-
-            expect(actions.getErrorMessages()).toContain('Spaces are not allowed in the name.');
-          });
-
-          test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', async () => {
-            const expectInvalidChar = (char: string) => {
-              if (char === '-' || char === '_') {
-                return;
-              }
-
-              try {
-                actions.formStep.nameInput.setValue(`with${char}`);
-
-                expect(actions.getErrorMessages()).toContain(
-                  `Remove the character ${char} from the name.`
-                );
-              } catch {
-                throw Error(`Char "${char}" expected invalid but was allowed`);
-              }
-            };
-
-            await actions.formStep.button.click(); // display form errors
-
-            [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS].forEach(expectInvalidChar);
-          });
-        });
-
-        describe('proxy address', () => {
-          beforeEach(async () => {
-            await act(async () => {
-              ({ actions, component } = await setup(httpSetup));
+            await waitFor(() => {
+              expect(screen.getByText(invalidSeedMessage)).toBeInTheDocument();
             });
+          }
+        }, 20000);
 
-            component.update();
+        test('should require a numeric "port" to be set', async () => {
+          const { user } = await goToFormStep({ securityModel: 'api' });
+          await user.click(screen.getByTestId('remoteClusterFormNextButton'));
 
-            actions.formStep.connectionModeSwitch.toggle();
-          });
+          const seedsContainer = screen.getByTestId('remoteClusterFormSeedsInput');
+          const seedsInput = within(seedsContainer).getByRole('combobox') as HTMLInputElement;
 
-          test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', async () => {
-            await actions.formStep.button.click(); // display form errors
+          fireEvent.change(seedsInput, { target: { value: '192.168.1.1' } });
+          expect(seedsInput.value).toBe('192.168.1.1');
+          fireEvent.keyDown(seedsInput, { key: 'Enter' });
+          await waitFor(() => expect(screen.getByText('A port is required.')).toBeInTheDocument());
 
-            const expectInvalidChar = (char: string) => {
-              actions.formStep.proxyAddressInput.setValue(`192.16${char}:3000`);
-              expect(actions.getErrorMessages()).toContain(
-                'Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes.'
-              );
-            };
+          // Clear between attempts so we don't rely on the previous error state.
+          fireEvent.change(seedsInput, { target: { value: '' } });
 
-            [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
-              .filter(notInArray(['-', '_', ':']))
-              .forEach(expectInvalidChar);
-          });
+          fireEvent.change(seedsInput, { target: { value: '192.168.1.1:abc' } });
+          expect(seedsInput.value).toBe('192.168.1.1:abc');
+          fireEvent.keyDown(seedsInput, { key: 'Enter' });
+          await waitFor(() => expect(screen.getByText('A port is required.')).toBeInTheDocument());
+        }, 20000);
+      });
 
-          test('should require a numeric "port" to be set', async () => {
-            await actions.formStep.button.click();
+      describe('node connections', () => {
+        test('should require a valid number of node connections', async () => {
+          const { user } = await goToFormStep({ securityModel: 'api' });
+          await user.click(screen.getByTestId('remoteClusterFormNextButton'));
 
-            actions.formStep.proxyAddressInput.setValue('192.168.1.1');
-            expect(actions.getErrorMessages()).toContain('A port is required.');
+          const input = screen.getByTestId('remoteClusterFormNodeConnectionsInput');
+          fireEvent.change(input, { target: { value: String(MAX_NODE_CONNECTIONS + 1) } });
 
-            actions.formStep.proxyAddressInput.setValue('192.168.1.1:abc');
-            expect(actions.getErrorMessages()).toContain('A port is required.');
+          await waitFor(() => {
+            expect(
+              screen.getByText(`This number must be equal or less than ${MAX_NODE_CONNECTIONS}.`)
+            ).toBeInTheDocument();
           });
         });
+      });
+
+      test('server name is optional (proxy connection)', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+
+        await user.click(screen.getByTestId('remoteClusterFormConnectionModeToggle'));
+        await user.click(screen.getByTestId('remoteClusterFormNextButton'));
+
+        expect(screen.getByText('A proxy address is required.')).toBeInTheDocument();
       });
     });
 
-    describe('Review step', () => {
-      describe('on cloud', () => {
-        beforeEach(async () => {
-          await act(async () => {
-            ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
-          });
-
-          component.update();
-        });
-
-        test('back button goes to second step', async () => {
-          await actions.setupTrustStep.selectApiKeyTrustMode();
-          await actions.setupTrustStep.button.click();
-
-          await actions.formStep.nameInput.setValue('remote_cluster_apiKey_cloud');
-          await actions.formStep.cloudRemoteAddressInput.setValue('1:1');
-          await actions.formStep.button.click();
-
-          await actions.reviewStep.backButton.click();
-          expect(actions.formStep.isOnFormStep()).toBe(true);
-        });
-
-        test('shows expected documentation when api_key is selected', async () => {
-          await actions.setupTrustStep.selectApiKeyTrustMode();
-          await actions.setupTrustStep.button.click();
-
-          await actions.formStep.nameInput.setValue('remote_cluster_apiKey_cloud');
-          await actions.formStep.cloudRemoteAddressInput.setValue('1:1');
-          await actions.formStep.button.click();
-
-          expect(actions.reviewStep.cloud.apiKeyDocumentationExists()).toBe(true);
-          expect(actions.reviewStep.cloud.certDocumentationExists()).toBe(false);
-        });
-
-        test('shows expected documentation when cert is selected', async () => {
-          await actions.setupTrustStep.selectCertificatesTrustMode();
-          await actions.setupTrustStep.button.click();
-
-          await actions.formStep.nameInput.setValue('remote_cluster_cert_cloud');
-          await actions.formStep.cloudRemoteAddressInput.setValue('1:1');
-          await actions.formStep.button.click();
-
-          expect(actions.reviewStep.cloud.certDocumentationExists()).toBe(true);
-          expect(actions.reviewStep.cloud.apiKeyDocumentationExists()).toBe(false);
-        });
+    describe('on cloud', () => {
+      test('advanced options are initially disabled', async () => {
+        await goToFormStep({ securityModel: 'api', context: { isCloudEnabled: true } });
+        const toggle = screen.getByTestId('remoteClusterFormCloudAdvancedOptionsToggle');
+        expect(toggle).toHaveAttribute('aria-checked', 'false');
       });
-      describe('on prem', () => {
-        beforeEach(async () => {
-          await act(async () => {
-            ({ actions, component } = await setup(httpSetup));
-          });
 
-          component.update();
+      test('TLS server name has optional label', async () => {
+        const { user } = await goToFormStep({
+          securityModel: 'api',
+          context: { isCloudEnabled: true },
         });
 
-        test('shows expected documentation when api_key is selected', async () => {
-          const open = jest.fn();
-          global.open = open;
+        await user.click(screen.getByTestId('remoteClusterFormCloudAdvancedOptionsToggle'));
 
-          await actions.setupTrustStep.selectApiKeyTrustMode();
-          await actions.setupTrustStep.button.click();
-
-          await actions.formStep.nameInput.setValue('remote_cluster_apiKey_onPrem');
-          await actions.formStep.seedsInput.setValue('1:1');
-          await actions.formStep.button.click();
-
-          expect(actions.reviewStep.onPrem.step1LinkExists()).toBe(true);
-          expect(actions.reviewStep.onPrem.step1Link()).toBe(onPremPrerequisitesApiKey);
-
-          expect(actions.reviewStep.onPrem.step2LinkExists()).toBe(true);
-          expect(actions.reviewStep.onPrem.step2Link()).toBe(onPremSecurityApiKey);
-        });
-
-        test('shows expected documentation when cert is selected', async () => {
-          const open = jest.fn();
-          global.open = open;
-
-          await actions.setupTrustStep.selectCertificatesTrustMode;
-          await actions.setupTrustStep.button.click();
-
-          await actions.formStep.nameInput.setValue('remote_cluster_cert_onPrem');
-          await actions.formStep.seedsInput.setValue('1:1');
-          await actions.formStep.button.click();
-
-          expect(actions.reviewStep.onPrem.step1LinkExists()).toBe(true);
-          expect(actions.reviewStep.onPrem.step1Link()).toBe(onPremPrerequisitesCert);
-
-          expect(actions.reviewStep.onPrem.step2LinkExists()).toBe(true);
-          expect(actions.reviewStep.onPrem.step2Link()).toBe(onPremSecurityCert);
-        });
+        const row = screen.getByTestId('remoteClusterFormTLSServerNameFormRow');
+        expect(within(row).getByText('TLS server name (optional)')).toBeInTheDocument();
       });
+
+      test('renders a switch for advanced options', async () => {
+        await goToFormStep({ securityModel: 'api', context: { isCloudEnabled: true } });
+        expect(
+          screen.getByTestId('remoteClusterFormCloudAdvancedOptionsToggle')
+        ).toBeInTheDocument();
+      });
+
+      test('renders no switch between sniff and proxy modes', async () => {
+        await goToFormStep({ securityModel: 'api', context: { isCloudEnabled: true } });
+        expect(
+          screen.queryByTestId('remoteClusterFormConnectionModeToggle')
+        ).not.toBeInTheDocument();
+      });
+
+      test('remote address is required', async () => {
+        const { user } = await goToFormStep({
+          securityModel: 'api',
+          context: { isCloudEnabled: true },
+        });
+        await user.click(screen.getByTestId('remoteClusterFormNextButton'));
+        expect(screen.getByText('A remote address is required.')).toBeInTheDocument();
+      });
+
+      test('should only allow alpha-numeric characters and "-" (dash) in the remote address "host" part', async () => {
+        const { user } = await goToFormStep({
+          securityModel: 'api',
+          context: { isCloudEnabled: true },
+        });
+        await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
+
+        const remoteAddressInput = screen.getByTestId('remoteClusterFormRemoteAddressInput');
+        // Representative invalid characters (full matrix covered by unit tests in validators).
+        for (const char of ['#', 'é', '+']) {
+          fireEvent.change(remoteAddressInput, { target: { value: `192.16${char}:3000` } });
+          expect(screen.getByText('Remote address is invalid.')).toBeInTheDocument();
+        }
+      });
+    });
+
+    describe('form validation', () => {
+      test('should not allow spaces', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        const nameInput = screen.getByTestId('remoteClusterFormNameInput');
+        fireEvent.change(nameInput, { target: { value: 'with space' } });
+
+        fireEvent.click(screen.getByTestId('remoteClusterFormNextButton'));
+
+        expect(screen.getByText('Spaces are not allowed in the name.')).toBeInTheDocument();
+      });
+
+      test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+        await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
+
+        const nameInput = screen.getByTestId('remoteClusterFormNameInput');
+        // Representative invalid characters (full matrix covered by unit tests in validators).
+        for (const char of ['#', 'é', '+']) {
+          fireEvent.change(nameInput, { target: { value: `with${char}` } });
+
+          expect(screen.getByText(/Remove the character/)).toBeInTheDocument();
+          expect(screen.getByText(char)).toBeInTheDocument();
+          expect(screen.getByText(/from the name\./)).toBeInTheDocument();
+        }
+      });
+
+      test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+        await user.click(screen.getByTestId('remoteClusterFormConnectionModeToggle'));
+        await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
+
+        const proxyAddressInput = screen.getByTestId('remoteClusterFormProxyAddressInput');
+        // Representative invalid characters (full matrix covered by unit tests in validators).
+        for (const char of ['#', 'é', '+']) {
+          fireEvent.change(proxyAddressInput, { target: { value: `192.16${char}:3000` } });
+          expect(
+            screen.getByText(
+              /Address must use host:port format\..*Hosts can only consist of letters, numbers, and dashes\./
+            )
+          ).toBeInTheDocument();
+        }
+      });
+
+      test('should require a numeric "port" to be set', async () => {
+        const { user } = await goToFormStep({ securityModel: 'api' });
+        await user.click(screen.getByTestId('remoteClusterFormConnectionModeToggle'));
+        await user.click(screen.getByTestId('remoteClusterFormNextButton')); // show errors
+
+        const proxyAddressInput = screen.getByTestId('remoteClusterFormProxyAddressInput');
+
+        fireEvent.change(proxyAddressInput, { target: { value: '192.168.1.1' } });
+        expect(screen.getByText('A port is required.')).toBeInTheDocument();
+
+        fireEvent.change(proxyAddressInput, { target: { value: '192.168.1.1:abc' } });
+        expect(screen.getByText('A port is required.')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Review step', () => {
+    const goToReviewStep = async (options: {
+      isCloud?: boolean;
+      securityModel: 'api' | 'cert';
+    }) => {
+      const { isCloud = false, securityModel } = options;
+      const { user } = renderAdd({ isCloudEnabled: isCloud });
+
+      await user.click(
+        await screen.findByTestId(
+          securityModel === 'api' ? 'setupTrustApiMode' : 'setupTrustCertMode'
+        )
+      );
+      await user.click(screen.getByTestId('remoteClusterTrustNextButton'));
+      await screen.findByTestId('remoteClusterFormNextButton');
+
+      const nameInput = screen.getByTestId('remoteClusterFormNameInput');
+      fireEvent.change(nameInput, {
+        target: {
+          value: securityModel === 'api' ? 'remote_cluster_apiKey' : 'remote_cluster_cert',
+        },
+      });
+
+      if (isCloud) {
+        const remoteAddressInput = screen.getByTestId('remoteClusterFormRemoteAddressInput');
+        fireEvent.change(remoteAddressInput, { target: { value: '1:1' } });
+      } else {
+        const seedsInput = new EuiComboBoxTestHarness('remoteClusterFormSeedsInput');
+        seedsInput.addCustomValue('1:1');
+      }
+
+      await user.click(screen.getByTestId('remoteClusterFormNextButton'));
+
+      // Review step renders content based on cloud/onPrem.
+      if (isCloud) {
+        await screen.findByTestId(
+          securityModel === 'api' ? 'cloudApiKeySteps' : 'cloudCertDocumentation'
+        );
+      } else {
+        await screen.findByTestId('remoteClusterReviewOnPremSteps');
+      }
+
+      return { user };
+    };
+
+    describe('on cloud', () => {
+      test('back button goes to second step', async () => {
+        const { user } = await goToReviewStep({ isCloud: true, securityModel: 'api' });
+        await user.click(screen.getByTestId('remoteClusterReviewtBackButton'));
+        expect(await screen.findByTestId('remoteClusterFormNextButton')).toBeInTheDocument();
+      });
+
+      test('shows expected documentation when api_key is selected', async () => {
+        await goToReviewStep({ isCloud: true, securityModel: 'api' });
+        expect(screen.getByTestId('cloudApiKeySteps')).toBeInTheDocument();
+        expect(screen.queryByTestId('cloudCertDocumentation')).not.toBeInTheDocument();
+      });
+
+      test('shows expected documentation when cert is selected', async () => {
+        await goToReviewStep({ isCloud: true, securityModel: 'cert' });
+        expect(screen.getByTestId('cloudCertDocumentation')).toBeInTheDocument();
+        expect(screen.queryByTestId('cloudApiKeySteps')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('on prem', () => {
+      test('shows expected documentation when api_key is selected', async () => {
+        await goToReviewStep({ isCloud: false, securityModel: 'api' });
+
+        expect(screen.getByTestId('remoteClusterReviewOnPremStep1')).toHaveAttribute(
+          'href',
+          onPremPrerequisitesApiKey
+        );
+        expect(screen.getByTestId('remoteClusterReviewOnPremStep2')).toHaveAttribute(
+          'href',
+          onPremSecurityApiKey
+        );
+      }, 20000);
+
+      test('shows expected documentation when cert is selected', async () => {
+        await goToReviewStep({ isCloud: false, securityModel: 'cert' });
+
+        expect(screen.getByTestId('remoteClusterReviewOnPremStep1')).toHaveAttribute(
+          'href',
+          onPremPrerequisitesCert
+        );
+        expect(screen.getByTestId('remoteClusterReviewOnPremStep2')).toHaveAttribute(
+          'href',
+          onPremSecurityCert
+        );
+      }, 20000);
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   useDockerContainerPageViewMetricsCharts,
   useDockerContainerKpiCharts,
   useK8sContainerKpiCharts,
+  getSubtitleFromFormula,
 } from './use_container_metrics_charts';
 
 const metricsDataViewId = 'metricsDataViewId';
@@ -115,6 +116,64 @@ describe('useK8sContainerKPIMetricsCharts', () => {
       result.current.forEach((chart, index) => {
         expect(chart).toHaveProperty('id', expectedOrder[index]);
       });
+    });
+  });
+});
+
+describe('Container subtitle patterns', () => {
+  describe('Max formulas', () => {
+    it('should match formulas starting with max', () => {
+      expect(getSubtitleFromFormula('max(container.cpu.usage)')).toBe('Max');
+    });
+
+    it('should match formulas with arithmetic before max', () => {
+      expect(getSubtitleFromFormula('1 - max(container.memory.usage)')).toBe('Max');
+      expect(getSubtitleFromFormula('100 * max(container.cpu.usage)')).toBe('Max');
+    });
+
+    it('should match formulas with parentheses around max', () => {
+      expect(getSubtitleFromFormula('(max(container.cpu.usage))')).toBe('Max');
+    });
+
+    it('should NOT match when max is nested inside another function', () => {
+      expect(getSubtitleFromFormula('sum(max(container.cpu.usage))')).toBe('');
+    });
+
+    it('should NOT match maximum (word boundary check)', () => {
+      expect(getSubtitleFromFormula('maximum(container.cpu.usage)')).toBe('');
+    });
+  });
+
+  describe('Average formulas', () => {
+    it('should match formulas starting with avg', () => {
+      expect(getSubtitleFromFormula('avg(container.cpu.usage)')).toBe('Average');
+    });
+
+    it('should match formulas starting with average', () => {
+      expect(getSubtitleFromFormula('average(container.cpu.usage)')).toBe('Average');
+    });
+
+    it('should match formulas with arithmetic before avg', () => {
+      expect(getSubtitleFromFormula('1 - avg(container.memory.usage)')).toBe('Average');
+      expect(getSubtitleFromFormula('100 * avg(container.cpu.usage)')).toBe('Average');
+    });
+
+    it('should match formulas with arithmetic before average', () => {
+      expect(getSubtitleFromFormula('1 - average(container.memory.usage)')).toBe('Average');
+      expect(getSubtitleFromFormula('100 * average(container.cpu.usage)')).toBe('Average');
+    });
+
+    it('should match formulas with parentheses around avg/average', () => {
+      expect(getSubtitleFromFormula('(avg(container.cpu.usage))')).toBe('Average');
+      expect(getSubtitleFromFormula('(average(container.cpu.usage))')).toBe('Average');
+    });
+
+    it('should NOT match when avg is nested inside another function', () => {
+      expect(getSubtitleFromFormula('sum(avg(container.cpu.usage))')).toBe('');
+    });
+
+    it('should NOT match averaging (word boundary check)', () => {
+      expect(getSubtitleFromFormula('averaging(container.cpu.usage)')).toBe('');
     });
   });
 });

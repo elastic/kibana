@@ -8,6 +8,7 @@ import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { Streams } from '@kbn/streams-schema';
 import { isRootStreamDefinition } from '@kbn/streams-schema';
+
 import { RootStreamEmptyPrompt } from './empty_prompts';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
@@ -25,7 +26,9 @@ export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentProps) {
-  if (isRootStreamDefinition(definition.stream)) {
+  const isRootStream = isRootStreamDefinition(definition.stream);
+
+  if (isRootStream) {
     return <RootStreamEmptyPrompt />;
   }
 

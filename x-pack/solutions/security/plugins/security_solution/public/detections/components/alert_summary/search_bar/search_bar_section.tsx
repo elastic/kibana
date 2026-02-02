@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -35,8 +35,6 @@ export interface SearchBarSectionProps {
 export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
   const { integrations } = useIntegrations({ packages });
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -45,10 +43,10 @@ export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionPr
       <EuiFlexItem>
         <SiemSearchBar
           dataTestSubj={SEARCH_BAR_TEST_ID}
+          dataView={dataView}
           hideFilterBar
           hideQueryMenu
           id={InputsModelId.global}
-          sourcererDataView={dataViewSpec}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

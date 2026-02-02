@@ -21,10 +21,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { TypesService } from './vis_types/types_service';
 export { VIS_EVENT_TO_TRIGGER } from './embeddable/events';
 export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
-export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
-export { prepareLogTable } from '../common/utils/prepare_log_table';
-export { XYCurveTypes } from '../common/convert_to_lens/constants';
 export { urlFor, getFullPath } from './utils/url_utils';
 
 /** @public types */
@@ -60,22 +57,7 @@ export type {
   VisualizationListItem,
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
-export {
-  SAVED_OBJECTS_LIMIT_SETTING,
-  SAVED_OBJECTS_PER_PAGE_SETTING,
-  LegendSize,
-  LegendSizeToPixels,
-  DEFAULT_LEGEND_SIZE,
-  VISUALIZE_EMBEDDABLE_TYPE,
-} from '../common/constants';
-export type { SavedVisState, VisParams, Dimension } from '../common';
-export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
-export type {
-  ExpressionValueXYDimension,
-  DateHistogramParams,
-  FakeParams,
-  HistogramParams,
-} from '../common/expression_functions/xy_dimension';
+export type { SavedVisState } from '../common';
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
@@ -92,5 +74,3 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
-
-export { visContainerClassName, visContainerStyle } from './vis.styles';

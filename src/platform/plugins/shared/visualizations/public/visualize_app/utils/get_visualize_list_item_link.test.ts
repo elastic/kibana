@@ -12,7 +12,7 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { createHashHistory } from 'history';
 import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
+import { GLOBAL_STATE_STORAGE_KEY } from '@kbn/visualizations-common';
 import type { VisualizeUserContent } from '../components/visualize_listing';
 
 const mockItem: VisualizeUserContent = {

@@ -5,21 +5,42 @@
  * 2.0.
  */
 
-import { zodStringWithDurationValidation } from './agent_policy_settings';
+import {
+  zodStringWithDurationValidation,
+  zodStringWithYamlValidation,
+} from './agent_policy_settings';
 
-describe('zodStringWithDurationValidation', () => {
-  it('accepts valid duration strings', () => {
-    const validDurations = ['30s', '5m', '2h', '1h', '15m', '45s'];
-    validDurations.forEach((duration) => {
-      const result = zodStringWithDurationValidation.safeParse(duration);
-      expect(result.success).toBe(true);
+describe('agent_policy_settings', () => {
+  describe('zodStringWithDurationValidation', () => {
+    it('accepts valid duration strings', () => {
+      const validDurations = ['30s', '5m', '2h', '1h', '15m', '45s'];
+      validDurations.forEach((duration) => {
+        const result = zodStringWithDurationValidation.safeParse(duration);
+        expect(result.success).toBe(true);
+      });
+    });
+
+    it('rejects invalid duration strings', () => {
+      const invalidDurations = ['30', '5x', '2hours', 'abc', '10d'];
+      invalidDurations.forEach((duration) => {
+        const result = zodStringWithDurationValidation.safeParse(duration);
+        expect(result.success).toBe(false);
+      });
     });
   });
 
-  it('rejects invalid duration strings', () => {
-    const invalidDurations = ['30', '5x', '2hours', 'abc', '10d'];
-    invalidDurations.forEach((duration) => {
-      const result = zodStringWithDurationValidation.safeParse(duration);
+  describe('zodStringWithYamlValidation', () => {
+    it('should accept valid YAML string', () => {
+      const result = zodStringWithYamlValidation.safeParse(
+        'nested:\n  key1: value1\n  key2: value2'
+      );
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid YAML string', () => {
+      const result = zodStringWithYamlValidation.safeParse(
+        'nested:\n  key1: value1\n  key1: value2'
+      );
       expect(result.success).toBe(false);
     });
   });

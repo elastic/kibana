@@ -186,6 +186,10 @@ export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity',
   defaultMessage: 'Activity',
 });
 
+export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachments', {
+  defaultMessage: 'Attachments',
+});
+
 export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
   defaultMessage: 'Alerts',
 });

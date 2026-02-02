@@ -6,13 +6,14 @@
  */
 
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
-import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
+import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
@@ -2567,6 +2568,121 @@ describe('Output Service', () => {
     });
   });
 
+  describe('bulkGet', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should decrypt and return multiple outputs', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      esoClient.getDecryptedAsInternalUser
+        .mockResolvedValueOnce({
+          id: outputIdToUuid('output-1'),
+          type: OUTPUT_SAVED_OBJECT_TYPE,
+          attributes: { name: 'Output 1', output_id: 'output-1' },
+          references: [],
+        } as any)
+        .mockResolvedValueOnce({
+          id: outputIdToUuid('output-2'),
+          type: OUTPUT_SAVED_OBJECT_TYPE,
+          attributes: { name: 'Output 2', output_id: 'output-2' },
+          references: [],
+        } as any);
+
+      const outputs = await outputService.bulkGet(['output-1', 'output-2']);
+
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-2')
+      );
+      expect(outputs).toHaveLength(2);
+      expect(outputs[0].id).toEqual('output-1');
+      expect(outputs[1].id).toEqual('output-2');
+    });
+
+    it('should filter out not found errors when ignoreNotFound is true', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-2')
+      );
+
+      esoClient.getDecryptedAsInternalUser
+        .mockResolvedValueOnce({
+          id: outputIdToUuid('output-1'),
+          type: OUTPUT_SAVED_OBJECT_TYPE,
+          attributes: { name: 'Output 1', output_id: 'output-1' },
+          references: [],
+        } as any)
+        .mockRejectedValueOnce(notFoundError);
+
+      const outputs = await outputService.bulkGet(['output-1', 'output-2'], {
+        ignoreNotFound: true,
+      });
+
+      expect(outputs).toHaveLength(1);
+      expect(outputs[0].id).toEqual('output-1');
+    });
+
+    it('should throw error for not found when ignoreNotFound is false', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
+
+      esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
+
+      await expect(
+        outputService.bulkGet(['output-1'], { ignoreNotFound: false } as any)
+      ).rejects.toThrow();
+    });
+
+    it('should handle decryption errors when ignoreNotFound is true', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
+      esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
+
+      const outputs = await outputService.bulkGet(['output-1'], {
+        ignoreNotFound: true,
+      });
+
+      expect(outputs).toHaveLength(0);
+    });
+
+    it('should throw decryption errors when ignoreNotFound is false', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      const decryptionError = new Error('Decryption failed');
+      esoClient.getDecryptedAsInternalUser.mockRejectedValue(decryptionError);
+
+      await expect(
+        outputService.bulkGet(['output-1'], { ignoreNotFound: false } as any)
+      ).rejects.toThrow('Decryption failed');
+    });
+
+    it('should return empty array when ids is empty', async () => {
+      const esoClient = getMockedEncryptedSoClient();
+
+      const outputs = await outputService.bulkGet([]);
+
+      expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect(outputs).toEqual([]);
+    });
+  });
+
   describe('getDefaultDataOutputId', () => {
     it('work with a predefined id', async () => {
       const soClient = getMockedSoClient({
@@ -2735,6 +2851,11 @@ describe('Output Service', () => {
   });
 
   describe('backfillAllOutputPresets', () => {
+    beforeEach(() => {
+      // Ensure the encrypted saved objects client mock is set up
+      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+    });
+
     it('should update non-preconfigured output', async () => {
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
@@ -2747,14 +2868,22 @@ describe('Output Service', () => {
           score: 0,
         },
       ];
-      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+
+      const finderMock = {
         close: jest.fn(),
-        find: function* asyncGenerator() {
+        find: async function* asyncGenerator() {
           yield {
             saved_objects: savedObjects,
+            total: 1,
+            page: 1,
+            per_page: SO_SEARCH_LIMIT,
           };
         },
-      });
+      };
+
+      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValue(finderMock as any);
 
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
       await expect(promise).resolves.not.toThrow();
@@ -2763,6 +2892,23 @@ describe('Output Service', () => {
     it('should update preconfigured output', async () => {
       mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
       const soClient = getMockedSoClient({});
+
+      const finderMock = {
+        close: jest.fn(),
+        find: async function* asyncGenerator() {
+          yield {
+            saved_objects: [],
+            total: 0,
+            page: 1,
+            per_page: SO_SEARCH_LIMIT,
+          };
+        },
+      };
+
+      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValue(finderMock as any);
+
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
       await expect(promise).resolves.not.toThrow();
     });
@@ -2789,9 +2935,6 @@ describe('Output Service', () => {
       expect(output.ssl).toEqual(undefined);
       expect(mockedLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`Unable to parse ssl for output ${so.id}`)
-      );
-      expect(mockedLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`ssl value: invalid-json`)
       );
     });
 

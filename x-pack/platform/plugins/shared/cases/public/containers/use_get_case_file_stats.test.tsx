@@ -17,6 +17,7 @@ import { constructFileKindIdByOwner } from '../../common/files';
 
 jest.mock('../common/lib/kibana');
 
+const searchTerm = 'foobar';
 const hookParams = {
   caseId: basicCase.id,
 };
@@ -33,7 +34,7 @@ describe('useGetCaseFileStats', () => {
     jest.clearAllMocks();
   });
 
-  it('calls filesClient.list with correct arguments', async () => {
+  it('calls filesClient.list when searchTerm is not provided', async () => {
     const filesClient = createMockFilesClient();
 
     renderHook(() => useGetCaseFileStats(hookParams), {
@@ -41,6 +42,20 @@ describe('useGetCaseFileStats', () => {
     });
 
     await waitFor(() => expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams));
+  });
+
+  it('calls filesClient.list with correct arguments when searchTerm is provided', async () => {
+    const filesClient = createMockFilesClient();
+    const hookParamsWithSearchTerm = { ...hookParams, searchTerm };
+    renderHook(() => useGetCaseFileStats(hookParamsWithSearchTerm), {
+      wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
+    });
+    await waitFor(() =>
+      expect(filesClient.list).toHaveBeenCalledWith({
+        ...expectedCallParams,
+        name: `*${searchTerm}*`,
+      })
+    );
   });
 
   it('shows an error toast when filesClient.list throws', async () => {

@@ -214,6 +214,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.errorMessage"

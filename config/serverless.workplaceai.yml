@@ -1,0 +1,177 @@
+# Workplace AI Project Config
+
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'workplaceai']
+
+## Enable the Serverless Workplace AI plugin
+xpack.serverless.workplaceAI.enabled: true
+
+## Cloud settings
+xpack.cloud.serverless.project_type: workplaceai
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/workplace_ai
+
+## Enable tech-preview pages
+uiSettings.overrides:
+  workflows:ui:enabled: true
+  dataSources:enabled: true
+
+## Enable workplace_ai plugins
+xpack.workplaceAIApp.enabled: true
+
+## EARS (elastic-auth-redirect-service) integration
+xpack.workplaceAIApp.ears.url: https://localhost:8052
+xpack.workplaceAIApp.ears.allow_insecure: true
+
+# Disable spaces
+xpack.spaces.maxSpaces: 1
+
+## Content Connectors in stack management
+xpack.contentConnectors.enabled: false
+
+## Disable Kibana Product Intercept
+xpack.product_intercept.enabled: false
+
+# Elastic Managed LLMs
+xpack.actions.preconfigured:
+  Anthropic-Claude-Sonnet-3-7:
+    name: Anthropic Claude Sonnet 3.7
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".rainbow-sprinkles-elastic"
+      providerConfig:
+        model_id: "rainbow-sprinkles"
+  Anthropic-Claude-Sonnet-4-5:
+    name: Anthropic Claude Sonnet 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".gp-llm-v2-chat_completion"
+      providerConfig:
+        model_id: "gp-llm-v2"
+  Anthropic-Claude-Opus-4-5:
+    name: Anthropic Claude Opus 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.5-opus-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.5-opus"
+  OpenAI-GPT-OSS-120B:
+    name: OpenAI GPT-OSS 120B
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-oss-120b-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-oss-120b"
+  OpenAI-GPT-4-1:
+    name: OpenAI GPT-4.1
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-4.1-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-4.1"
+  OpenAI-GPT-4-1-Mini:
+    name: OpenAI GPT-4.1 Mini
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-4.1-mini-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-4.1-mini"
+  OpenAI-GPT-5-2:
+    name: OpenAI GPT-5.2
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-5.2-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-5.2"
+  OpenAI-GPT-OSS-20B:
+    name: OpenAI GPT-OSS 20B
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-oss-20b-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-oss-20b"
+  OpenAI-o4:
+    name: OpenAI o4
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-o4-chat_completion"
+      providerConfig:
+        model_id: "openai-o4"
+  OpenAI-o4-Mini:
+    name: OpenAI o4 Mini
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-o4-mini-chat_completion"
+      providerConfig:
+        model_id: "openai-o4-mini"
+  Google-Gemini-2-5-Pro:
+    name: Google Gemini 2.5 Pro
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-2.5-pro-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-2.5-pro"
+  Google-Gemini-2-5-Flash:
+    name: Google Gemini 2.5 Flash
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-2.5-flash-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-2.5-flash"
+  Google-Gemini-3-0-Pro:
+    name: Google Gemini 3.0 Pro
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-3.0-pro-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-3.0-pro"
+  Google-Gemini-3-0-Flash:
+    name: Google Gemini 3.0 Flash
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-3.0-flash-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-3.0-flash"

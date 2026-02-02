@@ -31,4 +31,5 @@ export const awsS3 = createInventoryModel('awsS3', {
     id: 'aws.s3.bucket.name',
     name: 'aws.s3.bucket.name',
   },
+  nodeFilter: () => [{ term: { 'event.module': 'aws' } }],
 });

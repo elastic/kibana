@@ -7,20 +7,20 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
+import type { ChatPromptTemplate } from '@langchain/core/prompts';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
-import type { GraphNode } from '../../types';
-import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
+import type { GraphNode, MigrateRuleGraphParams } from '../../types';
+import { MATCH_PREBUILT_RULE_PROMPT_SPLUNK, MATCH_PREBUILT_RULE_PROMPT_GENERIC } from './prompts';
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
 } from '../../../../constants';
 
 interface GetMatchPrebuiltRuleNodeParams {
-  model: ChatModel;
+  model: MigrateRuleGraphParams['model'];
   logger: Logger;
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
@@ -57,7 +57,7 @@ export const getMatchPrebuiltRuleNode = ({
     }
 
     const outputParser = new JsonOutputParser();
-    const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
+    let promptTemplate: Awaited<ReturnType<ChatPromptTemplate['formatMessages']>>;
 
     const elasticSecurityRules = prebuiltRules.map((rule) => {
       return {
@@ -73,13 +73,26 @@ export const getMatchPrebuiltRuleNode = ({
       query: state.original_rule.query,
     };
 
+    if (state.original_rule.vendor === 'splunk') {
+      promptTemplate = await MATCH_PREBUILT_RULE_PROMPT_SPLUNK.formatMessages({
+        rules: JSON.stringify(elasticSecurityRules, null, 2),
+        splunk_rule: JSON.stringify(splunkRule, null, 2),
+      });
+    } else {
+      promptTemplate = await MATCH_PREBUILT_RULE_PROMPT_GENERIC.formatMessages({
+        rules: JSON.stringify(elasticSecurityRules, null, 2),
+        nl_rule_description: state.nl_query,
+      });
+    }
+
+    const mostRelevantRuleChain = model.pipe(outputParser);
+
     /*
      * Takes the most relevant rule from the array of rule(s) returned by the semantic query, returns either the most relevant or none.
      */
-    const response = (await mostRelevantRule.invoke({
-      rules: JSON.stringify(elasticSecurityRules, null, 2),
-      splunk_rule: JSON.stringify(splunkRule, null, 2),
-    })) as GetMatchedRuleResponse;
+    const response = (await mostRelevantRuleChain.invoke([
+      ...promptTemplate,
+    ])) as GetMatchedRuleResponse;
 
     const comments = response.summary
       ? [generateAssistantComment(cleanMarkdown(response.summary))]

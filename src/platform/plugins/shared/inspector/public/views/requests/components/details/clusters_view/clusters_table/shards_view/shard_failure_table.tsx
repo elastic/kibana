@@ -102,10 +102,13 @@ export function ShardFailureTable({ failures }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.shards.table.caption', {
+        defaultMessage: 'Shard failures',
+      })}
       items={failures.map((failure) => {
         return {
           rowId: getRowId(failure),
-          shard: failure.shard,
+          shard: failure.shard!,
           index: failure.index,
           failureType: failure.reason.type,
         };

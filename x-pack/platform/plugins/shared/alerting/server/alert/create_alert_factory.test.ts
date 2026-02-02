@@ -394,6 +394,7 @@ describe('createAlertFactory()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
       },
       state: {},

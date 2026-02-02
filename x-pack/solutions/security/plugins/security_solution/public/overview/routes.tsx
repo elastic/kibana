@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import {
   OVERVIEW_PATH,
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
   ENTITY_ANALYTICS_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
@@ -21,6 +23,7 @@ import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_dashboard';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -34,11 +37,19 @@ const DetectionResponseRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsRoutes = () => (
-  <PluginTemplateWrapper>
-    <EntityAnalyticsPage />
-  </PluginTemplateWrapper>
-);
+const EntityAnalyticsRoutes = () => {
+  const isThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+
+  if (isThreatHuntingEnabled) {
+    return <Redirect to={ENTITY_ANALYTICS_THREAT_HUNTING_PATH} />;
+  }
+
+  return (
+    <PluginTemplateWrapper>
+      <EntityAnalyticsPage />
+    </PluginTemplateWrapper>
+  );
+};
 
 const DataQualityRoutes = () => (
   <PluginTemplateWrapper>

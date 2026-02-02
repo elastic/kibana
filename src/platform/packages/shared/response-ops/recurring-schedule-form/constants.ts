@@ -11,6 +11,7 @@ import { Frequency } from '@kbn/rrule';
 import { invert, mapValues } from 'lodash';
 import moment from 'moment';
 import {
+  RECURRING_SCHEDULE_FORM_FREQUENCY_HOURLY,
   RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY,
   RECURRING_SCHEDULE_FORM_FREQUENCY_WEEKLY,
   RECURRING_SCHEDULE_FORM_FREQUENCY_MONTHLY,
@@ -19,6 +20,7 @@ import {
   RECURRING_SCHEDULE_FORM_ENDS_NEVER,
   RECURRING_SCHEDULE_FORM_ENDS_ON_DATE,
   RECURRING_SCHEDULE_FORM_ENDS_AFTER_X,
+  RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_HOURLY,
   RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_DAILY,
   RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_WEEKLY,
   RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_MONTHLY,
@@ -28,6 +30,10 @@ import {
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 export const DEFAULT_FREQUENCY_OPTIONS = [
+  {
+    text: RECURRING_SCHEDULE_FORM_FREQUENCY_HOURLY,
+    value: Frequency.HOURLY,
+  },
   {
     text: RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY,
     value: Frequency.DAILY,
@@ -51,6 +57,9 @@ export const DEFAULT_FREQUENCY_OPTIONS = [
 ];
 
 export const DEFAULT_PRESETS = {
+  [Frequency.HOURLY]: {
+    interval: 1,
+  },
   [Frequency.DAILY]: {
     interval: 1,
   },
@@ -121,6 +130,11 @@ export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_R
 );
 
 export const RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY = (interval = 1) => [
+  {
+    text: RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_HOURLY(interval),
+    value: Frequency.HOURLY,
+    'data-test-subj': 'customFrequencyHourly',
+  },
   {
     text: RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY_DAILY(interval),
     value: Frequency.DAILY,

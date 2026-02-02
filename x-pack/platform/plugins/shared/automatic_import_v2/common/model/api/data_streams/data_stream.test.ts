@@ -8,184 +8,43 @@
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 
 import {
-  CreateAutoImportDataStreamRequestParams,
-  CreateAutoImportDataStreamRequestBody,
-  CreateAutoImportDataStreamResponse,
-  UpdateAutoImportDataStreamRequestParams,
-  UpdateAutoImportDataStreamRequestBody,
+  StopAutoImportDataStreamRequestParams,
+  UploadSamplesToDataStreamRequestParams,
+  UploadSamplesToDataStreamRequestBody,
+  UploadSamplesToDataStreamResponse,
 } from './data_stream.gen';
 
 describe('data stream schemas', () => {
-  describe('CreateAutoImportDataStreamRequestParams', () => {
-    it('accepts valid params', () => {
+  describe('StopAutoImportDataStreamRequestParams', () => {
+    it('requires integration_id', () => {
       const payload = {
-        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
       };
 
-      const result = CreateAutoImportDataStreamRequestParams.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('requires integration_id', () => {
-      const result = CreateAutoImportDataStreamRequestParams.safeParse({});
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toContain('integration_id: Required');
     });
 
-    it('rejects empty integration_id', () => {
-      const payload = {
-        integration_id: '   ',
-      };
-
-      const result = CreateAutoImportDataStreamRequestParams.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
-    });
-  });
-
-  describe('CreateAutoImportDataStreamRequestBody', () => {
-    it('accepts a valid payload with all fields', () => {
-      const payload = {
-        title: 'data-stream-title',
-        description: 'Data stream description',
-        samples: ['sample1', 'sample2', 'sample3'],
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('accepts a minimal payload with only required fields', () => {
-      const payload = {
-        title: 'data-stream-title',
-        samples: ['sample1', 'sample2', 'sample3'],
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('rejects unknown properties', () => {
-      const payload = {
-        title: 'data-stream-title',
-        unknown: 'should be stripped',
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-    });
-
-    it('requires a title', () => {
-      const result = CreateAutoImportDataStreamRequestBody.safeParse({});
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('title: Required');
-    });
-
-    it('rejects an empty title', () => {
-      const payload = {
-        title: '   ',
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('title: No empty strings allowed');
-    });
-
-    it('accepts empty samples array', () => {
-      const payload = {
-        title: 'data-stream-title',
-        samples: [],
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-    });
-
-    it('rejects non-string samples', () => {
-      const payload = {
-        title: 'data-stream-title',
-        samples: [123, 456],
-      };
-
-      const result = CreateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain(
-        'samples.0: Expected string, received number'
-      );
-    });
-  });
-
-  describe('CreateAutoImportDataStreamResponse', () => {
     it('requires data_stream_id', () => {
-      const result = CreateAutoImportDataStreamResponse.safeParse({});
+      const payload = {
+        integration_id: 'integration-123',
+      };
+
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toContain('data_stream_id: Required');
     });
 
-    it('accepts a valid response', () => {
-      const payload = {
-        data_stream_id: 'data-stream-id-123',
-      };
-
-      const result = CreateAutoImportDataStreamResponse.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('rejects empty data_stream_id', () => {
-      const payload = {
-        data_stream_id: '   ',
-      };
-
-      const result = CreateAutoImportDataStreamResponse.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('data_stream_id: No empty strings allowed');
-    });
-  });
-
-  describe('UpdateAutoImportDataStreamRequestParams', () => {
-    it('accepts valid params', () => {
-      const payload = {
-        integration_id: 'integration-123',
-        data_stream_id: 'data-stream-456',
-      };
-
-      const result = UpdateAutoImportDataStreamRequestParams.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual(payload);
-    });
-
-    it('requires both integration_id and data_stream_id', () => {
-      const result = UpdateAutoImportDataStreamRequestParams.safeParse({});
-      expectParseError(result);
-
-      const errorString = stringifyZodError(result.error);
-      expect(errorString).toContain('integration_id: Required');
-      expect(errorString).toContain('data_stream_id: Required');
-    });
-
     it('rejects empty integration_id', () => {
       const payload = {
         integration_id: '   ',
-        data_stream_id: 'data-stream-456',
+        data_stream_id: 'data-stream-123',
       };
 
-      const result = UpdateAutoImportDataStreamRequestParams.safeParse(payload);
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
@@ -197,87 +56,410 @@ describe('data stream schemas', () => {
         data_stream_id: '   ',
       };
 
-      const result = UpdateAutoImportDataStreamRequestParams.safeParse(payload);
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toContain('data_stream_id: No empty strings allowed');
     });
+
+    it('accepts valid params', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+      };
+
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+        unknown: 'property',
+      };
+
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual({
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+      });
+    });
+
+    it('accepts params with various valid IDs', () => {
+      const testCases = [
+        {
+          integration_id: 'integration-001',
+          data_stream_id: 'data-stream-001',
+        },
+        {
+          integration_id: 'my-integration',
+          data_stream_id: 'my-data-stream',
+        },
+        {
+          integration_id: 'integration_with_underscores',
+          data_stream_id: 'data_stream_with_underscores',
+        },
+        {
+          integration_id: 'integration-with-dashes',
+          data_stream_id: 'data-stream-with-dashes',
+        },
+        {
+          integration_id: 'integration123',
+          data_stream_id: 'datastream123',
+        },
+      ];
+
+      testCases.forEach((payload) => {
+        const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+    });
+
+    it('rejects both empty integration_id and data_stream_id', () => {
+      const payload = {
+        integration_id: '   ',
+        data_stream_id: '   ',
+      };
+
+      const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      const errorMessage = stringifyZodError(result.error);
+      expect(errorMessage).toContain('integration_id: No empty strings allowed');
+      expect(errorMessage).toContain('data_stream_id: No empty strings allowed');
+    });
   });
 
-  describe('UpdateAutoImportDataStreamRequestBody', () => {
-    it('accepts an empty payload', () => {
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse({});
+  describe('UploadSamplesToDataStreamRequestParams', () => {
+    it('requires integration_id', () => {
+      const payload = {
+        data_stream_id: 'data-stream-123',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+    });
+
+    it('requires data_stream_id', () => {
+      const payload = {
+        integration_id: 'integration-123',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('data_stream_id: Required');
+    });
+
+    it('rejects empty integration_id', () => {
+      const payload = {
+        integration_id: '   ',
+        data_stream_id: 'data-stream-123',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
+    });
+
+    it('rejects empty data_stream_id', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: '   ',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('data_stream_id: No empty strings allowed');
+    });
+
+    it('accepts valid params', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = {
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+        unknown: 'property',
+      };
+
+      const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual({
+        integration_id: 'integration-123',
+        data_stream_id: 'data-stream-123',
+      });
+    });
+  });
+
+  describe('UploadSamplesToDataStreamRequestBody', () => {
+    const validOriginalSource = {
+      sourceType: 'file' as const,
+      sourceValue: 'test.log',
+    };
+
+    it('requires samples array', () => {
+      const payload = {
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('samples: Required');
+    });
+
+    it('requires originalSource', () => {
+      const payload = {
+        samples: ['Sample 1'],
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('originalSource: Required');
+    });
+
+    it('rejects non-array samples', () => {
+      const payload = {
+        samples: 'not-an-array',
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('samples: Expected array');
+    });
+
+    it('accepts empty samples array', () => {
+      const payload = {
+        samples: [],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('accepts single sample', () => {
+      const payload = {
+        samples: ['Sample log line 1'],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('accepts multiple samples', () => {
+      const payload = {
+        samples: [
+          'Sample log line 1',
+          'Sample log line 2',
+          'Sample log line 3',
+          'Sample log line 4',
+        ],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('accepts samples with special characters', () => {
+      const payload = {
+        samples: [
+          'Log with "quotes"',
+          'Log with \\backslashes\\',
+          'Log with \nnewlines',
+          'Log with JSON: {"key": "value"}',
+        ],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('rejects samples with non-string elements', () => {
+      const payload = {
+        samples: ['Valid string', 123, 'Another string'],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('Expected string');
+    });
+
+    it('accepts large number of samples', () => {
+      const payload = {
+        samples: Array.from({ length: 1000 }, (_, i) => `Log line ${i}`),
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data.samples).toHaveLength(1000);
+    });
+
+    it('accepts file source type', () => {
+      const payload = {
+        samples: ['Sample 1'],
+        originalSource: {
+          sourceType: 'file' as const,
+          sourceValue: 'access.log',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('accepts index source type', () => {
+      const payload = {
+        samples: ['Sample 1'],
+        originalSource: {
+          sourceType: 'index' as const,
+          sourceValue: 'logs-*',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual(payload);
+    });
+
+    it('rejects invalid source type', () => {
+      const payload = {
+        samples: ['Sample 1'],
+        originalSource: {
+          sourceType: 'invalid',
+          sourceValue: 'test',
+        },
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('Invalid enum value');
+    });
+
+    it('strips unknown properties', () => {
+      const payload = {
+        samples: ['Sample 1', 'Sample 2'],
+        originalSource: validOriginalSource,
+        unknown: 'property',
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+
+      expect(result.data).toEqual({
+        samples: ['Sample 1', 'Sample 2'],
+        originalSource: validOriginalSource,
+      });
+    });
+  });
+
+  describe('UploadSamplesToDataStreamResponse', () => {
+    it('accepts response without success field', () => {
+      const payload = {};
+
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
       expectParseSuccess(result);
 
       expect(result.data).toEqual({});
     });
 
-    it('accepts partial updates with description only', () => {
+    it('accepts response with success true', () => {
       const payload = {
-        description: 'updated description',
+        success: true,
       };
 
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
       expectParseSuccess(result);
 
       expect(result.data).toEqual(payload);
     });
 
-    it('accepts partial updates with samples only', () => {
+    it('accepts response with success false', () => {
       const payload = {
-        samples: ['new-sample-1', 'new-sample-2'],
+        success: false,
       };
 
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
       expectParseSuccess(result);
 
       expect(result.data).toEqual(payload);
     });
 
-    it('accepts partial updates with both description and samples', () => {
+    it('rejects non-boolean success', () => {
       const payload = {
-        description: 'updated description',
-        samples: ['new-sample-1', 'new-sample-2'],
+        success: 'true',
       };
 
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('success: Expected boolean');
+    });
+
+    it('rejects unknown properties due to strict mode', () => {
+      const payload = {
+        success: true,
+        unknown: 'property',
+      };
+
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('Unrecognized key');
+    });
+
+    it('accepts only success field', () => {
+      const payload = {
+        success: true,
+      };
+
+      const result = UploadSamplesToDataStreamResponse.safeParse(payload);
       expectParseSuccess(result);
 
-      expect(result.data).toEqual(payload);
-    });
-
-    it('rejects title updates', () => {
-      const payload = {
-        title: 'new title',
-      };
-
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain("Unrecognized key(s) in object: 'title'");
-    });
-
-    it('rejects unknown properties', () => {
-      const payload = {
-        description: 'updated description',
-        unexpected: 'value',
-      };
-
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-    });
-
-    it('rejects non-string samples', () => {
-      const payload = {
-        samples: [123, 456],
-      };
-
-      const result = UpdateAutoImportDataStreamRequestBody.safeParse(payload);
-      expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain(
-        'samples.0: Expected string, received number'
-      );
+      expect(result.data).toEqual({ success: true });
     });
   });
 });

@@ -19,6 +19,7 @@ import { type RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
 import { TableHeader } from '../../../common/components';
+import { InstallRuleActionBtn } from './install';
 
 interface ActionNameProps {
   disableActions?: boolean;
@@ -54,15 +55,11 @@ const ActionName = ({
   // Installable
   if (migrationRule.translation_result === MigrationTranslationResult.FULL) {
     return (
-      <EuiLink
-        disabled={disableActions}
-        onClick={() => {
-          installMigrationRule(migrationRule);
-        }}
-        data-test-subj="installRule"
-      >
-        {i18n.ACTIONS_INSTALL_LABEL}
-      </EuiLink>
+      <InstallRuleActionBtn
+        isDisabled={!!disableActions}
+        migrationRule={migrationRule}
+        installMigrationRule={installMigrationRule}
+      />
     );
   }
 

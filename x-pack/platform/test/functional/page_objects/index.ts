@@ -27,7 +27,7 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
-import { OneChatPageObject } from './onechat_page';
+import { AgentBuilderPageObject } from './agent_builder_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { LicenseManagementPageProvider } from './license_management_page';
@@ -67,7 +67,7 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
-  onechat: OneChatPageObject,
+  agentBuilder: AgentBuilderPageObject,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   grokDebugger: GrokDebuggerPageObject,
   licenseManagement: LicenseManagementPageProvider,

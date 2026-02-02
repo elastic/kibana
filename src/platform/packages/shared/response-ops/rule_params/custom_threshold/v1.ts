@@ -18,6 +18,7 @@ const allowedAggregators = [
   'min',
   'max',
   'cardinality',
+  'median',
   'rate',
   'p95',
   'p99',
@@ -57,7 +58,11 @@ const customCriterion = schema.object({
         name: schema.string(),
         aggType: oneOfLiterals(allowedAggregators),
         field: schema.string(),
-        filter: schema.never(),
+        filter: schema.maybe(
+          schema.string({
+            validate: validateKQLStringFilter,
+          })
+        ),
       }),
       schema.object({
         name: schema.string(),

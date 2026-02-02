@@ -12,7 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Jira connector parameter schemas for different sub-actions
 export const JiraPushToServiceParamsSchema = z.object({

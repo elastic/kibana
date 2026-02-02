@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { YamlValidationResult, StepNameInfo } from '../model/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { collectAllStepNames } from './collect_all_step_names';
+import type { StepNameInfo, YamlValidationResult } from '../model/types';
 
 export function validateStepNameUniqueness(yamlDocument: any): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];

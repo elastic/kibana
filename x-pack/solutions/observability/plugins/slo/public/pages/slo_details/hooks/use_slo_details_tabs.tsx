@@ -6,19 +6,19 @@
  */
 
 import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
-import { paths } from '../../../../common/locators/paths';
-import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { useKibana } from '../../../hooks/use_kibana';
-import type { SloTabId } from '../components/slo_details';
+import type { SloTabId } from '@kbn/deeplinks-observability';
 import {
   ALERTS_TAB_ID,
   DEFINITION_TAB_ID,
   HISTORY_TAB_ID,
   OVERVIEW_TAB_ID,
-} from '../components/slo_details';
+} from '@kbn/deeplinks-observability';
+import { i18n } from '@kbn/i18n';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
+import React from 'react';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Props {
   slo?: SLOWithSummaryResponse | null;

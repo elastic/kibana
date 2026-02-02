@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled', 'testing']);
       });
 
+      await unifiedTabs.selectTab(1); // trick to ensure tooltips do not block further clicks
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(2, 'third tab');

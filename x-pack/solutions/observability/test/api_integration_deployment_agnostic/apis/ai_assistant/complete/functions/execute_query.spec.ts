@@ -7,7 +7,7 @@
 
 import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { last } from 'lodash';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';

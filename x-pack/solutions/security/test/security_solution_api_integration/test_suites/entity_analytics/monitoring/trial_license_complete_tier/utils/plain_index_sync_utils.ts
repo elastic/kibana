@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from 'expect';
+import type { CreateEntitySourceRequestBody } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-
 export const PlainIndexSyncUtils = (
   getService: FtrProviderContext['getService'],
   indexName: string,
@@ -60,10 +60,9 @@ export const PlainIndexSyncUtils = (
   };
 
   const createEntitySourceForIndex = async () => {
-    const entitySource = {
+    const entitySource: CreateEntitySourceRequestBody = {
       type: 'index',
       name: `Entity source for index ${indexName}`,
-      managed: true,
       indexPattern: indexName,
       enabled: true,
       matchers: [

@@ -15,7 +15,8 @@
       "tags": [ "service:smtp", "org:google" ],
       "privateLocations": [],
       "wait": "30s",
-      "hash": "ekrjelkjrelkjre"
+      "hash": "ekrjelkjrelkjre",
+      "maintenance_windows": ["test-maintenance-window-2"]
     },
     {
       "locations": [ "dev" ],

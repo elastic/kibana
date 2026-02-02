@@ -6,10 +6,13 @@
  */
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import type {
+  DatasourceStates,
+  VisualizationMap,
+  DatasourceMap,
+  TypedLensSerializedState,
+} from '@kbn/lens-common';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
-import type { DatasourceStates } from '../../state_management/types';
-import type { VisualizationMap, DatasourceMap } from '../../types';
-import type { TypedLensSerializedState } from '../types';
 
 export function getStateManagementForInlineEditing(
   activeDatasourceId: 'formBased' | 'textBased',
@@ -39,6 +42,7 @@ export function getStateManagementForInlineEditing(
       {
         activeId: visualizationType || viz.visualizationType,
         state: visualizationState,
+        selectedLayerId: null,
       },
       datasourceStates,
       viz.state.query,

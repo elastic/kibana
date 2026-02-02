@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -45,7 +45,8 @@
     "@kbn/tooling-log",
     "@kbn/ebt-tools",
     "@kbn/apm-plugin",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

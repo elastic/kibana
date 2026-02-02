@@ -28,8 +28,8 @@ describe('elasticsearch clients errors', () => {
   });
 
   afterAll(async () => {
-    await kibanaServer.stop();
-    await esServer.stop();
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   it('has the proper JSON representation', async () => {

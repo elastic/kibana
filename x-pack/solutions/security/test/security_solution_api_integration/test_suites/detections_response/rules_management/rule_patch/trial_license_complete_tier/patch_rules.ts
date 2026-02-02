@@ -20,6 +20,12 @@ import type {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '@kbn/detections-response-ftr-services';
+import {
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -34,12 +40,6 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

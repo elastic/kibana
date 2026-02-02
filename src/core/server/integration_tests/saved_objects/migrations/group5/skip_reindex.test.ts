@@ -9,20 +9,20 @@
 
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import type { KibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import {
   readLog,
   clearLog,
   currentVersion,
   defaultKibanaIndex,
   startElasticsearch,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
   getCompatibleMigratorTestKit,
   getUpToDateMigratorTestKit,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 
 describe('when migrating to a new version', () => {
   let esServer: TestElasticsearchUtils['es'];

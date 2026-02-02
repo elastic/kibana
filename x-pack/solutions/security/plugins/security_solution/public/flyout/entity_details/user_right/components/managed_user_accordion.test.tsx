@@ -21,7 +21,7 @@ describe('ManagedUserAccordion', () => {
           managedUser={mockEntraUserFields}
           tableType={UserAssetTableType.assetEntra}
           openDetailsPanel={() => {}}
-          isLinkEnabled
+          isPreviewMode={false}
         >
           <div data-test-subj="test-children" />
         </ManagedUserAccordion>
@@ -41,7 +41,6 @@ describe('ManagedUserAccordion', () => {
           managedUser={mockEntraUserFields}
           tableType={UserAssetTableType.assetEntra}
           openDetailsPanel={() => {}}
-          isLinkEnabled
           isPreviewMode
         >
           <div data-test-subj="test-children" />
@@ -51,23 +50,5 @@ describe('ManagedUserAccordion', () => {
 
     expect(getByTestId('managed-user-accordion-userAssetEntraTitleLink')).toBeInTheDocument();
     expect(queryByTestId('managed-user-accordion-userAssetEntraTitleIcon')).not.toBeInTheDocument();
-  });
-
-  it('does not render link when link is not enabled', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <ManagedUserAccordion
-          title="test title"
-          managedUser={mockEntraUserFields}
-          tableType={UserAssetTableType.assetEntra}
-          openDetailsPanel={() => {}}
-          isLinkEnabled={false}
-        >
-          <div data-test-subj="test-children" />
-        </ManagedUserAccordion>
-      </TestProviders>
-    );
-
-    expect(queryByTestId('managed-user-accordion-userAssetEntraTitleLink')).not.toBeInTheDocument();
   });
 });

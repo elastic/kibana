@@ -58,12 +58,17 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     [messageVariables]
   );
 
+  const hasDeprecatedVariables = useMemo(
+    () => messageVariables?.some((variable) => Boolean(variable.deprecated)) ?? false,
+    [messageVariables]
+  );
+
   const messageVariablesToShow = useMemo(
     () =>
-      isShowAllPressed
+      !hasDeprecatedVariables || isShowAllPressed
         ? messageVariables
         : messageVariables?.filter((variable) => !variable.deprecated),
-    [messageVariables, isShowAllPressed]
+    [hasDeprecatedVariables, isShowAllPressed, messageVariables]
   );
 
   const optionsToShow = useMemo(() => {
@@ -207,34 +212,36 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {search}
             <EuiSpacer size="xs" />
             {list}
-            <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                justifyContent="spaceBetween"
-                responsive={false}
-                wrap={true}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText color="grey" size="xs">
-                    {isShowAllPressed
-                      ? i18n.DEPRECATED_VARIABLES_ARE_SHOWN
-                      : i18n.DEPRECATED_VARIABLES_ARE_HIDDEN}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj={'showDeprecatedVariablesButton'}
-                    size="xs"
-                    onClick={() =>
-                      isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
-                    }
-                  >
-                    {isShowAllPressed ? i18n.HIDE : i18n.SHOW_ALL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
+            {hasDeprecatedVariables && (
+              <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  responsive={false}
+                  wrap={true}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="grey" size="xs">
+                      {isShowAllPressed
+                        ? i18n.DEPRECATED_VARIABLES_ARE_SHOWN
+                        : i18n.DEPRECATED_VARIABLES_ARE_HIDDEN}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj={'showDeprecatedVariablesButton'}
+                      size="xs"
+                      onClick={() =>
+                        isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
+                      }
+                    >
+                      {isShowAllPressed ? i18n.HIDE : i18n.SHOW_ALL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPopoverFooter>
+            )}
           </>
         )}
       </EuiSelectable>

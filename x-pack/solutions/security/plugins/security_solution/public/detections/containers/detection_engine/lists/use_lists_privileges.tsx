@@ -57,7 +57,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
     canWriteIndex: null,
   });
 
-  const { listPrivileges, kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { listPrivileges, rulesPrivileges } = useUserPrivileges();
 
   // handleReadResult
   useEffect(() => {
@@ -72,16 +72,16 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
         isAuthenticated,
         canReadIndex: canReadIndex(listsPrivileges) && canReadIndex(listItemsPrivileges),
         canManageIndex:
-          kibanaSecuritySolutionsPrivileges.crud &&
+          rulesPrivileges.edit &&
           canManageIndex(listsPrivileges) &&
           canManageIndex(listItemsPrivileges),
         canWriteIndex:
-          kibanaSecuritySolutionsPrivileges.crud &&
+          rulesPrivileges.edit &&
           canWriteIndex(listsPrivileges) &&
           canWriteIndex(listItemsPrivileges),
       });
     }
-  }, [listPrivileges.result, kibanaSecuritySolutionsPrivileges.crud]);
+  }, [listPrivileges.result, rulesPrivileges.edit]);
 
   // handleReadError
   useEffect(() => {

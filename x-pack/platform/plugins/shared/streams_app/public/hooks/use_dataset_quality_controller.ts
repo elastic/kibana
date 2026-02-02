@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import { useHistory } from 'react-router-dom';
 import type {
@@ -13,6 +13,7 @@ import type {
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
@@ -20,12 +21,20 @@ import {
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
+import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
 
 export const useDatasetQualityController = (
   definition: Streams.ingest.all.GetResponse,
-  saveStateInUrl: boolean = true
+  saveStateInUrl: boolean = true,
+  refreshDefinition?: () => void
 ): DatasetQualityDetailsController | undefined => {
-  const { datasetQuality } = useKibana().dependencies.start;
+  const {
+    datasetQuality,
+    streams: { streamsRepositoryClient },
+    share: {
+      url: { locators },
+    },
+  } = useKibana().dependencies.start;
   const {
     core: {
       notifications: { toasts },
@@ -36,6 +45,25 @@ export const useDatasetQualityController = (
 
   const history = useHistory();
   const { timeState, setTime } = useTimefilter();
+
+  const streamsUrls = useMemo(() => {
+    const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+    if (!streamsLocator) {
+      return undefined;
+    }
+
+    const streamName = definition.stream.name;
+    return {
+      processingUrl: streamsLocator.getRedirectUrl({
+        name: streamName,
+        managementTab: 'processing',
+      } as StreamsAppLocatorParams),
+      schemaUrl: streamsLocator.getRedirectUrl({
+        name: streamName,
+        managementTab: 'schema',
+      } as StreamsAppLocatorParams),
+    };
+  }, [locators, definition.stream.name]);
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -61,6 +89,7 @@ export const useDatasetQualityController = (
             to: timeState.timeRange.to,
             refresh: DEFAULT_DATEPICKER_REFRESH,
           },
+          streamDefinition: definition,
         };
       }
 
@@ -71,7 +100,11 @@ export const useDatasetQualityController = (
             view: (Streams.WiredStream.Definition.is(definition.stream)
               ? 'wired'
               : 'classic') as DatasetQualityView,
+            streamDefinition: definition,
+            streamsUrls,
           },
+          streamsRepositoryClient,
+          refreshDefinition,
         });
       datasetQualityDetailsController.service.start();
 
@@ -105,12 +138,14 @@ export const useDatasetQualityController = (
     history,
     toasts,
     urlStateStorageContainer,
-    definition.stream.name,
+    definition,
     saveStateInUrl,
-    definition.stream,
     timeState.timeRange.from,
     timeState.timeRange.to,
     setTime,
+    streamsRepositoryClient,
+    refreshDefinition,
+    streamsUrls,
   ]);
 
   return controller;

@@ -77,10 +77,15 @@ export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYO
 export const openEntityStoreEnablementModal = () => {
   cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
   cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
+
+  cy.wait('@riskEnginePrivileges', { timeout: 120000 });
+  cy.wait('@entityStorePrivileges', { timeout: 120000 });
 };
 
 export const confirmEntityStoreEnablement = () => {
   cy.get(ENABLEMENT_MODAL_CONFIRM_BUTTON).click();
+
+  cy.get(ENTITY_STORE_ENABLEMENT_MODAL).should('not.exist');
 };
 
 export const waitForEntitiesListToAppear = () => {

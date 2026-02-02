@@ -6,6 +6,7 @@
  */
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import { isResourceSupportedVendor } from '../../../../../common/siem_migrations/rules/resources/types';
 import type {
   ElasticRule,
   RuleMigration,
@@ -21,6 +22,8 @@ import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import { getRulesMigrationTools } from './agent/tools';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -37,6 +40,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    public readonly vendor: SiemMigrationVendor,
     protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
@@ -44,7 +48,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, vendor, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new RuleMigrationsRetriever(this.migrationId, {
       data: this.data,
       rules: this.dependencies.rulesClient,
@@ -59,15 +63,22 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     const model = await this.actionsClientChat.createModel({
       connectorId,
       migrationId: this.migrationId,
+      migrationType: 'rules',
       abortController: this.abortController,
     });
+
+    const toolMap = getRulesMigrationTools(this.migrationId, {
+      rulesClient: this.data,
+    });
+
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
       this.dependencies.telemetry,
       this.logger,
       this.migrationId,
-      modelName
+      modelName,
+      this.vendor
     );
 
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
@@ -83,6 +94,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
+      tools: toolMap,
     });
 
     this.telemetry = telemetryClient;
@@ -97,8 +109,14 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationRule: StoredRuleMigrationRule
   ): Promise<RuleMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
-    return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
+    const resources = isResourceSupportedVendor(migrationRule.original_rule.vendor)
+      ? await this.retriever.resources.getResources(migrationRule.original_rule)
+      : {};
+    return {
+      id: migrationRule.id,
+      original_rule: migrationRule.original_rule,
+      resources,
+    };
   }
 
   /**

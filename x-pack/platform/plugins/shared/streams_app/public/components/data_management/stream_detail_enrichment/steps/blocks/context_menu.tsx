@@ -6,26 +6,35 @@
  */
 
 import {
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiContextMenuPanel,
-  useGeneratedHtmlId,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import { useSelector } from '@xstate5/react';
-import { isWhereBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
+import { useConditionFilteringEnabled } from '../../hooks/use_condition_filtering_enabled';
 import {
+  useInteractiveModeSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from '../../state_management/stream_enrichment_state_machine';
-import { deleteProcessorPromptOptions } from './action/prompt_options';
-import { deleteConditionPromptOptions } from './where/prompt_options';
-import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
+import { selectStreamType } from '../../state_management/stream_enrichment_state_machine/selectors';
+import { collectDescendantStepIds } from '../../state_management/utils';
 import type { StepConfigurationProps } from '../steps_list';
+import { EditStepDescriptionModal } from './action/edit_step_description_modal';
+import { deleteProcessorPromptOptions } from './action/prompt_options';
+import {
+  ADD_DESCRIPTION_MENU_LABEL,
+  EDIT_DESCRIPTION_MENU_LABEL,
+  REMOVE_DESCRIPTION_MENU_LABEL,
+} from './action/translations';
+import { deleteConditionPromptOptions } from './where/prompt_options';
 
 const moveUpItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.moveUpItemButtonText',
@@ -55,6 +64,13 @@ const duplicateItemText = i18n.translate(
   }
 );
 
+const previewConditionOnlyText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.previewConditionOnlyButtonText',
+  {
+    defaultMessage: 'Preview this only',
+  }
+);
+
 const deleteItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.deleteItemButtonText',
   {
@@ -73,27 +89,42 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isFirstStepInLevel,
   isLastStepInLevel,
 }) => {
-  const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
-  const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
-  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+  const {
+    reorderStep,
+    duplicateProcessor,
+    filterSimulationByCondition,
+    clearSimulationConditionFilter,
+  } = useStreamEnrichmentEvents();
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
   );
-  const canReorder = useStreamEnrichmentSelector(
+  const canReorder = useInteractiveModeSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'down' })
   );
-  const canDelete = useStreamEnrichmentSelector((snapshot) =>
+  const canDelete = useInteractiveModeSelector((snapshot) =>
     snapshot.can({ type: 'step.delete', id: stepRef.id })
   );
 
-  const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
-
+  const selectedConditionId = useInteractiveModeSelector(
+    (snapshot) => snapshot.context.selectedConditionId
+  );
+  const stepRefs = useInteractiveModeSelector((snapshot) => snapshot.context.stepRefs);
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const isWhere = isWhereBlock(step);
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
+
+  const isWhere = isConditionBlock(step);
+  const hasCustomDescription =
+    isActionBlock(step) &&
+    typeof step.description === 'string' &&
+    step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
+  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
 
   const menuPopoverId = useGeneratedHtmlId({
     prefix: 'stepContextMenuPopover',
@@ -108,7 +139,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   };
 
   const getChildStepsLength = () => {
-    return !isWhere ? 0 : collectDescendantIds(step.customIdentifier, stepRefs).size;
+    return !isWhere ? 0 : collectDescendantStepIds(steps, step.customIdentifier).size;
   };
 
   const deletePromptOptions = !isWhere
@@ -124,10 +155,29 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         }),
       };
 
-  const handleDelete = useDiscardConfirm(() => stepRef.send({ type: 'step.delete' }), {
-    enabled: canDelete,
-    ...deletePromptOptions,
-  });
+  const handleDelete = useDiscardConfirm(
+    () => {
+      stepRef.send({ type: 'step.delete' });
+
+      if (selectedConditionId === step.customIdentifier) {
+        clearSimulationConditionFilter();
+      }
+    },
+    {
+      enabled: canDelete,
+      ...deletePromptOptions,
+    }
+  );
+
+  const handleConditionFilter = () => {
+    if (selectedConditionId === step.customIdentifier) {
+      clearSimulationConditionFilter();
+    } else {
+      filterSimulationByCondition(step.customIdentifier);
+    }
+  };
+
+  const isConditionFilteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
   const items = [
     <EuiContextMenuItem
@@ -154,8 +204,52 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {moveDownItemText}
     </EuiContextMenuItem>,
+    ...(!isWhere
+      ? hasCustomDescription
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {EDIT_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuRemoveDescriptionItem"
+              key="removeDescription"
+              icon="minusInCircle"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                stepRef.send({ type: 'step.changeDescription', description: '' });
+              }}
+            >
+              {REMOVE_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
+        : [
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {ADD_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
+      data-stream-type={streamType}
       key="editItem"
       icon="pencil"
       disabled={!canEdit}
@@ -170,6 +264,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       ? [
           <EuiContextMenuItem
             data-test-subj="stepContextMenuDuplicateItem"
+            data-stream-type={streamType}
             key="duplicateStep"
             icon="copy"
             disabled={!canDuplicate}
@@ -182,8 +277,25 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
           </EuiContextMenuItem>,
         ]
       : []),
+    ...(isWhere
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuPreviewConditionItem"
+            key="previewCondition"
+            icon="filter"
+            disabled={!isConditionFilteringEnabled}
+            onClick={() => {
+              togglePopover(false);
+              handleConditionFilter();
+            }}
+          >
+            {previewConditionOnlyText}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuDeleteItem"
+      data-stream-type={streamType}
       key="deleteStep"
       icon="trash"
       disabled={!canDelete}
@@ -205,6 +317,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
         }
       )}
       data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
+      data-stream-type={streamType}
       disabled={!!stepUnderEdit}
       size="xs"
       iconType="boxesVertical"
@@ -213,14 +326,27 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   return (
-    <EuiPopover
-      id={menuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => togglePopover(false)}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id={menuPopoverId}
+        data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={() => togglePopover(false)}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+      {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
+        <EditStepDescriptionModal
+          step={step}
+          onCancel={() => toggleEditDescriptionModal(false)}
+          onSave={(description) => {
+            toggleEditDescriptionModal(false);
+            stepRef.send({ type: 'step.changeDescription', description });
+          }}
+        />
+      )}
+    </>
   );
 };

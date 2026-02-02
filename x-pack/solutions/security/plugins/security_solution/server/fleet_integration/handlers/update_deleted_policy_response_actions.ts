@@ -20,11 +20,6 @@ export const updateDeletedPolicyResponseActions = async (
 ): Promise<void> => {
   const logger = endpointService.createLogger('updateDeletedPolicyResponseActions');
 
-  if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug(`Space awareness feature flag is disabled. Nothing to do`);
-    return;
-  }
-
   if (deletedIntegrationPolicies.length === 0) {
     logger.debug(`No deleted integration policies provided on input. Nothing to do`);
     return;

@@ -7,32 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { v4 } from 'uuid';
+import type { KibanaRequest } from '@kbn/core/server';
+import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionParams } from './types';
+import { generateExecutionTaskScope } from '../utils';
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
 
   async scheduleResumeTask({
-    runAt,
-    workflowRunId,
-    spaceId,
+    workflowExecution,
+    resumeAt,
+    fakeRequest,
   }: {
-    runAt: Date;
-    workflowRunId: string;
-    spaceId: string;
+    workflowExecution: EsWorkflowExecution;
+    resumeAt: Date;
+    fakeRequest: KibanaRequest;
   }): Promise<{ taskId: string }> {
-    const task = await this.taskManager.schedule({
-      taskType: 'workflow:resume',
-      params: {
-        workflowRunId,
-        spaceId,
-      } as ResumeWorkflowExecutionParams,
-      state: {},
-      runAt,
-    });
+    const task = await this.taskManager.schedule(
+      {
+        id: v4(),
+        taskType: 'workflow:resume',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as ResumeWorkflowExecutionParams,
+        state: {},
+        runAt: resumeAt,
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+      },
+      { request: fakeRequest }
+    );
+
     return {
       taskId: task.id,
     };
+  }
+
+  async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
+    const { docs: idleTasks } = await this.taskManager.fetch({
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'task.status': TaskStatus.Idle,
+              },
+            },
+            {
+              term: {
+                'task.scope': `workflow:execution:${workflowExecutionId}`,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if (idleTasks.length) {
+      // TODO: To use bulkRunSoon once available
+      await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+    }
   }
 }

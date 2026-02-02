@@ -25,6 +25,10 @@ jest.mock('fs', () => ({
   },
 }));
 
+jest.mock('@kbn/repo-info', () => ({
+  REPO_ROOT: '/path/to',
+}));
+
 jest.mock('child_process', () => ({
   spawn: jest.fn(),
 }));
@@ -294,7 +298,7 @@ describe('run_all.ts', () => {
         [
           'scripts/jest',
           '--config',
-          '/path/to/config1.js',
+          'config1.js',
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
@@ -553,6 +557,27 @@ describe('run_all.ts', () => {
 
         expect(mockGetJestConfigs).toHaveBeenCalledWith([]);
         expect(mockLog.error).toHaveBeenCalledWith('No configs found after parsing --configs');
+      });
+
+      it('should not throw when all configs are empty', async () => {
+        mockGetopts.mockReturnValue({
+          configs: ', , ,',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [],
+          emptyConfigs: ['/path/to/empty-config.js'],
+        });
+
+        try {
+          await runJestAll();
+        } catch (err) {
+          expect((err as Error).message).toContain('process.exit called with code 0');
+        }
+
+        expect(mockGetJestConfigs).toHaveBeenCalledWith([]);
+        expect(mockLog.error).not.toHaveBeenCalled();
       });
 
       it('should handle process spawn errors gracefully', async () => {

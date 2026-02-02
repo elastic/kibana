@@ -41,9 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
   const utils = getService('securitySolutionUtils');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/246567
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
+  describe.skip('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
     let adminSupertest: TestAgent;
     let t1AnalystSupertest: TestAgent;
 

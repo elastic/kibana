@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { timerange, log } from '@kbn/apm-synthtrace-client';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { timerange, log } from '@kbn/synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 
 export async function createSimpleSyntheticLogs({
   logsSynthtraceEsClient,

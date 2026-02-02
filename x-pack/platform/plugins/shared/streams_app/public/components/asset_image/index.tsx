@@ -26,6 +26,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  noDocuments: {
+    light: () => import('./no_documents_light.svg'),
+    dark: () => import('./no_documents_dark.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.noDocumentsImage', {
+      defaultMessage: 'No documents image for the streams app',
+    }),
+  },
   significantEventsEmptyState: {
     light: () => import('./sig_events_empty_state_light.svg'),
     dark: () => import('./sig_events_empty_state_dark.svg'),
@@ -92,6 +99,27 @@ const imageSets = {
       defaultMessage: 'Checklist',
     }),
   },
+  attachmentsEmpty: {
+    light: () => import('./attachments_empty_light.svg'),
+    dark: () => import('./attachments_empty_dark.svg'),
+    alt: i18n.translate('xpack.streams.attachments.emptyStateImage', {
+      defaultMessage: 'Attachments empty state image',
+    }),
+  },
+  suggestPipeline: {
+    light: () => import('./suggest_pipeline.svg'),
+    dark: () => import('./suggest_pipeline_dark.svg'),
+    alt: i18n.translate('xpack.streams.suggestPipelineImage', {
+      defaultMessage: 'Suggest pipeline',
+    }),
+  },
+  routingSuggestionEmptyState: {
+    light: () => import('./routing_suggestion_empty_state.svg'),
+    dark: () => import('./routing_suggestion_empty_state.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.image', {
+      defaultMessage: 'Suggest AI partitioning image for the streams app',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {
@@ -119,5 +147,6 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
     };
   }, [colorMode, dark, light]);
 
-  return imageSrc ? <EuiImage size="m" {...props} alt={alt} src={imageSrc} /> : null;
+  const { size = 'm', ...restProps } = props;
+  return imageSrc ? <EuiImage size={size} {...restProps} alt={alt} src={imageSrc} /> : null;
 }

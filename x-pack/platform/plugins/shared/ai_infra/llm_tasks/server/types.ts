@@ -7,6 +7,7 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type { ResourceType } from '@kbn/product-doc-common';
 import type { RetrieveDocumentationAPI } from './tasks/retrieve_documentation';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -32,7 +33,10 @@ export interface LlmTasksPluginStart {
    * are respected. Can be used to check if the task can be registered
    * as LLM tool for example.
    */
-  retrieveDocumentationAvailable: (options: { inferenceId: string }) => Promise<boolean>;
+  retrieveDocumentationAvailable: (options: {
+    inferenceId: string;
+    resourceType?: ResourceType;
+  }) => Promise<boolean>;
   /**
    * Perform the `retrieveDocumentation` task.
    *

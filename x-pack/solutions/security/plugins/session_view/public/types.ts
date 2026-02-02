@@ -24,12 +24,14 @@ export interface SessionViewPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
-export type SessionViewIndices = 'endpoint' | 'auditbeat';
+export type SessionViewIndices = 'endpoint' | 'cloud_defend' | 'auditbeat';
 
 // the following are all the reportUiCounter click tracking events we send up.
 export type SessionViewTelemetryKey =
   | 'loaded_from_auditbeat_log'
   | 'loaded_from_auditbeat_alert'
+  | 'loaded_from_cloud_defend_log'
+  | 'loaded_from_cloud_defend_alert'
   | 'loaded_from_endpoint_log'
   | 'loaded_from_endpoint_alert'
   | 'loaded_from_unknown_log'

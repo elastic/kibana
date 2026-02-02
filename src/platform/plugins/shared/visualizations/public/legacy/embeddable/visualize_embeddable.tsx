@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
@@ -37,10 +37,14 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizationError,
+  visContainerStyle,
+  visualizeClassName,
+} from '@kbn/visualizations-common';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
-import VisualizationError from '../../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
 import type { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
@@ -51,7 +55,6 @@ import type { AttributeService } from './attribute_service';
 import type { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
 import type { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { visualizeClassName, visContainerStyle } from '../../vis.styles';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -82,6 +85,7 @@ export interface VisualizeInput extends EmbeddableInput {
   filters?: Filter[];
   timeRange?: TimeRange;
   timeslice?: [number, number];
+  projectRouting?: ProjectRouting;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -613,6 +617,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         query: this.input.query,
         filters: this.input.filters,
         disableWarningToasts: true,
+        projectRouting: this.input.projectRouting,
       },
       variables: {
         embeddableTitle: this.getTitle(),
