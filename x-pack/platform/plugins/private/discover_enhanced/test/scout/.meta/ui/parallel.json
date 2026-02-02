@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:03:09.722Z",
-  "sha1": "4ebdabbb2f59457a685a6b803aa5b45701dfb583",
+  "lastModified": "2026-01-30T09:07:59.499Z",
+  "sha1": "7a5e9f32cd7cb6a5db3fcf6ed97a2c5fbb1382e5",
   "tests": [
     {
       "id": "448e82090e00e69-f2cd2d3cdc77643",
@@ -86,7 +86,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 36,
+        "line": 38,
         "column": 14
       }
     },
@@ -105,7 +105,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 49,
+        "line": 51,
         "column": 14
       }
     },
@@ -124,7 +124,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 34,
+        "line": 36,
         "column": 14
       }
     },
@@ -143,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 40,
+        "line": 42,
         "column": 14
       }
     },
@@ -162,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 53,
+        "line": 55,
         "column": 14
       }
     }
