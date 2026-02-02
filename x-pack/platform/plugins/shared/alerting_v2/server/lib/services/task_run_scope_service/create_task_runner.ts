@@ -6,8 +6,8 @@
  */
 
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { Request } from '@kbn/core-di-server';
 import { Global } from '@kbn/core-di-internal';
+import { Request } from '@kbn/core-di-server';
 import type {
   RunContext,
   RunResult,
@@ -53,32 +53,6 @@ export function createTaskRunnerFactory({
         scope.bind(Request).toConstantValue(fakeRequest);
         scope.bind(Global).toConstantValue(Request);
         scope.bind(taskRunnerClass).toSelf().inRequestScope();
-
-        try {
-          const runner = scope.get(taskRunnerClass);
-          return await runner.run({ taskInstance, abortController });
-        } finally {
-          await scope.unbindAll();
-        }
-      },
-    });
-  };
-}
-
-export const TaskRunnerFactoryBisToken = Symbol.for(
-  'alerting_v2.TaskRunnerFactoryBis'
-) as ServiceIdentifier<TaskRunnerFactory>;
-
-export function createTaskRunnerFactoryBis({
-  getInjection,
-}: {
-  getInjection: () => CoreDiServiceStart;
-}): TaskRunnerFactory {
-  return ({ taskRunnerClass }) => {
-    return ({ taskInstance, abortController }: RunContext) => ({
-      run: async () => {
-        const scope = getInjection().fork();
-        scope.bind(taskRunnerClass).toSelf().inSingletonScope();
 
         try {
           const runner = scope.get(taskRunnerClass);

@@ -8,8 +8,8 @@
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -25,11 +25,10 @@ import {
 } from '../lib/services/storage_service/tokens';
 import {
   createTaskRunnerFactory,
-  createTaskRunnerFactoryBis,
-  TaskRunnerFactoryBisToken,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerStartDependencies } from '../types';
+import { DispatcherTaskRunner } from '../lib/dispatcher/task_runner';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -40,7 +39,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
   bind(ResourceManager).toSelf().inSingletonScope();
-  bind(DispatcherService).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
     .toDynamicValue(({ get }) => {
@@ -58,11 +56,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(TaskRunnerFactoryToken).toFactory((context) =>
     createTaskRunnerFactory({
-      getInjection: () => context.get(CoreStart('injection')),
-    })
-  );
-  bind(TaskRunnerFactoryBisToken).toFactory((context) =>
-    createTaskRunnerFactoryBis({
       getInjection: () => context.get(CoreStart('injection')),
     })
   );
@@ -92,6 +85,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
       return new StorageService(esClient, loggerService);
+    })
+    .inSingletonScope();
+
+  bind(DispatcherService).toSelf().inSingletonScope();
+
+  bind(DispatcherTaskRunner)
+    .toDynamicValue(({ get }) => {
+      const dispatcherService = get(DispatcherService);
+      return new DispatcherTaskRunner(dispatcherService);
     })
     .inSingletonScope();
 }
