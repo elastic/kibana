@@ -6,12 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import createContainer from 'constate';
-import type { DocViewerExtensionParams } from '@kbn/discover-plugin/public/context_awareness/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 
 interface UseDocViewerExtensionActionsParams {
-  actions?: DocViewerExtensionParams['actions'];
+  actions?: DocViewRenderProps['actions'];
 }
 
 const useDocViewerExtensionActions = ({ actions }: UseDocViewerExtensionActionsParams) => {
