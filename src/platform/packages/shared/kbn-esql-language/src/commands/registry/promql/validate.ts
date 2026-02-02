@@ -92,7 +92,7 @@ export const validate = (
 
   if (_context?.timeSeriesSources) {
     const sourcesSet = new Set(_context.timeSeriesSources.map((src) => src.name));
-    validateIndexSources(command, sourcesSet, messages);
+    validateIndexSources(command, sourcesSet, messages, paramValues);
   }
 
   // Basic value checks: presence, and minimal format for start/end.
@@ -186,7 +186,12 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
   if (query.type === 'unknown') {
     const text = query.text?.trim() ?? '';
 
-    return text !== '' && !looksLikePromqlParamAssignment(text);
+    // Empty text, starts with "=" (orphaned assignment value), or looks like param assignment
+    if (text === '' || text.startsWith('=') || looksLikePromqlParamAssignment(text)) {
+      return false;
+    }
+
+    return true;
   }
 
   return false;
@@ -196,34 +201,52 @@ function hasValidQuery(command: ESQLAstPromqlCommand): boolean {
 function validateIndexSources(
   command: ESQLAstPromqlCommand,
   sourcesSet: Set<string>,
-  messages: ESQLMessage[]
+  messages: ESQLMessage[],
+  paramValues: Map<
+    string,
+    {
+      value: string;
+      location: ESQLLocation;
+      entryLocation?: ESQLLocation;
+      keyLocation?: ESQLLocation;
+    }
+  >
 ): void {
   const params = command.params;
-
-  if (!params) {
-    return;
-  }
-
-  const indexEntry = params.entries.find(
+  const indexEntry = params?.entries.find(
     (entry) => isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
   );
 
-  if (!indexEntry) {
+  if (indexEntry) {
+    const indexValue = indexEntry.value;
+    const sources = isList(indexValue)
+      ? indexValue.values.filter(isSource)
+      : isSource(indexValue)
+      ? [indexValue]
+      : [];
+
+    for (const source of sources) {
+      const indexName = source.name;
+
+      if (indexName && isPromqlParamName(indexName.toLowerCase())) {
+        continue;
+      }
+
+      if (indexName && !sourceExists(indexName, sourcesSet)) {
+        messages.push(errors.byId('unknownIndex', source.location, { name: indexName }));
+      }
+    }
+
     return;
   }
 
-  const indexValue = indexEntry.value;
-  const sources = isList(indexValue)
-    ? indexValue.values.filter(isSource)
-    : isSource(indexValue)
-    ? [indexValue]
-    : [];
+  // Fallback: handles case when index is mis-parsed into query field
+  const indexParam = paramValues.get('index');
+  if (indexParam && indexParam.value) {
+    const indexName = stripQuotes(indexParam.value);
 
-  for (const source of sources) {
-    const indexName = source.name;
-
-    if (indexName && !sourceExists(indexName, sourcesSet)) {
-      messages.push(errors.byId('unknownIndex', source.location, { name: indexName }));
+    if (!sourceExists(indexName, sourcesSet)) {
+      messages.push(errors.byId('unknownIndex', indexParam.location, { name: indexName }));
     }
   }
 }

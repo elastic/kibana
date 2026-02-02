@@ -99,6 +99,13 @@ describe('PROMQL Validation', () => {
       );
     });
 
+    test('unknown index with missing query', () => {
+      promqlExpectErrors('PROMQL step="5m" index=hh', [
+        'Unknown index "hh"',
+        '[PROMQL] Missing query',
+      ]);
+    });
+
     test('multiple indexes - all valid', () => {
       promqlExpectErrors(
         'PROMQL index=timeseries_index,time_series_index step=5m start=?_tstart end=?_tend (rate(x[5m]))',
