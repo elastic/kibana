@@ -1,0 +1,193 @@
+---
+id: kbn-vitest
+title: '@kbn/vitest'
+slug: /kibana-dev-docs/kbn-vitest
+---
+
+# @kbn/vitest
+
+Shared Vitest configuration and utilities for Kibana packages and plugins.
+
+## Overview
+
+This package provides a consistent Vitest configuration that mirrors Kibana's Jest setup, enabling gradual migration from Jest to Vitest. It includes:
+
+- **Preset configurations** for unit and integration tests
+- **Module resolution** for `@kbn/*` packages
+- **Mock modules** for styles, files, workers, and APM
+- **Setup files** for jsdom, polyfills, and global test utilities
+
+## Usage
+
+### Basic Configuration
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import { createKbnVitestPreset } from '@kbn/vitest';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnVitestPreset({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+  })
+);
+```
+
+### Unit Tests (Default)
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import { createKbnUnitTestPreset } from '@kbn/vitest';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnUnitTestPreset({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+  })
+);
+```
+
+### Integration Tests
+
+```typescript
+import { defineConfig } from 'vitest/config';
+import { createKbnIntegrationTestPreset } from '@kbn/vitest';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnIntegrationTestPreset({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+  })
+);
+```
+
+## Configuration Options
+
+### KbnVitestPresetOptions
+
+| Option             | Type       | Default                                                             | Description                                       |
+| ------------------ | ---------- | ------------------------------------------------------------------- | ------------------------------------------------- |
+| `repoRoot`         | `string`   | required                                                            | The root directory of the Kibana repository       |
+| `packageRoot`      | `string`   | required                                                            | The root directory of the package being tested    |
+| `include`          | `string[]` | `['**/*.test.{ts,tsx,js,jsx}']`                                     | Test file patterns to match                       |
+| `exclude`          | `string[]` | `['**/node_modules/**', '**/target/**', '**/integration_tests/**']` | Test file patterns to exclude                     |
+| `jsdom`            | `boolean`  | `true`                                                              | Whether to use jsdom environment                  |
+| `integration`      | `boolean`  | `false`                                                             | Whether this is an integration test configuration |
+| `setupFiles`       | `string[]` | `[]`                                                                | Additional setup files to run before tests        |
+| `coverage.enabled` | `boolean`  | `false` (or `true` if `CODE_COVERAGE` env)                          | Enable coverage collection                        |
+| `coverage.include` | `string[]` | `['**/*.{ts,tsx,js,jsx}']`                                          | Files to include in coverage                      |
+| `coverage.exclude` | `string[]` | (various test/mock patterns)                                        | Files to exclude from coverage                    |
+
+## Migration from Jest
+
+### Test Syntax
+
+Vitest is largely compatible with Jest's API. The main differences:
+
+```typescript
+// Jest
+import { jest } from '@jest/globals';
+jest.mock('./module');
+jest.fn();
+jest.spyOn(object, 'method');
+
+// Vitest
+import { vi } from 'vitest';
+vi.mock('./module');
+vi.fn();
+vi.spyOn(object, 'method');
+```
+
+### Common Patterns
+
+| Jest                     | Vitest                 |
+| ------------------------ | ---------------------- |
+| `jest.fn()`              | `vi.fn()`              |
+| `jest.mock()`            | `vi.mock()`            |
+| `jest.spyOn()`           | `vi.spyOn()`           |
+| `jest.useFakeTimers()`   | `vi.useFakeTimers()`   |
+| `jest.useRealTimers()`   | `vi.useRealTimers()`   |
+| `jest.clearAllMocks()`   | `vi.clearAllMocks()`   |
+| `jest.resetAllMocks()`   | `vi.resetAllMocks()`   |
+| `jest.restoreAllMocks()` | `vi.restoreAllMocks()` |
+
+### Snapshot Testing
+
+Snapshots work the same way, but Vitest uses `.snap` files by default (same as Jest).
+
+```typescript
+expect(component).toMatchSnapshot();
+expect(value).toMatchInlineSnapshot();
+```
+
+## Mocks
+
+The package provides mock modules that can be used to stub out certain imports:
+
+### Style Mock
+
+```typescript
+import { styleMock } from '@kbn/vitest';
+vi.mock('./styles.scss', () => styleMock);
+```
+
+### CSS Module Mock
+
+```typescript
+import { cssModuleMock } from '@kbn/vitest';
+vi.mock('./component.module.css', () => ({ default: cssModuleMock }));
+```
+
+### File Mock
+
+```typescript
+import { fileMock } from '@kbn/vitest';
+vi.mock('./image.png', () => ({ default: fileMock }));
+```
+
+### Worker Mock
+
+```typescript
+import { workerMock } from '@kbn/vitest';
+vi.mock('./worker.ts?worker', () => ({ default: workerMock }));
+```
+
+### APM Agent Mock
+
+```typescript
+import { apmAgentMock } from '@kbn/vitest';
+vi.mock('elastic-apm-node', () => ({ default: apmAgentMock }));
+```
+
+## Running Tests
+
+```bash
+# Run tests for a specific package
+cd packages/my-package
+npx vitest
+
+# Run tests with coverage
+npx vitest --coverage
+
+# Run tests in watch mode
+npx vitest --watch
+
+# Run tests once (CI mode)
+npx vitest run
+```
+
+## Differences from Jest
+
+1. **Speed**: Vitest uses esbuild for transformation, which is significantly faster than Babel.
+
+2. **Native ESM**: Vitest has better ESM support out of the box.
+
+3. **HMR**: Test files can hot-reload during watch mode.
+
+4. **Type Checking**: Vitest can optionally run TypeScript type checking alongside tests.
+
+5. **Vite Integration**: Shares configuration with Vite builds, ensuring consistency.
