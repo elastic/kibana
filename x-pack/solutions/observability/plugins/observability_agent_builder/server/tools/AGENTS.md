@@ -218,7 +218,7 @@ Every tool MUST have a Synthtrace scenario. Run with:
 ```bash
 node scripts/synthtrace \
   src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/<tool_name>/<scenario>.ts \
-  --from "now-1h" --to "now" --clean --workers=1
+  --from "now-1h" --to "now" --clean
 ```
 
 ### Executing Tools Locally
