@@ -12,6 +12,7 @@ import { createIsNarrowSchema } from '../../../shared/type_guards';
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    downsample?: DownsampleStep[];
   };
 }
 
@@ -59,8 +60,16 @@ export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
   | ClassicIngestStreamEffectiveLifecycle;
 
+const downsampleStepSchema = z.object({
+  after: NonEmptyString,
+  fixed_interval: NonEmptyString,
+});
+
 const dslLifecycleSchema = z.object({
-  dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
+  dsl: z.object({
+    data_retention: z.optional(NonEmptyString),
+    downsample: z.optional(z.array(downsampleStepSchema)),
+  }),
 });
 const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
@@ -109,32 +118,21 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
-export interface IlmPolicyDownsampleAction {
-  /**
-   * The fixed time interval into which the data will be downsampled.
-   */
+export interface DownsampleStep {
+  after: string;
   fixed_interval: string;
-}
-
-export interface IlmPolicySearchableSnapshotAction {
-  /**
-   * Repository used to store the snapshot.
-   */
-  snapshot_repository: string;
 }
 
 export interface IlmPolicyPhase {
   name: PhaseName;
   size_in_bytes: number;
   min_age?: string;
-}
-
-export interface IlmPolicyPhaseWithDownsampleAndReadOnly extends IlmPolicyPhase {
-  downsample?: IlmPolicyDownsampleAction;
+  downsample?: DownsampleStep;
   readonly?: boolean;
+  searchable_snapshot?: string;
 }
 
-export interface IlmPolicyHotPhase extends IlmPolicyPhaseWithDownsampleAndReadOnly {
+export interface IlmPolicyHotPhase extends IlmPolicyPhase {
   name: 'hot';
   rollover: {
     max_size?: number | string;
@@ -145,16 +143,6 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhaseWithDownsampleAndReadOn
   };
 }
 
-export interface IlmPolicyColdPhase extends IlmPolicyPhaseWithDownsampleAndReadOnly {
-  name: 'cold';
-  searchable_snapshot?: IlmPolicySearchableSnapshotAction;
-}
-
-export interface IlmPolicyFrozenPhase extends IlmPolicyPhase {
-  name: 'frozen';
-  searchable_snapshot?: IlmPolicySearchableSnapshotAction;
-}
-
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
@@ -162,8 +150,8 @@ export interface IlmPolicyDeletePhase {
 
 export interface IlmPolicyPhases {
   hot?: IlmPolicyHotPhase;
-  warm?: IlmPolicyPhaseWithDownsampleAndReadOnly;
-  cold?: IlmPolicyColdPhase;
-  frozen?: IlmPolicyFrozenPhase;
+  warm?: IlmPolicyPhase;
+  cold?: IlmPolicyPhase;
+  frozen?: IlmPolicyPhase;
   delete?: IlmPolicyDeletePhase;
 }

@@ -41,3 +41,15 @@ export const DEFAULT_STROKE_WIDTH = 1;
 
 /** Width of the highlighted stroke */
 export const HIGHLIGHTED_STROKE_WIDTH = 2;
+
+/** Default node size in pixels when measured dimensions are not available */
+export const DEFAULT_NODE_SIZE = 56;
+
+/** Off-screen position for hidden elements (ensures they don't flash on screen) */
+export const OFFSCREEN_POSITION = -10000;
+
+/** Divisor for calculating popover offset from edge midpoint */
+export const EDGE_OFFSET_DIVISOR = 4;
+
+/** Duration of the center animation in milliseconds */
+export const CENTER_ANIMATION_DURATION_MS = 200;
