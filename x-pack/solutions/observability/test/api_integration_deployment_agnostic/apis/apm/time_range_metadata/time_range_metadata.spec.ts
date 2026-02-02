@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { omit, sortBy } from 'lodash';
@@ -12,7 +12,7 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { Readable } from 'stream';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

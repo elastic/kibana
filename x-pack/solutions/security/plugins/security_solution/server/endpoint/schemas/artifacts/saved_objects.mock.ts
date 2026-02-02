@@ -12,7 +12,7 @@ import type { InternalManifestSchema, InternalArtifactCompleteSchema } from './s
 export const getInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
-  artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+  artifactName: string = ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
 ): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact(
     getTranslatedExceptionListMock(),
@@ -26,7 +26,7 @@ export const getInternalArtifactMock = async (
 export const getEmptyInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
-  artifactName: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+  artifactName: string = ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
 ): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact({ entries: [] }, schemaVersion, os, artifactName);
   return artifact;
@@ -42,7 +42,7 @@ export const getInternalArtifactMockWithDiffs = async (
     mock,
     schemaVersion,
     os,
-    ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+    ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
   );
   return artifact;
 };

@@ -17,10 +17,10 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { OpenInDiscover } from '../category_table/use_open_in_discover';
 import { EmbeddableMenu } from './embeddable_menu';
 import type { RandomSampler } from '../sampling_menu';
-import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { SelectedPatterns } from './selected_patterns';
 import { CreateCategorizationJobButton } from '../create_categorization_job';
 import { SelectedField } from './field_selector';
+import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
 interface Props {
   renderViewModeToggle: (patternCount?: number) => React.ReactElement;

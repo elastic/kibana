@@ -50,6 +50,12 @@ const notifications: NotificationsStart = {
     get$: () => of([]),
   },
   showErrorDialog: () => {},
+  feedback: {
+    isEnabled: () => true,
+  },
+  tours: {
+    isEnabled: () => true,
+  },
 };
 
 const userProfile = { getUserProfile$: () => of(null) };
@@ -61,7 +67,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
   const { globals } = context;
   const { euiTheme } = globals;
 
-  const darkMode = ['v8.dark', 'v7.dark'].includes(euiTheme);
+  const darkMode = ['borealis.dark'].includes(euiTheme);
   ExperimentalFeaturesService.init({
     experimentalFeatures: {
       rulesListDatagrid: true,
@@ -74,6 +80,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
       alertDeletionSettingsEnabled: false,
+      unifiedRulesPage: false,
     },
   });
 

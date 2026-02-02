@@ -51,16 +51,35 @@ export class RequestContextFactory implements IRequestContextFactory {
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
     return {
       core: coreContext,
       actions: startPlugins.actions,
       logger: this.logger,
       getServerBasePath: () => core.http.basePath.serverBasePath,
       getSpaceId,
-      getCurrentUser: async () => coreContext.security.authc.getCurrentUser(),
+      getCurrentUser: async () => {
+        const user = await coreContext.security.authc.getCurrentUser();
+        if (!user) {
+          // Return a default system user for testing/non-authenticated environments
+          return {
+            username: 'system',
+            roles: [],
+            enabled: true,
+            authentication_realm: { name: 'reserved', type: 'reserved' },
+            lookup_realm: { name: 'reserved', type: 'reserved' },
+            authentication_provider: { type: 'basic', name: 'basic' },
+            authentication_type: 'realm' as const,
+            elastic_cloud_user: false,
+          };
+        }
+        return user;
+      },
       automaticImportService: this.options.automaticImportService,
       inference: startPlugins.inference,
       savedObjectsClient,
+      esClient,
     };
   }
 }

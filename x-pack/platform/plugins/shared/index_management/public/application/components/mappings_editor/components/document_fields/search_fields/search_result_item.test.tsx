@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StateProvider } from '../../../mappings_state_context';
 
 import { SearchResultItem } from './search_result_item';
@@ -28,25 +28,31 @@ describe('SearchResultItem', () => {
     display: <div>{'foo > bar > baz'}</div>,
   } as SearchResult;
 
-  it('should display the field name and a badge to indicate its type', () => {
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResultItem
-          item={item}
-          areActionButtonsVisible={false}
-          isHighlighted={false}
-          isDimmed={false}
-        />
-      </StateProvider>
+  const renderComponent = (props: React.ComponentProps<typeof SearchResultItem>) => {
+    return render(
+      <I18nProvider>
+        <StateProvider>
+          <SearchResultItem {...props} />
+        </StateProvider>
+      </I18nProvider>
     );
+  };
 
-    expect(
-      tree.find('SearchResultItem').find('[data-test-subj="fieldName"]').last().text()
-    ).toEqual('foo > bar > baz');
+  it('should display the field name and a badge to indicate its type', () => {
+    renderComponent({
+      item,
+      areActionButtonsVisible: false,
+      isHighlighted: false,
+      isDimmed: false,
+    });
 
-    expect(
-      tree.find('SearchResultItem').find('[data-test-subj="fieldType"]').last().text()
-    ).toEqual('Text');
+    const fieldName = screen.getByTestId('fieldName');
+    expect(fieldName).toBeInTheDocument();
+    expect(fieldName.textContent).toEqual('foo > bar > baz');
+
+    const fieldType = screen.getByTestId('fieldType');
+    expect(fieldType).toBeInTheDocument();
+    expect(fieldType.textContent).toEqual('Text');
   });
 
   it('should show multi-field badge if the field is a multi-field', () => {
@@ -58,37 +64,28 @@ describe('SearchResultItem', () => {
       },
     };
 
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResultItem
-          item={multiFieldItem}
-          areActionButtonsVisible={false}
-          isHighlighted={false}
-          isDimmed={false}
-        />
-      </StateProvider>
-    );
+    renderComponent({
+      item: multiFieldItem,
+      areActionButtonsVisible: false,
+      isHighlighted: false,
+      isDimmed: false,
+    });
 
-    expect(
-      tree.find('SearchResultItem').find('[data-test-subj="fieldType"]').last().text()
-    ).toEqual('Text multi-field');
+    const fieldType = screen.getByTestId('fieldType');
+    expect(fieldType).toBeInTheDocument();
+    expect(fieldType.textContent).toEqual('Text multi-field');
   });
 
   it('should render action buttons if "areActionButtonsVisible" is true', () => {
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResultItem
-          item={item}
-          areActionButtonsVisible={true}
-          isHighlighted={false}
-          isDimmed={false}
-        />
-      </StateProvider>
-    );
+    renderComponent({
+      item,
+      areActionButtonsVisible: true,
+      isHighlighted: false,
+      isDimmed: false,
+    });
 
-    expect(tree.find('SearchResultItem').find('[data-test-subj="fieldActions"]').exists()).toBe(
-      true
-    );
+    const fieldActions = screen.getByTestId('fieldActions');
+    expect(fieldActions).toBeInTheDocument();
   });
 
   it('should fall back to source type if the field type is not found in the type definition', () => {
@@ -104,19 +101,15 @@ describe('SearchResultItem', () => {
       },
     };
 
-    const tree = mountWithIntl(
-      <StateProvider>
-        <SearchResultItem
-          item={itemWithUnknownType as SearchResult}
-          areActionButtonsVisible={true}
-          isHighlighted={false}
-          isDimmed={false}
-        />
-      </StateProvider>
-    );
+    renderComponent({
+      item: itemWithUnknownType as SearchResult,
+      areActionButtonsVisible: true,
+      isHighlighted: false,
+      isDimmed: false,
+    });
 
-    expect(
-      tree.find('SearchResultItem').find('[data-test-subj="fieldType"]').last().text()
-    ).toEqual('unknown multi-field');
+    const fieldType = screen.getByTestId('fieldType');
+    expect(fieldType).toBeInTheDocument();
+    expect(fieldType.textContent).toEqual('unknown multi-field');
   });
 });

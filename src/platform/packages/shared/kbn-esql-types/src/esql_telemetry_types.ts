@@ -10,6 +10,12 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
+  onSuggestionsReady?: (
+    computeStart: number,
+    computeEnd: number,
+    queryLength: number,
+    queryLines: number
+  ) => void;
 }
 
 export enum QuerySource {
@@ -17,12 +23,30 @@ export enum QuerySource {
   STARRED = 'starred',
   MANUAL = 'manual',
   HELP = 'help',
+  AUTOCOMPLETE = 'autocomplete',
+  QUICK_SEARCH = 'quick_search',
 }
 
 export interface TelemetryQuerySubmittedProps {
-  query_source: QuerySource;
-  query_length: string;
-  query_lines: string;
-  anti_limit_before_aggregate: boolean;
-  anti_missing_sort_before_limit: boolean;
+  source: QuerySource;
+  query: string;
+}
+
+export enum ControlTriggerSource {
+  SMART_SUGGESTION = 'smart_suggestion',
+  QUESTION_MARK = 'question_mark',
+  ADD_CONTROL_BTN = 'add_control_btn',
+}
+
+export enum TelemetryControlCancelledReason {
+  CANCEL_BUTTON = 'cancel_button',
+  CLOSE_BUTTON = 'close_button',
+}
+
+export interface TelemetryLatencyProps {
+  duration: number; // Latency in milliseconds.
+  queryLength: number; // Query length in characters.
+  queryLines: number; // Query length in lines.
+  sessionId: string; // Editor mount session id.
+  isInitialLoad?: boolean; // True for the first sampled event of each metric.
 }

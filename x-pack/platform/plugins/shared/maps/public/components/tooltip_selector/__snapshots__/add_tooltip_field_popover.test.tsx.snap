@@ -18,7 +18,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   }
   closePopover={[Function]}
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="addTooltipFieldPopover"
   isOpen={false}
   ownFocus={true}
@@ -93,7 +93,7 @@ exports[`Should render 1`] = `
   }
   closePopover={[Function]}
   display="inline-block"
-  hasArrow={true}
+  hasArrow={false}
   id="addTooltipFieldPopover"
   isOpen={false}
   ownFocus={true}

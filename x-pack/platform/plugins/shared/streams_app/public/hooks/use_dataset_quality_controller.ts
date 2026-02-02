@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
-import { useHistory } from 'react-router-dom';
 import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
 } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { DEFAULT_DATEPICKER_REFRESH } from '@kbn/dataset-quality-plugin/common';
+import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import {
   getDatasetQualityDetailsStateFromUrl,
   updateUrlFromDatasetQualityDetailsState,
 } from '../util/url_state_storage_service';
 import { useKibana } from './use_kibana';
-import { useTimefilter } from './use_timefilter';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
+import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
+import { useTimeRange } from './use_time_range';
+import { useTimeRangeUpdate } from './use_time_range_update';
 
 export const useDatasetQualityController = (
   definition: Streams.ingest.all.GetResponse,
-  saveStateInUrl: boolean = true
+  saveStateInUrl: boolean = true,
+  refreshDefinition?: () => void
 ): DatasetQualityDetailsController | undefined => {
-  const { datasetQuality } = useKibana().dependencies.start;
+  const {
+    datasetQuality,
+    streams: { streamsRepositoryClient },
+    share: {
+      url: { locators },
+    },
+  } = useKibana().dependencies.start;
   const {
     core: {
       notifications: { toasts },
@@ -34,8 +43,27 @@ export const useDatasetQualityController = (
   const [controller, setController] = useState<DatasetQualityDetailsController>();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
-  const history = useHistory();
-  const { timeState, setTime } = useTimefilter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+
+  const streamsUrls = useMemo(() => {
+    const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
+    if (!streamsLocator) {
+      return undefined;
+    }
+
+    const streamName = definition.stream.name;
+    return {
+      processingUrl: streamsLocator.getRedirectUrl({
+        name: streamName,
+        managementTab: 'processing',
+      } as StreamsAppLocatorParams),
+      schemaUrl: streamsLocator.getRedirectUrl({
+        name: streamName,
+        managementTab: 'schema',
+      } as StreamsAppLocatorParams),
+    };
+  }, [locators, definition.stream.name]);
 
   useEffect(() => {
     async function getDatasetQualityDetailsController() {
@@ -49,6 +77,11 @@ export const useDatasetQualityController = (
         return;
       }
 
+      // Use time from URL params (rangeFrom/rangeTo) as the source of truth
+      // This ensures consistency across tabs within the Streams app.
+      const currentTimeFrom = rangeFrom ?? 'now-15m';
+      const currentTimeTo = rangeTo ?? 'now';
+
       // state initialized but empty
       if (initialState === null) {
         initialState = {
@@ -57,9 +90,21 @@ export const useDatasetQualityController = (
             ? 'wired'
             : 'classic') as DatasetQualityView,
           timeRange: {
-            from: timeState.timeRange.from,
-            to: timeState.timeRange.to,
+            from: currentTimeFrom,
+            to: currentTimeTo,
             refresh: DEFAULT_DATEPICKER_REFRESH,
+          },
+          streamDefinition: definition,
+        };
+      } else {
+        // The pageState may have stale time values from a previous visit,
+        // so always override with the URL time params.
+        initialState = {
+          ...initialState,
+          timeRange: {
+            from: currentTimeFrom,
+            to: currentTimeTo,
+            refresh: initialState.timeRange?.refresh ?? DEFAULT_DATEPICKER_REFRESH,
           },
         };
       }
@@ -71,7 +116,11 @@ export const useDatasetQualityController = (
             view: (Streams.WiredStream.Definition.is(definition.stream)
               ? 'wired'
               : 'classic') as DatasetQualityView,
+            streamDefinition: definition,
+            streamsUrls,
           },
+          streamsRepositoryClient,
+          refreshDefinition,
         });
       datasetQualityDetailsController.service.start();
 
@@ -88,7 +137,7 @@ export const useDatasetQualityController = (
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
-            setTime,
+            setTime: updateTimeRange,
           });
         }
       );
@@ -102,15 +151,16 @@ export const useDatasetQualityController = (
     getDatasetQualityDetailsController();
   }, [
     datasetQuality,
-    history,
     toasts,
     urlStateStorageContainer,
-    definition.stream.name,
+    definition,
     saveStateInUrl,
-    definition.stream,
-    timeState.timeRange.from,
-    timeState.timeRange.to,
-    setTime,
+    rangeFrom,
+    rangeTo,
+    updateTimeRange,
+    streamsRepositoryClient,
+    refreshDefinition,
+    streamsUrls,
   ]);
 
   return controller;

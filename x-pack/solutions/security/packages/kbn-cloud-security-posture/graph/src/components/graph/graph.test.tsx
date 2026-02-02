@@ -628,4 +628,170 @@ describe('<Graph />', () => {
       });
     });
   });
+
+  describe('interactiveBottomRightContent rendering', () => {
+    it('should not render content when interactiveBottomRightContent is null', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: null,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not render content when interactiveBottomRightContent is undefined', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId('graph-callout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render content when interactiveBottomRightContent is provided', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { getByText } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        expect(getByText('Test Content Title')).toBeInTheDocument();
+        expect(getByText('Test content message')).toBeInTheDocument();
+      });
+    });
+
+    it('should not render content when interactive is false even if interactiveBottomRightContent is provided', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { queryByText } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: false,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        expect(queryByText('Test Content Title')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render both custom content and Controls in the bottom-right Panel', async () => {
+      const customContent = (
+        <div data-test-subj="custom-content">
+          <h3>{'Test Content Title'}</h3>
+          <p>{'Test content message'}</p>
+        </div>
+      );
+
+      const { getByText, getByTestId } = renderGraphPreview({
+        nodes: [],
+        edges: [],
+        interactive: true,
+        interactiveBottomRightContent: customContent,
+      });
+
+      await waitFor(() => {
+        // Verify custom content is rendered
+        expect(getByText('Test Content Title')).toBeInTheDocument();
+
+        // Verify Controls are still rendered (check for zoom in button as indicator)
+        expect(getByTestId('cloudSecurityGraphGraphInvestigationZoomIn')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('interactive class', () => {
+    const testNodes: NodeViewModel[] = [
+      {
+        id: 'entity1',
+        label: 'Entity Node',
+        color: 'primary',
+        shape: 'hexagon',
+      },
+      {
+        id: 'label1',
+        label: 'Label Node',
+        color: 'primary',
+        shape: 'label',
+      },
+    ];
+
+    it('should add non-interactive class to nodes when interactive is false', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should not add non-interactive class to nodes when interactive is true', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).not.toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should add non-interactive class to relationship nodes when interactive is false', async () => {
+      const nodesWithRelationship: NodeViewModel[] = [
+        ...testNodes,
+        {
+          id: 'rel1',
+          label: 'Owns',
+          shape: 'relationship',
+        },
+      ];
+
+      const { container } = renderGraphPreview({
+        nodes: nodesWithRelationship,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const relationshipNode = container.querySelector('[data-id="rel1"]');
+        expect(relationshipNode).not.toBeNull();
+        expect(relationshipNode).toHaveClass('non-interactive');
+      });
+    });
+  });
 });

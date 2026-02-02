@@ -12,6 +12,7 @@ import type { DocumentNode } from '../../types/node';
 
 export type TraverseDocumentNodeContext = TraverseDocumentContext & {
   isRootNode: boolean;
+  parent?: TraverseDocumentNodeContext;
   parentNode: DocumentNode;
   parentKey: string | number;
 };

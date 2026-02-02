@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { isEmpty, isPlainObject, isString } from 'lodash';
 
 import type {

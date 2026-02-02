@@ -39,7 +39,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
   }
 
   _onSearchChange = ({ query, error }: EuiSearchBarOnChangeArgs) => {
-    if (!error) {
+    if (!error && query) {
       this.setState({ clusters: findClusters(this.props.request, query) });
     }
   };

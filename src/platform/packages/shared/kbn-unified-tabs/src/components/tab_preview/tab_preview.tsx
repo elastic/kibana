@@ -37,6 +37,7 @@ export interface TabPreviewProps {
   previewData: TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
+  position?: 'bottom' | 'left';
 }
 
 const getQueryLanguage = (tabPreviewData: TabPreviewData) => {
@@ -62,6 +63,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   tabItem,
   previewData,
   stopPreviewOnHover,
+  position = 'bottom',
   previewDelay = 1250, // as "long" EuiToolTip delay
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -73,27 +75,42 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   useEffect(() => {
     if (showPreview && tabRef.current) {
       const rect = tabRef.current.getBoundingClientRect();
-      const windowWidth = window.innerWidth;
-
-      // Check if preview would extend beyond right edge
-      const wouldExtendBeyondRight = rect.left + PREVIEW_WIDTH > windowWidth;
-
-      // Calculate left position based on screen edge constraints
-      let leftPosition = rect.left + window.scrollX;
-
-      if (wouldExtendBeyondRight) {
-        // Align right edge of preview with right edge of window
-        leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
-      }
 
       setTabPreviewData(previewData);
 
-      setTabPosition({
-        top: rect.bottom + window.scrollY,
-        left: leftPosition,
-      });
+      if (position === 'left') {
+        // Position to the left of the element
+        let leftPosition = rect.left + window.scrollX - PREVIEW_WIDTH - euiTheme.base - 30; // extra 30 to push it off the EUI selectable menu
+        const topPosition = rect.top + window.scrollY - euiTheme.base / 2;
+
+        // Ensure preview doesn't go off left edge
+        if (leftPosition < window.scrollX) {
+          leftPosition = window.scrollX + euiTheme.base;
+        }
+
+        setTabPosition({
+          top: topPosition,
+          left: leftPosition,
+        });
+      } else {
+        // Position below the element (default)
+        let leftPosition = rect.left + window.scrollX;
+
+        // Check if preview would extend beyond right edge
+        const wouldExtendBeyondRight = rect.left + PREVIEW_WIDTH > window.innerWidth;
+
+        if (wouldExtendBeyondRight) {
+          // Align right edge of preview with right edge of window
+          leftPosition = window.innerWidth - PREVIEW_WIDTH + window.scrollX;
+        }
+
+        setTabPosition({
+          top: rect.bottom + window.scrollY + euiTheme.base / 2,
+          left: leftPosition,
+        });
+      }
     }
-  }, [showPreview, previewData, tabItem]);
+  }, [showPreview, previewData, tabItem, euiTheme.base, position]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -148,48 +165,77 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         <EuiSplitPanel.Outer
           grow
           css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
-          data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
+          data-test-subj={`unifiedTabs_tabPreview_outerPanel_${tabItem.id}`}
         >
           {showPreview && !!tabPreviewData && (
-            <>
-              <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-                <EuiCodeBlock
-                  language={getQueryLanguage(tabPreviewData)}
-                  transparentBackground
-                  paddingSize="none"
-                  css={codeBlockCss}
-                  data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
-                >
-                  {getPreviewQuery(tabPreviewData)}
-                </EuiCodeBlock>
-              </EuiSplitPanel.Inner>
-              <EuiSplitPanel.Inner
-                grow={false}
-                color="subdued"
-                paddingSize="none"
-                className="eui-textBreakWord"
-                css={getSplitPanelCss(euiTheme)}
-              >
-                {tabPreviewData.status === TabStatus.RUNNING ? (
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">{tabItem.label}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <EuiHealth color={tabPreviewData.status} textSize="s">
-                    {tabItem.label}
-                  </EuiHealth>
-                )}
-              </EuiSplitPanel.Inner>
-            </>
+            <TabPreviewInner tabItem={tabItem} tabPreviewData={tabPreviewData} />
           )}
         </EuiSplitPanel.Outer>
       </EuiPortal>
     </div>
+  );
+};
+
+const TabPreviewInner: React.FC<{
+  tabItem: TabPreviewProps['tabItem'];
+  tabPreviewData: TabPreviewData;
+}> = ({ tabItem, tabPreviewData }) => {
+  const { euiTheme } = useEuiTheme();
+  const previewQuery = getPreviewQuery(tabPreviewData);
+
+  return (
+    <>
+      <EuiSplitPanel.Inner
+        paddingSize="none"
+        css={getSplitPanelCss(euiTheme)}
+        data-test-subj="unifiedTabs_tabPreview_contentPanel"
+      >
+        {tabPreviewData.title ? (
+          <EuiText
+            size="xs"
+            className="eui-textBreakWord"
+            css={getPreviewTitleCss(euiTheme, Boolean(previewQuery))}
+            data-test-subj={`unifiedTabs_tabPreview_title_${tabItem.id}`}
+          >
+            {tabPreviewData.title}
+          </EuiText>
+        ) : null}
+        {previewQuery ? (
+          <EuiCodeBlock
+            language={getQueryLanguage(tabPreviewData)}
+            transparentBackground
+            paddingSize="none"
+            css={codeBlockCss}
+            data-test-subj={`unifiedTabs_tabPreviewCodeBlock_${tabItem.id}`}
+          >
+            {previewQuery}
+          </EuiCodeBlock>
+        ) : null}
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        grow={false}
+        color="subdued"
+        paddingSize="none"
+        className="eui-textBreakWord"
+        css={getSplitPanelCss(euiTheme)}
+        data-test-subj={`unifiedTabs_tabPreview_label_${tabItem.id}`}
+      >
+        {tabPreviewData.status === TabStatus.RUNNING ? (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">{tabItem.label}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiHealth color={tabPreviewData.status} textSize="s">
+            {tabItem.label}
+          </EuiHealth>
+        )}
+      </EuiSplitPanel.Inner>
+    </>
   );
 };
 
@@ -207,6 +253,13 @@ const getPreviewContainerCss = (
     width: ${PREVIEW_WIDTH}px;
     opacity: ${showPreview ? 1 : 0};
     transition: opacity ${euiTheme.animation.normal} ease;
+  `;
+};
+
+const getPreviewTitleCss = (euiTheme: EuiThemeComputed, hasQuery: boolean) => {
+  return css`
+    margin-bottom: ${hasQuery ? euiTheme.size.s : 0};
+    font-family: ${euiTheme.font.familyCode};
   `;
 };
 

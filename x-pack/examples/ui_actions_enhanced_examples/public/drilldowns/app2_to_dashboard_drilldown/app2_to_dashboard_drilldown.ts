@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardEnhancedAbstractDashboardDrilldownConfig as Config } from '@kbn/dashboard-enhanced-plugin/public';
+import type { DashboardDrilldownConfig } from '@kbn/dashboard-enhanced-plugin/public';
 import { DashboardEnhancedAbstractDashboardDrilldown as AbstractDashboardDrilldown } from '@kbn/dashboard-enhanced-plugin/public';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import type { SampleApp2ClickContext } from '../../triggers';
@@ -20,7 +20,10 @@ export class App2ToDashboardDrilldown extends AbstractDashboardDrilldown<Context
 
   public readonly supportedTriggers = () => [SAMPLE_APP2_CLICK_TRIGGER];
 
-  protected async getLocation(config: Config, context: Context): Promise<KibanaLocation> {
+  protected async getLocation(
+    config: DashboardDrilldownConfig,
+    context: Context
+  ): Promise<KibanaLocation> {
     const location = await this.locator.getLocation({
       dashboardId: config.dashboardId,
     });

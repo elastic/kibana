@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { SETTINGS_API_ROUTES } from '../../constants';
@@ -19,7 +19,6 @@ import {
   SettingsResponseSchema,
   GetEnrollmentSettingsResponseSchema,
 } from '../../types';
-import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
@@ -32,11 +31,10 @@ import {
   putSpaceSettingsHandler,
 } from './settings_handler';
 
-export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(
-    config.enableExperimental || [],
-    config.experimentalFeatures || {}
-  );
+export const registerRoutes = (
+  router: FleetAuthzRouter,
+  experimentalFeatures: ExperimentalFeatures
+) => {
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       // @ts-ignore https://github.com/elastic/kibana/issues/203170

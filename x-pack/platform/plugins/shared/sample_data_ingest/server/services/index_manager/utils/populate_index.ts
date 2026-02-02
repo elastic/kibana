@@ -19,6 +19,7 @@ export const populateIndex = async ({
   legacySemanticText,
   log,
   elserInferenceId,
+  abortController,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
@@ -26,6 +27,7 @@ export const populateIndex = async ({
   archive: ZipArchive;
   log: Logger;
   elserInferenceId?: string;
+  abortController?: AbortController;
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
@@ -42,10 +44,9 @@ export const populateIndex = async ({
         contentBuffer,
         legacySemanticText,
         elserInferenceId,
+        abortController,
       });
     }
-
-    await esClient.indices.refresh({ index: indexName });
 
     log.debug(`Done populating index ${indexName}`);
   } catch (e) {
@@ -60,12 +61,14 @@ const indexContentFile = async ({
   esClient,
   legacySemanticText,
   elserInferenceId = internalElserInferenceId,
+  abortController,
 }: {
   indexName: string;
   contentBuffer: Buffer;
   esClient: ElasticsearchClient;
   legacySemanticText: boolean;
   elserInferenceId?: string;
+  abortController?: AbortController;
 }) => {
   const fileContent = contentBuffer.toString('utf-8');
   const lines = fileContent.split('\n');
@@ -88,10 +91,13 @@ const indexContentFile = async ({
     (document) => [{ index: { _index: indexName } }, document]
   );
 
-  const response = await esClient.bulk({
-    refresh: false,
-    operations,
-  });
+  const response = await esClient.bulk(
+    {
+      refresh: false,
+      operations,
+    },
+    { signal: abortController?.signal }
+  );
 
   if (response.errors) {
     const error = response.items.find((item) => item.index?.error)?.index?.error ?? 'unknown error';

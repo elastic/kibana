@@ -14,6 +14,7 @@ import type {
   CoreRequestHandlerContext,
   CoreSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   Logger,
   SavedObjectsClientContract,
@@ -25,6 +26,11 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { AutomaticImportService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
@@ -35,24 +41,22 @@ export interface AutomaticImportV2PluginSetup {
   spaces?: SpacesPluginSetup;
 }
 
-/** The plugin start interface */
-export interface AutomaticImportV2PluginStart {
-  actions: ActionsPluginStart;
-  inference: InferenceServerStart;
-  licensing: LicensingPluginStart;
-  spaces?: SpacesPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AutomaticImportV2PluginStart {}
 
 export interface AutomaticImportV2PluginSetupDependencies {
   actions: ActionsPluginSetup;
   spaces?: SpacesPluginSetup;
+  features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 export interface AutomaticImportV2PluginStartDependencies {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface AutomaticImportV2PluginApiRequestHandlerContext {
@@ -60,11 +64,12 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   actions: ActionsPluginStart;
   logger: Logger;
   getServerBasePath: () => string;
-  getCurrentUser: () => Promise<AuthenticatedUser | null>;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
+  esClient: ElasticsearchClient;
 }
 
 /**

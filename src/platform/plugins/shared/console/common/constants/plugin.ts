@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MAJOR_VERSION = '8.0.0';
-
 export const WELCOME_TOUR_DELAY = 250;

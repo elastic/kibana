@@ -30,7 +30,7 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery } from '@kbn/esql-language';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
@@ -137,7 +137,6 @@ export const EsqlQueryExpression: React.FC<
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
   const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
@@ -264,7 +263,11 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview({
+            dataViewsService: dataViews,
+            query: queryObj.esql,
+            http,
+          });
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
@@ -283,7 +286,6 @@ export const EsqlQueryExpression: React.FC<
       if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
         clearParam('timeField');
       }
-      setDetectedTimestamp(timestampField);
     },
     [timeField, setParam, clearParam, dataViews, http]
   );
@@ -301,7 +303,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          detectedTimestamp={detectedTimestamp}
           hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}

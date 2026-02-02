@@ -30,6 +30,8 @@
           "(props: Omit<any, \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/code_editor/mocks/code_editor_mock.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "Omit<any, \"className\"> & { className?: string | undefined; \"data-test-subj\"?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/mocks/code_editor_mock.tsx",
+            "lineNumber": 15,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

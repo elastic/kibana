@@ -31,20 +31,23 @@ import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
 import { TabStatus, type TabPreviewData } from '../../types';
-import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
+import { TabWithBackground } from '../tabs_visual_glue_to_app_container/tab_with_background';
 import { TabPreview } from '../tab_preview';
 import { useTabLabelWidth } from './use_tab_label_width';
 
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  selectedItemId?: string;
   isUnsaved?: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
+  onHoverChange?: (itemId: string, isHovered: boolean) => void;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
-  getPreviewData: (item: TabItem) => TabPreviewData;
+  getPreviewData?: (item: TabItem) => TabPreviewData;
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
@@ -52,7 +55,6 @@ export interface TabProps {
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
   disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
-  disablePreview?: boolean;
   disableDragAndDrop?: boolean;
 }
 
@@ -68,8 +70,11 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    selectedItemId,
     isUnsaved,
     isDragging,
+    hideRightSeparator,
+    onHoverChange,
     dragHandleProps,
     tabContentId,
     tabsSizeConfig,
@@ -82,7 +87,6 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelectedTabKeyDown,
     disableCloseButton = false,
     disableInlineLabelEditing = false,
-    disablePreview = false,
     disableDragAndDrop = false,
   } = props;
   const { euiTheme } = useEuiTheme();
@@ -91,7 +95,8 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
-  const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
+  const prevSelectedItemIdRef = useRef<string | undefined>(selectedItemId);
+  const previewData = useMemo(() => getPreviewData?.(item), [getPreviewData, item]);
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
@@ -190,6 +195,14 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
+  // dismisses action popover when the selected tab changes
+  useEffect(() => {
+    if (prevSelectedItemIdRef.current !== selectedItemId && !isSelected && isActionPopoverOpen) {
+      setActionPopover(false);
+    }
+    prevSelectedItemIdRef.current = selectedItemId;
+  }, [selectedItemId, isSelected, isActionPopoverOpen]);
+
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
@@ -218,8 +231,17 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {previewData.status === TabStatus.RUNNING && (
-                <EuiProgress size="xs" color="accent" position="absolute" />
+              {previewData?.status === TabStatus.RUNNING && (
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  css={css`
+                    // we can't simply use overflow: hidden; because then curved notches are not visible
+                    border-top-left-radius: ${euiTheme.border.radius.small};
+                    border-top-right-radius: ${euiTheme.border.radius.small};
+                  `}
+                />
               )}
               <EuiFlexGroup
                 ref={tabLabelRef}
@@ -266,6 +288,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     item={item}
                     getTabMenuItems={getTabMenuItems}
                     isPopoverOpen={isActionPopoverOpen}
+                    isSelected={isSelected}
                     setPopover={onToggleActionsMenu}
                     onEnterRenaming={onEnterRenaming}
                   />
@@ -275,15 +298,14 @@ export const Tab: React.FC<TabProps> = (props) => {
             )}
             {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                <EuiToolTip content={closeButtonLabel}>
+                <EuiToolTip content={closeButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
-                    tabIndex={-1}
+                    aria-label={closeButtonLabel}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
                     onClick={onCloseEvent}
+                    tabIndex={isSelected ? 0 : -1}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -294,22 +316,33 @@ export const Tab: React.FC<TabProps> = (props) => {
     </div>
   );
 
+  const tabWithBackground = (
+    <TabWithBackground
+      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      isSelected={isSelected}
+      isDragging={isDragging}
+      hideRightSeparator={hideRightSeparator}
+      services={services}
+      onMouseEnter={() => onHoverChange?.(item.id, true)}
+      onMouseLeave={() => onHoverChange?.(item.id, false)}
+    >
+      {mainTabContent}
+    </TabWithBackground>
+  );
+
+  if (!previewData) {
+    return tabWithBackground;
+  }
+
   return (
     <TabPreview
-      showPreview={!disablePreview && showPreview}
+      showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}
       previewData={previewData}
     >
-      <TabWithBackground
-        data-test-subj={`unifiedTabs_tab_${item.id}`}
-        isSelected={isSelected}
-        isDragging={isDragging}
-        services={services}
-      >
-        {mainTabContent}
-      </TabWithBackground>
+      {tabWithBackground}
     </TabPreview>
   );
 };
@@ -324,8 +357,6 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    border-right: ${euiTheme.border.thin};
-    border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 

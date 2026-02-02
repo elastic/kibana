@@ -28,9 +28,17 @@ export const RULE_MIGRATION_STOPPED_DESCRIPTION = (totalRules: number) => {
   });
 };
 
-export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_SPLUNK = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.splunk',
   { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
+);
+
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.qradar',
+  {
+    defaultMessage:
+      'You can also upload the missing reference sets and enhancements for more accurate results.',
+  }
 );
 
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
@@ -74,19 +82,22 @@ export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
   { defaultMessage: 'Rules' }
 );
 
-export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE = i18n.translate(
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources',
   { defaultMessage: 'Upload missing macros and lookup lists.' }
 );
 
-export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = (partialRulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
-    {
-      defaultMessage: 'Click Upload to continue translating {partialRulesCount} rules',
-      values: { partialRulesCount },
-    }
-  );
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_QRADAR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.qradar.uploadMissingResources',
+  { defaultMessage: 'Upload missing reference sets and rule enhancements' }
+);
+
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
+  {
+    defaultMessage: 'Click Upload to continue translating rules',
+  }
+);
 
 export const RULE_MIGRATION_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button',

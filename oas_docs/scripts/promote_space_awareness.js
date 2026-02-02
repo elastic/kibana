@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const path = require('node:path');
 const fs = require('node:fs');
 const { run } = require('@kbn/dev-cli-runner');

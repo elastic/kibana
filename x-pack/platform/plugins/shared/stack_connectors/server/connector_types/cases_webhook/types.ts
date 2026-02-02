@@ -5,42 +5,19 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
-import type { Logger } from '@kbn/core/server';
 import type {
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
-} from './schema';
-
-// config
-export type CasesWebhookPublicConfigurationType = z.infer<
-  typeof ExternalIncidentServiceConfigurationSchema
->;
-// secrets
-export type CasesWebhookSecretConfigurationType = z.infer<
-  typeof ExternalIncidentServiceSecretConfigurationSchema
->;
-// params
-export type CasesWebhookActionParamsType = z.infer<typeof ExecutorParamsSchema>;
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+  ExternalServiceIncidentResponse,
+  Incident,
+  PushToServiceApiParams,
+} from '@kbn/connector-schemas/cases_webhook';
+import type { Logger } from '@kbn/core/server';
 
 export interface ExternalServiceCredentials {
   config: CasesWebhookPublicConfigurationType;
   secrets: CasesWebhookSecretConfigurationType;
 }
-
-export interface ExternalServiceIncidentResponse {
-  id: string;
-  title: string;
-  url: string;
-  pushedDate: string;
-}
-export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
-
-export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
-export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
@@ -93,5 +70,3 @@ export interface GetIncidentResponse {
 export interface ExternalServiceApi {
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
 }
-
-export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;

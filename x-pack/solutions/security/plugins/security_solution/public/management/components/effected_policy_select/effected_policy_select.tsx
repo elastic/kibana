@@ -251,7 +251,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {artifactRestrictedPolicyIds.policyIds.length > 0 && !isGlobal && (
           <>
             <EuiSpacer />
-            <EuiCallOut size="s" data-test-subj={getTestId('unAccessiblePoliciesCallout')}>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              data-test-subj={getTestId('unAccessiblePoliciesCallout')}
+            >
               {ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(
                 artifactRestrictedPolicyIds.policyIds.length
               )}

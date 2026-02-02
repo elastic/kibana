@@ -25,28 +25,30 @@ import {
   scanActionSubFeature,
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 import type { SubFeatureReplacements } from '../../types';
-import { SECURITY_FEATURE_ID_V4 } from '../../constants';
+import { SECURITY_FEATURE_ID_V5 } from '../../constants';
 import { addSubFeatureReplacements } from '../../utils';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
-  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
-  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
 };
 
 /**
@@ -67,6 +69,7 @@ export const getSecurityV3SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),
@@ -94,9 +97,6 @@ export const getSecurityV3SubFeaturesMap = ({
       if (featureReplacements) {
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
-
-      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
-      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })

@@ -74,6 +74,8 @@ export function initializeInternalApi(
     ? parentApi.esqlVariables$
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
+  const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -91,6 +93,8 @@ export function initializeInternalApi(
     blockingError$,
     messages$,
     validationMessages$,
+    isEditingInProgress: () => isEditingInProgress$.getValue(),
+    updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

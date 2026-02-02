@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -25,7 +26,6 @@
     "@kbn/share-plugin",
     "@kbn/cloud-plugin",
     "@kbn/actions-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/langchain",
     "@kbn/logging",
@@ -61,6 +61,7 @@
     "@kbn/monaco",
     "@kbn/search-shared-ui",
     "@kbn/license-management-plugin",
+    "@kbn/connector-schemas",
     "@kbn/react-query"
   ],
   "exclude": [

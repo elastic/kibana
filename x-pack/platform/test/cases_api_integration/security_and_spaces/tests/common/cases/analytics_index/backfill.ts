@@ -47,7 +47,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe('analytics indexes backfill task', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/243870
+  describe.skip('analytics indexes backfill task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);

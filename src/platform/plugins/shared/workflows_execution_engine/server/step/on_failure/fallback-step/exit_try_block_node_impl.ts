@@ -23,12 +23,12 @@ export class ExitTryBlockNodeImpl implements NodeImplementation {
     if (stepState.error) {
       // if error is in state, that means failure path was executed
       // and we have to throw error
-      await this.stepExecutionRuntime.failStep(stepState.error);
+      this.stepExecutionRuntime.failStep(stepState.error);
       this.wfExecutionRuntimeManager.setWorkflowError(stepState.error);
       return;
     }
 
-    await this.stepExecutionRuntime.finishStep();
+    this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

@@ -75,6 +75,7 @@ export function initializeFetch({
         forceRefresh: fetchContext.isReload,
         searchSessionId,
         searchSessionMapBuffer: isRestore ? searchSessionMapBuffer : undefined,
+        projectRouting: fetchContext.projectRouting,
       })
     );
   });

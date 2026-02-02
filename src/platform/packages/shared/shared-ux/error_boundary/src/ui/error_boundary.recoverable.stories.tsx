@@ -64,6 +64,11 @@ export const SectionErrorInCallout: StoryFn = () => {
             <ChunkLoadErrorComponent />
           </KibanaSectionErrorBoundary>
         </EuiFormFieldset>
+        <EuiFormFieldset legend={{ children: 'Section C with 3 retries' }}>
+          <KibanaSectionErrorBoundary sectionName="sectionC" maxRetries={3}>
+            <ChunkLoadErrorComponent />
+          </KibanaSectionErrorBoundary>
+        </EuiFormFieldset>
       </KibanaErrorBoundaryDepsProvider>
     </Template>
   );

@@ -45,10 +45,13 @@ describe('<KibanaSectionErrorBoundary>', () => {
     jest.useRealTimers();
   });
 
-  const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const Template: FC<PropsWithChildren<{ maxRetries?: number }>> = ({
+    children,
+    maxRetries = 0,
+  }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
-        <KibanaSectionErrorBoundary sectionName="test section name">
+        <KibanaSectionErrorBoundary sectionName="test section name" maxRetries={maxRetries}>
           {children}
         </KibanaSectionErrorBoundary>
       </KibanaErrorBoundaryDepsProvider>
@@ -216,5 +219,40 @@ describe('<KibanaSectionErrorBoundary>', () => {
     );
     expect(payload.component_name).toBe('BadComponent');
     expect(payload.error_message).toBe('Error: This is an error to show the test user!');
+  });
+
+  describe('maxRetries behavior', () => {
+    it('defaults to maxRetries=0 and shows error immediately', async () => {
+      const { getByTestId, getByText } = render(
+        <Template>
+          <BadComponent />
+        </Template>
+      );
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should be visible immediately with no retries
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
+
+    it('shows error prompt after maxRetries exhausted', async () => {
+      const { getByTestId, getByText, queryByText } = render(
+        <Template maxRetries={1}>
+          <BadComponent />
+        </Template>
+      );
+
+      // Trigger first error (will retry)
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should NOT be visible yet (it's retrying)
+      expect(queryByText(strings.section.callout.fatal.title('test section name'))).toBeNull();
+
+      // Trigger error again (second error, exceeds maxRetries)
+      // Since we're in a retried state, clicking the button again triggers another error
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Now error prompt should be visible (retries exhausted)
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
   });
 });

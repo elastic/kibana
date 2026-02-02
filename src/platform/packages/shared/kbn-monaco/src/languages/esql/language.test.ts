@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PartialFieldsMetadataClient } from '@kbn/esql-validation-autocomplete/src/shared/types';
-import { getHoverItem, suggest } from '@kbn/esql-validation-autocomplete';
+import type { PartialFieldsMetadataClient } from '@kbn/esql-types';
+import { getHoverItem, suggest } from '@kbn/esql-language';
 import { monaco } from '../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from './language';
 
 // Mock the getHoverItem and suggest functions
-jest.mock('@kbn/esql-validation-autocomplete', () => ({
-  ...jest.requireActual('@kbn/esql-validation-autocomplete'),
+jest.mock('@kbn/esql-language', () => ({
   getHoverItem: jest.fn(),
   suggest: jest.fn(),
 }));

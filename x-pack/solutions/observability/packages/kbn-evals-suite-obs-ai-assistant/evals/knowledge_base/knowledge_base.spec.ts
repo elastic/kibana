@@ -97,7 +97,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
     });
 
     evaluate('retrieves one entry from the KB without LLM', async ({ chatClient }) => {
-      const conversation = await chatClient.complete({
+      const conversation = await chatClient.converse({
         messages: 'What DevOps teams do we have and how is the on-call rotation managed?',
       });
 

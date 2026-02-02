@@ -74,6 +74,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount={false}
         title={i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.loadingError', {
           defaultMessage: 'An error occurred while retrieving the latest snapshot status',
         })}

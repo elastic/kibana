@@ -434,7 +434,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
     describe('#validateCanReadItemInActiveSpace()', () => {
       const itemNotFoundInSpaceErrorMessage =
-        'EndpointExceptionsError: Item not found in space [default]';
+        'EndpointArtifactError: Item not found in space [default]';
       let savedExceptionItem: ExceptionListItemSchema;
 
       beforeEach(async () => {

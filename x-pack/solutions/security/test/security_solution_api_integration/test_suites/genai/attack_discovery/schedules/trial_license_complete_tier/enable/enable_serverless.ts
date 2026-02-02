@@ -7,7 +7,8 @@
 
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES } from '@kbn/elastic-assistant-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
+import { ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
@@ -52,7 +53,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path for predefined users', () => {
       const roles = [
-        'viewer',
         'editor',
         ROLES.t1_analyst,
         ROLES.t2_analyst,
@@ -81,6 +81,32 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
+      it('should not be able to enable a schedule with the "viewer" role', async () => {
+        const testAgent = await utils.createSuperTest('viewer');
+
+        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+        const result = await apis.enable({
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, {
+              id: createdSchedule.id,
+            })}`,
+          })
+        );
+
+        await checkIfScheduleDisabled({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
+      });
+
       it('should not be able to enable a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 
@@ -94,7 +120,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_enable`,
+            routeDetails: `POST ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 
@@ -120,7 +148,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_enable`,
+            routeDetails: `POST ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 
@@ -144,7 +174,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_enable`,
+            routeDetails: `POST ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 

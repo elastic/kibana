@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-agent-builder",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "private"
+}

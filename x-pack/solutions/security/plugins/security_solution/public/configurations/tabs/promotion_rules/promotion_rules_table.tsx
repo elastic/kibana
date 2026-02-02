@@ -19,7 +19,6 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FindRulesSortField } from '../../../../common/api/detection_engine';
 import { Loader } from '../../../common/components/loader';
-import { hasUserCRUDPermission } from '../../../common/utils/privileges';
 import type { EuiBasicTableOnChange } from '../../../detection_engine/common/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { useRuleManagementFilters } from '../../../detection_engine/rule_management/logic/use_rule_management_filters';
@@ -34,8 +33,8 @@ import {
   useEnabledColumn,
   useRuleExecutionStatusColumn,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
-import { useUserData } from '../../../detections/components/user_info';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const INITIAL_SORT_FIELD = 'name';
 
@@ -177,11 +176,10 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions: hasPermissions,
+    hasCRUDPermissions: canEditRules,
     isLoadingJobs: false,
     mlJobs: [],
     startMlJobs: async (jobIds: string[] | undefined) => {},

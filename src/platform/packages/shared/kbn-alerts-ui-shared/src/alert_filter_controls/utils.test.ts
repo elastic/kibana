@@ -20,13 +20,13 @@ import { isEqualWith } from 'lodash';
 const defaultControls: FilterControlConfig[] = [
   {
     fieldName: 'first',
-    hideActionBar: true,
+    displaySettings: { hideActionBar: true },
     selectedOptions: ['val1', 'val2'],
   },
 
   {
     fieldName: 'second',
-    hideActionBar: true,
+    displaySettings: { hideActionBar: true },
     selectedOptions: ['val1', 'val2'],
     persist: true,
   },
@@ -47,7 +47,7 @@ const secondControlsSet: FilterControlConfig[] = [
   },
   {
     fieldName: 'second',
-    hideActionBar: false,
+    displaySettings: { hideActionBar: false },
     exclude: true,
   },
 ];
@@ -71,10 +71,9 @@ describe('utils', () => {
       const filterItemObjList = getFilterItemObjListFromControlState(initialInputData);
 
       filterItemObjList.forEach((item, idx) => {
-        const panelObj =
-          initialInputData.initialChildControlState[
-            String(idx) as keyof typeof initialInputData.initialChildControlState
-          ];
+        const panelObj = initialInputData.initialChildControlState[
+          String(idx) as keyof typeof initialInputData.initialChildControlState
+        ] as FilterControlConfig;
         expect(item).toMatchObject({
           fieldName: panelObj.fieldName,
           selectedOptions: panelObj.selectedOptions,
@@ -95,7 +94,7 @@ describe('utils', () => {
       };
       const filterItemObjList = getFilterItemObjListFromControlState(newInputData);
 
-      let panelObj = newInputData.initialChildControlState['1'];
+      let panelObj = newInputData.initialChildControlState['1'] as FilterControlConfig;
       expect(filterItemObjList[0]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,
@@ -104,7 +103,7 @@ describe('utils', () => {
         exclude: panelObj.exclude,
       });
 
-      panelObj = newInputData.initialChildControlState['0'];
+      panelObj = newInputData.initialChildControlState['0'] as FilterControlConfig;
       expect(filterItemObjList[1]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,
@@ -126,7 +125,7 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: ['firstVal'],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
         },
       ];
 
@@ -143,13 +142,13 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: ['secondVal1', 'secondVal2'],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
           existsSelected: true,
         },
         {
           fieldName: 'second',
           selectedOptions: ['val1', 'val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
           exclude: true,
           persist: true,
         },
@@ -193,7 +192,7 @@ describe('utils', () => {
       const expectedResult = [
         {
           fieldName: 'second',
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
           selectedOptions: ['val1', 'val2'],
           persist: true,
         },
@@ -212,7 +211,7 @@ describe('utils', () => {
         {
           fieldName: 'second',
           selectedOptions: ['val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
         },
         {
           fieldName: 'first',
@@ -224,7 +223,7 @@ describe('utils', () => {
         {
           fieldName: 'second',
           selectedOptions: ['val2'],
-          hideActionBar: false,
+          displaySettings: { hideActionBar: false },
           persist: true,
         },
         {
@@ -233,7 +232,7 @@ describe('utils', () => {
         {
           fieldName: 'first',
           selectedOptions: [],
-          hideActionBar: true,
+          displaySettings: { hideActionBar: true },
         },
       ];
 

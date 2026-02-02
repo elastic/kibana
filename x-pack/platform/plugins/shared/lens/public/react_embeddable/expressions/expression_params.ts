@@ -23,9 +23,9 @@ import type {
   UserMessage,
   VisualizationDisplayOptions,
   ExpressionWrapperProps,
-  LensApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
   isLensFilterEvent,
   isLensMultiFilterEvent,

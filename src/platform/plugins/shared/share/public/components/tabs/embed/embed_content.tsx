@@ -18,8 +18,8 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIconTip,
   copyToClipboard,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -341,11 +341,12 @@ export const EmbedContent = ({
           <EuiToolTip
             content={
               isTextCopied
-                ? i18n.translate('share.embed.copied', { defaultMessage: 'Link copied' })
+                ? i18n.translate('share.embed.copied', { defaultMessage: 'Code copied' })
                 : null
             }
           >
             <EuiButton
+              iconType="copy"
               fill
               data-test-subj="copyEmbedUrlButton"
               onClick={copyUrlHelper}

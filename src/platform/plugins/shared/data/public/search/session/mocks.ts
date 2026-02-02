@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { ISessionsClient } from './sessions_client';
 import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
 import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
+import type { ISearchSessionEBTManager } from './ebt_manager';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {
@@ -41,7 +42,6 @@ export function getSessionServiceMock(
       state: SearchSessionState.None,
       isContinued: false,
     }).asObservable(),
-    disableSaveAfterSearchesExpire$: of(false),
     renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => ({
       complete: jest.fn(),
@@ -84,3 +84,14 @@ export const getPersistedSearchSessionSavedObjectAttributesMock = (
     ...overrides,
   };
 };
+
+export function getSearchSessionEBTManagerMock(): jest.Mocked<ISearchSessionEBTManager> {
+  return {
+    trackBgsStarted: jest.fn(),
+    trackBgsCompleted: jest.fn(),
+    trackBgsError: jest.fn(),
+    trackBgsCancelled: jest.fn(),
+    trackBgsOpened: jest.fn(),
+    trackBgsListView: jest.fn(),
+  };
+}

@@ -12,11 +12,10 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import _ from 'lodash';
 
@@ -96,21 +95,6 @@ const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
 
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
-
 // differentiate
 function isUUID(val: string) {
   return (
@@ -137,7 +121,6 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
-    logger.warn(`ssl value: ${ssl}`);
   }
   return {
     id: outputId ?? so.id,
@@ -390,7 +373,7 @@ async function remoteSyncIntegrationsCheck(
 
 class OutputService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {
@@ -765,22 +748,32 @@ class OutputService {
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
-    const res = await this.soClient.bulkGet<OutputSOAttributes>(
-      ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
+    if (ids.length === 0) {
+      return [];
+    }
+    const decryptedSavedObjects = await pMap(
+      ids,
+      async (id) => {
+        try {
+          const decryptedSo =
+            await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+              SAVED_OBJECT_TYPE,
+              outputIdToUuid(id)
+            );
+          return outputSavedObjectToOutput(decryptedSo);
+        } catch (error: any) {
+          if (ignoreNotFound && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return undefined;
+          }
+          throw error;
+        }
+      },
+      { concurrency: 50 } // Match the concurrency used in x-pack/platform/plugins/shared/encrypted_saved_objects/server/saved_objects/index.ts#L172
     );
 
-    return res.saved_objects
-      .map((so) => {
-        if (so.error) {
-          if (!ignoreNotFound || so.error.statusCode !== 404) {
-            throw so.error;
-          }
-          return undefined;
-        }
-
-        return outputSavedObjectToOutput(so);
-      })
-      .filter((output): output is Output => typeof output !== 'undefined');
+    return decryptedSavedObjects.filter(
+      (output): output is Output => typeof output !== 'undefined'
+    );
   }
 
   public async list() {

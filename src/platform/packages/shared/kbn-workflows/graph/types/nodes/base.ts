@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
+  DataSetStepSchema,
   ElasticsearchStepSchema,
   HttpStepSchema,
   KibanaStepSchema,
@@ -35,6 +36,13 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
+
+export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('data.set'),
+  configuration: DataSetStepSchema,
+});
+export type DataSetGraphNode = z.infer<typeof DataSetGraphNodeSchema>;
 
 export const HttpGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

@@ -15,7 +15,7 @@ export const OPTION_LIST_LABELS = '.controlPanel--label';
 
 export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
-export const OPTION_LIST_CLEAR_BTN = '.presentationUtil__floatingActions [aria-label="Clear"]';
+export const OPTION_LIST_CLEAR_BTN = '[data-test-subj$="clearControl"]';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
 
@@ -70,13 +70,11 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-delete"]`;
+  return `[data-test-subj="hover-actions-${idx}"] [data-test-subj="embeddablePanelAction-deletePanel"]`;
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-edit"]`;
+  return `[data-test-subj="hover-actions-${idx}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
 };
-
-export const FILTER_GROUP_CONTROL_CONFIRM_BTN = `[data-test-subj="confirmModalConfirmButton"]`;
 
 export const FILTER_GROUP_CHANGED_BANNER = `[data-test-subj="filter-group--changed-banner"]`;

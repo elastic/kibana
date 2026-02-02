@@ -20,6 +20,9 @@ import type {
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { AxiosInstance } from 'axios';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -81,39 +84,58 @@ import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
+import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
 
 export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
+  /**
+   * Optional space override. When set, connector operations and executions will be scoped to this spaceId
+   */
+  spaceId?: string;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export interface ActionsClientContext {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
+  spaceId?: string;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (
+    getAxiosParams: GetAxiosInstanceWithAuthFnOpts
+  ) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export class ActionsClient {
@@ -124,20 +146,26 @@ export class ActionsClient {
     actionTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
+    encryptedSavedObjectsClient,
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
     bulkExecutionEnqueuer,
     request,
+    spaceId,
     authorization,
     auditLogger,
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
+    getAxiosInstanceWithAuth,
+    spaces,
+    isESOCanEncrypt,
   }: ConstructorOptions) {
     this.context = {
       logger,
       actionTypeRegistry,
+      encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -145,11 +173,15 @@ export class ActionsClient {
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
+      spaceId,
       authorization,
       auditLogger,
       usageCounter,
       connectorTokenClient,
       getEventLogClient,
+      getAxiosInstanceWithAuth,
+      spaces,
+      isESOCanEncrypt,
     };
   }
 
@@ -497,6 +529,10 @@ export class ActionsClient {
     connectorExecuteParams: ConnectorExecuteParams
   ): Promise<ActionTypeExecutorResult<unknown>> {
     return execute(this.context, connectorExecuteParams);
+  }
+
+  public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, actionId);
   }
 
   public async bulkEnqueueExecution(

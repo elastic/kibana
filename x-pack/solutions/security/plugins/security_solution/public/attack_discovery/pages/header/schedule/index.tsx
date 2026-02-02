@@ -12,7 +12,7 @@ import { SCHEDULE_TAB_ID } from '../../settings_flyout/constants';
 import * as i18n from './translations';
 
 interface Props {
-  isLoading: boolean;
+  isLoading?: boolean;
   openFlyout: (tabId: string) => void;
 }
 

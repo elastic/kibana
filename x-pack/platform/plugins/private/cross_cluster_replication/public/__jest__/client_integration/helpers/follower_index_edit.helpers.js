@@ -11,6 +11,10 @@ import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 
+/**
+ * @param {object} [props]
+ * @returns {ReturnType<typeof renderWithRouter>}
+ */
 export const setup = (props = {}) => {
   return renderWithRouter(FollowerIndexEdit, {
     store: createCrossClusterReplicationStore(),

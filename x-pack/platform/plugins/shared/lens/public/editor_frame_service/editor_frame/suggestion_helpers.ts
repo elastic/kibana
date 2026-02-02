@@ -243,12 +243,14 @@ function getVisualizationSuggestions(
   datasourceId?: string
 ) {
   try {
+    const isSubtypeSupported =
+      subVisualizationId && visualization?.isSubtypeSupported?.(subVisualizationId);
     return visualization
       .getSuggestions({
         table,
         state: currentVisualizationState,
         keptLayerIds: datasourceSuggestion.keptLayerIds,
-        subVisualizationId,
+        subVisualizationId: isSubtypeSupported ? subVisualizationId : undefined,
         mainPalette,
         isFromContext,
         activeData,

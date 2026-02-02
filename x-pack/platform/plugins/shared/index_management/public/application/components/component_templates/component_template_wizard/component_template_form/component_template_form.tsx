@@ -133,6 +133,7 @@ export const ComponentTemplateForm = ({
   const apiError = saveError ? (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplateForm.saveTemplateError"

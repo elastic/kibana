@@ -8,18 +8,21 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { StoredLinksEmbeddableState } from '../types';
-import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
+import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
+import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
+import { getOptions } from './get_options';
 import { injectReferences } from './references';
 
 export function transformOut(
-  storedState: StoredLinksEmbeddableState | StoredLinksByValueState910,
+  storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
-  const state = isLegacyState(storedState)
+  const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
+  const state = transformTitlesOut(latestState);
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(
@@ -35,6 +38,9 @@ export function transformOut(
   // inject dashboard references when by-value
   return {
     ...state,
-    links: injectReferences(state.links, references),
+    links: injectReferences(state.links, references).map((link) => ({
+      ...link,
+      ...(link.options && { options: getOptions(link.type, link.options) }),
+    })),
   };
 }

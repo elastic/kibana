@@ -23,7 +23,9 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachm
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 
+jest.mock('../../../analytics/use_attach_events_ebt');
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../containers/use_create_attachments');
@@ -81,7 +83,7 @@ describe('use cases add to existing case modal hook', () => {
           basePath: '/jest',
           dispatch,
           features: {
-            alerts: { sync: true, enabled: true, isExperimental: false },
+            alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
             metrics: [],
             observables: { enabled: true, autoExtract: true },
             events: { enabled: true },
@@ -239,6 +241,8 @@ describe('use cases add to existing case modal hook', () => {
       attachments: [alertComment],
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
+
+    expect(jest.mocked(useAttachEventsEBT())).toHaveBeenCalled();
   });
 
   it('should call onSuccess when defined', async () => {

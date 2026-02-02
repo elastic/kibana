@@ -277,6 +277,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
                 }
               `}
               hideCloseButton={!canBeCollapsed}
+              session="never"
             >
               <EuiPageSidebar
                 className={sideNavClasses}

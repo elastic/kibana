@@ -59,6 +59,7 @@ export async function mountManagementSection({
     license$,
     actions: actionsService,
     notifications: notificationsService,
+    userProfile: coreStart.userProfile,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;

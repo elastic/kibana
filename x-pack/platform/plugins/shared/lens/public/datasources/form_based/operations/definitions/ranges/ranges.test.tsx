@@ -13,7 +13,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { mountWithProviders } from '../../../../../test_utils/test_utils';
 import type { FormBasedLayer, RangeIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 import { rangeOperation } from '..';
@@ -53,7 +53,7 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
-const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const kqlPluginMockValue = kqlPluginMock.createStartContract();
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
 const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
@@ -89,7 +89,7 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   fieldFormats: fieldFormatsPluginMockValue,
-  unifiedSearch: unifiedSearchPluginMockValue,
+  kql: kqlPluginMockValue,
   dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {

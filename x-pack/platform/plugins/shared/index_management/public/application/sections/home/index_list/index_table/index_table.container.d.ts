@@ -5,10 +5,11 @@
  * 2.0.
  */
 import type React from 'react';
-import type { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory, HttpSetup } from '@kbn/core/public';
 
 interface IndexTableProps {
   history: ScopedHistory;
+  http: HttpSetup;
 }
 
 export declare const IndexTable: React.FunctionComponent<IndexTableProps>;

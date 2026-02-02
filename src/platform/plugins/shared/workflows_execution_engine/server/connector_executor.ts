@@ -10,16 +10,12 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
-  constructor(
-    private actionsClient: IUnsecuredActionsClient | ActionsClient,
-    private isScoped: boolean = false
-  ) {}
+  constructor(private actionsClient: ActionsClient) {}
 
   public async execute(
     connectorType: string,
@@ -55,36 +51,21 @@ export class ConnectorExecutor {
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const connectorId = await this.resolveConnectorId(connectorName, spaceId);
 
-    if (this.isScoped) {
-      return (this.actionsClient as ActionsClient).execute({
-        actionId: connectorId,
-        params: connectorParams,
-      });
-    }
-
-    return (this.actionsClient as IUnsecuredActionsClient).execute({
-      id: connectorId,
+    return (this.actionsClient as ActionsClient).execute({
+      actionId: connectorId,
       params: connectorParams,
-      spaceId,
-      requesterId: 'background_task',
     });
   }
 
   private async resolveConnectorId(connectorName: string, spaceId: string): Promise<string> {
-    if (validateUuid(connectorName)) {
-      return connectorName;
-    }
-
-    const allConnectors = this.isScoped
-      ? await (this.actionsClient as ActionsClient).getAll()
-      : await (this.actionsClient as IUnsecuredActionsClient).getAll(spaceId);
+    const allConnectors = await (this.actionsClient as ActionsClient).getAll();
 
     const connector = allConnectors.find(
-      (c: ConnectorWithExtraFindData) => c.name === connectorName
+      (c: ConnectorWithExtraFindData) => c.name === connectorName || c.id === connectorName
     );
 
     if (!connector) {
-      throw new Error(`Connector with name ${connectorName} not found`);
+      throw new Error(`Connector ${connectorName} not found`);
     }
 
     return connector.id;

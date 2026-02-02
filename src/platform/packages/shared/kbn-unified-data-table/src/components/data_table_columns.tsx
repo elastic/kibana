@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiListGroupItemProps, RenderCellValue } from '@elastic/eui';
+import type { EuiDataGridRefProps, EuiListGroupItemProps, RenderCellValue } from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
@@ -122,6 +123,8 @@ function buildEuiGridColumn({
   onResize,
   sortedColumns,
   disableCellActions = false,
+  dataGridRef,
+  hideFilteringOnComputedColumns,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -147,6 +150,8 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  hideFilteringOnComputedColumns?: boolean;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -197,10 +202,11 @@ function buildEuiGridColumn({
       cellActions = dataViewField
         ? buildCellActions(
             dataViewField,
-            isPlainRecord,
             toastNotifications,
             valueToStringConverter,
-            onFilter
+            onFilter,
+            dataGridRef,
+            hideFilteringOnComputedColumns
           )
         : EMPTY_CELL_ACTIONS;
 
@@ -240,6 +246,7 @@ function buildEuiGridColumn({
                 defaultMessage: 'Remove column',
               }),
               iconType: 'cross',
+              'data-test-subj': 'unifiedDataTableRemoveColumn',
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
@@ -351,6 +358,8 @@ export function getEuiGridColumns({
   customGridColumnsConfiguration,
   onResize,
   sortedColumns,
+  dataGridRef,
+  hideFilteringOnComputedColumns,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -377,6 +386,8 @@ export function getEuiGridColumns({
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+  hideFilteringOnComputedColumns?: boolean;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -408,6 +419,8 @@ export function getEuiGridColumns({
       onResize,
       sortedColumns,
       disableCellActions,
+      dataGridRef,
+      hideFilteringOnComputedColumns,
     })
   );
 }

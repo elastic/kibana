@@ -10,10 +10,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { useEffect, useRef } from 'react';
-import type { Document } from 'yaml';
+import type { Document, Node } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
+import { getTriggerNodes } from '../../../../../common/lib/yaml';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 
 interface UseAlertTriggerDecorationsProps {
@@ -54,7 +54,7 @@ export const useAlertTriggerDecorations = ({
     const decorations = alertTriggers
       .map(({ node, typePair }) => {
         // Try to get the range from the typePair first, fallback to searching within the trigger node
-        let typeRange = getMonacoRangeFromYamlNode(model, typePair);
+        let typeRange = getMonacoRangeFromYamlNode(model, typePair.value as Node);
 
         if (!typeRange) {
           // Fallback: use the trigger node range and search for the type line

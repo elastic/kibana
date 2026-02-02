@@ -55,6 +55,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
 }) => {
   const onCreateClusterOption = useCallback(
     (option: string) => {
+      // @ts-expect-error upgrade typescript v5.9.3
       const nextClusters = ([...remoteClusterPrivilege.clusters] ?? []).concat([option]);
 
       onChange({
@@ -117,6 +118,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                 >
                   <RemoteClusterComboBox
                     data-test-subj={`remoteClusterClustersInput${formIndex}`}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     selectedOptions={([...remoteClusterPrivilege.clusters] ?? []).map(toOption)}
                     onCreateOption={onCreateClusterOption}
                     onChange={onClustersChange}

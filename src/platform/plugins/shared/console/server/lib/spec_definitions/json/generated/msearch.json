@@ -23,8 +23,9 @@
         "5"
       ],
       "pre_filter_shard_size": "",
+      "project_routing": "",
       "rest_total_hits_as_int": "__flag__",
-      "routing": "",
+      "routing": [],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"

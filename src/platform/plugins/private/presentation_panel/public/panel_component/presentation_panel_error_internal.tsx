@@ -7,23 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  type UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { useErrorTextStyle } from '@kbn/react-hooks';
 import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import type { DefaultPresentationPanelApi } from './types';
+
 import { uiActions } from '../kibana_services';
-import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
-import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
 import { CONTEXT_MENU_TRIGGER } from '../panel_actions';
+import { ACTION_EDIT_PANEL } from '../panel_actions/edit_panel_action/constants';
+import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
+import type { DefaultPresentationPanelApi } from './types';
 
 export interface PresentationPanelErrorProps {
   error: ErrorLike;
@@ -32,6 +43,8 @@ export interface PresentationPanelErrorProps {
 
 export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanelErrorProps) => {
   const errorTextStyle = useErrorTextStyle();
+  const { euiTheme } = useEuiTheme();
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
@@ -47,6 +60,19 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
   }, [error]);
 
   const [label, setLabel] = useState('');
+  const [panelSize, setPanelSize] = useState<{ width: number; height: number } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      if (!panelRef?.current) return;
+      const { width, height } = panelRef?.current?.getBoundingClientRect();
+      setPanelSize({ width, height });
+    });
+    if (panelRef?.current) observer.observe(panelRef?.current!);
+  }, [panelRef]);
+
   useEffect(() => {
     if (!isEditable) {
       setLabel('');
@@ -127,26 +153,114 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
     );
   }
 
+  const { isLandscape, isNarrow } = useMemo(() => {
+    const { width, height } = panelSize ?? { width: Infinity, height: Infinity };
+    return {
+      isLandscape: width > height && height < euiTheme.breakpoint.s / 3,
+      isNarrow: height < euiTheme.breakpoint.s / 10,
+    };
+  }, [panelSize, euiTheme.breakpoint.s]);
+
   return (
-    <EuiEmptyPrompt
-      body={
-        searchErrorDisplay?.body ?? (
-          <EuiText size="s" css={errorTextStyle}>
-            <Markdown data-test-subj="errorMessageMarkdown" readOnly>
-              {error.message?.length
-                ? error.message
-                : i18n.translate('presentationPanel.emptyErrorMessage', {
-                    defaultMessage: 'Error',
-                  })}
-            </Markdown>
-          </EuiText>
-        )
-      }
-      data-test-subj="embeddableStackError"
-      iconType="warning"
-      iconColor="danger"
-      layout="vertical"
-      actions={actions}
-    />
+    <div
+      ref={panelRef}
+      className={'embeddableError'}
+      data-test-subj="embeddableError"
+      css={[styles.fullWidthAndHeight, styles.outerWrapperStyles]}
+    >
+      {isNarrow ? (
+        <NarrowError error={error} />
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="l" css={styles.innerWrapperStyles}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="center"
+              direction={isLandscape ? 'row' : 'column'}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xl" type="error" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {searchErrorDisplay?.body ?? (
+                  <Markdown css={errorTextStyle} data-test-subj="errorMessageMarkdown" readOnly>
+                    {error.message?.length
+                      ? error.message
+                      : i18n.translate('presentationPanel.emptyErrorMessage', {
+                          defaultMessage: 'Error',
+                        })}
+                  </Markdown>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.actionStyles}>
+            {actions}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </div>
   );
+};
+
+const NarrowError = ({ error }: { error: ErrorLike }) => {
+  const errorTextStyle = useErrorTextStyle();
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const popoverButton = (
+    <EuiButtonEmpty
+      color="danger"
+      iconSize="m"
+      iconType="error"
+      onClick={() => setPopoverOpen((open) => !open)}
+      css={[styles.fullWidthAndHeight]}
+      size="s"
+    >
+      <FormattedMessage
+        id="presentationPanel.error.popoverButton"
+        defaultMessage="An error occurred. View more..."
+      />
+    </EuiButtonEmpty>
+  );
+
+  return (
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopoverOpen(false)}
+      css={[styles.fullWidthAndHeight]}
+      panelProps={{
+        css: styles.popoverErrorStyles,
+      }}
+    >
+      <Markdown data-test-subj="errorMessageMarkdown" readOnly css={errorTextStyle}>
+        {error.message?.length
+          ? error.message
+          : i18n.translate('presentationPanel.emptyErrorMessage', {
+              defaultMessage: 'Error',
+            })}
+      </Markdown>
+    </EuiPopover>
+  );
+};
+
+const styles = {
+  fullWidthAndHeight: css({
+    width: '100%',
+    height: '100%',
+  }),
+  actionStyles: css({
+    alignItems: 'center',
+    button: {
+      width: 'fit-content',
+    },
+  }),
+  outerWrapperStyles: css({ overflow: 'auto', display: 'flex' }),
+  innerWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({ padding: euiTheme.size.m, margin: 'auto' }),
+  popoverErrorStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxWidth: `calc(${euiTheme.size.xxxl} * 10)`,
+    }),
 };

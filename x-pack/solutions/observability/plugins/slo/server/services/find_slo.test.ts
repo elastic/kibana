@@ -12,11 +12,11 @@ import type { SLODefinition } from '../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryResult, SummarySearchClient } from './summary_search_client/types';
 
 describe('FindSLO', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockSummarySearchClient: jest.Mocked<SummarySearchClient>;
   let findSLO: FindSLO;
 

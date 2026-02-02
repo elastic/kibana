@@ -130,16 +130,6 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extends(
 export const ESQLSourceSchema = schema.object(
   {
     applyForceRefresh: applyForceRefreshSchema,
-    // TODO columns are derived from request, remove from stored state
-    columns: schema.arrayOf(
-      schema.object({
-        name: schema.string(),
-        type: schema.string(),
-        original_types: schema.maybe(schema.arrayOf(schema.string())),
-      })
-    ),
-    // TODO dataViewId is derived from esql statement, remove from stored state
-    dataViewId: schema.string(),
     dateField: schema.maybe(
       schema.string({
         meta: {

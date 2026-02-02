@@ -127,6 +127,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         {testingError ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"

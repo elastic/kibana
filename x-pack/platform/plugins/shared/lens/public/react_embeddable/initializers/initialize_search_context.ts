@@ -6,19 +6,23 @@
  */
 
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type {
+  ProjectRoutingOverrides,
+  PublishesProjectRoutingOverrides,
+  PublishesUnifiedSearch,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { initializeTimeRangeManager, timeRangeComparators } from '@kbn/presentation-publishing';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
-import type {
-  LensInternalApi,
-  LensRuntimeState,
-  LensSerializedState,
-  LensUnifiedSearchContext,
-} from '@kbn/lens-common';
+import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
 import type { LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
@@ -31,12 +35,19 @@ export const searchContextComparators: StateComparators<LensUnifiedSearchContext
 };
 
 export interface SearchContextConfig {
-  api: PublishesUnifiedSearch & PublishesSearchSession;
+  api: PublishesUnifiedSearch & PublishesSearchSession & PublishesProjectRoutingOverrides;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
+
+const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) => {
+  if (isOfAggregateQueryType(query)) {
+    const value = getProjectRoutingFromEsqlQuery(query.esql);
+    return value ? [{ value }] : undefined;
+  }
+};
 
 export function initializeSearchContext(
   initialState: LensRuntimeState,
@@ -61,6 +72,10 @@ export function initializeSearchContext(
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
+  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+    getProjectRoutingOverrides(attributes.state.query)
+  );
+
   const timeRangeManager = initializeTimeRangeManager(initialState);
 
   const subscriptions = [
@@ -76,6 +91,9 @@ export function initializeSearchContext(
         distinctUntilChanged(isEqual)
       )
       .subscribe(filters$),
+    query$
+      .pipe(map(getProjectRoutingOverrides), distinctUntilChanged(isEqual))
+      .subscribe(projectRoutingOverrides$),
   ];
 
   return {
@@ -84,6 +102,7 @@ export function initializeSearchContext(
       filters$,
       query$,
       timeslice$,
+      projectRoutingOverrides$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
     },
@@ -99,7 +118,7 @@ export function initializeSearchContext(
       lastReloadRequestTime: lastReloadRequestTime$.getValue(),
       ...timeRangeManager.getLatestState(),
     }),
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       timeRangeManager.reinitializeState(lastSaved);
     },
   };

@@ -59,5 +59,8 @@ export default createTestConfig({
     searchQueryRules: {
       pathname: '/app/elasticsearch/query_rules',
     },
+    searchGettingStarted: {
+      pathname: '/app/elasticsearch/getting_started',
+    },
   },
 });

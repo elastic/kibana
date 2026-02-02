@@ -33,8 +33,6 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
 import type { DashboardCapabilities } from '../../common';
-import type { LoadDashboardReturn } from './dashboard_content_management_service/types';
-import type { SearchDashboardsResponse } from './dashboard_content_management_service/lib/find_dashboards';
 
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,
@@ -77,66 +75,6 @@ export const setStubLogger = () => {
   setLogger(coreMock.createCoreContext().logger);
 };
 
-export const mockDashboardContentManagementService = {
-  loadDashboardState: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      dashboardInput: {},
-    } as LoadDashboardReturn)
-  ),
-  saveDashboardState: jest.fn(),
-  findDashboards: {
-    search: jest.fn().mockImplementation(({ search, size }) => {
-      const sizeToUse = size ?? 10;
-      const hits: SearchDashboardsResponse['hits'] = [];
-      for (let i = 0; i < sizeToUse; i++) {
-        hits.push({
-          type: 'dashboard',
-          id: `dashboard${i}`,
-          attributes: {
-            description: `dashboard${i} desc`,
-            title: `dashboard${i} - ${search} - title`,
-          },
-          references: [] as SearchDashboardsResponse['hits'][0]['references'],
-        } as SearchDashboardsResponse['hits'][0]);
-      }
-      return Promise.resolve({
-        total: sizeToUse,
-        hits,
-      });
-    }),
-    findById: jest.fn(),
-    findByIds: jest.fn().mockImplementation(() =>
-      Promise.resolve([
-        {
-          id: `dashboardUnsavedOne`,
-          status: 'success',
-          attributes: {
-            title: `Dashboard Unsaved One`,
-          },
-        },
-        {
-          id: `dashboardUnsavedTwo`,
-          status: 'success',
-          attributes: {
-            title: `Dashboard Unsaved Two`,
-          },
-        },
-        {
-          id: `dashboardUnsavedThree`,
-          status: 'success',
-          attributes: {
-            title: `Dashboard Unsaved Three`,
-          },
-        },
-      ])
-    ),
-    findByTitle: jest.fn(),
-  },
-  deleteDashboards: jest.fn(),
-  checkForDuplicateDashboardTitle: jest.fn(),
-  updateDashboardMeta: jest.fn(),
-};
-
 export const mockDashboardBackupService = {
   clearState: jest.fn(),
   getState: jest.fn().mockReturnValue(undefined),
@@ -147,10 +85,4 @@ export const mockDashboardBackupService = {
     .fn()
     .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
   dashboardHasUnsavedEdits: jest.fn(),
-};
-
-export const mockDashboardContentManagementCache = {
-  fetchDashboard: jest.fn(),
-  addDashboard: jest.fn(),
-  deleteDashboard: jest.fn(),
 };

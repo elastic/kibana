@@ -83,9 +83,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const colorMode = darkMode === false ? 'light' : darkMode === true ? 'dark' : 'system';
-    // Amsterdam theme is called `v8` internally
-    // and should be kept this way for compatibility reasons.
-    const themeTagName = themeName === 'amsterdam' ? 'v8' : themeName;
+    const themeTagName = themeName;
     const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
@@ -115,7 +113,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha256');
     hash.update(body);
     const etag = hash.digest('hex');
 

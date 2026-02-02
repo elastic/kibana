@@ -353,6 +353,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
+    // @ts-expect-error upgrade typescript v5.9.3
     previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
 
@@ -1649,28 +1650,6 @@ export function getReferenceRoot(layer: FormBasedLayer, columnId: string): strin
     currentId = refLookup[currentId];
   }
   return currentId;
-}
-
-export function getReferencedColumnIds(
-  layer: Omit<FormBasedLayer, 'indexPatternId'>,
-  columnId: string
-): string[] {
-  const referencedIds: string[] = [];
-  function collect(id: string) {
-    const column = layer.columns[id];
-    if (column && 'references' in column) {
-      const columnReferences = column.references;
-      // only record references which have created columns yet
-      const existingReferences = columnReferences.filter((reference) =>
-        Boolean(layer.columns[reference])
-      );
-      referencedIds.push(...existingReferences);
-      existingReferences.forEach(collect);
-    }
-  }
-  collect(columnId);
-
-  return referencedIds;
 }
 
 export function hasTermsWithManyBuckets(layer: FormBasedLayer): boolean {

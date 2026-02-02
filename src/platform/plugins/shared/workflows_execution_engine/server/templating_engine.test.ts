@@ -327,4 +327,188 @@ describe('WorkflowTemplatingEngine', () => {
       });
     });
   });
+
+  describe('raw value evaluation with ${{ }} syntax', () => {
+    it('should preserve array structure when using ${{ }} syntax', () => {
+      const obj = {
+        tags: '${{ inputs.tags }}',
+      };
+      const context = {
+        inputs: {
+          tags: ['tag1', 'tag2', 'tag3'],
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        tags: ['tag1', 'tag2', 'tag3'],
+      });
+      expect(Array.isArray(rendered.tags)).toBe(true);
+    });
+
+    it('should preserve object structure when using ${{ }} syntax', () => {
+      const obj = {
+        metadata: '${{ inputs.metadata }}',
+      };
+      const context = {
+        inputs: {
+          metadata: {
+            version: '1.0.0',
+            author: 'John Doe',
+          },
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        metadata: {
+          version: '1.0.0',
+          author: 'John Doe',
+        },
+      });
+      expect(typeof rendered.metadata).toBe('object');
+      expect(Array.isArray(rendered.metadata)).toBe(false);
+    });
+
+    it('should preserve boolean values', () => {
+      const obj = {
+        isActive: '${{ inputs.isActive }}',
+      };
+      const context = {
+        inputs: {
+          isActive: true,
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        isActive: true,
+      });
+      expect(typeof rendered.isActive).toBe('boolean');
+    });
+
+    it('should support both ${{ }} and {{ }} syntax in the same object', () => {
+      const obj = {
+        message: 'Hello {{ user.name }}!',
+        tags: '${{ inputs.tags }}',
+        count: 'Total: {{ inputs.count }}',
+      };
+      const context = {
+        user: {
+          name: 'Alice',
+        },
+        inputs: {
+          tags: ['admin', 'user'],
+          count: 5,
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        message: 'Hello Alice!',
+        tags: ['admin', 'user'],
+        count: 'Total: 5',
+      });
+    });
+
+    it('should support ${{ }} in nested objects', () => {
+      const obj = {
+        request: {
+          body: {
+            tags: '${{ inputs.tags }}',
+            message: 'Processing {{ inputs.count }} items',
+          },
+        },
+      };
+      const context = {
+        inputs: {
+          tags: ['urgent', 'important'],
+          count: 10,
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        request: {
+          body: {
+            tags: ['urgent', 'important'],
+            message: 'Processing 10 items',
+          },
+        },
+      });
+    });
+
+    it('should handle ${{ }} with filters', () => {
+      const obj = {
+        items: '${{ inputs.items | slice: 0, 2 }}',
+      };
+      const context = {
+        inputs: {
+          items: ['a', 'b', 'c', 'd'],
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        items: ['a', 'b'],
+      });
+      expect(Array.isArray(rendered.items)).toBe(true);
+    });
+
+    it('should convert ${{ str | split: "," }} to array', () => {
+      const obj = {
+        items: '${{ str | split: "," }}',
+      };
+      const context = {
+        str: 'foo,bar,dak',
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        items: ['foo', 'bar', 'dak'],
+      });
+      expect(Array.isArray(rendered.items)).toBe(true);
+    });
+
+    it('should not treat regular {{ }} as ${{ }}', () => {
+      const obj = {
+        message: '{{ inputs.str | split: "," }}',
+      };
+      const context = {
+        inputs: {
+          str: 'foo,bar,dak',
+        },
+      };
+      const rendered = templatingEngine.render(obj, context);
+      expect(rendered).toEqual({
+        message: 'foobardak',
+      });
+      expect(typeof rendered.message).toBe('string');
+    });
+
+    it('should preserve empty arrays', () => {
+      const obj = {
+        items: '${{ inputs.items }}',
+      };
+      const context = {
+        inputs: {
+          items: [],
+        },
+      };
+
+      const rendered = templatingEngine.render(obj, context);
+
+      expect(rendered).toEqual({
+        items: [],
+      });
+      expect(Array.isArray(rendered.items)).toBe(true);
+    });
+  });
 });

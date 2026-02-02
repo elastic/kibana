@@ -87,8 +87,11 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
           alignItems="flexStart"
         >
           <EuiFlexItem grow={false}>
-            <EuiText size="relative">{card.description}</EuiText>
+            <EuiText size="relative" color="subdued">
+              {card.description}
+            </EuiText>
           </EuiFlexItem>
+          <EuiSpacer size="s" />
           <EuiFlexItem>{card.buttonComponent}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiCard>
@@ -330,6 +333,7 @@ export const GetStartedWithElasticsearch = () => {
             })}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGrid columns={isSmallScreen ? 2 : 4} gutterSize="l" responsive={false}>

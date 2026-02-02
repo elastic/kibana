@@ -38,6 +38,8 @@
           "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
         "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,6 +51,8 @@
             "label": "{\n  provider,\n  settings = {},\n  path,\n}",
             "description": [],
             "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+            "lineNumber": 50,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -79,6 +83,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+                "lineNumber": 51,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -100,6 +106,8 @@
                       }
                     ],
                     "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
+                    "lineNumber": 124,
+                    "columnNumber": 42,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -116,6 +124,8 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+                "lineNumber": 52,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -127,6 +137,8 @@
                 "label": "path",
                 "description": [],
                 "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+                "lineNumber": 53,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -155,6 +167,8 @@
           "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
         ],
         "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +180,8 @@
             "label": "{\n  provider,\n  settings = {},\n}",
             "description": [],
             "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+            "lineNumber": 61,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +212,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+                "lineNumber": 62,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -217,6 +235,8 @@
                       }
                     ],
                     "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
+                    "lineNumber": 124,
+                    "columnNumber": 42,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -233,6 +253,8 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "src/core/packages/test-helpers/deprecations-getters/src/deprecations_getters.ts",
+                "lineNumber": 63,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

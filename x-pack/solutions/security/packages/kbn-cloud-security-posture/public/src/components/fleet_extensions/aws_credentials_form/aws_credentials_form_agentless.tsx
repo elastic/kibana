@@ -18,9 +18,8 @@ import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -104,14 +103,9 @@ const updatePolicyCloudConnectorSupport = (
     return;
   }
 
-  if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  } else if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
+  // Ensure cloud connector support is false if credential type is not cloud_connectors
+  // (CloudConnectorSetup component handles setting it to true when cloud_connectors is selected)
+  if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
@@ -129,7 +123,7 @@ const getCloudFormationConfig = (
 
   return {
     isSupported,
-    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink> || '',
+    accordionTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
     templateUrl: automationCredentialTemplate || '',
   };
 };
@@ -158,13 +152,23 @@ export const AwsCredentialsFormAgentless = ({
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(
+  // Update cloud connector support when relevant values change
+  React.useEffect(() => {
+    updatePolicyCloudConnectorSupport(
+      awsCredentialsType,
+      newPolicy,
+      updatePolicy,
+      input,
+      awsPolicyType
+    );
+  }, [
     awsCredentialsType,
+    newPolicy.supports_cloud_connector,
+    input,
+    awsPolicyType,
     newPolicy,
     updatePolicy,
-    input,
-    awsPolicyType
-  );
+  ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,

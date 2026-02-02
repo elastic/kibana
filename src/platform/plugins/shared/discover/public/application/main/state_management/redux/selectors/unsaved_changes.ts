@@ -16,16 +16,19 @@ import { canImportVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
-import { isEqualFilters } from '../../discover_app_state_container';
+import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
+  fromSavedObjectTabToTabState,
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { getSerializedSearchSourceDataViewDetails } from '../utils';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
@@ -71,6 +74,25 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    // Ensure the persisted tab accounts for default app state values when comparing,
+    // otherwise initializing a tab could automatically trigger unsaved changes.
+    const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
+      tab: fromSavedObjectTabToTabState({
+        tab: persistedTab,
+        initialAppState: getInitialAppState({
+          initialUrlState: undefined,
+          persistedTab,
+          dataView: getSerializedSearchSourceDataViewDetails(
+            persistedTab.serializedSearchSource,
+            state.savedDataViews
+          ),
+          services,
+        }),
+      }),
+      timeRestore: Boolean(persistedTab.timeRestore),
+      services,
+    });
+
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
@@ -89,7 +111,7 @@ export const selectHasUnsavedChanges = (
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
       const compare = TAB_COMPARATORS[key] as FieldComparator<DiscoverSessionTab[typeof key]>;
-      const prevField = persistedTab[key];
+      const prevField = persistedTabWithDefaults[key];
       const nextField = normalizedTab[key];
 
       if (!compare(prevField, nextField)) {
@@ -209,8 +231,14 @@ const TAB_COMPARATORS: TabComparators = {
   refreshInterval: fieldComparator('refreshInterval', { pause: true, value: 0 }),
   rowsPerPage: fieldComparator('rowsPerPage', 0),
   sampleSize: fieldComparator('sampleSize', 0),
+  chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
-  controlGroupJson: fieldComparator('controlGroupJson', '{}'),
+  controlGroupJson: (a, b) => {
+    // ignore the order of keys when comparing JSON strings
+    const testA = JSON.parse(a ?? '{}');
+    const testB = JSON.parse(b ?? '{}');
+    return isEqual(testA, testB);
+  },
 };

@@ -16,6 +16,7 @@ const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 const ALERT_SCHEDULED_ACTION_NAMESPACE = `${ALERT_NAMESPACE}.scheduled_action` as const;
+const ALERT_STATE_NAMESPACE = `${ALERT_NAMESPACE}.state` as const;
 
 // kibana.space_ids - space ID(s) of the rule that created this alert
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
@@ -50,6 +51,9 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
+
+// kibana.alert.maintenance_window_names - Names of maintenance windows that are affecting this alert
+const ALERT_MAINTENANCE_WINDOW_NAMES = `${ALERT_NAMESPACE}.maintenance_window_names` as const;
 
 // kibana.alert.consecutive_matches - count of consecutive times the alert has been active
 const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
@@ -145,10 +149,13 @@ const ALERT_SCHEDULED_ACTION_THROTTLING = `${ALERT_SCHEDULED_ACTION_NAMESPACE}.t
 // kibana.alert.index_pattern - index pattern for the alert
 const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
+const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 };
 
 export const fields = {
@@ -159,6 +166,7 @@ export const fields = {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
@@ -197,6 +205,7 @@ export const fields = {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export {
@@ -204,6 +213,7 @@ export {
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
   KIBANA_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 
   // fields
   ALERT_ACTION_GROUP,
@@ -213,6 +223,7 @@ export {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
@@ -251,6 +262,7 @@ export {
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
+  ALERT_MUTED,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

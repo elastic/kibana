@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -23,7 +24,6 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
-import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -35,9 +35,6 @@ describe('Perform bulk action route', () => {
   let context: ReturnType<typeof requestContextMock.createTools>['context'];
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const mockRule = getFindResultWithSingleHit().data[0];
-  const experimentalFeatures = {
-    bulkEditAlertSuppressionEnabled: true,
-  } as ConfigType['experimentalFeatures'];
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -51,9 +48,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, ml, {
-      experimentalFeatures,
-    } as ConfigType);
+    performBulkActionRoute(server.router, ml);
   });
 
   afterEach(() => {
@@ -688,7 +683,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Cannot use both ids and gaps_range_start/gaps_range_end in request payload.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
@@ -707,7 +702,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Both gaps_range_start and gaps_range_end must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
@@ -726,13 +721,48 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'Both gaps_range_start and gaps_range_end must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if gaps range is provided without gap_fill_statuses', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
+      );
+    });
+
+    it('rejects payload if gap_fill_statuses are provided without gaps range', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
+        },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
   });
 
   describe('gap range functionality', () => {
-    it('passes gap range to rules find when provided with query', async () => {
+    it('passes gap range and status to rules find when provided with query', async () => {
       const gapStartDate = '2025-01-01T00:00:00.000Z';
       const gapEndDate = '2025-01-02T00:00:00.000Z';
 
@@ -744,6 +774,7 @@ describe('Perform bulk action route', () => {
           query: '',
           gaps_range_start: gapStartDate,
           gaps_range_end: gapEndDate,
+          gap_fill_statuses: [gapFillStatus.UNFILLED],
         },
       });
 
@@ -753,7 +784,7 @@ describe('Perform bulk action route', () => {
         expect.objectContaining({
           start: gapStartDate,
           end: gapEndDate,
-          statuses: ['unfilled', 'partially_filled'],
+          highestPriorityGapFillStatuses: ['unfilled'],
         })
       );
     });
@@ -789,59 +820,6 @@ describe('Perform bulk action route', () => {
         },
       })
     );
-  });
-});
-
-describe('Perform bulk action route, experimental feature bulkEditAlertSuppressionEnabled is disabled', () => {
-  let server: ReturnType<typeof serverMock.create>;
-  let clients: ReturnType<typeof requestContextMock.createTools>['clients'];
-  let context: ReturnType<typeof requestContextMock.createTools>['context'];
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  const experimentalFeatures = {} as ConfigType['experimentalFeatures'];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-
-    performBulkActionRoute(server.router, ml, {
-      experimentalFeatures,
-    } as ConfigType);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
-  it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
-    const response = await server.inject(
-      getBulkActionEditAlertSuppressionRequest(),
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body).toEqual({
-      message:
-        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
-      status_code: 400,
-    });
-  });
-
-  it('returns error for dry run mode if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
-    const response = await server.inject(
-      { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body).toEqual({
-      message:
-        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
-      status_code: 400,
-    });
   });
 });
 

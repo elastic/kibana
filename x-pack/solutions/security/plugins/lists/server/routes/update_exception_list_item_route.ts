@@ -8,10 +8,13 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api';
 import {
   UpdateExceptionListItemRequestBody,
   UpdateExceptionListItemResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -27,7 +30,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
       path: EXCEPTION_LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })
@@ -71,20 +74,25 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             });
           }
 
+          // Cast entries to the expected array type (request body is a union type)
+          const entriesArray = entries as ExceptionListItemEntryArray;
+          const osTypesArray = (osTypes ?? []) as OsTypeArray;
+          const tagsArray = tags ?? [];
+
           const exceptionLists = await getExceptionListClient(context);
           const exceptionListItem = await exceptionLists.updateOverwriteExceptionListItem({
             _version,
             comments,
             description,
-            entries,
+            entries: entriesArray,
             expireTime,
             id,
             itemId,
             meta,
             name,
             namespaceType,
-            osTypes,
-            tags,
+            osTypes: osTypesArray,
+            tags: tagsArray,
             type,
           });
 

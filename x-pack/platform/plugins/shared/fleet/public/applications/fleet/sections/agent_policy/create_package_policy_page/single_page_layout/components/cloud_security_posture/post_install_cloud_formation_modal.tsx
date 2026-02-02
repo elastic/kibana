@@ -79,7 +79,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
         {error && isError && !isLoadingInitialRequest && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut announceOnMount title={error} color="danger" iconType="error" />
           </>
         )}
       </EuiModalBody>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, httpExitSpan, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, httpExitSpan, timerange } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 
 export function generateApmData({ from, to }: { from: Date; to: Date }) {

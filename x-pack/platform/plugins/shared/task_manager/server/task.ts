@@ -303,14 +303,6 @@ interface RruleHourly extends RruleCommon {
   bymonthday?: never;
 }
 
-interface RruleHourly extends RruleCommon {
-  freq: Frequency.HOURLY;
-  byhour?: never;
-  byminute?: number[];
-  byweekday?: never;
-  bymonthday?: never;
-}
-
 export interface TaskUserScope {
   apiKeyId: string;
   spaceId?: string;
@@ -579,6 +571,7 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
+  regenerateApiKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

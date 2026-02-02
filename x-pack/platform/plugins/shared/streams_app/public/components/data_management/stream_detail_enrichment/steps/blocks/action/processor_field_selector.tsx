@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { default as React, useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
-import { FieldSelector } from '../../../../shared/field_selector';
 import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
+import { useStreamDataViewFieldTypes } from '../../../../../../hooks/use_stream_data_view_field_types';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
+import { useProcessorContext } from './processor_context';
 
 export interface ProcessorFieldSelectorProps {
   fieldKey?: string;
@@ -17,6 +23,8 @@ export interface ProcessorFieldSelectorProps {
   placeholder?: string;
   label?: string;
   onChange?: (value: string) => void;
+  labelAppend?: React.ReactNode;
+  processorId?: string;
 }
 
 export const ProcessorFieldSelector = ({
@@ -25,8 +33,37 @@ export const ProcessorFieldSelector = ({
   placeholder,
   label,
   onChange,
+  labelAppend,
+  processorId: processorIdProp,
 }: ProcessorFieldSelectorProps) => {
-  const suggestions = useEnrichmentFieldSuggestions();
+  const fieldSuggestions = useEnrichmentFieldSuggestions();
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
+  const processorContext = useProcessorContext();
+
+  // Use processorId from context if available, otherwise use prop
+  const processorId = processorContext?.processorId ?? processorIdProp;
+
+  // Fetch DataView field types with automatic caching via React Query
+  const { fieldTypeMap } = useStreamDataViewFieldTypes(streamName);
+
+  // Get validation-based field types for this processor
+  const validationFieldTypes = useStreamEnrichmentSelector((state) => {
+    if (!processorId) return new Map();
+    return state.context.fieldTypesByProcessor.get(processorId) || new Map();
+  });
+
+  // Enrich field suggestions with types from DataView and validation
+  const suggestions = useMemo(() => {
+    return fieldSuggestions.map((suggestion) => {
+      // Prefer validation-based type over mapping-based type
+      const validationType = validationFieldTypes.get(suggestion.name);
+      const mappingType = fieldTypeMap.get(suggestion.name);
+      return {
+        ...suggestion,
+        type: validationType || mappingType,
+      };
+    });
+  }, [fieldSuggestions, fieldTypeMap, validationFieldTypes]);
 
   const { field, fieldState } = useController({
     name: fieldKey,
@@ -62,7 +99,7 @@ export const ProcessorFieldSelector = ({
   );
 
   return (
-    <FieldSelector
+    <AutocompleteSelector
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}
@@ -73,6 +110,8 @@ export const ProcessorFieldSelector = ({
       dataTestSubj="streamsAppProcessorFieldSelectorComboFieldText"
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
+      labelAppend={labelAppend}
+      showIcon={true}
     />
   );
 };

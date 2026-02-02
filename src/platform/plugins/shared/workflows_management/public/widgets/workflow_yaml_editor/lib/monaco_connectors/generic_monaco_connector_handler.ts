@@ -10,9 +10,8 @@
 import type { monaco } from '@kbn/monaco';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import type {
-  ActionContext,
-  ActionInfo,
   ConnectorExamples,
+  ConnectorInfo,
   HoverContext,
 } from '../monaco_providers/provider_interfaces';
 
@@ -45,7 +44,10 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       }
 
       // Determine connector category
-      const category = this.categorizeConnector(connectorType);
+      const connectorInfo = this.getConnectorInfo(connectorType);
+      if (!connectorInfo) {
+        return null;
+      }
 
       // Create basic hover content
       const content = [
@@ -53,11 +55,11 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         '',
         this.createConnectorOverview(
           connectorType,
-          `${category.name} connector for workflow automation`,
+          `${connectorInfo.name} connector for workflow automation`,
           [
-            `**Type**: ${category.description}`,
+            `**Type**: ${connectorInfo.description}`,
             '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
-            category.documentation ? `**Documentation**: ${category.documentation}` : '',
+            connectorInfo.documentation ? `**Documentation**: ${connectorInfo.documentation}` : '',
           ].filter(Boolean)
         ),
         '',
@@ -74,46 +76,22 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   }
 
   /**
-   * Generate basic actions for generic connectors
-   */
-  async generateActions(context: ActionContext): Promise<ActionInfo[]> {
-    const actions: ActionInfo[] = [];
-
-    // Add generic "Copy Step" action
-    actions.push(
-      this.createActionInfo('copy-step', 'Copy Step', () => this.copyStep(context), {
-        icon: 'copy',
-        tooltip: 'Copy this workflow step to clipboard',
-        priority: 5,
-      })
-    );
-
-    // Add "Validate Step" action
-    actions.push(
-      this.createActionInfo('validate-step', 'Validate Step', () => this.validateStep(context), {
-        icon: 'check',
-        tooltip: 'Validate step configuration',
-        priority: 3,
-      })
-    );
-
-    return actions;
-  }
-
-  /**
    * Get basic examples for generic connector types
    */
   getExamples(connectorType: string): ConnectorExamples | null {
-    const category = this.categorizeConnector(connectorType);
+    const connectorInfo = this.getConnectorInfo(connectorType);
+    if (!connectorInfo) {
+      return null;
+    }
 
     // Return category-specific examples
-    if (category.examples) {
+    if (connectorInfo.examples) {
       return {
-        params: category.examples.params,
+        params: connectorInfo.examples.params,
         snippet: `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
   type: ${connectorType}
   with:
-${Object.entries(category.examples.params || {})
+${Object.entries(connectorInfo.examples.params || {})
   .map(
     ([key, value]) =>
       `    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
@@ -128,12 +106,7 @@ ${Object.entries(category.examples.params || {})
   /**
    * Categorize connector types to provide better help
    */
-  private categorizeConnector(connectorType: string): {
-    name: string;
-    description: string;
-    documentation?: string;
-    examples?: ConnectorExamples;
-  } {
+  private getConnectorInfo(connectorType: string): ConnectorInfo | null {
     // HTTP-related connectors
     if (connectorType.includes('http') || connectorType.includes('webhook')) {
       return {
@@ -159,7 +132,6 @@ ${Object.entries(category.examples.params || {})
         examples: {
           params: {
             message: 'Hello from workflow!',
-            channel: '#general',
           },
         },
       };
@@ -173,7 +145,7 @@ ${Object.entries(category.examples.params || {})
         documentation: 'Configure recipient, subject, and message content',
         examples: {
           params: {
-            to: 'user@example.com',
+            to: ['user@example.com', 'other@example.com'],
             subject: 'Workflow Notification',
             message: 'Your workflow has completed successfully.',
           },
@@ -182,7 +154,7 @@ ${Object.entries(category.examples.params || {})
     }
 
     // Wait/delay connectors
-    if (connectorType.includes('wait') || connectorType.includes('delay')) {
+    if (connectorType.includes('wait')) {
       return {
         name: 'Wait',
         description: 'Timing connector for workflow delays',
@@ -196,7 +168,7 @@ ${Object.entries(category.examples.params || {})
     }
 
     // Console/logging connectors
-    if (connectorType.includes('console') || connectorType.includes('log')) {
+    if (connectorType.includes('console')) {
       return {
         name: 'Console',
         description: 'Logging connector for debugging and monitoring',
@@ -229,12 +201,7 @@ ${Object.entries(category.examples.params || {})
       };
     }
 
-    // Default fallback
-    return {
-      name: 'Custom',
-      description: 'Custom connector for specialized workflow tasks',
-      documentation: 'Refer to connector-specific documentation for parameter details',
-    };
+    return null;
   }
 
   /**
@@ -249,10 +216,13 @@ ${Object.entries(category.examples.params || {})
     ];
 
     // Add connector-specific hints
-    const category = this.categorizeConnector(connectorType);
-    if (category.examples?.params) {
+    const connectorInfo = this.getConnectorInfo(connectorType);
+    if (!connectorInfo) {
+      return '';
+    }
+    if (connectorInfo.examples?.params) {
       lines.push('', '**Example Parameters:**');
-      for (const [key, value] of Object.entries(category.examples.params)) {
+      for (const [key, value] of Object.entries(connectorInfo.examples.params)) {
         lines.push(
           `- \`${key}\`: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
         );
@@ -260,55 +230,5 @@ ${Object.entries(category.examples.params || {})
     }
 
     return lines.join('\n');
-  }
-
-  /**
-   * Copy step to clipboard
-   */
-  private async copyStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext?.stepNode) {
-        return;
-      }
-
-      // Convert step node to YAML string
-      const stepYaml = stepContext.stepNode.toString();
-      await navigator.clipboard.writeText(stepYaml);
-
-      // console.log('GenericMonacoConnectorHandler: Step copied to clipboard');
-    } catch (error) {
-      // console.error('GenericMonacoConnectorHandler: Error copying step', error);
-    }
-  }
-
-  /**
-   * Validate step configuration
-   */
-  private async validateStep(context: ActionContext): Promise<void> {
-    try {
-      const { stepContext } = context;
-      if (!stepContext) {
-        return;
-      }
-
-      // Basic validation - check for required fields
-      const hasName = !!stepContext.stepName;
-      const hasType = !!stepContext.stepType;
-
-      const issues: string[] = [];
-      if (!hasName) issues.push('Missing step name');
-      if (!hasType) issues.push('Missing step type');
-
-      /*
-      if (issues.length === 0) {
-        console.log('GenericMonacoConnectorHandler: Step validation passed');
-      } else {
-        console.warn('GenericMonacoConnectorHandler: Step validation issues:', issues);
-      }
-      */
-    } catch (error) {
-      // console.error('GenericMonacoConnectorHandler: Error validating step', error);
-    }
   }
 }

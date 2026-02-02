@@ -28,6 +28,8 @@
           "; isDist: boolean; }) => void"
         ],
         "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               ">"
             ],
             "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -57,6 +61,8 @@
             "label": "{\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }",
             "description": [],
             "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+            "lineNumber": 23,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -68,6 +74,8 @@
                 "label": "publicPath",
                 "description": [],
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+                "lineNumber": 24,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -79,6 +87,8 @@
                 "label": "routePath",
                 "description": [],
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+                "lineNumber": 25,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -90,6 +100,8 @@
                 "label": "bundlesPath",
                 "description": [],
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+                "lineNumber": 26,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -104,6 +116,8 @@
                   "FileHashCache"
                 ],
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -115,6 +129,8 @@
                 "label": "isDist",
                 "description": [],
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
+                "lineNumber": 28,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -139,6 +155,8 @@
           "{ readonly allowDynamicConfigOverrides: boolean; readonly skipBundleRoutesIfCdnEnabled: boolean; }"
         ],
         "path": "src/core/packages/apps/server-internal/src/core_app_config.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

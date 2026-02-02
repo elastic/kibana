@@ -8,7 +8,7 @@
  */
 
 import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
-import { getPathFromAncestors } from '../../../../common/lib/yaml_utils';
+import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { ConnectorIdItem } from '../model/types';
 
 export function collectAllConnectorIds(

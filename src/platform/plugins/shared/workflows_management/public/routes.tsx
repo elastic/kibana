@@ -13,10 +13,10 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { WorkflowDetailStoreProvider } from './entities/workflows/store/provider';
 import { useCapabilities } from './hooks/use_capabilities';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
-import { WorkflowDetailStoreProvider } from './widgets/workflow_yaml_editor/lib/store/provider';
 import { AccessDenied } from '../common/components/access_denied';
 
 const ReadWorkflowPermissionText = i18n.translate(

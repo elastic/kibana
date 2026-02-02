@@ -47,6 +47,35 @@ describe('extractTokensDangerouslySlow', () => {
     ]);
   });
 
+  it('extracts detailed patterns from error logs (collapse happens post-LLM)', async () => {
+    // Test case for error logs with stack traces
+    // Note: The collapse of generic patterns into GREEDYDATA now happens AFTER LLM review
+    // (in collapseSequentialFields), not during initial tokenization
+    const nodes = await extractGrokPatternDangerouslySlow([
+      "[2025-08-07T09:01:01Z] [ERROR] Traceback (most recent call last): File \"/app/processor.py\", line 112, in process_record user_email = record['user']['email'] KeyError: 'email'",
+      "[2025-08-07T09:01:02Z] [ERROR] TypeError: Cannot read properties of undefined (reading 'name') \n    at getUserName (/app/src/utils.js:12:25)\n    at /app/src/server.js:115:18\n    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)\n    at next (/app/node_modules/express/lib/router/route.js:144:13)",
+      '[2025-08-07T09:01:03Z] [ERROR] org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement\n    at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:276)\n    ... 87 more\nCaused by: org.hibernate.exception.ConstraintViolationException: could not execute statement\n    at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:112)\n    ... 96 more\nCaused by: java.sql.SQLIntegrityConstraintViolationException: ORA-01400: cannot insert NULL into ("SCHEMA_NAME"."TABLE_NAME"."COLUMN_NAME")\n    at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)\n    ... 112 more',
+      "[2025-08-07T09:01:04Z] [ERROR] System.IO.FileNotFoundException: Could not find file 'C:\\data\\input.txt'.\nFile name: 'C:\\data\\input.txt'\n    at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)\n    at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)",
+    ]);
+
+    // At the tokenization stage, we extract detailed patterns
+    // The LLM will later rename these fields, and collapseSequentialFields() will collapse
+    // sequential same-named fields into GREEDYDATA
+    const components = getGrokComponents(nodes);
+
+    // Verify we extract timestamp and log level correctly
+    expect(components[0]).toBe('[');
+    expect(components[1]).toBe('TIMESTAMP_ISO8601');
+    expect(components[2]).toBe(']');
+    expect(components[4]).toBe('[');
+    expect(components[5]).toBe('LOGLEVEL');
+    expect(components[6]).toBe(']');
+
+    // The error message content is extracted as detailed tokens
+    // (collapse happens in collapseSequentialFields after LLM review)
+    expect(components.length).toBeGreaterThan(7);
+  });
+
   it('handles varying column counts across messages', async () => {
     const nodes = await extractGrokPatternDangerouslySlow([
       'App 123 started',

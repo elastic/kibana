@@ -10,7 +10,7 @@
 import type { ExitForeachNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
 export class ExitForeachNodeImpl implements NodeImplementation {
@@ -21,7 +21,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     const foreachState = this.stepExecutionRuntime.getCurrentStepState();
 
     if (!foreachState) {
@@ -33,7 +33,7 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       return;
     }
 
-    await this.stepExecutionRuntime.finishStep();
+    this.stepExecutionRuntime.finishStep();
     this.workflowLogger.logDebug(
       `Exiting foreach step ${this.node.stepId} after processing all items.`,
       {

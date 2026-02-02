@@ -10,19 +10,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'rollup']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   describe('Stack management- rollup a11y tests', () => {
     const rollupJobName = `rollup${Date.now().toString()}`;
+    let deActivateRollupFeature: () => Promise<void>;
+
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await kibanaServer.uiSettings.update({
-        defaultIndex: 'logstash-*',
-      });
+      deActivateRollupFeature = await PageObjects.rollup.activateFeature();
+
       await PageObjects.settings.navigateTo();
       await PageObjects.rollup.clickRollupJobsTab();
     });
@@ -44,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.rollup.setIndexName('rollupindex');
         await PageObjects.rollup.moveToNextStep(2);
         await PageObjects.rollup.verifyStepIsActive(2);
+
         await a11y.testAppSnapshot();
       });
 
@@ -51,34 +48,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.rollup.setJobInterval('24h');
         await PageObjects.rollup.moveToNextStep(3);
         await PageObjects.rollup.verifyStepIsActive(3);
+
         await a11y.testAppSnapshot();
       });
 
       it('step 4 - histogram', async () => {
         await PageObjects.rollup.moveToNextStep(4);
         await PageObjects.rollup.verifyStepIsActive(4);
+
         await a11y.testAppSnapshot();
       });
 
       it('step 5 - metrics', async () => {
         await PageObjects.rollup.moveToNextStep(5);
         await PageObjects.rollup.verifyStepIsActive(5);
+
         await a11y.testAppSnapshot();
       });
 
       it('step 6 - review and save', async () => {
         await PageObjects.rollup.moveToNextStep(6);
         await PageObjects.rollup.verifyStepIsActive(6);
+
         await a11y.testAppSnapshot();
       });
 
       it('submit form and snapshot rollup flyout', async () => {
         await PageObjects.rollup.saveJob(false);
+
         await a11y.testAppSnapshot();
       });
 
       it('rollup table', async () => {
         await PageObjects.rollup.closeFlyout();
+
         await a11y.testAppSnapshot();
       });
     });
@@ -88,9 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
       });
-      await esArchiver.unload(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
+
+      await deActivateRollupFeature?.();
     });
   });
 }

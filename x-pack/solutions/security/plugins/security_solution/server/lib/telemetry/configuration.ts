@@ -82,6 +82,9 @@ class TelemetryConfigurationDTO {
     pageSize: 500,
     maxResponseSize: 10 * 1024 * 1024, // 10 MB
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
+    excludeColdAndFrozenTiers: async () => {
+      return false;
+    },
   };
   private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
 

@@ -66,8 +66,6 @@ describe('action list services', () => {
 
   describe('When using `getActionList()', () => {
     it('should return expected output', async () => {
-      const doc = actionRequests.hits.hits[0]._source;
-
       await expect(
         getActionList({
           endpointService: endpointAppContextService,
@@ -76,59 +74,51 @@ describe('action list services', () => {
           pageSize: 10,
         })
       ).resolves.toEqual({
-        page: 1,
-        pageSize: 10,
-        commands: undefined,
-        userIds: undefined,
-        startDate: undefined,
-        elasticAgentIds: undefined,
-        endDate: undefined,
         data: [
           {
             action: '123',
-            agents: ['agent-a'],
-            agentType: 'endpoint',
-            hosts: { 'agent-a': { name: 'Host-agent-a' } },
-            command: 'running-processes',
-            alertIds: undefined,
-            completedAt: '2022-04-30T16:08:47.449Z',
-            wasSuccessful: true,
-            errors: undefined,
-            id: '123',
-            isCompleted: true,
-            isExpired: false,
-            startedAt: '2022-04-27T16:08:47.449Z',
-            status: 'successful',
-            comment: doc?.EndpointActions.data.comment,
-            createdBy: doc?.user.id,
-            parameters: doc?.EndpointActions.data.parameters,
             agentState: {
               'agent-a': {
-                errors: undefined,
                 completedAt: '2022-04-30T16:08:47.449Z',
                 isCompleted: true,
                 wasSuccessful: true,
               },
             },
+            agentType: 'endpoint',
+            agents: ['agent-a'],
+            command: 'get-file',
+            comment: 'eloo8f2o5zofplw',
+            completedAt: '2022-04-30T16:08:47.449Z',
+            createdBy: 'Gail',
+            hosts: {
+              'agent-a': {
+                name: 'Host-agent-a',
+              },
+            },
+            id: '123',
+            isCompleted: true,
+            isExpired: false,
             outputs: {
               'agent-a': {
                 content: {
-                  code: 'ra_upload_file-success',
-                  disk_free_space: 4825566125475,
-                  path: '/disk1/file/saved/here',
+                  code: 'ra_scan_success_done',
+                  downloadUri: '/api/endpoint/action/123/file/123.agent-a/download',
                 },
                 type: 'json',
               },
             },
+            startedAt: '2022-04-27T16:08:47.449Z',
+            status: 'successful',
+            wasSuccessful: true,
           },
         ],
+        page: 1,
+        pageSize: 10,
         total: 1,
       });
     });
 
     it('should return expected `output` for given actions', async () => {
-      const doc = actionRequests.hits.hits[0]._source;
-
       await expect(
         getActionList({
           endpointService: endpointAppContextService,
@@ -138,42 +128,9 @@ describe('action list services', () => {
           withOutputs: ['123'],
         })
       ).resolves.toEqual({
-        page: 1,
-        pageSize: 10,
-        agentTypes: undefined,
-        commands: undefined,
-        userIds: undefined,
-        startDate: undefined,
-        elasticAgentIds: undefined,
-        endDate: undefined,
         data: [
           {
             action: '123',
-            agents: ['agent-a'],
-            agentType: 'endpoint',
-            hosts: { 'agent-a': { name: 'Host-agent-a' } },
-            command: 'running-processes',
-            completedAt: '2022-04-30T16:08:47.449Z',
-            errors: undefined,
-            wasSuccessful: true,
-            id: '123',
-            isCompleted: true,
-            isExpired: false,
-            startedAt: '2022-04-27T16:08:47.449Z',
-            status: 'successful',
-            outputs: {
-              'agent-a': {
-                content: {
-                  code: 'ra_upload_file-success',
-                  disk_free_space: 4825566125475,
-                  path: '/disk1/file/saved/here',
-                },
-                type: 'json',
-              },
-            },
-            comment: doc?.EndpointActions.data.comment,
-            createdBy: doc?.user.id,
-            parameters: doc?.EndpointActions.data.parameters,
             agentState: {
               'agent-a': {
                 completedAt: '2022-04-30T16:08:47.449Z',
@@ -181,8 +138,36 @@ describe('action list services', () => {
                 wasSuccessful: true,
               },
             },
+            agentType: 'endpoint',
+            agents: ['agent-a'],
+            command: 'get-file',
+            comment: 'eloo8f2o5zofplw',
+            completedAt: '2022-04-30T16:08:47.449Z',
+            createdBy: 'Gail',
+            hosts: {
+              'agent-a': {
+                name: 'Host-agent-a',
+              },
+            },
+            id: '123',
+            isCompleted: true,
+            isExpired: false,
+            outputs: {
+              'agent-a': {
+                content: {
+                  code: 'ra_scan_success_done',
+                  downloadUri: '/api/endpoint/action/123/file/123.agent-a/download',
+                },
+                type: 'json',
+              },
+            },
+            startedAt: '2022-04-27T16:08:47.449Z',
+            status: 'successful',
+            wasSuccessful: true,
           },
         ],
+        page: 1,
+        pageSize: 10,
         total: 1,
       });
     });
@@ -223,7 +208,7 @@ describe('action list services', () => {
               'agent-x': { name: '' },
             },
             alertIds: undefined,
-            command: 'running-processes',
+            command: 'get-file',
             completedAt: undefined,
             wasSuccessful: false,
             errors: undefined,

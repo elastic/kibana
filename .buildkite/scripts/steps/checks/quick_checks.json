@@ -52,6 +52,10 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/pkg_json_semver_ranges.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/prettier_topology.sh"
   },
   {
@@ -59,6 +63,9 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
@@ -83,6 +90,10 @@
   },
   {
     "script": ".buildkite/scripts/steps/checks/verify_codeowners.sh",
+    "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/verify_moon_projects.sh",
     "mayChangeFiles": true
   }
 ]

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore } from '..';
+import { FilterStateStore } from '@kbn/es-query-constants';
 
 export const rangeFilter = {
   meta: {

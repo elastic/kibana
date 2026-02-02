@@ -158,7 +158,8 @@ export function createKbnUrlTracker({
     try {
       urlWithStates = unhashUrl(urlWithHashes);
     } catch (e) {
-      toastNotifications.addDanger(e.message);
+      // eslint-disable-next-line no-console
+      console.warn(e.message);
     }
 
     previousActiveUrl = activeUrl;

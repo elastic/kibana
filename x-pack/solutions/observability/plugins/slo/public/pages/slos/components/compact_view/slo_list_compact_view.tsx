@@ -7,17 +7,17 @@
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import type { RulesParams } from '@kbn/observability-plugin/public';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { useQueryClient } from '@kbn/react-query';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQueryClient } from '@kbn/react-query';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { paths } from '../../../../../common/locators/paths';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
@@ -185,7 +185,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         !!permissions?.hasAllWriteRequested && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        const locator = locators.get<RulesParams>(rulesLocatorID);
+        const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
       },
     },

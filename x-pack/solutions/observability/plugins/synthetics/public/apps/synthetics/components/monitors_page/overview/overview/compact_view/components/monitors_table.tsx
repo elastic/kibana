@@ -13,6 +13,7 @@ import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import type { FlyoutParamProps } from '../../types';
 import { useMonitorsTableColumns } from '../hooks/use_monitors_table_columns';
 import { useMonitorsTablePagination } from '../hooks/use_monitors_table_pagination';
+import { useOverviewTrendsRequests } from '../../../../hooks/use_overview_trends_requests';
 
 export const MonitorsTable = ({
   items,
@@ -27,6 +28,8 @@ export const MonitorsTable = ({
   const { pageOfItems, pagination, onTableChange } = useMonitorsTablePagination({
     totalItems: items,
   });
+
+  useOverviewTrendsRequests(pageOfItems);
 
   const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback, items: pageOfItems });
 

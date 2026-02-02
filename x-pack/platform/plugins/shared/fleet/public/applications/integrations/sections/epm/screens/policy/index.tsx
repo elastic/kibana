@@ -33,6 +33,8 @@ export const Policy = memo(() => {
 
   if (fromQs && fromQs === 'fleet-policy-list') {
     from = 'edit';
+  } else if (fromQs && fromQs === 'installed-integrations') {
+    from = 'installed-integrations';
   } else {
     from = 'package-edit';
   }

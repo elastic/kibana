@@ -9,6 +9,7 @@
 
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import {
+  createMockRequestHandlerContext,
   createMockResponse,
   createMockRouterInstance,
   createMockWorkflowsApi,
@@ -17,15 +18,19 @@ import {
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
+jest.mock('../lib/with_license_check');
+
 describe('POST /api/workflows/{id}/run', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
+  let mockContext: ReturnType<typeof createMockRequestHandlerContext>;
 
   beforeEach(() => {
     mockRouter = createMockRouterInstance();
     workflowsApi = createMockWorkflowsApi();
     mockSpaces = createSpacesMock();
+    mockContext = createMockRequestHandlerContext();
     jest.clearAllMocks();
   });
 
@@ -84,7 +89,7 @@ describe('POST /api/workflows/{id}/run', () => {
       };
       const mockResponse = createMockResponse();
 
-      await routeHandler({}, mockRequest, mockResponse);
+      await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
       expect(workflowsApi.runWorkflow).toHaveBeenCalledWith(
@@ -106,10 +111,129 @@ describe('POST /api/workflows/{id}/run', () => {
       });
     });
 
+    it('should preprocess alert inputs when trigger type is alert', async () => {
+      const mockWorkflow = {
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        definition: {
+          name: 'Test Workflow',
+          steps: [],
+        },
+        yaml: 'name: Test Workflow',
+      };
+
+      const mockExecutionId = 'execution-123';
+      const mockAlertSource = {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        'kibana.alert.rule.uuid': 'rule-uuid-123',
+        'kibana.alert.rule.name': 'Test Rule',
+        'kibana.alert.rule.tags': ['tag1'],
+        'kibana.alert.rule.consumer': 'test-consumer',
+        'kibana.alert.rule.producer': 'test-producer',
+        'kibana.alert.rule.rule_type_id': 'test-rule-type',
+      };
+
+      const mockMget = jest.fn().mockResolvedValue({
+        docs: [
+          { _id: 'alert-1', _index: '.alerts-test-default', found: true, _source: mockAlertSource },
+        ],
+      });
+
+      const testMockContext = createMockRequestHandlerContext(
+        { elasticsearchClient: { mget: mockMget } },
+        ['test-rule-type']
+      );
+
+      workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
+      workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
+
+      const mockRequest = {
+        params: { id: 'workflow-123' },
+        body: {
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+            },
+          },
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/workflow-123/run' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(testMockContext, mockRequest, mockResponse);
+
+      expect(mockMget).toHaveBeenCalled();
+      expect(workflowsApi.runWorkflow).toHaveBeenCalled();
+      const runWorkflowCall = (workflowsApi.runWorkflow as jest.Mock).mock.calls[0];
+      const processedInputs = runWorkflowCall[2];
+      // Verify that inputs were transformed
+      expect(processedInputs.event.alerts).toBeDefined();
+      expect(processedInputs.event.rule).toBeDefined();
+      expect(processedInputs.event.rule.id).toBe('rule-uuid-123');
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          workflowExecutionId: mockExecutionId,
+        },
+      });
+    });
+
+    it('should return error when alert preprocessing fails', async () => {
+      const mockWorkflow = {
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        definition: {
+          name: 'Test Workflow',
+          steps: [],
+        },
+        yaml: 'name: Test Workflow',
+      };
+
+      const mockMget = jest.fn().mockRejectedValue(new Error('Elasticsearch error'));
+
+      const testMockContext = createMockRequestHandlerContext(
+        { elasticsearchClient: { mget: mockMget } },
+        ['test-rule-type']
+      );
+
+      workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
+      const mockRequest = {
+        params: { id: 'workflow-123' },
+        body: {
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+            },
+          },
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/workflow-123/run' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(testMockContext, mockRequest, mockResponse);
+
+      // Should return an error when preprocessing fails
+      expect(mockMget).toHaveBeenCalled();
+      expect(workflowsApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 500,
+          body: expect.objectContaining({
+            message: expect.stringContaining('Elasticsearch error'),
+          }),
+        })
+      );
+    });
+
     it('should return 404 when workflow is not found', async () => {
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(null);
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'non-existent-workflow' },
         body: {
@@ -137,8 +261,6 @@ describe('POST /api/workflows/{id}/run', () => {
       };
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -173,8 +295,6 @@ describe('POST /api/workflows/{id}/run', () => {
       };
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -198,8 +318,6 @@ describe('POST /api/workflows/{id}/run', () => {
     it('should handle API errors gracefully', async () => {
       const errorMessage = 'Workflow execution engine failed';
       workflowsApi.getWorkflow = jest.fn().mockRejectedValue(new Error(errorMessage));
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -238,8 +356,6 @@ describe('POST /api/workflows/{id}/run', () => {
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
       workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {
@@ -289,8 +405,6 @@ describe('POST /api/workflows/{id}/run', () => {
 
       workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
       workflowsApi.runWorkflow = jest.fn().mockRejectedValue(new Error('Execution engine error'));
-
-      const mockContext = {};
       const mockRequest = {
         params: { id: 'workflow-123' },
         body: {

@@ -12,7 +12,7 @@ import type { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
@@ -32,6 +32,7 @@ import {
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getProjectRouting,
   getLayerById,
   getEditState,
   getSelectedLayerId,
@@ -303,6 +304,7 @@ export function setQuery({
   searchSessionId,
   searchSessionMapBuffer,
   clearTimeslice,
+  projectRouting,
 }: {
   filters?: Filter[];
   query?: Query;
@@ -312,6 +314,7 @@ export function setQuery({
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
   clearTimeslice?: boolean;
+  projectRouting?: ProjectRouting;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -338,6 +341,7 @@ export function setQuery({
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
+      projectRouting: projectRouting ?? getProjectRouting(getState()),
     };
 
     const prevQueryContext = {
@@ -347,6 +351,7 @@ export function setQuery({
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
+      projectRouting: getProjectRouting(getState()),
     };
 
     if (!forceRefresh && _.isEqual(nextQueryContext, prevQueryContext)) {

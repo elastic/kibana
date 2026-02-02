@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,8 +21,12 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Subject } from 'rxjs';
+import type {
+  Datatable,
+  DatatableColumn,
+  DefaultInspectorAdapters,
+} from '@kbn/expressions-plugin/common';
+import type { ReplaySubject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -30,8 +34,8 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { RestorableStateProviderProps } from '@kbn/restorable-state';
-import type { UseRequestParamsResult } from './hooks/use_request_params';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -89,20 +93,6 @@ export interface UnifiedHistogramChartLoadEvent {
 }
 
 /**
- * Context object for requests made by Unified Histogram components
- */
-export interface UnifiedHistogramRequestContext {
-  /**
-   * Current search session ID
-   */
-  searchSessionId?: string;
-  /**
-   * The adapter to use for requests (does not apply to Lens requests)
-   */
-  adapter?: RequestAdapter;
-}
-
-/**
  * Context object for the hits count
  */
 export interface UnifiedHistogramHitsContext {
@@ -142,23 +132,6 @@ export interface UnifiedHistogramBreakdownContext {
   field?: DataViewField;
 }
 
-/**
- * Message to fetch the chart and total hits
- */
-export interface UnifiedHistogramFetchMessage {
-  type: 'fetch';
-}
-
-/**
- * Unified histogram input message
- */
-export type UnifiedHistogramInputMessage = UnifiedHistogramFetchMessage;
-
-/**
- * Unified histogram input observable
- */
-export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
-
 export enum UnifiedHistogramExternalVisContextStatus {
   unknown = 'unknown',
   applied = 'applied',
@@ -186,6 +159,16 @@ export interface LensRequestData {
   breakdownField?: string;
 }
 
+export enum LensVisServiceStatus {
+  'initial' = 'initial',
+  'completed' = 'completed',
+}
+
+export interface LensVisServiceState {
+  status: LensVisServiceStatus;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext;
+  visContext: UnifiedHistogramVisContext | undefined;
+}
 /**
  * Unified Histogram type for recreating a stored Lens vis
  */
@@ -195,28 +178,111 @@ export interface UnifiedHistogramVisContext {
   suggestionType: UnifiedHistogramSuggestionType;
 }
 
-// A shared interface for communication between Discover and custom components.
-export interface ChartSectionProps {
+export interface UnifiedHistogramFetchParamsExternal {
+  /**
+   * The request adapter to use for the inspector
+   */
+  requestAdapter: RequestAdapter | undefined;
   /**
    * The current search session ID
    */
-  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
-  /**
-   * Required services
-   */
-  services: UnifiedHistogramServices;
+  searchSessionId: string | undefined;
   /**
    * The abort controller to use for requests
    */
   abortController?: AbortController;
   /**
-   * The current query
+   * The current data view
    */
-  dataView?: DataView;
+  dataView: DataView;
   /**
    * The current query
    */
   query?: Query | AggregateQuery;
+  /**
+   * The current filters
+   */
+  filters?: Filter[];
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
+  /**
+   * The relative time range, used when timeRange is an absolute range (e.g. for edit visualization button)
+   */
+  relativeTimeRange?: TimeRange;
+  /**
+   * The ES|QL variables to use for the chart
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * The controls state to use for the chart
+   */
+  controlsState?: ControlPanelsState<ESQLControlState>;
+  /**
+   * The current columns
+   */
+  columns?: DatatableColumn[];
+  /**
+   * Preloaded data table sometimes used for rendering the chart in ES|QL mode
+   */
+  table?: Datatable;
+  /**
+   * The current breakdown field
+   */
+  breakdownField?: string;
+  /**
+   * The current time interval of the chart
+   */
+  timeInterval?: string;
+  /**
+   * The external custom Lens vis
+   */
+  externalVisContext?: UnifiedHistogramVisContext;
+  /**
+   * Callback to modify the default Lens vis attributes used in the chart
+   */
+  getModifiedVisAttributes?: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
+}
+
+export type UnifiedHistogramFetchParams = Omit<
+  UnifiedHistogramFetchParamsExternal,
+  'breakdownField' | 'timeInterval'
+> & {
+  query: Query | AggregateQuery;
+  filters: Filter[];
+  timeRange: TimeRange;
+  relativeTimeRange: TimeRange;
+  esqlVariables: ESQLControlVariable[];
+
+  // additional
+  lastReloadRequestTime: number;
+  isESQLQuery: boolean;
+  isTimeBased: boolean;
+  columnsMap: Record<string, DatatableColumn> | undefined;
+  breakdown:
+    | {
+        field: DataViewField | undefined;
+      }
+    | undefined;
+  timeInterval: string;
+};
+
+export interface UnifiedHistogramFetch$Arguments {
+  fetchParams: UnifiedHistogramFetchParams;
+  lensVisServiceState: LensVisServiceState | undefined;
+}
+
+export type UnifiedHistogramFetch$ = ReplaySubject<UnifiedHistogramFetch$Arguments>;
+
+// A shared interface for communication between Discover and custom components.
+export interface ChartSectionProps {
+  /**
+   * Required services
+   */
+  services: UnifiedHistogramServices;
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
@@ -241,11 +307,11 @@ export interface ChartSectionProps {
   /**
    * The request parameters for the chart
    */
-  requestParams: UseRequestParamsResult;
+  fetchParams: UnifiedHistogramFetchParams;
   /**
    * Observable for fetching the histogram data
    */
-  input$: UnifiedHistogramInput$;
+  fetch$: UnifiedHistogramFetch$;
   /**
    * Flag indicating that the chart is currently loading
    */
@@ -254,33 +320,4 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
-  /**
-   * The current time range
-   */
-  timeRange?: TimeRange;
 }
-/**
- * Supports customizing the chart (UnifiedHistogram) section in Discover
- */
-export type ChartSectionConfiguration<T extends object = object> =
-  | {
-      /**
-       * The component to render for the chart section
-       */
-      Component: React.ComponentType<ChartSectionProps & RestorableStateProviderProps<T>>;
-      /**
-       * Controls whether or not to replace the default histogram and activate the custom chart
-       */
-      replaceDefaultChart: true;
-      /**
-       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
-       */
-      localStorageKeyPrefix?: string;
-      /**
-       * The default chart section height
-       */
-      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
-    }
-  | {
-      replaceDefaultChart: false;
-    };

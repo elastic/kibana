@@ -85,7 +85,7 @@ module.exports = (request, options) => {
   }
 
   if (request.startsWith('zod/v4/')) {
-    return resolve.sync(`${request}/index.cjs`, {
+    return resolve.sync(`zod/v4/index.cjs`, {
       basedir: options.basedir,
       extensions: options.extensions,
     });

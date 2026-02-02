@@ -11,6 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CircuitBreakerResult } from './health_diagnostic_circuit_breakers.types';
+import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 
 /**
  * Enum defining the types of actions that can be applied to data,
@@ -59,6 +60,7 @@ export interface HealthDiagnosticServiceStart {
   taskManager: TaskManagerStartContract;
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
+  telemetryConfigProvider: TelemetryConfigProvider;
 }
 
 export interface HealthDiagnosticService {

@@ -27,7 +27,12 @@ import {
 } from './constants';
 import { decodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { removePrefixEssuDev } from './jwt-codecs/encoder-prefix';
-import { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
+import {
+  createMockIdpMetadata,
+  createSAMLResponse,
+  ensureSAMLRoleMapping,
+  getSAMLRequestId,
+} from './utils';
 
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
@@ -175,7 +180,7 @@ describe('mock-idp-utils', () => {
       const serverlessOptions = {
         ...baseOptions,
         serverless: {
-          organizationId: '1234567890',
+          organizationId: 'org1234567890',
           projectType: 'observability',
           uiamEnabled: true,
         },
@@ -299,11 +304,60 @@ describe('mock-idp-utils', () => {
         expect(payload.sub).toBe(serverlessOptions.username);
       });
 
+      it('should configure specified expiration dates for JWT access and refresh tokens', async () => {
+        // 1. Generate SAML response with short-lived access token.
+        const samlResponse = await createSAMLResponse({
+          ...serverlessOptions,
+          serverless: {
+            ...serverlessOptions.serverless,
+            accessTokenLifetimeSec: 5,
+            refreshTokenLifetimeSec: 10,
+          },
+        });
+
+        // 2. Extract raw encoded access and refresh tokens.
+        const [, accessTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+        const [, refreshTokenMatch] = Buffer.from(samlResponse, 'base64')
+          .toString('utf-8')
+          .match(
+            new RegExp(
+              `${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+              's'
+            )
+          )!;
+
+        // 3. Unwrap the tokens and extract payloads (format: header.payload.signature).
+        const [, encodedAccessTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(accessTokenMatch)
+        ).split('.');
+        const [, encodedRefreshTokenPayload] = decodeWithChecksum(
+          removePrefixEssuDev(refreshTokenMatch)
+        ).split('.');
+
+        // 4. Verify that exp = iat + 5 seconds.
+        const accessTokenPayload = JSON.parse(
+          Buffer.from(encodedAccessTokenPayload, 'base64url').toString()
+        );
+        expect(accessTokenPayload.exp).toBe(accessTokenPayload.iat + 5);
+
+        const refreshTokenPayload = JSON.parse(
+          Buffer.from(encodedRefreshTokenPayload, 'base64url').toString()
+        );
+        expect(refreshTokenPayload.exp).toBe(refreshTokenPayload.iat + 10);
+      });
+
       it('should not include UIAM tokens when uiamEnabled is false', async () => {
         const nonUiamOptions = {
           ...baseOptions,
           serverless: {
-            organizationId: '1234567890',
+            organizationId: 'org1234567890',
             projectType: 'observability',
             uiamEnabled: false,
           },
@@ -360,6 +414,27 @@ describe('mock-idp-utils', () => {
       } as any;
 
       await expect(ensureSAMLRoleMapping(mockClient)).rejects.toThrow('Elasticsearch error');
+    });
+  });
+
+  describe('getSAMLReuestId', () => {
+    it('should extract SAMLRequest ID from URL', async () => {
+      const url =
+        'http://localhost:5601/mock_idp/login?SAMLRequest=fZJvT8IwEMa%2FSnPvYVsnExqGQYmRxD8Epi98Q0q5SWPXzl6H8u2dggYT4tvePc9z97sOLz4qw7boSTubQ9KNgaFVbq3tSw6PxXWnDxejIcnK8FqMm7Cxc3xrkAJrhZbEvpJD461wkjQJKyskEZRYjO9uBe%2FGovYuOOUMsDER%2BtBGXTlLTYV%2BgX6rFT7Ob3PYhFCLKDJOSbNxFEQvi5NI1joiVI3XYRd9pUVt2aykegU2aefQVobv2U%2FLK6del3pdt%2B8v2gKbTnJYxhivB6XkPDtL0wT755hgT2a9lA9kkpWDslTIy7TfthM1OLUUpA058JhnnTjpJL0iyQTvi5R3z1P%2BDGx2WPFS2z26%2F3is9k0kbopi1pk9LApgTz8naBvgAFx8p%2Ftj0v8byx%2B8MDpJYxgd%2B%2F6e9b41mk5mzmi1Y2Nj3PuVRxkwh1IaQohGB%2BHfHzD6BA%3D%3D';
+      const requestId = await getSAMLRequestId(url);
+      expect(requestId).toEqual('_0e0d9fa2264331e87e1e5a65329a16f9ffce2f38');
+    });
+
+    it('should return undefined if SAMLRequest parameter is missing', async () => {
+      const noParamUrl = 'http://localhost:5601/mock_idp/login';
+      const requestId = await getSAMLRequestId(noParamUrl);
+      expect(requestId).toBeUndefined();
+    });
+
+    it('should return undefined if SAMLRequest parameter is invalid', async () => {
+      const invalidUrl = 'http://localhost:5601/mock_idp/login?SAMLRequest=YmxhaCBibGFoIGJsYWg=';
+      const requestId = await getSAMLRequestId(invalidUrl);
+      expect(requestId).toBeUndefined();
     });
   });
 });

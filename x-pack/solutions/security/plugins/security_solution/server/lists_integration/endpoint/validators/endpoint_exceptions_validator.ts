@@ -9,14 +9,15 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
+import type { ExceptionItemLikeOptions } from '../types';
 
 export class EndpointExceptionsValidator extends BaseValidator {
   static isEndpointException(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
@@ -26,21 +27,29 @@ export class EndpointExceptionsValidator extends BaseValidator {
   protected async validateHasWritePrivilege(): Promise<void> {
     await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
 
-    // Endpoint Exceptions are currently ONLY global, so we need to make sure the user
-    // also has the new Global Artifacts privilege
-    try {
-      await this.validateHasPrivilege('canManageGlobalArtifacts');
-    } catch (error) {
-      // We provide a more detailed error here
-      throw new EndpointExceptionsValidationError(
-        `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
-        403
-      );
+    if (!this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      // With disabled FF, Endpoint Exceptions are ONLY global, so we need to make sure the user
+      // also has the new Global Artifacts privilege
+      try {
+        await this.validateHasPrivilege('canManageGlobalArtifacts');
+      } catch (error) {
+        // We provide a more detailed error here
+        throw new EndpointExceptionsValidationError(
+          `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
     }
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+
+    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      await this.validateCanCreateByPolicyArtifacts(item);
+      await this.validateByPolicyItem(item);
+    }
+
     await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
 
@@ -48,14 +57,32 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   async validatePreUpdateItem(
-    item: UpdateExceptionListItemOptions,
+    _updatedItem: UpdateExceptionListItemOptions,
     currentItem: ExceptionListItemSchema
   ) {
-    await this.validateHasWritePrivilege();
-    await this.validateUpdateOwnerSpaceIds(item, currentItem);
-    await this.validateCanUpdateItemInActiveSpace(item, currentItem);
+    const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    return item;
+    await this.validateHasWritePrivilege();
+
+    if (this.endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      try {
+        await this.validateCanCreateByPolicyArtifacts(updatedItem);
+      } catch (noByPolicyAuthzError) {
+        // Not allowed to create/update by policy data. Validate that the effective scope of the item
+        // remained unchanged with this update or was set to `global` (only allowed update). If not,
+        // then throw the validation error that was catch'ed
+        if (this.wasByPolicyEffectScopeChanged(updatedItem, currentItem)) {
+          throw noByPolicyAuthzError;
+        }
+      }
+
+      await this.validateByPolicyItem(updatedItem, currentItem);
+    }
+
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(updatedItem, currentItem);
+
+    return _updatedItem;
   }
 
   async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {

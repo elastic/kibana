@@ -9,13 +9,13 @@ import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { ChangePointEmbeddableState } from '../embeddables/change_point_chart/types';
+import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
-import type { PatternAnalysisEmbeddableRuntimeState } from '../embeddables/pattern_analysis/types';
 import type { EmbeddableLogRateAnalysisType } from '../embeddables/log_rate_analysis/embeddable_log_rate_analysis_factory';
-import type { LogRateAnalysisEmbeddableRuntimeState } from '../embeddables/log_rate_analysis/types';
+import type { LogRateAnalysisEmbeddableState } from '../../common/embeddables/log_rate_analysis/types';
+import type { PatternAnalysisEmbeddableState } from '../../common/embeddables/pattern_analysis/types';
 
 type SupportedEmbeddableTypes =
   | EmbeddableChangePointChartType
@@ -26,9 +26,9 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
     ? ChangePointEmbeddableState
     : T extends EmbeddablePatternAnalysisType
-    ? PatternAnalysisEmbeddableRuntimeState
+    ? PatternAnalysisEmbeddableState
     : T extends EmbeddableLogRateAnalysisType
-    ? LogRateAnalysisEmbeddableRuntimeState
+    ? LogRateAnalysisEmbeddableState
     : never;
 
 /**

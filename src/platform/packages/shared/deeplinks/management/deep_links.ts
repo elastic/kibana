@@ -13,6 +13,7 @@ import type {
   FLEET_APP_ID,
   OSQUERY_APP_ID,
   MANAGEMENT_APP_ID,
+  CLOUD_CONNECT_NAV_ID,
 } from './constants';
 
 // Monitoring
@@ -71,10 +72,11 @@ export type ManagementId =
   | 'upgrade_assistant'
   | 'users'
   | 'watcher'
-  | 'genAiSettings'
-  | 'agentBuilder';
+  | 'genAiSettings';
 
 export type ManagementDeepLinkId = MonitoringAppId | `${ManagementAppId}:${ManagementId}`;
+
+export type CloudConnectDeepLinkId = typeof CLOUD_CONNECT_NAV_ID;
 
 // Combined
 export type AppId = MonitoringAppId | IntegrationsAppId | ManagementAppId;
@@ -83,4 +85,5 @@ export type DeepLinkId =
   | AppId
   | MonitoringDeepLinkId
   | IntegrationsDeepLinkId
+  | CloudConnectDeepLinkId
   | ManagementDeepLinkId;

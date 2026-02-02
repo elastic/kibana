@@ -22,16 +22,51 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
     // EuiFormControlLayout, so unfortunately there is some double nesting going on here
     // that we need to account for via height inheritence & unsetting EuiDualRange's
     // form control layout colors/borders
+
     rangeSliderControl: css`
       &,
       .euiPopover,
       .euiFormControlLayoutDelimited {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        width: 100%;
         height: 100%;
+      }
+
+      // remove the border coming from EUI
+      .euiFormControlLayoutDelimited::after {
+        border: none !important;
       }
 
       .euiFormControlLayout {
         border: none;
         border-radius: 0;
+
+        // Removes the border that appears on hover
+        &:hover {
+          z-index: 0 !important;
+
+          .euiFormControlLayout__childrenWrapper {
+            outline: none !important;
+          }
+        }
+      }
+
+      .euiFormControlLayout__childrenWrapper {
+        border: none;
+        box-shadow: none;
+        background: ${euiTheme.colors.backgroundBasePlain};
+
+        /** Don't deform the control when rendering the loading spinner. 
+        * Instead, render the spinner on top of the control with a light background,
+        * ensuring that it covers up the up/down arrow buttons rendered at all times by some browsers.
+        * Add 8px of right padding to get it out of the way of the drag handle.
+        */
+        & .euiFormControlLayoutIcons:last-child {
+          position: absolute;
+          right: 0;
+          padding-right: ${euiTheme.size.s}
+          background: ${euiTheme.colors.backgroundBasePlain};
+        }
       }
     `,
     invalid: css`
@@ -54,6 +89,21 @@ export const rangeSliderControlStyles = (euiThemeContext: UseEuiTheme) => {
       /* Remove the append background so the caution icon looks more natural */
       .euiFormControlLayout__append {
         background-color: transparent;
+        // remove the border on the append element
+        &::before {
+          display: none;
+        }
+      }
+
+      & input:last-child {
+        padding-right: ${euiTheme.size.s} !important; // overwrite edit mode styles
+      }
+    `,
+
+    editMode: css`
+      & input:last-child {
+        // ensures that the right up and down arrows are interactable despite drag handle
+        padding-right: ${euiTheme.size.base};
       }
     `,
 

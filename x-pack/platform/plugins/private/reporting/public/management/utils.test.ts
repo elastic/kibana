@@ -6,7 +6,7 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import { transformScheduledReport } from './utils';
+import { transformEmailNotification, transformScheduledReport } from './utils';
 import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 
@@ -73,13 +73,33 @@ describe('transformScheduledReport', () => {
     );
   });
 
-  it('marks as custom when freq=DAILY and no weekdays', () => {
+  it('handles freq=DAILY and no weekdays', () => {
     const report = {
       ...baseReport,
-      schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC' } },
+      schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 } },
     } as ScheduledReportApiJSON;
     expect(transformScheduledReport(report).recurringSchedule).toEqual(
-      expect.objectContaining({ frequency: 'CUSTOM', customFrequency: Frequency.DAILY })
+      expect.objectContaining({ ends: 'never', frequency: Frequency.DAILY, interval: 1 })
+    );
+  });
+
+  it('handles freq=DAILY and weekdays', () => {
+    const report = {
+      ...baseReport,
+      schedule: {
+        rrule: { freq: Frequency.DAILY, tzid: 'UTC', byweekday: ['MO', 'TU'], interval: 1 },
+      },
+    } as ScheduledReportApiJSON;
+    expect(transformScheduledReport(report).recurringSchedule).toEqual(
+      expect.objectContaining({
+        byweekday: {
+          '1': true,
+          '2': true,
+        },
+        ends: 'never',
+        frequency: 3,
+        interval: 1,
+      })
     );
   });
 
@@ -135,6 +155,27 @@ describe('transformScheduledReport', () => {
     const report = { ...baseReport, notification: undefined } as ScheduledReportApiJSON;
     expect(transformScheduledReport(report)).toEqual(
       expect.objectContaining({ sendByEmail: false, emailRecipients: [] })
+    );
+  });
+});
+
+describe('transformEmailNotification', () => {
+  it('transforms email notification fields correctly', () => {
+    const formEmailData = {
+      emailRecipients: ['to@email.com'],
+      emailCcRecipients: ['cc@email.com'],
+      emailBccRecipients: ['bcc@email.com'],
+      emailSubject: 'Test Subject',
+      emailMessage: 'This is a test message.',
+    };
+    expect(transformEmailNotification(formEmailData)).toEqual(
+      expect.objectContaining({
+        to: formEmailData.emailRecipients,
+        cc: formEmailData.emailCcRecipients,
+        bcc: formEmailData.emailBccRecipients,
+        subject: formEmailData.emailSubject,
+        message: formEmailData.emailMessage,
+      })
     );
   });
 });

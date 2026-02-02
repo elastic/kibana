@@ -14,7 +14,6 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
@@ -95,28 +94,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},
-        observabilityAIAssistant: {
-          service: {
-            isEnabled: () => true,
-          },
-          useGenAIConnectors: () => {
-            return {
-              loading: false,
-              selectedConnector: 'azure-gpt4o',
-              connectors: [
-                {
-                  id: 'azure-gpt4o',
-                  actionTypeId: '.gen-ai',
-                  name: 'GPT-4o Azure',
-                  config: {
-                    apiUrl: '',
-                    apiProvider: 'Azure OpenAI',
-                  },
-                },
-              ],
-            };
-          },
-        } as unknown as ObservabilityAIAssistantPublicStart,
         unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
         charts: {
           theme: {

@@ -51,6 +51,10 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from './apis';
@@ -186,7 +190,8 @@ export interface ISavedObjectsRepository {
    * @param options {@link SavedObjectsSearchOptions} - options for the search operation
    * @returns the {@link SavedObjectsSearchResponse}
    *
-   * @deprecated This method is experimental, please do not adopt it for production use cases yet!
+   * @remarks While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-search
    */
   search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
@@ -572,4 +577,27 @@ export interface ISavedObjectsRepository {
    * @param namespace Space to which the repository should be scoped to.
    */
   asScopedToNamespace(namespace: string): ISavedObjectsRepository;
+
+  /**
+   * Changes the ownership of one or more SavedObjects to a new owner.
+   *
+   * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
+   * @param options {@link SavedObjectsChangeOwnershipOptions} - object containing owner profile_uid that will be the new owner
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   */
+  changeOwnership(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeOwnershipOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the access mode of one or more SavedObjects to a new access mode.
+   *
+   * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
+   * @param options {@link SavedObjectsChangeAccessControlOptions} - object containing access mode. If empty, is considered to be marked as editable
+   */
+  changeAccessMode(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

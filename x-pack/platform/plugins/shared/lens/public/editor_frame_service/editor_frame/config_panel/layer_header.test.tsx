@@ -78,6 +78,7 @@ describe('LayerHeader', () => {
           visualization: {
             activeId: 'visA',
             state: 'state from a',
+            selectedLayerId: null,
           },
           datasourceStates: mockDatasourceStates(),
           activeDatasourceId: 'testDatasource',

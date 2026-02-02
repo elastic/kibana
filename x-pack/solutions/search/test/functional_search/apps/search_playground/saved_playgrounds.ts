@@ -46,6 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToUrl('searchPlayground');
 
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
+        await pageObjects.searchPlayground.expectDeprecationNoticeToExist();
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
         // Add a connector to the playground
@@ -84,7 +85,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           testPlaygroundName
         );
         const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: testPlaygroundName,

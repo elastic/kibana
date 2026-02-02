@@ -19,7 +19,7 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DEFAULT_VALUE_REPORT_TITLE } from '../../../../common/constants';
+import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { CostSavings } from './cost_savings';
 import { getTimeRangeAsDays, formatDollars, formatThousands } from './metrics';
@@ -28,6 +28,7 @@ import type { ValueMetrics } from './metrics';
 import { TimeSaved } from './time_saved';
 import { FilteringRate } from './filtering_rate';
 import { ThreatsDetected } from './threats_detected';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   attackAlertIds: string[];
@@ -53,10 +54,12 @@ export const ExecutiveSummary: React.FC<Props> = ({
   valueMetricsCompare,
 }) => {
   const { uiSettings } = useKibana().services;
-  const [title, setTitle] = useState<string>(uiSettings.get(DEFAULT_VALUE_REPORT_TITLE));
+  const [title, setTitle] = useState<string>(
+    uiSettings.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE)
+  );
   const updateTitle = useCallback(
     (newTitle: string) => {
-      uiSettings.set(DEFAULT_VALUE_REPORT_TITLE, newTitle);
+      uiSettings.set(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE, newTitle);
       setTitle(newTitle);
     },
     [uiSettings]
@@ -67,6 +70,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
     },
     [updateTitle]
   );
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
   const subtitle = useMemo(() => {
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -103,6 +108,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
       `}
     >
       <EuiInlineEditTitle
+        isReadOnly={isExportMode}
         className="executiveSummaryTitle"
         data-test-subj="executiveSummaryTitle"
         size="l"
@@ -132,7 +138,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           data-test-subj="executiveSummaryMainInfo"
         >
           <span>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               {isLoading ? (
                 <EuiSkeletonText lines={3} size="s" isLoading={true} />
               ) : hasAttackDiscoveries ? (

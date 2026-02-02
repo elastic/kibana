@@ -154,7 +154,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
 
   if (integrations.status === 'error') {
     return (
-      <EuiCallOut title="Error" color="danger">
+      <EuiCallOut announceOnMount title="Error" color="danger">
         <FormattedMessage
           id="xpack.fleet.debug.integrationDebugger.fetchError"
           defaultMessage="Error fetching installed Integrations"

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  IndicesUpdateAliasesAction,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
@@ -17,6 +20,7 @@ export interface ConcreteIndexInfo {
   index: string;
   alias: string;
   isWriteIndex: boolean;
+  isHidden?: boolean;
 }
 
 interface UpdateIndexMappingsAndSettingsOpts {
@@ -190,53 +194,78 @@ export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpt
   await opts.dataStreamAdapter.createStream(opts);
 };
 
-interface SetConcreteWriteIndexOpts {
+interface UpdateAliasesAndSetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   concreteIndices: ConcreteIndexInfo[];
   alias: string;
 }
 
-export async function findOrSetConcreteWriteIndex(
-  opts: SetConcreteWriteIndexOpts
+export async function updateAliasesAndSetConcreteWriteIndex(
+  opts: UpdateAliasesAndSetConcreteWriteIndexOpts
 ): Promise<ConcreteIndexInfo> {
   const { logger, esClient, concreteIndices, alias } = opts;
   const concreteWriteIndex = concreteIndices.find((index) => index.isWriteIndex);
-  if (concreteWriteIndex) {
+  const isHidden = concreteIndices.every((index) => index.isHidden);
+
+  if (isHidden && concreteWriteIndex) {
     return concreteWriteIndex;
-  } else {
-    logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
   }
+
+  if (!isHidden) {
+    logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
+    logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
+  }
+
+  const actions: IndicesUpdateAliasesAction[] = [];
   const lastIndex = concreteIndices.length - 1;
-  const concreteIndex = sortBy(concreteIndices, ['index'])[lastIndex];
-  logger.debug(
-    `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-  );
+  const sortedConcreteIndices = sortBy(concreteIndices, ['index']);
+  const concreteIndex = sortedConcreteIndices[lastIndex];
+
+  for (let i = 0; i < sortedConcreteIndices.length; i++) {
+    const index = sortedConcreteIndices[i];
+    //  If there is no write index, set last index as the write index
+    if (!concreteWriteIndex && i === lastIndex) {
+      logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
+      actions.push(
+        { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+        {
+          add: {
+            index: concreteIndex.index,
+            alias: concreteIndex.alias,
+            is_write_index: true,
+            is_hidden: true,
+          },
+        }
+      );
+      logger.debug(
+        `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+      );
+    } else if (!index.isHidden) {
+      actions.push({
+        add: {
+          index: index.index,
+          alias: index.alias,
+          is_write_index: index.isWriteIndex,
+          is_hidden: true,
+        },
+      });
+    }
+  }
+
   try {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          actions: [
-            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-            {
-              add: {
-                index: concreteIndex.index,
-                alias: concreteIndex.alias,
-                is_write_index: true,
-              },
-            },
-          ],
+          actions,
         }),
       { logger }
     );
-    logger.info(
-      `Successfully set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-    );
-    return concreteIndex;
+
+    logger.info(`Successfully updated index aliases for alias: ${alias}.`);
+    return concreteWriteIndex ?? concreteIndex;
   } catch (error) {
-    throw new Error(
-      `Failed to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-    );
+    throw new Error(`Failed to update index aliases for alias: ${alias}.`);
   }
 }
 

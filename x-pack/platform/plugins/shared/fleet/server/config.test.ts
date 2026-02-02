@@ -142,6 +142,18 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
+  it('should allow to specify fleetPolicyRevisionsCleanup configuration', () => {
+    expect(() => {
+      config.schema.validate({
+        fleetPolicyRevisionsCleanup: {
+          maxRevisions: 20,
+          interval: '2h',
+          maxPoliciesPerRun: 50,
+        },
+      });
+    }).not.toThrow();
+  });
+
   describe('deprecations', () => {
     it('should add two deprecations when trying to enable a non existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({

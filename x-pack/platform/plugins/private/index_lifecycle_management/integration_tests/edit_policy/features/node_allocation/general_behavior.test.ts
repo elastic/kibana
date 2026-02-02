@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, within, waitFor, fireEvent } from '@testing-library/react';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { setupEnvironment } from '../../../helpers';
-import type { GeneralNodeAllocationTestBed } from './general_behavior.helpers';
-import { setupGeneralNodeAllocation } from './general_behavior.helpers';
+import { setupEnvironment } from '../../../helpers/setup_environment';
+import { renderEditPolicy } from '../../../helpers/render_edit_policy';
+import { createNodeAllocationActions } from '../../../helpers/actions/node_allocation_actions';
+import { createFormToggleAndSetValueAction } from '../../../helpers/actions/form_toggle_and_set_value_action';
 import {
   POLICY_WITH_MIGRATE_OFF,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
@@ -18,21 +19,18 @@ import {
 import { API_BASE_PATH } from '../../../../common/constants';
 
 describe('<EditPolicy /> node allocation general behavior', () => {
-  let testBed: GeneralNodeAllocationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  const setup = async () => {
-    await act(async () => {
-      testBed = await setupGeneralNodeAllocation(httpSetup);
-    });
+  const setup = () => {
+    renderEditPolicy(httpSetup);
   };
 
   describe('data allocation', () => {
@@ -45,13 +43,15 @@ describe('<EditPolicy /> node allocation general behavior', () => {
       });
       httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
-      await setup();
+      setup();
 
-      const { component, actions } = testBed;
-      component.update();
+      await screen.findByTestId('savePolicyButton');
+
+      const actions = createNodeAllocationActions('warm');
 
       await actions.setDataAllocation('node_attrs');
-      await actions.savePolicy();
+      fireEvent.click(screen.getByTestId('savePolicyButton'));
+      await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
@@ -70,25 +70,28 @@ describe('<EditPolicy /> node allocation general behavior', () => {
           nodesByRoles: { data: ['123'] },
         });
 
-        await setup();
-
-        const { component } = testBed;
-        component.update();
+        setup();
+        await screen.findByTestId('savePolicyButton');
       });
 
       test('detecting use of the recommended allocation type', () => {
-        const { find } = testBed;
-        const selectedDataAllocation = find(
-          'warm-dataTierAllocationControls.dataTierSelect'
-        ).text();
+        const container = screen.getByTestId('warm-dataTierAllocationControls');
+        const selectedDataAllocation = within(container)
+          .getByTestId('dataTierSelect')
+          .textContent?.replace(/,/g, '')
+          .trim();
         expect(selectedDataAllocation).toBe('Use warm nodes (recommended)');
       });
 
       test('setting replicas serialization', async () => {
-        const { actions } = testBed;
+        const setReplicas = createFormToggleAndSetValueAction(
+          'warm-setReplicasSwitch',
+          'warm-selectedReplicaCount'
+        );
 
-        await actions.setReplicas('123');
-        await actions.savePolicy();
+        await setReplicas('123');
+        fireEvent.click(screen.getByTestId('savePolicyButton'));
+        await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
         const [requestUrl, requestBody] = lastReq;
@@ -114,20 +117,22 @@ describe('<EditPolicy /> node allocation general behavior', () => {
           nodesByRoles: { data: ['123'] },
         });
 
-        await setup();
-
-        const { component } = testBed;
-        component.update();
+        setup();
+        await screen.findByTestId('savePolicyButton');
       });
 
       test('detecting use of the custom allocation type', () => {
-        const { find } = testBed;
-        expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
+        const container = screen.getByTestId('warm-dataTierAllocationControls');
+        const textContent = within(container)
+          .getByTestId('dataTierSelect')
+          .textContent?.replace(/,/g, '')
+          .trim();
+        expect(textContent).toBe('Custom');
       });
 
       test('detecting use of the "off" allocation type', () => {
-        const { find } = testBed;
-        expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+        const container = screen.getByTestId('cold-dataTierAllocationControls');
+        expect(within(container).getByTestId('dataTierSelect').textContent).toContain('Off');
       });
     });
   });

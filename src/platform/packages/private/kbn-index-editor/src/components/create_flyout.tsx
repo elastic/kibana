@@ -73,6 +73,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
       ownFocus: true,
       onClose: onFlyoutClose,
       size: 'l',
+      outsideClickCloses: false,
     }
   );
 

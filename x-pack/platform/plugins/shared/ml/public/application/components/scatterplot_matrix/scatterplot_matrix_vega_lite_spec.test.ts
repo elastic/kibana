@@ -7,8 +7,7 @@
 
 import 'jest-canvas-mock';
 
-// @ts-ignore
-import { compile } from 'vega-lite/build/vega-lite';
+import { compile } from 'vega-lite';
 
 import type { EuiThemeComputed } from '@elastic/eui';
 

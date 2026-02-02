@@ -74,6 +74,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
       ui: { IndexPatternSelect },
     },
     uiSettings,
+    http,
   } = useDataVisualizerKibana().services;
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
@@ -110,7 +111,11 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
 
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController?: AbortController) => {
-      const adhocDataView = await getESQLAdHocDataview(query.esql, dataViews);
+      const adhocDataView = await getESQLAdHocDataview({
+        dataViewsService: dataViews,
+        query: query.esql,
+        http,
+      });
       if (adhocDataView && adhocDataView.id) {
         setDataViewId(adhocDataView.id);
       }
@@ -209,9 +214,9 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         >
           {isNewPanel ? (
             <EuiCallOut
+              announceOnMount={false}
               size="s"
               iconType="info"
-              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"

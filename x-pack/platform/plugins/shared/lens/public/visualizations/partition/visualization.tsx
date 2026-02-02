@@ -45,7 +45,6 @@ import {
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
-import { PieToolbar, PartitionFlyoutToolbar } from './toolbar';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
@@ -58,6 +57,8 @@ import {
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { PartitionStyleSettings, PartitionLegendSettings } from './toolbar';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -195,6 +196,10 @@ export const getPieVisualization = ({
   },
 
   getSuggestions: suggestions,
+
+  isSubtypeSupported(subtype) {
+    return subtype in PartitionChartsMeta;
+  },
 
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
@@ -542,12 +547,17 @@ export const getPieVisualization = ({
   toPreviewExpression: (state, layers, datasourceExpressionsByLayers) =>
     toPreviewExpression(state, layers, paletteService, datasourceExpressionsByLayers),
 
-  ToolbarComponent(props) {
-    return <PieToolbar {...props} />;
-  },
-
   FlyoutToolbarComponent(props) {
-    return <PartitionFlyoutToolbar {...props} />;
+    const { isDisabled: hasDisabledStyleSettings } = PartitionChartsMeta[props.state.shape].toolbar;
+    return (
+      <FlyoutToolbar
+        {...props}
+        contentMap={{
+          style: hasDisabledStyleSettings ? undefined : PartitionStyleSettings,
+          legend: PartitionLegendSettings,
+        }}
+      />
+    );
   },
 
   hasLayerSettings(props) {

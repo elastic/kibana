@@ -22,6 +22,7 @@ describe('transformUpdateBody', () => {
       notify_when: 'onActionGroupChange' as 'onActionGroupChange',
       alert_delay: { active: 5 },
       flapping: {
+        enabled: true,
         look_back_window: 10,
         status_change_threshold: 5,
       },
@@ -69,6 +70,7 @@ describe('transformUpdateBody', () => {
       notifyWhen: 'onActionGroupChange',
       alertDelay: { active: 5 },
       flapping: {
+        enabled: true,
         lookBackWindow: 10,
         statusChangeThreshold: 5,
       },
@@ -129,6 +131,7 @@ describe('transformUpdateBody', () => {
           },
         },
         "flapping": Object {
+          "enabled": true,
           "lookBackWindow": 10,
           "statusChangeThreshold": 5,
         },

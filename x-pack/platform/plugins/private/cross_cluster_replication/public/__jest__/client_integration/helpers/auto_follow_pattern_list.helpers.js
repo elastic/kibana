@@ -12,6 +12,10 @@ import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pa
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+/**
+ * @param {object} [props]
+ * @returns {ReturnType<typeof renderWithRouter>}
+ */
 export const setup = (props = {}) => {
   const result = renderWithRouter(AutoFollowPatternList, {
     store: createCrossClusterReplicationStore(),
@@ -37,7 +41,7 @@ export const setup = (props = {}) => {
     actions: {
       async selectAutoFollowPatternAt(index) {
         const table = new EuiTableTestHarness('autoFollowPatternListTable');
-        const checkbox = within(table.rows[index]).getByRole('checkbox');
+        const checkbox = within(table.getRows()[index]).getByRole('checkbox');
         await result.user.click(checkbox);
       },
 

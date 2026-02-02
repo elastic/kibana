@@ -9,7 +9,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
 import pRetry from 'p-retry';
 import { fetchActiveSpace } from '../common/spaces';
 import { dump } from '../common/utils';

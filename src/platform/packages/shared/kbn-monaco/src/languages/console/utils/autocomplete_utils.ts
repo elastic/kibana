@@ -60,7 +60,9 @@ export const checkForTripleQuotesAndEsqlQuery = (
       i++;
     } else if (/^(GET|POST|PUT|DELETE|HEAD|PATCH)/i.test(textFromIndex)) {
       // If this is the start of a new request, check if it is a _query API request
-      insideEsqlQueryRequest = /^(P|p)(O|o)(S|s)(T|t)\s+\/?_query(\n|\s|\?)/.test(textFromIndex);
+      insideEsqlQueryRequest = /^(P|p)(O|o)(S|s)(T|t)\s+\/?_query(\/async)?(\n|\s|\?)/.test(
+        textFromIndex
+      );
       // Move the index past the current line that contains request method and endpoint.
       const newlineIndex = text.indexOf('\n', i);
       if (newlineIndex === -1) {

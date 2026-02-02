@@ -43,8 +43,6 @@ export class Utils {
 
 const borealisDark = getEuiThemeVars({ name: 'borealis', darkMode: true });
 const borealisLight = getEuiThemeVars({ name: 'borealis', darkMode: false });
-const amsterdamDark = getEuiThemeVars({ name: 'amsterdam', darkMode: true });
-const amsterdamLight = getEuiThemeVars({ name: 'amsterdam', darkMode: false });
 
 // These colors should be replaced with the respective tokens whenever available from EUI
 export const VegaThemeColors = {
@@ -86,44 +84,6 @@ export const VegaThemeColors = {
       ],
     },
   },
-  amsterdam: {
-    dark: {
-      grid: '#343741', // euiColorChartLines euiColorLightShade
-      title: '#D4DAE5', // euiColorDarkestShade
-      label: '#98A2B3', // euiColorDarkShade
-      default: amsterdamDark.euiColorVis0, // visColors.euiColorVis0
-      visColors: [
-        amsterdamDark.euiColorVis0,
-        amsterdamDark.euiColorVis1,
-        amsterdamDark.euiColorVis2,
-        amsterdamDark.euiColorVis3,
-        amsterdamDark.euiColorVis4,
-        amsterdamDark.euiColorVis5,
-        amsterdamDark.euiColorVis6,
-        amsterdamDark.euiColorVis7,
-        amsterdamDark.euiColorVis8,
-        amsterdamDark.euiColorVis9,
-      ],
-    },
-    light: {
-      grid: '#eef0f3', // euiColorChartLines shade($euiColorLightestShade, 3%)
-      title: '#343741', // euiColorDarkestShade
-      label: '#69707D', // euiColorDarkShade
-      default: amsterdamLight.euiColorVis0, // visColors.euiColorVis0
-      visColors: [
-        amsterdamLight.euiColorVis0,
-        amsterdamLight.euiColorVis1,
-        amsterdamLight.euiColorVis2,
-        amsterdamLight.euiColorVis3,
-        amsterdamLight.euiColorVis4,
-        amsterdamLight.euiColorVis5,
-        amsterdamLight.euiColorVis6,
-        amsterdamLight.euiColorVis7,
-        amsterdamLight.euiColorVis8,
-        amsterdamLight.euiColorVis9,
-      ],
-    },
-  },
 };
 
 export function getVegaThemeColors(
@@ -131,6 +91,5 @@ export function getVegaThemeColors(
   colorToken: 'grid' | 'title' | 'label' | 'default' | 'visColors'
 ) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
-  const themeName = theme.name === 'amsterdam' ? 'amsterdam' : 'borealis';
-  return VegaThemeColors[themeName][colorMode][colorToken];
+  return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken];
 }

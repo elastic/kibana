@@ -23,6 +23,7 @@ export enum FieldType {
   STRING = 'str',
   INTEGER = 'int',
   BOOLEAN = 'bool',
+  MAP = 'map',
 }
 
 export interface ConfigCategoryProperties {

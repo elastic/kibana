@@ -8,7 +8,7 @@
 import { createTestConfig } from './config.base';
 
 export default createTestConfig({
-  serverlessProject: 'workplace_ai',
+  serverlessProject: 'workplaceai',
   testFiles: [],
   junit: {
     reportName: 'Serverless Workplace AI Base Config',

@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiSideNav,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -286,7 +287,11 @@ export const OverviewPage: React.FC<Props> = memo(
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
           {showLogsEssentialsCallout && <LogsEssentialsCallout />}
-
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="default">{packageInfo.name}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />

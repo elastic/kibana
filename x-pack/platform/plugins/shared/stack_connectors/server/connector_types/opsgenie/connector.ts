@@ -11,15 +11,19 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { OpsgenieSubActions } from '../../../common';
-import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
+import {
+  SUB_ACTION,
+  CreateAlertParamsSchema,
+  CloseAlertParamsSchema,
+  Response,
+} from '@kbn/connector-schemas/opsgenie';
 import type {
   CloseAlertParams,
   Config,
   CreateAlertParams,
   FailureResponseType,
   Secrets,
-} from './types';
+} from '@kbn/connector-schemas/opsgenie';
 import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
@@ -28,13 +32,13 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
 
     this.registerSubAction({
       method: this.createAlert.name,
-      name: OpsgenieSubActions.CreateAlert,
+      name: SUB_ACTION.CreateAlert,
       schema: CreateAlertParamsSchema,
     });
 
     this.registerSubAction({
       method: this.closeAlert.name,
-      name: OpsgenieSubActions.CloseAlert,
+      name: SUB_ACTION.CloseAlert,
       schema: CloseAlertParamsSchema,
     });
   }

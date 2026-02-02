@@ -7,12 +7,24 @@
 
 import type { RuleMigrationRetryFilter } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/rules/types';
+import { validateSelection } from './validate_selection';
 
-const RETRY_FILTERS: Record<RuleMigrationRetryFilter, RuleMigrationFilters> = {
+type RetryFilterWithoutSelected = Exclude<RuleMigrationRetryFilter, 'selected'>;
+
+const RETRY_FILTERS: Record<RetryFilterWithoutSelected, RuleMigrationFilters> = {
   failed: { failed: true },
   not_fully_translated: { fullyTranslated: false },
 };
 
-export const getRetryFilter = (retryFilter: RuleMigrationRetryFilter): RuleMigrationFilters => {
+export const getRetryFilter = (
+  retryFilter: RuleMigrationRetryFilter,
+  selection?: RuleMigrationFilters
+): RuleMigrationFilters => {
+  if (retryFilter === 'selected') {
+    if (!selection) {
+      throw new Error('selection must be provided when retryFilter is "selected"');
+    }
+    return validateSelection(selection);
+  }
   return RETRY_FILTERS[retryFilter];
 };

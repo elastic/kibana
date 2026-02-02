@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 const CustomIntegrationFieldsSchema = schema.object({
   readMeData: schema.string(),
-  categories: schema.maybe(schema.arrayOf(schema.string())),
+  categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
 });
 
 export const CustomIntegrationRequestSchema = {

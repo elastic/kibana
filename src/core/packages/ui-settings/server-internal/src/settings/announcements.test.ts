@@ -8,7 +8,7 @@
  */
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { getAnnouncementsSettings } from './announcements';
+import { getAnnouncementsSettings, getGlobalAnnouncementsSettings } from './announcements';
 
 describe('announcements settings', () => {
   const state = getAnnouncementsSettings();
@@ -28,6 +28,47 @@ describe('announcements settings', () => {
       expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
         `"expected value of type [boolean] but got [number]"`
       );
+    });
+  });
+});
+
+describe('global announcements settings', () => {
+  const state = getGlobalAnnouncementsSettings();
+
+  const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
+    setting.schema.validate(value);
+
+  describe('hideAnnouncements', () => {
+    const validate = getValidationFn(state.hideAnnouncements);
+
+    it('should only accept boolean values', () => {
+      expect(() => validate(true)).not.toThrow();
+      expect(() => validate(false)).not.toThrow();
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [string]"`
+      );
+      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [number]"`
+      );
+    });
+  });
+
+  describe('hideFeedback', () => {
+    const validate = getValidationFn(state.hideFeedback);
+
+    it('should only accept boolean values', () => {
+      expect(() => validate(true)).not.toThrow();
+      expect(() => validate(false)).not.toThrow();
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [string]"`
+      );
+      expect(() => validate(12)).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [number]"`
+      );
+    });
+
+    it('should be readonly', () => {
+      expect(state.hideFeedback.readonly).toBe(true);
     });
   });
 });

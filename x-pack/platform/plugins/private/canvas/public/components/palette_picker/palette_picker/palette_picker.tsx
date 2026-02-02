@@ -34,7 +34,9 @@ export const PalettePicker: FC<PalettePickerProps> = (props) => {
 
 PalettePicker.propTypes = {
   id: PropTypes.string,
+  // @ts-expect-error upgrade typescript v5.9.3
   palette: PropTypes.object,
   onChange: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   clearable: PropTypes.bool,
 };

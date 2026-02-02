@@ -13,8 +13,13 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
 export { PLUGIN } from './plugin';
-export { gapStatus } from './gap_status';
-export type { GapStatus } from './gap_status';
+export { gapStatus, gapFillStatus } from './gap_status';
+export type { GapStatus, GapFillStatus } from './gap_status';
 export { alertDeleteCategoryIds } from './alert_delete';
 export type { BackfillInitiator } from './backfill';
 export { backfillInitiator } from './backfill';
+export type { ValidReadAuthEditFields } from './valid_fields_with_read_auth';
+export { validFields } from './valid_fields_with_read_auth';
+export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
+export { GAP_AUTO_FILL_STATUS } from './gap_auto_fill_scheduler';
+export type { GapAutoFillStatus } from './gap_auto_fill_scheduler';

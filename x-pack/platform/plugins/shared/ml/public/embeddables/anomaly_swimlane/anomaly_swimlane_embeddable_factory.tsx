@@ -116,35 +116,31 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ = ((initialState.rawState.query
-        ? new BehaviorSubject(initialState.rawState.query)
+      const query$ = ((initialState.query
+        ? new BehaviorSubject(initialState.query)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ = ((initialState.rawState.filters
-        ? new BehaviorSubject(initialState.rawState.filters)
+      const filters$ = ((initialState.filters
+        ? new BehaviorSubject(initialState.filters)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
-      const swimlaneManager = initializeSwimLaneControls(initialState.rawState, titleManager.api);
+      const swimlaneManager = initializeSwimLaneControls(initialState, titleManager.api);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
       function serializeState() {
-        const rawState: AnomalySwimLaneEmbeddableState = {
+        return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...swimlaneManager.getLatestState(),
         } as AnomalySwimLaneEmbeddableState;
-        return {
-          rawState,
-          references: [],
-        };
       }
 
       const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
@@ -168,9 +164,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) swimlaneManager.reinitializeState(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
         },
       });
 

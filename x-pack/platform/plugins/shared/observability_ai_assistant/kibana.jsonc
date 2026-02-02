@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/obs-ai-team"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -20,8 +20,8 @@
       "llmTasks",
       "productDocBase"
     ],
-    "optionalPlugins": ["cloud", "serverless", "usageCollection"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "optionalPlugins": ["cloud", "serverless", "usageCollection", "agentBuilder"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []
   }

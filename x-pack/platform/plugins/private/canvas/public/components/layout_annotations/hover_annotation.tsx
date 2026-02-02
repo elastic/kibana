@@ -32,6 +32,7 @@ export const HoverAnnotation: FC<Props> = ({ transformMatrix, width, height }) =
 
 HoverAnnotation.propTypes = {
   height: PropTypes.number.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
 };

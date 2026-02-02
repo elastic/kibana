@@ -6,7 +6,9 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_partial_results": "__flag__",
-      "delimiter": "",
+      "delimiter": [
+        ","
+      ],
       "drop_null_columns": "__flag__",
       "format": [
         "csv",

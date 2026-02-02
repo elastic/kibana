@@ -74,22 +74,24 @@ export function TagsDimensionEditor({
   );
 
   const categories = useMemo(() => {
-    return getColorCategories(currentData?.rows, state.tagAccessor);
+    return getColorCategories(currentData?.rows, state.tagAccessor ? [state.tagAccessor] : []);
   }, [currentData?.rows, state.tagAccessor]);
 
   return (
-    <ColorMappingByTerms
-      isDarkMode={isDarkMode}
-      panelRef={panelRef}
-      palettes={palettes}
-      palette={state.palette}
-      setPalette={setPalette}
-      colorMapping={state.colorMapping}
-      setColorMapping={setColorMapping}
-      categories={categories}
-      paletteService={paletteService}
-      formatter={formatter}
-      isInlineEditing={isInlineEditing}
-    />
+    <div className="lnsIndexPatternDimensionEditor--padded">
+      <ColorMappingByTerms
+        isDarkMode={isDarkMode}
+        panelRef={panelRef}
+        palettes={palettes}
+        palette={state.palette}
+        setPalette={setPalette}
+        colorMapping={state.colorMapping}
+        setColorMapping={setColorMapping}
+        categories={categories}
+        paletteService={paletteService}
+        formatter={formatter}
+        isInlineEditing={isInlineEditing}
+      />
+    </div>
   );
 }

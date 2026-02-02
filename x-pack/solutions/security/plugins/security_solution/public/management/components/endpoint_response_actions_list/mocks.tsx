@@ -34,7 +34,7 @@ export const getActionListMock = async ({
   outputs = {},
 }: {
   agentTypes?: ResponseActionAgentType[];
-  agentState?: Pick<ActionDetails, 'agentState'>;
+  agentState?: ActionDetails['agentState'];
   agentIds?: string[];
   hosts?: Record<string, { name: string }>;
   commands?: string[];
@@ -75,6 +75,21 @@ export const getActionListMock = async ({
       errors,
       outputs,
     };
+
+    // If `agentState` is not provided, then create it using the statuses from the overall action
+    if (!actionDetailsOverrides.agentState) {
+      actionDetailsOverrides.agentState = agentIds.reduce((acc, agentId) => {
+        acc[agentId] = {
+          isCompleted: isCompleted ?? true,
+          wasSuccessful: wasSuccessful ?? true,
+          errors,
+          completedAt: actionDetailsOverrides.completedAt ?? '2023-05-10T20:09:25.824Z',
+        };
+
+        return acc;
+      }, {} as ActionDetails['agentState']);
+    }
+
     return endpointActionGenerator.generateActionDetails(actionDetailsOverrides);
   });
 

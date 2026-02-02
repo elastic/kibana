@@ -88,7 +88,10 @@ steps:
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-        expect(workflowExecutionDoc?.error).toBe('Error: Constantly failing connector');
+        expect(workflowExecutionDoc?.error).toEqual({
+          message: 'Error: Constantly failing connector',
+          type: 'Error',
+        });
         expect(workflowExecutionDoc?.scopeStack).toEqual([]);
       });
 
@@ -102,7 +105,10 @@ steps:
         );
         expect(failingStepExecutions.length).toBe(1);
         expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
-        expect(failingStepExecutions[0].error).toBe('Error: Constantly failing connector');
+        expect(failingStepExecutions[0].error).toEqual({
+          message: 'Error: Constantly failing connector',
+          type: 'Error',
+        });
       });
 
       // Note: Fallback steps are currently not executed when a step fails without retry

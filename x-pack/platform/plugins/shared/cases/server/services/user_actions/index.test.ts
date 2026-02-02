@@ -2034,22 +2034,6 @@ describe('CaseUserActionService', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "tags",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases-user-actions.attributes.type",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
                           "value": "title",
                         },
                       ],
@@ -2126,22 +2110,6 @@ describe('CaseUserActionService', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "tags",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases-user-actions.attributes.type",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
                           "value": "title",
                         },
                       ],
@@ -2175,6 +2143,22 @@ describe('CaseUserActionService', () => {
                           "isQuoted": false,
                           "type": "literal",
                           "value": "status",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "tags",
                         },
                       ],
                       "function": "is",

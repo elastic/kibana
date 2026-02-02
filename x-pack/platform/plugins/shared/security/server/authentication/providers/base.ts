@@ -82,6 +82,18 @@ export abstract class BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether intermediate session should be invalidated after a successful login.
+   * Some providers need to have their state checked to make sure all pending login attempts have
+   * completed before invalidating the session. This is particularly important for the SAML Provider,
+   * which may have pending login requests pending
+   * @param [state] Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated, `false` otherwise.
+   */
+  shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    return true;
+  }
+
+  /**
    * Performs initial login request and creates user session. Provider isn't required to implement
    * this method if it doesn't support initial login request.
    * @param request Request instance.

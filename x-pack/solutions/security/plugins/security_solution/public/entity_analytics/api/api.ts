@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   CreateEntitySourceResponse,
@@ -35,6 +35,7 @@ import type {
   SearchPrivilegesIndicesResponse,
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
@@ -261,7 +262,6 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify({
-          type: 'index',
           name: ENTITY_SOURCE_NAME,
           indexPattern,
         }),
@@ -440,7 +440,9 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) =>
+    const updateSavedObjectConfiguration = (
+      params: ConfigureRiskEngineSavedObjectRequestBodyInput
+    ) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
@@ -458,7 +460,7 @@ export const useEntityAnalyticsRoutes = () => {
       },
       signal?: AbortSignal
     ): Promise<EntityDetailsHighlightsResponse> =>
-      http.fetch(ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL, {
+      http.fetch(ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),

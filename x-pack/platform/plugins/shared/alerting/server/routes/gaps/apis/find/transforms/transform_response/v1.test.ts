@@ -37,6 +37,7 @@ describe('transformResponse v1', () => {
         {
           _id: 'test-gap-id',
           '@timestamp': '2024-01-01T00:00:00.000Z',
+          rule_id: 'some-rule-id',
           ...gap.toObject(),
         },
       ],
@@ -134,11 +135,13 @@ describe('transformResponse v1', () => {
     expect(result.data[0]).toEqual({
       _id: 'gap-1',
       '@timestamp': '2024-01-01T00:00:00.000Z',
+      rule_id: 'some-rule-id',
       ...gap1.toObject(),
     });
     expect(result.data[1]).toEqual({
       _id: 'gap-2',
       '@timestamp': '2024-01-01T00:00:00.000Z',
+      rule_id: 'some-rule-id',
       ...gap2.toObject(),
     });
   });

@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
 import rison from '@kbn/rison';
-import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/content_management/constants';
+import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/constants';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';

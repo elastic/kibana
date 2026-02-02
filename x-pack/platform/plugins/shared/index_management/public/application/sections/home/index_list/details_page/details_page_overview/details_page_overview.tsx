@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,16 +27,28 @@ import {
   CodeBox,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
+  EisCloudConnectPromoCallout,
+  EisUpdateCallout,
 } from '@kbn/search-api-panels';
-import type { Index } from '../../../../../../../common';
+import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
+import { type Index } from '../../../../../../../common';
+import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
-import { documentationService } from '../../../../../services';
+import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
 import { StatusDetails } from './status_details';
 import { DataStreamDetails } from './data_stream_details';
 import { StorageDetails } from './storage_details';
 import { AliasesDetails } from './aliases_details';
 import { SizeDocCountDetails } from './size_doc_count_details';
+
+import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
+import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
+import { hasElserOnMlNodeSemanticTextField } from '../../../../../components/mappings_editor/lib/utils';
+import { useMappingsStateListener } from '../../../../../components/mappings_editor/use_state_listener';
+import { parseMappings } from '../../../../../shared/parse_mappings';
+import { useUserPrivileges } from '../../../../../services/api';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 interface Props {
   indexDetails: Index;
@@ -58,19 +70,23 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   } = indexDetails;
   const {
     core,
-    plugins,
+    plugins: { cloud, share },
     services: { extensionsService },
   } = useAppContext();
+  const state = useMappingsState();
+  const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
+  const { isAtLeastEnterprise } = useLicense();
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
-
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
+  const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
+  const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
-  useEffect(() => {
-    plugins.cloud?.fetchElasticsearchConfig().then((config) => {
-      setElasticsearchUrl(config.elasticsearchUrl || 'https://your_deployment_url');
-    });
-  }, [plugins.cloud]);
+  const { data } = useUserPrivileges(indexDetails.name);
+  const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
+
+  const sizeFormatted = formatBytes(size);
+  const primarySizeFormatted = formatBytes(primarySize);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
@@ -80,10 +96,61 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
 
   const isLarge = useIsWithinBreakpoints(['xl']);
 
+  const shouldShowEisUpdateCallout =
+    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
+
+  const { parsedDefaultValue } = useMemo(
+    () => parseMappings(mappingsData ?? undefined),
+    [mappingsData]
+  );
+
+  useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
+
+  useEffect(() => {
+    cloud?.fetchElasticsearchConfig().then((config) => {
+      setElasticsearchUrl(config.elasticsearchUrl || 'https://your_deployment_url');
+    });
+  }, [cloud]);
+
   return (
     <>
+      <EisCloudConnectPromoCallout
+        promoId="indexDetailsOverview"
+        isSelfManaged={!cloud?.isCloudEnabled}
+        direction="row"
+        navigateToApp={() =>
+          core.application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+        }
+        addSpacer="bottom"
+      />
+      {hasElserOnMlNodeSemanticText && (
+        <EisUpdateCallout
+          ctaLink={documentationService.docLinks.enterpriseSearch.elasticInferenceService}
+          promoId="indexDetailsOverview"
+          shouldShowEisUpdateCallout={shouldShowEisUpdateCallout}
+          handleOnClick={() => setIsUpdatingElserMappings(true)}
+          direction="row"
+          hasUpdatePrivileges={hasUpdateMappingsPrivileges}
+          addSpacer="bottom"
+        />
+      )}
+      {isUpdatingElserMappings && (
+        <UpdateElserMappingsModal
+          indexName={name}
+          refetchMapping={resendRequest}
+          setIsModalOpen={setIsUpdatingElserMappings}
+          hasUpdatePrivileges={hasUpdateMappingsPrivileges}
+          modalId="indexDetailsOverview"
+        />
+      )}
+
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
+        <StorageDetails
+          size={sizeFormatted}
+          primarySize={primarySizeFormatted}
+          primary={primary}
+          replica={replica}
+        />
 
         <StatusDetails
           documents={documents}
@@ -92,7 +159,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           health={health}
         />
 
-        <SizeDocCountDetails size={size} documents={documents} />
+        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 
@@ -152,7 +219,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
               assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
-              sharePlugin={plugins.share}
+              sharePlugin={share}
               application={core.application}
               consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
             />

@@ -55,13 +55,6 @@ export class CommonPageObject extends FtrService {
     for (const key of tourStorageKeys) {
       await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
     }
-
-    // TODO: remove in https://github.com/elastic/kibana/issues/239313
-    const OTHER_TOUR_STORAGE_ENTRIES = [['solutionNavigationTour:completed', 'true']];
-
-    for (const [key, value] of OTHER_TOUR_STORAGE_ENTRIES) {
-      await this.browser.setLocalStorageItem(key, value);
-    }
   }
 
   /**
@@ -482,7 +475,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForTopNavToBeVisible() {
     await this.retry.try(async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       if (!isNavVisible) {
         throw new Error('Local nav not visible yet');
       }

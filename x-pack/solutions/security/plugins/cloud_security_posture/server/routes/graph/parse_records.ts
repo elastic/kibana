@@ -20,7 +20,11 @@ import type {
   NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
-import type { GraphEdge } from './types';
+import {
+  type GraphEdge,
+  NON_ENRICHED_ENTITY_TYPE_PLURAL,
+  NON_ENRICHED_ENTITY_TYPE_SINGULAR,
+} from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
 
 interface LabelEdges {
@@ -101,6 +105,44 @@ const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProp
   return mappedProps as NodeVisualProps;
 };
 
+/**
+ * Resolves the entity type based on enrichment data
+ * Falls back to singular/plural non-enriched types based on entity count
+ */
+const resolveEntityType = (entityType: string | null | undefined, idsCount: number): string => {
+  if (entityType) {
+    return entityType;
+  }
+  return idsCount === 1 ? NON_ENRICHED_ENTITY_TYPE_SINGULAR : NON_ENRICHED_ENTITY_TYPE_PLURAL;
+};
+
+/**
+ * Generates the appropriate label for an entity node
+ * Logic matches the previous ESQL EVAL calculations
+ */
+const generateEntityLabel = (
+  idsCount: number,
+  entityNodeId: string,
+  entityType: string,
+  entityName: string | string[] | null | undefined,
+  entitySubType: string | null | undefined
+): string => {
+  // Single non-enriched entity: show the group ID (which is the entity ID for single entities)
+  if (idsCount === 1 && entityType === NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    return entityNodeId;
+  }
+  // Single enriched entity: show the name (extract first element if array)
+  if (idsCount === 1 && entityType !== NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    const name = Array.isArray(entityName) ? entityName[0] : entityName;
+    return name || '';
+  }
+  // Multiple entities with subtype: show the subtype
+  if (idsCount > 1 && entitySubType) {
+    return entitySubType;
+  }
+  return '';
+};
+
 const createGroupedActorAndTargetNodes = (
   record: GraphEdge,
   context: ParseContext
@@ -111,24 +153,45 @@ const createGroupedActorAndTargetNodes = (
   const { nodesMap } = context;
   const {
     // actor attributes
-    actorIds,
+    actorNodeId,
     actorIdsCount,
     actorsDocData,
-    actorEntityGroup,
-    actorEntityType,
-    actorLabel,
+    actorEntityType: rawActorEntityType,
+    actorEntitySubType,
+    actorEntityName,
     actorHostIps,
     // target attributes
-    targetIds,
+    targetNodeId,
     targetIdsCount,
     targetsDocData,
-    targetEntityType,
-    targetLabel,
+    targetEntityType: rawTargetEntityType,
+    targetEntitySubType,
+    targetEntityName,
     targetHostIps,
   } = record;
 
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
+
+  // Resolve entity types and labels using utility functions
+  const actorEntityType = resolveEntityType(rawActorEntityType, actorIdsCount);
+  const targetEntityType = resolveEntityType(rawTargetEntityType, targetIdsCount);
+
+  const actorLabel = generateEntityLabel(
+    actorIdsCount,
+    actorNodeId,
+    actorEntityType,
+    actorEntityName,
+    actorEntitySubType
+  );
+
+  const targetLabel = generateEntityLabel(
+    targetIdsCount,
+    targetNodeId || '',
+    targetEntityType,
+    targetEntityName,
+    targetEntitySubType
+  );
 
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)
@@ -144,34 +207,44 @@ const createGroupedActorAndTargetNodes = (
         .map((targetData) => JSON.parse(targetData))
     : [];
 
-  const actorIdsArray = castArray(actorIds);
-  const targetIdsArray = castArray(targetIds);
-
-  const actorGroup = {
-    id: actorIdsCount > 0 ? actorIdsArray[0] : `${actorEntityGroup} ${uuidv4()}`,
+  const actorGroup: {
+    id: string;
+    type: string;
+    count?: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } = {
+    id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
     type: actorEntityType,
-    label: actorLabel,
-    count: actorIdsCount,
     docData: actorsDocDataArray,
     hostIps: actorHostIpsArray,
+    ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
+    ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
   };
 
-  const targetGroup =
-    targetIdsCount > 0
+  const targetGroup: {
+    id: string;
+    type: string;
+    count?: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } =
+    targetIdsCount > 0 && targetNodeId
       ? {
-          id: targetIdsArray[0]!, // by definition, it can't be null
+          id: targetNodeId,
           type: targetEntityType,
-          label: targetLabel,
-          count: targetIdsCount,
           docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
+          ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
+          ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
         }
       : {
           // Unknown target
-          id: `unknown ${uuidv4()}`,
+          id: `unknown-${uuidv4()}`,
           type: '',
           label: 'Unknown',
-          count: 0,
           docData: [],
           hostIps: [],
         };
@@ -181,10 +254,10 @@ const createGroupedActorAndTargetNodes = (
       nodesMap[id] = {
         id,
         color: 'primary' as const,
-        label,
+        ...(label ? { label } : {}),
         documentsData: docData,
         ...deriveEntityAttributesFromType(type),
-        ...(count > 1 ? { count } : {}),
+        ...(count && count > 1 ? { count } : {}),
         ...(hostIps.length > 0 ? { ips: hostIps } : {}),
       };
     }

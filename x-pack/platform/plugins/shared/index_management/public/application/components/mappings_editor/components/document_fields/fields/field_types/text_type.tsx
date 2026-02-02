@@ -203,6 +203,7 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                       <>
                         <EuiSpacer size="s" />
                         <EuiCallOut
+                          announceOnMount
                           title={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
                             {

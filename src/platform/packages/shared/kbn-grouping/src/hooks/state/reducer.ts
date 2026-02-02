@@ -47,6 +47,16 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         },
       };
     }
+    case ActionType.updateGroupSettings: {
+      const { id, settings } = action.payload;
+      return {
+        ...state,
+        groupById: {
+          ...groupsById,
+          [id]: { ...defaultGroup, ...groupsById[id], settings },
+        },
+      };
+    }
   }
   throw Error(`Unknown grouping action`);
 };

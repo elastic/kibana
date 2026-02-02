@@ -43,6 +43,7 @@ exports[`PipelinePanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
+    tableCaption="Pipeline settings and values"
     tableLayout="fixed"
   />
 </FlyoutPanel>

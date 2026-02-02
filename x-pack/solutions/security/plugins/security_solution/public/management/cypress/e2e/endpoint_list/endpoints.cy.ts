@@ -186,11 +186,11 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
       );
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL)
-        .find('select')
+        .find('input')
         .should('be.visible')
-        .as('reassignPolicySelect');
-      cy.get('@reassignPolicySelect').select(response.agentPolicies[0].name);
-      cy.get('@reassignPolicySelect').should('have.value', response.agentPolicies[0].id);
+        .as('reassignPolicyInput');
+      cy.get('@reassignPolicyInput').type('{backspace}');
+      cy.get('@reassignPolicyInput').type(`${response.agentPolicies[0].name}{enter}`);
 
       cy.getByTestSubj(FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON)
         .should('be.visible')

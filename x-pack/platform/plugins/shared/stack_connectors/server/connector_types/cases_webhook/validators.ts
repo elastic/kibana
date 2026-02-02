@@ -8,12 +8,12 @@
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { isEmpty } from 'lodash';
-import { AuthType } from '../../../common/auth/constants';
-import * as i18n from './translations';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
 import type {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
-} from './types';
+} from '@kbn/connector-schemas/cases_webhook';
+import * as i18n from './translations';
 
 export const validateCasesWebhookConfig = (
   configObject: CasesWebhookPublicConfigurationType,

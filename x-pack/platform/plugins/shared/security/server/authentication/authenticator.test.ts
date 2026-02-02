@@ -134,12 +134,15 @@ function expectAuditEvents(...events: ExpectedAuditEvent[]) {
 describe('Authenticator', () => {
   let mockHTTPAuthenticationProvider: jest.Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
   let mockBasicAuthenticationProvider: jest.Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
+  let mockSamlAuthenticationProvider: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+
   beforeEach(() => {
     mockHTTPAuthenticationProvider = {
       login: jest.fn(),
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
     };
 
     mockBasicAuthenticationProvider = {
@@ -147,6 +150,15 @@ describe('Authenticator', () => {
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+    };
+
+    mockSamlAuthenticationProvider = {
+      login: jest.fn(),
+      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: jest.fn(),
+      shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
     };
 
     jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
@@ -161,8 +173,7 @@ describe('Authenticator', () => {
 
     jest.requireMock('./providers/saml').SAMLAuthenticationProvider.mockImplementation(() => ({
       type: 'saml',
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      getHTTPAuthenticationScheme: jest.fn(),
+      ...mockSamlAuthenticationProvider,
     }));
   });
 
@@ -718,6 +729,7 @@ describe('Authenticator', () => {
           authenticate: jest.fn(),
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
+          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
         };
 
         mockSAMLAuthenticationProvider2 = {
@@ -725,6 +737,7 @@ describe('Authenticator', () => {
           authenticate: jest.fn(),
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
+          shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
         };
 
         jest
@@ -1457,6 +1470,127 @@ describe('Authenticator', () => {
           { action: 'user_logout', outcome: 'unknown' },
           { action: 'user_login', outcome: 'success' }
         );
+      });
+    });
+
+    describe('preserves state if provider is type `SAML` and there are remaining requestIds', () => {
+      const userProfileGrant: UserProfileGrant = {
+        type: 'accessToken',
+        accessToken: 'some-token',
+      };
+
+      beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: { saml1: { order: 1, realm: 'saml1' } },
+          },
+        });
+
+        authenticator = new Authenticator(mockOptions);
+      });
+
+      it('does not invalidate the intermediate session if there are requestIds in the state', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+
+        const samlState = {
+          requestIdMap: { 'id-1': '/request-path-1', 'id-2': '/request-path-2' },
+        };
+
+        const mockExistingSessionValue = sessionMock.createValue({
+          username: undefined,
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockExistingSessionValue },
+        });
+
+        // Mock to indicate that session needs to be kept alive for pending request IDs
+        mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin.mockReturnValue(
+          false
+        );
+
+        mockSamlAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        // Verify the provider method was called with the session state
+        expect(
+          mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin
+        ).toHaveBeenCalledWith(samlState);
+
+        // Intermediate session should not be invalidated since we're keeping it alive for pending requests
+        expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+
+        // When intermediate session still needs to exist (due to pending request IDs),
+        // a new session is created instead of updating the existing one
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+          username: user.username,
+          userProfileId: 'some-profile-uid',
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+      });
+
+      it('does invalidate intermediate session if there are no requestIds in the state', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const user = mockAuthenticatedUser();
+
+        const samlState = {
+          requestIdMap: {},
+        };
+
+        const mockExistingSessionValue = sessionMock.createValue({
+          username: undefined,
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
+
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockExistingSessionValue },
+        });
+
+        mockSamlAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.redirectTo('/test/url', {
+            user,
+            userProfileGrant,
+            state: samlState,
+          })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.redirectTo('/test/url', { user, userProfileGrant, state: samlState })
+        );
+
+        // Verify the provider method was called with the session state
+        expect(
+          mockSamlAuthenticationProvider.shouldInvalidateIntermediateSessionAfterLogin
+        ).toHaveBeenCalledWith(samlState);
+
+        // Intermediate session should be invalidated
+        expect(mockOptions.session.invalidate).toHaveBeenCalled();
+
+        expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+          username: user.username,
+          userProfileId: 'some-profile-uid',
+          provider: { type: 'saml', name: 'saml1' },
+          state: samlState,
+        });
       });
     });
   });

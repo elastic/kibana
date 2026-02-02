@@ -238,6 +238,11 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
     defaultMessage: 'AND',
   });
 
+  const watchIntervalLabel = i18n.translate(
+    'xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel',
+    { defaultMessage: 'Run watch every' }
+  );
+
   // Users might edit the request for use outside of the Watcher app. If they do make changes to it,
   // we have no guarantee it will still be compatible with the threshold alert form, so we strip
   // the metadata to avoid potential conflicts.
@@ -404,12 +409,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             <ErrableFormRow
               id="watchInterval"
               fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel"
-                  defaultMessage="Run watch every"
-                />
-              }
+              label={watchIntervalLabel}
               errorKey="triggerIntervalSize"
               isShowingErrors={hasErrors && watch.triggerIntervalSize !== undefined}
               errors={errors}
@@ -431,6 +431,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         setWatchProperty('triggerIntervalSize', '');
                       }
                     }}
+                    aria-label={watchIntervalLabel}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

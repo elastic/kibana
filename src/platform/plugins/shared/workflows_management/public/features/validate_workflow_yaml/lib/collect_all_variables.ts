@@ -10,10 +10,8 @@
 import type { Document } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { isEnterForeach } from '@kbn/workflows/graph';
 import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getCurrentPath, getStepNode } from '../../../../common/lib/yaml_utils';
-import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import { getPathAtOffset } from '../../../../common/lib/yaml';
 import type { VariableItem } from '../model/types';
 
 export function collectAllVariables(
@@ -23,36 +21,15 @@ export function collectAllVariables(
 ): VariableItem[] {
   const yamlString = model.getValue();
   const variableItems: VariableItem[] = [];
-  // Currently, foreach doesn't use mustache expressions, so we need to handle it separately
-  // TODO: remove if/when foreach uses mustache expressions
-  for (const node of workflowGraph?.getAllNodes() ?? []) {
-    if (!isEnterForeach(node)) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const yamlNode = getStepNode(yamlDocument, node.stepId);
-    const foreachValueNode = yamlNode?.get('foreach', true);
-    if (foreachValueNode && foreachValueNode.range) {
-      const monacoPosition = getMonacoRangeFromYamlNode(model, foreachValueNode);
-      variableItems.push({
-        id: `${node.configuration.foreach}-${monacoPosition?.startLineNumber ?? 0}-${
-          monacoPosition?.startColumn ?? 0
-        }-${monacoPosition?.endLineNumber ?? 0}-${monacoPosition?.endColumn ?? 0}`,
-        startLineNumber: monacoPosition?.startLineNumber ?? 0,
-        startColumn: monacoPosition?.startColumn ?? 0,
-        endLineNumber: monacoPosition?.endLineNumber ?? 0,
-        endColumn: monacoPosition?.endColumn ?? 0,
-        key: node.configuration.foreach,
-        type: 'foreach',
-        yamlPath: getCurrentPath(yamlDocument, foreachValueNode.range[0]),
-      });
-    }
-  }
   for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
     const startOffset = match.index ?? 0;
     const endOffset = startOffset + (match[0].length ?? 0);
     const startPosition = model.getPositionAt(startOffset);
     const endPosition = model.getPositionAt(endOffset);
+    const yamlPath = getPathAtOffset(yamlDocument, startOffset);
+    // simple heuristic to determine if it's a foreach configuration variable
+    const type =
+      yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
     variableItems.push({
       id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
         endPosition.lineNumber
@@ -62,8 +39,8 @@ export function collectAllVariables(
       endLineNumber: endPosition.lineNumber,
       endColumn: endPosition.column,
       key: match.groups?.key ?? null,
-      type: 'regexp',
-      yamlPath: getCurrentPath(yamlDocument, startOffset),
+      type,
+      yamlPath,
     });
   }
 

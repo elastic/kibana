@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { KQLCustomIndicator, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type {
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  KQLCustomIndicator,
+} from '@kbn/slo-schema';
 
 export const buildApmAvailabilityIndicator = (
-  params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}
-): SLOWithSummaryResponse['indicator'] => {
+  params: Partial<APMTransactionErrorRateIndicator['params']> = {}
+): APMTransactionErrorRateIndicator => {
   return {
     type: 'sli.apm.transactionErrorRate',
     params: {
@@ -24,8 +28,8 @@ export const buildApmAvailabilityIndicator = (
 };
 
 export const buildApmLatencyIndicator = (
-  params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}
-): SLOWithSummaryResponse['indicator'] => {
+  params: Partial<APMTransactionDurationIndicator['params']> = {}
+): APMTransactionDurationIndicator => {
   return {
     type: 'sli.apm.transactionDuration',
     params: {
@@ -41,8 +45,8 @@ export const buildApmLatencyIndicator = (
 };
 
 export const buildCustomKqlIndicator = (
-  params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}
-): SLOWithSummaryResponse['indicator'] => {
+  params: Partial<KQLCustomIndicator['params']> = {}
+): KQLCustomIndicator => {
   return {
     type: 'sli.kql.custom',
     params: {
@@ -53,5 +57,5 @@ export const buildCustomKqlIndicator = (
       timestampField: '@timestamp',
       ...params,
     },
-  } as KQLCustomIndicator;
+  };
 };

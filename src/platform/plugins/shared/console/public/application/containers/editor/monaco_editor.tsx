@@ -11,16 +11,13 @@ import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
-import type { ESQLCallbacks, monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 
 import { i18n } from '@kbn/i18n';
-import { getESQLSources } from '@kbn/esql-editor/src/helpers';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { FieldType } from '@kbn/esql-ast/src/definitions/types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
 import {
@@ -47,6 +44,8 @@ const useStyles = () => {
   return {
     editorActions: css`
       ${actions}
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xs};
 
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
@@ -59,6 +58,7 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const MonacoEditor = ({
@@ -66,6 +66,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  enableSuggestWidgetRepositioning,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -74,7 +75,6 @@ export const MonacoEditor = ({
       notifications,
       settings: settingsService,
       autocompleteInfo,
-      dataViews,
       data,
       licensing,
       application,
@@ -184,35 +184,18 @@ export const MonacoEditor = ({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         const getLicense = licensing?.getLicense;
-        return await getESQLSources(dataViews, { application, http }, getLicense);
+        return await getESQLSources({ application, http }, getLicense);
       },
-      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
-        if (queryToExecute) {
-          try {
-            const columns = await getESQLQueryColumns({
-              esqlQuery: queryToExecute,
-              search: data?.search?.search,
-            });
-            return (
-              columns?.map((c) => {
-                return {
-                  name: c.name,
-                  type: c.meta.esType as FieldType,
-                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
-                  userDefined: false,
-                };
-              }) || []
-            );
-          } catch (error) {
-            // Handle error
-            return [];
-          }
-        }
-        return [];
+      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) => {
+        const columns = await getEsqlColumns({
+          esqlQuery: query,
+          search: data?.search?.search,
+        });
+        return columns;
       },
     };
     return callbacks;
-  }, [licensing, dataViews, application, http, data?.search?.search]);
+  }, [licensing, application, http, data?.search?.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -272,13 +255,13 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
+              display="fill"
+              iconType="play"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -301,6 +284,7 @@ export const MonacoEditor = ({
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
@@ -314,6 +298,7 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );

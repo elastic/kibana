@@ -11,3 +11,4 @@ export { maintenanceWindowModelVersions } from './maintenance_window_model_versi
 export { ruleModelVersions } from './rule_model_versions';
 export { ruleTemplateModelVersions } from './rule_template_model_versions';
 export { rulesSettingsModelVersions } from './rules_settings_model_versions';
+export { gapAutoFillSchedulerModelVersions } from './gap_auto_fill_scheduler_model_versions';

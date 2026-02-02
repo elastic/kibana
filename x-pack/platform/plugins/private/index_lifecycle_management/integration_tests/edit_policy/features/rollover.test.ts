@@ -5,100 +5,107 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers';
-import type { RolloverTestBed } from './rollover.helpers';
-import { setupRolloverTestBed } from './rollover.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
 
 describe('<EditPolicy /> rollover', () => {
-  let testBed: RolloverTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setDefaultResponses();
-
-    await act(async () => {
-      testBed = await setupRolloverTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
+  beforeAll(() => {
+    jest.useFakeTimers();
   });
 
-  test('shows forcemerge when rollover enabled', async () => {
-    const { actions } = testBed;
-    expect(actions.hot.forceMergeExists()).toBeTruthy();
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
+    httpRequestsMockHelpers.setDefaultResponses();
+
+    renderEditPolicy(httpSetup);
+
+    await screen.findByTestId('savePolicyButton');
+  });
+
+  test('shows forcemerge when rollover enabled', () => {
+    expect(screen.getByTestId('hot-forceMergeSwitch')).toBeInTheDocument();
   });
 
   test('hides forcemerge when rollover is disabled', async () => {
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
-    expect(actions.hot.forceMergeExists()).toBeFalsy();
+    const rolloverActions = createRolloverActions();
+    rolloverActions.rollover.toggleDefault();
+    rolloverActions.rollover.toggle();
+    expect(screen.queryByTestId('hot-forceMergeSwitch')).not.toBeInTheDocument();
   });
 
-  test('shows shrink input when rollover enabled', async () => {
-    const { actions } = testBed;
-    expect(actions.hot.shrinkExists()).toBeTruthy();
+  test('shows shrink input when rollover enabled', () => {
+    expect(screen.getByTestId('hot-shrinkSwitch')).toBeInTheDocument();
   });
 
   test('hides shrink input when rollover is disabled', async () => {
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
-    expect(actions.hot.shrinkExists()).toBeFalsy();
+    const rolloverActions = createRolloverActions();
+    rolloverActions.rollover.toggleDefault();
+    rolloverActions.rollover.toggle();
+    expect(screen.queryByTestId('hot-shrinkSwitch')).not.toBeInTheDocument();
   });
 
-  test('shows readonly input when rollover enabled', async () => {
-    const { actions } = testBed;
-    expect(actions.hot.readonlyExists()).toBeTruthy();
+  test('shows readonly input when rollover enabled', () => {
+    expect(screen.getByTestId('hot-readonlySwitch')).toBeInTheDocument();
   });
 
   test('hides readonly input when rollover is disabled', async () => {
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
-    expect(actions.hot.readonlyExists()).toBeFalsy();
+    const rolloverActions = createRolloverActions();
+    rolloverActions.rollover.toggleDefault();
+    rolloverActions.rollover.toggle();
+    expect(screen.queryByTestId('hot-readonlySwitch')).not.toBeInTheDocument();
   });
 
   test('hides and disables searchable snapshot field', async () => {
-    const { actions } = testBed;
+    const togglePhase = createTogglePhaseAction();
+    expect(screen.getByTestId('searchableSnapshotField-hot')).toBeInTheDocument();
 
-    expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
-    await actions.togglePhase('cold');
+    const rolloverActions = createRolloverActions();
+    rolloverActions.rollover.toggleDefault();
+    rolloverActions.rollover.toggle();
+    await togglePhase('cold');
 
-    expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+    expect(screen.queryByTestId('searchableSnapshotField-hot')).not.toBeInTheDocument();
   });
 
   test('shows rollover tip on minimum age', async () => {
-    const { actions } = testBed;
+    const togglePhase = createTogglePhaseAction();
+    await togglePhase('warm');
+    await togglePhase('cold');
+    await togglePhase('frozen');
+    await togglePhase('delete');
 
-    await actions.togglePhase('warm');
-    await actions.togglePhase('cold');
-    await actions.togglePhase('frozen');
-    await actions.togglePhase('delete');
-
-    expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
-    expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
-    expect(actions.frozen.hasRolloverTipOnMinAge()).toBeTruthy();
-    expect(actions.delete.hasRolloverTipOnMinAge()).toBeTruthy();
+    expect(screen.getByTestId('warm-rolloverMinAgeInputIconTip')).toBeInTheDocument();
+    expect(screen.getByTestId('cold-rolloverMinAgeInputIconTip')).toBeInTheDocument();
+    expect(screen.getByTestId('frozen-rolloverMinAgeInputIconTip')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-rolloverMinAgeInputIconTip')).toBeInTheDocument();
   });
 
   test('hiding rollover tip on minimum age', async () => {
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
+    const rolloverActions = createRolloverActions();
+    const togglePhase = createTogglePhaseAction();
 
-    await actions.togglePhase('warm');
-    await actions.togglePhase('cold');
-    await actions.togglePhase('frozen');
-    await actions.togglePhase('delete');
+    rolloverActions.rollover.toggleDefault();
+    rolloverActions.rollover.toggle();
 
-    expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
-    expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();
-    expect(actions.frozen.hasRolloverTipOnMinAge()).toBeFalsy();
-    expect(actions.delete.hasRolloverTipOnMinAge()).toBeFalsy();
+    await togglePhase('warm');
+    await togglePhase('cold');
+    await togglePhase('frozen');
+    await togglePhase('delete');
+
+    expect(screen.queryByTestId('warm-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cold-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('frozen-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('delete-rolloverMinAgeInputIconTip')).not.toBeInTheDocument();
   });
 });

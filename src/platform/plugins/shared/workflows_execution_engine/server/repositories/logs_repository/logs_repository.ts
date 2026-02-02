@@ -7,173 +7,112 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
-import { createIndexWithMappings } from '../../../common/create_index';
-
-export interface WorkflowLogEvent {
-  '@timestamp'?: string;
-  message?: string;
-  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
-  workflow?: {
-    id?: string;
-    name?: string;
-    execution_id?: string;
-    step_id?: string;
-    step_execution_id?: string;
-    step_name?: string;
-    step_type?: string;
-  };
-  event?: {
-    action?: string;
-    category?: string[];
-    type?: string[];
-    provider?: string;
-    outcome?: 'success' | 'failure' | 'unknown';
-    duration?: number;
-    start?: string;
-    end?: string;
-  };
-  error?: {
-    message?: string;
-    type?: string;
-    stack_trace?: string;
-  };
-  tags?: string[];
-  [key: string]: unknown;
-}
+import type { QueryDslQueryContainer, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { ClientSearchRequest } from '@kbn/data-streams';
+import { initializeDataStreamClient, type WorkflowLogEvent } from './data_stream';
 
 export interface LogSearchResult {
   total: number;
-  logs: Array<{
-    '@timestamp': string;
-    message: string;
-    level: string;
-    workflow?: {
-      id?: string;
-      name?: string;
-      execution_id?: string;
-      step_id?: string;
-      step_name?: string;
-    };
-    [key: string]: unknown;
-  }>;
+  logs: WorkflowLogEvent[];
+}
+
+export interface SearchLogsParams {
+  // pagination
+  sortField?: string;
+  sortOrder?: SortOrder;
+  limit?: number;
+  offset?: number;
+
+  // space
+  spaceId?: string;
+
+  // fields
+  level?: string;
+  executionId?: string;
+  stepExecutionId?: string;
+  stepId?: string;
 }
 
 export class LogsRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(private readonly coreDataStreams: DataStreamsStart) {}
 
-  async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
-    await this.esClient?.bulk({
-      refresh: 'wait_for',
-      index: this.indexName,
-      body: logEvents.flatMap((logEvent) => [{ create: {} }, { doc: logEvent }]),
+  public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
+    const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
+
+    await dataStreamClient.bulk({
+      operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
     });
-  }
-
-  public async initialize(): Promise<void> {
-    await createIndexWithMappings({
-      esClient: this.esClient,
-      indexName: this.indexName,
-      mappings: WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
-  }
-
-  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.execution_id': executionId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchLogs(query);
-  }
-
-  public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
-    const mustClauses: unknown[] = [
-      {
-        term: {
-          level,
-        },
-      },
-    ];
-
-    if (executionId) {
-      mustClauses.push({
-        term: {
-          'workflow.execution_id': executionId,
-        },
-      });
-    }
-
-    const query = {
-      bool: {
-        must: mustClauses,
-      },
-    };
-
-    return this.searchLogs(query);
   }
 
   public async getRecentLogs(limit: number = 100): Promise<LogSearchResult> {
-    const query = {
-      match_all: {},
-    };
-
-    const response = await this.esClient.search({
-      index: this.indexName,
-      query,
-      sort: [{ '@timestamp': { order: 'desc' } }],
+    return this.searchDataStream({
+      query: { match_all: {} },
       size: limit,
     });
-
-    return {
-      total:
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logs: response.hits.hits.map((hit: any) => hit._source),
-    };
   }
 
-  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.execution_id': executionId,
-            },
-          },
-          {
-            term: {
-              'workflow.step_id': stepId,
-            },
-          },
-        ],
+  public async searchLogs(params: SearchLogsParams): Promise<LogSearchResult> {
+    const { limit = 100, offset = 0, sortField = '@timestamp', sortOrder = 'desc' } = params;
+
+    // Map API field names to Elasticsearch field names
+    const fieldMapping: Record<string, string> = {
+      timestamp: '@timestamp',
+      '@timestamp': '@timestamp',
+    };
+    const mappedSortField = fieldMapping[sortField] || sortField;
+
+    const mustQueries: QueryDslQueryContainer[] = [];
+
+    if (typeof params.executionId === 'string') {
+      mustQueries.push({
+        term: { 'workflow.execution_id': params.executionId },
+      });
+    }
+
+    if (typeof params.stepExecutionId === 'string') {
+      mustQueries.push({
+        term: { 'workflow.step_execution_id': params.stepExecutionId },
+      });
+    }
+
+    if (typeof params.stepId === 'string') {
+      mustQueries.push({
+        term: { 'workflow.step_id': params.stepId },
+      });
+    }
+
+    if (typeof params.level === 'string') {
+      mustQueries.push({
+        term: { level: params.level },
+      });
+    }
+
+    if (typeof params.spaceId === 'string') {
+      mustQueries.push({
+        term: { spaceId: params.spaceId },
+      });
+    }
+
+    return this.searchDataStream({
+      size: limit,
+      from: offset,
+      query: {
+        bool: {
+          must: mustQueries,
+        },
       },
-    };
-
-    return this.searchLogs(query);
+      sort: [{ [mappedSortField]: sortOrder }],
+    });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async searchLogs(query: any): Promise<LogSearchResult> {
-    const response = await this.esClient.search({
-      index: this.indexName,
-      query,
+  private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
+    const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
+
+    const response = await dataStreamClient.search({
       sort: [{ '@timestamp': { order: 'desc' } }],
-      size: 1000, // Default limit
+      size: 1000,
+      ...query,
     });
 
     return {
@@ -181,8 +120,8 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logs: response.hits.hits.map((hit: any) => hit._source),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      logs: response.hits.hits.map((hit) => hit._source!),
     };
   }
 }

@@ -194,5 +194,6 @@ export const renderEndzoneTooltip =
       );
     }
 
+    // @ts-expect-error upgrade typescript v5.9.3
     return renderValue ? formattedValue : null;
   };

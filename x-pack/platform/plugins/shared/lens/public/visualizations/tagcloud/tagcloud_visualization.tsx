@@ -25,13 +25,12 @@ import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
-import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { TagcloudAppearanceSettings } from './tagcloud_toolbar/appearance_settings';
+import { TagcloudAppearanceSettings } from './tagcloud_toolbar';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -324,10 +323,6 @@ export const getTagcloudVisualization = ({
       );
     }
     return null;
-  },
-
-  ToolbarComponent(props) {
-    return <TagcloudToolbar {...props} />;
   },
 
   FlyoutToolbarComponent(props) {

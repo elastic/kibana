@@ -14,6 +14,8 @@
           "() => boolean"
         ],
         "path": "src/core/packages/theme/browser-internal/src/system_theme.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

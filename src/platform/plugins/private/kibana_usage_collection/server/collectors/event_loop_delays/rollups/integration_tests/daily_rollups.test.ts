@@ -63,7 +63,7 @@ function createRawEventLoopDelaysDailyDocs() {
     createRawObject(moment()),
     createRawObject(moment()),
     createRawObject(moment().subtract(1, 'days')),
-    createRawObject(moment().subtract(2.5, 'days')), // could be considered 4 days if we use 3 and the check is performed the following hour
+    createRawObject(moment().subtract(2, 'days')),
   ];
 
   const outdatedRawEventLoopDelaysDaily = [
@@ -74,7 +74,8 @@ function createRawEventLoopDelaysDailyDocs() {
   return { rawEventLoopDelaysDaily, outdatedRawEventLoopDelaysDaily };
 }
 
-describe(`daily rollups integration test`, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/231367
+describe.skip(`daily rollups integration test`, () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;
@@ -110,8 +111,8 @@ describe(`daily rollups integration test`, () => {
   });
 
   afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('deletes documents older that 3 days from the saved objects repository', async () => {

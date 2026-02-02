@@ -309,10 +309,10 @@ describe('metric_visualization', () => {
                             "left",
                           ],
                           "lHeight": Array [
-                            82.5,
+                            75,
                           ],
                           "size": Array [
-                            55,
+                            50,
                           ],
                           "sizeUnit": Array [
                             "px",

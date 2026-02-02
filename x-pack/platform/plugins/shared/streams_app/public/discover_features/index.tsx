@@ -30,7 +30,7 @@ const DiscoverFlyoutStreamProcessingLink = dynamic(() =>
 );
 
 export function createDiscoverFlyoutStreamProcessingLink(
-  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc'>
+  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc' | 'dataView'>
 ) {
   return (props: ObservabilityStreamsFeatureRenderDeps) => (
     <DiscoverFlyoutStreamProcessingLink {...services} {...props} />

@@ -87,7 +87,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -112,7 +112,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://jsm.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://jsm.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -133,7 +133,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: Field \"apiKey\": Required`,
             });
           });
       });
@@ -212,7 +212,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"message\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"message\": Required)`,
           });
         });
 
@@ -231,7 +231,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"alias\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+            service_message: `Request validation failed (Field \"alias\": Required)`,
           });
         });
 
@@ -263,7 +263,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"responders\",\n      0,\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"received\": \"invalidType\",\n    \"code\": \"invalid_enum_value\",\n    \"options\": [\n      \"team\",\n      \"user\",\n      \"escalation\",\n      \"schedule\"\n    ],\n    \"path\": [\n      \"responders\",\n      0,\n      \"type\"\n    ],\n    \"message\": \"Invalid enum value. Expected 'team' | 'user' | 'escalation' | 'schedule', received 'invalidType'\"\n  },\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"name\"\n    ],\n    \"path\": [\n      \"responders\",\n      0\n    ],\n    \"message\": \"Unrecognized key(s) in object: 'name'\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"responders.0\": Unrecognized key(s) in object: 'name')`,
               });
             });
 
@@ -292,7 +292,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"responders\",\n      0,\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"responders.0.id\": Required)`,
               });
             });
 
@@ -356,7 +356,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"details\",\n      \"bananas\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n])`,
+                service_message: `Request validation failed (Field \"details.bananas\": Expected string, received number)`,
               });
             });
 

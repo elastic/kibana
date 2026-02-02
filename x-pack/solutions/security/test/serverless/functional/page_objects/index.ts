@@ -12,6 +12,10 @@ import { CspDashboardPageProvider } from '../../../cloud_security_posture_functi
 import { AddCisIntegrationFormPageProvider } from '../../../cloud_security_posture_functional/page_objects/add_cis_integration_form_page';
 import { BenchmarkPagePageProvider } from '../../../cloud_security_posture_functional/page_objects/benchmark_page';
 import { FindingsPageProvider } from '../../../cloud_security_posture_functional/page_objects/findings_page';
+import { AlertsPageObject } from '../../../cloud_security_posture_functional/page_objects/alerts_page';
+import { NetworkEventsPageObject } from '../../../cloud_security_posture_functional/page_objects/network_events_page';
+import { ExpandedFlyoutGraph } from '../../../cloud_security_posture_functional/page_objects/expanded_flyout_graph';
+import { TimelinePageObject } from '../../../cloud_security_posture_functional/page_objects/timeline_page';
 
 export const pageObjects = {
   ...svlPlatformPageObjects,
@@ -22,4 +26,8 @@ export const pageObjects = {
   cspSecurity: CspSecurityCommonProvider,
   cspBenchmarkPage: BenchmarkPagePageProvider,
   cspFindingsPage: FindingsPageProvider,
+  alerts: AlertsPageObject,
+  networkEvents: NetworkEventsPageObject,
+  expandedFlyoutGraph: ExpandedFlyoutGraph,
+  timeline: TimelinePageObject,
 };

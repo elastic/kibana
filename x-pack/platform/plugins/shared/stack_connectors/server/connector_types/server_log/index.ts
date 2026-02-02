@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
@@ -19,43 +18,37 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import {
+  CONNECTOR_NAME,
+  CONNECTOR_ID,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/server_log';
+import type { Config, Secrets, ActionParamsType } from '@kbn/connector-schemas/server_log';
 import { withoutControlCharacters } from '../lib/string_utils';
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;
 export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
-  {},
+  Config,
+  Secrets,
   ActionParamsType
 >;
 
-// params definition
-
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-
-const ParamsSchema = z
-  .object({
-    message: z.string(),
-    level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
-  })
-  .strict();
-
-export const ConnectorTypeId = '.server-log';
 // connector type definition
 export function getConnectorType(): ServerLogConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stackConnectors.serverLog.title', {
-      defaultMessage: 'Server log',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: z.object({}).strict().default({}) },
-      secrets: { schema: z.object({}).strict().default({}) },
+      config: { schema: ConfigSchema },
+      secrets: { schema: SecretsSchema },
       params: {
         schema: ParamsSchema,
       },

@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -80,8 +81,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       riskEntity: entityType,
     });
   }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
+
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-  const rows = useMemo(() => getItems(entityData), [entityData]);
+  const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(
+    'enableRiskScorePrivmonModifier'
+  );
+  const rows = useMemo(
+    () => getItems(entityData, isPrivmonModifierEnabled),
+    [entityData, isPrivmonModifierEnabled]
+  );
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
@@ -263,6 +271,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   />
                 </div>
                 <EuiBasicTable
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.riskSummaryTableCaption',
+                    {
+                      defaultMessage: 'Risk summary for {entity}',
+                      values: {
+                        entity: capitalize(entityType),
+                      },
+                    }
+                  )}
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
                   columns={columnsArray}

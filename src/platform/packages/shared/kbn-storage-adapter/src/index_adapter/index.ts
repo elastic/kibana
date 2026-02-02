@@ -9,6 +9,7 @@
 
 import type {
   BulkOperationContainer,
+  BulkOperationType,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
@@ -40,6 +41,7 @@ import type {
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
+import { BulkOperationError } from '../errors';
 
 function getAliasName(name: string) {
   return name;
@@ -351,6 +353,7 @@ export class StorageIndexAdapter<
   private bulk: StorageClientBulk<TApplicationType> = ({
     operations,
     refresh = 'wait_for',
+    throwOnFail = false,
     ...request
   }): Promise<StorageClientBulkResponse> => {
     if (operations.length === 0) {
@@ -393,6 +396,21 @@ export class StorageIndexAdapter<
     };
 
     return this.validateComponentsBeforeWriting(attemptBulk).then(async (response) => {
+      // Check for errors and throw if throwOnFail is true
+      if (throwOnFail) {
+        const erroredItems = response.items.filter((item) => {
+          const operation = Object.keys(item)[0] as BulkOperationType;
+          return item[operation]?.error;
+        });
+        if (erroredItems.length > 0) {
+          throw new BulkOperationError(
+            `Bulk operation failed for ${erroredItems.length} out of ${
+              response.items.length
+            } items: ${JSON.stringify(erroredItems)}`,
+            response
+          );
+        }
+      }
       return response;
     });
   };

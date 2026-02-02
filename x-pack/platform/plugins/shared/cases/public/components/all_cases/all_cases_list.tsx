@@ -33,7 +33,7 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
-import { useCheckAlertAttachments } from '../../containers/use_check_alert_attachments';
+import { useCheckDocumentAttachments } from '../../containers/use_check_alert_attachments';
 import { type GetAttachments } from './selector_modal/use_cases_add_to_existing_case_modal';
 
 const getSortField = (field: string): SortFieldCase =>
@@ -67,7 +67,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       queryParams,
     });
 
-    const { disabledCases, isLoading: isLoadingCaseAttachments } = useCheckAlertAttachments({
+    const { disabledCases, isLoading: isLoadingCaseAttachments } = useCheckDocumentAttachments({
       cases: data.cases,
       getAttachments,
     });
@@ -223,6 +223,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
           filterOptions={filterOptions}
+          deselectCases={deselectCases}
         />
         <CasesTableUtilityBar
           pagination={pagination}

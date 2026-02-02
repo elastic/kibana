@@ -13,9 +13,13 @@ const mockProductDocManager = {
   getStatus: jest.fn(),
   getStatuses: jest.fn(),
   install: jest.fn(),
+  installSecurityLabs: jest.fn(),
   uninstall: jest.fn(),
+  uninstallSecurityLabs: jest.fn(),
   update: jest.fn(),
   updateAll: jest.fn(),
+  updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
+  getSecurityLabsStatus: jest.fn(),
 };
 
 describe('helpers', () => {

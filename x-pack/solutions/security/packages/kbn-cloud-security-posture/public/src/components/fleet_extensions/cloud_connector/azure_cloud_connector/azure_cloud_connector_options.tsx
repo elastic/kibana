@@ -64,57 +64,84 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
   const availableFields = new Map<string, AzureCloudConnectorOptions>();
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
+    const tenantIdValue = inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value;
+    // Extract the id if it's a secret reference object, otherwise use the value as-is
+    const displayValue =
+      typeof tenantIdValue === 'object' && tenantIdValue?.id ? tenantIdValue.id : tenantIdValue;
+
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.tenant_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       isSecret: true,
-      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value,
+      value: displayValue,
     });
   }
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
+    const tenantIdValue = inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value;
+    // Extract the id if it's a secret reference object, otherwise use the value as-is
+    const displayValue =
+      typeof tenantIdValue === 'object' && tenantIdValue?.id ? tenantIdValue.id : tenantIdValue;
+
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.tenant_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       isSecret: true,
-      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value,
+      value: displayValue,
     });
   }
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
+    const clientIdValue = inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value;
+    // Extract the id if it's a secret reference object, otherwise use the value as-is
+    const displayValue =
+      typeof clientIdValue === 'object' && clientIdValue?.id ? clientIdValue.id : clientIdValue;
+
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.client_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       isSecret: true,
-      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value,
+      value: displayValue,
     });
   }
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
+    const clientIdValue = inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value;
+    // Extract the id if it's a secret reference object, otherwise use the value as-is
+    const displayValue =
+      typeof clientIdValue === 'object' && clientIdValue?.id ? clientIdValue.id : clientIdValue;
+
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.client_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       isSecret: true,
-      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value,
+      value: displayValue,
     });
   }
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
+    const azureCredentialsValue =
+      inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value;
+    // Extract the id if it's a secret reference object, otherwise use the value as-is
+    const displayValue =
+      typeof azureCredentialsValue === 'object' && azureCredentialsValue?.id
+        ? azureCredentialsValue.id
+        : azureCredentialsValue;
+
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.cloud_connector_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
-      value:
-        inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value,
+      value: displayValue,
     });
   }
 

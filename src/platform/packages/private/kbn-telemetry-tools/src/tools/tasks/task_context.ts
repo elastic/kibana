@@ -13,6 +13,7 @@ import { ErrorReporter } from './error_reporter';
 import type { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
+  configChanged?: boolean;
   parsedCollections?: ParsedUsageCollection[];
   mapping?: TelemetrySchemaObject;
   upstreamMapping?: TelemetrySchemaObject;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type VFC } from 'react';
+import React, { useCallback, type VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -49,21 +49,17 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
+  const menuItemClicked = useCallback(() => {
+    if (onClick) onClick();
+    investigateInTimelineFn();
+  }, [investigateInTimelineFn, onClick]);
+
   if (!hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
-  const menuItemClicked = () => {
-    if (onClick) onClick();
-    investigateInTimelineFn();
-  };
-
   return (
-    <EuiContextMenuItem
-      key="investigateInTime"
-      onClick={() => menuItemClicked()}
-      data-test-subj={dataTestSub}
-    >
+    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSub}>
       <FormattedMessage
         defaultMessage="Investigate in Timeline"
         id="xpack.securitySolution.threatIntelligence.investigateInTimelineButton"

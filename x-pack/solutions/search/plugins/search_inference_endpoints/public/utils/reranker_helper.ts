@@ -27,7 +27,6 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
   */
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
-    modelId === 'rainbow-sprinkles' ||
     ((modelId === 'multilingual-embed-v1' || modelId === 'rerank-v1') &&
       inferenceId.startsWith('.') &&
       service === ServiceProviderKeys.elastic)

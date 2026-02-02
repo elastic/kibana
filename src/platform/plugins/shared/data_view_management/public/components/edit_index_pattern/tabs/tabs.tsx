@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import type { EuiTabbedContentTab, FilterChecked } from '@elastic/eui';
+import type { EuiSelectableOption, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -20,9 +19,9 @@ import {
   EuiTabbedContent,
   EuiSpacer,
   EuiFieldSearch,
-  EuiFilterSelectItem,
   EuiToolTip,
   EuiButton,
+  EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
@@ -39,6 +38,8 @@ import type {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
+import { uniq } from 'lodash';
 import type { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import {
@@ -51,7 +52,7 @@ import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { RelationshipsTable } from '../relationships_table';
-import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
+import { getTabs, getPath, convertToEuiSelectableOptions, getNewSelectedValues } from './utils';
 import { getFieldInfo } from '../../utils';
 import { useStateSelector } from '../../../management_app/state_utils';
 
@@ -71,12 +72,6 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   compositeRuntimeFields: Record<string, RuntimeField>;
   refreshIndexPatternClick: () => void;
   isRefreshing?: boolean;
-}
-
-interface FilterItems {
-  value: string;
-  name: string;
-  checked?: FilterChecked;
 }
 
 const searchAriaLabel = i18n.translate(
@@ -158,14 +153,14 @@ const refreshTooltip = i18n.translate('indexPatternManagement.editDataView.refre
   defaultMessage: 'Refresh local copy of data view field list',
 });
 
-const SCHEMA_ITEMS: FilterItems[] = [
+const SCHEMA_ITEMS: EuiSelectableOption<{ value: string }>[] = [
   {
     value: 'runtime',
-    name: schemaOptionRuntime,
+    label: schemaOptionRuntime,
   },
   {
     value: 'indexed',
-    name: schemaOptionIndexed,
+    label: schemaOptionIndexed,
   },
 ];
 
@@ -208,27 +203,22 @@ export const Tabs: React.FC<TabsProps> = ({
   }>({});
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
   const [isScriptedFieldFilterOpen, setIsScriptedFieldFilterOpen] = useState(false);
-  const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string[]>([]);
-  const [isIndexedFilterOpen, setIsIndexedFilterOpen] = useState(false);
-  const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
-  const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
-  const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
-  const indexedFieldTypes = convertToEuiFilterOptions(
-    useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector)
-  );
   const scriptedFieldLanguages = useStateSelector(
     dataViewMgmtService.state$,
     scriptedFieldLangsSelector
   );
-  const closeEditorHandler = useRef<() => void | undefined>();
-  const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
+  const [isIndexedFilterOpen, setIsIndexedFilterOpen] = useState(false);
+  const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string[]>([]);
+  const indexedFieldTypes = useStateSelector(dataViewMgmtService.state$, indexedFieldTypeSelector);
   const filteredIndexedFieldTypeFilter = useMemo(() => {
     return indexedFieldTypeFilter.filter((fieldType) =>
       indexedFieldTypes.some((item) => item.value === fieldType)
     );
   }, [indexedFieldTypeFilter, indexedFieldTypes]);
 
+  const [schemaFieldTypeFilter, setSchemaFieldTypeFilter] = useState<string[]>([]);
+  const [isSchemaFilterOpen, setIsSchemaFilterOpen] = useState(false);
   const filteredSchemaFieldTypeFilter = useMemo(() => {
     return uniq(
       schemaFieldTypeFilter.filter((schemaFieldType) =>
@@ -236,6 +226,10 @@ export const Tabs: React.FC<TabsProps> = ({
       )
     );
   }, [schemaFieldTypeFilter]);
+
+  const fields = useStateSelector(dataViewMgmtService.state$, fieldsSelector);
+  const closeEditorHandler = useRef<() => void | undefined>();
+  const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
   const updateTab = useCallback(
     (tab: Pick<EuiTabbedContentTab, 'id'>) => {
@@ -338,27 +332,19 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item) => {
-                      const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
-                      return (
-                        <EuiFilterSelectItem
-                          checked={isSelected ? 'on' : undefined}
-                          key={item.value}
-                          onClick={() => {
-                            updateFieldTypeFilter(
-                              isSelected
-                                ? filteredIndexedFieldTypeFilter.filter((f) => f !== item.value)
-                                : [...filteredIndexedFieldTypeFilter, item.value]
-                            );
-                          }}
-                          data-test-subj={`indexedFieldTypeFilterDropdown-option-${item.value}${
-                            isSelected ? '-checked' : ''
-                          }`}
-                        >
-                          {item.name}
-                        </EuiFilterSelectItem>
-                      );
-                    })}
+                    <EuiSelectable
+                      data-test-subj="indexedFieldTypeSelectable"
+                      options={convertToEuiSelectableOptions(
+                        indexedFieldTypes,
+                        filteredIndexedFieldTypeFilter
+                      )}
+                      onChange={(newOptions) => {
+                        const [newSelectedValues] = getNewSelectedValues(newOptions);
+                        updateFieldTypeFilter(newSelectedValues);
+                      }}
+                    >
+                      {(list) => <div css={selectStyles}>{list}</div>}
+                    </EuiSelectable>
                   </EuiPopover>
                   <EuiPopover
                     anchorPosition="downCenter"
@@ -380,27 +366,19 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isSchemaFilterOpen}
                     closePopover={() => setIsSchemaFilterOpen(false)}
                   >
-                    {SCHEMA_ITEMS.map((item) => {
-                      const isSelected = filteredSchemaFieldTypeFilter.includes(item.value);
-                      return (
-                        <EuiFilterSelectItem
-                          checked={isSelected ? 'on' : undefined}
-                          key={item.value}
-                          onClick={() => {
-                            updateSchemaFieldTypeFilter(
-                              isSelected
-                                ? filteredSchemaFieldTypeFilter.filter((f) => f !== item.value)
-                                : [...filteredSchemaFieldTypeFilter, item.value]
-                            );
-                          }}
-                          data-test-subj={`schemaFieldTypeFilterDropdown-option-${item.value}${
-                            isSelected ? '-checked' : ''
-                          }`}
-                        >
-                          {item.name}
-                        </EuiFilterSelectItem>
-                      );
-                    })}
+                    <EuiSelectable
+                      data-test-subj="schemaTypeSelectable"
+                      options={convertToEuiSelectableOptions(
+                        SCHEMA_ITEMS,
+                        filteredSchemaFieldTypeFilter
+                      )}
+                      onChange={(newOptions) => {
+                        const [newSelectedValues] = getNewSelectedValues(newOptions);
+                        updateSchemaFieldTypeFilter(newSelectedValues);
+                      }}
+                    >
+                      {(list) => <div css={selectStyles}>{list}</div>}
+                    </EuiSelectable>
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
@@ -472,27 +450,19 @@ export const Tabs: React.FC<TabsProps> = ({
                   isOpen={isScriptedFieldFilterOpen}
                   closePopover={() => setIsScriptedFieldFilterOpen(false)}
                 >
-                  {scriptedFieldLanguages.map((item, index) => (
-                    <EuiFilterSelectItem
-                      checked={item.checked}
-                      key={item.value}
-                      onClick={() => {
-                        // this does the filtering
-                        setScriptedFieldLanguageFilter(
-                          item.checked
-                            ? scriptedFieldLanguageFilter.filter((f) => f !== item.value)
-                            : [...scriptedFieldLanguageFilter, item.value]
-                        );
-                        // updates the UI
-                        dataViewMgmtService.setScriptedFieldLangSelection(index);
-                      }}
-                      data-test-subj={`scriptedFieldLanguageFilterDropdown-option-${item.value}${
-                        item.checked ? '-checked' : ''
-                      }`}
-                    >
-                      {item.name}
-                    </EuiFilterSelectItem>
-                  ))}
+                  <EuiSelectable
+                    data-test-subj="scriptedFieldLanguageSelectable"
+                    options={convertToEuiSelectableOptions(
+                      scriptedFieldLanguages,
+                      scriptedFieldLanguageFilter
+                    )}
+                    onChange={(newOptions) => {
+                      const [newSelectedValues] = getNewSelectedValues(newOptions);
+                      setScriptedFieldLanguageFilter(newSelectedValues);
+                    }}
+                  >
+                    {(list) => <div css={selectStyles}>{list}</div>}
+                  </EuiSelectable>
                 </EuiPopover>
               </EuiFilterGroup>
             </EuiFlexItem>
@@ -501,14 +471,13 @@ export const Tabs: React.FC<TabsProps> = ({
       );
     },
     [
-      dataViewMgmtService,
       fieldFilter,
       filteredSchemaFieldTypeFilter,
       filteredIndexedFieldTypeFilter,
       indexedFieldTypes,
       isIndexedFilterOpen,
-      scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      scriptedFieldLanguageFilter,
       isScriptedFieldFilterOpen,
       isSchemaFilterOpen,
       openFieldEditor,
@@ -703,3 +672,7 @@ export const Tabs: React.FC<TabsProps> = ({
     />
   );
 };
+
+const selectStyles = css({
+  width: 150,
+});

@@ -1,0 +1,520 @@
+{
+  "id": "@kbn/otel-demo",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.ensureOtelDemo",
+        "type": "Function",
+        "tags": [],
+        "label": "ensureOtelDemo",
+        "description": [
+          "\nEnsures the OpenTelemetry Demo is running on Kubernetes (minikube) with\ntelemetry data being sent to Elasticsearch.\n\nThis function:\n1. Ensures minikube is running\n2. Reads Elasticsearch configuration from kibana.dev.yml\n3. Enables the streams feature in Kibana (sets up logs index)\n4. Generates OTel Collector configuration with k8sattributes processor\n5. Generates Kubernetes manifests for the OTel Demo\n6. Deploys to minikube using kubectl\n"
+        ],
+        "signature": [
+          "({\n  log,\n  signal,\n  configPath,\n  logsIndex = 'logs',\n  teardown = false,\n  scenarioIds = [],\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; signal: AbortSignal; configPath?: string | undefined; logsIndex?: string | undefined; teardown?: boolean | undefined; scenarioIds?: string[] | undefined; }) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.ensureOtelDemo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  signal,\n  configPath,\n  logsIndex = 'logs',\n  teardown = false,\n  scenarioIds = [],\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+            "lineNumber": 96,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 97,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 98,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.configPath",
+                "type": "string",
+                "tags": [],
+                "label": "configPath",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 99,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.logsIndex",
+                "type": "string",
+                "tags": [],
+                "label": "logsIndex",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 100,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.teardown",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "teardown",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 101,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.ensureOtelDemo.$1.scenarioIds",
+                "type": "Array",
+                "tags": [],
+                "label": "scenarioIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 102,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.getScenarioById",
+        "type": "Function",
+        "tags": [],
+        "label": "getScenarioById",
+        "description": [
+          "\nGet a scenario by ID"
+        ],
+        "signature": [
+          "(id: string) => ",
+          {
+            "pluginId": "@kbn/otel-demo",
+            "scope": "server",
+            "docId": "kibKbnOtelDemoPluginApi",
+            "section": "def-server.FailureScenario",
+            "text": "FailureScenario"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 371,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.getScenarioById.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 374,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.getScenariosByCategory",
+        "type": "Function",
+        "tags": [],
+        "label": "getScenariosByCategory",
+        "description": [
+          "\nGet all scenarios in a category"
+        ],
+        "signature": [
+          "(category: \"dramatic\" | \"subtle\") => ",
+          {
+            "pluginId": "@kbn/otel-demo",
+            "scope": "server",
+            "docId": "kibKbnOtelDemoPluginApi",
+            "section": "def-server.FailureScenario",
+            "text": "FailureScenario"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 378,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.getScenariosByCategory.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "\"dramatic\" | \"subtle\""
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 381,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.listScenarioIds",
+        "type": "Function",
+        "tags": [],
+        "label": "listScenarioIds",
+        "description": [
+          "\nList all available scenario IDs"
+        ],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 385,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.patchScenarios",
+        "type": "Function",
+        "tags": [],
+        "label": "patchScenarios",
+        "description": [
+          "\nPatches failure scenarios onto a running OTel Demo cluster.\nUses kubectl set env to update deployments without full redeployment.\n"
+        ],
+        "signature": [
+          "({\n  log,\n  scenarioIds = [],\n  reset = false,\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; scenarioIds?: string[] | undefined; reset?: boolean | undefined; }) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+        "lineNumber": 293,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.patchScenarios.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  scenarioIds = [],\n  reset = false,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+            "lineNumber": 305,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.patchScenarios.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 306,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.patchScenarios.$1.scenarioIds",
+                "type": "Array",
+                "tags": [],
+                "label": "scenarioIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 307,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/otel-demo",
+                "id": "def-server.patchScenarios.$1.reset",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "reset",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-otel-demo/src/ensure_otel_demo.ts",
+                "lineNumber": 308,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.FailureScenario",
+        "type": "Interface",
+        "tags": [],
+        "label": "FailureScenario",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.category",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "\"dramatic\" | \"subtle\""
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "{ type: \"env\"; service: string; variable: string; value: string; description: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/otel-demo",
+            "id": "def-server.FailureScenario.recovery",
+            "type": "Array",
+            "tags": [],
+            "label": "recovery",
+            "description": [],
+            "signature": [
+              "{ type: \"env\"; service: string; variable: string; value: string; description: string; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/otel-demo",
+        "id": "def-server.FAILURE_SCENARIOS",
+        "type": "Array",
+        "tags": [],
+        "label": "FAILURE_SCENARIOS",
+        "description": [
+          "\nFailure scenarios that can be applied to the OTel Demo.\nThese simulate real-world misconfigurations and failures."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/otel-demo",
+            "scope": "server",
+            "docId": "kibKbnOtelDemoPluginApi",
+            "section": "def-server.FailureScenario",
+            "text": "FailureScenario"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-otel-demo/src/failure_scenarios.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

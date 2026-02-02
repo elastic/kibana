@@ -32,6 +32,8 @@
           "(kibanaUrl: string) => Promise<string>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 49,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,9 +70,11 @@
           "\nCreates a SAML response that can be passed directly to the Kibana ACS endpoint to authenticate a user.\n"
         ],
         "signature": [
-          "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean; } | undefined; }) => Promise<string>"
+          "(options: { kibanaUrl: string; authnRequestId?: string | undefined; username: string; full_name?: string | undefined; email?: string | undefined; roles: string[]; serverless?: { organizationId: string; projectType: string; uiamEnabled: false; } | { organizationId: string; projectType: string; uiamEnabled: true; accessTokenLifetimeSec?: number | undefined; refreshTokenLifetimeSec?: number | undefined; } | undefined; }) => Promise<string>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,6 +86,8 @@
             "label": "options",
             "description": [],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 102,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -93,6 +101,8 @@
                   "Fully qualified URL where Kibana is hosted (including base path)"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 103,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -109,6 +119,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 105,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -120,6 +132,8 @@
                 "label": "username",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 107,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -134,6 +148,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 108,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -148,6 +164,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 109,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -162,20 +180,24 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 110,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/mock-idp-utils",
                 "id": "def-common.createSAMLResponse.$1.serverless",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "serverless",
                 "description": [],
                 "signature": [
-                  "{ organizationId: string; projectType: string; uiamEnabled: boolean; } | undefined"
+                  "{ organizationId: string; projectType: string; uiamEnabled: false; } | { organizationId: string; projectType: string; uiamEnabled: true; accessTokenLifetimeSec?: number | undefined; refreshTokenLifetimeSec?: number | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+                "lineNumber": 111,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -200,6 +222,8 @@
           ") => Promise<unknown>"
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -214,6 +238,116 @@
               "default"
             ],
             "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 242,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.generateCosmosDBApiRequestHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "generateCosmosDBApiRequestHeaders",
+        "description": [],
+        "signature": [
+          "(httpVerb: \"POST\" | \"PUT\", resourceType: \"docs\" | \"dbs\" | \"colls\", resourceId: string) => { Authorization: string; 'x-ms-date': string; 'x-ms-version': string; 'Content-Type': string; }"
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 267,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.generateCosmosDBApiRequestHeaders.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "httpVerb",
+            "description": [],
+            "signature": [
+              "\"POST\" | \"PUT\""
+            ],
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.generateCosmosDBApiRequestHeaders.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resourceType",
+            "description": [],
+            "signature": [
+              "\"docs\" | \"dbs\" | \"colls\""
+            ],
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.generateCosmosDBApiRequestHeaders.$3",
+            "type": "string",
+            "tags": [],
+            "label": "resourceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.getSAMLRequestId",
+        "type": "Function",
+        "tags": [],
+        "label": "getSAMLRequestId",
+        "description": [],
+        "signature": [
+          "(requestUrl: string) => Promise<string | undefined>"
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+        "lineNumber": 417,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mock-idp-utils",
+            "id": "def-common.getSAMLRequestId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "requestUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-mock-idp-utils/src/utils.ts",
+            "lineNumber": 417,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -237,6 +371,8 @@
           "\"http://saml.elastic-cloud.com/attributes/email\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -252,6 +388,8 @@
           "\"http://saml.elastic-cloud.com/attributes/name\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -267,6 +405,8 @@
           "\"http://saml.elastic-cloud.com/attributes/principal\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -282,6 +422,8 @@
           "\"http://saml.elastic-cloud.com/attributes/roles\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -297,6 +439,8 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,6 +456,8 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -327,6 +473,8 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -342,6 +490,8 @@
           "\"http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -357,6 +507,8 @@
           "\"urn:mock-idp\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -372,6 +524,8 @@
           "\"/mock_idp/login\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -387,6 +541,8 @@
           "\"/mock_idp/logout\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,6 +558,8 @@
           "\"cloud-saml-kibana\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -417,6 +575,8 @@
           "\"saml\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -432,6 +592,121 @@
           "\"mock-idp-mapping\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY",
+        "description": [],
+        "signature": [
+          "\"C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS",
+        "description": [],
+        "signature": [
+          "\"api-keys\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION",
+        "description": [],
+        "signature": [
+          "\"token-invalidation\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS",
+        "description": [],
+        "signature": [
+          "\"users\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_INTERNAL_URL",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_NAME",
+        "description": [],
+        "signature": [
+          "\"uiam-db\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_COSMOS_DB_URL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_COSMOS_DB_URL",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -444,9 +719,11 @@
         "label": "MOCK_IDP_UIAM_ORGANIZATION_ID",
         "description": [],
         "signature": [
-          "\"1234567890\""
+          "\"org1234567890\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -462,6 +739,36 @@
           "\"abcde1234567890\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_SERVICE_INTERNAL_URL",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mock-idp-utils",
+        "id": "def-common.MOCK_IDP_UIAM_SERVICE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_SERVICE_URL",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -477,6 +784,8 @@
           "\"Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,6 +801,8 @@
           "\"MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

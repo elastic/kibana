@@ -82,10 +82,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/157776
-    // Beware that this test will pass locally and in flaky test runner, but it
-    // will fail after merged.
-    describe.skip('with variables in request body', () => {
+    describe('with variables in request body', () => {
       it('should send a successful request', async () => {
         await PageObjects.console.openConfig();
         await PageObjects.console.addNewVariable({ name: 'query1', value: '{"match_all": {}}' });

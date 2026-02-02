@@ -6,22 +6,21 @@
  */
 
 import {
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { docLinks } from '../../../common/doc_links';
+import { LogoContainerStyle } from './styles';
 
 export const Observability: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { http, cloud } = useKibana().services;
 
   const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
@@ -38,122 +37,50 @@ export const Observability: React.FC = () => {
     return http.basePath.prepend('/app/management/kibana/spaces/create');
   }, [http]);
 
-  const analyzeLogsIntegration = useMemo(() => {
-    return http.basePath.prepend('/app/integrations/browse/observability');
-  }, [http]);
-
   return (
-    <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="l" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
-        <EuiAvatar
-          size="xl"
-          color="plain"
-          name="Observability"
-          iconType="logoObservability"
-          style={{ border: euiTheme.border.thin }}
-        />
+        <EuiFlexGroup justifyContent="center" alignItems="flexStart">
+          <EuiFlexItem css={LogoContainerStyle} grow={false}>
+            <EuiIcon size="xxl" type="logoObservability" name="Observability" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h4>
+            <EuiTitle size="xs">
+              <h3>
                 {i18n.translate('xpack.searchHomepage.observability.title', {
                   defaultMessage: 'Observability',
                 })}
-              </h4>
+              </h3>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <span>
+            <EuiText size="relative" color="subdued">
+              <p>
                 {i18n.translate('xpack.searchHomepage.observability.description', {
                   defaultMessage:
                     'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
                 })}
-              </span>
+              </p>
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" direction="column">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate('xpack.searchHomepage.observability.logsTitle', {
-                          defaultMessage: 'Collect and analyze logs',
-                        })}
-                      </span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isServerless ? (
-                      <EuiLink
-                        href={docLinks.analyzeLogs}
-                        data-test-subj="exploreLogstashAndBeatsLink"
-                      >
-                        {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
-                          defaultMessage: 'Explore Logstash and Beats',
-                        })}
-                      </EuiLink>
-                    ) : (
-                      <EuiLink
-                        href={analyzeLogsIntegration}
-                        data-test-subj="analyzeLogsBrowseIntegrations"
-                      >
-                        {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
-                          defaultMessage: 'Explore Logstash and Beats',
-                        })}
-                      </EuiLink>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" direction="column">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate(
-                          'xpack.searchHomepage.observability.performanceMonitoringTitle',
-                          {
-                            defaultMessage: 'Powerful performance monitoring',
-                          }
-                        )}
-                      </span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {isServerless ? (
-                      <EuiLink href={o11yTrialLink} data-test-subj="createObservabilityProjectLink">
-                        {i18n.translate(
-                          'xpack.searchHomepage.observability.createObservabilityProjectLink',
-                          {
-                            defaultMessage: 'Create an Observability project',
-                          }
-                        )}
-                      </EuiLink>
-                    ) : (
-                      <EuiLink
-                        href={o11yCreateSpaceLink}
-                        data-test-subj="createObservabilitySpaceLink"
-                      >
-                        {i18n.translate(
-                          'xpack.searchHomepage.observability.createObservabilitySpaceLink',
-                          {
-                            defaultMessage: 'Create an Observability space',
-                          }
-                        )}
-                      </EuiLink>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            {isServerless ? (
+              <EuiLink href={o11yTrialLink} data-test-subj="createObservabilityProjectLink">
+                {i18n.translate(
+                  'xpack.searchHomepage.observability.createObservabilityProjectLink',
+                  {
+                    defaultMessage: 'Create an Observability project',
+                  }
+                )}
+              </EuiLink>
+            ) : (
+              <EuiLink href={o11yCreateSpaceLink} data-test-subj="createObservabilitySpaceLink">
+                {i18n.translate('xpack.searchHomepage.observability.createObservabilitySpaceLink', {
+                  defaultMessage: 'Create an Observability space',
+                })}
+              </EuiLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

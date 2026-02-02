@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { Journey } from '@kbn/journeys';
-import { subj } from '@kbn/test-subj-selector';
+import { createDashboardJourney } from './utils/dashboard_journey';
 
-export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
+export const journey = createDashboardJourney({
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_saved_search_only_dashboard'],
-})
-
-  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await kibanaPage.waitForListViewTable();
-  })
-
-  .step('Go to Ecommerce Dashboard with Saved Search only', async ({ page, kibanaPage }) => {
-    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard'));
-    await kibanaPage.waitForVisualizations({ count: 1 });
-  });
+  dashboardName: 'Ecommerce Dashboard with Saved Search only',
+  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard',
+  visualizationCount: 1,
+});

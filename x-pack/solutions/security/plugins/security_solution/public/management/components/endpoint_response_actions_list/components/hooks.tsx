@@ -324,6 +324,9 @@ export const useActionsLogFilter = ({
           if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
             return false;
           }
+          if (commandName === 'memory-dump' && !featureFlags.responseActionsEndpointMemoryDump) {
+            return false;
+          }
 
           return true;
         }).map((commandName) => ({

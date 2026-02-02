@@ -1,0 +1,37 @@
+name: Test Workflow with JSON Schema Reference
+version: "1"
+enabled: true
+description: Simple test workflow demonstrating JSON Schema $ref with default values
+
+triggers:
+  - type: manual
+
+inputs:
+  properties:
+    user:
+      $ref: "#/definitions/UserSchema"
+  required: [user]
+  additionalProperties: false
+  definitions:
+    UserSchema:
+      type: object
+      properties:
+        name:
+          type: string
+          default: "John Doe"
+        email:
+          type: string
+          format: email
+          default: "john.doe@example.com"
+        age:
+          type: number
+          default: 30
+      required: [name, email]
+      additionalProperties: false
+
+steps:
+  - name: print-user-info
+    type: console
+    with:
+      message: "User Info: Name={{ inputs.user.name }}, Email={{ inputs.user.email }}, Age={{ inputs.user.age }}"
+

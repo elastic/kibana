@@ -16,6 +16,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -45,6 +49,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

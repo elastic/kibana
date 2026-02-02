@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useStopSiemMigration, STOP_SUCCESS, STOP_ERROR } from './use_stop_siem_migration';
+import { MigrationSource } from '../types';
 
 const mockStopRuleMigration = jest.fn();
 const mockStopDashboardMigration = jest.fn();
@@ -48,10 +49,13 @@ describe('useStopSiemMigration', () => {
     const wrapper = createWrapper();
     const { result } = renderHook(() => useStopSiemMigration('rule'), { wrapper });
     act(() => {
-      result.current.mutate({ migrationId: 'some-migration-id' });
+      result.current.mutate({ migrationId: 'some-migration-id', vendor: MigrationSource.SPLUNK });
     });
     await waitFor(() => result.current.isSuccess);
-    expect(mockStopRuleMigration).toHaveBeenCalledWith('some-migration-id');
+    expect(mockStopRuleMigration).toHaveBeenCalledWith({
+      migrationId: 'some-migration-id',
+      vendor: MigrationSource.SPLUNK,
+    });
     expect(mockAddSuccess).toHaveBeenCalledWith(STOP_SUCCESS);
   });
 
@@ -60,10 +64,13 @@ describe('useStopSiemMigration', () => {
     const wrapper = createWrapper();
     const { result } = renderHook(() => useStopSiemMigration('dashboard'), { wrapper });
     act(() => {
-      result.current.mutate({ migrationId: 'did' });
+      result.current.mutate({ migrationId: 'did', vendor: MigrationSource.SPLUNK });
     });
     await waitFor(() => result.current.isSuccess);
-    expect(mockStopDashboardMigration).toHaveBeenCalledWith('did');
+    expect(mockStopDashboardMigration).toHaveBeenCalledWith({
+      migrationId: 'did',
+      vendor: MigrationSource.SPLUNK,
+    });
     expect(mockAddSuccess).toHaveBeenCalledWith(STOP_SUCCESS);
   });
 

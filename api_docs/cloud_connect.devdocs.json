@@ -1,0 +1,141 @@
+{
+  "id": "cloudConnect",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudConnect",
+      "id": "def-public.CloudConnectedPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudConnectedPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "cloudConnect",
+          "id": "def-public.CloudConnectedPluginSetup.cloudUrl",
+          "type": "string",
+          "tags": [],
+          "label": "cloudUrl",
+          "description": [],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudConnect",
+      "id": "def-public.CloudConnectedPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudConnectedPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/cloud_connect/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudConnect",
+        "id": "def-server.CloudConnectConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudConnectConfig",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly cloudUrl: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud_connect/server/config.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudConnect",
+      "id": "def-server.CloudConnectedPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudConnectedPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudConnect",
+      "id": "def-server.CloudConnectedPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudConnectedPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/cloud_connect/server/plugin.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudConnect",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/cloud_connect/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

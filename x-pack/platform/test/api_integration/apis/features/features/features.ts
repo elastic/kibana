@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
             'searchSynonyms',
             'searchQueryRules',
             'searchPlayground',
-            'siemV4',
+            'siemV5',
             'slo',
             'streams',
             'securitySolutionAssistant',
@@ -141,10 +141,12 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionCasesV3',
             'securitySolutionTimeline',
             'securitySolutionNotes',
+            'securitySolutionRulesV2',
             'securitySolutionSiemMigrations',
             'workflowsManagement',
             'fleet',
             'fleetv2',
+            'cloudConnect',
           ].sort()
         );
       });

@@ -280,9 +280,12 @@ export function useFieldStatsSearchStrategy(
             if (
               Array.isArray(f) &&
               f.length === 1 &&
+              // @ts-expect-error upgrade typescript v5.9.3
               Array.isArray(f[0].fields) &&
+              // @ts-expect-error upgrade typescript v5.9.3
               f[0].fields.length > 0
             ) {
+              // @ts-expect-error upgrade typescript v5.9.3
               statsMap.set(f[0].fields[0], f[0]);
             }
           });

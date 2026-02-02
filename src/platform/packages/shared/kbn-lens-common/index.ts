@@ -238,12 +238,12 @@ export type {
   ValidXYDataLayerConfig,
   ValidLayer,
   XYState,
-  State,
 } from './visualizations/xy/types';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
   LensSerializedState,
+  LensSerializedSharedState,
   LensByReferenceInput,
   LensSavedObjectAttributes,
   VisualizationContextHelper,
@@ -252,8 +252,8 @@ export type {
   DocumentToExpressionReturnType,
   PreventableEvent,
   LensOverrides,
-  LensByReference,
-  LensPropsVariants,
+  LensByValueSerializedState,
+  LensByRefSerializedState,
   ViewInDiscoverCallbacks,
   IntegrationCallbacks,
   LensPublicCallbacks,
@@ -267,15 +267,16 @@ export type {
   LensRuntimeState,
   LensHasEditPanel,
   LensInspectorAdapters,
-  LensApi,
   LensInternalApi,
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
+  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
-  LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
+  LensByValueBase,
+  LensRequestHandlersProps,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,
@@ -294,6 +295,7 @@ export {
   LENS_RANGE_MODES,
 } from './datasources/constants';
 export {
+  LENS_UNKNOWN_VIS,
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
   LENS_LEGEND_DISPLAY,
@@ -316,6 +318,7 @@ export {
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
+  LEGACY_SINGLE_ROW_HEIGHT_MODE,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
@@ -373,6 +376,18 @@ export {
   SeriesTypes,
   visualizationSubtypes,
   visualizationTypes,
+  AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
+export {
+  getLensLayerTypeTabDisplayName,
+  lensLayerTypeTabDisplayNames,
+} from './visualizations/layer_type_tab_display_name';
+
+export {
+  hasStateFormulaColumn,
+  getFormulaColumnsFromLayer,
+  getReferencedColumnIds,
+  cleanupFormulaReferenceColumns,
+} from './datasources/form_based/helpers';

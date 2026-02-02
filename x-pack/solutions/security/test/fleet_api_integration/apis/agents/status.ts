@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-
+import { v4 as uuidv4 } from 'uuid';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
@@ -355,6 +355,39 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent1',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+      await es.create({
+        refresh: 'wait_for',
+        index: 'logs-system.system-default',
+        id: uuidv4(),
+        body: {
+          agent: {
+            id: 'agent2',
+          },
+          '@timestamp': new Date().toISOString(),
+          data_stream: {
+            dataset: 'system.system',
+            namespace: 'default',
+            type: 'logs',
+          },
+        },
+      });
+
       const { body: apiResponse1 } = await supertest
         .get(`/api/fleet/agent_status/data?agentsIds=agent1&agentsIds=agent2`)
         .expect(200);
@@ -364,12 +397,26 @@ export default function ({ getService }: FtrProviderContext) {
         )
         .expect(200);
       expect(apiResponse1).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
       });
       expect(apiResponse2).to.eql({
-        items: [{ agent1: { data: false } }, { agent2: { data: false } }],
+        items: [{ agent1: { data: true } }, { agent2: { data: true } }],
         dataPreview: [],
+      });
+
+      // clean up test data
+      await es.deleteByQuery({
+        index: 'logs-system.system-default',
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'agent.id': ['agent1', 'agent2'],
+              },
+            },
+          },
+        },
       });
     });
   });

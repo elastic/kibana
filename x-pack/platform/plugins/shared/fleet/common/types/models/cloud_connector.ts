@@ -6,6 +6,8 @@
  */
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
+export type AccountType = 'single-account' | 'organization-account';
+
 export interface CloudConnectorSecretReference {
   isSecretRef: boolean;
   id: string;
@@ -30,23 +32,20 @@ export interface AwsCloudConnectorVars {
 }
 
 export interface AzureCloudConnectorVars {
-  tenant_id: CloudConnectorVar;
-  client_id: CloudConnectorVar;
+  tenant_id: CloudConnectorSecretVar;
+  client_id: CloudConnectorSecretVar;
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-export type CloudConnectorVars =
-  | AwsCloudConnectorVars
-  | AzureCloudConnectorVars
-  // TODO: Remove Record<string, unknown> in https://github.com/elastic/security-team/issues/14284
-  | Record<string, unknown>;
+export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
 export interface CloudConnector {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
+  accountType?: AccountType;
   vars: CloudConnectorVars;
-  packagePolicyCount: number;
+  packagePolicyCount?: number;
   created_at: string;
   updated_at: string;
   namespace?: string;
@@ -55,10 +54,6 @@ export interface CloudConnector {
 export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
-}
-
-export interface CreateCloudConnectorRequest {
-  name: string;
-  vars: CloudConnectorVars;
-  cloudProvider: CloudProvider;
+  kuery?: string;
+  fields?: string[];
 }

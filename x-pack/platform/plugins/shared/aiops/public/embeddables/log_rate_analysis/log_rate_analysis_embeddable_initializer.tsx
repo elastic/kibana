@@ -32,16 +32,15 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { TimeFieldWarning } from '../../components/time_field_warning';
-
-import type { LogRateAnalysisEmbeddableRuntimeState } from './types';
+import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
 export interface LogRateAnalysisEmbeddableInitializerProps {
   dataViews: DataViewsPublicPluginStart;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  initialInput?: Partial<LogRateAnalysisEmbeddableRuntimeState>;
-  onCreate: (props: LogRateAnalysisEmbeddableRuntimeState) => void;
+  initialInput?: Partial<LogRateAnalysisEmbeddableState>;
+  onCreate: (props: LogRateAnalysisEmbeddableState) => void;
   onCancel: () => void;
-  onPreview: (update: LogRateAnalysisEmbeddableRuntimeState) => Promise<void>;
+  onPreview: (update: LogRateAnalysisEmbeddableState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -59,8 +58,8 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   const { euiTheme } = useEuiTheme();
   const isMounted = useMountedState();
 
-  const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableRuntimeState>(
-    pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableRuntimeState
+  const [formInput, setFormInput] = useState<LogRateAnalysisEmbeddableState>(
+    pick(initialInput ?? {}, ['dataViewId']) as LogRateAnalysisEmbeddableState
   );
 
   // State to track if the selected data view is time based, undefined is used
@@ -166,7 +165,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
                 autoFocus={!formInput.dataViewId}
                 fullWidth
                 compressed
-                indexPatternId={formInput.dataViewId}
+                indexPatternId={formInput.dataViewId ?? ''}
                 placeholder={i18n.translate(
                   'xpack.aiops.embeddableLogRateAnalysis.config.dataViewSelectorPlaceholder',
                   {

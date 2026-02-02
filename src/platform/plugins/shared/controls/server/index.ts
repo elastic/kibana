@@ -11,11 +11,3 @@ export const plugin = async () => {
   const { ControlsPlugin } = await import('./plugin');
   return new ControlsPlugin();
 };
-
-export {
-  controlGroupSavedObjectStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSavedObjectState,
-} from './control_group/control_group_persistence';
-export { initializeControlGroupTelemetry } from './control_group/control_group_telemetry';
-
-export type { ControlGroupTelemetry } from './control_group/types';

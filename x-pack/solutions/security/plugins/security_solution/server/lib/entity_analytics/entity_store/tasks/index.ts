@@ -8,3 +8,4 @@
 export * from './field_retention_enrichment/field_retention_enrichment_task';
 export * from './data_view_refresh/data_view_refresh_task';
 export * from './snapshot/snapshot';
+export * from './health/health';

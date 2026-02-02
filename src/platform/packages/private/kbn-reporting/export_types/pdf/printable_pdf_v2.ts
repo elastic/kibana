@@ -78,7 +78,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadPDFV2>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -167,7 +167,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
         warnings,
       })),
       catchError((err) => {
-        logger.error(err);
+        logger.debug(err, { tags: ['execute-job', jobId] });
         return Rx.throwError(() => err);
       })
     );

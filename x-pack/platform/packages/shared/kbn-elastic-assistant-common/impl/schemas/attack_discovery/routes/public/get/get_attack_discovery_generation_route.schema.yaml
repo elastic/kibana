@@ -16,9 +16,8 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoveryGeneration
-      x-state: Technical Preview; added in 9.2.0
       summary: Get a single Attack discovery generation, including its discoveries and (optional) generation metadata
-      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics. `Technical preview`
+      description: Returns a specific Attack discovery generation, including all generated Attack discoveries and associated metadata, including execution status and statistics.
       parameters:
         - name: execution_uuid
           in: path

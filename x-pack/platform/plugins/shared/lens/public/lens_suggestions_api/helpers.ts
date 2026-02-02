@@ -172,20 +172,37 @@ export function switchVisualizationType({
   suggestions,
   targetTypeId,
   familyType,
-  shouldSwitch,
+  forceSwitch,
 }: {
   visualizationMap: VisualizationMap;
   suggestions: Suggestion[];
   targetTypeId?: string;
   familyType: string;
-  shouldSwitch: boolean;
+  forceSwitch: boolean;
 }): Suggestion[] | undefined {
   const suggestion = suggestions.find((s) => s.visualizationId === familyType);
 
+  const visualizationInstance = visualizationMap[familyType];
+
+  const currentTypeId =
+    suggestion &&
+    targetTypeId &&
+    visualizationInstance?.getVisualizationTypeId(suggestion.visualizationState);
+
+  // Determine if a switch is required either
+  // via force flag
+  // or by checking if the target type is supported by the family chart type
+  const shouldSwitch =
+    forceSwitch ||
+    (targetTypeId &&
+      visualizationInstance?.isSubtypeSupported?.(targetTypeId) &&
+      currentTypeId !== targetTypeId);
+
   if (shouldSwitch && suggestion && familyType && targetTypeId) {
-    const visualizationState = visualizationMap[
-      suggestion.visualizationId
-    ]?.switchVisualizationType?.(targetTypeId, suggestion?.visualizationState);
+    const visualizationState = visualizationInstance?.switchVisualizationType?.(
+      targetTypeId,
+      suggestion?.visualizationState
+    );
 
     return [
       {

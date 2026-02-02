@@ -9,7 +9,8 @@ import { v4 as uuidV4 } from 'uuid';
 import type { AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
 import type { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_DELAYED, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertHit, CombinedSummarizedAlerts } from '../types';
 import type {
   AlertInstanceMeta,
@@ -60,6 +61,7 @@ export class Alert<
   private context: Context;
   private readonly id: string;
   private alertAsData: AlertAsData | undefined;
+  private status: AlertStatus | undefined;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
@@ -68,6 +70,7 @@ export class Alert<
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
     this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
+    this.meta.maintenanceWindowNames = meta.maintenanceWindowNames ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -267,6 +270,7 @@ export class Alert<
           // the flapping flag, and the UUID
           meta: {
             maintenanceWindowIds: this.meta.maintenanceWindowIds,
+            maintenanceWindowNames: this.meta.maintenanceWindowNames,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
@@ -344,6 +348,14 @@ export class Alert<
     return this.meta.maintenanceWindowIds ?? [];
   }
 
+  setMaintenanceWindowNames(maintenanceWindowNames: string[] = []) {
+    this.meta.maintenanceWindowNames = maintenanceWindowNames;
+  }
+
+  getMaintenanceWindowNames() {
+    return this.meta.maintenanceWindowNames ?? [];
+  }
+
   incrementActiveCount() {
     if (!this.meta.activeCount) {
       this.meta.activeCount = 0;
@@ -357,5 +369,13 @@ export class Alert<
 
   resetActiveCount() {
     this.meta.activeCount = 0;
+  }
+
+  setStatus(status: AlertStatus) {
+    this.status = status;
+  }
+
+  isDelayed() {
+    return this.status === ALERT_STATUS_DELAYED;
   }
 }

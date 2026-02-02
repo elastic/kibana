@@ -15,6 +15,7 @@ const INDEX_NAME_MANUAL = 'test-lookup-index-manual';
 const INDEX_NAME_FILE = 'test-lookup-index-file';
 const INDEX_NAME_EDITION = 'test-lookup-index-edition';
 const INITIAL_COLUMN_PLACEHOLDERS = 4;
+const NUMBER_OF_CONTROL_COLUMNS = 2;
 const IMPORT_FILE_PATH = path.join(__dirname, 'imports', 'customers.csv');
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -22,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const monacoEditor = getService('monacoEditor');
   const esql = getService('esql');
   const es = getService('es');
   const retry = getService('retry');
@@ -74,11 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creation by file upload', async function () {
       // Type lookup join query with index name inside it
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_FILE}`);
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
@@ -86,29 +82,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Import a file
       await indexEditor.uploadFile(IMPORT_FILE_PATH);
-      await testSubjects.isDisplayed('indexEditorPreviewFile');
-      await testSubjects.click('indexEditorImportButton');
+      await testSubjects.isDisplayed('fileUploadLiteLookupSteps');
+      await testSubjects.click('fileUploadLiteLookupReviewButton', 6000);
+
+      await testSubjects.click('fileUploadLiteLookupImportButton', 6000);
+
+      // Wait for finish button to be enabled and click it
+      // wait for file upload component to disappear
+      await retry.tryForTime(20000, async () => {
+        await testSubjects.waitForEnabled('fileUploadLiteLookupFinishButton', 6000);
+        await testSubjects.click('fileUploadLiteLookupFinishButton', 6000);
+        await testSubjects.missingOrFail('fileUploadLiteLookupSteps');
+      });
 
       // Check data grid has been populated correctly
       await retry.tryForTime(6000, async () => {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
           'Select column',
+          'Actions columnActions', // Add row control column
           'Keywordcustomer_first_name',
           'Keywordcustomer_full_name',
           'Keywordcustomer_gender',
           'Numbercustomer_id',
           'Keywordcustomer_last_name',
           'Keywordemail',
+          '', // Add column control column
         ]);
         expect(gridData.rows[0]).to.eql([
           '', // toggles column
+          '', // Add row control column
           'Elyssa',
           'Elyssa Underwood',
           'FEMALE',
           27,
           'Underwood',
           'elyssa@underwood-family.zzz',
+          '', // Add column control column
         ]);
       });
 
@@ -132,8 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creation by manually adding data', async function () {
       // Type lookup join query
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue('from logstash-* | LOOKUP JOIN ', 'ESQLEditor');
+      await esql.typeEsqlEditorQuery('from logstash-* | LOOKUP JOIN ');
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel('Create lookup index');
@@ -146,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS);
 
       for (let index = 0; index < INITIAL_COLUMN_PLACEHOLDERS; index++) {
-        await indexEditor.setColumnName(`column-${index + 1}`, index);
+        await indexEditor.setColumn(`column-${index + 1}`, 'keyword', index);
       }
 
       expect(await indexEditor.getColumnNames()).to.eql([
@@ -157,29 +166,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       // Add a new column
-      await indexEditor.addColumn();
-      await indexEditor.setColumnName(`extra-column`, 4);
+      await indexEditor.addColumn('extra-column', 'keyword');
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
       // Add another column and then delete it
-      await indexEditor.addColumn();
-      await indexEditor.setColumnName(`column-to-be-deleted`, 5);
+      await indexEditor.addColumn('column-to-be-deleted', 'text');
       await indexEditor.deleteColumn('column-to-be-deleted');
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
       // Add cell values for the first row
-      for (let colIndex = 1; colIndex <= 5; colIndex++) {
-        await indexEditor.setCellValue(0, colIndex, `value-1-${colIndex}`);
+      for (
+        let colIndex = NUMBER_OF_CONTROL_COLUMNS;
+        colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
+        colIndex++
+      ) {
+        await indexEditor.setCellValue(0, colIndex, `value-1-${colIndex - 1}`);
       }
 
       // Add new row with values
-      await indexEditor.addRow();
-      for (let colIndex = 1; colIndex <= 5; colIndex++) {
-        await indexEditor.setCellValue(0, colIndex, `value-2-${colIndex}`);
+      await indexEditor.addRow(0);
+      for (
+        let colIndex = NUMBER_OF_CONTROL_COLUMNS;
+        colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
+        colIndex++
+      ) {
+        await indexEditor.setCellValue(1, colIndex, `value-2-${colIndex - 1}`);
       }
 
       // Edit column name
-      await indexEditor.setColumnName('renamed-column-1', 0);
+      await indexEditor.setColumn('renamed-column-1', 'text', 0);
 
       // Save the index
       await indexEditor.saveChangesAndClose();
@@ -206,6 +221,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'extra-column': 'value-2-5',
           },
         ]);
+
+        await indexEditor.verifyIndexMappings(INDEX_NAME_MANUAL, {
+          'renamed-column-1': { type: 'text' },
+          'column-2': { type: 'keyword' },
+          'column-3': { type: 'keyword' },
+          'column-4': { type: 'keyword' },
+          'extra-column': { type: 'keyword' },
+        });
       });
     });
 
@@ -248,11 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
 
       // Type lookup join query
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`);
 
       // Hover the index badge and click on the edit option
       await esql.selectEsqlBadgeHoverOption('lookupIndexBadge', 'Edit lookup index');
@@ -272,33 +291,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Edit cell values
-      await indexEditor.setCellValue(0, 1, 'Jasmin');
-      await indexEditor.setCellValue(0, 2, 'Jasmin Upperwood');
+      await indexEditor.setCellValue(0, 2, 'Jasmin');
+      await indexEditor.setCellValue(0, 3, 'Jasmin Upperwood');
 
-      await indexEditor.setCellValue(1, 1, 'Philip');
-      await indexEditor.setCellValue(1, 2, 'Philip Tompsoon');
+      await indexEditor.setCellValue(1, 2, 'Philip');
+      await indexEditor.setCellValue(1, 3, 'Philip Tompsoon');
 
       // Add a new row with some values and delete it
-      await indexEditor.addRow();
-      await indexEditor.setCellValue(0, 1, 'New Name');
-      await indexEditor.setCellValue(0, 2, 'New Name Surname');
+      await indexEditor.addRow(0);
+      await indexEditor.setCellValue(1, 2, 'New Name');
+      await indexEditor.setCellValue(1, 3, 'New Name Surname');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
-      await indexEditor.deleteRow(0);
+      await indexEditor.deleteRow(1);
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Add a new row with some values
-      await indexEditor.addRow();
-      await indexEditor.setCellValue(0, 1, 'Pedro');
-      await indexEditor.setCellValue(0, 2, 'Pedro Fernandez');
+      await indexEditor.addRow(0);
+      await indexEditor.setCellValue(1, 2, 'Pedro');
+      await indexEditor.setCellValue(1, 3, 'Pedro Fernandez');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
       // Add a new column
-      await indexEditor.addColumn();
-      await indexEditor.setColumnName('age', 0); // it's cero because there is only one editable column
-      await indexEditor.setCellValue(0, 7, '30');
-      await indexEditor.setCellValue(1, 7, '40');
-      await indexEditor.setCellValue(2, 7, '25');
+      await indexEditor.addColumn('age', 'integer');
+      await indexEditor.setCellValue(0, 8, '30');
+      await indexEditor.setCellValue(1, 8, '40');
+      await indexEditor.setCellValue(2, 8, '25');
 
       // Try to exit without saving changes
       await indexEditor.closeIndexEditor();
@@ -319,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             customer_id: '27',
             customer_last_name: 'Underwood',
             email: 'elyssa@underwood-family.zzz',
-            age: 40,
+            age: 30,
           },
           {
             customer_first_name: 'Philip',
@@ -333,27 +351,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             customer_first_name: 'Pedro',
             customer_full_name: 'Pedro Fernandez',
-            age: 30,
+            age: 40,
           },
         ]);
+        await indexEditor.verifyIndexMappings(INDEX_NAME_EDITION, {
+          age: { type: 'integer' },
+          customer_first_name: { type: 'text' },
+          customer_full_name: { type: 'text' },
+          customer_gender: { type: 'text' },
+          customer_id: { type: 'text' },
+          customer_last_name: { type: 'text' },
+          email: { type: 'text' },
+        });
       });
     });
 
-    it('allows to save an edition without closing the flyout', async () => {
+    it('allows to save an edition without closing the flyout', async function () {
       // Type lookup join query with index name inside it
-      await monacoEditor.setCodeEditorValue('');
-      await monacoEditor.typeCodeEditorValue(
-        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_MANUAL}`,
-        'ESQLEditor'
-      );
+      await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_MANUAL}`);
 
       // Click Create lookup index suggestion
       await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_MANUAL}"`);
       await testSubjects.isDisplayed('lookupIndexFlyout');
 
       // Manually set content
-      await indexEditor.setColumnName(`my_column`, 0);
-      await indexEditor.setCellValue(0, 1, `value`);
+      await indexEditor.setColumn(`my_column`, 'text', 0);
+      await indexEditor.setCellValue(0, 2, `value`);
 
       // Save changes
       await indexEditor.saveChanges();
@@ -367,14 +390,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
-  });
 
-  async function cleanLookupJoinIndexes() {
-    for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
-      const indexExists = await es.indices.exists({ index: name });
-      if (indexExists) {
-        await es.indices.delete({ index: name });
+    async function cleanLookupJoinIndexes() {
+      for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
+        const indexExists = await es.indices.exists({ index: name });
+        if (indexExists) {
+          await es.indices.delete({ index: name });
+        }
       }
     }
-  }
+  });
 }

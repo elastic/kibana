@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
@@ -51,27 +51,46 @@ jest.mock('../../../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
-jest.mock('../../../../utils/kibana_react', () => ({
-  useKibana: () => ({
-    services: {
-      ...mockCoreMock.createStart(),
-      charts: mockedChartStartContract,
-      aiops: {
-        EmbeddableChangePointChart: jest.fn(),
-      },
-      data: {
-        search: jest.fn(),
-      },
-      share: {
-        url: {
-          locators: {
-            get: jest
-              .fn()
-              .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('/view-in-app-url') }),
-          },
-        },
+jest.mock('./log_rate_analysis', () => ({
+  LogRateAnalysis: jest.fn(() => <div data-test-subj="LogRateAnalysis" />),
+}));
+
+const mockServices = {
+  ...coreMock.createStart(),
+  charts: mockedChartStartContract,
+  aiops: {
+    EmbeddableChangePointChart: jest.fn(),
+  },
+  data: {
+    search: {
+      searchSource: {
+        create: jest.fn().mockResolvedValue({
+          getField: jest.fn().mockReturnValue({ id: 'test-index' }),
+        }),
       },
     },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest
+          .fn()
+          .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('/view-in-app-url') }),
+      },
+    },
+  },
+  application: {
+    capabilities: {
+      aiops: {
+        enabled: false,
+      },
+    },
+  },
+};
+
+jest.mock('../../../../utils/kibana_react', () => ({
+  useKibana: () => ({
+    services: mockServices,
   }),
 }));
 
@@ -145,5 +164,55 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('chartTitle-5').textContent).toBe(
       'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
     );
+  });
+
+  it('should not render LogRateAnalysis when aiops is disabled', () => {
+    const result = renderComponent();
+    expect(result.queryByTestId('LogRateAnalysis')).not.toBeInTheDocument();
+  });
+
+  it('should not render LogRateAnalysis when aiops is disabled and has evaluation values', () => {
+    const result = renderComponent({}, {
+      'kibana.alert.evaluation.values': [2500, 5],
+    } as Object);
+    expect(result.queryByTestId('LogRateAnalysis')).not.toBeInTheDocument();
+  });
+
+  it('should render LogRateAnalysis when aiops is enabled and has evaluation values', () => {
+    mockServices.application.capabilities.aiops.enabled = true;
+    const result = renderComponent({}, {
+      'kibana.alert.evaluation.values': [2500, 5],
+    } as Object);
+    expect(result.getByTestId('LogRateAnalysis')).toBeTruthy();
+  });
+
+  it('should not render LogRateAnalysis when hasEvaluationValues is false', () => {
+    mockServices.application.capabilities.aiops.enabled = true;
+    const result = renderComponent({}, {
+      'kibana.alert.evaluation.values': [null, null],
+    } as Object);
+    expect(result.queryByTestId('LogRateAnalysis')).not.toBeInTheDocument();
+  });
+
+  it('should render LogRateAnalysis when hasEvaluationValues has some null but also some values', () => {
+    mockServices.application.capabilities.aiops.enabled = true;
+    const result = renderComponent({}, {
+      'kibana.alert.evaluation.values': [null, 5],
+    } as Object);
+    expect(result.getByTestId('LogRateAnalysis')).toBeTruthy();
+  });
+
+  it('should render LogRateAnalysis even when criteria array is empty if conditions are met', () => {
+    mockServices.application.capabilities.aiops.enabled = true;
+    const result = renderComponent({}, {
+      [ALERT_RULE_PARAMETERS]: {
+        ...buildCustomThresholdRule().params,
+        criteria: [],
+      } as Object,
+      'kibana.alert.evaluation.values': [2500, 5],
+    } as Object);
+    // Even with empty criteria, it renders the container and LogRateAnalysis if aiops is enabled
+    expect(result.queryByTestId('thresholdAlertOverviewSection')).toBeInTheDocument();
+    expect(result.queryByTestId('LogRateAnalysis')).toBeInTheDocument();
   });
 });

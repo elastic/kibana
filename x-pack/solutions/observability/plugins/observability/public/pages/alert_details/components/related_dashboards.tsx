@@ -19,7 +19,7 @@ interface RelatedDashboardsProps {
   linkedDashboards?: LinkedDashboard[];
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }
 
 export function RelatedDashboards({
@@ -59,7 +59,7 @@ export function RelatedDashboards({
   );
 
   return (
-    <div>
+    <div data-test-subj="alertRelatedDashboards">
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.linkedDashboards', {
           defaultMessage: 'Linked dashboards',

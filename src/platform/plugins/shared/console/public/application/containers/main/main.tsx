@@ -361,6 +361,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               loading={!done}
               inputEditorValue={inputEditorValue}
               setInputEditorValue={setInputEditorValue}
+              enableSuggestWidgetRepositioning={!isEmbeddable}
             />
           )}
           {currentTab === HISTORY_TAB_ID && <History />}

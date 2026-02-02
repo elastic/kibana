@@ -7,10 +7,8 @@
 
 import type * as http from 'http';
 import expect from '@kbn/expect';
-import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'cspSecurity',
@@ -31,7 +29,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
+      mockApiServer = mockAgentlessApiService.listen(8089);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
     });

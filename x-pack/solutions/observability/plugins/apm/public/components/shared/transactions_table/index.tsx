@@ -217,6 +217,7 @@ export function TransactionsTable({
       {showMaxTransactionGroupsExceededWarning && mainStatistics.maxCountExceeded && (
         <EuiFlexItem>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.apm.transactionsCallout.cardinalityWarning.title', {
               defaultMessage:
                 'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',

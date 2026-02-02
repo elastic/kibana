@@ -69,10 +69,36 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 `vis_type_vega.enableExternalUrls`
 :   Set this value to `true` to allow Vega to use any URL to access external data sources and images. When `false`, Vega can only get data from {{es}}. **Default: `false`**
 
+### UI Settings [ec_ui_settings]
+
+#### Version 9.4+ [ec_ui_version_9_4]
+```{applies_to}
+stack: ga 9.4+
+```
+
+`uiSettings.globalOverrides.hideAnnouncements`
+:   Set to `true` to stop showing messages and tours that highlight new features. **Default: `false`**
+
+`uiSettings.globalOverrides.hideFeedback`
+:   Set to `true` to stop showing elements requesting user feedback. **Default: `false`**
 
 ## X-Pack configuration settings [ec-xpack-config]
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
+
+### Version 9.3+ [ec_version_9_3]
+```{applies_to}
+stack: ga 9.3
+```
+
+`xpack.actions.email.maximum_body_length`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
+`xpack.fleet.integrationRollbackTTL`
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
+
+`xpack.reporting.csv.maxRows`
+:    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
 
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
@@ -113,6 +139,15 @@ stack: ga 9.1
 
 `xpack.fleet.autoUpgrades.retryDelays`:
 :   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 8.18+ [ec_version_8_18]
 
@@ -410,6 +445,9 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 
 `csp.img_src`
 :   Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
+
+`csp.object_src` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
 
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).

@@ -15,13 +15,27 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
+} from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  GRAPH_ACTOR_ENTITY_FIELDS,
+  GRAPH_TARGET_ENTITY_FIELDS,
+} from '@kbn/cloud-security-posture-common/constants';
+import {
+  generateFieldHintCases,
+  formatJsonProperty,
+  buildLookupJoinEsql,
+  buildEnrichPolicyEsql,
+} from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
+  isLookupIndexAvailable: boolean;
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
@@ -60,8 +74,12 @@ export const fetchGraph = async ({
     }
   });
 
-  const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
-
+  // Check if the entities lookup index exists and is in lookup mode (preferred)
+  // If not, fall back to checking if the enrich policy exists (deprecated)
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const isEnrichPolicyExists = isLookupIndexAvailable
+    ? false
+    : await checkEnrichPolicyExists(esClient, logger, spaceId);
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
@@ -71,6 +89,7 @@ export const fetchGraph = async ({
     indexPatterns,
     originEventIds,
     originAlertIds,
+    isLookupIndexAvailable,
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
@@ -116,8 +135,9 @@ const buildDslFilter = (
         ? []
         : [
             {
-              exists: {
-                field: 'target.entity.id',
+              bool: {
+                should: GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } })),
+                minimum_should_match: 1,
               },
             },
           ]),
@@ -153,6 +173,11 @@ const checkEnrichPolicyExists = async (
       name: getEnrichPolicyId(spaceId),
     });
 
+    logger.debug(
+      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
+        policies?.length
+      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
+    );
     return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
   } catch (error) {
     logger.error(`Error fetching enrich policy ${error.message}`);
@@ -161,10 +186,99 @@ const checkEnrichPolicyExists = async (
   }
 };
 
+/**
+ * Checks if the entities latest index exists and is configured in lookup mode.
+ * This is the preferred method for entity enrichment (replaces deprecated ENRICH policy).
+ */
+const checkIfEntitiesIndexLookupMode = async (
+  esClient: IScopedClusterClient,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> => {
+  const indexName = getEntitiesLatestIndexName(spaceId);
+  try {
+    const response = await esClient.asInternalUser.indices.getSettings({
+      index: indexName,
+    });
+    const indexSettings = response[indexName];
+    if (!indexSettings) {
+      logger.debug(`Entities index ${indexName} not found`);
+      return false;
+    }
+
+    // Check if index is in lookup mode
+    const mode = indexSettings.settings?.index?.mode;
+    const isLookupMode = mode === 'lookup';
+
+    if (!isLookupMode) {
+      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
+    }
+
+    return isLookupMode;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist`);
+      return false;
+    }
+    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * Generates ESQL statements for building entity fields with enrichment data.
+ * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ * Uses REPLACE to fix "{," pattern that occurs when first property is null.
+ */
+const buildEnrichedEntityFieldsEsql = (): string => {
+  return `// Construct actor and target entities data
+// Build entity field conditionally - only include fields that have values
+// Put required fields first (no comma prefix), optional fields use comma prefix
+| EVAL actorEntityField = CASE(
+    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+      ${formatJsonProperty('name', 'actorEntityName')},
+      ${formatJsonProperty('type', 'actorEntityType')},
+      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
+      CASE(
+        actorHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
+        ""
+      ),
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}")
+  )
+| EVAL targetEntityField = CASE(
+    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+      ${formatJsonProperty('name', 'targetEntityName')},
+      ${formatJsonProperty('type', 'targetEntityType')},
+      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
+      CASE(
+        targetHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
+        ""
+      ),
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}")
+  )`;
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
+  isLookupIndexAvailable,
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
@@ -172,72 +286,115 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
+  const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
+
+  // Generate target entity ID collection logic
+  // All fields use the same pattern: only append if not null
+  // This ensures we filter out null values and only collect actual target entity IDs
+  const targetEntityIdEvals = [
+    // Initialize targetEntityId as null
+    '| EVAL targetEntityId = TO_STRING(null)',
+    // For each target field, append if not null
+    ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => {
+      return `| EVAL targetEntityId = CASE(
+    ${field} IS NULL,
+    targetEntityId,
+    CASE(
+      targetEntityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(targetEntityId, ${field}))
+    )
+  )`;
+    }),
+  ].join('\n');
+
+  // Generate actor and target field hint CASE statements
+  const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
+  const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
+
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| EVAL actorEntityId = COALESCE(
+    ${actorFieldsCoalesce}
+  )
+| WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
+| EVAL actorEntityId = COALESCE(
+    ${actorFieldsCoalesce}
+  )
+${targetEntityIdEvals}
+| MV_EXPAND actorEntityId
+| MV_EXPAND targetEntityId
+| EVAL actorEntityFieldHint = CASE(
+${actorFieldHintCases},
+    ""
+  )
+| EVAL targetEntityFieldHint = CASE(
+${targetFieldHintCases},
+    ""
+)
 ${
-  isEnrichPolicyExists
+  isLookupIndexAvailable
     ? `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+${buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId))}
 
-// Construct actor and target entities data
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
-      CASE (
-        actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-    "}",
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
-      CASE (
-        targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-    "}",
-  "}")
+${buildEnrichedEntityFieldsEsql()}
+`
+    : isEnrichPolicyExists
+    ? `
+${buildEnrichPolicyEsql(enrichPolicyName)}
+
+${buildEnrichedEntityFieldsEsql()}
 `
     : `
-// Fallback to null string with non-enriched actor
+| EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+  "}")
+| EVAL targetEntityField = CONCAT(",\\"entity\\":", "{",
+    "\\"availableInEntityStore\\":false",
+    ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+  "}")
+// Fallback to null string with non-enriched entity metadata
+| EVAL actorEntityName = TO_STRING(null)
 | EVAL actorEntityType = TO_STRING(null)
 | EVAL actorEntitySubType = TO_STRING(null)
 | EVAL actorHostIp = TO_STRING(null)
-| EVAL actorDocData = TO_STRING(null)
-
-// Fallback to null string with non-enriched target
+| EVAL targetEntityName = TO_STRING(null)
 | EVAL targetEntityType = TO_STRING(null)
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
-| EVAL targetDocData = TO_STRING(null)
 `
 }
+// Create actor and target data with entity data
+
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actorEntityId, "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    actorEntityField,
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    targetEntityField,
+  "}")
+
 // Map host and source values to enriched contextual data
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
+      ? `COALESCE(event.id in (${originEventIds
+          .map((_id, idx) => `?og_id${idx}`)
+          .join(', ')}), false)`
       : 'false'
   }
-| EVAL isOriginAlert = isOrigin AND ${
+| EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
+      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+          .map((_id, idx) => `?og_alrt_id${idx}`)
+          .join(', ')}), false)`
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
@@ -259,64 +416,45 @@ ${
         : ''
     }
   "}")
-
-// Construct actor and target entity groups
-| EVAL actorEntityGroup = CASE(
-    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
-    CONCAT(actorEntityType, ":", actorEntitySubType),
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actor.entity.id
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
-    CONCAT(targetEntityType, ":", targetEntitySubType),
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    target.entity.id
-  )
-
-| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
-| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    ""
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    ""
-  )
 | STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
   isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
-  actorEntityGroup = VALUES(actorEntityGroup),
-  actorIds = VALUES(actor.entity.id),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
-  actorEntityType = VALUES(actorEntityType),
-  actorLabel = VALUES(actorLabel),
-  actorsDocData = VALUES(actorDocData),
+  actorNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    MV_COUNT(VALUES(actorEntityId)) == 1, TO_STRING(VALUES(actorEntityId)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(actorEntityId)), ","))
+  ),
+  actorIdsCount = COUNT_DISTINCT(actorEntityId),
+  actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
+  actorsDocData = VALUES(actorDocData),
   // target attributes
-  targetEntityGroup = VALUES(targetEntityGroup),
-  targetIds = VALUES(target.entity.id),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
-  targetEntityType = VALUES(targetEntityType),
-  targetLabel = VALUES(targetLabel),
+  targetNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    COUNT_DISTINCT(targetEntityId) == 0, null,
+    CASE(
+      MV_COUNT(VALUES(targetEntityId)) == 1, TO_STRING(VALUES(targetEntityId)),
+      MD5(MV_CONCAT(MV_SORT(VALUES(targetEntityId)), ","))
+    )
+  ),
+  targetIdsCount = COUNT_DISTINCT(targetEntityId),
+  targetEntityName = VALUES(targetEntityName),
+  targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
-      actorEntityGroup,
-      targetEntityGroup,
+      actorEntityType,
+      actorEntitySubType,
+      targetEntityType,
+      targetEntitySubType,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
+| SORT action DESC, isOrigin`;
 
   return query;
 };

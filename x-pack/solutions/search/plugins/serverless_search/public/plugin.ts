@@ -10,7 +10,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
-import { of } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
@@ -19,7 +21,7 @@ import type {
   ServerlessSearchPluginStartDependencies,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { navigationTree } from './navigation_tree';
+import { createNavigationTree } from './navigation_tree';
 import { SEARCH_HOMEPAGE_PATH } from './application/constants';
 import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
@@ -131,7 +133,14 @@ export class ServerlessSearchPlugin
     serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    const navigationTree$ = of(navigationTree(core.application));
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
+      map(([application, chatExperience]) => {
+        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+        return createNavigationTree({ ...application, showAiAssistant });
+      })
+    );
     serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(

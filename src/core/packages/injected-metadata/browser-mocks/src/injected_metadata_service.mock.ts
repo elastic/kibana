@@ -43,7 +43,7 @@ const createSetupContractMock = () => {
     } as any),
     getTheme: jest.fn().mockReturnValue({
       darkMode: false,
-      name: 'amsterdam',
+      name: 'borealis',
       version: 'v8',
       stylesheetPaths: {
         default: ['light-1.css'],

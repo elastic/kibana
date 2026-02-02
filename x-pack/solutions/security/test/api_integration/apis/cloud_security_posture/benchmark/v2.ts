@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('GET /internal/cloud_security_posture/benchmark', () => {
+  // TODO: see https://github.com/elastic/kibana/pull/243499
+  describe.skip('GET /internal/cloud_security_posture/benchmark', () => {
     let agentPolicyId: string;
     let agentPolicyId2: string;
     let agentPolicyId3: string;

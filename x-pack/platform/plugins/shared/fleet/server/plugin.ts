@@ -25,7 +25,7 @@ import type {
   SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -51,7 +51,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -148,13 +148,24 @@ import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/mana
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
-import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
+import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
+import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 import { registerSetupTasks } from './tasks/setup';
+import {
+  registerAgentlessDeploymentSyncTask,
+  scheduleAgentlessDeploymentSyncTask,
+} from './tasks/agentless/deployment_sync_task';
+import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import {
+  type AgentlessPoliciesService,
+  AgentlessPoliciesServiceImpl,
+} from './services/agentless/agentless_policies';
+import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -211,6 +222,7 @@ export interface FleetAppContext {
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   autoInstallContentPackagesTask: AutoInstallContentPackagesTask;
   agentStatusChangeTask?: AgentStatusChangeTask;
+  fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -258,6 +270,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  agentlessPoliciesService: AgentlessPoliciesService;
   runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   cloudConnectorService: CloudConnectorServiceInterface;
@@ -325,6 +338,7 @@ export class FleetPlugin
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
+  private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -656,6 +670,9 @@ export class FleetPlugin
     registerBumpAgentPoliciesTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
+    registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
+    registerReindexIntegrationKnowledgeTask(deps.taskManager);
+    registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -709,6 +726,16 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.agentStatusChange?.taskInterval,
+      },
+    });
+    this.fleetPolicyRevisionsCleanupTask = new FleetPolicyRevisionsCleanupTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        maxRevisions: config.fleetPolicyRevisionsCleanup?.maxRevisions,
+        interval: config.fleetPolicyRevisionsCleanup?.interval,
+        maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
@@ -770,6 +797,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
@@ -793,6 +821,13 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    scheduleAgentlessDeploymentSyncTask(
+      plugins.taskManager,
+      this.configInitialValue as FleetConfigType
+    ).catch(() => {});
+    this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -832,7 +867,9 @@ export class FleetPlugin
         await backOff(
           async () => {
             await setupFleet(
-              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.savedObjects.getUnsafeInternalClient({
+                excludedExtensions: [SPACES_EXTENSION_ID],
+              }),
               core.elasticsearch.client.asInternalUser,
               { useLock: true }
             );
@@ -888,7 +925,9 @@ export class FleetPlugin
       }
     })();
 
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalSoClient = core.savedObjects.getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -907,6 +946,12 @@ export class FleetPlugin
       ),
       agentPolicyService,
       packagePolicyService,
+      agentlessPoliciesService: new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        internalSoClient,
+        core.elasticsearch.client.asInternalUser,
+        logger
+      ),
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
       },

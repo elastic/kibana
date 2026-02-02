@@ -8,11 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
-import { EntityStoreCapability } from '@kbn/entities-schema';
+import { EntityStoreCapability, identityFieldsSchema } from '@kbn/entities-schema';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
 } from '@elastic/elasticsearch/lib/api/types';
+import { generatePivotGroup } from '@kbn/entityManager-plugin/server/lib/entities/transform/generate_latest_transform';
+import get from 'lodash/get';
 import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -155,7 +157,12 @@ export class EntityStoreCrudClient {
       id: uuidv4(),
       index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
+      refresh: 'wait_for',
     });
+
+    if (updateByQueryResp.updated === 0) {
+      await this.createLatestIndexEntity(type, normalizedDocToECS);
+    }
   }
 
   public async deleteEntity(type: APIEntityType, body: DeleteRequestBody) {
@@ -208,6 +215,41 @@ export class EntityStoreCrudClient {
     if (!enabled) {
       throw new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API);
     }
+  }
+
+  private async createLatestIndexEntity(
+    type: APIEntityType,
+    normalizedDocToECS: CustomECSDocument
+  ) {
+    const { identityField } = engineDescriptionRegistry[type];
+    const previewTransform = await this.esClient.transform.previewTransform<{
+      _source: { entity: { identity: Record<EntityType, string> } };
+      _id: string;
+    }>(
+      getEntityPreviewTransformConfig(
+        type as EntityType,
+        this.namespace,
+        identityField,
+        normalizedDocToECS.entity.id
+      ),
+      { querystring: { as_index_request: true } }
+    );
+
+    const previewDoc = previewTransform.preview.find(
+      (v) => get(v._source.entity.identity, identityField) === normalizedDocToECS.entity.id
+    );
+    if (!previewDoc) {
+      throw new EntityNotFoundError(type, normalizedDocToECS.entity.id);
+    }
+
+    await this.esClient.create({
+      id: previewDoc._id,
+      index: getEntitiesIndexName(type, this.namespace),
+      document: buildDocumentToUpdate(type, normalizedDocToECS),
+      refresh: 'true',
+    });
+
+    this.logger.info(`Creating entity '${normalizedDocToECS.entity.id}' (type ${type})`);
   }
 }
 
@@ -337,3 +379,22 @@ function getFieldDescriptions(
 
   return descriptions;
 }
+
+// Generates the minimal preview transform config required to extract an entity's '_id' using 'as_index_request'
+const getEntityPreviewTransformConfig = (
+  type: EntityType,
+  namespace: string,
+  identityField: string,
+  id: string
+) => ({
+  source: {
+    index: getEntityUpdatesDataStreamName(type, namespace),
+    query: { bool: { must: { term: { [identityField]: id } } } },
+  },
+  pivot: {
+    group_by: generatePivotGroup([identityFieldsSchema.parse(identityField)]), // used for '_id' generation
+    aggs: {
+      count: { value_count: { field: identityField } }, // placeholder only. 'aggs' cannot be empty
+    },
+  },
+});

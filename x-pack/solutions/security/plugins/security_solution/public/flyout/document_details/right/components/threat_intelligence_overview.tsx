@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
@@ -22,16 +24,40 @@ import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
-const TITLE = (
+const HEADER_TITLE = (
   <FormattedMessage
     id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTitle"
     defaultMessage="Threat intelligence"
   />
 );
-const TOOLTIP = (
+const HEADER_TOOLTIP = (
   <FormattedMessage
     id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTooltip"
     defaultMessage="Show all threat intelligence"
+  />
+);
+const DEFAULT_TIME_RANGE_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.badgeLabel"
+    defaultMessage="Time range applied"
+  />
+);
+const CUSTOM_TIME_RANGE_LABEL = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.badgeLabel"
+    defaultMessage="Custom time range applied"
+  />
+);
+const DEFAULT_TIME_RANGE_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeAppliedTooltipLabel"
+    defaultMessage="Threat intelligence helps you to find current and emerging threats in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
+  />
+);
+const CUSTOM_TIME_RANGE_TOOLTIP = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeAppliedTooltipLabel"
+    defaultMessage="Threat intelligence helps you to find current and emerging threats in your environment during the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
   />
 );
 
@@ -42,6 +68,9 @@ const TOOLTIP = (
  */
 export const ThreatIntelligenceOverview: FC = () => {
   const { dataFormattedForFieldBrowser, isPreviewMode } = useDocumentDetailsContext();
+
+  const { storage } = useKibana().services;
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE);
 
   const goToThreatIntelligenceTab = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -55,7 +84,7 @@ export const ThreatIntelligenceOverview: FC = () => {
   const link = useMemo(
     () => ({
       callback: goToThreatIntelligenceTab,
-      tooltip: TOOLTIP,
+      tooltip: HEADER_TOOLTIP,
     }),
     [goToThreatIntelligenceTab]
   );
@@ -85,9 +114,20 @@ export const ThreatIntelligenceOverview: FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: TITLE,
+        title: HEADER_TITLE,
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        headerContent: (
+          <EuiToolTip
+            content={
+              timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
+            }
+          >
+            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
+              {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
+            </EuiBadge>
+          </EuiToolTip>
+        ),
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
       content={{ loading }}

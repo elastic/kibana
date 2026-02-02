@@ -73,7 +73,7 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="timeline-modal-open-timeline
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
-export const PIN_EVENT = '[data-test-subj="pin"]';
+export const PIN_EVENT = '[data-test-subj="timeline-pin-event-button"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 

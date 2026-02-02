@@ -11,6 +11,7 @@ import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import type {
   BaseStep,
+  DataSetStep,
   ElasticsearchStep,
   ForEachStep,
   HttpStep,
@@ -28,6 +29,7 @@ import type {
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
+  DataSetGraphNode,
   ElasticsearchGraphNode,
   EnterConditionBranchNode,
   EnterContinueNode,
@@ -136,6 +138,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
+  if ((currentStep as DataSetStep).type === 'data.set') {
+    return visitDataSetStep(currentStep as DataSetStep, context);
+  }
+
   if ((currentStep as HttpStep).type === 'http') {
     return visitHttpStep(currentStep as HttpStep, context);
   }
@@ -167,6 +173,26 @@ export function visitWaitStep(
     },
   };
   graph.setNode(waitNode.id, waitNode);
+
+  return graph;
+}
+
+export function visitDataSetStep(
+  currentStep: DataSetStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const dataSetNode: DataSetGraphNode = {
+    id: getStepId(currentStep, context),
+    type: 'data.set',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(dataSetNode.id, dataSetNode);
 
   return graph;
 }
@@ -378,8 +404,13 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -470,7 +501,11 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -480,6 +515,9 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',

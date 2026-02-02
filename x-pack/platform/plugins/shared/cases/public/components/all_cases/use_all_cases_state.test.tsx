@@ -11,7 +11,12 @@ import { CaseStatuses } from '@kbn/cases-components';
 
 import { TestProviders } from '../../common/mock';
 import { useAllCasesState } from './use_all_cases_state';
-import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
+import {
+  DEFAULT_CASES_TABLE_STATE,
+  DEFAULT_FROM_DATE,
+  DEFAULT_TABLE_LIMIT,
+  DEFAULT_TO_DATE,
+} from '../../containers/constants';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
 import { CaseSeverity } from '../../../common';
@@ -181,7 +186,7 @@ describe('useAllCasesQueryParams', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       search:
-        'cases=(page:1,perPage:10,severity:!(medium),sortField:createdAt,sortOrder:desc,status:!(open))&foo=bar&foo=baz&test=my-test',
+        'cases=(from:now-30d,page:1,perPage:10,severity:!(medium),sortField:createdAt,sortOrder:desc,status:!(open),to:now)&foo=bar&foo=baz&test=my-test',
     });
   });
 
@@ -200,6 +205,8 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        from: DEFAULT_FROM_DATE,
+        to: DEFAULT_TO_DATE,
       },
       queryParams: {
         page: DEFAULT_CASES_TABLE_STATE.queryParams.page + 10,
@@ -310,7 +317,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockReplace).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
+      search: 'cases=(from:now-30d,page:1,perPage:30,sortField:createdAt,sortOrder:desc,to:now)',
     });
   });
 
@@ -439,7 +446,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
+      search: 'cases=(from:now-30d,page:1,perPage:30,sortField:createdAt,sortOrder:desc,to:now)',
     });
   });
 
@@ -496,7 +503,8 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'cases=(page:1,perPage:10,sortField:createdAt,sortOrder:desc,status:!(closed))',
+      search:
+        'cases=(from:now-30d,page:1,perPage:10,sortField:createdAt,sortOrder:desc,status:!(closed),to:now)',
     });
   });
 

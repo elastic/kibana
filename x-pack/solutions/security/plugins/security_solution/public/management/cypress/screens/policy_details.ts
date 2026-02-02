@@ -21,17 +21,12 @@ import { expectAndCloseSuccessToast } from '../tasks/toasts';
 import { getNoPrivilegesPage } from './common';
 
 /**
- * Loads the Policy details page - either for the `policyId` provided on input, or if undefined,
- * then the first policy displayed on the Policy List will be opened
+ * Loads the Policy details page for a policy defined by `policyId`.
  * @param policyId
  */
-export const visitPolicyDetailsPage = (policyId?: string) => {
-  if (policyId) {
-    loadPage(`${APP_POLICIES_PATH}/${policyId}`);
-  } else {
-    cy.visit(APP_POLICIES_PATH);
-    cy.getByTestSubj('policyNameCellLink').eq(0).click({ force: true });
-  }
+export const visitPolicyDetailsPage = (policyId: string) => {
+  loadPage(`${APP_POLICIES_PATH}/${policyId}`);
+
   cy.getByTestSubj('policyDetailsPage').should('exist');
   cy.get('#settings').should('exist'); // waiting for Policy Settings tab
 };

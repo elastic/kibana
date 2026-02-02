@@ -81,6 +81,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     if (!uiCapabilities.spaces?.manage) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"

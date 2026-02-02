@@ -434,6 +434,9 @@ export class BaseValidator {
       () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
     );
 
-    throw new EndpointExceptionsValidationError(`Item not found in space [${activeSpaceId}]`, 404);
+    throw new EndpointArtifactExceptionValidationError(
+      `Item not found in space [${activeSpaceId}]`,
+      404
+    );
   }
 }

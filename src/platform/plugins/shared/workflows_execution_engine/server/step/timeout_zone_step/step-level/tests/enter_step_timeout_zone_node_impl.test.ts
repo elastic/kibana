@@ -124,7 +124,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       } as any as StepExecutionRuntime;
     });
 
-    it('should not throw error when within timeout limit', async () => {
+    it('should not throw error when within timeout limit', () => {
       const startTime = new Date().getTime() - 10000; // 10 seconds ago
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -133,11 +133,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
+      expect(() => impl.monitor(monitoredContextMock)).not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
-    it('should throw error and abort when timeout exceeded', async () => {
+    it('should throw error and abort when timeout exceeded', () => {
       const startTime = new Date().getTime() - 40000; // 40 seconds ago (exceeds 30s timeout)
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -147,7 +147,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       };
 
       try {
-        await impl.monitor(monitoredContextMock);
+        impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
         expect(error.message).toMatch(
@@ -167,14 +167,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      try {
-        await impl.monitor(monitoredContextMock);
-        fail('Expected monitor to throw error');
-      } catch (error: any) {
-        expect(error.message).toMatch(
-          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
-        );
-      }
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+      );
     });
 
     it('should handle different timeout formats', async () => {
@@ -188,11 +183,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
+      expect(() => impl.monitor(monitoredContextMock)).not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
-    it('should use step execution from step execution runtime directly', async () => {
+    it('should use step execution from step execution runtime directly', () => {
       const startTime = new Date().getTime() - 10000;
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -201,18 +196,18 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await impl.monitor(monitoredContextMock);
+      impl.monitor(monitoredContextMock);
 
       // The implementation uses stepExecutionRuntime.stepExecution directly
       expect(stepExecutionRuntimeMock.stepExecution).toBeDefined();
     });
 
-    it('should handle missing step execution', async () => {
+    it('should handle missing step execution', () => {
       // Remove stepExecution to simulate null/undefined
       (stepExecutionRuntimeMock as any).stepExecution = null;
 
       try {
-        await impl.monitor(monitoredContextMock);
+        impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
         expect(error.message).toEqual("Cannot read properties of null (reading 'startedAt')");
@@ -230,14 +225,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       };
 
       // Should exceed the 30s timeout and report 50 (seconds but labeled as "ms" due to bug)
-      try {
-        await impl.monitor(monitoredContextMock);
-        fail('Expected monitor to throw error');
-      } catch (error: any) {
-        expect(error.message).toBe(
-          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
-        );
-      }
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+      );
     });
   });
 });

@@ -34,6 +34,10 @@ export const bulkUpsertBatch =
             { create: {} },
             {
               '@timestamp': timestamp,
+              event: {
+                ingested: timestamp,
+                '@timestamp': timestamp,
+              },
               user: {
                 name: u.username,
                 is_privileged: true,
@@ -87,7 +91,11 @@ export const bulkUpsertBatch =
 
                 if (userModified) {
                   ctx._source['@timestamp'] = params.timestamp;
+                  if (ctx._source.event == null) {
+                    ctx._source.event = new HashMap();
+                  }
                   ctx._source.event.ingested = params.timestamp;
+                  ctx._source.event.put('@timestamp', params.timestamp);
                 }
               `,
               lang: 'painless',

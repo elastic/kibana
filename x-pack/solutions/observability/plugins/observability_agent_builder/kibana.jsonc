@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-agent-builder-plugin",
+  "owner": ["@elastic/obs-ai-team"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityAgentBuilder",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "agentBuilder",
+      "apmDataAccess",
+      "logsDataAccess",
+      "inference",
+      "security",
+      "ruleRegistry",
+      "dataViews",
+      "metricsDataAccess",
+      "inference",
+      "discoverShared",
+      "licensing"
+    ],
+    "optionalPlugins": ["ml", "spaces"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "extraPublicDirs": []
+  }
+}

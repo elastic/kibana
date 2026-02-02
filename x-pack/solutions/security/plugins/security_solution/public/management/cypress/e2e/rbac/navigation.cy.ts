@@ -40,7 +40,7 @@ describe('Navigation RBAC', () => {
       name: 'Trusted devices',
       privilegePrefix: 'trusted_devices_',
       selector: Selectors.TRUSTED_DEVICES,
-      siemVersions: ['siemV3', 'siemV4'], // Only available starting siemV3
+      siemVersions: ['siemV3', 'siemV4', 'siemV5'], // Only available starting siemV3
     },
     {
       name: 'Event filters',

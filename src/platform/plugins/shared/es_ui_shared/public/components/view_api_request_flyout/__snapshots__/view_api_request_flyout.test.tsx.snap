@@ -43,7 +43,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
             class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -53,6 +53,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"

@@ -98,6 +98,7 @@ describe(
         .should('deep.equal', [
           'Endpoint ListAll',
           'Automatic TroubleshootingNone',
+          'SOC ManagementNone',
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
           'Trusted DevicesNone',

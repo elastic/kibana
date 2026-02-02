@@ -55,5 +55,6 @@ export type ResolvedLink = Link & {
 
 export interface DashboardItem {
   id: string;
-  attributes: Pick<DashboardState, 'title' | 'description' | 'timeRestore'>;
+  title: DashboardState['title'];
+  description?: DashboardState['description'];
 }

@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-llm-tasks",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared"
+}
+

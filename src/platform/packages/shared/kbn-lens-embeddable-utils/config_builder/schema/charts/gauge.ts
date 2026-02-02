@@ -9,29 +9,39 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, metricOperationDefinitionSchema } from '../metric_ops';
+import {
+  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnSchema,
+  metricOperationDefinitionSchema,
+} from '../metric_ops';
 import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
 const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
     schema.oneOf(
       [
-        schema.object({
-          type: schema.literal('bullet'),
-          direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
-            defaultValue: 'horizontal',
-          }),
-        }),
-        schema.object({
-          type: schema.oneOf([
-            schema.literal('circle'),
-            schema.literal('semiCircle'),
-            schema.literal('arc'),
-          ]),
-        }),
+        schema.object(
+          {
+            type: schema.literal('bullet'),
+            direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+              defaultValue: 'horizontal',
+            }),
+          },
+          { meta: { id: 'gaugeShapeBullet', description: 'Bullet gauge shape' } }
+        ),
+        schema.object(
+          {
+            type: schema.oneOf([
+              schema.literal('circle'),
+              schema.literal('semiCircle'),
+              schema.literal('arc'),
+            ]),
+          },
+          { meta: { id: 'gaugeShapeCircular', description: 'Circular gauge shape' } }
+        ),
       ],
       { defaultValue: { type: 'bullet', direction: 'horizontal' } }
     )
@@ -80,6 +90,12 @@ const gaugeStateMetricOptionsSchema = {
    */
   title: schema.maybe(schema.string({ meta: { description: 'Title' } })),
   /**
+   * Whether to hide the title
+   */
+  hide_title: schema.maybe(
+    schema.boolean({ meta: { description: 'Hide title' }, defaultValue: false })
+  ),
+  /**
    * Sub title
    */
   sub_title: schema.maybe(schema.string({ meta: { description: 'Sub title' } })),
@@ -97,42 +113,46 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
-export const gaugeStateSchemaNoESQL = schema.object({
-  type: schema.literal('gauge'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...gaugeStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: mergeAllMetricsWithChartDimensionSchema(
-    schema.object({
+export const gaugeStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('gauge'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...gaugeStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchema({
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerNoESQLOpsSchema,
-    })
-  ),
-});
+    }),
+  },
+  { meta: { id: 'gaugeNoESQL' } }
+);
 
-const gaugeStateSchemaESQL = schema.object({
-  type: schema.literal('gauge'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...gaugeStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: schema.allOf([
-    schema.object({
+export const gaugeStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('gauge'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...gaugeStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends({
       ...gaugeStateMetricOptionsSchema,
       ...gaugeStateMetricInnerESQLOpsSchema,
     }),
-    esqlColumnSchema,
-  ]),
-});
+  },
+  { meta: { id: 'gaugeESQL' } }
+);
 
-export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL]);
+export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+  meta: { id: 'gaugeChartSchema' },
+});
 
 export type GaugeState = TypeOf<typeof gaugeStateSchema>;
 export type GaugeStateNoESQL = TypeOf<typeof gaugeStateSchemaNoESQL>;

@@ -21,9 +21,9 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  SSLSettings,
 } from './types';
 
 export type {

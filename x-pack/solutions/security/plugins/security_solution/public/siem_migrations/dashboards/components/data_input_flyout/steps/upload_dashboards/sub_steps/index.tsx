@@ -11,12 +11,14 @@ import type { DashboardMigrationStats } from '../../../../../types';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
 import { SubSteps, useMigrationNameStep } from '../../../../../../common/components';
 import { useCopyExportQueryStep } from './copy_export_query';
-import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
+import type { OnMigrationCreated } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
 import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
 import { useCheckResourcesStep } from '../../common/check_resources';
+import type { MigrationSource, OnMissingResourcesFetched } from '../../../../../../common/types';
 interface DashboardsUploadSubStepsProps {
   migrationStats?: DashboardMigrationStats;
+  migrationSource: MigrationSource;
   onMissingResourcesFetched: OnMissingResourcesFetched;
   onMigrationCreated: OnMigrationCreated;
 }
@@ -32,6 +34,7 @@ type SubStep =
 
 export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubSteps({
   migrationStats,
+  migrationSource,
   onMissingResourcesFetched,
   onMigrationCreated,
 }: DashboardsUploadSubStepsProps) {
@@ -62,8 +65,8 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   // Copy query step
   const onCopied = useCallback(() => {
     setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
-    telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id });
-  }, [telemetry, migrationStats?.id]);
+    telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id, vendor: migrationSource });
+  }, [telemetry, migrationStats?.id, migrationSource]);
   const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(2, subStep), onCopied });
 
   // Upload dashboards step

@@ -30,6 +30,8 @@
           "() => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/router/mocks/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

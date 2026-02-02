@@ -15,12 +15,16 @@
  */
 
 import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import { EntityType } from '../common.gen';
 
 export type DeleteEntityEngineRequestQuery = z.infer<typeof DeleteEntityEngineRequestQuery>;
 export const DeleteEntityEngineRequestQuery = z.object({
+  /**
+   * Control flag to also delete the entity data.
+   */
+  delete_data: BooleanFromString.optional(),
   /**
    * Control flag to also delete the entity data.
    */
@@ -40,4 +44,22 @@ export type DeleteEntityEngineRequestParamsInput = z.input<typeof DeleteEntityEn
 export type DeleteEntityEngineResponse = z.infer<typeof DeleteEntityEngineResponse>;
 export const DeleteEntityEngineResponse = z.object({
   deleted: z.boolean().optional(),
+});
+export type DeleteEntityEnginesRequestQuery = z.infer<typeof DeleteEntityEnginesRequestQuery>;
+export const DeleteEntityEnginesRequestQuery = z.object({
+  /**
+   * The entity type of the engine ('user', 'host', 'service', 'generic').
+   */
+  entityTypes: ArrayFromString(EntityType).optional(),
+  /**
+   * Control flag to also delete the entity data.
+   */
+  delete_data: BooleanFromString.optional(),
+});
+export type DeleteEntityEnginesRequestQueryInput = z.input<typeof DeleteEntityEnginesRequestQuery>;
+
+export type DeleteEntityEnginesResponse = z.infer<typeof DeleteEntityEnginesResponse>;
+export const DeleteEntityEnginesResponse = z.object({
+  deleted: z.array(EntityType).optional(),
+  still_running: z.array(EntityType).optional(),
 });

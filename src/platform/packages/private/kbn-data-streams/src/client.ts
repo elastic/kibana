@@ -8,79 +8,38 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type api from '@elastic/elasticsearch/lib/api/types';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
+import type { ClientHelpers } from './types/client';
 import type {
-  IDataStreamClient,
-  BaseSearchRuntimeMappings,
-  DataStreamDefinition,
-  IDataStreamClientIndexRequest,
-  SearchRequestImproved,
-  ClientHelpers,
-} from './types';
+  ClientSearchRequest,
+  ClientIndexRequest,
+  ClientBulkRequest,
+  ClientGetRequest,
+} from './types/es_api';
+
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
 
-type AnyDataStream = DataStreamDefinition<any>;
-
-type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
-
-export interface DataStreamClientArgs<
-  S extends object,
-  SRM extends BaseSearchRuntimeMappings = {}
-> {
-  /**
-   * @remark For now just one
-   */
-  dataStreams: DataStreamDefinition<S, SRM>;
-  elasticsearchClient: ElasticsearchClient;
-  logger: Logger;
-
-  // TODO: support serialize/deserialize opts so that we can map from S => Deserialized values
-  //       For example: read a doc { date: '2023-10-01T00:00:00Z' } and deserialize it to { date: moment.Moment }
-  //                    write a doc { date: moment.Moment } and serialize it to { date: '2023-10-01T00:00:00Z' }
-}
-
-export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMappings>
-  implements IDataStreamClient<S, SRM>
+export class DataStreamClient<
+  MappingsInDefinition extends MappingsDefinition,
+  FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
+  SRM extends BaseSearchRuntimeMappings = never
+> implements IDataStreamClient<MappingsInDefinition, FullDocumentType, SRM>
 {
-  public helpers: ClientHelpers<SRM> = {
-    getFieldsFromHit: (hit) => {
-      const fields = (hit.fields ?? {}) as Record<keyof SRM, unknown[]>;
-      return fields;
-    },
-  };
   private readonly runtimeFields: string[];
   private constructor(
     private readonly client: ElasticsearchClient,
-    private readonly dataStreams: AnyDataStream
+    private readonly dataStreamDefinition: DataStreamDefinition<
+      MappingsInDefinition,
+      FullDocumentType,
+      SRM
+    >
   ) {
-    this.runtimeFields = Object.keys(dataStreams.searchRuntimeMappings ?? {});
-  }
-
-  public async index(args: IDataStreamClientIndexRequest<S>) {
-    return this.client.index({
-      index: this.dataStreams.name,
-      ...args,
-    });
-  }
-
-  public async search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
-    args: SearchRequestImproved<SRM>,
-    transportOpts?: TransportRequestOptionsWithOutMeta
-  ) {
-    return this.client.search<S, Agg>(
-      {
-        index: this.dataStreams.name,
-        runtime_mappings: this.dataStreams.searchRuntimeMappings,
-        fields: this.runtimeFields,
-        ...args,
-      },
-      transportOpts
-    );
+    this.runtimeFields = Object.keys(dataStreamDefinition.searchRuntimeMappings ?? {});
   }
 
   /**
@@ -89,13 +48,71 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
    * @remark This function should execute early in the application lifecycle and preferably once per
    *         data stream. However, it should be idempotent.
    */
-  public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(
-    args: DataStreamClientArgs<S, SRM>
-  ): Promise<DataStreamClient<S, SRM>> {
+  public static async initialize<
+    MappingsInDefinition extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
+    SRM extends BaseSearchRuntimeMappings = never
+  >(args: {
+    dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
+    elasticsearchClient: ElasticsearchClient;
+    logger: Logger;
+    lazyCreation?: boolean;
+  }) {
     validateClientArgs(args);
-    await initialize(args);
-    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.dataStreams);
+    const { dataStreamReady } = await initialize({ ...args, lazyCreation: args.lazyCreation });
+    if (!dataStreamReady) {
+      return;
+    }
+
+    return new DataStreamClient(args.elasticsearchClient, args.dataStream);
   }
 
-  // TODO: expose a create function that skips initialization
+  public helpers: ClientHelpers<SRM> = {
+    getFieldsFromHit: (hit) => {
+      const fields = (hit.fields ?? {}) as Record<keyof SRM, unknown[]>;
+      return fields;
+    },
+  };
+
+  public async index(args: ClientIndexRequest<FullDocumentType>) {
+    return this.client.index<FullDocumentType>({
+      ...args,
+      index: this.dataStreamDefinition.name,
+    });
+  }
+
+  public async bulk(args: ClientBulkRequest<FullDocumentType>) {
+    return this.client.bulk<FullDocumentType>({
+      index: this.dataStreamDefinition.name,
+      ...args,
+    });
+  }
+
+  public async get(args: ClientGetRequest) {
+    return this.client.get<FullDocumentType>({
+      index: this.dataStreamDefinition.name,
+      ...args,
+    });
+  }
+
+  public async existsIndex() {
+    return this.client.indices.exists({
+      index: this.dataStreamDefinition.name,
+    });
+  }
+
+  public async search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
+    args: ClientSearchRequest<SRM>,
+    transportOpts?: TransportRequestOptionsWithOutMeta
+  ) {
+    return this.client.search<FullDocumentType, Agg>(
+      {
+        index: this.dataStreamDefinition.name,
+        runtime_mappings: this.dataStreamDefinition.searchRuntimeMappings,
+        fields: this.runtimeFields,
+        ...args,
+      },
+      transportOpts
+    );
+  }
 }

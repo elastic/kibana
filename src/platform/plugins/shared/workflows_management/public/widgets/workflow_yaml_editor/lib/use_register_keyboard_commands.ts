@@ -37,6 +37,18 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
 
       const { editor, openActionsPopover, save, run, saveAndRun } = params;
 
+      /**
+       * Helper function to wrap action handlers with read-only check
+       */
+      const withReadOnlyCheck = <T extends unknown[]>(callback: (...args: T) => void) => {
+        return (...args: T) => {
+          if (editor.getOption(monaco.editor.EditorOption.readOnly) === true) {
+            return;
+          }
+          callback(...args);
+        };
+      };
+
       keyboardActions.current = [
         // Toggle comments action
         // This addresses keyboard layout issues where Ctrl+/ doesn't work on non-US layouts
@@ -54,9 +66,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
             // eslint-disable-next-line no-bitwise
             monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Digit7, // German, Turkish, Spanish, Swiss layouts
           ],
-          run: (ed) => {
+          run: withReadOnlyCheck((ed) => {
             ed.trigger('keyboard', 'editor.action.commentLine', null);
-          },
+          }),
         }),
 
         // Open the actions popover
@@ -67,7 +79,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           }),
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-          run: openActionsPopover,
+          run: withReadOnlyCheck(() => {
+            openActionsPopover();
+          }),
         }),
 
         // Save action
@@ -78,7 +92,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           }),
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
-          run: save,
+          run: withReadOnlyCheck(() => {
+            save();
+          }),
         }),
 
         // Run action
@@ -89,7 +105,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           }),
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-          run,
+          run: withReadOnlyCheck(() => {
+            run();
+          }),
         }),
 
         // Save and Run action
@@ -100,7 +118,9 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           }),
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
-          run: saveAndRun,
+          run: withReadOnlyCheck(() => {
+            saveAndRun();
+          }),
         }),
       ];
     },

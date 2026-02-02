@@ -1,0 +1,1707 @@
+{
+  "id": "kql",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.FilterButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "FilterButtonGroup",
+        "description": [],
+        "signature": [
+          "({ items, attached, size, ...rest }: Props) => React.JSX.Element"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/components/query_string_input/filter_button_group.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.FilterButtonGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ items, attached, size = 's', ...rest }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/filter_button_group.tsx",
+            "lineNumber": 30,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.fromUser",
+        "type": "Function",
+        "tags": [],
+        "label": "fromUser",
+        "description": [
+          "\nTake userInput from the user and make it into a query object"
+        ],
+        "signature": [
+          "(userInput: string | object) => any"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/components/query_string_input/from_user.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.fromUser.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "userInput",
+            "description": [],
+            "signature": [
+              "string | object"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/from_user.ts",
+            "lineNumber": 18,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QueryLanguageSwitcher",
+        "type": "Function",
+        "tags": [],
+        "label": "QueryLanguageSwitcher",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "QueryLanguageSwitcherProps",
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/components/query_string_input/language_switcher.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryLanguageSwitcher.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QueryStringInput",
+        "type": "Function",
+        "tags": [],
+        "label": "QueryStringInput",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "kql",
+            "scope": "public",
+            "docId": "kibKqlPluginApi",
+            "section": "def-public.QueryStringInputProps",
+            "text": "QueryStringInputProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/components/query_string_input/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.QueryStringInputProps",
+                "text": "QueryStringInputProps"
+              }
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.KqlPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "KqlPluginSetup",
+        "description": [],
+        "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.KqlPluginSetup.autocomplete",
+            "type": "Object",
+            "tags": [],
+            "label": "autocomplete",
+            "description": [],
+            "signature": [
+              "{ getQuerySuggestions: ",
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.QuerySuggestionGetFn",
+                "text": "QuerySuggestionGetFn"
+              },
+              "; getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QueryStringInputProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryStringInputProps",
+        "description": [],
+        "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+        "lineNumber": 104,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | ",
+              "DataViewByIdOrTitle",
+              ")[]"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.disableAutoFocus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableAutoFocus",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.screenTitle",
+            "type": "string",
+            "tags": [],
+            "label": "screenTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.prepend",
+            "type": "Any",
+            "tags": [],
+            "label": "prepend",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.persistedLog",
+            "type": "Object",
+            "tags": [],
+            "label": "persistedLog",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.PersistedLog",
+                "text": "PersistedLog"
+              },
+              "<any> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.bubbleSubmitEvent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "bubbleSubmitEvent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 111,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.disableLanguageSwitcher",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableLanguageSwitcher",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.languageSwitcherPopoverAnchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "languageSwitcherPopoverAnchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.onBlur",
+            "type": "Function",
+            "tags": [],
+            "label": "onBlur",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "((query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-public.QueryStringInputProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 116,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeQueryInputFocus",
+            "description": [],
+            "signature": [
+              "((isFocused: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-public.QueryStringInputProps.onChangeQueryInputFocus.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isFocused",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 117,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [],
+            "signature": [
+              "((query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-public.QueryStringInputProps.onSubmit.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 118,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.submitOnBlur",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "submitOnBlur",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 119,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsListSize",
+                "text": "SuggestionsListSize"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.suggestionsAbstraction",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionsAbstraction",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsAbstraction",
+                "text": "SuggestionsAbstraction"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 123,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.isClearable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isClearable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.iconType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconType",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 126,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.appName",
+            "type": "string",
+            "tags": [],
+            "label": "appName",
+            "description": [],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.deps",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "QueryStringInputDependencies"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.nonKqlMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nonKqlMode",
+            "description": [],
+            "signature": [
+              "\"text\" | \"lucene\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 131,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.autoSubmit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoSubmit",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.storageKey",
+            "type": "string",
+            "tags": [],
+            "label": "storageKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.timeRangeForSuggestionsOverride",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeRangeForSuggestionsOverride",
+            "description": [
+              "\nOverride whether autocomplete suggestions are restricted by time range."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QueryStringInputProps.filtersForSuggestions",
+            "type": "Array",
+            "tags": [],
+            "label": "filtersForSuggestions",
+            "description": [
+              "\nAdd additional filters used for suggestions"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QuerySuggestionGetFnArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySuggestionGetFnArgs",
+        "description": [],
+        "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.language",
+            "type": "string",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.indexPatterns",
+            "type": "Array",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionStart",
+            "type": "number",
+            "tags": [],
+            "label": "selectionStart",
+            "description": [],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.selectionEnd",
+            "type": "number",
+            "tags": [],
+            "label": "selectionEnd",
+            "description": [],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.useTimeRange",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useTimeRange",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.boolFilter",
+            "type": "Any",
+            "tags": [],
+            "label": "boolFilter",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.method",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ValueSuggestionsMethod",
+                "text": "ValueSuggestionsMethod"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFnArgs.suggestionsAbstraction",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionsAbstraction",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.SuggestionsAbstraction",
+                "text": "SuggestionsAbstraction"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.SuggestionsAbstraction",
+        "type": "Interface",
+        "tags": [],
+        "label": "SuggestionsAbstraction",
+        "description": [],
+        "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.SuggestionsAbstraction.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\""
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.SuggestionsAbstraction.fields",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { field: string; fieldToQuery: string; displayField: string | undefined; nestedDisplayField?: string | undefined; nestedField?: string | undefined; nestedPath?: string | undefined; }; }"
+            ],
+            "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QuerySuggestionTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "QuerySuggestionTypes",
+        "description": [],
+        "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.AutocompleteStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AutocompleteStart",
+        "description": [],
+        "signature": [
+          "{ getQuerySuggestions: ",
+          {
+            "pluginId": "kql",
+            "scope": "public",
+            "docId": "kibKqlPluginApi",
+            "section": "def-public.QuerySuggestionGetFn",
+            "text": "QuerySuggestionGetFn"
+          },
+          "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+          "ValueSuggestionsGetFn",
+          "; }"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/autocomplete/autocomplete_service.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QuerySuggestion",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestion",
+        "description": [],
+        "signature": [
+          "QuerySuggestionBasic",
+          " | ",
+          "QuerySuggestionField"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.QuerySuggestionGetFn",
+        "type": "Type",
+        "tags": [],
+        "label": "QuerySuggestionGetFn",
+        "description": [],
+        "signature": [
+          "(args: ",
+          {
+            "pluginId": "kql",
+            "scope": "public",
+            "docId": "kibKqlPluginApi",
+            "section": "def-public.QuerySuggestionGetFnArgs",
+            "text": "QuerySuggestionGetFnArgs"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "kql",
+            "scope": "public",
+            "docId": "kibKqlPluginApi",
+            "section": "def-public.QuerySuggestion",
+            "text": "QuerySuggestion"
+          },
+          "[]> | undefined"
+        ],
+        "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-public.QuerySuggestionGetFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kql",
+                "scope": "public",
+                "docId": "kibKqlPluginApi",
+                "section": "def-public.QuerySuggestionGetFnArgs",
+                "text": "QuerySuggestionGetFnArgs"
+              }
+            ],
+            "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kql",
+        "id": "def-public.SuggestionsListSize",
+        "type": "Type",
+        "tags": [],
+        "label": "SuggestionsListSize",
+        "description": [],
+        "signature": [
+          "\"s\" | \"l\""
+        ],
+        "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+        "lineNumber": 56,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "kql",
+      "id": "def-public.KqlPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "KqlPluginStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+      "lineNumber": 39,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "kql",
+          "id": "def-public.KqlPluginStart.autocomplete",
+          "type": "Object",
+          "tags": [],
+          "label": "autocomplete",
+          "description": [
+            "\nautocomplete service\n{@link AutocompleteStart}"
+          ],
+          "signature": [
+            "{ getQuerySuggestions: ",
+            {
+              "pluginId": "kql",
+              "scope": "public",
+              "docId": "kibKqlPluginApi",
+              "section": "def-public.QuerySuggestionGetFn",
+              "text": "QuerySuggestionGetFn"
+            },
+            "; hasQuerySuggestions: (language: string) => boolean; getValueSuggestions: ",
+            "ValueSuggestionsGetFn",
+            "; }"
+          ],
+          "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "kql",
+          "id": "def-public.KqlPluginStart.QueryStringInput",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "QueryStringInput",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<Omit<",
+            {
+              "pluginId": "kql",
+              "scope": "public",
+              "docId": "kibKqlPluginApi",
+              "section": "def-public.QueryStringInputProps",
+              "text": "QueryStringInputProps"
+            },
+            ", \"deps\">, any> | React.FunctionComponent<Omit<",
+            {
+              "pluginId": "kql",
+              "scope": "public",
+              "docId": "kibKqlPluginApi",
+              "section": "def-public.QueryStringInputProps",
+              "text": "QueryStringInputProps"
+            },
+            ", \"deps\">>"
+          ],
+          "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+          "lineNumber": 45,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "kql",
+        "id": "def-server.KQLServerPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "KQLServerPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "kql",
+            "scope": "server",
+            "docId": "kibKqlPluginApi",
+            "section": "def-server.KQLServerPlugin",
+            "text": "KQLServerPlugin"
+          },
+          " implements ",
+          "Plugin",
+          "<",
+          {
+            "pluginId": "kql",
+            "scope": "server",
+            "docId": "kibKqlPluginApi",
+            "section": "def-server.KQLServerPluginSetup",
+            "text": "KQLServerPluginSetup"
+          },
+          ", ",
+          {
+            "pluginId": "kql",
+            "scope": "server",
+            "docId": "kibKqlPluginApi",
+            "section": "def-server.KQLServerPluginStart",
+            "text": "KQLServerPluginStart"
+          },
+          ", ",
+          "KQLServerPluginSetupDependencies",
+          ", ",
+          "KQLServerPluginStartDependencies",
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kql",
+            "id": "def-server.KQLServerPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-server.KQLServerPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
+                ],
+                "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 39,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-server.KQLServerPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreSetup",
+              "<",
+              "KQLServerPluginStartDependencies",
+              ", ",
+              {
+                "pluginId": "kql",
+                "scope": "server",
+                "docId": "kibKqlPluginApi",
+                "section": "def-server.KQLServerPluginStart",
+                "text": "KQLServerPluginStart"
+              },
+              ">, {}: ",
+              "KQLServerPluginSetupDependencies",
+              ") => { autocomplete: { getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; getInitializerContextConfig: () => { legacy: { globalConfig$: ",
+              "Observable",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isLessThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isEqualTo: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isLessThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isEqualTo: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>; }; create: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => ",
+              "Observable",
+              "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }; }"
+            ],
+            "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-server.KQLServerPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<",
+                  "KQLServerPluginStartDependencies",
+                  ", ",
+                  {
+                    "pluginId": "kql",
+                    "scope": "server",
+                    "docId": "kibKqlPluginApi",
+                    "section": "def-server.KQLServerPluginStart",
+                    "text": "KQLServerPluginStart"
+                  },
+                  ">"
+                ],
+                "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kql",
+                "id": "def-server.KQLServerPlugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{}",
+                "description": [],
+                "signature": [
+                  "KQLServerPluginSetupDependencies"
+                ],
+                "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-server.KQLServerPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              "CoreStart",
+              ", {}: ",
+              "KQLServerPluginStartDependencies",
+              ") => {}"
+            ],
+            "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kql",
+                "id": "def-server.KQLServerPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreStart"
+                ],
+                "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 52,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kql",
+                "id": "def-server.KQLServerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{}",
+                "description": [],
+                "signature": [
+                  "KQLServerPluginStartDependencies"
+                ],
+                "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 52,
+                "columnNumber": 33,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "kql",
+            "id": "def-server.KQLServerPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "kql",
+      "id": "def-server.KQLServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "KQLServerPluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "kql",
+          "id": "def-server.KQLServerPluginSetup.autocomplete",
+          "type": "Object",
+          "tags": [],
+          "label": "autocomplete",
+          "description": [],
+          "signature": [
+            "{ getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; getInitializerContextConfig: () => { legacy: { globalConfig$: ",
+            "Observable",
+            "<Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; isLessThan: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; isEqualTo: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+            "ByteSizeValueUnit",
+            " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; isLessThan: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; isEqualTo: (other: ",
+            {
+              "pluginId": "@kbn/config-schema",
+              "scope": "common",
+              "docId": "kibKbnConfigSchemaPluginApi",
+              "section": "def-common.ByteSizeValue",
+              "text": "ByteSizeValue"
+            },
+            ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+            "ByteSizeValueUnit",
+            " | undefined) => string; }>; }>; }>; }; create: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => ",
+            "Observable",
+            "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }"
+          ],
+          "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "kql",
+      "id": "def-server.KQLServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "KQLServerPluginStart",
+      "description": [],
+      "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 18 as const;
+export const ESO_TYPES_COUNT = 19 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -69,6 +69,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ad_hoc_run_params": "6539367aa4ae8340c62f123c3457c6b8d7873c92de68651c70d41028dfe7ed32",
         "alert": "d961ff113e2b7995a49483b8937fcbdccfe425ac82b59a050931cd620b043ed1",
         "api_key_pending_invalidation": "ce3641d95c31bcc2880a294f0123060dcc5026f0a493befdda74924a7ea5c4a0",
+        "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
         "connector_token": "16ca2154c13c5ee3d3a45b55d4ea6cd33aeaceaef3dc229b002d25470bfc9b3b",
         "entity-discovery-api-key": "cd3b5230a513d2d3503583223e48362fbbbc7812aa4710579a62acfa5bbc30e6",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
@@ -114,6 +115,8 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
         "ad_hoc_run_params|1",
+        "alert|8",
+        "alert|7",
         "alert|6",
         "alert|5",
         "alert|4",
@@ -121,6 +124,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|2",
         "alert|1",
         "api_key_pending_invalidation|1",
+        "cloud-connect-api-key|1",
         "connector_token|1",
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",

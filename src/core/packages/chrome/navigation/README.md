@@ -4,7 +4,7 @@ An adaptive side navigation system built with [Elastic UI](https://eui.elastic.c
 
 | Expanded mode                 | Collapsed mode                 |
 | ----------------------------- | ------------------------------ |
-| ![image](./expanded-mode.png) | ![image](./collapsed-mode.png) |
+| ![image](./assets/expanded_mode.png) | ![image](./assets/collapsed_mode.png) |
 
 ## Usage
 

@@ -23,6 +23,7 @@ export interface ParsedVariablePath {
 // Tries to parse the path into a property path and filters
 // Returns null if the path is invalid
 // Returns an object with the property path and filters if the path is valid
+// TODO: should be refactored to use liquidjs parser
 export function parseVariablePath(path: string): ParsedVariablePath | null {
   const errors: string[] = [];
   // Trim whitespace

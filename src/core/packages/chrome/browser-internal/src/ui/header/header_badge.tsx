@@ -52,8 +52,9 @@ export class HeaderBadge extends Component<Props, State> {
     }
 
     return (
-      <div css={({ euiTheme }) => ({ alignSelf: 'center', marginLeft: euiTheme.size.base })}>
+      <div css={({ euiTheme }) => ({ alignSelf: 'center', marginRight: euiTheme.size.s })}>
         <EuiBetaBadge
+          alignment="middle"
           data-test-subj="headerBadge"
           data-test-badge-label={this.state.badge.text}
           tabIndex={0}

@@ -11,14 +11,14 @@ import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { z } from '@kbn/zod';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
+  SUB_ACTION,
   TheHiveIncidentResponseSchema,
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   ExecutorSubActionCreateAlertParamsSchema,
-} from '../../../common/thehive/schema';
+} from '@kbn/connector-schemas/thehive';
 import type {
   TheHiveConfig,
   TheHiveSecrets,
@@ -27,7 +27,7 @@ import type {
   ExternalServiceIncidentResponse,
   Incident,
   GetIncidentResponse,
-} from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
 
 export const API_VERSION = 'v1';
 

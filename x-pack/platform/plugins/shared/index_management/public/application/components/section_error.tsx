@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 export interface Error {
   cause?: string[];
@@ -18,7 +18,7 @@ export interface Error {
 }
 
 interface Props {
-  title: React.ReactNode;
+  title: string;
   error: Error;
 }
 
@@ -33,17 +33,17 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
   const cause = causeAttributes ?? causeRoot;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
+    <EuiCallOut announceOnMount title={title} color="danger" iconType="warning" {...rest}>
       <div>{message || statusText}</div>
       {cause && (
-        <Fragment>
+        <>
           <EuiSpacer size="m" />
           <ul>
             {cause.map((causeMsg, i) => (
               <li key={i}>{causeMsg}</li>
             ))}
           </ul>
-        </Fragment>
+        </>
       )}
     </EuiCallOut>
   );

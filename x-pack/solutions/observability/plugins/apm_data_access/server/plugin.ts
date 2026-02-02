@@ -11,18 +11,14 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  KibanaRequest,
 } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
-  ApmDataAccessServerDependencies,
   ApmDataAccessServerSetupDependencies,
 } from './types';
 import { getServices } from './services/get_services';
-import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
-import { checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -50,22 +46,8 @@ export class ApmDataAccessPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ApmDataAccessServerDependencies) {
-    const getApmIndicesWithInternalUserFn = (request: KibanaRequest) => {
-      const soClient = core.savedObjects.getScopedClient(request);
-      return plugins.apmSourcesAccess.getApmIndices(soClient);
-    };
-
-    const startServices = {
-      hasPrivileges: ({ request }: Pick<ApmDataAccessPrivilegesCheck, 'request'>) =>
-        checkPrivileges({
-          request,
-          getApmIndices: getApmIndicesWithInternalUserFn,
-          security: plugins.security,
-        }),
-    };
-
-    return startServices;
+  public start(_core: CoreStart): ApmDataAccessPluginStart {
+    return {};
   }
 
   public stop() {}

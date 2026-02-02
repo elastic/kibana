@@ -8,11 +8,12 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointComponentApi, ChangePointEmbeddableState } from './types';
+import type { ChangePointComponentApi } from './types';
+import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
 
 type ChangePointEmbeddableCustomState = Omit<
   ChangePointEmbeddableState,
-  'timeRange' | 'title' | 'description' | 'hidePanelTitles'
+  'timeRange' | 'title' | 'description' | 'hide_title'
 >;
 
 export const changePointComparators: StateComparators<ChangePointEmbeddableCustomState> = {
@@ -25,14 +26,14 @@ export const changePointComparators: StateComparators<ChangePointEmbeddableCusto
   maxSeriesToPlot: 'referenceEquality',
 };
 
-export const initializeChangePointControls = (rawState: ChangePointEmbeddableState) => {
-  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(rawState.viewType);
-  const dataViewId = new BehaviorSubject<string>(rawState.dataViewId);
-  const fn = new BehaviorSubject(rawState.fn);
-  const metricField = new BehaviorSubject(rawState.metricField);
-  const splitField = new BehaviorSubject(rawState.splitField);
-  const partitions = new BehaviorSubject(rawState.partitions);
-  const maxSeriesToPlot = new BehaviorSubject(rawState.maxSeriesToPlot);
+export const initializeChangePointControls = (initialState: ChangePointEmbeddableState) => {
+  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(initialState.viewType);
+  const dataViewId = new BehaviorSubject<string>(initialState.dataViewId);
+  const fn = new BehaviorSubject(initialState.fn);
+  const metricField = new BehaviorSubject(initialState.metricField);
+  const splitField = new BehaviorSubject(initialState.splitField);
+  const partitions = new BehaviorSubject(initialState.partitions);
+  const maxSeriesToPlot = new BehaviorSubject(initialState.maxSeriesToPlot);
 
   const updateUserInput = (update: ChangePointEmbeddableCustomState) => {
     viewType.next(update.viewType);

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { infra, timerange } from '@kbn/apm-synthtrace-client';
+import { infra, timerange } from '@kbn/synthtrace-client';
 
 export function generateHostsData({
   from,

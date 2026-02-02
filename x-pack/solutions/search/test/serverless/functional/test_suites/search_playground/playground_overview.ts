@@ -105,9 +105,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('without existing LLM connectors', () => {
         after(async () => {
           await svlSearchNavigation.navigateToLandingPage();
-          await pageObjects.svlCommonNavigation.sidenav.openSection(
-            'search_project_nav_footer.project_settings_project_nav'
-          );
 
           await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(

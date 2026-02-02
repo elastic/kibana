@@ -10,12 +10,13 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
-import { buildRequestFromConnector } from '@kbn/workflows';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for elasticsearch-specific properties
 export interface ElasticsearchActionStep extends BaseStep {
@@ -77,7 +78,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
-      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
+      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
         labels: {
@@ -91,7 +92,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
   }
 
   private async executeElasticsearchRequest(
-    esClient: any,
+    esClient: ElasticsearchClient,
     stepType: string,
     params: any
   ): Promise<any> {
@@ -102,16 +103,17 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       return esClient.transport.request({ method, path, body });
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
-      const { method = 'GET', path, body } = params;
-      return esClient.transport.request({ method, path, body });
+      const { method = 'GET', path, body, headers } = params;
+      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
         method,
         path,
         body: requestBody,
-        params: queryParams,
-      } = buildRequestFromConnector(stepType, params);
+        query: queryParams,
+        bulkBody,
+      } = buildElasticsearchRequest(stepType, params);
 
       // Build query string manually if needed
       let finalPath = path;
@@ -123,34 +125,10 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const requestOptions = {
         method,
         path: finalPath,
-        body: requestBody,
+        body: !bulkBody ? requestBody : undefined,
+        bulkBody,
       };
 
-      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
-      if (requestOptions.path.endsWith('/_bulk')) {
-        // Further processing for bulk requests can be added here
-        // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
-        // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
-        const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
-
-        // Optional: forward query flags like refresh if you have them
-        const refresh = queryParams?.refresh ?? false;
-
-        // Turn each doc into an action+doc pair
-        const bulkBody = docs?.flatMap((doc) => {
-          // If you have ids, use: { index: { _id: doc._id } }
-          return [{ index: {} }, doc];
-        });
-
-        if (bulkBody?.length) {
-          return esClient.bulk({
-            index: pathIndex, // default index for all actions
-            refresh, // true | false | 'wait_for'
-            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-          });
-        }
-      }
       return esClient.transport.request(requestOptions);
     }
   }

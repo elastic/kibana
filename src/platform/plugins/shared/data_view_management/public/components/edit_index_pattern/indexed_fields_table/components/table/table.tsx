@@ -328,7 +328,10 @@ export const getConflictModalContent = ({
           />
         </p>
         <EuiBasicTable
-          tableCaption="Demo of EuiBasicTable"
+          tableCaption={i18n.translate(
+            'indexPatternManagement.editIndexPattern.fields.conflictModal.tableCaption',
+            { defaultMessage: 'Field type conflicts across indices' }
+          )}
           items={getItems(conflictDescriptions)}
           rowHeader="firstName"
           columns={conflictColumns}
@@ -516,6 +519,10 @@ class TableClass extends PureComponent<
 
     return (
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'indexPatternManagement.editIndexPattern.fields.table.tableCaption',
+          { defaultMessage: 'Indexed fields' }
+        )}
         items={items}
         columns={columns}
         pagination={pagination}

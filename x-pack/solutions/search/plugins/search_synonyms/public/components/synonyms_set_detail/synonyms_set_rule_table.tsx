@@ -260,6 +260,9 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
               setPageIndex(page.index);
               setPageSize(page.size);
             }}
+            tableCaption={i18n.translate('xpack.searchSynonyms.synonymsSetTable.tableCaption', {
+              defaultMessage: 'Synonym rules',
+            })}
           />
         </>
       )}

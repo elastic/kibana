@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 require('./endpoint_agent_runner').cli();

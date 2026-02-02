@@ -6,6 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { Redirect } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingElastic } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
@@ -25,7 +27,17 @@ export const SiemReadinessRoutes = () => {
       <PluginTemplateWrapper>
         <SecuritySolutionPageWrapper noPadding>
           <Suspense fallback={<EuiLoadingElastic />}>
-            <SiemReadinessDashboardLazy />
+            <Routes>
+              <Route
+                exact
+                path={SIEM_READINESS_PATH}
+                render={() => <Redirect to={`${SIEM_READINESS_PATH}/visibility/coverage`} />}
+              />
+              <Route
+                path={`${SIEM_READINESS_PATH}/visibility/:tab`}
+                component={SiemReadinessDashboardLazy}
+              />
+            </Routes>
           </Suspense>
         </SecuritySolutionPageWrapper>
       </PluginTemplateWrapper>

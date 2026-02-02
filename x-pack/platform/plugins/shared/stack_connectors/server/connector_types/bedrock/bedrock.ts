@@ -19,8 +19,10 @@ import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agent
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
@@ -31,7 +33,9 @@ import {
   BedrockClientSendParamsSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
-} from '../../../common/bedrock/schema';
+  DashboardActionParamsSchema,
+  ConverseResponseSchema,
+} from '@kbn/connector-schemas/bedrock';
 import type {
   Config,
   Secrets,
@@ -46,18 +50,12 @@ import type {
   ConverseActionResponse,
   ConverseParams,
   ConverseStreamParams,
-} from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
+  ConverseResponse,
   StreamingResponse,
-} from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+} from '@kbn/connector-schemas/bedrock';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   extractRegionId,
   formatBedrockBody,
@@ -533,7 +531,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout = DEFAULT_TIMEOUT_MS,
     }: ConverseParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<RunActionResponse> {
+  ): Promise<ConverseResponse> {
     const modelId = reqModel ?? this.model;
     if (!modelId) {
       throw new Error('No model specified. Please configure a default model.');
@@ -550,7 +548,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       toolConfig: {
         tools,
-        toolChoice: { auto: toolChoice },
+        toolChoice,
       },
       system,
       modelId,
@@ -565,11 +563,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: requestBody,
       signal,
       timeout,
-      responseSchema: RunApiLatestResponseSchema,
+      responseSchema: ConverseResponseSchema,
     };
-    const response = await this.runApiLatest(requestArgs, connectorUsageCollector);
+    const response = await this.request(requestArgs, connectorUsageCollector);
 
-    return response;
+    return response.data;
   }
   private async _converseStream({
     messages,

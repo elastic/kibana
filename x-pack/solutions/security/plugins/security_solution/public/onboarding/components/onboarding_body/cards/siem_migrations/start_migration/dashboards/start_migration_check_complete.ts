@@ -24,7 +24,7 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
 > = async ({ siemMigrations }) => {
   const missingCapabilities = siemMigrations.dashboards
-    .getMissingCapabilities('all')
+    .getMissingCapabilities('minimum')
     .map(({ description }) => description);
 
   let isComplete = false;

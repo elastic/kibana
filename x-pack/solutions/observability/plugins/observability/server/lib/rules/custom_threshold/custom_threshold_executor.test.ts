@@ -4129,6 +4129,119 @@ describe('The custom threshold alert type', () => {
       });
     });
   });
+
+  describe('with median aggregation', () => {
+    setup();
+
+    describe('querying the entire infrastructure', () => {
+      beforeEach(() => jest.clearAllMocks());
+      afterAll(() => clearInstances());
+      const instanceID = '*';
+      const execute = (
+        comparator: COMPARATORS,
+        threshold: number[],
+        sourceId: string = 'default'
+      ) =>
+        executor({
+          ...mockOptions,
+          services,
+          params: {
+            ...mockOptions.params,
+            sourceId,
+            criteria: [
+              {
+                ...customThresholdMedianCriterion,
+                comparator,
+                threshold,
+              },
+            ],
+          },
+        });
+      const setResults = (
+        comparator: COMPARATORS,
+        threshold: number[],
+        shouldFire: boolean = false,
+        isNoData: boolean = false
+      ) =>
+        setEvaluationResults([
+          {
+            '*': {
+              ...customThresholdMedianCriterion,
+              comparator,
+              threshold,
+              currentValue: 1.0,
+              timestamp: new Date().toISOString(),
+              shouldFire,
+              isNoData,
+              bucketKey: { groupBy0: '*' },
+            },
+          },
+        ]);
+      test('alerts as expected with the > comparator', async () => {
+        setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.GREATER_THAN, [1.5], false);
+        await execute(COMPARATORS.GREATER_THAN, [1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the < comparator', async () => {
+        setResults(COMPARATORS.LESS_THAN, [1.5], true);
+        await execute(COMPARATORS.LESS_THAN, [1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.LESS_THAN, [0.75], false);
+        await execute(COMPARATORS.LESS_THAN, [0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the >= comparator', async () => {
+        setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75], true);
+        await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], true);
+        await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5], false);
+        await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the <= comparator', async () => {
+        setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5], true);
+        await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], true);
+        await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75], false);
+        await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the between comparator', async () => {
+        setResults(COMPARATORS.BETWEEN, [0, 1.5], true);
+        await execute(COMPARATORS.BETWEEN, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.BETWEEN, [0, 0.75], false);
+        await execute(COMPARATORS.BETWEEN, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('alerts as expected with the not between comparator', async () => {
+        setResults(COMPARATORS.NOT_BETWEEN, [0, 0.75], true);
+        await execute(COMPARATORS.NOT_BETWEEN, [0, 0.75]);
+        expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
+        setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
+        await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+        expect(getLastReportedAlert(instanceID)).toBe(undefined);
+      });
+      test('reports expected values to the action context', async () => {
+        setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+        await execute(COMPARATORS.GREATER_THAN, [0.75]);
+        const reportedAlert = getLastReportedAlert(instanceID);
+        expect(reportedAlert?.context?.group).toBeUndefined();
+        expect(reportedAlert?.context?.reason).toBe(
+          'Median of test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
+        );
+      });
+    });
+  });
 });
 
 function getLastReportedAlert(id: string): ReportedAlert | undefined {
@@ -4215,6 +4328,20 @@ const customThresholdLastValueCriterion: CustomMetricExpressionParams = {
   metrics: [
     {
       aggType: Aggregators.LAST_VALUE,
+      name: 'A',
+      field: 'test.metric.1',
+    },
+  ],
+  timeSize: 1,
+  timeUnit: 'm',
+  threshold: [0],
+};
+
+const customThresholdMedianCriterion: CustomMetricExpressionParams = {
+  comparator: COMPARATORS.GREATER_THAN,
+  metrics: [
+    {
+      aggType: Aggregators.MED,
       name: 'A',
       field: 'test.metric.1',
     },

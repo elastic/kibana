@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,12 +59,12 @@ export const SurveyKubernetes = () => {
               iconType: 'help',
               text: (
                 <>
-                  <p>
+                  <EuiText size="s" css={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                     <FormattedMessage
                       id="xpack.infra.homePage.kubernetesToastText"
                       defaultMessage="Help us design your Kubernetes experience by completing a feedback survey."
                     />
-                  </p>
+                  </EuiText>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <FeatureFeedbackButton

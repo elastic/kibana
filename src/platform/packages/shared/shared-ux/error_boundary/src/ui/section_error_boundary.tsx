@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { apm } from '@elastic/apm-rum';
 
 import { getErrorBoundaryLabels } from '../../lib';
@@ -21,6 +21,13 @@ import {
 
 interface SectionErrorBoundaryProps {
   sectionName: string;
+  /** How many times to retry remounting before showing error (default: 0, no retries) */
+  maxRetries?: number;
+}
+
+interface SectionErrorBoundaryState extends BaseErrorBoundaryState {
+  /** How many times we've retried */
+  retryCount?: number;
 }
 
 /**
@@ -34,6 +41,13 @@ interface SectionErrorBoundaryProps {
  * If it is acceptable to assume the risk of allowing users to interact with a UI that
  * has an error state, then using `KibanaSectionErrorBoundary` may be an acceptable alternative,
  * but this must be judged on a case-by-case basis.
+ *
+ * @example
+ * ```tsx
+ * <KibanaSectionErrorBoundary sectionName="Dashboard" maxRetries={3}>
+ *   <MySection />
+ * </KibanaSectionErrorBoundary>
+ * ```
  */
 export const KibanaSectionErrorBoundary = (
   props: React.PropsWithChildren<SectionErrorBoundaryProps>
@@ -44,7 +58,7 @@ export const KibanaSectionErrorBoundary = (
 
 class SectionErrorBoundaryInternal extends BaseErrorBoundary<
   React.PropsWithChildren<SectionErrorBoundaryProps> & BaseErrorBoundaryProps,
-  BaseErrorBoundaryState
+  SectionErrorBoundaryState
 > {
   constructor(props: SectionErrorBoundaryProps & BaseErrorBoundaryProps) {
     super(props);
@@ -54,6 +68,7 @@ class SectionErrorBoundaryInternal extends BaseErrorBoundary<
       errorInfo: null,
       componentName: null,
       isFatal: null,
+      retryCount: 0,
     };
   }
 
@@ -68,21 +83,36 @@ class SectionErrorBoundaryInternal extends BaseErrorBoundary<
     const enqueuedError = this.props.services.errorService.enqueueError(error, errorInfo);
     const { id: errorId, isFatal, name } = enqueuedError;
 
-    this.setState({
-      error,
-      errorInfo,
-      componentName: name,
-      isFatal,
-      errorId,
+    this.setState((prevState) => {
+      const nextRetryCount = (prevState.retryCount ?? 0) + 1;
+
+      return {
+        error,
+        errorInfo,
+        componentName: name,
+        isFatal,
+        errorId,
+        retryCount: nextRetryCount,
+      };
     });
   }
 
   render() {
-    if (!this.state.error) {
+    const { error, retryCount = 0 } = this.state;
+    const { maxRetries = 0 } = this.props;
+    const hasRetriesRemaining = retryCount <= maxRetries && error !== null;
+
+    // If there are retries remaining, remount children with fresh state
+    if (hasRetriesRemaining) {
+      return <Fragment key={retryCount}>{this.props.children}</Fragment>;
+    }
+
+    // Once retries are exhausted or no error, show normal children or error prompt
+    if (!error) {
       return this.props.children;
     }
 
-    const { error, errorInfo, componentName, isFatal } = this.state;
+    const { errorInfo, componentName, isFatal } = this.state;
 
     if (isFatal) {
       return (

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { ExistsFilter } from './exists_filter';
 import type { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
 import type { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
@@ -39,16 +40,6 @@ export enum FILTERS {
   RANGE_FROM_VALUE = 'range_from_value',
   SPATIAL_FILTER = 'spatial_filter',
   COMBINED = 'combined',
-}
-
-/**
-  Filter,
- * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
- * @public
- */
-export enum FilterStateStore {
-  APP_STATE = 'appState',
-  GLOBAL_STATE = 'globalState',
 }
 
 export type FilterMetaParams =

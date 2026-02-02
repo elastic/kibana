@@ -30,10 +30,6 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
-import { registerNavigationEventTypes } from './analytics';
-
-import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
-
 export class NavigationPublicPlugin
   implements
     Plugin<
@@ -53,8 +49,6 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    registerNavigationEventTypes(core);
-
     this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
@@ -77,15 +71,9 @@ export class NavigationPublicPlugin
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
-    /*
-     *
-     *  This helps clients of navigation to create
-     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
-     *
-     *  Useful in creating multiple stateful SearchBar in the same app without affecting
-     *  global filters
-     *
-     * */
+    /**
+     * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+     */
     const createCustomTopNav = (
       /*
        * Custom instance of unified search if it needs to be overridden
@@ -128,25 +116,19 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (this.isSolutionNavEnabled || isServerless) {
-      const hideAnnouncements = core.settings.client.get('hideAnnouncements', false);
-      if (!hideAnnouncements) {
-        const { project } = core.chrome as InternalChromeStart;
-        const tourManager = new SolutionNavigationTourManager({
-          navigationTourManager: project.navigationTourManager,
-          spacesSolutionViewTourManager: spaces?.solutionViewTourManager,
-          userProfile: core.userProfile,
-          capabilities: core.application.capabilities,
-          featureFlags: core.featureFlags,
-        });
-        void tourManager.startTour();
-      }
-    }
-
     return {
       ui: {
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         TopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {

@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { IndicatorFieldValue } from './field_value';
 import {
+  RawIndicatorFieldId,
   generateMockIndicator,
   generateMockIndicatorWithTlp,
 } from '../../../../../../common/threat_intelligence/types/indicator';
@@ -27,7 +28,13 @@ describe('<IndicatorField />', () => {
     );
     expect(asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
-        0.0.0.0
+        <div
+          class="css-12og07k-IndicatorFieldValue"
+        >
+          <span>
+            0.0.0.0
+          </span>
+        </div>
       </DocumentFragment>
     `);
   });
@@ -81,6 +88,29 @@ describe('<IndicatorField />', () => {
             </span>
           </span>
         </span>
+      </DocumentFragment>
+    `);
+  });
+
+  it('should render multiple values', () => {
+    const mockField = RawIndicatorFieldId.NameOrigin;
+
+    const { asFragment } = render(
+      <IndicatorFieldValue indicator={mockIndicator} field={mockField} />
+    );
+
+    expect(asFragment()).toMatchInlineSnapshot(`
+      <DocumentFragment>
+        <div
+          class="css-12og07k-IndicatorFieldValue"
+        >
+          <span>
+            forwarded
+          </span>
+          <span>
+            abusech-malware
+          </span>
+        </div>
       </DocumentFragment>
     `);
   });

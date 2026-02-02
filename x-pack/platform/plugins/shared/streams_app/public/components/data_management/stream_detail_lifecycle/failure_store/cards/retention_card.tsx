@@ -6,43 +6,83 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { useFailureStoreRedirectLink } from '../../hooks/use_failure_store_redirect_link';
+import { EuiButton } from '@elastic/eui';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
 
 export const RetentionCard = ({
   openModal,
   canManageFailureStore,
-  isWired,
   streamName,
-  failureStore,
+  failureStoreConfig,
 }: {
   openModal: (show: boolean) => void;
   canManageFailureStore: boolean;
-  isWired: boolean;
   streamName: string;
-  failureStore?: FailureStore;
+  failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
-  const { href } = useFailureStoreRedirectLink({ streamName });
+  const {
+    failureStoreEnabled,
+    customRetentionPeriod,
+    defaultRetentionPeriod,
+    inheritOptions,
+    retentionDisabled,
+  } = failureStoreConfig;
 
-  if (
-    !failureStore ||
-    !failureStore.enabled ||
-    (!failureStore.retentionPeriod.custom && !failureStore.retentionPeriod.default)
-  ) {
+  if (!failureStoreEnabled) {
     return null;
   }
-  const { retentionPeriod } = failureStore;
 
+  const {
+    isWired: isWiredStream,
+    isCurrentlyInherited: isInheritingFailureStore,
+    canShowInherit,
+  } = inheritOptions;
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.title',
     {
-      defaultMessage: 'Failure retention',
+      defaultMessage: 'Retention',
     }
   );
 
-  const retentionTypeApplied = retentionPeriod.custom
+  const getRetentionOrigin = () => {
+    if (isWiredStream) {
+      if (isInheritingFailureStore) {
+        return i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromParent', {
+          defaultMessage: 'Inherit from parent',
+        });
+      } else if (canShowInherit) {
+        return i18n.translate('xpack.streams.streamDetailFailureStore.overrideParent', {
+          defaultMessage: 'Override parent',
+        });
+      }
+      return null;
+    }
+
+    if (!isWiredStream) {
+      return isInheritingFailureStore
+        ? i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromIndexTemplate', {
+            defaultMessage: 'Inherit from index template',
+          })
+        : i18n.translate('xpack.streams.streamDetailFailureStore.overrideIndexTemplate', {
+            defaultMessage: 'Override index template',
+          });
+    }
+
+    return null;
+  };
+
+  const retentionOrigin = getRetentionOrigin();
+
+  const retentionTypeApplied = retentionDisabled
+    ? i18n.translate(
+        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.indefinite',
+        {
+          defaultMessage: 'Indefinite retention',
+        }
+      )
+    : customRetentionPeriod
     ? i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.custom',
         {
@@ -56,51 +96,52 @@ export const RetentionCard = ({
         }
       );
 
-  const failureRetentionPeriod = retentionPeriod.custom
-    ? getTimeSizeAndUnitLabel(retentionPeriod.custom)
-    : getTimeSizeAndUnitLabel(retentionPeriod.default);
+  const failureRetentionPeriod = retentionDisabled
+    ? '∞'
+    : customRetentionPeriod
+    ? getTimeSizeAndUnitLabel(customRetentionPeriod)
+    : getTimeSizeAndUnitLabel(defaultRetentionPeriod);
 
-  const viewInDiscover = i18n.translate(
-    'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.discoverButton',
-    {
-      defaultMessage: 'View in discover',
-    }
-  );
-  const editFailureStore = i18n.translate(
-    'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editButton',
-    {
-      defaultMessage: 'Edit failure store',
-    }
-  );
-
-  const getActions = () => {
-    const actions = [];
-    if (canManageFailureStore && !isWired) {
-      actions.push({
-        iconType: 'pencil',
-        ariaLabel: editFailureStore,
-        tooltip: editFailureStore,
-        onClick: () => openModal(true),
-        'data-test-subj': 'streamFailureStoreEditRetention',
-      });
-    }
-    actions.push({
-      iconType: 'discoverApp',
-      ariaLabel: viewInDiscover,
-      tooltip: viewInDiscover,
-      href,
-      'data-test-subj': 'streamFailureStoreViewInDiscover',
-    });
-    return actions;
-  };
+  const subtitles = retentionOrigin
+    ? [retentionTypeApplied, retentionOrigin]
+    : [retentionTypeApplied];
 
   const metric = [
     {
       data: failureRetentionPeriod,
-      subtitle: retentionTypeApplied,
+      subtitle: subtitles,
       'data-test-subj': 'failureStoreRetention',
     },
   ];
 
-  return <BaseMetricCard title={title} actions={getActions()} metrics={metric} />;
+  return (
+    <BaseMetricCard
+      title={title}
+      actions={
+        canManageFailureStore ? (
+          <EuiButton
+            data-test-subj="streamFailureStoreEditRetention"
+            size="s"
+            color="text"
+            onClick={() => openModal(true)}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editFailureStoreRetentionMethodAriaLabel',
+              {
+                defaultMessage: 'Edit failure store retention method',
+              }
+            )}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.editRetentionMethodButton',
+              {
+                defaultMessage: 'Edit retention method',
+              }
+            )}
+          </EuiButton>
+        ) : undefined
+      }
+      metrics={metric}
+      data-test-subj="failureStoreRetentionCard"
+    />
+  );
 };

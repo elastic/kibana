@@ -22,10 +22,12 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { routeWithNamespace, waitFor } from '../../../../../config/services/detections_response';
+import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-type PrivmonUser = ListPrivMonUsersResponse[number];
+type PrivmonUser = ListPrivMonUsersResponse[number] & {
+  '@timestamp'?: string;
+};
 // Default within last month so included in first run range of now-1M
 const DEFAULT_INTEGRATIONS_RELATIVE_TIMESTAMP = new Date(
   Date.now() - 3.5 * 7 * 24 * 60 * 60 * 1000
@@ -42,7 +44,6 @@ const OKTA_USER_IDS = {
 interface TimestampSource {
   '@timestamp'?: string;
 }
-
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
@@ -319,7 +320,7 @@ export const PrivMonUtils = (
 
   async function getLastProcessedMarker(indexPattern: string) {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.find(
+    const integration = res.body.sources.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
@@ -356,7 +357,7 @@ export const PrivMonUtils = (
       ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
       ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
       ctx._source.user.entity.attributes.Privileged = params.new_privileged_status;
-      ctx._source.user.roles = params.roles;      
+      ctx._source.user.roles = params.roles;
     `,
         params: { new_privileged_status: isPrivileged, roles: rolesParam },
       },
@@ -370,7 +371,7 @@ export const PrivMonUtils = (
       query: {},
     });
 
-    const sources = res.body as ListEntitySourcesResponse;
+    const { sources } = res.body as ListEntitySourcesResponse;
     const source = sources.find((s) => s.integrationName === integrationName);
     if (!source) {
       throw new Error(`No monitoring source found for integration ${integrationName}`);

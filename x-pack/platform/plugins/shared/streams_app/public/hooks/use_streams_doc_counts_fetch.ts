@@ -6,35 +6,40 @@
  */
 
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useEffect, useRef } from 'react';
+import type { StreamDocsStat } from '@kbn/streams-plugin/common';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
+import { executeEsqlQuery } from './use_execute_esql_query';
 
 export interface StreamDocCountsFetch {
-  docCount: Promise<UnparsedEsqlResponse>;
-  failedDocCount: Promise<UnparsedEsqlResponse>;
-  degradedDocCount: Promise<UnparsedEsqlResponse>;
+  docCount: Promise<StreamDocsStat[]>;
+  failedDocCount: Promise<StreamDocsStat[]>;
+  degradedDocCount: Promise<StreamDocsStat[]>;
 }
-
-const DEFAULT_NUM_DATA_POINTS = 25;
 
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
-  numDataPoints?: number;
   canReadFailureStore: boolean;
+  numDataPoints: number;
 }
 
 export function useStreamDocCountsFetch({
-  groupTotalCountByTimestamp,
-  numDataPoints = DEFAULT_NUM_DATA_POINTS,
+  groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
   canReadFailureStore,
+  numDataPoints,
 }: UseDocCountFetchProps): {
-  getStreamDocCounts(streamName: string): StreamDocCountsFetch;
+  getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
+  getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
 } {
   const { timeState, timeState$ } = useTimefilter();
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-  const promiseCache = useRef<Partial<Record<string, StreamDocCountsFetch>>>({});
+  const {
+    streams: { streamsRepositoryClient },
+    data,
+  } = useKibana().dependencies.start;
+  const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
+  const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
@@ -42,7 +47,8 @@ export function useStreamDocCountsFetch({
   }
 
   useUpdateEffect(() => {
-    promiseCache.current = {};
+    docCountsPromiseCache.current = null;
+    histogramPromiseCache.current = {};
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
   }, [canReadFailureStore]);
@@ -59,7 +65,8 @@ export function useStreamDocCountsFetch({
         const shouldRefresh = kind !== 'initial';
 
         if (shouldRefresh) {
-          promiseCache.current = {};
+          docCountsPromiseCache.current = null;
+          histogramPromiseCache.current = {};
           abortControllerRef.current?.abort();
           abortControllerRef.current = new AbortController();
         }
@@ -71,9 +78,9 @@ export function useStreamDocCountsFetch({
   }, [timeState$]);
 
   return {
-    getStreamDocCounts(streamName: string) {
-      if (promiseCache.current[streamName]) {
-        return promiseCache.current[streamName] as StreamDocCountsFetch;
+    getStreamDocCounts(streamName?: string) {
+      if (docCountsPromiseCache.current) {
+        return docCountsPromiseCache.current;
       }
 
       const abortController = abortControllerRef.current;
@@ -82,61 +89,84 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
-      const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
-
-      const countPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${source} | STATS doc_count = COUNT(*)${
-              groupTotalCountByTimestamp
-                ? ` BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`
-                : ''
-            }`,
-            start: timeState.start,
-            end: timeState.end,
-          },
-        },
+      const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
         signal: abortController.signal,
+        ...(streamName
+          ? {
+              params: {
+                query: {
+                  stream: streamName,
+                },
+              },
+            }
+          : {}),
       });
 
       const failedCountPromise = canReadFailureStore
-        ? streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
+            signal: abortController.signal,
             params: {
-              body: {
-                operationName: 'get_failed_doc_count_for_stream',
-                query: `FROM ${streamName}::failures | STATS failed_doc_count = count(*)`,
+              query: {
                 start: timeState.start,
                 end: timeState.end,
+                ...(streamName ? { stream: streamName } : {}),
               },
             },
-            signal: abortController.signal,
           })
         : Promise.reject(new Error('Cannot read failed doc count, insufficient privileges'));
 
-      const degradedCountPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_degraded_doc_count_for_stream',
-            query: `FROM ${streamName} METADATA _ignored | WHERE _ignored IS NOT NULL | STATS degraded_doc_count = count(*)`,
-            start: timeState.start,
-            end: timeState.end,
-          },
-        },
-        signal: abortController.signal,
-      });
+      const degradedCountPromise = streamsRepositoryClient.fetch(
+        'GET /internal/streams/doc_counts/degraded',
+        {
+          signal: abortController.signal,
+          ...(streamName
+            ? {
+                params: {
+                  query: {
+                    stream: streamName,
+                  },
+                },
+              }
+            : {}),
+        }
+      );
 
-      const histogramFetch = {
+      const docCountsFetch: StreamDocCountsFetch = {
         docCount: countPromise,
         failedDocCount: failedCountPromise,
         degradedDocCount: degradedCountPromise,
       };
 
-      promiseCache.current[streamName] = histogramFetch;
+      docCountsPromiseCache.current = docCountsFetch;
 
-      return histogramFetch;
+      return docCountsFetch;
+    },
+    getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
+      const cachedPromise = histogramPromiseCache.current[streamName];
+      if (cachedPromise) {
+        return cachedPromise;
+      }
+
+      const abortController = abortControllerRef.current;
+      if (!abortController) {
+        throw new Error('Abort controller not set');
+      }
+
+      const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+
+      const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
+
+      const histogramPromise = executeEsqlQuery({
+        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+        search: data.search.search,
+        signal: abortController.signal,
+        start: timeState.start,
+        end: timeState.end,
+      }) as Promise<UnparsedEsqlResponse>;
+
+      histogramPromiseCache.current[streamName] = histogramPromise;
+
+      return histogramPromise;
     },
   };
 }

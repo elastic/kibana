@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+export {
+  type HighContrastSeparatorOptions,
+  getHighContrastBorder,
+  getHighContrastSeparator,
+} from '@kbn/core-chrome-layout-utils';
 
 export const highContrastHoverStyle = ({ euiTheme }: UseEuiTheme) => `
     outline-color: var(--high-contrast-hover-indicator-color, ${euiTheme.border.color});
@@ -20,7 +27,8 @@ export const highContrastHoverStyle = ({ euiTheme }: UseEuiTheme) => `
 /**
  * Hook to get the high contrast mode hover styles for buttons.
  *
- * @returns The high contrast mode hover styles.
+ * @param selector - the selector to apply the high contrast mode hover styles to.
+ * @returns the high contrast mode hover styles.
  */
 export const useHighContrastModeStyles = (selector: string = '') => {
   const euiThemeContext = useEuiTheme();

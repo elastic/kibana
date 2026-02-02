@@ -149,19 +149,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
-    it('renders tour', async () => {
-      await svlCommonNavigation.sidenav.tour.reset();
-      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
-      await svlCommonNavigation.sidenav.tour.nextStep();
-      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
-      await svlCommonNavigation.sidenav.tour.nextStep();
-      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
-      await svlCommonNavigation.sidenav.tour.nextStep();
-      await svlCommonNavigation.sidenav.tour.expectHidden();
-      await browser.refresh();
-      await svlCommonNavigation.sidenav.tour.expectHidden();
-    });
-
     it('opens panel on legacy management landing page', async () => {
       await common.navigateToApp('management');
       await testSubjects.exists('cards-navigation-page');

@@ -15,7 +15,8 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/connector-schemas/jira/constants';
+
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
@@ -125,7 +126,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -144,7 +145,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"projectKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"projectKey\": Required`,
             });
           });
       });
@@ -168,7 +169,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -190,7 +191,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"email\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiToken\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"email\": Required;\n [2]: Field \"apiToken\": Required`,
             });
           });
       });
@@ -258,7 +259,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_union_discriminator\",\n    \"options\": [\n      \"getFields\",\n      \"getIncident\",\n      \"handshake\",\n      \"pushToService\",\n      \"issueTypes\",\n      \"fieldsByIssueType\",\n      \"issues\",\n      \"issue\"\n    ],\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'issueTypes' | 'fieldsByIssueType' | 'issues' | 'issue'\"\n  }\n]`,
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'issueTypes' | 'fieldsByIssueType' | 'issues' | 'issue'`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -276,7 +277,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"object\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -302,7 +303,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"summary\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.incident.summary\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -330,7 +331,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"commentId\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -357,7 +358,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subActionParams\",\n      \"comments\",\n      0,\n      \"comment\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -385,7 +386,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"custom\",\n    \"message\": \"The label label with spaces cannot contain spaces\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"labels\",\n      0\n    ]\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.incident.labels.0\": The label label with spaces cannot contain spaces`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -420,7 +421,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"custom\",\n    \"message\": \"A maximum of 20 fields in otherFields can be defined at a time.\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"otherFields\"\n    ]\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.incident.otherFields\": A maximum of 20 fields in otherFields can be defined at a time.`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -450,7 +451,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: [\n  {\n    \"code\": \"custom\",\n    \"message\": \"The following properties cannot be defined inside otherFields: summary.\",\n    \"path\": [\n      \"subActionParams\",\n      \"incident\",\n      \"otherFields\",\n      \"summary\"\n    ]\n  }\n]`,
+                message: `error validating action params: Field \"subActionParams.incident.otherFields.summary\": The following properties cannot be defined inside otherFields: summary.`,
                 errorSource: TaskErrorSource.USER,
               });
             });

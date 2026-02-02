@@ -36,6 +36,8 @@ import {
 } from '../../../../common/entity_analytics/asset_criticality';
 import { AssetCriticalityBadge } from '../asset_criticality';
 import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
+import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import { SecurityPageName } from '../../../../common/constants';
 
 const SpacedOrderedList = styled.ol`
   li {
@@ -141,7 +143,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.introText"
-              defaultMessage="Entity Risk Analytics surfaces risky hosts and users from within your environment."
+              defaultMessage="Entity Risk Analytics surfaces risky entities within your environment."
             />
           </p>
           <p>
@@ -203,7 +205,19 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep1"
-                defaultMessage="Only scores users and hosts (entities) associated with detection alerts that have not been closed."
+                defaultMessage="Only scores entities associated with detection alerts that have not been closed. This behavior is configurable in the {managementLink}."
+                values={{
+                  managementLink: (
+                    <SecuritySolutionLinkAnchor
+                      deepLinkId={SecurityPageName.entityAnalyticsManagement}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.riskInformation.managementScreenLink"
+                        defaultMessage="entity risk scoring management screen"
+                      />
+                    </SecuritySolutionLinkAnchor>
+                  ),
+                }}
               />
             </li>
             <li>
@@ -215,13 +229,14 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep3"
-                defaultMessage="If the 'Asset Criticality' feature is enabled in your space, entity risk scoring verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Asset Criticality' category."
+                defaultMessage="If an asset criticality level has been assigned to the entity, entity risk scoring retrieves the criticality level and applies a score modifier under the 'Asset Criticality' category."
               />
               <EuiSpacer size="s" />
               <EuiBasicTable
                 columns={getCriticalityLevelTableColumns()}
                 items={criticalityLevelTableItems}
                 data-test-subj="criticality-level-information-table"
+                tableCaption={i18n.CRITICALITY_LEVEL_TABLE_CAPTION}
               />
               <EuiSpacer size="s" />
             </li>
@@ -241,6 +256,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
                 columns={getRiskLevelTableColumns()}
                 items={riskLevelTableItems}
                 data-test-subj="risk-level-information-table"
+                tableCaption={i18n.ENTITY_RISK_LEVELS}
               />
               <EuiSpacer size="s" />
             </li>

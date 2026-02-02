@@ -385,6 +385,7 @@ describe('updateLastScheduledActions()', () => {
         },
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
       },
     });
   });
@@ -399,6 +400,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -416,6 +418,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -431,6 +434,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -450,6 +454,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -466,6 +471,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -484,6 +490,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -500,6 +507,7 @@ describe('updateLastScheduledActions()', () => {
       meta: {
         flappingHistory: [],
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -596,6 +604,7 @@ describe('toJSON', () => {
           },
           flappingHistory: [false, true],
           maintenanceWindowIds: [],
+          maintenanceWindowNames: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -663,6 +672,7 @@ describe('toRaw', () => {
         flappingHistory: [false, true, true],
         flapping: false,
         maintenanceWindowIds: [],
+        maintenanceWindowNames: [],
         uuid: expect.any(String),
         activeCount: 1,
       },
@@ -687,6 +697,7 @@ describe('setFlappingHistory', () => {
             false,
           ],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -720,6 +731,7 @@ describe('setFlapping', () => {
           "flapping": false,
           "flappingHistory": Array [],
           "maintenanceWindowIds": Array [],
+          "maintenanceWindowNames": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -776,7 +788,6 @@ describe('resetPendingRecoveredCount', () => {
     expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });
-
 describe('isFilteredOut', () => {
   const summarizedAlerts: CombinedSummarizedAlerts = {
     all: {
@@ -875,5 +886,24 @@ describe('resetActiveCount', () => {
     });
     alert.resetActiveCount();
     expect(alert.getActiveCount()).toEqual(0);
+  });
+});
+
+describe('isDelayed', () => {
+  test('returns false when status is not delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('active');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns false when status is not set', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.isDelayed()).toEqual(false);
+  });
+
+  test('returns true when status is delayed', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setStatus('delayed');
+    expect(alert.isDelayed()).toEqual(true);
   });
 });

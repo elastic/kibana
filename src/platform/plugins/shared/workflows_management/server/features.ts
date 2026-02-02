@@ -26,6 +26,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
   category: DEFAULT_APP_CATEGORIES.kibana,
   app: [],
   order: 3000,
+  minimumLicense: 'enterprise',
   privileges: {
     // Nothing at top level privileges, all specific actions are managed by sub_features privileges below
     all: { app: [], api: [], savedObject: { all: [], read: [] }, ui: [] },

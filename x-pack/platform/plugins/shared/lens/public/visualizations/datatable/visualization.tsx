@@ -41,8 +41,6 @@ import {
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
-import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
-import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { FormatFactory } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
@@ -51,7 +49,6 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DataTableToolbar } from './components/toolbar';
 import {
   defaultPaletteParams,
   findMinMaxByColumnId,
@@ -60,10 +57,15 @@ import {
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
-import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
+import {
+  DatatableAppearanceSettings,
+  getSimpleColumnType,
+  TableDimensionDataExtraEditor,
+  TableDimensionEditor,
+  TableDimensionEditorAdditionalSection,
+} from './components';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -125,6 +127,7 @@ export const getDatatableVisualization = ({
       columns: [],
       layerId: addNewLayer(),
       layerType: LayerTypes.DATA,
+      showRowNumbers: true,
     };
   },
 
@@ -260,7 +263,9 @@ export const getDatatableVisualization = ({
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: forceSuggestion ? 1 : (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
-          ...(state || {}),
+          ...(state || {
+            showRowNumbers: true,
+          }),
           layerId: table.layerId,
           layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
@@ -654,6 +659,7 @@ export const getDatatableVisualization = ({
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
       density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
+      showRowNumbers: state.showRowNumbers,
     }).toAst();
 
     return {
@@ -692,10 +698,6 @@ export const getDatatableVisualization = ({
       }
       return acc;
     }, []);
-  },
-
-  ToolbarComponent(props) {
-    return <DataTableToolbar {...props} />;
   },
 
   FlyoutToolbarComponent(props) {

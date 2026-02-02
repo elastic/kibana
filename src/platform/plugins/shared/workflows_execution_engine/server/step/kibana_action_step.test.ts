@@ -12,7 +12,7 @@ import type { KibanaActionStep } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -86,7 +86,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should extract fetcher options and not include them in request body', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test Case',
@@ -164,7 +164,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     it('should work without fetcher options', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test Case',
@@ -198,7 +198,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -234,7 +234,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -263,7 +263,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -297,7 +297,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -329,7 +329,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -362,7 +362,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',
@@ -399,7 +399,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
       const step: KibanaActionStep = {
         name: 'test_step',
-        type: 'kibana.createCaseDefaultSpace',
+        type: 'kibana.createCase',
         spaceId: 'default',
         with: {
           title: 'Test',

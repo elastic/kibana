@@ -6,12 +6,12 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
+import type { GetAllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { transformGetAllConnectorsResponseV2 } from '../get_all/transforms';
+import { transformGetAllConnectorsResponseV1 } from '../get_all/transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const getAllConnectorsIncludingSystemRoute = (
@@ -34,7 +34,8 @@ export const getAllConnectorsIncludingSystemRoute = (
           includeSystemActions: true,
         });
 
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV2(result);
+        const responseBody: GetAllConnectorsResponseV1 =
+          transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
     )

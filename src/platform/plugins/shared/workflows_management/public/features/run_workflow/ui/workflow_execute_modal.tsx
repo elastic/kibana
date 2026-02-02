@@ -24,8 +24,12 @@ import {
 import { css, Global } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { parseDocument } from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -39,7 +43,10 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   }
 
   const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  const hasInputs = definition.inputs && definition.inputs.length > 0;
+  // Check if inputs exist and have properties (handles both new and legacy formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  const hasInputs =
+    normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
   if (hasManualTrigger && hasInputs) {
     return 'manual';
@@ -49,17 +56,24 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
 
 interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
+  workflowId?: string;
+  isTestRun: boolean;
   onClose: () => void;
   onSubmit: (data: Record<string, unknown>) => void;
+  yamlString?: string;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, onClose, onSubmit }) => {
+  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
     const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
-    const [executionInput, setExecutionInput] = useState<string>('');
+    const { executionInput, setExecutionInput } = useExecutionInput({
+      workflowName: definition?.name || '',
+      workflowId,
+      selectedTrigger,
+    });
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
     const { euiTheme } = useEuiTheme();
@@ -77,16 +91,39 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [setExecutionInput, setSelectedTrigger]
     );
 
+    // Extract inputs from yamlString if definition.inputs is undefined
+    const inputs = useMemo(() => {
+      if (definition?.inputs) {
+        return definition.inputs;
+      }
+      if (yamlString) {
+        try {
+          const yamlDoc = parseDocument(yamlString);
+          const yamlJson = yamlDoc.toJSON();
+          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
+            return (yamlJson as Record<string, unknown>).inputs;
+          }
+        } catch (e) {
+          // Ignore errors when extracting from YAML
+        }
+      }
+      return undefined;
+    }, [definition?.inputs, yamlString]);
+
     const shouldAutoRun = useMemo(() => {
-      if (
-        definition &&
-        !definition.triggers?.some((trigger) => trigger.type === 'alert') &&
-        !definition.inputs
-      ) {
+      if (!definition) {
+        return false;
+      }
+      const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const hasInputs =
+        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+      if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
       return false;
-    }, [definition]);
+    }, [definition, inputs]);
 
     useEffect(() => {
       if (shouldAutoRun) {
@@ -99,26 +136,54 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      if (definition?.inputs) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const hasInputs =
+        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+      if (hasInputs) {
         setSelectedTrigger('manual');
       }
-    }, [shouldAutoRun, onSubmit, onClose, definition]);
+    }, [shouldAutoRun, onSubmit, onClose, definition, inputs]);
 
     if (shouldAutoRun) {
       // Not rendered if the workflow should auto run, will close the modal automatically
       return null;
     }
 
+    const modalTitle = isTestRun
+      ? {
+          id: 'workflows.workflowExecuteModal.testTitle',
+          defaultMessage: 'Test Workflow',
+        }
+      : {
+          id: 'workflows.workflowExecuteModal.runTitle',
+          defaultMessage: 'Run Workflow',
+        };
+
     return (
       <>
         {/*
         The following Global CSS is needed to ensure that modal will not overlay SearchBar's
-        autocomplete popup
+        autocomplete popup. The autocomplete popup has z-index 4001, so we need to ensure
+        the modal and its overlay don't block it.
       */}
         <Global
           styles={css`
             .euiOverlayMask:has(.workflowExecuteModal) {
               z-index: 4000;
+            }
+            /* Ensure query input container allows autocomplete to overflow */
+            .workflowExecuteModal [data-test-subj='workflow-query-input'] {
+              position: relative;
+              z-index: 1;
+            }
+            /* Allow autocomplete popup to render above modal */
+            .workflowExecuteModal .kbnQueryBar__textareaWrapOuter {
+              overflow: visible;
+            }
+            .workflowExecuteModal .kbnTypeahead,
+            .workflowExecuteModal .kbnTypeahead__popover {
+              z-index: 4002 !important;
             }
           `}
         />
@@ -130,7 +195,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           style={{ width: '1200px', height: '100vh' }}
         >
           <EuiModalHeader>
-            <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              {i18n.translate(modalTitle.id, { defaultMessage: modalTitle.defaultMessage })}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiFlexGroup direction="row" gutterSize="l">
@@ -190,7 +257,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             )}
             {selectedTrigger === 'manual' && (
               <WorkflowExecuteManualForm
-                definition={definition}
+                definition={
+                  definition
+                    ? {
+                        ...definition,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        inputs: inputs as any,
+                      }
+                    : null
+                }
                 value={executionInput}
                 errors={executionInputErrors}
                 setErrors={setExecutionInputErrors}

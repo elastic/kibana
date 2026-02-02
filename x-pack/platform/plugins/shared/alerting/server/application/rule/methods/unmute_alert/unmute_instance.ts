@@ -77,6 +77,8 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
     await updateRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       savedObjectsUpdateOptions: { version },
@@ -87,5 +89,14 @@ async function unmuteInstanceWithOCC(
         updatedAt: new Date().toISOString(),
       }),
     });
+
+    if (indices && indices.length > 0) {
+      await context.alertsService?.unmuteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }

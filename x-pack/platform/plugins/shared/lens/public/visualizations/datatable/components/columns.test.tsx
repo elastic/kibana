@@ -52,18 +52,17 @@ const callCreateGridColumns = (
     table: CreateGridColumnsParams[1];
     handleFilterClick: CreateGridColumnsParams[2];
     handleTransposedColumnClick: CreateGridColumnsParams[3];
-    isReadOnly: CreateGridColumnsParams[4];
-    columnConfig: CreateGridColumnsParams[5];
-    visibleColumns: CreateGridColumnsParams[6];
-    formatFactory: CreateGridColumnsParams[7];
-    onColumnResize: CreateGridColumnsParams[8];
-    onColumnHide: CreateGridColumnsParams[9];
-    alignments: CreateGridColumnsParams[10];
-    headerRowHeight: CreateGridColumnsParams[11];
-    headerRowLines: CreateGridColumnsParams[12];
-    columnCellValueActions: CreateGridColumnsParams[13];
-    closeCellPopover: CreateGridColumnsParams[14];
-    columnFilterable: CreateGridColumnsParams[15];
+    columnConfig: CreateGridColumnsParams[4];
+    visibleColumns: CreateGridColumnsParams[5];
+    formatFactory: CreateGridColumnsParams[6];
+    onColumnResize: CreateGridColumnsParams[7];
+    onColumnHide: CreateGridColumnsParams[8];
+    alignments: CreateGridColumnsParams[9];
+    headerRowHeight: CreateGridColumnsParams[10];
+    headerRowLines: CreateGridColumnsParams[11];
+    columnCellValueActions: CreateGridColumnsParams[12];
+    closeCellPopover: CreateGridColumnsParams[13];
+    columnFilterable: CreateGridColumnsParams[14];
   }> = {}
 ) =>
   createGridColumns(
@@ -71,7 +70,6 @@ const callCreateGridColumns = (
     params.table ?? table,
     params.handleFilterClick,
     params.handleTransposedColumnClick,
-    params.isReadOnly ?? false,
     params.columnConfig ?? { columns: [], sortingColumnId: undefined, sortingDirection: 'none' },
     params.visibleColumns ?? visibleColumns,
     params.formatFactory ?? (((x: unknown) => ({ convert: () => x })) as unknown as FormatFactory),

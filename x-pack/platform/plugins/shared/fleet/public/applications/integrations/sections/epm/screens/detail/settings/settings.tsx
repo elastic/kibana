@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -95,6 +96,7 @@ interface Props {
 export const SettingsPage: React.FC<Props> = memo(
   ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
     const authz = useAuthz();
+    const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
@@ -355,25 +357,47 @@ export const SettingsPage: React.FC<Props> = memo(
                         </h4>
                       </EuiTitle>
                       <EuiSpacer size="s" />
-                      <p>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageInstallDescription"
-                          defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
-                          values={{
-                            title,
-                          }}
-                        />
-                      </p>
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
+                      {canInstallPackages ? (
+                        <>
                           <p>
-                            <InstallButton
-                              {...packageInfo}
-                              disabled={packageMetadata?.has_policies}
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.packageInstallDescription"
+                              defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
+                              values={{
+                                title,
+                              }}
                             />
                           </p>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                          <EuiFlexGroup>
+                            <EuiFlexItem grow={false}>
+                              <p>
+                                <InstallButton
+                                  {...packageInfo}
+                                  disabled={packageMetadata?.has_policies}
+                                />
+                              </p>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      ) : (
+                        <EuiCallOut
+                          announceOnMount
+                          color="warning"
+                          iconType="lock"
+                          data-test-subj="installPermissionCallout"
+                          title={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequiredTitle"
+                              defaultMessage="Permission required"
+                            />
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.installPermissionRequired"
+                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                          />
+                        </EuiCallOut>
+                      )}
                     </div>
                   ) : (
                     <>

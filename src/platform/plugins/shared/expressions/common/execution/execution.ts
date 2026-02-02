@@ -14,21 +14,28 @@ import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import type { Subscription } from 'rxjs';
 import {
+  catchError,
   combineLatest,
   defer,
+  finalize,
   from,
   identity,
   isObservable,
   last,
+  map,
+  Observable,
   of,
+  pluck,
+  ReplaySubject,
+  shareReplay,
+  switchMap,
   takeWhile,
+  tap,
   throwError,
   timer,
-  Observable,
-  ReplaySubject,
 } from 'rxjs';
-import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
-import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { AbortError, calculateObjectHash, now } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Executor } from '../executor';
 import type { ExecutionContainer } from './container';
@@ -42,8 +49,8 @@ import type {
   ExpressionAstFunction,
   ExpressionAstNode,
 } from '../ast';
-import { parse, formatExpression, parseExpression } from '../ast';
-import type { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { formatExpression, parse, parseExpression } from '../ast';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
 import type { Datatable } from '../expression_types';
 import { getType } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
@@ -171,8 +178,11 @@ function throttle<T>(timeout: number) {
 function takeUntilAborted<T>(signal: AbortSignal) {
   return (source: Observable<T>) =>
     new Observable<T>((subscriber) => {
-      const throwAbortError = () => {
-        subscriber.error(new AbortError());
+      const throwAbortError = (e?: Event) => {
+        // If the execution was aborted due to end user cancellation, we still want to let
+        // the execution complete and handle the partial results
+        if ((e?.target as AbortSignal)?.reason !== AbortReason.CANCELED)
+          subscriber.error(new AbortError());
       };
 
       subscriber.add(source.subscribe(subscriber));
@@ -318,7 +328,9 @@ export class Execution<
       ),
       catchError((error) => {
         if (this.abortController.signal.aborted) {
-          this.childExecutions.forEach((childExecution) => childExecution.cancel());
+          this.childExecutions.forEach((childExecution) =>
+            childExecution.cancel(this.abortController.signal.reason)
+          );
 
           return of({ result: createAbortErrorValue(), partial: false });
         }
@@ -339,8 +351,8 @@ export class Execution<
   /**
    * Stop execution of expression.
    */
-  cancel() {
-    this.abortController.abort();
+  cancel(reason?: AbortReason) {
+    this.abortController.abort(reason);
   }
 
   /**
@@ -526,6 +538,7 @@ export class Execution<
           if (completionFlag && hash) {
             const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
+              // @ts-expect-error upgrade typescript v5.9.3
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
             this.functionCache.set(hash, {

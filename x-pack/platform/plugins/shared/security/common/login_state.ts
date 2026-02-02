@@ -15,6 +15,7 @@ export interface LoginSelectorProvider {
   description?: string;
   hint?: string;
   icon?: string;
+  origin?: string | string[];
 }
 
 export interface LoginSelector {

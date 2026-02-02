@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
 export const getInjectFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const enhancements = state.enhancements || {};
     const factory = getEmbeddableFactory(state.type);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
@@ -27,14 +25,10 @@ export const getInjectFunction = (
       updatedInput = factory.inject(updatedInput, references) as EmbeddableStateWithType;
     }
 
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      updatedInput.enhancements![key] = getEnhancement(key).inject(
-        enhancements[key] as SerializableRecord,
-        references
-      );
-    });
+    updatedInput.enhancements = enhancementsPersistableState.inject(
+      state.enhancements || {},
+      references
+    );
 
     return updatedInput;
   };

@@ -9,6 +9,8 @@ import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import type { Gap } from '../gap';
+import type { BackfillInitiator } from '../../../../common/constants';
+import { backfillInitiator } from '../../../../common/constants';
 import { adHocRunStatus } from '../../../../common/constants';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import type { ScheduledItem } from './utils';
@@ -23,6 +25,7 @@ interface ApplyScheduledBackfillsToGapParams {
   backfillClient: BackfillClient;
   actionsClient: ActionsClient;
   ruleId: string;
+  initiator: BackfillInitiator | undefined;
 }
 
 export const applyScheduledBackfillsToGap = async ({
@@ -34,6 +37,7 @@ export const applyScheduledBackfillsToGap = async ({
   backfillClient,
   actionsClient,
   ruleId,
+  initiator,
 }: ApplyScheduledBackfillsToGapParams) => {
   const hasFailedBackfillTask = scheduledItems.some(
     (scheduleItem) =>
@@ -49,6 +53,10 @@ export const applyScheduledBackfillsToGap = async ({
     gap,
     scheduledItems,
   });
+
+  if (initiator === backfillInitiator.SYSTEM && hasFailedBackfillTask) {
+    gap.incrementFailedAutoFillAttempts();
+  }
 
   if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
     await calculateGapStateFromAllBackfills({

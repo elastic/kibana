@@ -16,7 +16,7 @@ import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
 import type { ITaskMetricsService } from './task_metrics.types';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
-import { newTelemetryLogger } from './helpers';
+import { newTelemetryLogger, withErrorMessage } from './helpers';
 import { type TelemetryLogger } from './telemetry_logger';
 
 export interface SecurityTelemetryTaskConfig {
@@ -136,7 +136,7 @@ export class SecurityTelemetryTask {
         params: { version: this.config.version },
       });
     } catch (error) {
-      this.logger.error('Error scheduling task', { error });
+      this.logger.error('Error scheduling task', withErrorMessage(error));
     }
   };
 

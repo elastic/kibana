@@ -13,10 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  EuiText,
   EuiSpacer,
   EuiLink,
   EuiIconTip,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
@@ -328,8 +328,8 @@ export const DetailsItems: FC<{
 
   return (
     <>
-      {items.map(({ title, description }) => (
-        <>
+      {items.map(({ title, description }, index) => (
+        <React.Fragment key={`detail-item-${index}-${title}`}>
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem css={{ width: '180px' }} grow={false}>
               {title}
@@ -337,7 +337,7 @@ export const DetailsItems: FC<{
             <EuiFlexItem>{description}</EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-        </>
+        </React.Fragment>
       ))}
     </>
   );
@@ -577,25 +577,26 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 
   return (
     <div>
-      <EuiText size="xs">
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
-            defaultMessage="Anomaly explanation {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
-                  <FormattedMessage
-                    id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </h4>
-      </EuiText>
-
+      <EuiTitle size="xxs">
+        <h3>
+          <strong>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle"
+              defaultMessage="Anomaly explanation {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
+                    <FormattedMessage
+                      id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </strong>
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
 
       {explanationDetails.map(({ title, description }) => (
@@ -613,14 +614,16 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
       <EuiSpacer size="s" />
       {impactDetails.length ? (
         <>
-          <EuiText size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.ml.anomaliesTable.anomalyDetails.impactOnScoreTitle"
-                defaultMessage="Impact on initial score"
-              />
-            </h4>
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>
+              <strong>
+                <FormattedMessage
+                  id="xpack.ml.anomaliesTable.anomalyDetails.impactOnScoreTitle"
+                  defaultMessage="Impact on initial score"
+                />
+              </strong>
+            </h3>
+          </EuiTitle>
           <EuiSpacer size="s" />
 
           {impactDetails.map(({ title, description }) => (

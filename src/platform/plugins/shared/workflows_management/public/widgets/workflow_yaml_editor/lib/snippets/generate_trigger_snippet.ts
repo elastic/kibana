@@ -86,7 +86,9 @@ export function generateTriggerSnippet(
     return stringify(trigger, stringifyOptions);
   }
 
-  return stringify([{ type: triggerType, ...parameters }], stringifyOptions).replace('- type:', '');
+  return stringify([{ type: triggerType, ...parameters }], stringifyOptions)
+    .replace('- type:', '')
+    .trim();
 }
 
 /**

@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
+import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 export const SWIMLANE_TYPE = {
@@ -37,7 +37,7 @@ const anomalySwimlaneViewBySchema = schema.object({
 const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(schema.arrayOf(filterSchema)),
+  filters: schema.maybe(schema.arrayOf(storedFilterSchema)),
   query: schema.maybe(querySchema),
   timeRange: schema.maybe(timeRangeSchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),

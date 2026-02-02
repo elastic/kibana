@@ -11,7 +11,7 @@ import FieldsPreview from './case_fields_preview';
 
 import { theHiveConnector } from '../mock';
 import { renderWithTestingProviders } from '../../../common/mock';
-import { createQueryWithMarkup } from '../../../common/test_utils';
+import { tableMatchesExpectedContent } from '../../../common/test_utils';
 
 describe('TheHive Fields: Preview', () => {
   const fields = {
@@ -25,7 +25,9 @@ describe('TheHive Fields: Preview', () => {
   it('renders all fields correctly', () => {
     renderWithTestingProviders(<FieldsPreview connector={theHiveConnector} fields={fields} />);
 
-    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
-    expect(getByTextWithMarkup('TLP: GREEN')).toBeInTheDocument();
+    const rows = screen.getAllByTestId('card-list-item-row');
+    const expectedContent = [['TLP', 'GREEN']];
+
+    tableMatchesExpectedContent({ expectedContent, tableRows: rows });
   });
 });

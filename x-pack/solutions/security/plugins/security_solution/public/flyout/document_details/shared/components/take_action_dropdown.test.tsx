@@ -38,7 +38,7 @@ jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 
 jest.mock('../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -46,7 +46,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -124,7 +124,7 @@ describe('take action dropdown', () => {
     (useHttp as jest.Mock).mockReturnValue(mockStartServicesMock.http);
   });
 
-  afterEach(() => {
+  beforeEach(() => {
     (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
@@ -157,7 +157,12 @@ describe('take action dropdown', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
+        rulesPrivileges: {
+          rules: { read: true, edit: true },
+          exceptions: { read: true, edit: true },
+        },
       });
+
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown {...defaultProps} />
@@ -379,6 +384,17 @@ describe('take action dropdown', () => {
 
     describe('"Add Endpoint exception" button', () => {
       const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+
+      beforeEach(() => {
+        (useUserPrivileges as jest.Mock).mockReturnValue(
+          getUserPrivilegesMockDefaultValue({
+            rulesPrivileges: {
+              rules: { read: true, edit: true },
+              exceptions: { read: true, edit: true },
+            },
+          })
+        );
+      });
 
       test('should enable the "Add Endpoint exception" button if provided endpoint alert and has right privileges', async () => {
         set(defaultProps.dataAsNestedObject, 'kibana.alert.original_event.kind', ['alert']);

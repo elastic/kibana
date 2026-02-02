@@ -66,7 +66,7 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
       {showErrorCallout && (
         <>
           <EuiSpacer size={'s'} />
-          <EuiCallOut color="warning" iconType="warning" size="m">
+          <EuiCallOut announceOnMount color="warning" iconType="warning" size="m">
             <p>
               <FormattedMessage
                 id="xpack.transform.list.extendedStatsError"

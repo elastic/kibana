@@ -6,20 +6,36 @@
  */
 
 import expect from '@kbn/expect';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES, INVENTORY_PATH, METRICS_EXPLORER_PATH } from './constants';
+import {
+  INVENTORY_PATH,
+  METRICS_EXPLORER_PATH,
+  DATE_WITH_HOSTS_DATA,
+  DATE_WITH_HOSTS_DATA_FROM,
+  DATE_WITH_HOSTS_DATA_TO,
+  DATE_WITH_POD_DATA,
+  DATE_WITH_POD_DATA_FROM,
+  DATE_WITH_POD_DATA_TO,
+} from './constants';
+import { generateHostData, generatePodsData } from './helpers';
 
-const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
-const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
-const DATE_WITH_POD_WITH_DATA = DATES.metricsAndLogs.pods.withData;
+const DATE_WITHOUT_DATA = '10/09/2018 10:00:00 PM';
+
+const HOSTS = [
+  {
+    hostName: 'demo-stack-redis-01',
+    cpuValue: 0.5,
+  },
+];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'svlCommonPage']);
   const kibanaServer = getService('kibanaServer');
+  const synthtrace = getService('synthtrace');
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to inventory', timeout, async () => {
@@ -30,34 +46,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
   describe('Infra pages', function () {
+    let synthEsClient: InfraSynthtraceEsClient;
+
     before(async () => {
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
+
+      const clients = await synthtrace.getClients(['infraEsClient']);
+      synthEsClient = clients.infraEsClient;
+    });
+
+    after(async () => {
+      await synthEsClient.clean();
     });
 
     describe('Inventory page', function () {
       this.tags('includeFirefox');
+
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
       describe('with metrics present', () => {
         before(async () => {
-          await esArchiver.load(
-            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-          );
-          await esArchiver.load(
-            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
-          );
+          await synthEsClient.index([
+            generateHostData({
+              from: DATE_WITH_HOSTS_DATA_FROM,
+              to: DATE_WITH_HOSTS_DATA_TO,
+              hosts: HOSTS,
+            }),
+            generatePodsData({
+              from: DATE_WITH_POD_DATA_FROM,
+              to: DATE_WITH_POD_DATA_TO,
+              count: 1,
+            }),
+          ]);
           await pageObjects.common.navigateToApp(INVENTORY_PATH);
           await pageObjects.infraHome.waitForLoading();
         });
+
         after(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-          );
-          await esArchiver.unload(
-            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
-          );
+          await synthEsClient.clean();
         });
 
         it('renders the correct page title', async () => {
@@ -75,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('renders the waffle map and tooltips for dates with data', async () => {
-          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
           await pageObjects.infraHome.getWaffleMap();
         });
 
@@ -86,7 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Should redirect to Host Details page', async () => {
-            await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+            await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
             await pageObjects.infraHome.goToHost();
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.waitForLoading();
@@ -104,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('Should redirect to Node Details page', async () => {
             await pageObjects.infraHome.goToPods();
-            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
+            await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 
@@ -122,17 +150,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('Metrics explorer page', function () {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-        );
+        await synthEsClient.index([
+          generateHostData({
+            from: DATE_WITH_HOSTS_DATA_FROM,
+            to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS,
+          }),
+        ]);
         await pageObjects.common.navigateToApp(METRICS_EXPLORER_PATH);
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
+
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-        );
+        await synthEsClient.clean();
       });
 
       it('should be disabled', async () => {

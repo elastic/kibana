@@ -22,7 +22,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
-import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 
@@ -141,9 +140,7 @@ export const renderApp = ({
 };
 
 function App() {
-  const { isServerless } = usePluginContext();
-
-  const routes = getRoutes(isServerless);
+  const routes = getRoutes();
 
   return (
     <Routes enableExecutionContextTracking={true}>

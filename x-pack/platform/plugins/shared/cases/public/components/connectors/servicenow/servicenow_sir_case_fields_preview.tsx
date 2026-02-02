@@ -82,8 +82,15 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
     [choicesFormatted.subcategory, category]
   );
 
-  const listItems = useMemo(
-    () => [
+  const listItems = useMemo(() => {
+    let additionalFieldsParsed: Record<string, string> = {};
+    try {
+      additionalFieldsParsed = additionalFields ? JSON.parse(additionalFields) : {};
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing additional fields:', error, { additionalFields });
+    }
+    return [
       ...(destIp != null && destIp
         ? [
             {
@@ -142,29 +149,25 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
           ]
         : []),
       ...(additionalFields != null && additionalFields.length > 0
-        ? [
-            {
-              title: i18n.ADDITIONAL_FIELDS_LABEL,
-              description: additionalFields,
-              displayAsCodeBlock: true,
-            },
-          ]
+        ? Object.keys(additionalFieldsParsed).map((key) => ({
+            title: key,
+            description: additionalFieldsParsed[key],
+          }))
         : []),
-    ],
-    [
-      category,
-      categoryOptions,
-      destIp,
-      malwareHash,
-      malwareUrl,
-      priority,
-      priorityOptions,
-      sourceIp,
-      subcategory,
-      subcategoryOptions,
-      additionalFields,
-    ]
-  );
+    ];
+  }, [
+    category,
+    categoryOptions,
+    destIp,
+    malwareHash,
+    malwareUrl,
+    priority,
+    priorityOptions,
+    sourceIp,
+    subcategory,
+    subcategoryOptions,
+    additionalFields,
+  ]);
 
   return (
     <>

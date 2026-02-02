@@ -55,17 +55,13 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
             function serializeState() {
               if (savedObjectId !== undefined) {
                 return {
-                  rawState: {
-                    savedObjectId,
-                  },
+                  savedObjectId,
                 };
               }
 
               return {
-                rawState: {
-                  layout,
-                  links: serializeResolvedLinks(links ?? []),
-                },
+                layout,
+                links: serializeResolvedLinks(links ?? []),
               };
             }
 
@@ -78,6 +74,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       },
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
+        isResizable: false,
       },
     });
   },

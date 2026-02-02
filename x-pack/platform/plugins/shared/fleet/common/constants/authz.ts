@@ -8,7 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-export const SECURITY_SOLUTION_APP_ID = 'siemV4';
+export const SECURITY_SOLUTION_APP_ID = 'siemV5';
 
 export interface PrivilegeMapObject {
   appId: string;
@@ -120,6 +120,18 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readEventFilters',
   },
+  showEndpointExceptions: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'showEndpointExceptions',
+  },
+  crudEndpointExceptions: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'crudEndpointExceptions',
+  },
   writeGlobalArtifacts: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',
@@ -137,6 +149,18 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeSplit: '-',
     privilegeType: 'api',
     privilegeName: 'readPolicyManagement',
+  },
+  readScriptsManagement: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'readScriptsManagement',
+  },
+  writeScriptsManagement: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeScriptsManagement',
   },
   writeActionsLogManagement: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
