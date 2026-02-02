@@ -900,9 +900,33 @@ const InternalUnifiedDataTable = React.forwardRef<
       ]
     );
 
+    interface TimelineRowWithData {
+      data?: Array<{ field?: string; value?: Serializable }>;
+    }
+
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-      (fieldName, rowIndex) =>
-        displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
+      (fieldName, rowIndex) => {
+        if (!displayedRows.length) {
+          return undefined;
+        }
+
+        const row = displayedRows[rowIndex % displayedRows.length];
+
+        const flattenedValue = row.flattened[fieldName];
+
+        if (flattenedValue !== undefined) {
+          return flattenedValue as Serializable;
+        }
+
+        // UnifiedDataTable builds `flattened` from `_source` only. For timeline rows, `_source`
+        // is the ECS object, while some fields exist only in the timeline `data` array.
+        // Cell actions (filter/copy/add) need those non-ECS values too.
+        // Fall back to the timeline-specific `data` array when the field isn't in ECS.
+        const rowData = (row as TimelineRowWithData).data;
+        const dataValue = rowData?.find((item) => item.field === fieldName)?.value;
+
+        return dataValue;
+      },
       [displayedRows]
     );
 

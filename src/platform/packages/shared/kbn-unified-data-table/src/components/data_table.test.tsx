@@ -66,6 +66,18 @@ const dataViewMock = buildDataViewMock({
   timeFieldName: '@timestamp',
 });
 
+interface TimelineRowWithData extends DataTableRecord {
+  data: Array<{ field: string; value: string[] }>;
+}
+
+const buildTimelineRowWithData = (
+  hit: EsHitRecord,
+  data: TimelineRowWithData['data']
+): TimelineRowWithData => ({
+  ...buildDataTableRecord(hit, dataViewMock),
+  data,
+});
+
 function getProps(): UnifiedDataTableProps {
   const services = servicesMock;
   services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
@@ -453,6 +465,34 @@ describe('UnifiedDataTable', () => {
           },
           disableCellActions: false,
         });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should fall back to timeline data when flattened value is missing',
+      async () => {
+        const rowWithData = buildTimelineRowWithData(
+          {
+            _index: 'i',
+            _id: '1',
+            _source: {},
+          },
+          [{ field: 'agent.version', value: ['8.0.0'] }]
+        );
+
+        await getComponent({
+          ...getProps(),
+          columns: ['agent.version'],
+          cellActionsTriggerId: 'test',
+          rows: [rowWithData],
+          columnsMeta: { 'agent.version': { type: 'string' as DatatableColumnType } },
+        });
+
+        const { getCellValue } = mockUseDataGridColumnsCellActions.mock.calls[0][0] as {
+          getCellValue: (fieldName: string, rowIndex: number) => unknown;
+        };
+        expect(getCellValue('agent.version', 0)).toEqual(['8.0.0']);
       },
       EXTENDED_JEST_TIMEOUT
     );
