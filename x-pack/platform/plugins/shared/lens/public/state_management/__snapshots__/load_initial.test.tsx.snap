@@ -20,6 +20,7 @@ Object {
       },
     },
     "filters": Array [],
+    "hideTextBasedEditor": undefined,
     "isFullscreenDatasource": false,
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
