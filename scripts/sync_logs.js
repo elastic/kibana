@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Sync documents from a source Elasticsearch cluster to a destination cluster.
  * Runs in a loop: each cycle fetches documents (24h @timestamp window), transforms,
@@ -19,14 +28,15 @@
 
 require('@kbn/setup-node-env');
 
-const path = require('path');
-const fs = require('fs');
-const yaml = require('js-yaml');
-const getopts = require('getopts');
-const { Client } = require('@elastic/elasticsearch');
+var path = require('path');
+var fs = require('fs');
+var yaml = require('js-yaml');
+var getopts = require('getopts');
+var elasticsearch = require('@elastic/elasticsearch');
+var Client = elasticsearch.Client;
 
-const requestTimeoutMs = 30_000;
-const BASE_QUERY = {
+var requestTimeoutMs = 30000;
+var BASE_QUERY = {
   bool: {
     must: [
       { match_all: {} },
@@ -44,49 +54,63 @@ const BASE_QUERY = {
  * Uses config file (default config/kibana.dev.yml or --config), then env overrides.
  */
 function readKibanaConfig(configPath, log) {
-  const configPathToUse = path.resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
-  let esConfigValues = {};
+  var configPathToUse = path.resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
+  var esConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
     try {
-      const loaded = yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {};
+      var loaded = yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {};
       // Support flat keys (elasticsearch.hosts) or nested (elasticsearch: { hosts })
       if (loaded.elasticsearch && typeof loaded.elasticsearch === 'object') {
         esConfigValues = loaded.elasticsearch;
       } else {
-        for (const [key, value] of Object.entries(loaded)) {
-          if (key.startsWith('elasticsearch.') && value != null) {
-            const sub = key.slice('elasticsearch.'.length);
-            esConfigValues[sub] = Array.isArray(value) ? value[0] : value;
+        for (var key in loaded) {
+          if (Object.prototype.hasOwnProperty.call(loaded, key)) {
+            var value = loaded[key];
+            if (key.startsWith('elasticsearch.') && value != null) {
+              var sub = key.slice('elasticsearch.'.length);
+              esConfigValues[sub] = Array.isArray(value) ? value[0] : value;
+            }
           }
         }
       }
     } catch (err) {
-      if (log) log(`Warning: could not read config ${configPathToUse}: ${err.message}`);
+      if (log) log('Warning: could not read config ' + configPathToUse + ': ' + err.message);
     }
   } else if (log) {
-    log(`Config file not found at ${configPathToUse}; using env or defaults for destination.`);
+    log('Config file not found at ' + configPathToUse + '; using env or defaults for destination.');
   }
 
-  const envOverrides = {};
-  const esHost = process.env.ELASTICSEARCH_HOST;
-  const esUser = process.env.ELASTICSEARCH_USERNAME;
-  const esPass = process.env.ELASTICSEARCH_PASSWORD;
+  var envOverrides = {};
+  var esHost = process.env.ELASTICSEARCH_HOST;
+  var esUser = process.env.ELASTICSEARCH_USERNAME;
+  var esPass = process.env.ELASTICSEARCH_PASSWORD;
   if (esHost) envOverrides.hosts = esHost;
   if (esUser) envOverrides.username = esUser;
   if (esPass) envOverrides.password = esPass;
 
-  return {
+  var baseConfig = {
     hosts: 'http://localhost:9200',
     username: 'elastic',
     password: 'changeme',
-    ...esConfigValues,
-    ...envOverrides,
   };
+
+  Object.keys(esConfigValues).forEach(function (key) {
+    baseConfig[key] = esConfigValues[key];
+  });
+
+  Object.keys(envOverrides).forEach(function (key) {
+    baseConfig[key] = envOverrides[key];
+  });
+
+  return baseConfig;
 }
 
-function parseConfig(log = () => {}) {
-  const opts = getopts(process.argv.slice(2), {
+function parseConfig(log) {
+  if (log === void 0) {
+    log = function () {};
+  }
+  var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose', c: 'config' },
     boolean: ['help', 'verbose', 'no-verify-certs'],
     string: [
@@ -104,42 +128,47 @@ function parseConfig(log = () => {}) {
   });
 
   // Helper: CLI flag > env var > default (getopts sets "" for missing string opts)
-  const get = (opt, envVar, fallback) =>
-    opts[opt]?.trim() || process.env[envVar]?.trim() || fallback;
+  var get = function (opt, envVar, fallback) {
+    var optValue = opts[opt];
+    var envValue = process.env[envVar];
+    return (optValue && optValue.trim()) || (envValue && envValue.trim()) || fallback;
+  };
 
-  const sourceHost = get('source-host', 'SOURCE_ELASTICSEARCH_HOST', undefined);
-  const sourceApiKey = get('source-api-key', 'SOURCE_ELASTICSEARCH_API_KEY', undefined);
-  const indexPattern = get('index-pattern', 'SYNC_INDEX_PATTERN', 'logs*');
-  const size = get('size', 'SYNC_SIZE', '100');
-  const interval = get('interval', 'SYNC_INTERVAL_SECONDS', '1');
-  const sampleMode = get('sample-mode', 'SYNC_SAMPLE_MODE', 'random');
-  const randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
-  const targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
-  const batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
+  var sourceHost = get('source-host', 'SOURCE_ELASTICSEARCH_HOST', undefined);
+  var sourceApiKey = get('source-api-key', 'SOURCE_ELASTICSEARCH_API_KEY', undefined);
+  var indexPattern = get('index-pattern', 'SYNC_INDEX_PATTERN', 'logs*');
+  var size = get('size', 'SYNC_SIZE', '100');
+  var interval = get('interval', 'SYNC_INTERVAL_SECONDS', '1');
+  var sampleMode = get('sample-mode', 'SYNC_SAMPLE_MODE', 'random');
+  var randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
+  var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
+  var batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
 
-  const destEsConfig = readKibanaConfig(opts.config, log);
-  const destHost =
-    typeof destEsConfig.hosts === 'string'
-      ? destEsConfig.hosts
-      : Array.isArray(destEsConfig.hosts)
-      ? destEsConfig.hosts[0]
-      : 'http://localhost:9200';
+  var destEsConfig = readKibanaConfig(opts.config, log);
+  var destHost;
+  if (typeof destEsConfig.hosts === 'string') {
+    destHost = destEsConfig.hosts;
+  } else if (Array.isArray(destEsConfig.hosts)) {
+    destHost = destEsConfig.hosts[0];
+  } else {
+    destHost = 'http://localhost:9200';
+  }
 
-  const config = {
-    sourceHost,
-    sourceApiKey,
+  var config = {
+    sourceHost: sourceHost,
+    sourceApiKey: sourceApiKey,
     destHost: destHost.replace(/\/$/, ''),
     destUsername: destEsConfig.username || 'elastic',
     destPassword: destEsConfig.password || 'changeme',
-    indexPattern,
+    indexPattern: indexPattern,
     size: parseInt(size, 10),
     intervalSeconds: parseFloat(interval),
-    sampleMode,
+    sampleMode: sampleMode,
     randomSeed: randomSeed !== undefined ? parseInt(randomSeed, 10) : null,
-    targetIndex,
+    targetIndex: targetIndex,
     batchSize: parseInt(batchSize, 10),
-    noVerifyCerts: opts['no-verify-certs'] ?? false,
-    verbose: opts.verbose ?? false,
+    noVerifyCerts: opts['no-verify-certs'] || false,
+    verbose: opts.verbose || false,
   };
 
   if (!config.sourceHost || !config.sourceApiKey) {
@@ -168,10 +197,10 @@ function parseConfig(log = () => {}) {
   return config;
 }
 
-function createSourceClient(config, log) {
-  const node = config.sourceHost.replace(/\/$/, '');
-  const client = new Client({
-    node,
+function createSourceClient(config) {
+  var node = config.sourceHost.replace(/\/$/, '');
+  var client = new Client({
+    node: node,
     auth: { apiKey: config.sourceApiKey },
     requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
@@ -179,10 +208,10 @@ function createSourceClient(config, log) {
   return client;
 }
 
-function createDestClient(config, log) {
-  const node = config.destHost.replace(/\/$/, '');
-  const client = new Client({
-    node,
+function createDestClient(config) {
+  var node = config.destHost.replace(/\/$/, '');
+  var client = new Client({
+    node: node,
     auth: { username: config.destUsername, password: config.destPassword },
     requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
@@ -190,56 +219,67 @@ function createDestClient(config, log) {
   return client;
 }
 
-async function pingCluster(client, label, log) {
-  try {
-    const info = await client.info();
-    const name = info.cluster_name ?? 'unknown';
-    const version = info.version?.number ?? 'unknown';
-    log(`[${label}] Connected: ${name} (${version})`);
-  } catch (err) {
-    log(`[${label}] Connection failed: ${err.message}`);
-    throw err;
-  }
+function pingCluster(client, label, log) {
+  return client
+    .info()
+    .then(function (info) {
+      var name = (info.body ? info.body.cluster_name : info.cluster_name) || 'unknown';
+      var version =
+        (info.body
+          ? info.body.version && info.body.version.number
+          : info.version && info.version.number) || 'unknown';
+      log('[' + label + '] Connected: ' + name + ' (' + version + ')');
+    })
+    .catch(function (err) {
+      log('[' + label + '] Connection failed: ' + err.message);
+      throw err;
+    });
 }
 
 function search(sourceClient, config, cycleNumber, log) {
-  const size = config.size;
-  const indexPattern = config.indexPattern;
-  let body;
+  var size = config.size;
+  var indexPattern = config.indexPattern;
+  var body;
   if (config.sampleMode === 'recent') {
     body = {
       query: BASE_QUERY,
       sort: [{ '@timestamp': { order: 'desc' } }],
-      size,
+      size: size,
     };
   } else {
-    const seed =
-      config.randomSeed !== null ? config.randomSeed : (config.runSeed ?? Date.now()) + cycleNumber;
+    var seed =
+      config.randomSeed !== null ? config.randomSeed : (config.runSeed || Date.now()) + cycleNumber;
     body = {
       query: {
         function_score: {
           query: BASE_QUERY,
-          functions: [{ random_score: { seed } }],
+          functions: [{ random_score: { seed: seed } }],
           score_mode: 'sum',
         },
       },
-      size,
+      size: size,
     };
   }
 
   return sourceClient
-    .search({ index: indexPattern, body })
-    .then((res) => {
-      const hits = res.hits?.hits ?? [];
-      return hits.map((hit) => ({
-        _index: hit._index,
-        _id: hit._id,
-        _source: hit._source ?? {},
-        ...(hit._score != null && { _score: hit._score }),
-      }));
+    .search({ index: indexPattern, body: body })
+    .then(function (res) {
+      var hits =
+        (res.body && res.body.hits && res.body.hits.hits) || (res.hits && res.hits.hits) || [];
+      return hits.map(function (hit) {
+        var result = {
+          _index: hit._index,
+          _id: hit._id,
+          _source: hit._source || {},
+        };
+        if (hit._score != null) {
+          result._score = hit._score;
+        }
+        return result;
+      });
     })
-    .catch((err) => {
-      log(`Search failed: ${err.message}`);
+    .catch(function (err) {
+      log('Search failed: ' + err.message);
       return [];
     });
 }
@@ -248,17 +288,20 @@ function search(sourceClient, config, cycleNumber, log) {
 // As these fields are constant keywords in the data stream naming scheme, it would mean only documents
 // with the same data stream fields would be accepted.
 function stripDataStreamFields(doc) {
-  const src = doc._source;
+  var src = doc._source;
   if (!src || typeof src !== 'object') return;
-  for (const key of Object.keys(src)) {
-    if (key.startsWith('data_stream.')) {
-      delete src[key];
+  for (var key in src) {
+    if (Object.prototype.hasOwnProperty.call(src, key)) {
+      if (key.startsWith('data_stream.')) {
+        delete src[key];
+      }
     }
   }
 }
 
 function transform(docs, targetIndex) {
-  for (const doc of docs) {
+  for (var i = 0; i < docs.length; i++) {
+    var doc = docs[i];
     stripDataStreamFields(doc);
     if (targetIndex) {
       doc._index = targetIndex;
@@ -269,107 +312,136 @@ function transform(docs, targetIndex) {
 function backingIndexToStreamName(index) {
   if (typeof index !== 'string') return index;
   if (!index.startsWith('.ds-')) return index;
-  const withoutPrefix = index.slice(4);
-  const parts = withoutPrefix.split('-');
+  var withoutPrefix = index.slice(4);
+  var parts = withoutPrefix.split('-');
   if (parts.length >= 3) {
     return parts.slice(0, -2).join('-');
   }
   return index;
 }
 
-async function ensureDataStreamExists(destClient, name, log) {
-  try {
-    await destClient.indices.getDataStream({ name });
-    return true;
-  } catch (err) {
-    if (err.meta?.statusCode === 404) {
-      try {
-        await destClient.indices.createDataStream({ name });
-        log(`Created data stream: ${name}`);
-        return true;
-      } catch (createErr) {
-        log(`Failed to create data stream ${name}: ${createErr.message}`);
-        return false;
+function ensureDataStreamExists(destClient, name, log) {
+  return destClient.indices
+    .getDataStream({ name: name })
+    .then(function () {
+      return true;
+    })
+    .catch(function (err) {
+      if (err.meta && err.meta.statusCode === 404) {
+        return destClient.indices
+          .createDataStream({ name: name })
+          .then(function () {
+            log('Created data stream: ' + name);
+            return true;
+          })
+          .catch(function (createErr) {
+            log('Failed to create data stream ' + name + ': ' + createErr.message);
+            return false;
+          });
       }
-    }
-    log(`Failed to get data stream ${name}: ${err.message}`);
-    return false;
-  }
+      log('Failed to get data stream ' + name + ': ' + err.message);
+      return false;
+    });
 }
 
-async function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, batchSize, log) {
-  if (docs.length === 0) return 0;
+function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, batchSize, log) {
+  if (docs.length === 0) return Promise.resolve(0);
 
-  const exists = await ensureDataStreamExists(destClient, targetStreamOrIndex, log);
-  if (!exists) return 0;
+  return ensureDataStreamExists(destClient, targetStreamOrIndex, log).then(function (exists) {
+    if (!exists) return 0;
 
-  let totalUploaded = 0;
-  for (let i = 0; i < docs.length; i += batchSize) {
-    const batch = docs.slice(i, i + batchSize);
-    const operations = [];
-    for (const doc of batch) {
-      // Do not send _id so ES auto-generates; avoids "document already exists" when same doc is synced again
-      operations.push({ create: { _index: targetStreamOrIndex } });
-      operations.push(doc._source ?? doc);
-    }
+    var totalUploaded = 0;
+    var chain = Promise.resolve();
 
-    try {
-      const response = await destClient.bulk({
-        operations,
-        refresh: false,
-      });
-
-      if (response.errors) {
-        const items = response.items ?? [];
-        for (const item of items) {
-          const create = item.create;
-          if (create?.error) {
-            log(
-              `Bulk create error [${create._index}] (ES _id: ${create._id ?? 'auto-generated'}): ${
-                create.error.reason ?? JSON.stringify(create.error)
-              }`
-            );
-          } else if (create) {
-            totalUploaded += 1;
-          }
+    var createBulkRequest = function (batch) {
+      return function () {
+        var operations = [];
+        for (var j = 0; j < batch.length; j++) {
+          var doc = batch[j];
+          operations.push({ create: { _index: targetStreamOrIndex } });
+          operations.push(doc._source || doc);
         }
-      } else {
-        totalUploaded += batch.length;
-      }
-    } catch (err) {
-      log(`Bulk request failed: ${err.message}`);
+
+        return destClient
+          .bulk({
+            operations: operations,
+            refresh: false,
+          })
+          .then(function (response) {
+            var res = response.body || response;
+            if (res.errors) {
+              var items = res.items || [];
+              for (var k = 0; k < items.length; k++) {
+                var item = items[k];
+                var create = item.create;
+                if (create && create.error) {
+                  log(
+                    'Bulk create error [' +
+                      create._index +
+                      '] (ES _id: ' +
+                      (create._id || 'auto-generated') +
+                      '): ' +
+                      (create.error.reason || JSON.stringify(create.error))
+                  );
+                } else if (create) {
+                  totalUploaded += 1;
+                }
+              }
+            } else {
+              totalUploaded += batch.length;
+            }
+          })
+          .catch(function (err) {
+            log('Bulk request failed: ' + err.message);
+          });
+      };
+    };
+
+    for (var i = 0; i < docs.length; i += batchSize) {
+      var batch = docs.slice(i, i + batchSize);
+      chain = chain.then(createBulkRequest(batch));
     }
-  }
-  return totalUploaded;
+
+    return chain.then(function () {
+      return totalUploaded;
+    });
+  });
 }
 
-async function runSyncCycle(sourceClient, destClient, config, cycleNumber, log) {
-  const docs = await search(sourceClient, config, cycleNumber, log);
-  if (docs.length === 0) return 0;
-  transform(docs, config.targetIndex);
+function runSyncCycle(sourceClient, destClient, config, cycleNumber, log) {
+  return search(sourceClient, config, cycleNumber, log).then(function (docs) {
+    if (docs.length === 0) return 0;
+    transform(docs, config.targetIndex);
 
-  if (config.targetIndex) {
-    return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
-  }
+    if (config.targetIndex) {
+      return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
+    }
 
-  const byStream = new Map();
-  for (const doc of docs) {
-    const streamName = backingIndexToStreamName(doc._index);
-    if (!byStream.has(streamName)) byStream.set(streamName, []);
-    byStream.get(streamName).push(doc);
-  }
+    var byStream = {};
+    for (var i = 0; i < docs.length; i++) {
+      var doc = docs[i];
+      var streamName = backingIndexToStreamName(doc._index);
+      if (!byStream[streamName]) byStream[streamName] = [];
+      byStream[streamName].push(doc);
+    }
 
-  let total = 0;
-  for (const [streamName, groupDocs] of byStream) {
-    total += await uploadDocumentsToStream(
-      destClient,
-      groupDocs,
-      streamName,
-      config.batchSize,
-      log
-    );
-  }
-  return total;
+    var total = 0;
+    var streamPromises = [];
+    Object.keys(byStream).forEach(function (streamName) {
+      var groupDocs = byStream[streamName];
+      streamPromises.push(
+        uploadDocumentsToStream(destClient, groupDocs, streamName, config.batchSize, log).then(
+          function (uploaded) {
+            total += uploaded;
+          }
+        )
+      );
+    });
+
+    return Promise.all(streamPromises).then(function () {
+      return total;
+    });
+  });
 }
 
 function showHelp() {
@@ -405,8 +477,8 @@ Other:
 `);
 }
 
-async function main() {
-  const opts = getopts(process.argv.slice(2), {
+function main() {
+  var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose' },
     boolean: ['help', 'verbose'],
   });
@@ -415,60 +487,83 @@ async function main() {
     process.exit(0);
   }
 
-  const config = parseConfig();
-  const log = config.verbose
-    ? (msg) => console.log(`[${new Date().toISOString()}] ${msg}`)
-    : (msg) => console.log(msg);
+  var config = parseConfig();
+  var log = config.verbose
+    ? function (msg) {
+        console.log('[' + new Date().toISOString() + '] ' + msg);
+      }
+    : function (msg) {
+        console.log(msg);
+      };
 
   if (config.randomSeed === null) {
     config.runSeed = Date.now();
   }
 
-  const sourceClient = createSourceClient(config, log);
-  const destClient = createDestClient(config, log);
+  var sourceClient = createSourceClient(config);
+  var destClient = createDestClient(config);
 
-  await pingCluster(sourceClient, 'source', log);
-  await pingCluster(destClient, 'dest', log);
-
-  let shutdownRequested = false;
-  const onSignal = () => {
+  var shutdownRequested = false;
+  var onSignal = function () {
     shutdownRequested = true;
     log('Shutdown requested; finishing current cycle...');
   };
   process.on('SIGINT', onSignal);
   process.on('SIGTERM', onSignal);
 
-  let cycle = 0;
-  while (!shutdownRequested) {
-    cycle += 1;
-    try {
-      const pushed = await runSyncCycle(sourceClient, destClient, config, cycle, log);
-      log(`Cycle ${cycle}: pushed ${pushed} documents`);
-    } catch (err) {
-      log(`Cycle ${cycle} failed: ${err.message}`);
+  var cycle = 0;
+  function loop() {
+    if (shutdownRequested) {
+      log('Sync stopped.');
+      process.exit(0);
+      return;
     }
-    if (shutdownRequested) break;
-    await new Promise((r) => setTimeout(r, config.intervalSeconds * 1000));
+    cycle += 1;
+    runSyncCycle(sourceClient, destClient, config, cycle, log)
+      .then(function (pushed) {
+        log('Cycle ' + cycle + ': pushed ' + pushed + ' documents');
+        if (shutdownRequested) {
+          log('Sync stopped.');
+          process.exit(0);
+        } else {
+          setTimeout(loop, config.intervalSeconds * 1000);
+        }
+      })
+      .catch(function (err) {
+        log('Cycle ' + cycle + ' failed: ' + err.message);
+        if (shutdownRequested) {
+          log('Sync stopped.');
+          process.exit(0);
+        } else {
+          setTimeout(loop, config.intervalSeconds * 1000);
+        }
+      });
   }
 
-  log('Sync stopped.');
-  process.exit(0);
+  pingCluster(sourceClient, 'source', log)
+    .then(function () {
+      return pingCluster(destClient, 'dest', log);
+    })
+    .then(function () {
+      loop();
+    })
+    .catch(function (err) {
+      console.error('Fatal:', err);
+      process.exit(1);
+    });
 }
 
 if (require.main === module) {
-  main().catch((err) => {
-    console.error('Fatal:', err);
-    process.exit(1);
-  });
+  main();
 }
 
 module.exports = {
-  parseConfig,
-  createSourceClient,
-  createDestClient,
-  search,
-  transform,
-  backingIndexToStreamName,
-  uploadDocumentsToStream,
-  runSyncCycle,
+  parseConfig: parseConfig,
+  createSourceClient: createSourceClient,
+  createDestClient: createDestClient,
+  search: search,
+  transform: transform,
+  backingIndexToStreamName: backingIndexToStreamName,
+  uploadDocumentsToStream: uploadDocumentsToStream,
+  runSyncCycle: runSyncCycle,
 };
