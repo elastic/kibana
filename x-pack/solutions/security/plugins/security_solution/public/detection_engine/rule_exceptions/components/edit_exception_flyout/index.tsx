@@ -110,7 +110,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
-  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
 
   const [
     {
@@ -161,7 +161,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     useFindExceptionListReferences();
 
   useEffect(() => {
-    if (fetchReferences != null && canReadRules) {
+    if (fetchReferences != null && canReadExceptions) {
       fetchReferences([
         {
           id: list.id,
@@ -170,7 +170,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         },
       ]);
     }
-  }, [list, fetchReferences, canReadRules]);
+  }, [list, fetchReferences, canReadExceptions]);
 
   /**
    * Reducer action dispatchers

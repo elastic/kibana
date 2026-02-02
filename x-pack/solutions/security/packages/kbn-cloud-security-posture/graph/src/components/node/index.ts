@@ -12,3 +12,4 @@ export { PentagonNode } from './pentagon_node';
 export { RectangleNode } from './rectangle_node';
 export { LabelNode } from './label_node/label_node';
 export { EdgeGroupNode } from './edge_group_node';
+export { RelationshipNode } from './relationship_node/relationship_node';
