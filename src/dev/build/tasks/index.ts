@@ -9,6 +9,7 @@
 
 export * from './bin';
 export * from './build_kibana_platform_plugins';
+export * from './build_kibana_platform_plugins_vite';
 export * from './build_packages_task';
 export * from './clean_tasks';
 export * from './copy_legacy_source_task';

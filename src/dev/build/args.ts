@@ -49,6 +49,7 @@ export function readCliArgs(argv: string[]) {
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
+      'use-vite',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -154,6 +155,7 @@ export function readCliArgs(argv: string[]) {
     eprRegistry: flags['epr-registry'],
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
+    useVite: Boolean(flags['use-vite']),
   };
 
   return {

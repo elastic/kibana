@@ -43,6 +43,7 @@ export interface BuildOptions {
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
+  useVite: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
@@ -76,7 +77,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    // Use Vite or webpack-based plugin build depending on flag
+    if (options.useVite) {
+      await globalRun(Tasks.BuildKibanaPlatformPluginsVite);
+    } else {
+      await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    }
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
