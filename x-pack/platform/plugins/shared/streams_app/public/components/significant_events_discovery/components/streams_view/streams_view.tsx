@@ -26,7 +26,7 @@ import pMap from 'p-map';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
-import { useInsightsApi } from '../../../../hooks/use_insights_api';
+import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { formatChangePoint } from '../../utils/change_point';
@@ -58,7 +58,7 @@ export function StreamsView() {
     Record<string, TaskResult<OnboardingResult>>
   >({});
   const aiFeatures = useAIFeatures();
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useInsightsApi(
+  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );
   const onStreamStatusUpdate = useCallback(
