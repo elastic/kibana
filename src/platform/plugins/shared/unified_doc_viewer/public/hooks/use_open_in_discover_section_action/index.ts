@@ -44,14 +44,17 @@ export function useOpenInDiscoverSectionAction(
       return undefined;
     }
 
-    // TODO: unify repeated return
+    const actionBase = {
+      dataTestSubj,
+      label: OPEN_IN_DISCOVER_LABEL,
+      icon: 'discoverApp',
+      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+    };
+
     if (href) {
       return {
-        dataTestSubj,
-        label: OPEN_IN_DISCOVER_LABEL,
+        ...actionBase,
         href,
-        icon: 'discoverApp',
-        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
         onClick: canOpenInNewTab ? onClick : undefined,
       };
     }
@@ -61,10 +64,7 @@ export function useOpenInDiscoverSectionAction(
     }
 
     return {
-      dataTestSubj,
-      label: OPEN_IN_DISCOVER_LABEL,
-      icon: 'discoverApp',
-      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+      ...actionBase,
       onClick,
     };
   }, [canOpenInNewTab, dataTestSubj, href, onClick]);
