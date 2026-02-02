@@ -545,10 +545,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const ancestors = desiredState
       .all()
-      .filter((stream) => {
-        return isDescendantOf(stream.definition.name, this._definition.name);
+      .filter((stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> => {
+        return (
+          isDescendantOf(stream.definition.name, this._definition.name) &&
+          Streams.WiredStream.Definition.is(stream.definition)
+        );
       })
-      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+      .map((stream) => stream.definition);
 
     const descendants = desiredState
       .all()
