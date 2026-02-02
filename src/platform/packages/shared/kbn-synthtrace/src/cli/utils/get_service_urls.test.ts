@@ -32,9 +32,7 @@ describe('getServiceUrls', () => {
 
   describe('localhost Stateful', () => {
     it('should discover local service urls and auth if none provided', async () => {
-      const expectedValidAuth = 'elastic:changeme';
-
-      mockFetchWithAllowedSegments([expectedValidAuth, 'http://localhost:5601']);
+      mockFetchWithAllowedSegments(['http://localhost:9200', 'http://localhost:5601'], 1);
       await expectServiceUrls(undefined, undefined, undefined, {
         esUrl: 'http://elastic:changeme@localhost:9200',
         kibanaUrl: 'http://localhost:5601',
@@ -42,13 +40,14 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
         },
+        username: 'elastic',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
     it('should discover auth for local service urls', async () => {
-      const expectedValidAuth = 'elastic:changeme';
-
-      mockFetchWithAllowedSegments([expectedValidAuth, 'http://localhost:5601']);
+      mockFetchWithAllowedSegments(['http://localhost:9200', 'http://localhost:5601'], 1);
       await expectServiceUrls('http://localhost:9200', 'http://localhost:5601', undefined, {
         esUrl: 'http://elastic:changeme@localhost:9200',
         kibanaUrl: 'http://localhost:5601',
@@ -56,14 +55,16 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
         },
+        username: 'elastic',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
     it('should discover target from Kibana URL when target is not provided', async () => {
       const kibana = 'http://elastic:changeme@localhost:5601';
-      const expectedValidAuth = 'elastic:changeme';
 
-      mockFetchWithAllowedSegments([expectedValidAuth, 'http://localhost:5601']);
+      mockFetchWithAllowedSegments(['http://localhost:9200', 'http://localhost:5601']);
       await expectServiceUrls(undefined, kibana, undefined, {
         esUrl: 'http://elastic:changeme@localhost:9200',
         kibanaUrl: 'http://localhost:5601',
@@ -71,6 +72,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
         },
+        username: 'elastic',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
@@ -86,6 +90,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
         },
+        username: 'elastic',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
@@ -102,6 +109,9 @@ describe('getServiceUrls', () => {
           kibanaUrl: 'http://localhost:5601',
           esHeaders: undefined,
           kibanaHeaders: undefined,
+          username: 'elastic',
+          password: 'changeme',
+          apiKey: undefined,
         },
         `Failed to authenticate user for ${target}`
       );
@@ -121,6 +131,9 @@ describe('getServiceUrls', () => {
           kibanaUrl: 'http://localhost:5601',
           esHeaders: undefined,
           kibanaHeaders: undefined,
+          username: 'elastic',
+          password: 'changeme',
+          apiKey: undefined,
         },
         `Could not connect to Kibana.`
       );
@@ -142,6 +155,9 @@ describe('getServiceUrls', () => {
           kibanaHeaders: {
             Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
           },
+          username: 'elastic',
+          password: 'changeme',
+          apiKey: undefined,
         },
         `Could not discover Elasticsearch URL based on Kibana URL ${kibana.replace(authStr, '.*')}.` // On CI auth is stripped
       );
@@ -150,12 +166,7 @@ describe('getServiceUrls', () => {
 
   describe('localhost Serverless', () => {
     it('should discover local https service urls and auth if none provided', async () => {
-      const expectedValidAuth = 'elastic_serverless:changeme';
-
-      mockFetchWithAllowedSegments([
-        `https://${expectedValidAuth}@localhost:9200`,
-        'http://localhost:5601',
-      ]); // Only allow https for ES and http for Kibana
+      mockFetchWithAllowedSegments(['https://localhost:9200', 'http://localhost:5601'], 2); // Only allow https for ES and http for Kibana
       await expectServiceUrls(undefined, undefined, undefined, {
         esUrl: 'https://elastic_serverless:changeme@localhost:9200',
         kibanaUrl: 'http://localhost:5601',
@@ -163,14 +174,14 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic_serverless:changeme').toString('base64')}`,
         },
+        username: 'elastic_serverless',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
     it('should discover auth for local https service urls', async () => {
-      mockFetchWithAllowedSegments([
-        'https://elastic_serverless:changeme@localhost:9200',
-        'https://localhost:5601',
-      ]); // Only allow https urls
+      mockFetchWithAllowedSegments(['https://localhost:9200', 'https://localhost:5601'], 2); // Only allow https urls
       await expectServiceUrls('https://localhost:9200', 'https://localhost:5601', undefined, {
         esUrl: 'https://elastic_serverless:changeme@localhost:9200',
         kibanaUrl: 'https://localhost:5601',
@@ -178,6 +189,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic_serverless:changeme').toString('base64')}`,
         },
+        username: 'elastic_serverless',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
@@ -191,6 +205,9 @@ describe('getServiceUrls', () => {
         kibanaUrl: 'https://localhost:5601',
         esHeaders: headers,
         kibanaHeaders: headers,
+        username: undefined,
+        password: undefined,
+        apiKey,
       });
     });
 
@@ -209,6 +226,9 @@ describe('getServiceUrls', () => {
           kibanaHeaders: {
             Authorization: `Basic ${Buffer.from('elastic_serverless:changeme').toString('base64')}`,
           },
+          username: 'elastic_serverless',
+          password: 'changeme',
+          apiKey: undefined,
         },
         `Could not connect to Kibana.`
       );
@@ -227,6 +247,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic_serverless:changeme').toString('base64')}`,
         },
+        username: 'elastic_serverless',
+        password: 'changeme',
+        apiKey: undefined,
       });
     });
 
@@ -244,6 +267,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('elastic_serverless:changeme').toString('base64')}`,
         },
+        username: 'elastic_serverless',
+        password: 'changeme',
+        apiKey: undefined,
       });
 
       expect(warnSpy).toHaveBeenCalledWith(
@@ -266,6 +292,9 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('username:1223334444').toString('base64')}`,
         },
+        username: 'username',
+        password: '1223334444',
+        apiKey: undefined,
       });
     });
 
@@ -273,8 +302,9 @@ describe('getServiceUrls', () => {
       const kibana = 'https://username:1223334444@cluster.kb.us-west2.gcp.elastic-cloud.com';
       const kibanaWithoutAuth = 'https://cluster.kb.us-west2.gcp.elastic-cloud.com';
       const expectedEsUrl = kibana.replace('.kb', '.es');
+      const expectedEsUrlWithoutAuth = kibanaWithoutAuth.replace('.kb', '.es');
 
-      mockFetchWithAllowedSegments([kibanaWithoutAuth, expectedEsUrl]);
+      mockFetchWithAllowedSegments([kibanaWithoutAuth, expectedEsUrlWithoutAuth]);
       await expectServiceUrls(undefined, kibana, undefined, {
         esUrl: expectedEsUrl,
         kibanaUrl: kibanaWithoutAuth,
@@ -282,14 +312,22 @@ describe('getServiceUrls', () => {
         kibanaHeaders: {
           Authorization: `Basic ${Buffer.from('username:1223334444').toString('base64')}`,
         },
+        username: 'username',
+        password: '1223334444',
+        apiKey: undefined,
       });
     });
   });
 });
 
-function mockFetchWithAllowedSegments(allowedUrlSegments: string[]) {
+function mockFetchWithAllowedSegments(allowedUrlSegments: string[], discardNRequests: number = 0) {
+  let requestsCount = 0;
   mockedFetch.mockImplementation(async (url) => {
     if (allowedUrlSegments.some((segment) => (url as string).includes(segment))) {
+      requestsCount++;
+      if (requestsCount <= discardNRequests) {
+        return new Response(null, { status: 404 });
+      }
       return new Response(null, { status: 200 });
     }
 
