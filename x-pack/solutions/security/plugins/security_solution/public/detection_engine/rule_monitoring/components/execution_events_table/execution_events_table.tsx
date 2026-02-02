@@ -96,7 +96,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EventMessageFilter value={filters.state.searchTerm} onChange={filters.setSearchTerm} />
+          <EventMessageFilter onSearch={filters.setSearchTerm} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogLevelFilter selectedItems={filters.state.logLevels} onChange={filters.setLogLevels} />
@@ -127,6 +127,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         sorting={sorting.state}
         pagination={pagination.state}
         onChange={handleTableChange}
+        tableCaption={i18n.TABLE_SUBTITLE}
       />
     </EuiPanel>
   );
