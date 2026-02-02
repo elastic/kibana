@@ -18,3 +18,6 @@ export * from './tools/run_log_rate_analysis/log_rate_analysis_spike';
 export * from './tools/get_anomaly_detection_jobs/anomalies';
 export * from './tools/get_trace_metrics/trace_metrics';
 export * from './tools/get_index_info/field_discovery';
+export * from './tools/get_log_change_points/log_change_points';
+export * from './tools/get_metric_change_points/metric_change_points';
+export * from './tools/get_trace_change_points/trace_change_points';

@@ -412,6 +412,9 @@ export class JobsListUI extends Component {
       <>
         <EuiBasicTable
           data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+          tableCaption={i18n.translate('xpack.ml.jobsList.tableCaption', {
+            defaultMessage: 'List of anomaly detection jobs',
+          })}
           loading={loading === true}
           noItemsMessage={
             loading

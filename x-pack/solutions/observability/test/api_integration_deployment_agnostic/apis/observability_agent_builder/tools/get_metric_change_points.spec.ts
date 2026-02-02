@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  type ApmSynthtraceEsClient,
+  generateMetricChangePointsData,
+  METRIC_CHANGE_POINTS_ANALYSIS_WINDOW,
+  METRIC_CHANGE_POINTS_INDEX,
+} from '@kbn/synthtrace';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_metric_change_points/tool';
 import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  METRIC_CHANGE_POINTS_ANALYSIS_WINDOW,
-  METRIC_CHANGE_POINTS_INDEX,
-  createMetricChangePointsData,
-} from '../utils/synthtrace_scenarios/create_metric_change_points_data';
 
 interface ToolResult {
   type: ToolResultType.other;
@@ -37,7 +37,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-      await createMetricChangePointsData({ apmSynthtraceEsClient });
+      const { client, generator } = generateMetricChangePointsData({
+        apmEsClient: apmSynthtraceEsClient,
+      });
+      await client.index(generator);
     });
 
     after(async () => {

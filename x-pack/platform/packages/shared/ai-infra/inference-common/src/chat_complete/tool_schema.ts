@@ -37,7 +37,7 @@ interface ToolSchemaTypeNumber extends ToolSchemaFragmentBase {
 
 interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   type: 'array';
-  items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
+  items?: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
 }
 
 /**
@@ -64,9 +64,10 @@ type FromToolSchemaObject<TToolSchemaObject extends ToolSchemaTypeObject> =
       >
     : never;
 
-type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> = Array<
-  FromToolSchema<TToolSchemaObject['items']>
->;
+type FromToolSchemaArray<TToolSchemaObject extends ToolSchemaTypeArray> =
+  TToolSchemaObject['items'] extends Exclude<ToolSchemaType, ToolSchemaTypeArray>
+    ? Array<FromToolSchema<TToolSchemaObject['items']>>
+    : unknown[];
 
 type FromToolSchemaString<TToolSchemaString extends ToolSchemaTypeString> =
   TToolSchemaString extends { const: string }

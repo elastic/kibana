@@ -114,18 +114,69 @@ export class RulesClientFactory {
     this.securityService = options.securityService;
   }
 
+  /**
+   * Creates a RulesClient bound to the space derived from the provided request (default behavior).
+   */
   public async create(
     request: KibanaRequest,
     savedObjects: SavedObjectsServiceStart
   ): Promise<RulesClient> {
+    return await this.createInternal({
+      request,
+      savedObjects,
+      spaceId: this.getSpaceId(request),
+      isExplicitSpaceOverride: false,
+    });
+  }
+
+  /**
+   * Creates a RulesClient bound to an explicit spaceId while preserving the original request
+   * (and its auth context). This avoids forging fake requests, which can break auth under UIAM.
+   */
+  public async createWithSpaceId(
+    request: KibanaRequest,
+    savedObjects: SavedObjectsServiceStart,
+    spaceId: string
+  ): Promise<RulesClient> {
+    return await this.createInternal({
+      request,
+      savedObjects,
+      spaceId,
+      isExplicitSpaceOverride: true,
+    });
+  }
+
+  private async createInternal({
+    request,
+    savedObjects,
+    spaceId,
+    isExplicitSpaceOverride,
+  }: {
+    request: KibanaRequest;
+    savedObjects: SavedObjectsServiceStart;
+    spaceId: string;
+    isExplicitSpaceOverride: boolean;
+  }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
-    const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
     }
 
-    const authorization = await this.authorization.create(request);
+    const authorization = await this.authorization.createForSpace(request, spaceId);
+
+    const unsecuredSavedObjectsClient = savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [
+          RULE_SAVED_OBJECT_TYPE,
+          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          API_KEY_PENDING_INVALIDATION_TYPE,
+          AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+        ],
+      })
+      .asScopedToNamespace(spaceId);
 
     return new RulesClient({
       spaceId,
@@ -135,16 +186,7 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       maxScheduledPerMinute: this.maxScheduledPerMinute,
-      unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [
-          RULE_SAVED_OBJECT_TYPE,
-          RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-          API_KEY_PENDING_INVALIDATION_TYPE,
-          AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-        ],
-      }),
+      unsecuredSavedObjectsClient,
       authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
       namespace: this.spaceIdToNamespace(spaceId),
@@ -186,9 +228,15 @@ export class RulesClientFactory {
         };
       },
       async getActionsClient() {
+        if (isExplicitSpaceOverride) {
+          return actions.getActionsClientWithRequestInSpace(request, spaceId);
+        }
         return actions.getActionsClientWithRequest(request);
       },
       async getEventLogClient() {
+        if (isExplicitSpaceOverride) {
+          return eventLog.getClientWithRequestInSpace(request, spaceId);
+        }
         return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,

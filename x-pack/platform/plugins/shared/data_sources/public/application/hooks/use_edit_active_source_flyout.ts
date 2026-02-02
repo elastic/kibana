@@ -14,6 +14,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type { ActiveSource } from '../../types/connector';
 import { queryKeys } from '../query_keys';
 import { useStackConnector } from './use_stack_connector';
+import { getConnectorIconType } from '../../utils/get_connector_icon';
 
 export interface UseEditActiveSourceFlyoutOptions {
   activeSource: ActiveSource | null;
@@ -135,6 +136,9 @@ export const useEditActiveSourceFlyout = ({
 
     return triggersActionsUi.getEditConnectorFlyout({
       connector: connectorWithDataSourceName,
+      icon: getConnectorIconType(activeSource.iconType),
+      hideRulesTab: true,
+      isTestable: false,
       onClose: closeFlyout,
       onConnectorUpdated: handleConnectorUpdated,
     });

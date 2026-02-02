@@ -13,10 +13,12 @@ import type {
   ShorthandUnaryFilterCondition,
   FilterCondition,
   Condition,
+  BinaryOperatorKeys,
 } from '../../types/conditions';
 import {
   BINARY_OPERATORS,
   UNARY_OPERATORS,
+  ARRAY_OPERATORS,
   isAndCondition,
   isFilterCondition,
   isOrCondition,
@@ -101,6 +103,8 @@ export function getDefaultFormValueForOperator(
       return true;
     case 'range':
       return {};
+    case 'includes':
+      return '';
     default:
       return '';
   }
@@ -178,6 +182,7 @@ function getFieldTypeForFilterCondition(
     case 'contains':
     case 'startsWith':
     case 'endsWith':
+    case 'includes':
       return 'string';
     default:
       return 'string';
@@ -261,3 +266,7 @@ export function isConditionComplete(condition: Condition | undefined): boolean {
 
   return false;
 }
+
+export const isArrayOperator = (operator: OperatorKeys | undefined): boolean => {
+  return operator !== undefined && ARRAY_OPERATORS.includes(operator as BinaryOperatorKeys);
+};

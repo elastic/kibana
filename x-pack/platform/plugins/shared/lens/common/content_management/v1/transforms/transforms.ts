@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { LensAttributes, LensSavedObject } from '../../../../server/content_management/v1';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 import { convertToLegendStats } from './legend_stats';
 import { attributesCleanup } from './attributes';
 import { metricMigrations } from './metric';
 import { addVersion } from './add_version';
-import type { LensSavedObjectV0, LensAttributesV0 } from './types';
+
+import type { LensAttributesV0, LensSavedObjectV0 } from '../../v0/types';
+import type { LensAttributesV1, LensSavedObjectV1 } from './types';
 
 /**
  * Transforms existing unversioned Lens SO attributes to v1 Lens Item attributes
@@ -25,8 +26,8 @@ import type { LensSavedObjectV0, LensAttributesV0 } from './types';
  * - Add version property
  */
 export function transformToV1LensItemAttributes(
-  attributes: LensAttributesV0 | LensAttributes
-): LensAttributes {
+  attributes: LensAttributesV0 | LensAttributesV1
+): LensAttributesV1 {
   return [
     convertToLegendStats,
     convertToRawColorMappingsFn,
@@ -45,10 +46,10 @@ export function transformToV1LensItemAttributes(
  * - Add version property
  */
 export function transformToV1LensSavedObject(
-  so: LensSavedObjectV0 | LensSavedObject
-): LensSavedObject {
+  so: LensSavedObjectV0 | LensSavedObjectV1
+): LensSavedObjectV1 {
   return {
     ...so,
-    attributes: transformToV1LensItemAttributes(so.attributes as LensAttributesV0 | LensAttributes),
+    attributes: transformToV1LensItemAttributes(so.attributes),
   };
 }

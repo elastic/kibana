@@ -70,7 +70,7 @@ export interface StreamlangValidationOptions {
    * List of reserved/forbidden field names that cannot be modified by processors
    */
   reservedFields: string[];
-  streamType?: 'classic' | 'wired';
+  streamType: 'classic' | 'wired';
 }
 
 export interface StreamlangValidationResult {

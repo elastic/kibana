@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/dev-utils'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod

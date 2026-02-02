@@ -97,8 +97,15 @@ export type InteractiveModeEvent =
       step: StreamlangConditionBlock;
     }
   | { type: 'step.change'; id: string }
+  | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   | {
       type: 'step.addProcessor';
       processor?: StreamlangProcessorDefinition;

@@ -44,22 +44,21 @@ describe('Color Categories', () => {
     });
 
     it('should return no categories when accessor is not found', () => {
-      expect(getColorCategories(mockDatatableRows, 'N/A')).toEqual([]);
+      expect(getColorCategories(mockDatatableRows, ['N/A'])).toEqual([]);
     });
 
     it('should return no categories when no rows are defined', () => {
-      expect(getColorCategories(undefined, 'extension')).toEqual([]);
+      expect(getColorCategories(undefined, ['extension'])).toEqual([]);
     });
 
     it('should return all categories from mixed value datatable', () => {
-      expect(getColorCategories(mockDatatableRows, 'value')).toEqual([
+      expect(getColorCategories(mockDatatableRows, ['value'])).toEqual([
         1,
         false,
         true,
         0,
         NaN,
         null,
-        undefined,
         '',
         'test-string',
         {
@@ -71,16 +70,11 @@ describe('Color Categories', () => {
 
     it('should exclude selected categories from datatable', () => {
       expect(
-        getColorCategories(mockDatatableRows, 'value', [
-          1,
-          false,
-          true,
-          0,
-          NaN,
-          null,
-          undefined,
-          '',
-        ])
+        getColorCategories(
+          mockDatatableRows,
+          ['value'],
+          [1, false, true, 0, NaN, null, undefined, '']
+        )
       ).toEqual([
         'test-string',
         {
@@ -91,7 +85,7 @@ describe('Color Categories', () => {
     });
 
     it('should return known serialized categories from datatable', () => {
-      expect(getColorCategories(mockDatatableRows, 'complex', [])).toEqual([
+      expect(getColorCategories(mockDatatableRows, ['complex'], [])).toEqual([
         mockRange.serialize(),
         mockMultiField.serialize(),
         fakeClass,
@@ -105,22 +99,21 @@ describe('Color Categories', () => {
     });
 
     it('should return no categories when accessor is not found', () => {
-      expect(getLegacyColorCategories(mockDatatableRows, 'N/A')).toEqual([]);
+      expect(getLegacyColorCategories(mockDatatableRows, ['N/A'])).toEqual([]);
     });
 
     it('should return no categories when no rows are defined', () => {
-      expect(getLegacyColorCategories(undefined, 'extension')).toEqual([]);
+      expect(getLegacyColorCategories(undefined, ['extension'])).toEqual([]);
     });
 
     it('should return all categories from mixed value datatable', () => {
-      expect(getLegacyColorCategories(mockDatatableRows, 'value')).toEqual([
+      expect(getLegacyColorCategories(mockDatatableRows, ['value'])).toEqual([
         '1',
         'false',
         'true',
         '0',
         'NaN',
-        'null',
-        'undefined',
+        '__missing__',
         '',
         'test-string',
         '{"test":"obj"}',
@@ -130,21 +123,16 @@ describe('Color Categories', () => {
 
     it('should exclude selected categories from datatable', () => {
       expect(
-        getLegacyColorCategories(mockDatatableRows, 'value', [
-          1,
-          false,
-          true,
-          0,
-          NaN,
-          null,
-          undefined,
-          '',
-        ])
+        getLegacyColorCategories(
+          mockDatatableRows,
+          ['value'],
+          [1, false, true, 0, NaN, null, undefined, '']
+        )
       ).toEqual(['test-string', '{"test":"obj"}', 'array']);
     });
 
     it('should return known serialized categories from datatable', () => {
-      expect(getLegacyColorCategories(mockDatatableRows, 'complex', [])).toEqual([
+      expect(getLegacyColorCategories(mockDatatableRows, ['complex'], [])).toEqual([
         String(mockRange),
         String(mockMultiField),
         JSON.stringify(fakeClass),
