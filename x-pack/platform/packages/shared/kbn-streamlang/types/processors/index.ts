@@ -461,7 +461,7 @@ export interface JoinProcessor extends ProcessorBaseWithWhere {
 
 export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('join'),
-  from: z.array(StreamlangSourceField),
+  from: z.array(StreamlangSourceField).nonempty(),
   delimiter: z.string(),
   to: StreamlangTargetField,
   ignore_missing: z.optional(z.boolean()),
