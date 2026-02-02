@@ -353,7 +353,6 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     });
 
     // 2. Create the stream definition document (without the esql, only the view reference)
-    // The stored definition only includes the view reference, not the actual esql query
     const { query, ...restDefinition } = this._definition;
     const definitionToStore = {
       ...restDefinition,

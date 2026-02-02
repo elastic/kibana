@@ -196,10 +196,3 @@ export const useStreamSamplesSelector = <T,>(
 
   return useSelector(routingSamplesRef, selector);
 };
-
-// Query stream selectors
-export const useIsQueryModeCreating = () => {
-  return useStreamsRoutingSelector((state) =>
-    state.matches({ ready: { queryMode: 'creating' } })
-  );
-};
