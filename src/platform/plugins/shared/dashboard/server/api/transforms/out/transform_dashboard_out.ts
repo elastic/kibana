@@ -11,7 +11,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
-import { transformControlGroupOut } from './transform_control_group_out';
+import { transformPinnedPanelsOut } from './transform_pinned_panels';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
@@ -22,7 +22,7 @@ export function transformDashboardOut(
 ): DashboardState | Partial<DashboardState> {
   const {
     pinned_panels,
-    controlGroupInput,
+    controlGroupInput: pinnedPanelsOut,
     description,
     kibanaSavedObjectMeta,
     optionsJSON,
@@ -41,16 +41,11 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  const pinnedControlsOut = transformControlGroupOut(
-    controlGroupInput,
+  const pinnedControlsOut = transformPinnedPanelsOut(
+    pinnedPanelsOut,
     pinned_panels,
     references ?? []
   );
-  console.log({ pinnedControlsOut });
-
-  pinnedControlsOut?.forEach((control) => {
-    console.log({ control });
-  });
 
   const timeRange =
     timeRestore && timeFrom && timeTo

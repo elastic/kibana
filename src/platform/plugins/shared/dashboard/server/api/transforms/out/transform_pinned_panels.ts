@@ -24,7 +24,7 @@ import { embeddableService, logger } from '../../../kibana_services';
 
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
-export function transformControlGroupOut(
+export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'],
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[]
@@ -34,7 +34,7 @@ export function transformControlGroupOut(
      * >=9.4, pinned panels are stored under the key `pinned_panels` without any JSON bucketing
      */
     return injectPinnedPanelReferences(
-      flow(transformPinnedPanelsObjectToArray, transformControlProperties)(pinnedPanels.panels),
+      flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
       containerReferences
     );
   } else if (controlGroupInput) {
@@ -46,7 +46,7 @@ export function transformControlGroupOut(
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
-            transformControlProperties
+            transformPinnedPanelProperties
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
@@ -88,7 +88,7 @@ function transformPinnedPanelsObjectToArray(
   return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
 }
 
-function transformControlProperties(
+function transformPinnedPanelProperties(
   controls: Array<StoredPinnedPanels[string] & { id: string }>
 ): PinnedPanelsState {
   return controls
