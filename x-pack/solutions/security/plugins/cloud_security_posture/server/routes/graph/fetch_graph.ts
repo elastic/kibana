@@ -39,6 +39,7 @@ interface BuildEsqlQueryParams {
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
+  pinnedEntityIds?: string[];
 }
 
 export const fetchGraph = async ({
@@ -51,6 +52,7 @@ export const fetchGraph = async ({
   indexPatterns,
   spaceId,
   esQuery,
+  pinnedEntityIds,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -61,6 +63,7 @@ export const fetchGraph = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
+  pinnedEntityIds?: string[];
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -93,6 +96,7 @@ export const fetchGraph = async ({
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
+    pinnedEntityIds,
   });
 
   logger.trace(`Executing query [${query}]`);
@@ -109,6 +113,7 @@ export const fetchGraph = async ({
         ...originEventIds
           .filter((originEventId) => originEventId.isAlert)
           .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+        ...(pinnedEntityIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
       ],
     })
     .toRecords<GraphEdge>();
@@ -282,6 +287,7 @@ const buildEsqlQuery = ({
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
+  pinnedEntityIds,
 }: BuildEsqlQueryParams): string => {
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
@@ -312,6 +318,21 @@ const buildEsqlQuery = ({
   const actorFieldHintCases = generateFieldHintCases(GRAPH_ACTOR_ENTITY_FIELDS, 'actorEntityId');
   const targetFieldHintCases = generateFieldHintCases(GRAPH_TARGET_ENTITY_FIELDS, 'targetEntityId');
 
+  // Generate pinned entity evaluation
+  // This checks if the current actor or target entity ID matches any of the pinned entity IDs
+  const pinnedEntityEval =
+    pinnedEntityIds && pinnedEntityIds.length > 0
+      ? `| EVAL pinned = CASE(
+    actorEntityId IN (${pinnedEntityIds
+      .map((_id, idx) => `?pinned_id${idx}`)
+      .join(', ')}), actorEntityId,
+    targetEntityId IN (${pinnedEntityIds
+      .map((_id, idx) => `?pinned_id${idx}`)
+      .join(', ')}), targetEntityId,
+    null
+  )`
+      : '| EVAL pinned = TO_STRING(null)';
+
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
@@ -325,6 +346,7 @@ const buildEsqlQuery = ({
 ${targetEntityIdEvals}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
+${pinnedEntityEval}
 | EVAL actorEntityFieldHint = CASE(
 ${actorFieldHintCases},
     ""
@@ -452,7 +474,8 @@ ${buildEnrichedEntityFieldsEsql()}
       targetEntityType,
       targetEntitySubType,
       isOrigin,
-      isOriginAlert
+      isOriginAlert,
+      pinned
 | LIMIT 1000
 | SORT action DESC, isOrigin`;
 

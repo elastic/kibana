@@ -42,7 +42,7 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const { nodesLimit, showUnknownTarget = false } = request.body;
+        const { nodesLimit, showUnknownTarget = false, pinnedEntityIds } = request.body;
         const { originEventIds, start, end, indexPatterns, esQuery } = request.body
           .query as GraphRequest['query'];
         const spaceId = await cspContext.spacesService?.getSpaceId(request);
@@ -72,6 +72,7 @@ export const defineGraphRoute = (router: CspRouter) =>
             },
             showUnknownTarget,
             nodesLimit,
+            pinnedEntityIds,
           });
 
           return response.ok({ body: resp });

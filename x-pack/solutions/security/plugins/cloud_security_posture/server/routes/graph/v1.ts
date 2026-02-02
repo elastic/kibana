@@ -28,6 +28,7 @@ export interface GetGraphParams {
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
+  pinnedEntityIds?: string[];
 }
 
 export const getGraph = async ({
@@ -35,6 +36,7 @@ export const getGraph = async ({
   query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
+  pinnedEntityIds,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
@@ -54,6 +56,7 @@ export const getGraph = async ({
     indexPatterns,
     spaceId,
     esQuery,
+    pinnedEntityIds,
   });
 
   return parseRecords(logger, results.records, nodesLimit);

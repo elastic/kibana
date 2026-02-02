@@ -20,6 +20,7 @@ import {
   addFilter,
   containsFilter,
   removeFilter,
+  getFilterValues,
 } from './search_filters';
 
 const dataViewId = 'test-data-view';
@@ -301,6 +302,74 @@ describe('search_filters', () => {
       expect(newFilters).toHaveLength(2);
       expect(isCombinedFilter(newFilters[1])).toBe(true);
       expect(newFilters[1].meta.params).toHaveLength(2);
+    });
+  });
+
+  describe('getFilterValues', () => {
+    it('should return empty array for empty filters', () => {
+      const filters: Filter[] = [];
+
+      expect(getFilterValues(filters, key)).toEqual([]);
+    });
+
+    it('should return value from phrase filter with matching key', () => {
+      const filters: Filter[] = [buildFilterMock(key, value)];
+
+      expect(getFilterValues(filters, key)).toEqual([value]);
+    });
+
+    it('should return empty array when key does not match', () => {
+      const filters: Filter[] = [buildFilterMock('other-key', value)];
+
+      expect(getFilterValues(filters, key)).toEqual([]);
+    });
+
+    it('should return values from combined filter', () => {
+      const filters: Filter[] = [
+        buildCombinedFilterMock([buildFilterMock(key, 'value1'), buildFilterMock(key, 'value2')]),
+      ];
+
+      expect(getFilterValues(filters, key)).toEqual(['value1', 'value2']);
+    });
+
+    it('should skip disabled filters', () => {
+      const disabledFilter = buildFilterMock(key, value);
+      disabledFilter.meta.disabled = true;
+      const filters: Filter[] = [disabledFilter, buildFilterMock(key, 'enabled-value')];
+
+      expect(getFilterValues(filters, key)).toEqual(['enabled-value']);
+    });
+
+    it('should handle multiple keys', () => {
+      const filters: Filter[] = [
+        buildFilterMock('key1', 'value1'),
+        buildFilterMock('key2', 'value2'),
+        buildFilterMock('key3', 'value3'),
+      ];
+
+      expect(getFilterValues(filters, ['key1', 'key2'])).toEqual(['value1', 'value2']);
+    });
+
+    it('should return values from mixed phrase and combined filters', () => {
+      const filters: Filter[] = [
+        buildFilterMock(key, 'phrase-value'),
+        buildCombinedFilterMock([
+          buildFilterMock(key, 'combined-value1'),
+          buildFilterMock('other-key', 'other-value'),
+        ]),
+      ];
+
+      expect(getFilterValues(filters, key)).toEqual(['phrase-value', 'combined-value1']);
+    });
+
+    it('should handle readonly string array for keys', () => {
+      const readonlyKeys = ['key1', 'key2'] as const;
+      const filters: Filter[] = [
+        buildFilterMock('key1', 'value1'),
+        buildFilterMock('key2', 'value2'),
+      ];
+
+      expect(getFilterValues(filters, readonlyKeys)).toEqual(['value1', 'value2']);
     });
   });
 });
