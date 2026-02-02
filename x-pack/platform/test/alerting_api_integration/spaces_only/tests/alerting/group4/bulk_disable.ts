@@ -134,7 +134,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
     }
 
-    beforeEach(async () => {
+    before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
 
@@ -147,7 +147,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
-    afterEach(async () => {
+    after(async () => {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
