@@ -28,8 +28,7 @@
       "logsDataAccess",
       "embeddable",
       "savedSearch",
-      "spaces",
-      "reporting"
+      "spaces"
     ],
     "optionalPlugins": [
       "features",
@@ -42,14 +41,15 @@
       "ingestPipelines",
       "automaticImport",
       "alerting",
-      "sloShared"
+      "sloShared",
+      "reporting"
     ],
     "requiredBundles": [
       "kibanaReact",
       "esUiShared",
       "logsShared",
       "kibanaUtils",
-      "usageCollection",
+      "usageCollection"
     ],
     "extraPublicDirs": ["common"]
   }
