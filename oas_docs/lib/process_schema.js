@@ -229,7 +229,7 @@ const createProcessSchema = (
           const name = nameGenerator(context, compType, idx);
 
           if (components[name]) {
-            log.warn(`Component name collision: ${name} - appending counter`);
+            log.warning(`Component name collision: ${name} - appending counter`);
           }
 
           const itemToStore = item;

@@ -62,7 +62,7 @@ describe('createProcessSchema', () => {
     mockLog = {
       info: jest.fn(),
       debug: jest.fn(),
-      warn: jest.fn(),
+      warning: jest.fn(),
       error: jest.fn(),
     };
   });
