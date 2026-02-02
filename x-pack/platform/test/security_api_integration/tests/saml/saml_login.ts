@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const kibanaServerConfig = config.get('servers.kibana');
+  const isSSlEnabled = !!kibanaServerConfig.certificateAuthorities || false;
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
@@ -49,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function checkStandardSessionCookiePropsDefault(sessionCookie: Cookie) {
     expect(sessionCookie.sameSite).to.be(undefined);
-    expect(sessionCookie.secure).to.be(false);
+    expect(sessionCookie.secure).to.be(isSSlEnabled);
   }
 
   function checkIntermediateSessionCookiePropsDefault(sessionCookie: Cookie) {
