@@ -107,8 +107,8 @@ export const getStructuredAnswerPrompt = async (
   const { attachmentTypes } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
-  // Generate initial messages from conversation with result transformation
-  const initialMessages = await convertPreviousRounds({
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
   });
@@ -158,7 +158,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`),
     ],
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
