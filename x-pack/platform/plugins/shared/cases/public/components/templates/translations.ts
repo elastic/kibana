@@ -200,6 +200,18 @@ export const SUCCESS_SET_AS_DEFAULT_TEMPLATE = (templateName: string) =>
     values: { templateName },
   });
 
+export const SUCCESS_CLONING_TEMPLATE = (templateName: string) =>
+  i18n.translate('xpack.cases.templates.successCloningTemplate', {
+    defaultMessage: '{templateName} was cloned successfully',
+    values: { templateName },
+  });
+
+export const CLONED_TEMPLATE_NAME_PREFIX = (templateName: string) =>
+  i18n.translate('xpack.cases.templates.clonedTemplateNamePrefix', {
+    defaultMessage: 'Cloned: {templateName}',
+    values: { templateName },
+  });
+
 export const ERROR_DELETING_TEMPLATE = i18n.translate(
   'xpack.cases.templates.errorDeletingTemplate',
   {

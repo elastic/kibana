@@ -17,7 +17,15 @@ interface MutationArgs {
   template: TemplateRequest;
 }
 
-export const useCreateTemplate = () => {
+interface UseCreateTemplateProps {
+  onSuccess?: (data: Template) => void;
+  disableDefaultSuccessToast?: boolean;
+}
+
+export const useCreateTemplate = ({
+  onSuccess,
+  disableDefaultSuccessToast,
+}: UseCreateTemplateProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
@@ -25,9 +33,12 @@ export const useCreateTemplate = () => {
     ({ template }) => postTemplate({ template }),
     {
       mutationKey: casesMutationsKeys.createTemplate,
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries(casesQueriesKeys.templates);
-        showSuccessToast(i18n.SUCCESS_CREATING_TEMPLATE);
+        if (!disableDefaultSuccessToast) {
+          showSuccessToast(i18n.SUCCESS_CREATING_TEMPLATE);
+        }
+        onSuccess?.(data);
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_CREATING_TEMPLATE });

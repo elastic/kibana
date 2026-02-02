@@ -10,6 +10,7 @@ import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
 import { useUpdateTemplate } from './use_update_template';
+import { useCreateTemplate } from './use_create_template';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import * as i18n from '../../templates/translations';
 
@@ -31,6 +32,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     },
   });
 
+  const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
+    disableDefaultSuccessToast: true,
+  });
+
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
   const handleEdit = useCallback(
@@ -40,11 +45,28 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     [navigateToCasesEditTemplate]
   );
 
-  const handleClone = useCallback((template: Template) => {
-    // TODO: Implement clone functionality
-    // eslint-disable-next-line no-console
-    console.log('Clone template:', template);
-  }, []);
+  const handleClone = useCallback(
+    (template: Template) => {
+      cloneTemplate(
+        {
+          template: {
+            name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name),
+            description: template.description,
+            solution: template.solution,
+            fields: template.fields,
+            tags: template.tags,
+            isDefault: false,
+          },
+        },
+        {
+          onSuccess: () => {
+            showSuccessToast(i18n.SUCCESS_CLONING_TEMPLATE(template.name));
+          },
+        }
+      );
+    },
+    [cloneTemplate, showSuccessToast]
+  );
 
   const handleSetAsDefault = useCallback(
     (template: Template) => {
@@ -88,5 +110,6 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     templateToDelete,
     isDeleting,
     isSettingDefault,
+    isCloning,
   };
 };
