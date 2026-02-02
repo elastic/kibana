@@ -106,10 +106,7 @@ TS metrics-*
   it('should generate exponential histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockExponentialHistogramMetric,
-      splitAccessors: [
-        'service.name',
-        'host.name',
-      ],
+      splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
       `
@@ -135,10 +132,7 @@ TS metrics-*
   it('should generate tdigest histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockTdigestMetric,
-      splitAccessors: [
-        'service.name',
-        'host.name',
-      ],
+      splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
       `
