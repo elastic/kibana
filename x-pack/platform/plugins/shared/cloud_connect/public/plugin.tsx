@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
   CoreSetup,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -22,6 +23,7 @@ import type {
 } from './types';
 import { CloudConnectTelemetryService } from './telemetry/service';
 import { CloudConnectApiService } from './lib/api';
+import { createUseCloudConnectStatusHook } from './hooks';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 
@@ -84,8 +86,14 @@ export class CloudConnectedPlugin
     return {};
   }
 
-  public start() {
-    return {};
+  public start(core: CoreStart): CloudConnectedPluginStart {
+    const useCloudConnectStatus = createUseCloudConnectStatusHook({ http: core.http });
+
+    return {
+      hooks: {
+        useCloudConnectStatus,
+      },
+    };
   }
 
   public stop() {}
