@@ -162,7 +162,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
   const { data: mitreAttackIndicesDocCounts } = useMitreAttackIndicesDocCounts(activeRuleIndices);
 
-  // // Calculate total unique MITRE-related rules
+  // Calculate total unique MITRE-related rules
   const totalMitreRules = useMemo((): number => {
     // 1. Create a lowercase set for O(1) lookups
     const staticTacticSet = new Set(MITRE_TACTICS_LIST.map((t) => t.toLowerCase()));
@@ -299,12 +299,14 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               button={
                 <div
                   onClick={() => setActiveTacticPopover(tactic.tacticId)}
+                  // Keyboard accessibility: Opens the popover when user presses Enter or Space
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       setActiveTacticPopover(tactic.tacticId);
                     }
                   }}
+                  // Makes this div focusable via keyboard navigation (Tab key)
                   tabIndex={0}
                   role="button"
                   style={{
