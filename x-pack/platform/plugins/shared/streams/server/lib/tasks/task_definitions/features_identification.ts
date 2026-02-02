@@ -90,7 +90,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const features = identifiedFeatures.map((feature) => {
                   const existing = existingFeatures.find(({ id }) => id === feature.id);
                   if (existing) {
-                    console.log("WILL MERGE FEATURE", feature.id);
+                    taskContext.logger.debug(
+                      `Overwriting feature with id [${feature.id}] since it already exists.\nExisting feature: ${JSON.stringify(existing)}\nNew feature: ${JSON.stringify(feature)}`
+                    );
                   }
                   return {
                     ...feature,
