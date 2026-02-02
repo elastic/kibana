@@ -7,13 +7,11 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import type { SERVICE_NAME, TRACE_ID } from '@kbn/apm-types/es_fields';
 import { ERROR_GROUP_ID } from '@kbn/apm-types/es_fields';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
 import { getFirstSeenPerGroup } from './get_first_seen_per_group';
-import { getDownstreamServicePerGroup } from './get_downstream_service_resource';
 
 export type SpanExceptionSample = Awaited<ReturnType<typeof getSpanExceptionSamples>>[number];
 
@@ -48,30 +46,24 @@ export async function getSpanExceptionGroups({
     fields,
   });
 
-  const [firstSeenMap, downstreamServiceMap] = await Promise.all([
-    includeFirstSeen
-      ? getFirstSeenPerGroup({
-          apmEventClient,
-          spanExceptionSamples,
-          endMs,
-          logger,
-        })
-      : new Map<string, string>(),
-    getDownstreamServicePerGroup({
-      apmEventClient,
-      spanExceptionSamples,
-      startMs,
-      endMs,
-      logger,
-    }),
-  ]);
+  const firstSeenMap = includeFirstSeen
+    ? await getFirstSeenPerGroup({
+        apmEventClient,
+        spanExceptionSamples,
+        endMs,
+        logger,
+      })
+    : new Map<string, string>();
 
   return spanExceptionSamples.map((sample) => {
     const groupId = sample.sample[ERROR_GROUP_ID];
-    const downstreamServiceResource = downstreamServiceMap.get(groupId);
     const firstSeen = firstSeenMap.get(groupId);
 
-    return { type: 'spanException' as const, ...sample, firstSeen, downstreamServiceResource };
+    return {
+      type: 'spanException' as const,
+      ...sample,
+      firstSeen,
+    };
   });
 }
 
@@ -140,8 +132,6 @@ async function getSpanExceptionSamples({
   return buckets.map((bucket) => {
     const sample = unwrapEsFields(bucket.sample?.hits?.hits?.[0]?.fields) as {
       [ERROR_GROUP_ID]: string;
-      [TRACE_ID]: string | undefined;
-      [SERVICE_NAME]: string | undefined;
       [key: string]: unknown;
     };
     const lastSeen = bucket.last_seen?.value

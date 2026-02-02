@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
+import { compact, uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import {
@@ -17,45 +17,67 @@ import {
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
-import type { SpanExceptionSample } from './get_span_exception_groups';
+
+interface LogGroupSample {
+  sample: {
+    'trace.id'?: string;
+    'service.name'?: string;
+    [key: string]: unknown;
+  };
+}
 
 /**
- * Fetches the name of the downstream service resource for errors that occurred during outbound calls.
- * This can be useful for identifying which external services are contributing to errors in the application.
+ * Creates a unique key for a trace + service combination.
  */
-export async function getDownstreamServicePerGroup({
+function getTraceServiceKey(traceId: string, serviceName: string): string {
+  return `${traceId}:${serviceName}`;
+}
+
+/**
+ * Fetches failed downstream dependencies for logs/exceptions.
+ * Looks for failed outbound spans to identify which external services are contributing to errors.
+ *
+ * Returns a Map keyed by "traceId:serviceName" -> downstream service resource name
+ */
+export async function getFailedDownstreamDependencies({
   apmEventClient,
-  spanExceptionSamples,
+  logGroups,
   startMs,
   endMs,
   logger,
 }: {
   apmEventClient: ApmEventClient;
-  spanExceptionSamples: SpanExceptionSample[];
+  logGroups: LogGroupSample[];
   startMs: number;
   endMs: number;
   logger: Logger;
 }): Promise<Map<string, string>> {
   const samples = compact(
-    spanExceptionSamples.map(({ sample }) => {
+    logGroups.map(({ sample }) => {
       const traceId = sample['trace.id'];
       const serviceName = sample['service.name'];
-      const groupId = sample['error.grouping_key'];
-      if (traceId && serviceName && groupId) {
-        return { traceId, serviceName, groupId };
+      if (traceId && serviceName) {
+        return { traceId, serviceName };
       }
     })
   );
 
-  if (samples.length === 0) {
+  // Deduplicate by traceId + serviceName to avoid redundant queries
+  const uniqueSamples = uniqBy(samples, ({ traceId, serviceName }) =>
+    getTraceServiceKey(traceId, serviceName)
+  );
+
+  if (uniqueSamples.length === 0) {
     return new Map();
   }
 
-  logger.debug(`Fetching downstream service resource for ${samples.length} error samples`);
+  logger.debug(
+    `Fetching downstream service resource for ${uniqueSamples.length} trace/service pairs`
+  );
 
   const { responses } = await apmEventClient.msearch(
     'get_downstream_service_resource',
-    ...samples.map(({ traceId, serviceName }) => ({
+    ...uniqueSamples.map(({ traceId, serviceName }) => ({
       apm: {
         sources: [
           {
@@ -84,23 +106,40 @@ export async function getDownstreamServicePerGroup({
   );
 
   // msearch returns responses in the same order as the input queries,
-  // so responses[i] corresponds to samples[i]
+  // so responses[i] corresponds to uniqueSamples[i]
   const entries = compact(
     responses.map((response, i) => {
-      const { groupId } = samples[i];
+      const { traceId, serviceName } = uniqueSamples[i];
       const hit = response.hits?.hits?.[0];
       if (!hit?.fields) {
         return null;
       }
 
-      const resource = getEsField(hit.fields, SPAN_DESTINATION_SERVICE_RESOURCE);
-      if (typeof resource !== 'string') {
+      const resource = getEsField<string>(hit.fields, SPAN_DESTINATION_SERVICE_RESOURCE);
+      if (!resource) {
         return null;
       }
 
-      return [groupId, resource] as const;
+      const key = getTraceServiceKey(traceId, serviceName);
+      return [key, resource] as const;
     })
   );
 
   return new Map(entries);
+}
+
+/**
+ * Looks up the downstream dependency for a log group from the pre-fetched map.
+ */
+export function lookupDownstreamDependency(
+  group: LogGroupSample,
+  downstreamServiceMap: Map<string, string>
+): string | undefined {
+  const traceId = group.sample['trace.id'];
+  const serviceName = group.sample['service.name'];
+
+  if (typeof traceId === 'string' && typeof serviceName === 'string') {
+    const key = getTraceServiceKey(traceId, serviceName);
+    return downstreamServiceMap.get(key);
+  }
 }

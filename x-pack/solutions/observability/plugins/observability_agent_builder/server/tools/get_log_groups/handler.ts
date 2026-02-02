@@ -36,6 +36,10 @@ import { buildApmResources } from '../../utils/build_apm_resources';
 import { getNonExceptionLogGroups } from './get_non_exception_logs_groups';
 import { getSpanExceptionGroups } from './get_span_exception_groups';
 import { getLogExceptionGroups } from './get_log_exception_groups';
+import {
+  getFailedDownstreamDependencies,
+  lookupDownstreamDependency,
+} from './get_downstream_service_resource';
 
 export async function getToolHandler({
   core,
@@ -141,9 +145,22 @@ export async function getToolHandler({
     }),
   ]);
 
-  return orderBy(
-    [...spanExceptionGroups, ...logExceptionGroups, ...nonExceptionLogGroups],
-    (group) => group.count,
-    ['desc']
-  );
+  const allGroups = [...spanExceptionGroups, ...logExceptionGroups, ...nonExceptionLogGroups];
+
+  // Fetch failed downstream dependencies for all groups that have trace.id and service.name
+  const downstreamDependencyMap = await getFailedDownstreamDependencies({
+    apmEventClient,
+    logGroups: allGroups,
+    startMs,
+    endMs,
+    logger,
+  });
+
+  // Add downstream dependency to each group
+  const groupsWithDownstream = allGroups.map((group) => {
+    const downstreamServiceResource = lookupDownstreamDependency(group, downstreamDependencyMap);
+    return { ...group, downstreamServiceResource };
+  });
+
+  return orderBy(groupsWithDownstream, (group) => group.count, ['desc']);
 }
