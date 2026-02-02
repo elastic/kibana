@@ -54,4 +54,4 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
       allowAPIUpdate: true,
     }),
   ],
-};
+} as const satisfies EntityDefinitionWithoutId;

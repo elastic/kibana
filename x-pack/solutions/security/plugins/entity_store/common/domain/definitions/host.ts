@@ -89,4 +89,4 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
       allowAPIUpdate: true,
     }),
   ],
-};
+} as const satisfies EntityDefinitionWithoutId;

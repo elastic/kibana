@@ -108,4 +108,4 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
 
     ...getCommonFieldDescriptions('entity'),
   ],
-};
+} as const satisfies EntityDefinitionWithoutId;

@@ -80,4 +80,4 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       allowAPIUpdate: true,
     }),
   ],
-};
+} as const satisfies EntityDefinitionWithoutId;
