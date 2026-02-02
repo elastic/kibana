@@ -263,13 +263,8 @@ export class SplunkXmlDashboardParser extends XmlParser implements SplunkXmlDash
       };
     }
 
-    // Ensure it's a dashboard with rows
-    const hasRows = xmlContent.includes('<row');
-    return hasRows
-      ? { isSupported: true }
-      : {
-          isSupported: false,
-          reason: 'No <row> elements found in the provided Dashboard XML.',
-        };
+    return {
+      isSupported: true,
+    };
   }
 }

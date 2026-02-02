@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
+
+const DEFAULT_PANEL_WIDTH = 20;
+const DEFAULT_PANEL_HEIGHT = 16;
+
 interface DashboardStructure {
   item: string;
   type: 'block';
@@ -18,7 +23,7 @@ interface DashboardStructure {
 
 interface DashboardViz {
   dataSources: {
-    primary: string;
+    primary?: string;
   };
   // not supported yet
   eventHandlers?: {};
@@ -80,7 +85,7 @@ interface DashboardDefinition {
   title: '';
 }
 
-import type { ParsedPanel, VizType } from '../types';
+import type { PanelSection, ParsedPanel, VizType } from '../types';
 import { XmlParser } from '../xml/xml';
 import type { SplunkDashboardParser } from './types';
 
@@ -106,9 +111,13 @@ export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashb
         const tabbedDef = tabbedDefEl._;
         if (tabbedDef) {
           const title = tabbedDefEl.$?.title || 'Untitled Section';
+          const section: PanelSection = {
+            id: uuidV4(),
+            title,
+          };
           const tabbedDefinition = JSON.parse(tabbedDef) as DashboardDefinition;
           const tabbedPanels = this.extractPanelsFromDefinition(tabbedDefinition);
-          panels.push(...tabbedPanels.map((panel) => ({ ...panel, section: { title } })));
+          panels.push(...tabbedPanels.map((panel) => ({ ...panel, section })));
         }
       }
     }
@@ -125,21 +134,39 @@ export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashb
   private extractPanelsFromDefinition(definition: DashboardDefinition): ParsedPanel[] {
     const visualizations = this.extractVizSummaryFromLayout(definition.layout);
     const parsedPanels: ParsedPanel[] = [];
-    for (const viz of visualizations) {
+    visualizations.forEach((viz, idx) => {
       const vizDetails = this.processViz(viz.id, definition);
+
       if (vizDetails) {
         const parsedPanel: ParsedPanel = {
           id: viz.id,
           title: vizDetails?.title,
           query: vizDetails?.query,
           viz_type: vizDetails?.viz_type,
-          position: viz.position,
+          position: this.calculatePanelPosition(idx, visualizations.length),
         };
 
         parsedPanels.push(parsedPanel);
       }
-    }
+    });
     return parsedPanels;
+  }
+
+  private calculatePanelPosition(
+    index: number,
+    totalNumber: number,
+    panelPerRow: number = 2
+  ): ParsedPanel['position'] {
+    const row = Math.floor(index / panelPerRow);
+    const col = index % panelPerRow;
+    const w = 20;
+    const h = 16;
+    return {
+      x: col * w,
+      y: row * h,
+      w: DEFAULT_PANEL_WIDTH,
+      h: DEFAULT_PANEL_HEIGHT,
+    };
   }
 
   private extractVizSummaryFromLayout(layout: DashboardLayout): Array<{
@@ -177,6 +204,20 @@ export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashb
     if (!vizObj) {
       return null;
     }
+
+    if (vizObj.type === 'splunk.markdown') {
+      return {
+        id: vizId,
+        title: vizObj.title || 'Markdown Panel',
+        query: vizObj.options?.markdown || '',
+        viz_type: 'markdown',
+      };
+    }
+
+    if (!vizObj.dataSources || !('primary' in vizObj.dataSources) || !vizObj.dataSources.primary) {
+      return null;
+    }
+
     const query = this.extractQueryFromDataSource(
       vizObj.dataSources.primary,
       defintion.dataSources
@@ -241,6 +282,8 @@ export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashb
         return 'metric';
       case 'splunk.area':
         return 'area';
+      case 'splunk.markdown':
+        return 'markdown';
       default:
         return 'table';
     }

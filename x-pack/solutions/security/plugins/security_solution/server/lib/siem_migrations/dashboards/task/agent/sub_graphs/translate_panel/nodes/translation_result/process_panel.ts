@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
 import type { EsqlColumn } from '../../types';
 
@@ -96,7 +97,7 @@ function parseColumns(extractedColumns: EsqlColumn[]): {
       columnList.push({
         columnId: columnName,
         fieldName: columnName,
-        meta: { type },
+        meta: { type: esFieldTypeToKibanaFieldType(type) },
         /* The first column is mostly a metric so here we are making that assumption
          * unless we have better way to do this. */
         inMetricDimension: true,
@@ -131,6 +132,7 @@ function configureVixTypeProperties(
     'area_stacked',
     'line',
     'heatmap',
+    'markdown',
   ];
 
   if (chartTypes.includes(vizType)) {

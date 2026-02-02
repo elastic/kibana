@@ -52,5 +52,6 @@ export interface PanelPosition {
 }
 
 export interface PanelSection {
+  id: string;
   title: string;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
@@ -15,6 +16,14 @@ interface DashboardData {
     title: string;
     description: string;
     panelsJSON: string;
+    sections?: Array<{
+      collapsed: boolean;
+      title: string;
+      gridData: {
+        y: number;
+        i: string;
+      };
+    }>;
   };
 }
 
@@ -50,6 +59,18 @@ export const getAggregateDashboardNode = (): GraphNode => {
     dashboardData.attributes.title = title;
     dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
+    dashboardData.attributes.sections = (
+      state.parsed_original_dashboard.panels.filter((panel) => Boolean(panel.section)) as Array<
+        ParsedPanel & { section: { id: string; title: string } }
+      >
+    ).map((panel) => ({
+      collapsed: true,
+      title: panel.section.title,
+      gridData: {
+        y: 16,
+        i: panel.section.id,
+      },
+    }));
 
     let translationResult: MigrationTranslationResult;
 
