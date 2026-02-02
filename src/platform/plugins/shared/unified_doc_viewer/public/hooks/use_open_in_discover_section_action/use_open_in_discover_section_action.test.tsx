@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import {
   OPEN_IN_DISCOVER_LABEL,
-  OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+  OPEN_IN_DISCOVER_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
 import { DocViewerExtensionActionsProvider } from '../use_doc_viewer_extension_actions';
 import { useOpenInDiscoverSectionAction } from '.';
@@ -64,7 +64,7 @@ describe('useOpenInDiscoverSectionAction', () => {
       expect.objectContaining({
         href,
         label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
         icon: 'discoverApp',
         dataTestSubj,
         onClick: undefined,
@@ -95,7 +95,7 @@ describe('useOpenInDiscoverSectionAction', () => {
     expect(result.current).toEqual(
       expect.objectContaining({
         label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
         icon: 'discoverApp',
         dataTestSubj,
         onClick: expect.any(Function),
