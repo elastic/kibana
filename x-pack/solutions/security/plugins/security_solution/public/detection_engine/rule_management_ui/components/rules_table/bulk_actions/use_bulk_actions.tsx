@@ -102,7 +102,7 @@ export const useBulkActions = ({
     rulesPrivileges: {
       rules: { edit: canEditRules },
       enableDisable: { edit: canEnableDisableRules },
-      investigationGuide: { edit: canEditInvestigationGuides },
+      customHighlightedFields: { edit: canEditCustomHighlightedFields },
     },
   } = useUserPrivileges();
 
@@ -553,7 +553,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               name: i18n.BULK_ACTION_INVESTIGATION_FIELDS,
               'data-test-subj': 'investigationFieldsBulkEditRule',
-              disabled: !canEditInvestigationGuides || isEditDisabled,
+              disabled: !canEditCustomHighlightedFields || isEditDisabled,
               panel: 3,
             },
             ...(isBulkEditAlertSuppressionFeatureEnabled
@@ -789,7 +789,7 @@ export const useBulkActions = ({
       isAlertSuppressionLicenseValid,
       isAllSelected,
       canEnableDisableRules,
-      canEditInvestigationGuides,
+      canEditCustomHighlightedFields,
       isBulkEditAlertSuppressionFeatureEnabled,
       alertSuppressionUpsellingMessage,
       canCreateTimelines,
