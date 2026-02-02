@@ -73,9 +73,7 @@ export const useChartLayersFromEsql = ({
 
     const yAxis: LensBaseLayer[] = columns
       .filter(
-        (col) =>
-          col.meta.type !== 'date' &&
-          !queryInfo.dimensions.some((dim) => dim === col.name)
+        (col) => col.meta.type !== 'date' && !queryInfo.dimensions.some((dim) => dim === col.name)
       )
       .map((col) => ({
         label: col.name,
