@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { CancelButton } from './cancel_button';
 export { SendFeedbackButton } from './send_feedback_button';
 
 export { FeedbackFooter } from './feedback_footer';

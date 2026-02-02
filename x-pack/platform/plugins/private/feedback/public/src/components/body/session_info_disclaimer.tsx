@@ -6,21 +6,24 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SessionInfoDisclaimer = () => (
-  <EuiText size="s" color="subdued" data-test-subj="feedbackFormSessionInfo">
-    <FormattedMessage
-      id="feedback.form.sessionInfo.description"
-      defaultMessage="Your session information is included along with your input and email. If you need assistance, <supportLink>submit a support request</supportLink> instead."
-      values={{
-        supportLink: (linkText) => (
-          <EuiLink href="https://support.elastic.co" target="_blank">
-            {linkText}
-          </EuiLink>
-        ),
-      }}
-    />
-  </EuiText>
+  <>
+    <EuiSpacer size="l" />
+    <EuiText size="s" color="subdued" data-test-subj="feedbackSessionInfoDisclaimer">
+      <FormattedMessage
+        id="feedback.form.sessionInfo.description"
+        defaultMessage="Your session information is included along with your input and email. If you need assistance, <supportLink>submit a support request</supportLink> instead."
+        values={{
+          supportLink: (linkText) => (
+            <EuiLink href="https://support.elastic.co" target="_blank">
+              {linkText}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
+  </>
 );

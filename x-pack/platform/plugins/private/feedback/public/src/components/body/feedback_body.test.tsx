@@ -86,4 +86,20 @@ describe('FeedbackBody', () => {
     expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledWith(questionId, 'Test feedback');
     expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledTimes(1);
   });
+
+  it('should render CSAT buttons', async () => {
+    await act(async () => {
+      renderWithI18n(<FeedbackBody {...propsMock} />);
+    });
+
+    expect(screen.getByTestId('feedbackCsatButtonGroup')).toBeInTheDocument();
+  });
+
+  it('should render email consent checkbox', async () => {
+    await act(async () => {
+      renderWithI18n(<FeedbackBody {...propsMock} />);
+    });
+
+    expect(screen.getByTestId('feedbackEmailConsentCheckbox')).toBeInTheDocument();
+  });
 });

@@ -22,7 +22,8 @@ export const EmailConsentCheck = ({ allowEmailContact, handleChangeAllowEmailCon
 
   return (
     <EuiCheckbox
-      id="feedbackFormCheckbox"
+      id="feedbackEmailConsentCheckbox"
+      data-test-subj="feedbackEmailConsentCheckbox"
       label={i18n.translate('feedback.form.body.checkbox.consentLabel', {
         defaultMessage: "I'm open to being contacted via email.",
       })}

@@ -9,17 +9,16 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SendFeedbackButton } from './send_feedback_button';
-import { CancelButton } from './cancel_button';
 
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
-  hideFeedbackContainer: () => void;
+  isSubmitting: boolean;
   submitFeedback: () => Promise<void>;
 }
 
 export const FeedbackFooter = ({
   isSendFeedbackButtonDisabled,
-  hideFeedbackContainer,
+  isSubmitting,
   submitFeedback,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -32,11 +31,9 @@ export const FeedbackFooter = ({
     <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFooter">
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
-          <CancelButton hideFeedbackContainer={hideFeedbackContainer} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <SendFeedbackButton
             isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
+            isSubmitting={isSubmitting}
             submitFeedback={submitFeedback}
           />
         </EuiFlexItem>

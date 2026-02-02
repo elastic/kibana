@@ -21,8 +21,11 @@ describe('Feedback Plugin', () => {
       jest.clearAllMocks();
     });
 
-    it('should register feedback button when feedback is enabled', () => {
+    it('should register feedback button when feedback is enabled, telemetry is enabled and user is opted in', () => {
       coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
+      jest.spyOn(telemetryStartMock.telemetryService, 'canSendTelemetry').mockReturnValue(true);
+      jest.spyOn(telemetryStartMock.telemetryService, 'getIsOptedIn').mockReturnValue(true);
+
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();
@@ -34,6 +37,7 @@ describe('Feedback Plugin', () => {
 
     it('should not register feedback button when feedback is disabled', () => {
       coreStartMock.notifications.feedback.isEnabled.mockReturnValue(false);
+
       plugin.start(coreStartMock, { cloud: cloudStartMock, telemetry: telemetryStartMock });
 
       expect(coreStartMock.notifications.feedback.isEnabled).toHaveBeenCalled();

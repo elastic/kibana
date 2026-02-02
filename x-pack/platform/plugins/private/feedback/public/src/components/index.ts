@@ -17,7 +17,6 @@ export { FeedbackTextArea } from './body';
 export { SessionInfoDisclaimer } from './body';
 export { FeedbackBody } from './body';
 
-export { CancelButton } from './footer';
 export { SendFeedbackButton } from './footer';
 export { FeedbackFooter } from './footer';
 

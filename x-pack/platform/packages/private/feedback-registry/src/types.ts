@@ -11,35 +11,38 @@
  */
 export type FeedbackRegistryEntryId = string;
 
+/**
+ * Definition of a feedback question entry in the feedback registry.
+ */
 export interface FeedbackRegistryEntry {
   /**
    * Unique identifier for the feedback entry.
    */
   id: string;
   /**
-   * Sort order for displaying the feedback entry.
+   * Sort order for displaying the feedback entry. The lower the number, the higher it appears in the UI.
    */
   order: number;
   /**
-   * The question text.
+   * The question text to be submitted with telemetry.
    */
   question: string;
   /**
-   * Represents the label shown above the feedback text area.
+   * The question text which appears in the UI.
    */
   label?: {
     i18nId: string;
     defaultMessage: string;
   };
   /**
-   * Optional placeholder for the feedback text area.
+   * Optional placeholder to show in the UI.
    */
   placeholder?: {
     i18nId: string;
     defaultMessage: string;
   };
   /**
-   * Optional aria-label for the feedback text area.
+   * Optional aria-label.
    */
   ariaLabel?: {
     i18nId: string;
@@ -47,4 +50,7 @@ export interface FeedbackRegistryEntry {
   };
 }
 
+/**
+ * List of feedback plugin questions for a given application.
+ */
 export type FeedbackRegistry = Map<FeedbackRegistryEntryId, FeedbackRegistryEntry[]>;

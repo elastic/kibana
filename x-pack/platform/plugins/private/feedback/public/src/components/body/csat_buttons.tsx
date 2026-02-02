@@ -18,28 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-const options = [
-  {
-    id: '1',
-    label: '1',
-  },
-  {
-    id: '2',
-    label: '2',
-  },
-  {
-    id: '3',
-    label: '3',
-  },
-  {
-    id: '4',
-    label: '4',
-  },
-  {
-    id: '5',
-    label: '5',
-  },
-];
+const options = Array.from({ length: 5 }, (_, i) => ({
+  id: `${i + 1}`,
+  label: `${i + 1}`,
+}));
 
 interface Props {
   selectedCsatOptionId: string;
@@ -65,7 +47,7 @@ export const CsatButtons = ({
   return (
     <EuiFormRow
       label={i18n.translate('feedback.body.csatButtons.titleText', {
-        defaultMessage: 'How would you rate your experience with {appTitle}?',
+        defaultMessage: 'How satisfied are you with {appTitle}?',
         values: {
           appTitle,
         },
@@ -73,6 +55,7 @@ export const CsatButtons = ({
     >
       <>
         <EuiButtonGroup
+          data-test-subj="feedbackCsatButtonGroup"
           options={options}
           legend={i18n.translate('feedback.body.csatButtons.legend', {
             defaultMessage: 'Customer satisfaction rating',

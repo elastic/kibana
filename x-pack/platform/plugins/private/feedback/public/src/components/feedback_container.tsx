@@ -36,6 +36,7 @@ export const FeedbackContainer = ({
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
   const [allowEmailContact, setAllowEmailContact] = useState(true);
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const solutionView = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -72,6 +73,8 @@ export const FeedbackContainer = ({
 
   const submitFeedback = async () => {
     try {
+      setIsSubmitting(true);
+
       const eventData = {
         app_id: appId,
         user_email: allowEmailContact && email ? email : undefined,
@@ -87,9 +90,11 @@ export const FeedbackContainer = ({
         url: appUrl,
       };
 
-      core.http.post(`/internal/feedback/send`, {
+      await core.http.post(`/internal/feedback/send`, {
         body: JSON.stringify(eventData),
       });
+
+      setIsSubmitting(false);
 
       core.notifications.toasts.addSuccess({
         title: i18n.translate('feedback.submissionSuccessToast.title', {
@@ -104,6 +109,8 @@ export const FeedbackContainer = ({
           defaultMessage: 'Failed to submit feedback. Please try again later.',
         }),
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -136,7 +143,7 @@ export const FeedbackContainer = ({
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
-        hideFeedbackContainer={hideFeedbackContainer}
+        isSubmitting={isSubmitting}
       />
     </EuiFlexGroup>
   );

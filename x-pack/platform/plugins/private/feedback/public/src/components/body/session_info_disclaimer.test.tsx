@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { SessionInfoDisclaimer } from './session_info_disclaimer';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { FeedbackHeader } from './feedback_header';
+import { screen } from '@testing-library/dom';
 
-describe('FeedbackHeader', () => {
-  it('should render feedback header', () => {
-    renderWithI18n(<FeedbackHeader />);
+describe('SessionInfoDisclaimer', () => {
+  it('should render session info disclaimer', () => {
+    renderWithI18n(<SessionInfoDisclaimer />);
 
-    const header = screen.getByTestId('feedbackHeader');
-
-    expect(header).toBeInTheDocument();
+    expect(screen.getByTestId('feedbackSessionInfoDisclaimer')).toBeInTheDocument();
   });
 });

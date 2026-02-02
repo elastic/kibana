@@ -25,9 +25,11 @@ export const getAppDetails = (core: CoreStart) => {
   let match = navLinks.find((link) => link.url === executionContext.url);
 
   /**
-   * If no exact match, check if executionContext.url starts with any navLink.url
-   * This handles cases where executionContext is more specific.
-   * Sort by URL length descending to get the most specific match first.
+   * If no exact match, check if executionContext.url starts with any navLink.url then
+   * sort the matches by URL length descending to get the most specific match first.
+   * This handles cases where apps have sub-paths created by an navigation event within the app,
+   * which causes the executionContext.url to contain that sub-path but navLink doesn't
+   * e.g /app/slos/welcome (executionContext.url) vs /app/slos (navLink.url)
    */
   if (!match && executionContext.url) {
     const matches = navLinks

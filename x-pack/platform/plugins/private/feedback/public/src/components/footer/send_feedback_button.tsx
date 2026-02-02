@@ -12,10 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
+  isSubmitting: boolean;
   submitFeedback: () => Promise<void>;
 }
 
-export const SendFeedbackButton = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
+export const SendFeedbackButton = ({
+  isSendFeedbackButtonDisabled,
+  isSubmitting,
+  submitFeedback,
+}: Props) => {
   const handleSubmit = async () => {
     await submitFeedback();
   };
@@ -35,6 +40,7 @@ export const SendFeedbackButton = ({ isSendFeedbackButtonDisabled, submitFeedbac
         color="primary"
         data-test-subj="feedbackFooterSendFeedbackButton"
         disabled={isSendFeedbackButtonDisabled}
+        isLoading={isSubmitting}
         onClick={handleSubmit}
         iconType="send"
       >
