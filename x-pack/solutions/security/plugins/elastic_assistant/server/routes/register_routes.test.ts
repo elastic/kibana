@@ -57,6 +57,7 @@ import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedul
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/enable';
 import { getMissingIndexPrivilegesInternalRoute } from './attack_discovery/privileges/get_missing_privileges';
 import { suggestUsersRoute } from './users/suggest';
+import { createAttackDiscoveryAlertsRoute } from './test_internal/create_attack_discovery_alerts_route';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
@@ -108,6 +109,8 @@ jest.mock('./attack_discovery/schedules/public/post/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as jest.Mock;
 jest.mock('./users/suggest');
 const suggestUsersRouteMock = suggestUsersRoute as jest.Mock;
+jest.mock('./test_internal/create_attack_discovery_alerts_route');
+const createAttackDiscoveryAlertsRouteMock = createAttackDiscoveryAlertsRoute as jest.Mock;
 
 jest.mock('./user_conversations/create_route');
 const createConversationRouteMock = createConversationRoute as jest.Mock;
@@ -173,7 +176,7 @@ describe('registerRoutes', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, config);
+    registerRoutes(server.router, loggerMock, config, false);
   });
 
   it('should call `findAlertSummaryRouteMock`', () => {
@@ -352,5 +355,26 @@ describe('registerRoutes', () => {
 
   it('should call `suggestUsersRouteMock`', () => {
     expect(suggestUsersRouteMock).toHaveBeenCalledWith(server.router, loggerMock);
+  });
+
+  it('should not register data generator routes when disabled', () => {
+    expect(createAttackDiscoveryAlertsRouteMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('registerRoutes with data generator routes enabled', () => {
+  const loggerMock = loggingSystemMock.createLogger();
+  let server: ReturnType<typeof serverMock.create>;
+  const config = { elserInferenceId: defaultInferenceEndpoints.ELSER, responseTimeout: 60000 };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+
+    server = serverMock.create();
+    registerRoutes(server.router, loggerMock, config, true);
+  });
+
+  it('should register data generator routes when enabled', () => {
+    expect(createAttackDiscoveryAlertsRouteMock).toHaveBeenCalledWith(server.router);
   });
 });
