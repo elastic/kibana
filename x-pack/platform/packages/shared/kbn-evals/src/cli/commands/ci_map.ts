@@ -30,12 +30,12 @@ export const ciMapCmd: Command<void> = {
         command: 'Add GH label evals:all to run all eval suites in PR CI',
       },
       ...suites.flatMap((suite) => {
-      const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-      return labels.map((label) => ({
-        label,
-        suiteId: suite.id,
-        command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
-      }));
+        const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+        return labels.map((label) => ({
+          label,
+          suiteId: suite.id,
+          command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
+        }));
       }),
     ];
 
