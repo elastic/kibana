@@ -104,19 +104,22 @@ export const performMatchSearch = async ({
           try {
             const fieldName = field.path.includes(' ') ? `\`${field.path}\`` : field.path;
             const indexName = result.index.includes(' ') ? `\`${result.index}\`` : result.index;
+            // Using the defaults for numSnippets and numWords, but these can be customized for future experiments if desired
+            const numSnippets = 5;
+            const numWords = 300;
             const esqlQuery = interpolateEsqlQuery(
-              `FROM ${indexName} METADATA _id | WHERE _id == ?docId | EVAL snippets = TOP_SNIPPETS(${fieldName}, ?term, {"num_snippets": 5}) | MV_EXPAND snippets | KEEP snippets`,
+              `FROM ${indexName} METADATA _id | WHERE _id == ?docId | EVAL snippets = TOP_SNIPPETS(${fieldName}, ?term, {"num_snippets": ${numSnippets}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP snippets`,
               {
                 docId: result.id,
                 term,
               }
             );
 
-            logger.info(`Running TOP_SNIPPETS query: ${esqlQuery}`);
+            logger.debug(`Running TOP_SNIPPETS query: ${esqlQuery}`);
 
             const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
 
-            logger.info(
+            logger.debug(
               `TOP_SNIPPETS response for doc="${result.id}", field="${field.path}": ${JSON.stringify(esqlResponse)}`
             );
 
@@ -131,7 +134,7 @@ export const performMatchSearch = async ({
               }
             }
           } catch (error) {
-            logger.info(
+            logger.debug(
               `TOP_SNIPPETS failed for document id="${result.id}", field="${field.path}": ${
                 error instanceof Error ? error.message : String(error)
               }`
