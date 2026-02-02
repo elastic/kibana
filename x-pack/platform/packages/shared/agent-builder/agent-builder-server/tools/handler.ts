@@ -19,10 +19,11 @@ import type {
   ToolResultStore,
   ToolPromptManager,
   ToolStateManager,
-  SkillsService,
+  ToolManager,
 } from '../runner';
 import type { IToolFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import { SkillsService } from '../runner/skills_service';
 
 /**
  * Tool result as returned by the tool handler.
@@ -130,7 +131,11 @@ export interface ToolHandlerContext {
   /**
    * Skills service to interact with skills.
    */
-  skillsService: SkillsService;
+  skills: SkillsService;
+  /**
+   * Tool manager to manage active tools for the agent.
+   */
+  toolManager: ToolManager;
   /**
    * File store to access data from the agent's virtual filesystem
    */

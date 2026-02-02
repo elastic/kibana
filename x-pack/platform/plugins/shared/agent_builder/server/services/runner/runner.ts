@@ -29,6 +29,7 @@ import type {
   ScopedRunnerRunInternalToolParams,
   ConversationStateManager,
   PromptManager,
+  ToolManager,
 } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -38,7 +39,7 @@ import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { TrackingService } from '../../telemetry';
-import { createEmptyRunContext, createConversationStateManager } from './utils';
+import { createEmptyRunContext, createConversationStateManager, createToolManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
@@ -67,7 +68,8 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
-  skillsService: SkillServiceStart;
+  skillServiceStart: SkillServiceStart;
+  toolManager: ToolManager;
   filestore: IFileStore;
 }
 
@@ -81,6 +83,7 @@ export type CreateRunnerDeps = Omit<
   | 'promptManager'
   | 'stateManager'
   | 'filestore'
+  | 'toolManager'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
 };
@@ -171,6 +174,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
+    const toolManager = createToolManager();
 
     const modelProvider = modelProviderFactory({ request, defaultConnectorId });
     const allDeps = {
@@ -184,6 +188,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       stateManager,
       promptManager,
       filestore,
+      toolManager
     };
     return createScopedRunner(allDeps);
   };

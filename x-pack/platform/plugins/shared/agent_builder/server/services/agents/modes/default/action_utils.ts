@@ -117,8 +117,7 @@ export const processStructuredAnswerResponse = (
   } catch (error) {
     return errorAction(
       createAgentExecutionError(
-        `Error processing structured response: ${
-          error instanceof Error ? error.message : String(error)
+        `Error processing structured response: ${error instanceof Error ? error.message : String(error)
         }`,
         AgentExecutionErrorCode.emptyResponse,
         {}

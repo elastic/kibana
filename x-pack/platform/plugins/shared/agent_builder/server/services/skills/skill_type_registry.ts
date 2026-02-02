@@ -8,6 +8,7 @@
 import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
+
 export interface SkillTypeRegistry {
   register(skill: SkillTypeDefinition): void;
   has(skillId: string): boolean;
@@ -22,8 +23,6 @@ export const createSkillTypeRegistry = (): SkillTypeRegistry => {
 class SkillTypeRegistryImpl implements SkillTypeRegistry {
   private skills: Map<string, SkillTypeDefinition> = new Map();
   private skillFullPaths: Set<string> = new Set();
-
-  constructor() { }
 
   register(skill: SkillTypeDefinition) {
     validateSkillTypeDefinition(skill);

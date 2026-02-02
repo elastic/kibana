@@ -31,7 +31,7 @@ export interface RunnerFactoryDeps {
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
-  skillsService: SkillServiceStart;
+  skillServiceStart: SkillServiceStart;
   trackingService?: TrackingService;
 }
 

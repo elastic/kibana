@@ -14,14 +14,14 @@ import { ToolAvailabilityCache } from '../../tools/builtin/availability_cache';
 import type { ToolsServiceStart } from '../../tools';
 
 export const createSkillsService = ({
-  skillsStart,
-  toolsStart,
+  skillServiceStart,
+  toolsServiceStart,
   runner,
   request,
   spaceId,
 }: {
-  skillsStart: SkillServiceStart;
-  toolsStart: ToolsServiceStart;
+  skillServiceStart: SkillServiceStart;
+  toolsServiceStart: ToolsServiceStart;
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
@@ -29,16 +29,16 @@ export const createSkillsService = ({
   const toolConverterFn = createSkillToolConverter({
     request,
     spaceId,
-    definitions: toolsStart.getToolDefinitions(),
+    definitions: toolsServiceStart.getToolDefinitions(),
     runner,
   });
 
   return {
     list: () => {
-      return skillsStart.listSkills();
+      return skillServiceStart.listSkills();
     },
     getSkillDefinition: (skillId) => {
-      return skillsStart.getSkillDefinition(skillId);
+      return skillServiceStart.getSkillDefinition(skillId);
     },
     convertSkillTool: toolConverterFn,
   };

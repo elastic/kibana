@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { ToolManager } from './tool_manager';
+export { ToolManager, createToolManager } from './tool_manager';
 export { LRUMap } from './lru_map';
 export type { ToolManagerParams } from './tool_manager';

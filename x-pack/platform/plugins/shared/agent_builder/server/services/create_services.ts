@@ -76,7 +76,7 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
-    const skills = this.services.skills.start();
+    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -107,7 +107,7 @@ export class ServiceManager {
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
-      skillsService: skills,
+      skillServiceStart: skillsServiceStart,
       trackingService,
     });
     runner = runnerFactory.getRunner();
@@ -134,7 +134,7 @@ export class ServiceManager {
       tools,
       agents,
       attachments,
-      skills,
+      skills: skillsServiceStart,
       conversations,
       runnerFactory,
       chat,

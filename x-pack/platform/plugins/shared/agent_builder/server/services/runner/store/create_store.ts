@@ -13,10 +13,11 @@ import { createSkillsStore } from './volumes/skills/skills_store';
 import { CreateRunnerDeps } from '../runner';
 
 export const createStore = ({ conversation, runnerDeps }: { conversation?: Conversation, runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'> }) => {
+  const { skillServiceStart } = runnerDeps;
   const filesystem = new VirtualFileSystem();
 
   const resultStore = createResultStore({ conversation });
-  const skillsStore = createSkillsStore({ skills: runnerDeps.skillsService.listSkills() });
+  const skillsStore = createSkillsStore({ skills: skillServiceStart.listSkills() });
   filesystem.mount(resultStore.getVolume());
   filesystem.mount(skillsStore.getVolume());
 
