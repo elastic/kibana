@@ -35,7 +35,7 @@ export function SloDetailsHistory({ slo, isFlyout }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
-        <EuiFlexItem grow css={{ maxWidth: 500 }}>
+        <EuiFlexItem grow css={isFlyout ? undefined : { maxWidth: 500 }}>
           {slo.timeWindow.type === 'calendarAligned' ? (
             <CalendarPeriodPicker
               period={toDuration(slo.timeWindow.duration).unit === 'w' ? 'week' : 'month'}
@@ -57,7 +57,8 @@ export function SloDetailsHistory({ slo, isFlyout }: Props) {
                 updateState({ range: newRange });
               }}
               width="full"
-              showUpdateButton={false}
+              showUpdateButton={isFlyout}
+              updateButtonProps={{ fill: false }}
               commonlyUsedRanges={uiSettings
                 .get('timepicker:quickRanges')
                 .map(({ from, to, display }: { from: string; to: string; display: string }) => ({
@@ -65,6 +66,7 @@ export function SloDetailsHistory({ slo, isFlyout }: Props) {
                   end: to,
                   label: display,
                 }))}
+              compressed={isFlyout}
             />
           )}
         </EuiFlexItem>
