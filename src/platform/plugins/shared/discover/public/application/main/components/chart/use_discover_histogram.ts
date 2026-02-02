@@ -34,7 +34,11 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
+import {
+  type DiscoverAppState,
+  selectTabCombinedFilters,
+  useAppStateSelector,
+} from '../../state_management/redux';
 import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
@@ -201,14 +205,7 @@ export const useDiscoverHistogram = (
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const query = useAppStateSelector((state) => state.query);
-  const appFilters = useAppStateSelector((state) => state.filters);
-  const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
-
-  const filtersMemoized = useMemo(() => {
-    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
-    return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [appFilters, globalFilters]);
-
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
@@ -228,7 +225,7 @@ export const useDiscoverHistogram = (
       requestAdapter: inspectorAdapters.requests,
       dataView,
       query,
-      filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
+      filters,
       timeRange,
       relativeTimeRange,
       breakdownField,
@@ -245,7 +242,7 @@ export const useDiscoverHistogram = (
     currentTabControlState,
     dataView,
     esqlVariables,
-    filtersMemoized,
+    filters,
     inspectorAdapters.requests,
     isEsqlMode,
     timeRange,

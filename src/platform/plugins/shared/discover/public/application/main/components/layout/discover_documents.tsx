@@ -48,14 +48,17 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useAppStateSelector, useCurrentTabRuntimeState } from '../../state_management/redux';
+import {
+  selectTabCombinedFilters,
+  useAppStateSelector,
+  useCurrentTabRuntimeState,
+} from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -303,7 +306,7 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
-  const { filters } = useQuerySubscriber({ data: services.data });
+  const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const extensionActions = useMemo(
     () => ({
