@@ -14,6 +14,14 @@ const equationResultText = i18n.translate('xpack.observability.customThreshold.a
   defaultMessage: 'Equation result for ',
 });
 
+const resolveMetricDisplay = (metric: MetricExpression['metrics'][0]) => {
+  if (metric.field && metric.filter) {
+    return `${metric.aggType} (${metric.field}, ${metric.filter})`;
+  }
+
+  return `${metric.aggType} (${metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
+    })`
+}
 export const generateChartTitleAndTooltip = (
   criterion: MetricExpression,
   chartTitleLimit = CHART_TITLE_LIMIT
@@ -22,9 +30,7 @@ export const generateChartTitleAndTooltip = (
 
   criterion.metrics.forEach(
     (metric) =>
-      (metricNameResolver[metric.name] = `${metric.aggType} (${
-        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-      })`)
+      (metricNameResolver[metric.name] = resolveMetricDisplay(metric))
   );
 
   let equation = criterion.equation
