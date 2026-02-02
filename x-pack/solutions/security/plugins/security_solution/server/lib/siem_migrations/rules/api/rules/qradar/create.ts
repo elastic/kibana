@@ -68,11 +68,11 @@ export const registerSiemRuleMigrationsCreateQRadarRulesRoute = (
               });
             }
 
-            const isEligibleForTranslation = qradarRules.filter(
+            const isEligibleForTranslation = qradarRules.some(
               (rule) => rule.rule_type !== 'building_block'
             );
 
-            if (isEligibleForTranslation.length === 0) {
+            if (!isEligibleForTranslation) {
               return res.badRequest({
                 body: { message: 'No valid rules could be extracted from the XML' },
               });
