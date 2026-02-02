@@ -40,6 +40,28 @@ const insightsTaskRoute = createServerRoute({
           .describe(
             'Optional connector ID. If not provided, the default AI connector from settings will be used.'
           ),
+        streamNames: z
+          .array(z.string())
+          .optional()
+          .describe('Stream names to analyze. If not provided, analyzes all streams.'),
+        from: z
+          .number()
+          .optional()
+          .describe('Start of time range (epoch ms). Defaults to now-1h.'),
+        to: z.number().optional().describe('End of time range (epoch ms). Defaults to now.'),
+        bucketSize: z
+          .string()
+          .optional()
+          .describe('Bucket size for histogram (e.g., "1h", "15m"). Auto-derived if not provided.'),
+        changeThreshold: z
+          .number()
+          .optional()
+          .describe('Minimum absolute percentage change to include (default: 20 for 20%).'),
+        maxQueries: z
+          .number()
+          .optional()
+          .describe('Maximum number of queries to process (default: 50).'),
+        queryFilter: z.string().optional().describe('Optional text filter for query search.'),
       }),
       z.object({
         action: z.literal('cancel').describe('Cancel an in-progress generation task'),
@@ -80,6 +102,13 @@ const insightsTaskRoute = createServerRoute({
 
                 return {
                   connectorId,
+                  streamNames: body.streamNames,
+                  from: body.from,
+                  to: body.to,
+                  bucketSize: body.bucketSize,
+                  changeThreshold: body.changeThreshold,
+                  maxQueries: body.maxQueries,
+                  queryFilter: body.queryFilter,
                 };
               })(),
               request,
