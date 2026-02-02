@@ -62,7 +62,7 @@ export async function getSpanExceptionGroups({
     return {
       type: 'spanException' as const,
       ...sample,
-      firstSeen,
+      ...(firstSeen && { firstSeen }),
     };
   });
 }
