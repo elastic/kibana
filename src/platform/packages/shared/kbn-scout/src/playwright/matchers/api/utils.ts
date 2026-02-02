@@ -12,14 +12,13 @@ export interface MatcherErrorOptions {
   matcherName: string;
   received: unknown;
   isNegated?: boolean;
-  skipStackLines?: number;
 }
 
 /**
  * Format error messages for API matchers like Playwright.
  */
 export function createMatcherError(options: MatcherErrorOptions): Error {
-  const { expected, matcherName, received, isNegated = false, skipStackLines = 0 } = options;
+  const { expected, matcherName, received, isNegated = false } = options;
   const gray = '\x1b[90m';
   const red = '\x1b[31m';
   const green = '\x1b[32m';
@@ -31,19 +30,31 @@ export function createMatcherError(options: MatcherErrorOptions): Error {
     `${matcherName}` +
     `${gray}(${green}expected${gray})${reset}`;
 
-  const error = new Error(
+  return new Error(
     `${matcherCall}\n\n` +
       `Expected: ${isNegated ? 'not ' : ''}${green}${expected}${reset}\n` +
       `Received: ${red}${received}${reset}`
   );
+}
 
-  if (skipStackLines > 0 && error.stack) {
-    const lines = error.stack.split('\n');
-    // First line is the error message, rest are stack frames
-    const messageLines = lines.filter((line) => !line.trimStart().startsWith('at '));
-    const stackLines = lines.filter((line) => line.trimStart().startsWith('at '));
-    error.stack = [...messageLines, ...stackLines.slice(skipStackLines)].join('\n');
-  }
-
-  return error;
+/**
+ * Wraps a matcher function to fix the stack trace.
+ * When a matcher throws, the error points to internal files instead of the test.
+ * This wrapper catches the error and uses Error.captureStackTrace to exclude
+ * the wrapper function, making the error point to the actual test file.
+ */
+export function wrapMatcher<TArgs extends unknown[], TReturn>(
+  fn: (...args: TArgs) => TReturn
+): (...args: TArgs) => TReturn {
+  const wrapper = (...args: TArgs): TReturn => {
+    try {
+      return fn(...args);
+    } catch (error) {
+      if (error instanceof Error) {
+        Error.captureStackTrace(error, wrapper);
+      }
+      throw error;
+    }
+  };
+  return wrapper;
 }

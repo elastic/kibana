@@ -11,6 +11,7 @@ export const FEATURE_UUID = 'feature.uuid';
 export const FEATURE_TYPE = 'feature.type';
 export const FEATURE_DESCRIPTION = 'feature.description';
 export const FEATURE_NAME = 'feature.name';
+export const FEATURE_TITLE = 'feature.title';
 export const FEATURE_VALUE = 'feature.value';
 export const FEATURE_CONFIDENCE = 'feature.confidence';
 export const FEATURE_EVIDENCE = 'feature.evidence';
