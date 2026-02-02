@@ -13,13 +13,12 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 /**
  * Fetches step executions by their IDs using mget (O(1) operation).
- * This is more efficient than search and doesn't require index refresh.
+ * This is real-time (reads from translog) and doesn't require index refresh.
  */
 async function getStepExecutionsByIds(
   esClient: ElasticsearchClient,
@@ -91,29 +90,14 @@ export const getWorkflowExecution = async ({
 
     let stepExecutions: EsWorkflowStepExecution[];
 
-    // Use mget if we have step execution IDs (O(1) lookup, doesn't require index refresh)
+    // Use mget if we have step execution IDs - this is O(1) and real-time
+    // (reads from translog, no refresh needed)
     if (doc.stepExecutionIds && doc.stepExecutionIds.length > 0) {
       stepExecutions = await getStepExecutionsByIds(
         esClient,
         stepsExecutionIndex,
         doc.stepExecutionIds
       );
-
-      // If some steps are missing or not in terminal status when workflow is terminal,
-      // refresh and retry - this handles the race condition
-      if (isTerminalStatus(doc.status)) {
-        const allFound = stepExecutions.length === doc.stepExecutionIds.length;
-        const allTerminal = stepExecutions.every((step) => isTerminalStatus(step.status));
-
-        if (!allFound || !allTerminal) {
-          await esClient.indices.refresh({ index: stepsExecutionIndex });
-          stepExecutions = await getStepExecutionsByIds(
-            esClient,
-            stepsExecutionIndex,
-            doc.stepExecutionIds
-          );
-        }
-      }
     } else {
       // Fallback to search for backward compatibility (old workflows without stepExecutionIds)
       stepExecutions = await searchStepExecutions({
@@ -123,19 +107,8 @@ export const getWorkflowExecution = async ({
         workflowExecutionId,
         spaceId,
       });
-
-      // For old workflows, use the previous refresh logic
-      if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
-        await esClient.indices.refresh({ index: stepsExecutionIndex });
-        stepExecutions = await searchStepExecutions({
-          esClient,
-          logger,
-          stepsExecutionIndex,
-          workflowExecutionId,
-          spaceId,
-        });
-      }
     }
+
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
