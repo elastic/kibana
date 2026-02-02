@@ -86,4 +86,25 @@ describe('useDeleteTemplate', () => {
 
     expect(result.current.error).toEqual(error);
   });
+
+  it('calls onSuccess callback on successful deletion', async () => {
+    const onSuccessMock = jest.fn();
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(() => useDeleteTemplate({ onSuccess: onSuccessMock }), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders queryClient={queryClient}>{children}</TestProviders>
+      ),
+    });
+
+    await act(async () => {
+      result.current.mutate({ templateId: 'template-1' });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(onSuccessMock).toHaveBeenCalled();
+  });
 });

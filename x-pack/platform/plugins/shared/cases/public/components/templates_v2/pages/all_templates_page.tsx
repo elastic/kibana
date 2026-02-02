@@ -29,6 +29,7 @@ import { TemplatesTableFilters } from '../components/templates_table_filters';
 import { TemplatesInfoPanel } from '../components/templates_info_panel';
 import { TemplatesBulkActions } from '../components/templates_bulk_actions';
 import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_prompt';
+import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -46,8 +47,20 @@ export const AllTemplatesPage: React.FC = () => {
     totalItemCount: data?.total ?? 0,
   });
 
-  const { handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete } =
-    useTemplatesActions();
+  const handleDeleteSuccess = useCallback(() => {
+    setQueryParams({ page: 1 });
+  }, [setQueryParams]);
+
+  const {
+    handleEdit,
+    handleClone,
+    handleSetAsDefault,
+    handleExport,
+    handleDelete,
+    confirmDelete,
+    cancelDelete,
+    templateToDelete,
+  } = useTemplatesActions({ onDeleteSuccess: handleDeleteSuccess });
 
   const { columns } = useTemplatesColumns({
     onEdit: handleEdit,
@@ -158,6 +171,14 @@ export const AllTemplatesPage: React.FC = () => {
             sorting={sorting}
           />
         </>
+      )}
+      {templateToDelete && (
+        <DeleteConfirmationModal
+          title={i18n.DELETE_TITLE(templateToDelete.name)}
+          message={i18n.DELETE_MESSAGE(templateToDelete.name)}
+          onCancel={cancelDelete}
+          onConfirm={confirmDelete}
+        />
       )}
     </>
   );

@@ -12,13 +12,17 @@ import { TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
 import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
+import { useDeleteTemplate } from './use_delete_template';
 
 jest.mock('../../../common/navigation/hooks', () => ({
   ...jest.requireActual('../../../common/navigation/hooks'),
   useCasesEditTemplateNavigation: jest.fn(),
 }));
 
+jest.mock('./use_delete_template');
+
 const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
+const useDeleteTemplateMock = useDeleteTemplate as jest.Mock;
 
 describe('useTemplatesActions', () => {
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
@@ -40,12 +44,17 @@ describe('useTemplatesActions', () => {
 
   let consoleSpy: jest.SpyInstance;
   const navigateToCasesEditTemplateMock = jest.fn();
+  const deleteTemplateMock = jest.fn();
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     useCasesEditTemplateNavigationMock.mockReturnValue({
       navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
       getCasesEditTemplateUrl: jest.fn(),
+    });
+    useDeleteTemplateMock.mockReturnValue({
+      mutate: deleteTemplateMock,
+      isLoading: false,
     });
   });
 
@@ -62,6 +71,10 @@ describe('useTemplatesActions', () => {
     expect(result.current).toHaveProperty('handleSetAsDefault');
     expect(result.current).toHaveProperty('handleExport');
     expect(result.current).toHaveProperty('handleDelete');
+    expect(result.current).toHaveProperty('confirmDelete');
+    expect(result.current).toHaveProperty('cancelDelete');
+    expect(result.current).toHaveProperty('templateToDelete');
+    expect(result.current).toHaveProperty('isDeleting');
   });
 
   it('handleEdit navigates to edit template page', () => {
@@ -114,16 +127,62 @@ describe('useTemplatesActions', () => {
     expect(consoleSpy).toHaveBeenCalledWith('Export template:', mockTemplate);
   });
 
-  it('handleDelete is a function', () => {
+  it('handleDelete sets templateToDelete', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
-    expect(typeof result.current.handleDelete).toBe('function');
+    expect(result.current.templateToDelete).toBeNull();
 
     act(() => {
       result.current.handleDelete(mockTemplate);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Delete template:', mockTemplate);
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+  });
+
+  it('confirmDelete calls deleteTemplate mutation and clears templateToDelete', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleDelete(mockTemplate);
+    });
+
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+
+    act(() => {
+      result.current.confirmDelete();
+    });
+
+    expect(deleteTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.key });
+    expect(result.current.templateToDelete).toBeNull();
+  });
+
+  it('passes onDeleteSuccess to useDeleteTemplate hook', () => {
+    const onDeleteSuccessMock = jest.fn();
+    renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
+      wrapper,
+    });
+
+    // Verify useDeleteTemplate was called with the onSuccess callback
+    expect(useDeleteTemplateMock).toHaveBeenCalledWith({
+      onSuccess: onDeleteSuccessMock,
+    });
+  });
+
+  it('cancelDelete clears templateToDelete without calling mutation', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleDelete(mockTemplate);
+    });
+
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+
+    act(() => {
+      result.current.cancelDelete();
+    });
+
+    expect(deleteTemplateMock).not.toHaveBeenCalled();
+    expect(result.current.templateToDelete).toBeNull();
   });
 
   it('handlers are stable between renders', () => {
@@ -138,5 +197,6 @@ describe('useTemplatesActions', () => {
     expect(result.current.handleSetAsDefault).toBe(firstRenderHandlers.handleSetAsDefault);
     expect(result.current.handleExport).toBe(firstRenderHandlers.handleExport);
     expect(result.current.handleDelete).toBe(firstRenderHandlers.handleDelete);
+    expect(result.current.cancelDelete).toBe(firstRenderHandlers.cancelDelete);
   });
 });

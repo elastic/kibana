@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
+import { useDeleteTemplate } from './use_delete_template';
 
-export const useTemplatesActions = () => {
+interface UseTemplatesActionsProps {
+  onDeleteSuccess?: () => void;
+}
+
+export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
+  const { mutate: deleteTemplate, isLoading: isDeleting } = useDeleteTemplate({
+    onSuccess: onDeleteSuccess,
+  });
+  const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
   const handleEdit = useCallback(
     (template: Template) => {
@@ -38,9 +47,18 @@ export const useTemplatesActions = () => {
   }, []);
 
   const handleDelete = useCallback((template: Template) => {
-    // TODO: Implement delete functionality
-    // eslint-disable-next-line no-console
-    console.log('Delete template:', template);
+    setTemplateToDelete(template);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (templateToDelete) {
+      deleteTemplate({ templateId: templateToDelete.key });
+      setTemplateToDelete(null);
+    }
+  }, [templateToDelete, deleteTemplate]);
+
+  const cancelDelete = useCallback(() => {
+    setTemplateToDelete(null);
   }, []);
 
   return {
@@ -49,5 +67,9 @@ export const useTemplatesActions = () => {
     handleSetAsDefault,
     handleExport,
     handleDelete,
+    confirmDelete,
+    cancelDelete,
+    templateToDelete,
+    isDeleting,
   };
 };

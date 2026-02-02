@@ -17,7 +17,11 @@ interface MutationArgs {
   templateId: string;
 }
 
-export const useDeleteTemplate = () => {
+interface UseDeleteTemplateProps {
+  onSuccess?: () => void;
+}
+
+export const useDeleteTemplate = ({ onSuccess }: UseDeleteTemplateProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
@@ -26,8 +30,9 @@ export const useDeleteTemplate = () => {
     {
       mutationKey: casesMutationsKeys.deleteTemplate,
       onSuccess: () => {
-        queryClient.invalidateQueries(casesQueriesKeys.templates);
+        queryClient.invalidateQueries(casesQueriesKeys.templatesList());
         showSuccessToast(i18n.SUCCESS_DELETING_TEMPLATE);
+        onSuccess?.();
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_DELETING_TEMPLATE });
