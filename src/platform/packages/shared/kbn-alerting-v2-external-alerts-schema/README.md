@@ -9,8 +9,8 @@ This package provides TypeScript types and Zod schemas for defining and validati
 ## Usage
 
 ```typescript
-import { ExternalAlertSchema } from '@kbn/alerting-v2-external-alerts-schema';
+import { datadogAlertEventSchema } from '@kbn/alerting-v2-external-alerts-schema';
 
 // Use schemas for validation
-const validated = ExternalAlertSchema.parse(alertData);
+const validated = datadogAlertEventSchema.parse(alertData);
 ```
