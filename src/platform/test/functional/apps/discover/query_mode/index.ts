@@ -26,7 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_update_query_mode'));
     loadTestFile(require.resolve('./_default_query_mode'));
   });
 }
