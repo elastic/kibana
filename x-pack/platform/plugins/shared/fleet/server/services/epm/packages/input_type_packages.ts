@@ -110,7 +110,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (dataStreamType !== 'metrics' && dataStream.elasticsearch?.index_mode === 'time_series') {
     logger.debug(
       `Ignoring time_series index mode for package "${pkgInfo.name}" ` +
-      `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
+        `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
     );
 
     // Remove time_series index mode from dataStream.
