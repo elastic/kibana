@@ -26,13 +26,14 @@ export { CascadeRowHeaderPrimitive };
 
 /**
  * @internal
- * @description Internal component that is used to render a row in the data cascade.
+ * @description Internal component that is used to render a row in the data cascade component.
  */
 export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   activeStickyRenderSlotRef,
   isActiveSticky,
   innerRef,
   onCascadeGroupNodeExpanded,
+  onCascadeGroupNodeCollapsed,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
   rowHeaderActions,
@@ -75,6 +76,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         enableRowSelection={enableRowSelection}
         enableSecondaryExpansionAction={enableSecondaryExpansionAction}
         onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+        onCascadeGroupNodeCollapsed={onCascadeGroupNodeCollapsed}
       />
     );
   }, [
@@ -83,6 +85,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     enableSecondaryExpansionAction,
     isGroupNode,
     onCascadeGroupNodeExpanded,
+    onCascadeGroupNodeCollapsed,
     rowHeaderActions,
     rowHeaderMetaSlots,
     rowInstance,

@@ -903,6 +903,120 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     );
   });
 
+  apiTest(
+    'should handle includes filter condition with string array',
+    async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'attributes.has_error_tag',
+            value: 'yes',
+            where: {
+              field: 'attributes.tags',
+              includes: 'error',
+            },
+          } as SetProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const mappingDoc = { attributes: { tags: [''], has_error_tag: 'null' } };
+      const docs = [
+        { attributes: { tags: ['error', 'warning', 'info'] } },
+        { attributes: { tags: ['warning', 'info'] } },
+        { attributes: { tags: ['error'] } },
+        { attributes: { tags: ['debug', 'trace'] } },
+      ];
+
+      await testBed.ingest('ingest-includes-string', docs, processors);
+      const ingestResult = await testBed.getDocsOrdered('ingest-includes-string');
+
+      await testBed.ingest('esql-includes-string', [mappingDoc, ...docs]);
+      const esqlResult = await esql.queryOnIndex('esql-includes-string', query);
+
+      // Ingest pipeline results
+      expect(ingestResult[0].attributes).toStrictEqual(
+        expect.objectContaining({ tags: ['error', 'warning', 'info'], has_error_tag: 'yes' })
+      );
+      expect(ingestResult[1].attributes).not.toHaveProperty('has_error_tag');
+      expect(ingestResult[2].attributes).toStrictEqual(
+        expect.objectContaining({ tags: ['error'], has_error_tag: 'yes' })
+      );
+      expect(ingestResult[3].attributes).not.toHaveProperty('has_error_tag');
+
+      // ESQL results
+      expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': 'yes' })
+      );
+      expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': null })
+      );
+      expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': 'yes' })
+      );
+      expect(esqlResult.documentsOrdered[4]).toStrictEqual(
+        expect.objectContaining({ 'attributes.has_error_tag': null })
+      );
+    }
+  );
+
+  apiTest('should handle includes with NOT condition', async ({ testBed, esql }) => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'set',
+          to: 'attributes.no_admin',
+          value: 'regular_user',
+          where: {
+            not: {
+              field: 'attributes.roles',
+              includes: 'admin',
+            },
+          },
+        } as SetProcessor,
+      ],
+    };
+
+    const { processors } = transpileIngestPipeline(streamlangDSL);
+    const { query } = transpileEsql(streamlangDSL);
+
+    const mappingDoc = { attributes: { roles: [''], no_admin: 'null' } };
+    const docs = [
+      { attributes: { roles: ['user', 'viewer'] } },
+      { attributes: { roles: ['admin', 'user'] } },
+      { attributes: { roles: ['editor'] } },
+    ];
+
+    await testBed.ingest('ingest-includes-not', docs, processors);
+    const ingestResult = await testBed.getDocsOrdered('ingest-includes-not');
+
+    await testBed.ingest('esql-includes-not', [mappingDoc, ...docs]);
+    const esqlResult = await esql.queryOnIndex('esql-includes-not', query);
+
+    // Ingest pipeline results
+    expect(ingestResult[0].attributes).toStrictEqual(
+      expect.objectContaining({ roles: ['user', 'viewer'], no_admin: 'regular_user' })
+    );
+    expect(ingestResult[1].attributes).not.toHaveProperty('no_admin');
+    expect(ingestResult[2].attributes).toStrictEqual(
+      expect.objectContaining({ roles: ['editor'], no_admin: 'regular_user' })
+    );
+
+    // ESQL results
+    expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': 'regular_user' })
+    );
+    expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': null })
+    );
+    expect(esqlResult.documentsOrdered[3]).toStrictEqual(
+      expect.objectContaining({ 'attributes.no_admin': 'regular_user' })
+    );
+  });
+
   apiTest('should handle special characters in patterns', async ({ testBed, esql }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [

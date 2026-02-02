@@ -17,6 +17,7 @@ import type {
   GetSLOTemplateResponse,
   ListHealthScanResponse,
   PostHealthScanResponse,
+  SearchSLODefinitionResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -164,6 +165,33 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send();
+
+      return body;
+    },
+
+    async searchDefinitions(
+      roleAuthc: RoleCredentials,
+      params?: {
+        search?: string;
+        size?: number;
+        searchAfter?: string;
+        remoteName?: string;
+      },
+      expectedStatus: number = 200
+    ): Promise<SearchSLODefinitionResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params?.search !== undefined) queryParams.search = params.search;
+      if (params?.size !== undefined) queryParams.size = params.size;
+      if (params?.searchAfter !== undefined) queryParams.searchAfter = params.searchAfter;
+      if (params?.remoteName !== undefined) queryParams.remoteName = params.remoteName;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_search_definitions`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
 
       return body;
     },

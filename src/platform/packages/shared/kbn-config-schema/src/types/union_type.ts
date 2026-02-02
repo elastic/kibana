@@ -11,18 +11,20 @@ import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import type { ExtendsDeepOptions } from './type';
-import { Type, type TypeOptions, type TypeMeta } from './type';
+import { Type, type TypeOptions } from './type';
 
-export type UnionTypeOptions<T> = TypeOptions<T> & {
-  meta?: Omit<TypeMeta, 'id'>;
-};
+export type UnionTypeOptions<T> = TypeOptions<T>;
 
 export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   private readonly unionTypes: RTS;
   private readonly typeOptions?: UnionTypeOptions<T>;
 
   constructor(types: RTS, options?: UnionTypeOptions<T>) {
-    const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
+    let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
+
+    if (options?.meta?.id) {
+      schema = schema.id(options.meta.id);
+    }
 
     super(schema, options);
     this.unionTypes = types;

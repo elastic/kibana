@@ -20,7 +20,7 @@ import { ContentInsightsProvider } from '@kbn/content-management-content-insight
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
@@ -125,7 +125,10 @@ export interface TableListViewKibanaDependencies {
       };
     };
     overlays: {
-      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+      openSystemFlyout(
+        content: React.ReactElement,
+        options?: OverlaySystemFlyoutOpenOptions
+      ): OverlayRef;
     };
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];

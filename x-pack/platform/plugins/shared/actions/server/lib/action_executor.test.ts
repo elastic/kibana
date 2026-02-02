@@ -2231,3 +2231,46 @@ describe('execute() - optional params validator', () => {
     );
   });
 });
+
+describe('execute() - spaceId override', () => {
+  test('uses the provided spaceId instead of deriving from request', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute({
+      ...executeParams,
+      spaceId: 'override-space',
+    });
+
+    // spacesMock.getSpaceId should not be called when spaceId is provided
+    expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
+
+    // The action should be fetched from the override space namespace
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'override-space' }
+    );
+  });
+
+  test('falls back to deriving spaceId from request when spaceId is not provided', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    // spacesMock.getSpaceId should be called when no spaceId override is provided
+    expect(spacesMock.getSpaceId).toHaveBeenCalled();
+
+    // The action should be fetched from the namespace derived from request
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'some-namespace' }
+    );
+  });
+});

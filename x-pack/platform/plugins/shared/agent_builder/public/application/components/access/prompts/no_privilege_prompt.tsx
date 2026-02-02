@@ -8,9 +8,10 @@
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PromptLayoutVariant } from '../../common/prompt/layout';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import { ErrorPrompt } from '../../common/prompt/error_prompt';
 
 export interface NoPrivilegePromptProps {
   variant?: PromptLayoutVariant;
@@ -21,7 +22,7 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
   const assetBasePath = useAssetBasePath();
   const { docLinksService } = useAgentBuilderServices();
 
-  const primaryButton = (
+  const learnMoreButton = (
     <EuiButtonEmpty
       href={docLinksService.agentBuilder}
       target="_blank"
@@ -36,24 +37,13 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
   );
 
   return (
-    <PromptLayout
+    <ErrorPrompt
       variant={variant}
+      errorType="MISSING_PRIVILEGES"
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
       }
-      title={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.noPrivilege.title"
-          defaultMessage="Access denied"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.noPrivilege.description"
-          defaultMessage="You don't have the required privileges to access the Agent Builder. Please contact your administrator."
-        />
-      }
-      primaryButton={primaryButton}
+      primaryButton={learnMoreButton}
     />
   );
 };

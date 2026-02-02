@@ -194,7 +194,7 @@ describe('DetectionRulesClient.patchRule', () => {
     );
   });
 
-  it('enables the rule if the nexParams have enabled: true', async () => {
+  it('enables the rule if the nextParams have enabled: true', async () => {
     // Mock the existing rule
     const existingRule = getRulesSchemaMock();
     existingRule.enabled = false;
@@ -217,7 +217,7 @@ describe('DetectionRulesClient.patchRule', () => {
     );
   });
 
-  it('disables the rule if the nexParams have enabled: false', async () => {
+  it('disables the rule if the nextParams have enabled: false', async () => {
     // Mock the existing rule
     const existingRule = getRulesSchemaMock();
     existingRule.enabled = true;
@@ -390,6 +390,59 @@ describe('DetectionRulesClient.patchRule', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('RBAC', () => {
+    it('calls the bulkEditRuleParamsWithReadAuth method when all fields are valid fields', async () => {
+      // Mock the existing rule
+      const existingRule = getRulesSchemaMock();
+      existingRule.exceptions_list = [];
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule update
+      const rulePatch = {
+        rule_id: existingRule.rule_id,
+        exceptions_list: getQueryRuleParams().exceptionsList,
+      };
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
+      rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+        rules: [getRuleMock(getQueryRuleParams())],
+        skipped: [],
+        errors: [],
+        total: 1,
+      });
+
+      await detectionRulesClient.patchRule({ rulePatch });
+
+      expect(rulesClient.bulkEditRuleParamsWithReadAuth).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: [
+            {
+              field: 'exceptionsList',
+              operation: 'set',
+              value: [
+                {
+                  id: 'some_uuid',
+                  list_id: 'list_id_single',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: 'endpoint_list',
+                  list_id: 'endpoint_list',
+                  namespace_type: 'agnostic',
+                  type: 'endpoint',
+                },
+              ],
+            },
+            { field: 'ruleSource', operation: 'set', value: { type: 'internal' } },
+          ],
+        })
+      );
+      expect(rulesClient.update).not.toHaveBeenCalled();
     });
   });
 });
