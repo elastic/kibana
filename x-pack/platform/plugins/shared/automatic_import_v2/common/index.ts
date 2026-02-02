@@ -5,6 +5,7 @@
  * 2.0.
  */
 export type {
+  ApproveIntegrationRequest,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
@@ -14,6 +15,8 @@ export type {
 } from './model/api/integrations/integration.gen';
 
 export {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
