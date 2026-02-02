@@ -14,8 +14,8 @@ import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';
 import { init as initNotification } from './app/services/notifications';
 import type { PluginDependencies, ClientConfigType } from './types';
+import { ccrDataEnricher } from './ccr_data_enricher';
 
-// @ts-ignore;
 import { setHttpClient } from './app/services/api';
 
 export class CrossClusterReplicationPlugin implements Plugin {
@@ -105,6 +105,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
             };
 
             indexManagement.extensionsService.addBadge(followerBadgeExtension);
+            indexManagement.indexDataEnricher.add(ccrDataEnricher);
           }
         } else {
           ccrApp.disable();

@@ -74,7 +74,7 @@ export function usePrebuiltRulesUpgrade({
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const {
     data: upgradeReviewResponse,
