@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { isTelemetryBeingSent } from '../utils';
 
 interface Props {
   core: CoreStart;
@@ -19,9 +18,6 @@ interface Props {
 }
 
 export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
-
   const handleShowFeedbackContainer = () => {
     // Only load the feedback container if we know the user can send telemetry
     Promise.all([import('./feedback_container'), import('@kbn/react-kibana-mount')]).then(
@@ -43,23 +39,6 @@ export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) =>
     );
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-
-    isTelemetryBeingSent(core.analytics)
-      .then((isBeingSent) => {
-        if (isBeingSent) {
-          setEnabledFeedbackButton(true);
-        }
-      })
-      .catch(() => {
-        setEnabledFeedbackButton(false);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [core.analytics]);
-
   return (
     <EuiHeaderSectionItemButton
       data-test-subj="feedbackTriggerButton"
@@ -68,8 +47,6 @@ export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) =>
         defaultMessage: 'Give feedback',
       })}
       onClick={handleShowFeedbackContainer}
-      isLoading={isLoading}
-      disabled={!enabledFeedbackButton}
     >
       <EuiIcon type="comment" size="m" />
     </EuiHeaderSectionItemButton>

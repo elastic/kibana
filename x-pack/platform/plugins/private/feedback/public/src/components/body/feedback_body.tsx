@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { FeedbackRegistryEntry } from '@kbn/feedback-registry/common';
+import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
 import { SessionInfoDisclaimer } from './session_info_disclaimer';

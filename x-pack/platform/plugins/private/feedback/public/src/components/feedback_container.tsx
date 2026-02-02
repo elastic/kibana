@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { getCurrentAppTitleAndId, getQuestions } from '../utils';
+import useObservable from 'react-use/lib/useObservable';
+import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
+import { getAppDetails } from '../utils';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
 import { FeedbackFooter } from './footer/feedback_footer';
-import { FEEDBACK_SUBMITTED_EVENT_TYPE, type FeedbackSubmittedEventData } from '../telemetry';
 
 interface Props {
   core: CoreStart;
@@ -35,21 +36,12 @@ export const FeedbackContainer = ({
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
   const [allowEmailContact, setAllowEmailContact] = useState(true);
   const [email, setEmail] = useState('');
-  const [solutionView, setSolutionView] = useState<string | null>(null);
 
-  const { title: appTitle, id: appId } = getCurrentAppTitleAndId(core);
+  const solutionView = useObservable(core.chrome.getActiveSolutionNavId$());
 
-  const questions = getQuestions(appId);
+  const { title: appTitle, id: appId, url: appUrl } = getAppDetails(core);
 
-  useEffect(() => {
-    const solutionSub = core.chrome.getActiveSolutionNavId$().subscribe((solutionId) => {
-      setSolutionView(solutionId);
-    });
-
-    return () => {
-      solutionSub.unsubscribe();
-    };
-  }, [core.chrome]);
+  const questions = getFeedbackQuestionsForApp(appId);
 
   const isSendFeedbackButtonDisabled =
     !selectedCsatOptionId &&
@@ -80,7 +72,7 @@ export const FeedbackContainer = ({
 
   const submitFeedback = async () => {
     try {
-      const eventData: FeedbackSubmittedEventData = {
+      const eventData = {
         app_id: appId,
         user_email: allowEmailContact && email ? email : undefined,
         allow_email_contact: allowEmailContact,
@@ -92,23 +84,26 @@ export const FeedbackContainer = ({
           question: question.question,
           answer: questionAnswers[question.id]?.trim() || 'N/A',
         })),
+        url: appUrl,
       };
 
-      core.analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, eventData);
+      core.http.post(`/internal/feedback/send`, {
+        body: JSON.stringify(eventData),
+      });
 
       core.notifications.toasts.addSuccess({
         title: i18n.translate('feedback.submissionSuccessToast.title', {
           defaultMessage: 'Thanks for your feedback!',
         }),
-        text: i18n.translate('feedback.submissionSuccessToast.text', {
-          defaultMessage:
-            'If you remember anything else, you can always come back and submit it again.',
-        }),
       });
 
       hideFeedbackContainer();
-    } catch (error) {
-      // Silently fail
+    } catch (_error) {
+      core.notifications.toasts.addSuccess({
+        title: i18n.translate('feedback.submissionFailureToast.title', {
+          defaultMessage: 'Failed to submit feedback. Please try again later.',
+        }),
+      });
     }
   };
 

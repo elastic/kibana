@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import type { EventTypeOpts, RootSchema } from '@kbn/core/public';
+import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 
-export const FEEDBACK_SUBMITTED_EVENT_TYPE = 'feedback_submitted';
-
-export interface FeedbackQuestion {
+interface FeedbackQuestion {
   id: string;
   question: string;
   answer: string;
 }
 
-export interface FeedbackSubmittedEventData {
+interface FeedbackSubmittedEventData {
   app_id: string;
+  solution: string;
+  allow_email_contact: boolean;
+  url: string;
+  user_id?: string;
   user_email?: string;
-  solution?: string;
   csat_score?: number;
   questions?: FeedbackQuestion[];
   organization_id?: string;
-  allow_email_contact: boolean;
 }
+
+export const FEEDBACK_SUBMITTED_EVENT_TYPE = 'feedback_submitted';
 
 const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
   app_id: {
@@ -33,6 +35,13 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
       optional: false,
     },
   },
+  user_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The unique identifier of the user submitting feedback',
+      optional: true,
+    },
+  },
   user_email: {
     type: 'keyword',
     _meta: {
@@ -40,12 +49,19 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
       optional: true,
     },
   },
+  url: {
+    type: 'keyword',
+    _meta: {
+      description: 'The URL of the page from which the feedback was submitted',
+      optional: false,
+    },
+  },
   solution: {
     type: 'keyword',
     _meta: {
       description:
-        'The active solution view or project type (e.g., security, observability, search)',
-      optional: true,
+        'The active solution view or project type (e.g., security, observability, search) or "classic" if no solution view is active',
+      optional: false,
     },
   },
   csat_score: {

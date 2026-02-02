@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export { feedbackRegistry } from './registry';
+export { getFeedbackQuestionsForApp } from './src';
 
 export {
   DEFAULT_REGISTRY_ID,
   DEFAULT_EXPERIENCE_QUESTION_ID,
   DEFAULT_GENERAL_QUESTION_ID,
-} from './constants';
+} from './src';
 
-export type { FeedbackRegistryEntry, FeedbackRegistryEntryId, FeedbackRegistry } from './types';
+export type { FeedbackRegistryEntry, FeedbackRegistryEntryId, FeedbackRegistry } from './src';

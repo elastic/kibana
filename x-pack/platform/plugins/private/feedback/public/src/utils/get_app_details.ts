@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 
-export const getCurrentAppTitleAndId = (core: CoreStart) => {
+export const getAppDetails = (core: CoreStart) => {
   /**
    * Clear previous context to get the latest app info
    */
@@ -50,5 +50,6 @@ export const getCurrentAppTitleAndId = (core: CoreStart) => {
   return {
     title: title ?? 'Kibana',
     id: match?.id ?? 'Kibana',
+    url: executionContext.url,
   };
 };

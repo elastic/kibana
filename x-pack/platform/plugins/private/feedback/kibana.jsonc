@@ -8,7 +8,7 @@
   "plugin": {
     "id": "feedback",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "telemetry"
     ],

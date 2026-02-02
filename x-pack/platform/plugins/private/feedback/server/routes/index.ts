@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { FEEDBACK_SUBMITTED_EVENT_TYPE, feedbackSubmittedEventType } from './feedback_events';
-
-export type { FeedbackQuestion, FeedbackSubmittedEventData } from './feedback_events';
+export { registerSendFeedbackRoute } from './send_feedback';

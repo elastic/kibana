@@ -10,7 +10,6 @@ import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
-import { feedbackSubmittedEventType } from './src/telemetry/feedback_events';
 
 interface FeedbackPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -24,8 +23,7 @@ interface FeedbackPluginStartDependencies {
 export class FeedbackPlugin implements Plugin {
   private organizationId?: string;
 
-  public setup(core: CoreSetup, { cloud }: FeedbackPluginSetupDependencies) {
-    core.analytics.registerEventType(feedbackSubmittedEventType);
+  public setup(_core: CoreSetup, { cloud }: FeedbackPluginSetupDependencies) {
     this.organizationId = cloud?.organizationId;
     return {};
   }

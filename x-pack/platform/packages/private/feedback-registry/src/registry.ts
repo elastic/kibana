@@ -10,9 +10,9 @@ import {
   DEFAULT_GENERAL_QUESTION_ID,
   DEFAULT_REGISTRY_ID,
 } from './constants';
-import type { FeedbackRegistry } from './types';
+import type { FeedbackRegistry, FeedbackRegistryEntry } from './types';
 
-export const feedbackRegistry: FeedbackRegistry = new Map([
+const feedbackRegistry: FeedbackRegistry = new Map([
   [
     DEFAULT_REGISTRY_ID,
     [
@@ -45,3 +45,11 @@ export const feedbackRegistry: FeedbackRegistry = new Map([
     ],
   ],
 ]);
+
+export const getFeedbackQuestionsForApp = (appId?: string): FeedbackRegistryEntry[] => {
+  if (appId && feedbackRegistry.has(appId)) {
+    return feedbackRegistry.get(appId)?.sort((a, b) => a.order - b.order) || [];
+  }
+
+  return feedbackRegistry.get(DEFAULT_REGISTRY_ID)?.sort((a, b) => a.order - b.order) || [];
+};

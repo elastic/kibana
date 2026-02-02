@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "common/**/*",
+    "**/*.ts",
   ],
   "exclude": [
     "target/**/*"

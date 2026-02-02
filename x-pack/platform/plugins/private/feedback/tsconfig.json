@@ -5,6 +5,7 @@
   },
   "include": [
     "public/**/*",
+    "server/**/*",
   ],
   "kbn_references": [
     "@kbn/react-kibana-mount",
@@ -13,9 +14,10 @@
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/core-chrome-browser-internal",
-    "@kbn/feedback-registry",
     "@kbn/cloud-plugin",
-    "@kbn/telemetry-plugin"
+    "@kbn/telemetry-plugin",
+    "@kbn/config-schema",
+    "@kbn/feedback-registry"
   ],
   "exclude": [
     "target/**/*",

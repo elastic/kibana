@@ -27,7 +27,7 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - common/**/*
+    - '**/*.ts'
     - '!target/**/*'
 tasks:
   jest:

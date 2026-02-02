@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { getUserEmail } from './get_user_email';
-export { getAppDetails } from './get_app_details';
+import { FeedbackPlugin } from './plugin';
+
+export function plugin() {
+  return new FeedbackPlugin();
+}
