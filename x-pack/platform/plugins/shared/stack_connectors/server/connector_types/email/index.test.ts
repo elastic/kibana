@@ -757,6 +757,27 @@ describe('params validation', () => {
       `"error validating action params: Field \\"replyTo.0\\": String must contain at most 512 character(s)"`
     );
   });
+
+  test('throws for more than 10 "replyTo" addresses', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+    const replyToAddresses = Array.from({ length: 11 }, (_, i) => `reply${i}@example.com`);
+
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['bob@example.com'],
+          replyTo: replyToAddresses,
+          subject: 'this is a test',
+          message: 'this is a message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"replyTo\\": Array must contain at most 10 element(s)"`
+    );
+  });
 });
 
 describe('execute()', () => {

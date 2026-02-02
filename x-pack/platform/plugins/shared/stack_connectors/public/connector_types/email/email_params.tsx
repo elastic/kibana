@@ -42,8 +42,8 @@ export const getEmailSender = (connector?: ActionConnector): string[] => {
     connector.config &&
     connector.config.from
   ) {
-    const config = connector.config;
-    return typeof config.from === 'string' ? [config.from] : [];
+    const from = connector.config.from;
+    return typeof from === 'string' ? [from] : [];
   }
 
   return [];
