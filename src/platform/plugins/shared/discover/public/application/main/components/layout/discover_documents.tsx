@@ -70,6 +70,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
+  OpenInNewTabParams,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
@@ -307,12 +308,22 @@ function DiscoverDocumentsComponent({
   );
   const { filters } = useQuerySubscriber({ data: services.data });
 
+  const extensionActions = useMemo(
+    () => ({
+      openInNewTab: (params: OpenInNewTabParams) => {
+        dispatch(internalStateActions.openInNewTabExtPointAction(params));
+      },
+    }),
+    [dispatch]
+  );
+
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
+    extensionActions,
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
