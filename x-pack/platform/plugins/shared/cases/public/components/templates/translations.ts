@@ -75,6 +75,21 @@ export const IMPORT_TEMPLATE = i18n.translate('xpack.cases.templates.importTempl
   defaultMessage: 'Import template',
 });
 
+export const IMPORT_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.importTemplateDescription',
+  {
+    defaultMessage: 'Requires YAML format upload',
+  }
+);
+
+export const IMPORT_SELECTED = i18n.translate('xpack.cases.templates.importSelected', {
+  defaultMessage: 'Import selected',
+});
+
+export const CANCEL = i18n.translate('xpack.cases.templates.cancel', {
+  defaultMessage: 'Cancel',
+});
+
 export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.createTemplate', {
   defaultMessage: 'Create template',
 });

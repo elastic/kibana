@@ -246,4 +246,48 @@ describe('AllTemplatesPage', () => {
       expect(apiMock.getTemplates.mock.calls.length).toBeGreaterThan(initialCallCount);
     });
   });
+
+  it('opens the import template flyout when clicking the import button', async () => {
+    const queryClient = createTestQueryClient();
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('import-template-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('template-flyout')).toBeInTheDocument();
+    });
+  });
+
+  it('closes the import template flyout when clicking the cancel button', async () => {
+    const queryClient = createTestQueryClient();
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('templates-table')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('import-template-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('template-flyout')).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByTestId('template-flyout-cancel'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
+    });
+  });
 });

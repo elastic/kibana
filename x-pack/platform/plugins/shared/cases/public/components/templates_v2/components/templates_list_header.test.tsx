@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 
 import { TemplatesListHeader } from './templates_list_header';
@@ -36,5 +37,27 @@ describe('TemplatesListHeader', () => {
 
     expect(await screen.findByTestId('create-template-button')).toBeInTheDocument();
     expect(screen.getByText('Create template')).toBeInTheDocument();
+  });
+
+  it('opens the import template flyout when clicking the import button', async () => {
+    renderWithTestingProviders(<TemplatesListHeader />);
+
+    expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('import-template-button'));
+
+    expect(await screen.findByTestId('template-flyout')).toBeInTheDocument();
+    expect(screen.getByTestId('template-flyout-header')).toBeInTheDocument();
+  });
+
+  it('closes the flyout when clicking the cancel button', async () => {
+    renderWithTestingProviders(<TemplatesListHeader />);
+
+    await userEvent.click(await screen.findByTestId('import-template-button'));
+    expect(await screen.findByTestId('template-flyout')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('template-flyout-cancel'));
+
+    expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
   });
 });
