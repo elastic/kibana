@@ -220,11 +220,11 @@ export const prepareConversation = async ({
           },
           formatContext
         );
-        if (!formatted.getRepresentation) {
+        if (!formatted?.getRepresentation) {
           return undefined;
         }
         const representation = await formatted.getRepresentation();
-        return representation.type === 'text' ? representation.value : undefined;
+        return representation?.type === 'text' ? representation.value : undefined;
       } catch {
         return undefined;
       }
@@ -298,6 +298,13 @@ const prepareAttachment = async ({
   try {
     const formatted = await definition.format(attachment, formatContext);
     const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+    if (!formatted.getRepresentation) {
+      return {
+        attachment,
+        representation: { type: 'text', value: JSON.stringify(attachment.data) },
+        tools,
+      };
+    }
     const baseRepresentation = await formatted.getRepresentation();
     const representation = definition.resolve
       ? withByReferenceNote({ representation: baseRepresentation, attachment })

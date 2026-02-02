@@ -15,6 +15,7 @@ import type {
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -167,7 +168,7 @@ describe('attachment tools', () => {
         description: 'Lens ref',
       });
 
-      const tool = getTools({
+      const customAttachmentsService = {
         getTypeDefinition: () =>
           ({
             id: AttachmentType.visualizationRef,
@@ -188,6 +189,11 @@ describe('attachment tools', () => {
               };
             },
           } as unknown as AttachmentTypeDefinition),
+      } as any;
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: customAttachmentsService,
+        formatContext,
       }).find((t) => t.id === 'platform.core.attachment_read')!;
       const result = (await tool.handler({ attachment_id: attachment.id }, {
         savedObjectsClient: {

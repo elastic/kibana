@@ -202,6 +202,9 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
   filestore: FileSystemStoreMock;
   prompts: ToolPromptManagerMock;
   stateManager: ToolStateManagerMock;
+  savedObjectsClient: ReturnType<
+    ReturnType<typeof savedObjectsServiceMock.createStartContract>['getScopedClient']
+  >;
 }
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
@@ -222,6 +225,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     stateManager: createToolStateManagerMock(),
     attachments: createAttachmentStateManagerMock(),
     filestore: createFileSystemStoreMock(),
+    savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
   };
 };
 

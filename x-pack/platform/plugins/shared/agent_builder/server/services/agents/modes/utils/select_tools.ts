@@ -64,7 +64,6 @@ export const selectTools = async ({
     attachmentsService,
     formatContext,
     runner,
-    attachmentsService,
   });
 
   // create tools for filesystem
