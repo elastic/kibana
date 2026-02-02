@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -21,8 +21,7 @@ import {
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import { sortBy } from 'lodash';
-import { useDebouncedValue } from '@kbn/visualization-utils';
+import { debounce, sortBy } from 'lodash';
 import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
@@ -49,17 +48,16 @@ export const DimensionsSelector = ({
   singleSelection = false,
   isLoading = false,
 }: DimensionsSelectorProps) => {
-  const { inputValue: localSelection, handleInputChange } = useDebouncedValue<Dimension[]>(
-    {
-      onChange,
-      value: selectedDimensions,
-    },
-    { wait: singleSelection ? 0 : DEBOUNCE_TIME }
-  );
+  const [localSelectedDimensions, setLocalSelectedDimensions] =
+    useState<Dimension[]>(selectedDimensions);
+
+  useEffect(() => {
+    setLocalSelectedDimensions(selectedDimensions);
+  }, [selectedDimensions]);
 
   const selectedNamesSet = useMemo(
-    () => new Set(localSelection.map((d) => d.name)),
-    [localSelection]
+    () => new Set(localSelectedDimensions.map((d) => d.name)),
+    [localSelectedDimensions]
   );
 
   const intersectingDimensions = useMemo(() => {
@@ -92,7 +90,7 @@ export const DimensionsSelector = ({
   }, [fields, selectedNamesSet, dimensions]);
 
   const options: SelectableEntry[] = useMemo(() => {
-    const isAtMaxLimit = localSelection.length >= MAX_DIMENSIONS_SELECTIONS;
+    const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
@@ -107,37 +105,73 @@ export const DimensionsSelector = ({
         key: dimension.name,
       };
     });
-    return sortBy(mappedOptions, (option) => {
-      if (option.checked === 'on') {
-        const selectionIndex = localSelection.findIndex((dim) => dim.name === option.value);
-        return selectionIndex !== -1 ? selectionIndex : Infinity;
+    // Sort so that selected options appear first
+    return sortBy(mappedOptions, (option) => (option.checked === 'on' ? 0 : 1));
+  }, [
+    dimensions,
+    selectedNamesSet,
+    localSelectedDimensions.length,
+    intersectingDimensions,
+    singleSelection,
+  ]);
+
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Create debounced onChange only for multi-selection mode
+  const debouncedOnChange = useMemo(() => {
+    if (singleSelection) {
+      return null;
+    }
+    return debounce((dim: Dimension[]) => {
+      onChangeRef.current(dim);
+    }, DEBOUNCE_TIME);
+  }, [singleSelection]);
+
+  useEffect(() => {
+    return () => {
+      if (debouncedOnChange) {
+        debouncedOnChange.cancel();
       }
-      return Infinity;
-    });
-  }, [dimensions, selectedNamesSet, localSelection, intersectingDimensions, singleSelection]);
+    };
+  }, [debouncedOnChange]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      const dimensionMap = new Map(dimensions.map((d) => [d.name, d]));
-      const newSelection = opts
-        .map((opt) => dimensionMap.get(opt.value))
-        .filter((d): d is Dimension => d !== undefined)
-        .slice(0, MAX_DIMENSIONS_SELECTIONS);
+      const selectedValues = new Set(opts.map((p) => p.value));
+      const newSelection = dimensions.filter((d) => selectedValues.has(d.name));
+      // Enforce the maximum limit
+      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
 
-      handleInputChange(newSelection);
+      // For single selection, call onChange immediately
+      if (singleSelection || !debouncedOnChange) {
+        setLocalSelectedDimensions(limitedSelection);
+        onChange(limitedSelection);
+      } else {
+        setLocalSelectedDimensions(limitedSelection);
+        debouncedOnChange.cancel();
+        debouncedOnChange(limitedSelection);
+      }
     },
-    [dimensions, handleInputChange]
+    [onChange, dimensions, singleSelection, debouncedOnChange]
   );
 
   const handleClearAll = useCallback(() => {
-    handleInputChange([]);
-  }, [handleInputChange]);
+    if (debouncedOnChange) {
+      debouncedOnChange.cancel();
+    }
+
+    setLocalSelectedDimensions([]);
+    onChange([]);
+  }, [onChange, debouncedOnChange]);
 
   const buttonLabel = useMemo(() => {
-    const count = localSelection.length;
-    const isAtMaxDimensions = localSelection.length >= MAX_DIMENSIONS_SELECTIONS;
+    const count = localSelectedDimensions.length;
+    const isAtMaxDimensions = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -188,10 +222,10 @@ export const DimensionsSelector = ({
         )}
       </EuiFlexGroup>
     );
-  }, [localSelection, isLoading]);
+  }, [localSelectedDimensions, isLoading]);
 
   const popoverContentBelowSearch = useMemo(() => {
-    const count = localSelection.length;
+    const count = localSelectedDimensions.length;
     if (count === 0) {
       return undefined;
     }
@@ -222,7 +256,7 @@ export const DimensionsSelector = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [localSelection.length, handleClearAll]);
+  }, [localSelectedDimensions.length, handleClearAll]);
 
   return (
     <ToolbarSelector
