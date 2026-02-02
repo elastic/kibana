@@ -38,7 +38,7 @@ import type {
 import { getInheritedFieldsFromAncestors, isOtelStream, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileIngestPipeline, validateStreamlang } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
@@ -113,6 +113,36 @@ export const simulateProcessing = async ({
     ]);
 
   const streamFields = await getStreamFields(streamsClient, stream);
+
+  // Get reserved fields for validation
+  const reservedFields = Object.entries(streamFields)
+    .filter(([, { type }]) => type === 'system')
+    .map(([name]) => name);
+
+  // Validate the Streamlang DSL before attempting simulation
+  const validationResult = validateStreamlang(params.body.processing, {
+    reservedFields,
+    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+  });
+
+  if (!validationResult.isValid) {
+    return {
+      documents: [],
+      processors_metrics: {},
+      documents_metrics: {
+        failed_rate: 1,
+        partially_parsed_rate: 0,
+        skipped_rate: 0,
+        parsed_rate: 0,
+        dropped_rate: 0,
+      },
+      detected_fields: [],
+      definition_error: {
+        type: 'validation_error',
+        message: validationResult.errors.map((e) => e.message).join(', '),
+      },
+    };
+  }
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params, stream, streamFields);

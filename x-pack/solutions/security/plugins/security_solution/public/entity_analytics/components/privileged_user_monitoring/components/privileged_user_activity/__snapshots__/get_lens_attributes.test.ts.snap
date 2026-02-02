@@ -85,7 +85,9 @@ Object {
           "layerType": "data",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "uuidv4()",
+          "splitAccessors": Array [
+            "uuidv4()",
+          ],
           "xAccessor": "uuidv4()",
         },
       ],

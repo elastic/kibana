@@ -43,7 +43,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = ({
             showGridlines: false,
             layerType: 'data',
             xAccessor: columnTimestampId,
-            splitAccessor: stackByField ? stackByFieldAccessorId : undefined,
+            splitAccessors: stackByField ? [stackByFieldAccessorId] : undefined,
           },
         ],
         yRightExtent: {

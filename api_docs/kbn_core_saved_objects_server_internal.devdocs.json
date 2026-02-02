@@ -1103,7 +1103,7 @@
         "label": "SAVED_OBJECT_TYPES_COUNT",
         "description": [],
         "signature": [
-          "143"
+          "144"
         ],
         "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
         "lineNumber": 14,

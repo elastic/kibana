@@ -11,6 +11,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -21,9 +22,14 @@ import { internalStateActions } from '../../state_management/redux';
 describe('useTopNavLinks', () => {
   const services = {
     ...createDiscoverServicesMock(),
+    application: {
+      ...createDiscoverServicesMock().application,
+      currentAppId$: new BehaviorSubject('discover'),
+    },
     capabilities: {
       discover_v2: {
         save: true,
+        storeSearchSession: true,
       },
     },
     uiSettings: {
@@ -68,8 +74,6 @@ describe('useTopNavLinks', () => {
           hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
-          topNavCustomization: undefined,
-          shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
           persistedDiscoverSession: undefined,
           ...hookAttrs,
@@ -81,118 +85,49 @@ describe('useTopNavLinks', () => {
   };
 
   it('should return results', () => {
-    const topNavLinks = setup();
+    const appMenuConfig = setup();
 
-    expect(topNavLinks).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "color": "text",
-          "emphasize": true,
-          "fill": false,
-          "id": "esql",
-          "label": "Try ES|QL",
-          "run": [Function],
-          "testId": "select-text-based-language-btn",
-          "tooltip": "ES|QL is Elastic's powerful new piped query language.",
-        },
-        Object {
-          "description": "Open Inspector for search",
-          "id": "inspect",
-          "label": "Inspect",
-          "run": [Function],
-          "testId": "openInspectorButton",
-        },
-        Object {
-          "description": "New session",
-          "iconOnly": true,
-          "iconType": "plus",
-          "id": "new",
-          "label": "New session",
-          "run": [Function],
-          "testId": "discoverNewButton",
-        },
-        Object {
-          "description": "Open session",
-          "iconOnly": true,
-          "iconType": "folderOpen",
-          "id": "open",
-          "label": "Open session",
-          "run": [Function],
-          "testId": "discoverOpenButton",
-        },
-        Object {
-          "description": "Save session",
-          "emphasize": true,
-          "iconType": "save",
-          "id": "save",
-          "label": "Save",
-          "run": [Function],
-          "testId": "discoverSaveButton",
-        },
-      ]
-    `);
+    expect(appMenuConfig.items).toBeDefined();
+    expect(appMenuConfig.items?.length).toBeGreaterThan(0);
+
+    // Check for key items
+    const itemIds = appMenuConfig.items?.map((item) => item.id);
+    expect(itemIds).toContain('new');
+    expect(itemIds).toContain('open');
+
+    // Check primary action item (Save)
+    expect(appMenuConfig.primaryActionItem).toBeDefined();
+    expect(appMenuConfig.primaryActionItem?.label).toBe('Save');
   });
 
   describe('when ES|QL mode is true', () => {
-    it('should return results', () => {
-      const topNavLinks = setup({
+    it('should NOT include the esql secondary action item', () => {
+      const appMenuConfig = setup({
         isEsqlMode: true,
       });
 
-      expect(topNavLinks).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "text",
-            "emphasize": true,
-            "fill": false,
-            "id": "esql",
-            "label": "Switch to classic",
-            "run": [Function],
-            "testId": "switch-to-dataviews",
-            "tooltip": "Switch to KQL or Lucene syntax.",
-          },
-          Object {
-            "description": "Open Inspector for search",
-            "id": "inspect",
-            "label": "Inspect",
-            "run": [Function],
-            "testId": "openInspectorButton",
-          },
-          Object {
-            "description": "New session",
-            "iconOnly": true,
-            "iconType": "plus",
-            "id": "new",
-            "label": "New session",
-            "run": [Function],
-            "testId": "discoverNewButton",
-          },
-          Object {
-            "description": "Open session",
-            "iconOnly": true,
-            "iconType": "folderOpen",
-            "id": "open",
-            "label": "Open session",
-            "run": [Function],
-            "testId": "discoverOpenButton",
-          },
-          Object {
-            "description": "Save session",
-            "emphasize": true,
-            "iconType": "save",
-            "id": "save",
-            "label": "Save",
-            "run": [Function],
-            "testId": "discoverSaveButton",
-          },
-        ]
-      `);
+      expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeUndefined();
+    });
+  });
+
+  describe('when ES|QL mode is false (classic mode)', () => {
+    it('should include the esql secondary action item', () => {
+      const appMenuConfig = setup({
+        isEsqlMode: false,
+      });
+
+      expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem?.id).toBe('esql');
+      expect(appMenuConfig.secondaryActionItem?.label).toBe('ES|QL');
     });
   });
 
   describe('when share service included', () => {
     beforeAll(() => {
       services.share = sharePluginMock.createStartContract();
+      jest.spyOn(services.share, 'availableIntegrations').mockReturnValue([]);
     });
 
     afterAll(() => {
@@ -200,69 +135,34 @@ describe('useTopNavLinks', () => {
     });
 
     it('should include the share menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "color": "text",
-            "emphasize": true,
-            "fill": false,
-            "id": "esql",
-            "label": "Try ES|QL",
-            "run": [Function],
-            "testId": "select-text-based-language-btn",
-            "tooltip": "ES|QL is Elastic's powerful new piped query language.",
-          },
-          Object {
-            "description": "Open Inspector for search",
-            "id": "inspect",
-            "label": "Inspect",
-            "run": [Function],
-            "testId": "openInspectorButton",
-          },
-          Object {
-            "description": "New session",
-            "iconOnly": true,
-            "iconType": "plus",
-            "id": "new",
-            "label": "New session",
-            "run": [Function],
-            "testId": "discoverNewButton",
-          },
-          Object {
-            "description": "Open session",
-            "iconOnly": true,
-            "iconType": "folderOpen",
-            "id": "open",
-            "label": "Open session",
-            "run": [Function],
-            "testId": "discoverOpenButton",
-          },
-          Object {
-            "description": "Share Discover session",
-            "iconOnly": true,
-            "iconType": "share",
-            "id": "share",
-            "label": "Share",
-            "run": [Function],
-            "testId": "shareTopNavButton",
-          },
-          Object {
-            "description": "Save session",
-            "emphasize": true,
-            "iconType": "save",
-            "id": "save",
-            "label": "Save",
-            "run": [Function],
-            "testId": "discoverSaveButton",
-          },
-        ]
-      `);
+      expect(appMenuConfig.items).toBeDefined();
+
+      // Check for share item
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
+      expect(shareItem?.label).toBe('Share');
     });
 
     it('should include the export menu item', () => {
-      const topNavLinks = renderHook(
+      jest
+        .spyOn(services.share!, 'availableIntegrations')
+        .mockImplementation((_objectType, groupId) => {
+          if (groupId === 'export') {
+            return [
+              {
+                id: 'csvReports',
+                shareType: 'integration' as const,
+                groupId: 'export',
+                config: () => Promise.resolve({}),
+              },
+            ];
+          }
+          return [];
+        });
+
+      const appMenuConfig = renderHook(
         () =>
           useTopNavLinks({
             dataView: dataViewMock,
@@ -272,8 +172,6 @@ describe('useTopNavLinks', () => {
             hasUnsavedChanges: false,
             isEsqlMode: false,
             adHocDataViews: [],
-            topNavCustomization: undefined,
-            shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration: true,
             persistedDiscoverSession: undefined,
           }),
@@ -281,7 +179,16 @@ describe('useTopNavLinks', () => {
           wrapper: Wrapper,
         }
       ).result.current;
-      expect(topNavLinks.filter((obj) => obj.id === 'export')).toBeDefined();
+
+      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
+      expect(exportItem).toBeDefined();
+      expect(exportItem?.label).toBe('Export');
+
+      expect(exportItem?.items).toBeDefined();
+      expect(exportItem?.items?.length).toBeGreaterThan(0);
+
+      const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
+      expect(shareItem).toBeDefined();
     });
   });
 
@@ -295,17 +202,102 @@ describe('useTopNavLinks', () => {
     });
 
     it('should return the background search menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toBeDefined();
+      const backgroundSearchItem = appMenuConfig.items?.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeDefined();
     });
   });
 
   describe('when background search is disabled', () => {
     it('should NOT return the background search menu item', () => {
-      const topNavLinks = setup();
+      const appMenuConfig = setup();
 
-      expect(topNavLinks.filter((obj) => obj.id === 'backgroundSearch')).toHaveLength(0);
+      const backgroundSearchItem = appMenuConfig.items?.find(
+        (item) => item.id === 'backgroundSearch'
+      );
+      expect(backgroundSearchItem).toBeUndefined();
+    });
+  });
+
+  describe('save button with unsaved changes', () => {
+    it('should show notification indicator when there are unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        true
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBe('You have unsaved changes');
+    });
+
+    it('should NOT show notification indicator when there are no unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: false });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        false
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBeUndefined();
+    });
+
+    it('should include Save as and Reset changes options in split button menu', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.items).toBeDefined();
+      const itemIds = appMenuConfig.primaryActionItem?.splitButtonProps?.items?.map(
+        (item) => item.id
+      );
+      expect(itemIds).toContain('saveAs');
+      expect(itemIds).toContain('resetChanges');
+    });
+
+    it('should have correct labels for split button menu items', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.label).toBe('Save as');
+      expect(resetChangesItem?.label).toBe('Reset changes');
+    });
+
+    it('should have run functions defined for split button menu items', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.run).toBeDefined();
+      expect(resetChangesItem?.run).toBeDefined();
+    });
+
+    it('should disable reset changes button when there are no unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: false });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(true);
+    });
+
+    it('should enable reset changes button when there are unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(false);
     });
   });
 });

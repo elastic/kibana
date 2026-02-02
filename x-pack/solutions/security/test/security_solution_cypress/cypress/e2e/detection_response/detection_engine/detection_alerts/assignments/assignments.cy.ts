@@ -18,7 +18,7 @@ import {
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
-import { getDefaultUsername } from '../../../../../tasks/common/users';
+import { getDefaultUserFullname } from '../../../../../tasks/common/users';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
@@ -40,8 +40,7 @@ import {
 } from '../../../../../tasks/alert_assignments';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/183787
-describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -67,88 +66,100 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
     });
 
     it('alert with some assignees in alerts table & details flyout', () => {
-      const users = [getDefaultUsername()];
-      updateAssigneesForFirstAlert(users);
+      getDefaultUserFullname().then((fullName) => {
+        const users = [fullName];
+        updateAssigneesForFirstAlert(users);
 
-      alertsTableShowsAssigneesForAlert(users);
+        alertsTableShowsAssigneesForAlert(users);
 
-      expandFirstAlert();
-      alertDetailsFlyoutShowsAssignees(users);
+        expandFirstAlert();
+        alertDetailsFlyoutShowsAssignees(users);
+      });
     });
   });
 
   context('Updating assignees (single alert)', () => {
     it('adding new assignees via `More actions` in alerts table', () => {
-      // Assign users
-      const users = [getDefaultUsername()];
-      updateAssigneesForFirstAlert(users);
+      getDefaultUserFullname().then((fullName) => {
+        // Assign users
+        const users = [fullName];
+        updateAssigneesForFirstAlert(users);
 
-      // Assignees should appear in the alerts table
-      alertsTableShowsAssigneesForAlert(users);
+        // Assignees should appear in the alerts table
+        alertsTableShowsAssigneesForAlert(users);
 
-      // Assignees should appear in the alert's details flyout
-      expandFirstAlert();
-      alertDetailsFlyoutShowsAssignees(users);
+        // Assignees should appear in the alert's details flyout
+        expandFirstAlert();
+        alertDetailsFlyoutShowsAssignees(users);
+      });
     });
 
     it('adding new assignees via add button in flyout', () => {
       expandFirstAlert();
 
-      // Assign users
-      const users = [getDefaultUsername()];
-      updateAssigneesViaAddButtonInFlyout(users);
+      getDefaultUserFullname().then((fullName) => {
+        // Assign users
+        const users = [fullName];
+        updateAssigneesViaAddButtonInFlyout(users);
 
-      // Assignees should appear in the alert's details flyout
-      alertDetailsFlyoutShowsAssignees(users);
+        // Assignees should appear in the alert's details flyout
+        alertDetailsFlyoutShowsAssignees(users);
 
-      // Assignees should appear in the alerts table
-      closeAlertFlyout();
-      alertsTableShowsAssigneesForAlert(users);
+        // Assignees should appear in the alerts table
+        closeAlertFlyout();
+        alertsTableShowsAssigneesForAlert(users);
+      });
     });
 
     it('adding new assignees via `Take action` button in flyout', () => {
       expandFirstAlert();
 
-      // Assign users
-      const users = [getDefaultUsername()];
-      updateAssigneesViaTakeActionButtonInFlyout(users);
+      getDefaultUserFullname().then((fullName) => {
+        // Assign users
+        const users = [fullName];
+        updateAssigneesViaTakeActionButtonInFlyout(users);
 
-      // Assignees should appear in the alert's details flyout
-      alertDetailsFlyoutShowsAssignees(users);
+        // Assignees should appear in the alert's details flyout
+        alertDetailsFlyoutShowsAssignees(users);
 
-      // Assignees should appear in the alerts table
-      closeAlertFlyout();
-      alertsTableShowsAssigneesForAlert(users);
+        // Assignees should appear in the alerts table
+        closeAlertFlyout();
+        alertsTableShowsAssigneesForAlert(users);
+      });
     });
 
     it('removing all assignees via `More actions` in alerts table', () => {
-      // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
-      updateAssigneesForFirstAlert(initialAssignees);
-      alertsTableShowsAssigneesForAlert(initialAssignees);
+      getDefaultUserFullname().then((fullName) => {
+        // Initially assigned users
+        const initialAssignees = [fullName];
+        updateAssigneesForFirstAlert(initialAssignees);
+        alertsTableShowsAssigneesForAlert(initialAssignees);
 
-      removeAllAssigneesForFirstAlert();
+        removeAllAssigneesForFirstAlert();
 
-      // Alert should not show any assignee in alerts table or in details flyout
-      checkEmptyAssigneesStateInAlertsTable();
-      expandFirstAlert();
-      checkEmptyAssigneesStateInAlertDetailsFlyout();
+        // Alert should not show any assignee in alerts table or in details flyout
+        checkEmptyAssigneesStateInAlertsTable();
+        expandFirstAlert();
+        checkEmptyAssigneesStateInAlertDetailsFlyout();
+      });
     });
 
     it('removing all assignees via `Take action` button in flyout', () => {
       expandFirstAlert();
 
-      // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
-      updateAssigneesViaTakeActionButtonInFlyout(initialAssignees);
-      alertDetailsFlyoutShowsAssignees(initialAssignees);
+      getDefaultUserFullname().then((fullName) => {
+        // Initially assigned users
+        const initialAssignees = [fullName];
+        updateAssigneesViaTakeActionButtonInFlyout(initialAssignees);
+        alertDetailsFlyoutShowsAssignees(initialAssignees);
 
-      removeAllAssigneesViaTakeActionButtonInFlyout();
+        removeAllAssigneesViaTakeActionButtonInFlyout();
 
-      // Alert should not show any assignee in alerts table or in details flyout
-      checkEmptyAssigneesStateInAlertDetailsFlyout();
-      closeAlertFlyout();
-      checkEmptyAssigneesStateInAlertsTable();
+        // Alert should not show any assignee in alerts table or in details flyout
+        checkEmptyAssigneesStateInAlertDetailsFlyout();
+        closeAlertFlyout();
+        checkEmptyAssigneesStateInAlertsTable();
+      });
     });
   });
 
@@ -156,28 +167,32 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
     it('adding new assignees should be reflected in UI (alerts table)', () => {
       selectFirstPageAlerts();
 
-      // Assign users
-      const users = [getDefaultUsername()];
-      bulkUpdateAssignees(users);
+      getDefaultUserFullname().then((fullName) => {
+        // Assign users
+        const users = [fullName];
+        bulkUpdateAssignees(users);
 
-      // Assignees should appear in the alerts table
-      alertsTableShowsAssigneesForAllAlerts(users);
+        // Assignees should appear in the alerts table
+        alertsTableShowsAssigneesForAllAlerts(users);
+      });
     });
 
     it('removing all assignees should be reflected in UI (alerts table)', () => {
       selectFirstPageAlerts();
 
-      // Initially assigned users
-      const initialAssignees = [getDefaultUsername()];
-      bulkUpdateAssignees(initialAssignees);
-      alertsTableShowsAssigneesForAllAlerts(initialAssignees);
+      getDefaultUserFullname().then((fullName) => {
+        // Initially assigned users
+        const initialAssignees = [fullName];
+        bulkUpdateAssignees(initialAssignees);
+        alertsTableShowsAssigneesForAllAlerts(initialAssignees);
 
-      // Unassign alert
-      selectFirstPageAlerts();
-      bulkRemoveAllAssignees();
+        // Unassign alert
+        selectFirstPageAlerts();
+        bulkRemoveAllAssignees();
 
-      // Alerts should not have assignees
-      checkEmptyAssigneesStateInAlertsTable();
+        // Alerts should not have assignees
+        checkEmptyAssigneesStateInAlertsTable();
+      });
     });
   });
 
@@ -186,47 +201,56 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
       const totalNumberOfAlerts = 5;
       const numberOfSelectedAlerts = 2;
       selectNumberOfAlerts(numberOfSelectedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
 
-      filterByAssignees([NO_ASSIGNEES]);
+      getDefaultUserFullname().then((fullName) => {
+        bulkUpdateAssignees([fullName]);
 
-      const expectedNumberOfAlerts = totalNumberOfAlerts - numberOfSelectedAlerts;
-      cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+        filterByAssignees([NO_ASSIGNEES]);
+
+        const expectedNumberOfAlerts = totalNumberOfAlerts - numberOfSelectedAlerts;
+        cy.get(ALERTS_COUNT).contains(expectedNumberOfAlerts);
+      });
     });
 
     it('by one assignee', () => {
       const numberOfSelectedAlerts = 2;
       selectNumberOfAlerts(numberOfSelectedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
 
-      filterByAssignees([getDefaultUsername()]);
+      getDefaultUserFullname().then((fullName) => {
+        bulkUpdateAssignees([fullName]);
 
-      cy.get(ALERTS_COUNT).contains(numberOfSelectedAlerts);
+        filterByAssignees([fullName]);
+
+        cy.get(ALERTS_COUNT).contains(numberOfSelectedAlerts);
+      });
     });
 
     it('by assignee and alert status', () => {
       const totalNumberOfAlerts = 5;
       const numberOfAssignedAlerts = 3;
       selectNumberOfAlerts(numberOfAssignedAlerts);
-      bulkUpdateAssignees([getDefaultUsername()]);
 
-      filterByAssignees([getDefaultUsername()]);
+      getDefaultUserFullname().then((fullName) => {
+        bulkUpdateAssignees([fullName]);
 
-      const numberOfClosedAlerts = 1;
-      selectNumberOfAlerts(numberOfClosedAlerts);
-      closeAlerts();
+        filterByAssignees([fullName]);
 
-      const expectedNumberOfAllerts1 = numberOfAssignedAlerts - numberOfClosedAlerts;
-      cy.get(ALERTS_COUNT).contains(expectedNumberOfAllerts1);
+        const numberOfClosedAlerts = 1;
+        selectNumberOfAlerts(numberOfClosedAlerts);
+        closeAlerts();
 
-      clearAssigneesFilter();
+        const expectedNumberOfAllerts1 = numberOfAssignedAlerts - numberOfClosedAlerts;
+        cy.get(ALERTS_COUNT).contains(expectedNumberOfAllerts1);
 
-      const expectedNumberOfAllerts2 = totalNumberOfAlerts - numberOfClosedAlerts;
-      cy.get(ALERTS_COUNT).contains(expectedNumberOfAllerts2);
+        clearAssigneesFilter();
 
-      filterByAssignees([getDefaultUsername()]);
-      selectPageFilterValue(0, 'closed');
-      cy.get(ALERTS_COUNT).contains(numberOfClosedAlerts);
+        const expectedNumberOfAllerts2 = totalNumberOfAlerts - numberOfClosedAlerts;
+        cy.get(ALERTS_COUNT).contains(expectedNumberOfAllerts2);
+
+        filterByAssignees([fullName]);
+        selectPageFilterValue(0, 'closed');
+        cy.get(ALERTS_COUNT).contains(numberOfClosedAlerts);
+      });
     });
   });
 });

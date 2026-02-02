@@ -62,8 +62,15 @@ export class DatePicker {
     }
   }
 
-  async setAbsoluteRange({ from, to }: { from: string; to: string }) {
-    await this.showStartEndTimes();
+  async typeAbsoluteRange({
+    from,
+    to,
+    validateDates = false,
+  }: {
+    from: string;
+    to: string;
+    validateDates?: boolean;
+  }) {
     // we start with end date
     await this.page.testSubj.click('superDatePickerendDatePopoverButton');
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
@@ -81,15 +88,23 @@ export class DatePicker {
     await this.page.testSubj.click('parseAbsoluteDateFormat');
     await this.page.keyboard.press('Escape');
 
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
-      `Date picker 'start date' should be set correctly`
-    ).toHaveText(from);
-    await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
-      `Date picker 'end date' should be set correctly`
-    ).toHaveText(to);
+    if (validateDates) {
+      await expect(
+        this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+        `Date picker 'start date' should be set correctly`
+      ).toHaveText(from);
+      await expect(
+        this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+        `Date picker 'end date' should be set correctly`
+      ).toHaveText(to);
+    }
+
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async setAbsoluteRange({ from, to }: { from: string; to: string }) {
+    await this.showStartEndTimes();
+    await this.typeAbsoluteRange({ from, to, validateDates: true });
   }
 
   async getTimeConfig(): Promise<{ start: string; end: string }> {
@@ -116,5 +131,9 @@ export class DatePicker {
     await intervalInput.press('Enter');
 
     await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+  }
+
+  async waitToBeHidden() {
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
   }
 }

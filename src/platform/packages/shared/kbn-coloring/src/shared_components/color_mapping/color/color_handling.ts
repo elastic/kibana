@@ -92,11 +92,13 @@ export function getColorFactory(
   // find all categories that don't match with an assignment
   const unassignedAutoAssignmentsMap = new Map(
     data.type === 'categories'
-      ? data.categories
-          .map((category: SerializedValue) => deserializeField(category))
+      ? data.categories // data.categories contains the serialized values
+          .map((category: SerializedValue) => deserializeField(category)) // convert to rawValues/instances like MultiFieldKey etc
           .filter((category: RawValue) => {
+            // remove categories one maching an assignment
             return !assignmentMatcher.hasMatch(category);
           })
+          // setting the Map keys as the stringified version of the rawValue
           .map((category: RawValue, i) => {
             const key = getValueKey(category);
             const autoAssignment = autoAssignments[i];

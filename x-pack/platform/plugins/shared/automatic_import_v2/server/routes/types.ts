@@ -8,9 +8,15 @@
 import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
 import type { InputType } from '../../common';
 
-export interface CreateIntegrationParams {
+export interface CreateUpdateIntegrationParams {
   integrationParams: IntegrationParams;
   authenticatedUser: AuthenticatedUser;
+}
+
+export interface ApproveIntegrationParams {
+  integrationId: string;
+  authenticatedUser: AuthenticatedUser;
+  version: string;
 }
 
 export interface CreateDataStreamParams {

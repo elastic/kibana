@@ -152,6 +152,42 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'concat') {
+      const fromLength = step.from.length;
+      const isPlural = fromLength !== 1;
+
+      const singularConcatDescription = i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.concatProcessorDescriptionSingular',
+        {
+          defaultMessage: 'Concatenates {fromLength} value.',
+          values: {
+            fromLength,
+          },
+        }
+      );
+
+      const pluralConcatDescription = i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.concatProcessorDescriptionPlural',
+        {
+          defaultMessage: 'Concatenates {fromLength} values.',
+          values: {
+            fromLength,
+          },
+        }
+      );
+
+      return isPlural ? pluralConcatDescription : singularConcatDescription;
+    } else if (step.action === 'join') {
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.joinProcessorDescription',
+        {
+          defaultMessage: 'Combines {fromLength} field(s) with "{delimiter}"',
+          values: {
+            fromLength: step.from.length,
+            delimiter: step.delimiter,
+          },
+        }
+      );
     } else {
       const { action, parentId, customIdentifier, ignore_failure, ...rest } = step;
       // Remove 'where' if it exists (some processors have it, some don't)
