@@ -7,10 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type Drilldown = {
+import { LicenseType } from '@kbn/licensing-types';
+import type { EmbeddableApiContext, PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { Observable } from 'rxjs';
+
+export type DrilldownStateInternal = DrilldownState & { actionId: string };
+
+export type DrilldownDefinition<TDrilldownState extends DrilldownState = DrilldownState> = {
+  execute: (drilldownState: TDrilldownState, context: EmbeddableApiContext) => Promise<void>,
+  isCompatible?: ActionDefinition['isCompatible'],
+  
+  /**
+   * Minimal license level
+   * Empty means no restrictions
+   */
+  minimalLicense?: LicenseType,
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
+
   /**
    * List of triggers supported by drilldown type
    * Used to narrow trigger selection when configuring drilldown
    */
   supportedTriggers: string[];
+}
+
+export interface DrilldownsManager {
+  api: HasDrilldowns;
+  cleanup: () => void;
+  comparators: StateComparators<DrilldownsState>;
+  anyStateChange$: Observable<void>;
+  getLatestState: () => DrilldownsState;
+  reinitializeState: (lastState: DrilldownsState) => void;
+}
+
+export type HasDrilldowns = {
+  setDrilldowns: (drilldowns: DrilldownState[]) => void;
+  drilldowns$: PublishingSubject<DrilldownState[]>;
+};
+
+//
+// TODO replace with types from server when server PR merges
+//
+export type DrilldownState = {
+  label: string;
+  triggers: string[];
+  type: string;
+}
+
+export type DrilldownsState = {
+  drilldowns?: DrilldownState[]
 }

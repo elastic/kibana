@@ -23,6 +23,7 @@ import type {
   TransformEnhancementsOut,
 } from '../common';
 import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -35,6 +36,7 @@ export interface EmbeddableStartDependencies {
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface EmbeddableSetup {
