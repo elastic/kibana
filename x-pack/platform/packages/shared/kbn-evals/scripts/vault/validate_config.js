@@ -11,13 +11,13 @@
  * - Allows unknown keys (so adding new fields won't break existing consumers).
  * - Prints nothing on success.
  * - Prints a safe error message on failure (without dumping config contents).
+ *
+ * NOTE: This script is executed from CI "repository hooks" before dependencies are installed,
+ * so it MUST NOT require repo packages (e.g. @kbn/babel-register).
  */
-
-require('@kbn/babel-register').install();
 
 const Fs = require('fs');
 const minimist = require('minimist');
-const { validateKbnEvalsCiConfig } = require('./manage_secrets');
 
 function die(message) {
   process.stderr.write(`${message}\n`);
@@ -33,6 +33,67 @@ function redact(message) {
       // base64 blobs (avoid leaking via error messages)
       .replace(/[A-Za-z0-9+/]{50,}={0,2}/g, '<redacted>')
   );
+}
+
+function isNonEmptyString(v) {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
+function assertNonEmptyString(obj, path) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (const part of parts) {
+    if (!cur || typeof cur !== 'object' || !(part in cur)) {
+      die(`Invalid kbn-evals CI config: missing "${path}"`);
+    }
+    cur = cur[part];
+  }
+  if (!isNonEmptyString(cur)) {
+    die(`Invalid kbn-evals CI config: "${path}" must be a non-empty string`);
+  }
+}
+
+function assertOptionalNonEmptyString(obj, path) {
+  const parts = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (!cur || typeof cur !== 'object' || !(part in cur)) {
+      return; // missing is ok
+    }
+    cur = cur[part];
+  }
+  if (cur === undefined || cur === null) return;
+  if (!isNonEmptyString(cur)) {
+    die(`Invalid kbn-evals CI config: "${path}" must be a non-empty string when provided`);
+  }
+}
+
+function validateConfigShape(config) {
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    die('Invalid kbn-evals CI config: root must be a JSON object');
+  }
+
+  // Required
+  assertNonEmptyString(config, 'litellm.baseUrl');
+  assertNonEmptyString(config, 'litellm.virtualKey');
+  assertNonEmptyString(config, 'evaluationConnectorId');
+  assertNonEmptyString(config, 'evaluationsEs.url');
+  assertNonEmptyString(config, 'evaluationsEs.apiKey');
+
+  // Optional
+  assertOptionalNonEmptyString(config, 'litellm.teamId');
+  assertOptionalNonEmptyString(config, 'litellm.teamName');
+
+  // Optional tracingEs block (if present, require both fields)
+  const tracingEs = config.tracingEs;
+  if (tracingEs !== undefined && tracingEs !== null) {
+    if (!tracingEs || typeof tracingEs !== 'object' || Array.isArray(tracingEs)) {
+      die('Invalid kbn-evals CI config: "tracingEs" must be an object when provided');
+    }
+    assertNonEmptyString(config, 'tracingEs.url');
+    assertNonEmptyString(config, 'tracingEs.apiKey');
+  }
 }
 
 async function readStdin() {
@@ -75,7 +136,7 @@ async function main() {
   }
 
   try {
-    validateKbnEvalsCiConfig(parsed);
+    validateConfigShape(parsed);
   } catch (e) {
     die(`Invalid kbn-evals CI config${useStdin ? '' : ` in ${configPath}`}: ${redact(e.message)}`);
   }
