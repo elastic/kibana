@@ -7,7 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand, getQuerySummary, isComputedColumn } from '@kbn/esql-utils';
 import type {
   DatasourceMap,
   VisualizationMap,
@@ -48,6 +48,36 @@ const createSuggestionWithAttributes = (
         context,
       })
     : suggestion;
+
+// Determine line charts is suitable for the context.
+// Line charts are suitable when there's a date column (x-axis) and a computed numeric column (y-axis).
+// Returns `undefined` when not applicable (non-ESQL / no textBasedColumns), so callers can skip filtering.
+const shouldShowLineChart = (
+  context: VisualizeFieldContext | VisualizeEditorContext
+): boolean | undefined => {
+  // Only applies to ESQL queries with textBasedColumns
+  if (!('textBasedColumns' in context) || !context.textBasedColumns || !('query' in context)) {
+    return undefined;
+  }
+
+  const columns = context.textBasedColumns;
+  const esqlQuery = context.query?.esql;
+
+  if (!esqlQuery) return undefined;
+
+  // Get query summary to identify computed columns
+  const summary = getQuerySummary(esqlQuery);
+
+  // Check if there's at least one date column (for x-axis)
+  const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
+
+  // Check if there's at least one computed numeric column (for y-axis)
+  const hasComputedNumericColumn = columns.some(
+    (col) => col.meta?.type === 'number' && isComputedColumn(col.name, summary)
+  );
+
+  return hasDateColumn && hasComputedNumericColumn;
+};
 
 export const suggestionsApi = ({
   context,
@@ -133,7 +163,11 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  const chartType = preferredChartType?.toLowerCase();
+  const chartType = preferredChartType
+    ? preferredChartType?.toLowerCase()
+    : shouldShowLineChart(context)
+    ? 'line'
+    : undefined;
 
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
