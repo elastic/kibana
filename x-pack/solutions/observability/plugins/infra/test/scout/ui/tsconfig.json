@@ -6,7 +6,7 @@
   "include": ["**/*"],
   "kbn_references": [
     "@kbn/scout-oblt",
-    "@kbn/synthtrace-client",
+    "@kbn/apm-synthtrace-client",
   ],
   "exclude": ["target/**/*"]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { infra, timerange } from '@kbn/synthtrace-client';
+import { infra, timerange } from '@kbn/apm-synthtrace-client';
 import { K8S_HOST_NAME, K8S_HOSTS, K8S_POD_NAME } from '../constants';
 
 export function generateHostsWithK8sNodeData({ from, to }: { from: string; to: string }) {

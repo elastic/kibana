@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { infra, timerange } from '@kbn/synthtrace-client';
+import { infra, timerange } from '@kbn/apm-synthtrace-client';
 
 export function generateDockerContainersData({
   from,

@@ -17,7 +17,7 @@ import {
   globalSetupHook as baseGlobalSetupHook,
   getSynthtraceClient,
 } from '@kbn/scout-oblt';
-import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import type { InfraDocument, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 // generates traces, metrics for services
 export function generateAddServicesToExistingHost({

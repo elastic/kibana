@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
+import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 
 export function generateLogsDataForHosts({
   from,
