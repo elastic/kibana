@@ -10,6 +10,27 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
+  /**
+   * INSTRUCTIONS FOR UPDATING SNAPSHOT:
+   * 1. edit this file (node_modules/jest-snapshot/build/InlineSnapshots.js)
+   *  to include the following code snippet right after the saveSnapshotsForFile function
+   * ```
+   * // HACK: Fix broken inline snapshot path for 'authorization.ts'
+if (sourceFilePath === 'authorization.ts') {
+  const path = require('path');
+  sourceFilePath = path.resolve(
+    __dirname,
+    '../../../x-pack/solutions/security/test/serverless/api_integration/test_suites/platform_security/authorization.ts'
+  );
+  console.warn(':warning: HACK: Overriding snapshot path to:', sourceFilePath);
+}
+  ```
+   * 2. From the kibana dir run `node scripts/functional_tests_server.js --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts`
+   * to start the test server
+   * 
+   * 3. in a separate terminal cd into this directory and run `node ../../../../../../../scripts/functional_test_runner.js   --config ../../configs/config.ts   --grep "security/authorization available features composite features"   --updateSnapshots`
+   * 4. the snapshot should be updated now.
+   */
   describe('security/authorization', function () {
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
@@ -1176,14 +1197,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/writeGlobalArtifacts",
                 "ui:siemV5/showEndpointExceptions",
                 "ui:siemV5/crudEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeBlocklist",
@@ -1210,6 +1235,7 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siem/readBlocklist",
@@ -1218,6 +1244,8 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
@@ -1244,6 +1272,7 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
                 "ui:siem/showEndpointExceptions",
@@ -1267,6 +1296,8 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeEventFilters",
@@ -1293,6 +1324,7 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readEventFilters",
                 "ui:siem/readEventFilters",
@@ -1322,6 +1354,8 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
@@ -1354,6 +1388,7 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readHostIsolationExceptions",
                 "api:securitySolution-accessHostIsolationExceptions",
@@ -2282,10 +2317,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
                 "login:",
@@ -2721,9 +2758,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "policy_management_all": Array [
                 "login:",
@@ -3201,9 +3239,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
                 "ui:siemV5/showEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "scan_operations_all": Array [
                 "login:",
@@ -3220,6 +3259,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedApplications",
@@ -3246,6 +3287,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedApplications",
                 "ui:siem/readTrustedApplications",
@@ -4133,14 +4175,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/writeGlobalArtifacts",
                 "ui:siemV5/showEndpointExceptions",
                 "ui:siemV5/crudEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeBlocklist",
@@ -4167,6 +4213,7 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siemV2/readBlocklist",
@@ -4175,6 +4222,8 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
@@ -4201,6 +4250,7 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
                 "ui:siemV2/showEndpointExceptions",
@@ -4224,6 +4274,8 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeEventFilters",
@@ -4250,6 +4302,7 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readEventFilters",
                 "ui:siemV2/readEventFilters",
@@ -4285,6 +4338,8 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
@@ -4317,6 +4372,7 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readHostIsolationExceptions",
                 "api:securitySolution-accessHostIsolationExceptions",
@@ -5183,10 +5239,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
                 "login:",
@@ -5594,9 +5652,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "policy_management_all": Array [
                 "login:",
@@ -6046,9 +6105,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
                 "ui:siemV5/showEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "scan_operations_all": Array [
                 "login:",
@@ -6065,6 +6125,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedApplications",
@@ -6091,6 +6153,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedApplications",
                 "ui:siemV2/readTrustedApplications",
@@ -6990,14 +7053,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/threat-intelligence",
                 "ui:siemV5/showEndpointExceptions",
                 "ui:siemV5/crudEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeBlocklist",
@@ -7022,6 +7089,7 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siemV3/readBlocklist",
@@ -7030,6 +7098,8 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
@@ -7054,6 +7124,7 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
                 "ui:siemV3/showEndpointExceptions",
@@ -7077,6 +7148,8 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeEventFilters",
@@ -7101,6 +7174,7 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readEventFilters",
                 "ui:siemV3/readEventFilters",
@@ -7136,6 +7210,8 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
@@ -7166,6 +7242,7 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readHostIsolationExceptions",
                 "api:securitySolution-accessHostIsolationExceptions",
@@ -8030,10 +8107,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
                 "login:",
@@ -8440,9 +8519,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "policy_management_all": Array [
                 "login:",
@@ -8891,9 +8971,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
                 "ui:siemV5/showEndpointExceptions",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "scan_operations_all": Array [
                 "login:",
@@ -8910,6 +8991,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedApplications",
@@ -8934,6 +9017,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedApplications",
                 "ui:siemV3/readTrustedApplications",
@@ -8942,6 +9026,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedDevices",
@@ -8966,6 +9052,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedDevices",
                 "ui:siemV3/readTrustedDevices",
@@ -9860,14 +9947,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "blocklist_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeBlocklist",
@@ -9892,6 +9983,7 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siemV4/readBlocklist",
@@ -9900,6 +9992,8 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
@@ -9924,6 +10018,7 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
                 "ui:siemV4/showEndpointExceptions",
@@ -9947,6 +10042,8 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeEventFilters",
@@ -9971,6 +10068,7 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readEventFilters",
                 "ui:siemV4/readEventFilters",
@@ -10006,6 +10104,8 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
@@ -10036,6 +10136,7 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readHostIsolationExceptions",
                 "api:securitySolution-accessHostIsolationExceptions",
@@ -10901,10 +11002,12 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/edit_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/edit_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
+                "ui:securitySolutionRulesV2/editExceptions",
               ],
               "minimal_read": Array [
                 "login:",
@@ -11312,9 +11415,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "policy_management_all": Array [
                 "login:",
@@ -11760,9 +11864,10 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV5/investigation-guide",
                 "ui:siemV5/investigation-guide-interactions",
                 "ui:siemV5/threat-intelligence",
-                "ui:navLinks/securitySolutionRulesV1",
-                "ui:securitySolutionRulesV1/read_rules",
-                "ui:securitySolutionRulesV1/detections",
+                "ui:navLinks/securitySolutionRules",
+                "ui:securitySolutionRulesV2/read_rules",
+                "ui:securitySolutionRulesV2/readExceptions",
+                "ui:securitySolutionRulesV2/detections",
               ],
               "scan_operations_all": Array [
                 "login:",
@@ -11779,6 +11884,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedApplications",
@@ -11803,6 +11910,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedApplications",
                 "ui:siemV4/readTrustedApplications",
@@ -11811,6 +11919,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedDevices",
@@ -11835,6 +11945,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedDevices",
                 "ui:siemV4/readTrustedDevices",
@@ -12314,6 +12425,8 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeBlocklist",
@@ -12336,6 +12449,7 @@ export default function ({ getService }: FtrProviderContext) {
               "blocklist_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siemV5/readBlocklist",
@@ -12343,6 +12457,8 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
@@ -12365,6 +12481,7 @@ export default function ({ getService }: FtrProviderContext) {
               "endpoint_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-showEndpointExceptions",
                 "ui:siemV5/showEndpointExceptions",
@@ -12384,6 +12501,8 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeEventFilters",
@@ -12406,6 +12525,7 @@ export default function ({ getService }: FtrProviderContext) {
               "event_filters_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readEventFilters",
                 "ui:siemV5/readEventFilters",
@@ -12435,6 +12555,8 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-deleteHostIsolationExceptions",
@@ -12461,6 +12583,7 @@ export default function ({ getService }: FtrProviderContext) {
               "host_isolation_exceptions_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readHostIsolationExceptions",
                 "api:securitySolution-accessHostIsolationExceptions",
@@ -13388,6 +13511,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedApplications",
@@ -13410,6 +13535,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_applications_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedApplications",
                 "ui:siemV5/readTrustedApplications",
@@ -13417,6 +13543,8 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_all": Array [
                 "login:",
                 "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
                 "api:lists-read",
                 "api:lists-summary",
                 "api:securitySolution-writeTrustedDevices",
@@ -13439,6 +13567,7 @@ export default function ({ getService }: FtrProviderContext) {
               "trusted_devices_read": Array [
                 "login:",
                 "api:lists-read",
+                "api:exceptions-read",
                 "api:lists-summary",
                 "api:securitySolution-readTrustedDevices",
                 "ui:siemV5/readTrustedDevices",

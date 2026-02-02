@@ -33,6 +33,20 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     return this._dbfFile !== null && this._prjFile !== null && this._shxFile !== null;
   }
 
+  public getSidecarFiles(): File[] {
+    const sidecarFiles: File[] = [];
+    if (this._dbfFile) {
+      sidecarFiles.push(this._dbfFile);
+    }
+    if (this._prjFile) {
+      sidecarFiles.push(this._prjFile);
+    }
+    if (this._shxFile) {
+      sidecarFiles.push(this._shxFile);
+    }
+    return sidecarFiles;
+  }
+
   public renderEditor(onChange: () => void) {
     return !this.canPreview() ? (
       <ShapefileEditor
@@ -93,16 +107,7 @@ export class ShapefileImporter extends AbstractGeoFileImporter {
     };
 
     if (this._iterator === undefined) {
-      const sideCarFiles: File[] = [];
-      if (this._dbfFile) {
-        sideCarFiles.push(this._dbfFile);
-      }
-      if (this._prjFile) {
-        sideCarFiles.push(this._prjFile);
-      }
-      if (this._shxFile) {
-        sideCarFiles.push(this._shxFile);
-      }
+      const sideCarFiles: File[] = this.getSidecarFiles();
       const fileSystem = new BrowserFileSystem([this._getFile(), ...sideCarFiles]);
       this._iterator = (await loadInBatches(this._getFile().name, ShapefileLoader, {
         fetch: fileSystem.fetch,
