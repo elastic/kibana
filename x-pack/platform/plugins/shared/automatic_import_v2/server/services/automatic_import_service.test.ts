@@ -175,6 +175,35 @@ describe('AutomaticImportSetupService', () => {
       expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
     });
 
+    it('should not approve integration with no data streams', async () => {
+      const mockGetIntegration = jest.fn().mockResolvedValue({
+        integration_id: 'integration-empty',
+        created_by: 'creator',
+        status: 'pending',
+        metadata: { title: 't', description: 'd', version: '0.0.1' },
+      });
+      const mockGetAllDataStreams = jest.fn().mockResolvedValue([]);
+      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+
+      (service as any).savedObjectService = {
+        getIntegration: mockGetIntegration,
+        getAllDataStreams: mockGetAllDataStreams,
+        updateIntegration: mockUpdateIntegration,
+      };
+
+      await expect(
+        service.approveIntegration({
+          integrationId: 'integration-empty',
+          authenticatedUser: { username: 'approver-user' } as any,
+          version: '1.2.3',
+        })
+      ).rejects.toThrow('Cannot approve integration integration-empty with no data streams');
+
+      expect(mockGetIntegration).toHaveBeenCalledWith('integration-empty');
+      expect(mockGetAllDataStreams).toHaveBeenCalledWith('integration-empty');
+      expect(mockUpdateIntegration).not.toHaveBeenCalled();
+    });
+
     it('should not approve integration if any data stream is not completed', async () => {
       const mockGetIntegration = jest.fn().mockResolvedValue({
         integration_id: 'integration-123',
