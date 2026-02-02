@@ -39,7 +39,7 @@ export const generateReportHandler: FleetRequestHandler<
 
   const reporting = appContextService.getReportingStart();
   if (!reporting) {
-    throw new FleetError('Report generation is not ready');
+    throw new FleetError('Report generation is not available');
   }
 
   const jobConfig = {

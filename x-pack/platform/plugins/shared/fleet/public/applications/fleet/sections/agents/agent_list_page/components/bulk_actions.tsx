@@ -18,7 +18,7 @@ import {
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense } from '../../../../hooks';
+import { useAuthz, useLicense, useStartServices } from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -69,7 +69,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
-
+  const { reporting } = useStartServices();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
@@ -163,7 +163,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         ),
         icon: 'exportAction',
-        disabled: !authz.fleet.generateAgentReports,
+        disabled: !authz.fleet.generateAgentReports || !reporting,
         onClick: () => {
           setIsExportCSVModalOpen(true);
         },
@@ -176,6 +176,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     authz.fleet.readAgents,
     authz.fleet.generateAgentReports,
     doesLicenseAllowMigration,
+    reporting,
   ]);
 
   // Build hierarchical menu items

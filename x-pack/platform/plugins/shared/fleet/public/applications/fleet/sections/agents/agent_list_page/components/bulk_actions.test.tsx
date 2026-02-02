@@ -85,6 +85,7 @@ describe('AgentBulkActions', () => {
       cloud: {
         isServerlessEnabled,
       },
+      reporting: {},
     });
   };
 
