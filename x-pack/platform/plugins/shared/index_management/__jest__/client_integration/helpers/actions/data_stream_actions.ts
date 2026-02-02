@@ -399,7 +399,7 @@ export const createNonDataStreamIndex = (name: string) => ({
   replica: 1,
   documents: 10000,
   documents_deleted: 100,
-  size: '156kb',
-  primary_size: '156kb',
+  size: 159744,
+  primary_size: 159744,
   name,
 });
