@@ -43,7 +43,7 @@ export interface ConversationToLangchainOptions {
  * When `resultTransformer` is provided, tool results from previous rounds
  * will be passed through the transformer function.
  */
-export const conversationToLangchainMessages = async ({
+export const convertPreviousRounds = async ({
   conversation,
   resultTransformer,
   ignoreSteps = false,

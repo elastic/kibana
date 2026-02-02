@@ -7,7 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { conversationToLangchainMessages } from '../../utils/to_langchain_messages';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
@@ -22,15 +22,15 @@ export const getAnswerAgentPrompt = async (
 ): Promise<BaseMessageLike[]> => {
   const { actions, answerActions, processedConversation, resultTransformer } = params;
 
-  // Generate initial messages from conversation with result transformation
-  const initialMessages = await conversationToLangchainMessages({
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
   });
 
   return [
     ['system', getAnswerSystemMessage(params)],
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];
@@ -108,7 +108,7 @@ export const getStructuredAnswerPrompt = async (
   const visEnabled = capabilities.visualizations;
 
   // Generate initial messages from conversation with result transformation
-  const initialMessages = await conversationToLangchainMessages({
+  const initialMessages = await convertPreviousRounds({
     conversation: processedConversation,
     resultTransformer,
   });

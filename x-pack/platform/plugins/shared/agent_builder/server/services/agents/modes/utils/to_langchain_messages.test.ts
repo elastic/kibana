@@ -10,7 +10,7 @@ import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type { ToolCallStep, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { conversationToLangchainMessages } from './to_langchain_messages';
+import { convertPreviousRounds } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -22,7 +22,7 @@ import type {
   ProcessedRoundInput,
 } from './prepare_conversation';
 
-describe('conversationLangchainMessages', () => {
+describe('convertPreviousRounds', () => {
   const now = new Date().toISOString();
 
   const makeRoundInput = (
@@ -115,7 +115,7 @@ describe('conversationLangchainMessages', () => {
 
   it('returns only the user message if no previous rounds', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -136,7 +136,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = await conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -173,7 +173,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -239,7 +239,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('bye');
-    const result = await conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -298,7 +298,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -319,7 +319,7 @@ describe('conversationLangchainMessages', () => {
         'This is the formatted text content'
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
-      const result = await conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
@@ -350,7 +350,7 @@ describe('conversationLangchainMessages', () => {
         attachment1,
         attachment2,
       ]);
-      const result = await conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ nextInput }),
       });
 
@@ -385,7 +385,7 @@ describe('conversationLangchainMessages', () => {
         }),
       ];
       const nextInput = makeRoundInput('next message');
-      const result = await conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -519,7 +519,7 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
         );
       });
 
-      const result = await conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -584,7 +584,7 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
         return aggregated;
       });
 
-      const result = await conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation,
         resultTransformer: customTransformer,
       });
