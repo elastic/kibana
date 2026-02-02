@@ -46,6 +46,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () 
     );
 
     expect(response.statusCode).toBe(200);
+    expect(response.body.paths?.[oasPath]).toBeDefined();
 
     const createBodySchema =
       response.body.paths[oasPath].post.requestBody.content[
@@ -55,8 +56,9 @@ apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () 
     const panelSchema = panelsSchema.items.anyOf.find(
       (schema: { properties: Record<string, unknown> }) => 'config' in schema.properties
     );
-    const configSchema = panelSchema.properties.config;
+    expect(panelSchema).toBeDefined();
 
+    const configSchema = panelSchema.properties.config;
     expect(configSchema.anyOf).toHaveLength(2);
     expect(configSchema.anyOf).toStrictEqual(snapshot);
   });
