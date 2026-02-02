@@ -13,6 +13,7 @@ import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,
   EnrichmentUrlState,
+  FailureStoreDataSource,
   KqlSamplesDataSource,
   LatestSamplesDataSource,
 } from '../../../../../../common/url_schema';
@@ -60,6 +61,12 @@ export const createDefaultCustomSamplesDataSource = (
   enabled: true,
   documents: [],
   storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`,
+});
+
+export const createFailureStoreDataSource = (streamName: string): FailureStoreDataSource => ({
+  type: 'failure-store',
+  name: DATA_SOURCES_I18N.failureStore.defaultName,
+  enabled: true,
 });
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {

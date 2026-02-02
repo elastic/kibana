@@ -140,6 +140,7 @@ function getWaterfallErrorsMarks({
                 docId,
                 errorCount: 1,
                 errorDocId: error.id,
+                docIndex: error.index,
               });
             }
           : undefined,
