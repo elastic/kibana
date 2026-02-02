@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
-import type { BehaviorSubject } from 'rxjs';
-
-export interface PublishesControlsLayout {
-  layout$: BehaviorSubject<{
-    controls: {
-      [id: string]: PinnedControlLayoutState;
-    };
-  }>;
-}
-export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
-  Boolean((api as PublishesControlsLayout).layout$);
+export const SAVED_OBJECT_REF_NAME = 'savedObjectRef';
