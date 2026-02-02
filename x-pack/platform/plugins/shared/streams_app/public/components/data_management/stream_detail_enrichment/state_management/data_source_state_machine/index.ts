@@ -6,4 +6,5 @@
  */
 
 export * from './data_source_state_machine';
+export { getDocumentId, buildFetchMoreEsqlQuery } from './fetch_more_actor';
 export type * from './types';

@@ -77,6 +77,4 @@ export interface SimulationContext {
   baseSimulation?: Simulation;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
-  isFetchingMore: boolean;
-  fetchMoreError?: Error;
 }

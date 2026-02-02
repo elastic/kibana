@@ -22,6 +22,7 @@ import {
   createDataCollectionFailureNotifier,
   createDataCollectorActor,
 } from './data_collector_actor';
+import { createFetchMoreDocumentsActor, getDocumentId } from './fetch_more_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
@@ -37,6 +38,7 @@ export const dataSourceMachine = setup({
   },
   actors: {
     collectData: getPlaceholderFor(createDataCollectorActor),
+    fetchMoreDocuments: getPlaceholderFor(createFetchMoreDocumentsActor),
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
@@ -72,6 +74,24 @@ export const dataSourceMachine = setup({
       })
     ),
     storeData: assign((_, params: { data: SampleDocument[] }) => ({ data: params.data })),
+    setFetchingMore: assign(() => ({
+      isFetchingMore: true,
+      fetchMoreError: undefined,
+    })),
+    appendData: assign(({ context }, params: { data: SampleDocument[] }) => {
+      // Merge new documents with existing ones, avoiding duplicates
+      const existingIds = new Set(context.data.map((doc) => getDocumentId(doc)));
+      const newDocs = params.data.filter((doc) => !existingIds.has(getDocumentId(doc)));
+      return {
+        data: [...context.data, ...newDocs],
+        isFetchingMore: false,
+        fetchMoreError: undefined,
+      };
+    }),
+    storeFetchMoreError: assign((_, params: { error: Error }) => ({
+      isFetchingMore: false,
+      fetchMoreError: params.error,
+    })),
     toggleDataSourceActivity: assign(({ context }) => ({
       dataSource: { ...context.dataSource, enabled: !context.dataSource.enabled },
     })),
@@ -100,6 +120,9 @@ export const dataSourceMachine = setup({
       const ignoredProps = ['name'];
       return !isEqual(omit(context.dataSource, ignoredProps), omit(event.dataSource, ignoredProps));
     },
+    canFetchMore: ({ context }) => {
+      return !context.isFetchingMore && context.data.length > 0;
+    },
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QQIYBcUGUD2BXATgMZgB0EYaY+AtgJYB2DUAxANoAMAuoqAA7axaaWtno8QAD0QBaAIwAmEu1kAOAMzsAbLIDsAVnX75agDQgAnogM6SagJzLNmlXYAsRtQF9PZ1BhwExGQUVHSM9CysstxIIPyCwqLiUgiyziSyrirZdpp2eqp6Oq5mlggGmiQ6dvJ6blqaOuzy3r7oWHhEpGD0KABGADaQzH4dgaRo2FBQQwCChMIAbkLmHDF8AkIiYrEpdZWqafI6asdqeux6pYia7iTOddWushfydq0gowFdJD39QxARu1vkF8GAAGZg2AACzW4niWySu0Q+SUdh0TVc2hO7DsL2uCBcdhI+wK52Mb3ksg+X06QT+g2GtPGJEI0JQETAcNiCMSO1AKSxrgyeQcKiKJwuVwsKKaSip7Cyenkmj0zlcNOBdO6vUZgOZPzZHJgUXWcU2fOSiBcKhJpzU4tkdnUdWlZXR7HlskV4pVavFmv82t+uoBJAG2BQECYABF2swqPhsPgSLwBuhwcnqGR2gBhbADIYLZPzSb4bkbBLbK0IHS2716PRZfJUpwYgne1FNzs6PIaWReHyfLUs6Owf5Mkc-SbTOYLWjLNCrLjwi3V5EIDRqEmZPLPE54tQlGUIW42B7otwvZrvIcGoJjif6qcPsBDSgV81VpECqyabf5E8KhYgUFyyASBSKLkOjyG8zyvLeQ70Ng5DwLE95gKu378pIMhOCQjquBKbzKmovYEs8nryM8ThFG8djnERgZjD85CUDQDBMFhiI4Sk0h6CQrjsC4W6nLI4nKPIEGKrYW6NLUInHMxII6k+3GWhuci2oRxEtmRmgEioChorcmjsGoLwuHoynBgyYa0BAQzqeuv6pMqsl2G4REYmomjHB28jAfcVKXk4zSqjoNksnZkDhpG0YRHGGDOT+uEIG8GRKq4sGYr21EEs6UHFLo5KquqUWsbQ456ilvGIL525UoU7gvNemQQeKmXKER7C9ioVKDm0Qajm+IQQLVNbATY2V5GkrhZOcuQUeiVQ0b6lwuK4iGeEAA */
@@ -111,6 +134,8 @@ export const dataSourceMachine = setup({
     streamName: input.streamName,
     streamType: input.streamType,
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
+    isFetchingMore: false,
+    fetchMoreError: undefined,
   }),
   initial: 'determining',
   states: {
@@ -130,6 +155,10 @@ export const dataSourceMachine = setup({
           ],
         },
         'dataSource.refresh': { target: '.loadingData', reenter: true },
+        'dataSource.fetchMore': {
+          guard: 'canFetchMore',
+          target: '.fetchingMore',
+        },
         'dataSource.change': [
           // For custom samples with substantive changes, debounce before collecting
           {
@@ -201,6 +230,40 @@ export const dataSourceMachine = setup({
             },
           },
         },
+        fetchingMore: {
+          entry: [{ type: 'setFetchingMore' }],
+          invoke: {
+            id: 'fetchMoreDocumentsActor',
+            src: 'fetchMoreDocuments',
+            input: ({ context, event }) => {
+              assertEvent(event, 'dataSource.fetchMore');
+              return {
+                streamName: context.streamName,
+                condition: event.condition,
+                existingData: context.data,
+              };
+            },
+            onDone: {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'appendData',
+                  params: ({ event }) => ({ data: event.output }),
+                },
+                { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
+              ],
+            },
+            onError: {
+              target: 'idle',
+              actions: [
+                {
+                  type: 'storeFetchMoreError',
+                  params: ({ event }) => ({ error: event.error as Error }),
+                },
+              ],
+            },
+          },
+        },
       },
     },
     disabled: {
@@ -241,6 +304,7 @@ export const createDataSourceMachineImplementations = ({
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
     collectData: createDataCollectorActor({ data, telemetryClient, streamsRepositoryClient }),
+    fetchMoreDocuments: createFetchMoreDocumentsActor({ data }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),

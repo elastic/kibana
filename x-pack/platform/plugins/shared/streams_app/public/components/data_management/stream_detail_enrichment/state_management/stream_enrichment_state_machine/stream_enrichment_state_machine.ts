@@ -44,6 +44,7 @@ import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
   createSimulationMachineImplementations,
+  findConditionById,
   simulationMachine,
 } from '../simulation_state_machine';
 import { yamlModeMachine } from '../yaml_mode_machine';
@@ -285,6 +286,20 @@ export const streamEnrichmentMachine = setup({
       context.simulatorRef.send({
         type: 'simulation.clearConditionFilter',
       });
+    },
+    forwardFetchMoreToDataSource: ({ context }) => {
+      const simulatorSnapshot = context.simulatorRef.getSnapshot();
+      const { selectedConditionId, steps } = simulatorSnapshot.context;
+
+      if (!selectedConditionId) return;
+
+      const condition = findConditionById(steps, selectedConditionId);
+      if (!condition) return;
+
+      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+      if (!activeDataSourceRef) return;
+
+      activeDataSourceRef.send({ type: 'dataSource.fetchMore', condition });
     },
   },
   guards: {
@@ -574,7 +589,7 @@ export const streamEnrichmentMachine = setup({
                       ],
                     },
                     'simulation.fetchMore': {
-                      actions: forwardTo('simulator'),
+                      actions: [{ type: 'forwardFetchMoreToDataSource' }],
                     },
                     // Forward other step events to interactive mode machine
                     'step.*': {
@@ -606,7 +621,7 @@ export const streamEnrichmentMachine = setup({
                       actions: forwardTo('simulator'),
                     },
                     'simulation.fetchMore': {
-                      actions: forwardTo('simulator'),
+                      actions: [{ type: 'forwardFetchMoreToDataSource' }],
                     },
                     // Forward yaml events to YAML mode machine
                     'yaml.*': {

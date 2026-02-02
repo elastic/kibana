@@ -170,14 +170,21 @@ test.describe(
       // Wait for the button to appear
       await pageObjects.streams.expectFetchMoreMatchingSamplesButtonVisible();
 
-      // Get the initial badge showing the percentage of matching samples
-      // With our controlled data, initial sample should have 0% 'warn' logs
-      const badge = pageObjects.streams.getConditionFilterSelectedBadge();
-      const initialPercentageText = await badge.textContent();
-      const initialPercentage = parseInt(initialPercentageText || '0', 10);
+      // Verify initial state: no 'warn' logs in the preview table
+      // because all 'warn' logs have older timestamps and won't be in the first 50 docs
+      await pageObjects.streams.switchToColumnsView();
+      const initialRows = await pageObjects.streams.getPreviewTableRows();
+      expect(initialRows.length).toBeGreaterThan(0);
 
-      // Initial percentage should be 0% because all 'warn' logs are older
-      expect(initialPercentage).toBe(0);
+      // All initial rows should have 'info' level (no 'warn' logs in initial sample)
+      for (let rowIndex = 0; rowIndex < initialRows.length; rowIndex++) {
+        await pageObjects.streams.expectCellValueContains({
+          columnName: 'log.level',
+          rowIndex,
+          value: 'warn',
+          invertCondition: true, // Should NOT contain 'warn'
+        });
+      }
 
       // Click the button to fetch more matching samples
       const button = pageObjects.streams.getFetchMoreMatchingSamplesButton();
@@ -195,13 +202,26 @@ test.describe(
         { timeout: 10000 }
       );
 
-      // After fetching, the percentage should have increased because
-      // the "load more" query (without time range limitation) found the 'warn' logs
-      const newPercentageText = await badge.textContent();
-      const newPercentage = parseInt(newPercentageText || '0', 10);
+      // After fetching, validate that actual 'warn' documents now appear in the preview table
+      // The "load more" query (without time range limitation) should have found the 'warn' logs
+      const updatedRows = await pageObjects.streams.getPreviewTableRows();
+      expect(updatedRows.length).toBeGreaterThan(0);
 
-      // The new percentage should be greater than the initial (0%)
-      expect(newPercentage).toBeGreaterThan(initialPercentage);
+      // Verify that at least one cell in the log.level column contains 'warn'
+      // Use Playwright's locator to find cells with 'warn' value directly
+      const warnLogCells = page.locator('[data-gridcell-column-id="log.level"]', {
+        hasText: 'warn',
+      });
+      // Verify at least one 'warn' log document was fetched and is now in the preview
+      const warnLogCount = await warnLogCells.count();
+      expect(warnLogCount).toBeGreaterThan(0);
+
+      // Also verify by checking the message column for the warning message pattern
+      const warningMessageCells = page.locator('[data-gridcell-column-id="message"]', {
+        hasText: 'Warning log message',
+      });
+      const warningMessageCount = await warningMessageCells.count();
+      expect(warningMessageCount).toBeGreaterThan(0);
     });
 
     test('should not show "Load more matching samples" button when no condition is selected', async ({

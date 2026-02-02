@@ -8,6 +8,7 @@
 import type { ActorRef, Snapshot } from 'xstate5';
 import type { IToasts } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Condition } from '@kbn/streamlang';
 import type { SampleDocument } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
@@ -43,6 +44,8 @@ export interface DataSourceContext {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;
+  isFetchingMore: boolean;
+  fetchMoreError?: Error;
 }
 
 export type DataSourceEvent =
@@ -50,4 +53,5 @@ export type DataSourceEvent =
   | { type: 'dataSource.delete' }
   | { type: 'dataSource.refresh' }
   | { type: 'dataSource.enable' }
-  | { type: 'dataSource.disable' };
+  | { type: 'dataSource.disable' }
+  | { type: 'dataSource.fetchMore'; condition: Condition };

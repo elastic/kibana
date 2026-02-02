@@ -142,8 +142,17 @@ const PreviewDocumentsGroupBy = () => {
   const activeSamples = useSimulatorSelector(
     (state) => selectSamplesForSimulation(state.context).length
   );
-  const isFetchingMore = useSimulatorSelector((state) => state.context.isFetchingMore);
-  const fetchMoreError = useSimulatorSelector((state) => state.context.fetchMoreError);
+
+  // Read isFetchingMore and fetchMoreError from the active data source state
+  const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>
+    getActiveDataSourceRef(snapshot.context.dataSourcesRefs)
+  );
+  const isFetchingMore = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.isFetchingMore : false
+  );
+  const fetchMoreError = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.fetchMoreError : undefined
+  );
   const conditionPercentage =
     totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
   const conditionRate = totalSamples > 0 ? activeSamples / totalSamples : 0;
