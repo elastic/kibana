@@ -41,7 +41,7 @@ import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
-import { SkillServiceStart } from '../services/skills';
+import type { SkillServiceStart } from '../services/skills';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
@@ -189,7 +189,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   logger: MockedLogger;
   request: KibanaRequest;
   toolManager: ToolManagerMock;
-  skillServiceStart: SkillServiceStartMock;  
+  skillServiceStart: SkillServiceStartMock;
 }
 
 export interface CreateRunnerDepsMock extends CreateRunnerDeps {

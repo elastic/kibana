@@ -89,7 +89,7 @@ export const alertAnalysisSkill = defineSkillType({
   getAllowedTools: () => [
     `security.alerts`,
     `security.security_labs_search`,
-    `platform.core.cases`
+    `platform.core.cases`,
   ],
   getInlineTools: () => [
     {
@@ -98,28 +98,38 @@ export const alertAnalysisSkill = defineSkillType({
       description: 'Get related alerts to the alert',
       schema: z.object({
         alertId: z.string(),
-        timeWindowHours: z.number().min(1).max(12 * 7).default(24),
+        timeWindowHours: z
+          .number()
+          .min(1)
+          .max(12 * 7)
+          .default(24),
       }),
       handler: async (_args, context) => {
         const relatedAlerts = [
           {
-            "_index": ".internal.alerts-security.alerts-default-000001",
-            "_id": "dcca5e4d246937407a184d50ff14c1cee9bb0b2138a5d42b73ff989d3e5ce5c5",
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _id: 'dcca5e4d246937407a184d50ff14c1cee9bb0b2138a5d42b73ff989d3e5ce5c5',
           },
           {
-            "_index": ".internal.alerts-security.alerts-default-000001",
-            "_id": "e365f31e2817fd463ee4c821ec22778e0725e3b530fd1726f6fe0356b8b6cfb5",
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _id: 'e365f31e2817fd463ee4c821ec22778e0725e3b530fd1726f6fe0356b8b6cfb5',
           },
           {
-              "_index": ".internal.alerts-security.alerts-default-000001",
-              "_id": "f05e609bd92feaa4609700a849496ca25846d90396756062ead4e642414cb9a7",
-          }
-        ]
+            _index: '.internal.alerts-security.alerts-default-000001',
+            _id: 'f05e609bd92feaa4609700a849496ca25846d90396756062ead4e642414cb9a7',
+          },
+        ];
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { message: `Related alerts fetched successfully.\n${JSON.stringify(relatedAlerts, null, 2)}` },
+              data: {
+                message: `Related alerts fetched successfully.\n${JSON.stringify(
+                  relatedAlerts,
+                  null,
+                  2
+                )}`,
+              },
             },
           ],
         };
