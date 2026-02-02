@@ -11,6 +11,11 @@ import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
 import type { Agent as HttpAgent } from 'http';
 import type { Agent as HttpsAgent } from 'https';
 
+// Extend RequestInit to include agent property for Node.js fetch
+interface RequestInitWithAgent extends RequestInit {
+  agent?: HttpAgent | HttpsAgent;
+}
+
 export interface ArtifactRepositoryProxySettings {
   proxyUrl: string;
   proxyHeaders?: Record<string, string>;
@@ -57,10 +62,7 @@ function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOpti
  * If proxyUrl is defined, use it as a proxy for requests to targetUrl.
  * If proxyUrl is not defined, return empty options (direct request to targetUrl).
  */
-export function getFetchOptions(
-  targetUrl: string,
-  proxyUrl?: string
-): { agent?: HttpAgent | HttpsAgent } {
+export function getFetchOptions(targetUrl: string, proxyUrl?: string): RequestInitWithAgent {
   // If proxyUrl is not defined, return empty options for direct request to targetUrl
   if (!proxyUrl) {
     return {};

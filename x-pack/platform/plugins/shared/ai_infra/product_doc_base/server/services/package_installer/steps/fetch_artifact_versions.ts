@@ -36,7 +36,7 @@ export const fetchArtifactVersions = async ({
   } else {
     const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
     const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
-    const res = await fetch(fetchUrl, fetchOptions);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
     xml = await res.text();
   }
 
@@ -114,7 +114,7 @@ export const fetchSecurityLabsVersions = async ({
   } else {
     const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
     const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
-    const res = await fetch(fetchUrl, fetchOptions);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
     xml = await res.text();
   }
 

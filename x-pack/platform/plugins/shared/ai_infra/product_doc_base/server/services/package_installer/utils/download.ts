@@ -29,7 +29,7 @@ export const downloadToDisk = async (
     readStream = createReadStream(path);
   } else {
     const fetchOptions = getFetchOptions(fileUrl, artifactRepositoryProxyUrl);
-    const res = await fetch(fileUrl, fetchOptions);
+    const res = await fetch(fileUrl, fetchOptions as RequestInit);
 
     if (!res.body) {
       throw new Error('Response body is null');
