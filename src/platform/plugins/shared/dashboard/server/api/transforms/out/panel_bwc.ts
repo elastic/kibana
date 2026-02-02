@@ -41,7 +41,7 @@ export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjec
   };
 }
 
-// By reference types that store reference with name 'savedObjectRef'
+// By reference types that stored panel references with the name 'savedObjectRef' before 9.4.0
 const BY_REF_TYPES = ['links', 'search', 'visualization', 'lens', 'map'];
 
 export function transformPanelReferencesOut(
