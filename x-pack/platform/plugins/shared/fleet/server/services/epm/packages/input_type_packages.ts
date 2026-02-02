@@ -107,6 +107,19 @@ export async function installAssetsForInputPackagePolicy(opts: {
     dataStreamType
   );
 
+  if (dataStreamType !== 'metrics' && dataStream.elasticsearch?.index_mode === 'time_series') {
+    logger.debug(
+      `Ignoring time_series index mode for package "${pkgInfo.name}" ` +
+      `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
+    );
+
+    // Remove time_series index mode from dataStream.
+    if (dataStream.elasticsearch) {
+      const { index_mode, ...restElasticsearch } = dataStream.elasticsearch;
+      dataStream.elasticsearch = restElasticsearch;
+    }
+  }
+
   if (existingDataStreams.length) {
     const existingDataStreamsAreFromDifferentPackage =
       checkExistingDataStreamsAreFromDifferentPackage(pkgInfo, existingDataStreams);

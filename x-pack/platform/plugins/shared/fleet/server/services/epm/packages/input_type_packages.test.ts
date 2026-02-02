@@ -57,6 +57,11 @@ jest.mock('../../app_context', () => {
 describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+    mockedLogger.debug.mockClear();
+    mockedLogger.error.mockClear();
+    mockedLogger.warn.mockClear();
+    mockedLogger.info.mockClear();
   });
 
   it('should do nothing for non input package', async () => {
@@ -154,6 +159,222 @@ describe('installAssetsForInputPackagePolicy', () => {
       {
         'test.tata': 'log-test.tata-*',
       }
+    );
+  });
+
+  it('should remove time_series index mode for non-metrics data stream types', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      ...TEST_PKG_INFO_INPUT,
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'test.tata' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+  });
+
+  it('should preserve time_series index mode for metrics data stream type', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      type: 'input',
+      name: 'test',
+      version: '1.0.0',
+      policy_templates: [
+        {
+          name: 'metrics',
+          type: 'metrics',
+        },
+      ],
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'metrics',
+            type: 'metrics',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: { 'data_stream.dataset': { value: 'test.metrics' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).not.toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+  });
+
+  it('should use data_stream_type var when provided', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      ...TEST_PKG_INFO_INPUT,
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'traces',
+            type: 'traces',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: {
+                  'data_stream.dataset': { value: 'test.traces' },
+                  'data_stream.type': { value: 'traces' },
+                },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('data stream type is "traces"')
+    );
+  });
+
+  it('should default to logs type when data_stream.type is not specified', async () => {
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+
+    const pkgInfoWithTimeSeries = {
+      ...TEST_PKG_INFO_INPUT,
+      elasticsearch: {
+        index_mode: 'time_series',
+        'index_template.mappings': {},
+      },
+    };
+
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'test',
+        version: '1.0.0',
+      },
+      packageInfo: pkgInfoWithTimeSeries,
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: pkgInfoWithTimeSeries as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: false,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                vars: { 'data_stream.dataset': { value: 'test.default' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Ignoring time_series index mode')
+    );
+    expect(mockedLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('data stream type is "logs"')
     );
   });
 });
