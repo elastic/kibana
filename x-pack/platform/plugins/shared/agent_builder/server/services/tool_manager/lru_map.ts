@@ -22,7 +22,7 @@ export class LRUMap<K, V> {
         }
     }
 
-    get size(): number {
+    public get size(): number {
         return this.map.size;
     }
 

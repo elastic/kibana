@@ -20,7 +20,8 @@ import type { AgentBuilderBuiltinTool } from '../allow_lists';
 /**
  * Skill directory structure - explicit about how skills are organized.
  *
- * The purpose of this is to encorage skills to be well organized, grouped logically and consistently.
+ * The purpose of this is to encourage skills to be well organized, grouped logically and consistently.
+ * This also requires code owners to review directory changes to ensure skills are discoverable.
  *
  * In order to store skills in a new directory, you need to add the directory to the structure.
  */
@@ -65,12 +66,12 @@ export interface SkillTypeDefinition<
    *
    * Skills should be grouped logically by path to be discoverable by the agent.
    *
-   * If a directory path is not available, you can modify the DirectoryStructure in the agent-builder-server package.
+   * If a directory path is not available, you can modify the `SkillsDirectoryStructure` in the agent-builder-server package.
    *
    * Example:
-   * - "skills/security/alerts/rules" - skill is stored in "security/alerts/rules/<name>/SKILL.md" directory
-   * - "skills/observability/alerts" - skill is stored in the "observability/alerts/<name>/SKILL.md" directory
-   * - "skills/platform/core" - skill is stored in the "platform/core/<name>/SKILL.md" directory
+   * - "skills/security/alerts/rules" - skill is stored at the path "security/alerts/rules/[name]/SKILL.md"
+   * - "skills/observability/alerts" - skill is stored at the path "observability/alerts/[name]/SKILL.md"
+   * - "skills/platform/core" - skill is stored at the path "platform/core/[name]/SKILL.md"
    */
   basePath: TBasePath;
 
@@ -88,9 +89,9 @@ export interface SkillTypeDefinition<
    */
   referencedContent?: {
     /**
-     * Name of the content. Also used as the file name. 
+     * Name of the content. Also used as the file name `<reference-name>.md`. 
      * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
-     * <basePath>/<name>/<relativePath>/<reference-name> must be unique.
+     * [basePath]/[name]/[relativePath]/[reference-name] must be unique.
      */
     name: string;
     /**
@@ -98,12 +99,12 @@ export interface SkillTypeDefinition<
      * 
      * Valid relative paths are:
      * - "." - stores reference content in the same directory as the skill
-     * - "./<directory>" - stores reference content in the "<directory>" directory
-     * - Avoid multiple levels of directories (such as "./<directory>/<subdirectory>") to keep the structure flat.
+     * - "./[directory]" - stores reference content in the "[directory]" directory
+     * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
      * 
      * Examples:
-     * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/<name>.md" file
-     * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/<name>.md" file
+     * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
+     * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
      */
     relativePath: string;
     /**
@@ -134,14 +135,22 @@ export interface SkillTypeDefinition<
  * - description: max 1024 characters, non-empty
  */
 export const skillTypeDefinitionSchema = z.object({
+  id: z.string().min(1, 'ID must be non-empty'),
+  basePath: z.string().min(1, 'Base path must be non-empty'),
   name: z
     .string()
     .max(64, 'Name must be at most 64 characters')
-    .regex(/^[a-z0-9-]+$/, 'Name must contain only lowercase letters, numbers, and hyphens'),
+    .regex(/^[a-z0-9-_]+$/, 'Name must contain only lowercase letters, numbers, underscores, and hyphens'),
   description: z
     .string()
     .min(1, 'Description must be non-empty')
     .max(1024, 'Description must be at most 1024 characters'),
+  body: z.string().min(1, 'Body must be non-empty'),
+  referencedContent: z.array(z.object({
+    name: z.string().min(1, 'Name must be non-empty').max(64, 'Name must be at most 64 characters').regex(/^[a-z0-9-_]+$/, 'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'),
+    relativePath: z.string().min(1, 'Relative path must be non-empty').regex(/^(?:\.|\.\/[a-z0-9-_]+)$/, 'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'),
+    body: z.string().min(1, 'Body must be non-empty'),
+  })).optional(),
 });
 
 /**
@@ -155,10 +164,7 @@ export const skillTypeDefinitionSchema = z.object({
 export function validateSkillTypeDefinition<TName extends string, TPath extends DirectoryPath>(
   definition: SkillTypeDefinition<TName, TPath>
 ): SkillTypeDefinition<TName, TPath> {
-  skillTypeDefinitionSchema.parse({
-    name: definition.name,
-    description: definition.description,
-  });
+  skillTypeDefinitionSchema.parse(definition);
   return definition;
 }
 

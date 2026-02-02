@@ -11,12 +11,12 @@ import { z } from '@kbn/zod';
 
 /**
  * DISCLAIMER: This skill is a sample skill.
- * 
+ *
  * Threat analysis skill for security operations.
  * This skill helps analyze security threats, investigate alerts, and assess risk.
  */
 export const alertAnalysisSkill = defineSkillType({
-  id: 'security.alert-analysis',
+  id: 'alert-analysis',
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
@@ -26,27 +26,20 @@ export const alertAnalysisSkill = defineSkillType({
 ## Alert Analysis Process
 
 ### 1. Initial Alert Assessment
+- Fetch the alert
 - Review the alert's core details: severity, timestamp, rule name, and description
 - Identify key entities involved: users, hosts, IP addresses, file hashes, domains
 - Understand the alert context: what triggered it, what it indicates
 - Note the alert's status and any existing assignments or comments
 
 ### 2. Find Related Alerts
-- Search for alerts involving the same entities (users, hosts, IPs) within a relevant time window
-- Look for alerts triggered by the same rule or similar detection rules
-- Identify alert patterns: multiple alerts from the same source, repeated behaviors
-- Group related alerts to understand if this is part of a larger attack campaign
-- Check for alerts with similar attack patterns or MITRE ATT&CK techniques
+- Search for alerts involving the same entities (users, hosts, IPs) within a relevant time window using the 'security.alert-analysis.get-related-alerts' tool
 
-### 3. Find Related Events
-- Retrieve raw security events associated with the alert
-- Search for events involving the same entities before and after the alert timestamp
-- Correlate events across different data sources (network, endpoint, cloud)
-- Identify event sequences that led to the alert or occurred as a result
-- Look for anomalous event patterns that might indicate broader compromise
+### 3. Search security labs
+- Query security labs for details about the alert's indicators of compromise (IOCs) using the 'security.security_labs_search' tool
 
 ### 4. Find Related Cases
-- Search existing security cases that reference the same entities or similar incidents
+- Search existing security cases that reference the same entities or similar incidents using the 'platform.core.cases' tool
 - Check if this alert or similar alerts have been investigated before
 - Review case notes and findings from previous investigations
 - Identify if this alert should be added to an existing case or requires a new case
@@ -68,7 +61,6 @@ export const alertAnalysisSkill = defineSkillType({
 
 ## Best Practices
 - Always start with the alert details before expanding the investigation
-- Use the reference queries at ./queries/
 - Use entity relationships to find related security data efficiently
 - Maintain chronological context when analyzing events and alerts
 - Cross-reference findings across alerts, events, and cases for validation
@@ -80,46 +72,58 @@ export const alertAnalysisSkill = defineSkillType({
       name: 'related_by_entities',
       body: `FROM .alerts-security.alerts-* METADATA _id, _index
 | WHERE (
-  host.name == "ENTITY_VALUE_PLACEHOLDER" OR
-  user.name == "ENTITY_VALUE_PLACEHOLDER" OR
-  source.ip == "ENTITY_VALUE_PLACEHOLDER" OR
-  destination.ip == "ENTITY_VALUE_PLACEHOLDER" OR
-  entity.name == "ENTITY_VALUE_PLACEHOLDER"
-)
+    host.name == "ENTITY_VALUE_PLACEHOLDER" OR
+    user.name == "ENTITY_VALUE_PLACEHOLDER" OR
+    source.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+    destination.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+    entity.name == "ENTITY_VALUE_PLACEHOLDER"
+  )
 | WHERE @timestamp >= NOW() - INTERVAL 7 DAYS
 | KEEP _id, _index, @timestamp, kibana.alert.rule.name, kibana.alert.severity, 
-     kibana.alert.workflow_status, host.name, user.name, source.ip, 
-     destination.ip, entity.name, entity.type, message
+       kibana.alert.workflow_status, host.name, user.name, source.ip, 
+       destination.ip, entity.name, entity.type, message
 | SORT @timestamp DESC
 | LIMIT 100`,
     },
   ],
   getAllowedTools: () => [
     `security.alerts`,
-    `security.entity_risk_score`,
-    `security.attack_discovery_search`,
     `security.security_labs_search`,
+    `platform.core.cases`
   ],
   getInlineTools: () => [
     {
-      id: "security.alert-analysis.get-related-alerts",
+      id: 'security.alert-analysis.get-related-alerts',
       type: ToolType.builtin,
-      description: "Get related alerts to the alert",
+      description: 'Get related alerts to the alert',
       schema: z.object({
         alertId: z.string(),
+        timeWindowHours: z.number().min(1).max(12 * 7).default(24),
       }),
       handler: async (_args, context) => {
-        // TODO: Implement the handler
+        const relatedAlerts = [
+          {
+            "_index": ".internal.alerts-security.alerts-default-000001",
+            "_id": "dcca5e4d246937407a184d50ff14c1cee9bb0b2138a5d42b73ff989d3e5ce5c5",
+          },
+          {
+            "_index": ".internal.alerts-security.alerts-default-000001",
+            "_id": "e365f31e2817fd463ee4c821ec22778e0725e3b530fd1726f6fe0356b8b6cfb5",
+          },
+          {
+              "_index": ".internal.alerts-security.alerts-default-000001",
+              "_id": "f05e609bd92feaa4609700a849496ca25846d90396756062ead4e642414cb9a7",
+          }
+        ]
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { message: "Related alerts fetched successfully" },
+              data: { message: `Related alerts fetched successfully.\n${JSON.stringify(relatedAlerts, null, 2)}` },
             },
           ],
         };
       },
-    }
-  ]
+    },
+  ],
 });
-
