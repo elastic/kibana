@@ -76,3 +76,19 @@ export const sloAlertsEmbeddableSchema = schema.allOf(
 );
 
 export type SloAlertsConfig = TypeOf<typeof sloAlertsEmbeddableSchema>;
+
+const sloErrorBudgetStateSchema = schema.object({
+  slo_id: schema.maybe(schema.string()),
+  slo_instance_id: schema.maybe(schema.string()),
+});
+
+export const sloErrorBudgetEmbeddableSchema = schema.allOf(
+  [sloErrorBudgetStateSchema, serializedTitlesSchema],
+  {
+    meta: {
+      description: 'SLO error budget embeddable schema',
+    },
+  }
+);
+
+export type SloErrorBudgetConfig = TypeOf<typeof sloErrorBudgetEmbeddableSchema>;

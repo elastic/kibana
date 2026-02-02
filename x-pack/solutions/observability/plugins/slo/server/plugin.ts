@@ -55,10 +55,15 @@ import type {
 } from './types';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
-import { sloOverviewEmbeddableSchema, sloAlertsEmbeddableSchema } from './embeddable_schemas';
+import {
+  sloOverviewEmbeddableSchema,
+  sloAlertsEmbeddableSchema,
+  sloErrorBudgetEmbeddableSchema,
+} from './embeddable_schemas';
 
 const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
 const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
+const SLO_ERROR_BUDGET_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 export class SLOPlugin
@@ -279,6 +284,10 @@ export class SLOPlugin
 
     plugins.embeddable.registerTransforms(SLO_ALERTS_EMBEDDABLE_ID, {
       getSchema: () => sloAlertsEmbeddableSchema,
+    });
+
+    plugins.embeddable.registerTransforms(SLO_ERROR_BUDGET_ID, {
+      getSchema: () => sloErrorBudgetEmbeddableSchema,
     });
 
     return {};
