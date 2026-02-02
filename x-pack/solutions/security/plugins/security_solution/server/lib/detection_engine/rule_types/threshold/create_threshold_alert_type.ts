@@ -68,8 +68,15 @@ export const createThresholdAlertType = (): SecurityAlertType<
     solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, startedAt, state } = execOptions;
-      const { tuple, completeRule, spaceId, ruleDataClient, aggregatableTimestampField } =
-        sharedParams;
+      const {
+        tuple,
+        completeRule,
+        spaceId,
+        ruleDataClient,
+        aggregatableTimestampField,
+        primaryTimestamp,
+        secondaryTimestamp,
+      } = sharedParams;
       const ruleParams = sharedParams.completeRule.ruleParams;
 
       const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
@@ -108,12 +115,17 @@ export const createThresholdAlertType = (): SecurityAlertType<
 
       const timestampCommand = `, ${TIMESTAMP} = MAX(${aggregatableTimestampField})`;
 
+      const timestampOverrideCommand =
+        aggregatableTimestampField === 'kibana.combined_timestamp'
+          ? `| eval ${aggregatableTimestampField}=CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
+          : '';
       const countCommand = `| WHERE threshold.count >= ${threshold.value}`;
       const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}${timestampCommand}`;
       const aggrByCommand = byFields ? `${aggrCommand} BY ${byFields}` : aggrCommand;
 
       const esqlQuery = [
         `FROM ${ruleParams.index}`,
+        timestampOverrideCommand,
         nullFiltersCommand,
         aggrByCommand,
         countCommand,
