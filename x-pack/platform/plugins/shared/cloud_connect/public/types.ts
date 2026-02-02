@@ -8,6 +8,7 @@
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudConnectTelemetryService } from './telemetry/client';
 import type { CloudConnectApiService } from './lib/api';
@@ -43,6 +44,7 @@ export interface CloudConnectApiConfig {
 export interface CloudConnectedSetupDeps {
   management: ManagementSetup;
   cloud?: CloudSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface CloudConnectedStartDeps {

@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type {
   CloudConnectedPluginSetup,
   CloudConnectedPluginStart,
@@ -38,6 +39,7 @@ export class CloudConnectedPlugin
 {
   private readonly config: CloudConnectConfig;
   private readonly telemetry = new CloudConnectTelemetryService();
+  private homeSetup?: HomePublicPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<CloudConnectConfig>();
@@ -52,6 +54,9 @@ export class CloudConnectedPlugin
     if (plugins.cloud?.isCloudEnabled) {
       return {};
     }
+
+    // Store home setup reference for registering the hook in start()
+    this.homeSetup = plugins.home;
 
     // Setup telemetry
     this.telemetry.setup(core.analytics);
@@ -88,6 +93,13 @@ export class CloudConnectedPlugin
 
   public start(core: CoreStart): CloudConnectedPluginStart {
     const useCloudConnectStatus = createUseCloudConnectStatusHook({ http: core.http });
+
+    // Register the hook with home plugin if available.
+    // We use this registration pattern instead of having home depend on cloudConnect
+    // because that would create a circular dependency (cloudConnect → management → home).
+    if (this.homeSetup) {
+      this.homeSetup.addData.registerCloudConnectStatusHook(useCloudConnectStatus);
+    }
 
     return {
       hooks: {

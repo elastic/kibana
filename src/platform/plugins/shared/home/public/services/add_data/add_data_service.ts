@@ -14,8 +14,18 @@ export interface AddDataTab {
   getComponent: () => JSX.Element;
 }
 
+/** @public */
+export interface CloudConnectStatusResult {
+  isCloudConnected: boolean;
+  isLoading: boolean;
+}
+
+/** @public */
+export type CloudConnectStatusHook = () => CloudConnectStatusResult;
+
 export class AddDataService {
   private addDataTabs: Record<string, AddDataTab> = {};
+  private cloudConnectStatusHook: CloudConnectStatusHook | undefined;
 
   public setup() {
     return {
@@ -28,11 +38,22 @@ export class AddDataService {
         }
         this.addDataTabs[tab.id] = tab;
       },
+      /**
+       * Registers a hook that returns the cloud connect status.
+       * Used by the cloud_connect plugin to provide connection status to the home page.
+       */
+      registerCloudConnectStatusHook: (hook: CloudConnectStatusHook) => {
+        this.cloudConnectStatusHook = hook;
+      },
     };
   }
 
   public getAddDataTabs() {
     return Object.values(this.addDataTabs);
+  }
+
+  public getCloudConnectStatusHook(): CloudConnectStatusHook | undefined {
+    return this.cloudConnectStatusHook;
   }
 }
 
