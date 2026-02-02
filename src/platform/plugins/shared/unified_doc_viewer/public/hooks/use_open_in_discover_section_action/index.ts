@@ -11,7 +11,7 @@ import { useCallback, useMemo } from 'react';
 import type { Action } from '../../components/content_framework/section/section_actions';
 import {
   OPEN_IN_DISCOVER_LABEL,
-  OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+  OPEN_IN_DISCOVER_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
 import { useDocViewerExtensionActionsContext } from '../use_doc_viewer_extension_actions';
 
@@ -44,13 +44,14 @@ export function useOpenInDiscoverSectionAction(
       return undefined;
     }
 
+    // TODO: unify repeated return
     if (href) {
       return {
         dataTestSubj,
         label: OPEN_IN_DISCOVER_LABEL,
         href,
         icon: 'discoverApp',
-        ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
         onClick: canOpenInNewTab ? onClick : undefined,
       };
     }
@@ -63,7 +64,7 @@ export function useOpenInDiscoverSectionAction(
       dataTestSubj,
       label: OPEN_IN_DISCOVER_LABEL,
       icon: 'discoverApp',
-      ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
       onClick,
     };
   }, [canOpenInNewTab, dataTestSubj, href, onClick]);
