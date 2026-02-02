@@ -416,7 +416,7 @@ function convertStateValueDisplayToAPI(
 
 function fromLensStateToSharedPartitionAPI(
   visualization: PartitionLens['state']['visualization']
-): PartitionState['legend'] {
+): Pick<PartitionState, 'legend' | 'value_display'> | undefined {
   const layerState = visualization.layers[0];
   const legend = stripUndefined({
     visible: layerState.legendDisplay === 'default' ? 'auto' : layerState.legendDisplay,
@@ -424,12 +424,14 @@ function fromLensStateToSharedPartitionAPI(
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
     size: layerState.legendSize,
   });
+  const valueDisplay = stripUndefined({
+    mode: convertStateValueDisplayToAPI(layerState.numberDisplay),
+    percent_decimals: layerState.percentDecimals,
+  });
+
   return stripUndefined({
     legend: Object.keys(legend).length > 0 ? legend : undefined,
-    value_display: stripUndefined({
-      mode: convertStateValueDisplayToAPI(layerState.numberDisplay),
-      percent_decimals: layerState.percentDecimals,
-    }),
+    value_display: Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined,
   });
 }
 
