@@ -23,9 +23,7 @@ export function registerConnectorTypesFromSpecs({
   // Register connector specs
   for (const spec of Object.values(connectorsSpecs)) {
     // Filter external alert connectors if the feature flag is disabled
-    const isExternalAlertConnector =
-      spec.metadata.supportedFeatureIds.includes('alerting') ||
-      externalAlertConnectorIds.includes(spec.metadata.id);
+    const isExternalAlertConnector = externalAlertConnectorIds.includes(spec.metadata.id);
 
     if (isExternalAlertConnector && !experimentalFeatures.externalAlertConnectorsOn) {
       continue;
