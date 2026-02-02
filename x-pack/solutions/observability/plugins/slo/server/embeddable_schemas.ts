@@ -92,3 +92,20 @@ export const sloErrorBudgetEmbeddableSchema = schema.allOf(
 );
 
 export type SloErrorBudgetConfig = TypeOf<typeof sloErrorBudgetEmbeddableSchema>;
+
+const sloBurnRateStateSchema = schema.object({
+  slo_id: schema.string(),
+  slo_instance_id: schema.string(),
+  duration: schema.string(),
+});
+
+export const sloBurnRateEmbeddableSchema = schema.allOf(
+  [sloBurnRateStateSchema, serializedTitlesSchema],
+  {
+    meta: {
+      description: 'SLO burn rate embeddable schema',
+    },
+  }
+);
+
+export type SloBurnRateConfig = TypeOf<typeof sloBurnRateEmbeddableSchema>;

@@ -59,11 +59,13 @@ import {
   sloOverviewEmbeddableSchema,
   sloAlertsEmbeddableSchema,
   sloErrorBudgetEmbeddableSchema,
+  sloBurnRateEmbeddableSchema,
 } from './embeddable_schemas';
 
 const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
 const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
 const SLO_ERROR_BUDGET_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
+const SLO_BURN_RATE_EMBEDDABLE_ID = 'SLO_BURN_RATE_EMBEDDABLE';
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 export class SLOPlugin
@@ -288,6 +290,10 @@ export class SLOPlugin
 
     plugins.embeddable.registerTransforms(SLO_ERROR_BUDGET_ID, {
       getSchema: () => sloErrorBudgetEmbeddableSchema,
+    });
+
+    plugins.embeddable.registerTransforms(SLO_BURN_RATE_EMBEDDABLE_ID, {
+      getSchema: () => sloBurnRateEmbeddableSchema,
     });
 
     return {};
