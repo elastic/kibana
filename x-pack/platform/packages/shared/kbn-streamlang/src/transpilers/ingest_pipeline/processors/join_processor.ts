@@ -21,13 +21,13 @@ import type { JoinProcessor } from '../../../../types/processors';
  *    boolean allPresent = true;
  *
  *    if (ctx.containsKey('field1') && ctx['field1'] != null) {
- *      fields.add(ctx['field1']);
+ *      fields.add(ctx['field1'].toString());
  *    } else {
  *      allPresent = false;
  *    }
  *
  *    if (ctx.containsKey('field2') && ctx['field2'] != null) {
- *      fields.add(ctx['field2']);
+ *      fields.add(ctx['field2'].toString());
  *    } else {
  *      allPresent = false;
  *    }
@@ -54,7 +54,7 @@ ${processor.from
   .map(
     (fromField) => `
 if (ctx.containsKey('${fromField}') && ctx['${fromField}'] != null) {
-  fields.add(ctx['${fromField}']);
+  fields.add(ctx['${fromField}'].toString());
 } else {
   allPresent = false;
 }
