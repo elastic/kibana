@@ -127,7 +127,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
         <React.Fragment>
           <StickyHeaderPortalProvider
-            portalRef={headerPortalRenderRef}
+            extensionPointRef={headerPortalRenderRef}
             isActiveSticky={isActiveSticky}
           >
             {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (

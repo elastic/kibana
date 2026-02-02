@@ -11,45 +11,32 @@ import React, { createContext, useContext, useMemo, type PropsWithChildren } fro
 
 export interface StickyHeaderPortalContextValue {
   /**
-   * Ref to the portal container in the sticky header.
-   * Will be null if the row is not the active sticky row.
+   * Ref to the portal container element in the sticky header.
    */
-  portalRef: React.RefObject<HTMLDivElement | null>;
+  extensionPointRef: React.RefObject<HTMLDivElement | null>;
   /**
    * Whether the current row is the active sticky row.
-   * When true, content can be portaled to the sticky header via `portalRef`.
    */
   isActiveSticky: boolean;
 }
 
 const StickyHeaderPortalContext = createContext<StickyHeaderPortalContextValue | null>(null);
 
-export interface StickyHeaderPortalProviderProps {
-  /**
-   * Ref to the portal container element in the sticky header.
-   */
-  portalRef: React.RefObject<HTMLDivElement | null>;
-  /**
-   * Whether the current row is the active sticky row.
-   */
-  isActiveSticky: boolean;
-}
-
 /**
  * @internal
  * @description Provider component that makes the sticky header portal ref available to descendant cells.
  */
 export function StickyHeaderPortalProvider({
-  portalRef,
+  extensionPointRef,
   isActiveSticky,
   children,
-}: PropsWithChildren<StickyHeaderPortalProviderProps>) {
+}: PropsWithChildren<StickyHeaderPortalContextValue>) {
   const value = useMemo<StickyHeaderPortalContextValue>(
     () => ({
-      portalRef,
+      extensionPointRef,
       isActiveSticky,
     }),
-    [portalRef, isActiveSticky]
+    [extensionPointRef, isActiveSticky]
   );
 
   return (
@@ -86,6 +73,10 @@ export function StickyHeaderPortalProvider({
  * };
  * ```
  */
-export function useStickyHeaderPortal(): StickyHeaderPortalContextValue | null {
-  return useContext(StickyHeaderPortalContext);
+export function useStickyHeaderPortal(): StickyHeaderPortalContextValue {
+  const ctx = useContext(StickyHeaderPortalContext);
+  if (!ctx) {
+    throw new Error('useStickyHeaderPortal must be used within a StickyHeaderPortalProvider');
+  }
+  return ctx;
 }

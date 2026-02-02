@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
@@ -41,11 +40,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
 
   const stickyHeaderPortal = useStickyHeaderPortal();
-  const stickyHeaderElementRef = useRef<React.ReactNode | null>(null);
-
-  const registerElementToActiveStickyHeader = useCallback((element: React.ReactNode) => {
-    stickyHeaderElementRef.current = element;
-  }, []);
 
   const styles = useMemo(() => cascadeRowCellStyles(euiTheme), [euiTheme]);
 
@@ -172,7 +166,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollOffset,
       getScrollMargin,
       preventSizeChangePropagation,
-      registerElementToActiveStickyHeader,
+      stickyHeaderPortal,
     });
   }, [
     children,
@@ -183,7 +177,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollOffset,
     getScrollMargin,
     preventSizeChangePropagation,
-    registerElementToActiveStickyHeader,
+    stickyHeaderPortal,
   ]);
 
   return (
@@ -194,13 +188,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
           size={size === 'l' ? 'm' : size}
           isLoading={isPendingRowLeafDataFetch || !leafData}
         >
-          <>
-            {stickyHeaderPortal?.isActiveSticky &&
-            stickyHeaderPortal.portalRef.current &&
-            stickyHeaderElementRef.current
-              ? createPortal(stickyHeaderElementRef.current, stickyHeaderPortal.portalRef.current)
-              : null}
-          </>
           <div css={styles.cellInner}>{memoizedChild}</div>
         </EuiSkeletonText>
       </EuiFlexItem>

@@ -123,7 +123,7 @@ const ESQLDataCascade = React.memo(
         getScrollOffset,
         getScrollMargin,
         preventSizeChangePropagation,
-        registerElementToActiveStickyHeader,
+        stickyHeaderPortal,
       }) => (
         <ESQLDataCascadeLeafCell
           {...props}
@@ -134,7 +134,7 @@ const ESQLDataCascade = React.memo(
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
           preventSizeChangePropagation={preventSizeChangePropagation}
-          registerElementToActiveStickyHeader={registerElementToActiveStickyHeader}
+          stickyHeaderPortal={stickyHeaderPortal}
         />
       ),
       [dataView, props]

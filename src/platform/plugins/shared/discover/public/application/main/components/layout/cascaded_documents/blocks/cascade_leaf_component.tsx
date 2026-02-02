@@ -8,7 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
+import { createPortal } from 'react-dom';
+import {
+  EuiPanel,
+  EuiText,
+  type EuiDataGridCustomBodyProps,
+  useEuiTheme,
+  type EuiDataGridToolbarProps,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -37,23 +45,26 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset' | 'preventSizeChangePropagation'
+      | 'stickyHeaderPortal'
+      | 'getScrollElement'
+      | 'getScrollMargin'
+      | 'getScrollOffset'
+      | 'preventSizeChangePropagation'
     > {
   cellData: DataTableRecord[];
   cellId: string;
-  registerElementToActiveStickyHeader: (node: React.ReactNode) => void;
 }
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
     Pick<
       ESQLDataCascadeLeafCellProps,
-      'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
+      'stickyHeaderPortal' | 'getScrollElement' | 'getScrollMargin' | 'preventSizeChangePropagation'
     > {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
-  registerActiveStickyHeaderElement: () => void;
+  toolbarRenderer: EuiDataGridToolbarProps['renderCustomToolbar'];
 }
 
 const EMPTY_SORT: SortOrder[] = [];
@@ -79,7 +90,8 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   visibleRowData,
   headerRow,
   footerRow,
-  registerActiveStickyHeaderElement,
+  stickyHeaderPortal,
+  toolbarRenderer,
 }: CustomCascadeGridBodyProps) {
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
@@ -88,12 +100,6 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
-
-  useEffect(() => {
-    // registers an element that will render when this cell's row header
-    // becomes the active sticky row
-    registerActiveStickyHeaderElement();
-  }, [registerActiveStickyHeaderElement]);
 
   const customCascadeGridBodyStyle = useMemo(
     () => getCustomCascadeGridBodyStyle(euiTheme),
@@ -160,7 +166,34 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
-      <>{headerRow}</>
+      <>
+        {stickyHeaderPortal?.isActiveSticky && stickyHeaderPortal.extensionPointRef.current
+          ? createPortal(
+              <>
+                <div>
+                  {toolbarRenderer?.({
+                    hasRoomForGridControls: true,
+                    fullScreenControl: (
+                      <EuiButtonIcon iconType="fullScreen" aria-label="Full Screen" />
+                    ),
+                    keyboardShortcutsControl: (
+                      <EuiButtonIcon iconType="keyboardShortcuts" aria-label="Keyboard Shortcuts" />
+                    ),
+                    displayControl: (
+                      <EuiButtonIcon iconType="display" aria-label="Display Options" />
+                    ),
+                    columnControl: <EuiButtonIcon iconType="column" aria-label="Column Options" />,
+                    columnSortingControl: (
+                      <EuiButtonIcon iconType="columnSorting" aria-label="Column Sorting Options" />
+                    ),
+                  })}
+                </div>
+                <>{headerRow}</>
+              </>,
+              stickyHeaderPortal.extensionPointRef.current
+            )
+          : headerRow}
+      </>
       <div
         ref={customGridBodyScrollContainerRef}
         css={customCascadeGridBodyStyle.virtualizerContainer}
@@ -212,7 +245,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollOffset,
     preventSizeChangePropagation,
     onUpdateDataGridDensity,
-    registerElementToActiveStickyHeader,
+    stickyHeaderPortal,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
@@ -256,27 +289,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [cellData]
     );
 
-    // This callback registers an element that will render when this cell's row header
-    // becomes the active sticky row
-    const renderCustomToolbar = useCallback(
-      (cb: NonNullable<UnifiedDataTableProps['renderCustomToolbar']>) => () => {
-        return registerElementToActiveStickyHeader(
-          cb({
-            toolbarProps: {
-              hasRoomForGridControls: true,
-              columnControl: true,
-              columnSortingControl: true,
-              fullScreenControl: true,
-              keyboardShortcutsControl: true,
-              displayControl: true,
-            },
-            gridProps: {},
-          })
-        );
-      },
-      [registerElementToActiveStickyHeader]
-    );
-
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
     >(
@@ -307,7 +319,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
           preventSizeChangePropagation={preventSizeChangePropagation}
           initialOffset={getScrollOffset}
           isFullScreenMode={isCellInFullScreenMode}
-          registerActiveStickyHeaderElement={renderCustomToolbar(context.renderCustomToolbar!)}
+          stickyHeaderPortal={stickyHeaderPortal}
+          toolbarRenderer={context.renderCustomToolbar}
         />
       ),
       [
@@ -318,7 +331,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         getScrollMargin,
         getScrollOffset,
         isCellInFullScreenMode,
-        renderCustomToolbar,
+        stickyHeaderPortal,
       ]
     );
 

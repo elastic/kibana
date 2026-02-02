@@ -1154,7 +1154,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
     ]);
 
-    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar']>(
       () =>
         renderCustomToolbar
           ? (toolbarProps) =>
