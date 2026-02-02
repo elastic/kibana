@@ -12,6 +12,7 @@ export { useCreateUpdateIntegration } from './hooks/use_create_update_integratio
 export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
 export { useUploadSamples } from './hooks/use_upload_samples';
+export { useDeleteDataStream } from './hooks/use_delete_data_stream';
 
 export {
   INDEX_VALIDATION_FAILED,

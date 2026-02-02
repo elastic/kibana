@@ -101,3 +101,22 @@ export const uploadSamplesToDataStream = async ({
       signal: abortSignal,
     }
   );
+
+export interface DeleteDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export const deleteDataStream = async ({
+  http,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & DeleteDataStreamRequest): Promise<void> =>
+  http.delete<void>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+    }
+  );

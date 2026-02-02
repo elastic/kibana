@@ -68,3 +68,17 @@ export const UPLOAD_SAMPLES_ERROR = i18n.translate(
     defaultMessage: 'Failed to upload samples',
   }
 );
+
+export const DELETE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteDataStream.success',
+  {
+    defaultMessage: 'Data stream deleted successfully',
+  }
+);
+
+export const DELETE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.deleteDataStream.error',
+  {
+    defaultMessage: 'Failed to delete data stream',
+  }
+);

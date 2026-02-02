@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,13 +12,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import type { DataStreamResponse } from '../../../../../common/model/common_attributes.gen';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById } from '../../../../common';
+import { DataStreamsTable } from './data_streams_table/data_steams_table';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { isCreateDataStreamFlyoutOpen, openCreateDataStreamFlyout, closeCreateDataStreamFlyout } =
@@ -30,52 +27,6 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { integration } = useGetIntegrationById(integrationId);
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
-
-  const dataStreamColumns: Array<EuiBasicTableColumn<DataStreamResponse>> = useMemo(
-    () => [
-      {
-        field: 'title',
-        name: 'Title',
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'dataStreamId',
-        name: 'Name',
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'inputTypes',
-        name: 'Data Collection Methods',
-        render: (inputTypes: DataStreamResponse['inputTypes']) => (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {inputTypes.map((inputType) => (
-              <EuiFlexItem grow={false} key={inputType.name}>
-                <EuiBadge color="hollow">{inputType.name}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      },
-      {
-        field: 'status',
-        name: 'Status',
-        sortable: true,
-        render: (status: DataStreamResponse['status']) => {
-          const statusColorMap: Record<DataStreamResponse['status'], string> = {
-            pending: 'default',
-            processing: 'primary',
-            completed: 'success',
-            failed: 'danger',
-            cancelled: 'warning',
-          };
-          return <EuiBadge color={statusColorMap[status]}>{status}</EuiBadge>;
-        },
-      },
-    ],
-    []
-  );
 
   return (
     <>
@@ -115,7 +66,6 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
             {i18n.ZERO_STATE_DESCRIPTION}
           </EuiText>
           <EuiFlexItem grow={false}>
-            {' '}
             <EuiButton
               iconType="plusInCircle"
               onClick={openCreateDataStreamFlyout}
@@ -127,13 +77,8 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
         </EuiFlexGroup>
       )}
 
-      {hasDataStreams && integration?.dataStreams && (
-        <EuiBasicTable<DataStreamResponse>
-          items={integration.dataStreams}
-          columns={dataStreamColumns}
-          tableLayout="auto"
-          tableCaption={i18n.DATA_STREAMS_TITLE}
-        />
+      {hasDataStreams && integration?.dataStreams && integrationId && (
+        <DataStreamsTable integrationId={integrationId} items={integration.dataStreams} />
       )}
 
       {isCreateDataStreamFlyoutOpen && (
