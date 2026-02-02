@@ -5,25 +5,25 @@
  * 2.0.
  */
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
-import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useUrlAppState } from './hooks/use_url_app_state';
-import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { toDuration } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
-import { EventsChartPagePanel } from '../events_chart_panel/events_chart_page_panel';
 import { HistoricalDataCharts } from '../historical_data_charts/historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';
+import { ErrorRatePanel } from '../error_rate_panel';
+import { EventsChartPanel } from '../events_chart_panel';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
+  isFlyout?: boolean;
 }
 
-export function SloDetailsHistory({ slo }: Props) {
+export function SloDetailsHistory({ slo, isFlyout }: Props) {
   const { uiSettings } = useKibana().services;
 
   const { state, updateState } = useUrlAppState(slo);
@@ -70,25 +70,12 @@ export function SloDetailsHistory({ slo }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.slo.sloDetailsHistory.h2.errorRatePanelTitle', {
-                  defaultMessage: 'Error rate',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <ErrorRateChart
-            slo={slo}
-            dataTimeRange={state.range}
-            onBrushed={onBrushed}
-            variant={['VIOLATED', 'DEGRADING'].includes(slo.summary.status) ? 'danger' : 'success'}
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
+      <ErrorRatePanel
+        slo={slo}
+        dataTimeRange={state.range}
+        onBrushed={onBrushed}
+        isFlyout={isFlyout}
+      />
 
       <HistoricalDataCharts
         slo={slo}
@@ -96,13 +83,15 @@ export function SloDetailsHistory({ slo }: Props) {
         range={state.range}
         onBrushed={onBrushed}
         hideHeaderDurationLabel={true}
+        isFlyout={isFlyout}
       />
 
-      <EventsChartPagePanel
+      <EventsChartPanel
         slo={slo}
         range={state.range}
         hideRangeDurationLabel
         onBrushed={onBrushed}
+        isFlyout={isFlyout}
       />
     </EuiFlexGroup>
   );

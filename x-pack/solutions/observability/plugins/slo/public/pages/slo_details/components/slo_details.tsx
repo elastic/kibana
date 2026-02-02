@@ -50,7 +50,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: P
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return <SloDetailsHistory slo={slo} />;
+    return <SloDetailsHistory slo={slo} isFlyout={isFlyout} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
