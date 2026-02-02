@@ -7,6 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceGroupsPage } }) => {
@@ -35,7 +36,7 @@ test.describe('Service Groups', { tag: ['@ess', '@svlOblt'] }, () => {
 
       // open the service picker and filter by service environment and agent name (changed to work better in MKI environment)
       await serviceGroupsPage.typeInTheSearchBar(
-        'service.environment : "production"  and agent.name : "go"'
+        `service.environment : "${PRODUCTION_ENVIRONMENT}"  and agent.name : "go"`
       );
 
       // verify expected synthetic services are listed and save

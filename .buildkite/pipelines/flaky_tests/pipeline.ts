@@ -74,7 +74,7 @@ function getScoutServerRunFlags(configPath: string): string[] {
   } else if (groupType === 'security') {
     flags.push('--serverless=security');
   } else if (groupType === 'search') {
-    flags.push('--serverless=search');
+    flags.push('--serverless=es');
   } else {
     throw new Error(`Unknown solution type: ${groupType}.`);
   }

@@ -23,7 +23,6 @@ import { AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT } from '../../../common/const
 
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
@@ -91,6 +90,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ) {
     const packagePolicyId = data.id || uuidv4();
 
+    const policyTemplate = data.policy_template;
+
     const agentPolicyId = packagePolicyId; // Use the same ID for agent policy and package policy
     const force = data.force;
     this.logger.debug('Creating agentless policy');
@@ -98,9 +99,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const user = request
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
-    const authorizationHeader = request
-      ? HTTPAuthorizationHeader.parseFromRequest(request, user?.username)
-      : null;
 
     const spaceId = this.soClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
@@ -165,7 +163,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           data_output_id: outputId,
           is_protected: false,
         },
-        { id: agentPolicyId, skipDeploy: true, authorizationHeader, user }
+        { id: agentPolicyId, skipDeploy: true, request, user }
       );
 
       createdAgentPolicyId = agentPolicy.id;
@@ -185,7 +183,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           }),
       };
 
-      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        policyTemplate,
+      });
 
       // Integrate cloud connector if enabled for this agentless policy
       const {
@@ -196,6 +196,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         packagePolicy: newPackagePolicy,
         agentPolicy,
         policyName: data.name,
+        packageInfo: pkgInfo,
         soClient: this.soClient,
         esClient: this.esClient,
         logger: this.logger,
@@ -217,7 +218,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           force,
           bumpRevision: false,
           spaceId,
-          authorizationHeader,
           user,
         },
         context,

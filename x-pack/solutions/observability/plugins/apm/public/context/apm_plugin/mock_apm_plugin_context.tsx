@@ -162,6 +162,7 @@ const mockConfig: ConfigSchema = {
     infrastructureTabAvailable: true,
     infraUiAvailable: true,
     migrationToFleetAvailable: true,
+    serviceMapUseReactFlow: false,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
     // to be removed in https://github.com/elastic/kibana/issues/221904

@@ -16,13 +16,13 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
-import { SeverityBadge } from '../../severity_badge';
+import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -32,7 +32,7 @@ interface Props {
   selectedQueries: StreamQueryKql[];
   isSubmitting: boolean;
   onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
-  features: Omit<Feature, 'description'>[];
+  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
 }
 
@@ -44,7 +44,7 @@ export function SignificantEventsGeneratedTable({
   onSelectionChange,
   definition,
   isSubmitting,
-  features,
+  systems,
   dataViews,
 }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -76,7 +76,7 @@ export function SignificantEventsGeneratedTable({
           isEditing={eventsInEditMode.includes(query.id)}
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
-          features={features}
+          systems={systems}
           dataViews={dataViews}
         />
       );
@@ -96,14 +96,14 @@ export function SignificantEventsGeneratedTable({
           isEditing={eventsInEditMode.includes(query.id)}
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
-          features={features}
+          systems={systems}
           dataViews={dataViews}
         />
       );
     }
     setItemIdToExpandedRowMap(copy);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventsInEditMode, definition, onEditQuery, features, dataViews, generatedQueries]);
+  }, [eventsInEditMode, definition, onEditQuery, systems, dataViews, generatedQueries]);
 
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
@@ -143,8 +143,8 @@ export function SignificantEventsGeneratedTable({
     {
       width: '15%',
       field: 'feature',
-      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.featureColumn', {
-        defaultMessage: 'Feature',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.systemColumn', {
+        defaultMessage: 'System',
       }),
       render: (_, item: StreamQueryKql) => {
         return <EuiBadge color="hollow">{item.feature?.name ?? '--'}</EuiBadge>;

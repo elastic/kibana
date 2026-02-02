@@ -26,7 +26,6 @@ export function isInStepsContext(path: (string | number)[]): boolean {
 /**
  * Detect if we're in a scheduled trigger's with block
  */
-// TODO: replace it with triggersLookup or something like that
 export function isInScheduledTriggerWithBlock(
   yamlDocument: Document,
   absolutePosition: number

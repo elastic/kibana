@@ -9,9 +9,9 @@
 
 import axios from 'axios';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { HttpStepImpl } from './http_step_impl';
 import { UrlValidator } from '../../lib/url_validator';
-import { ExecutionError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';

@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/grouping'
   - '@kbn/std'
   - '@kbn/react-query'
+  - '@kbn/kql'
 tags:
   - shared-browser
   - package

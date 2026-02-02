@@ -17,8 +17,8 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_TOUR_DISMISS,
-  EIS_TOUR_CTA,
+  TOUR_DISMISS,
+  TOUR_CTA,
   EIS_PROMO_TOUR_DESCRIPTION,
   EIS_PROMO_TOUR_TITLE,
 } from '../translations';
@@ -70,7 +70,7 @@ export const EisPromotionalTour = ({
           data-telemetry-id={`${dataId}-dismiss-btn`}
           onClick={onDismissPromo}
         >
-          {EIS_TOUR_DISMISS}
+          {TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -82,7 +82,7 @@ export const EisPromotionalTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_TOUR_CTA}
+                {TOUR_CTA}
               </EuiButton>,
             ]
           : []),

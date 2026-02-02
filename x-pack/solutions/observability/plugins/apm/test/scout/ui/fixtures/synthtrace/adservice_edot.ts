@@ -11,6 +11,7 @@ import {
   EDOT_INSTANCE_ID,
   EDOT_TRANSACTION_NAME,
   EDOT_ERROR_MESSAGE,
+  PRODUCTION_ENVIRONMENT,
 } from '../constants';
 
 export function adserviceEdot({
@@ -27,7 +28,7 @@ export function adserviceEdot({
   const edotService = apm
     .service({
       name: SERVICE_EDOT_ADSERVICE,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'java',
     })
     .instance(EDOT_INSTANCE_ID);

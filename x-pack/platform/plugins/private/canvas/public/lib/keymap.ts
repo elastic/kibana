@@ -55,7 +55,7 @@ const getShortcuts = (
   }
 
   return {
-    osx: macShortcuts,
+    mac: macShortcuts,
     windows: shortcuts,
     linux: shortcuts,
     other: shortcuts,

@@ -127,13 +127,19 @@ export class DocumentUpgradePipeline implements MigrationPipeline {
   private assertCompatibility() {
     const { id, type, typeMigrationVersion: currentVersion } = this.document;
     const latestVersion = maxVersion(
+      '0.0.0',
       this.migrations[type]?.latestVersion.migrate,
       this.migrations[type]?.latestVersion.convert
     );
 
-    if (isGreater(currentVersion, latestVersion)) {
+    if (
+      // a SO type with no migrations: and only a single modelVersion: is, by definition,
+      // compatible, as we only allow schema definitions in the initial modelVersion.
+      (currentVersion !== '10.1.0' || latestVersion !== '0.0.0') &&
+      isGreater(currentVersion, latestVersion)
+    ) {
       throw Boom.badData(
-        `Document "${id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`,
+        `Document "${id}" of type '${type}' belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`,
         this.document
       );
     }

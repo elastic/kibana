@@ -11,6 +11,7 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ShowAssistantOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
@@ -19,8 +20,6 @@ import {
   useAssistantSpaceId,
   type LastConversation,
 } from '../use_space_aware_context';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 export const AssistantOverlay = React.memo(() => {
   const spaceId = useAssistantSpaceId();

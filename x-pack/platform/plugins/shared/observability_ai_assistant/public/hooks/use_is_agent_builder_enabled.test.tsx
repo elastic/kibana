@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { AIChatExperience, AI_AGENTS_FEATURE_FLAG } from '@kbn/ai-assistant-common';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
 
@@ -34,9 +34,6 @@ describe('useIsAgentBuilderEnabled', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCapabilities.agentBuilder = { show: true };
-    mockFeatureFlags.getBooleanValue.mockImplementation(
-      (key: string) => key === AI_AGENTS_FEATURE_FLAG
-    );
   });
 
   it('reads the chat experience setting with the expected key', () => {
@@ -89,18 +86,6 @@ describe('useIsAgentBuilderEnabled', () => {
 
     expect(result.current.hasAgentBuilderAccess).toBe(false);
     expect(result.current.isAgentChatExperienceEnabled).toBe(true);
-    expect(result.current.isAgentBuilderEnabled).toBe(false);
-  });
-
-  it('does not treat Agent experience as enabled when the AI agents feature flag is off', () => {
-    mockFeatureFlags.getBooleanValue.mockReturnValue(false);
-    mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
-    mockCapabilities.agentBuilder = { show: true };
-
-    const { result } = renderHook(() => useIsAgentBuilderEnabled());
-
-    expect(result.current.hasAgentBuilderAccess).toBe(false);
-    expect(result.current.isAgentChatExperienceEnabled).toBe(false);
     expect(result.current.isAgentBuilderEnabled).toBe(false);
   });
 });

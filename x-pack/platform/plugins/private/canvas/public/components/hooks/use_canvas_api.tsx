@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 
-import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import type { CanvasContainerApi } from '../../../types';
@@ -44,10 +44,10 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   );
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
-    const panelStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
+    const panelStateMap: Record<string, BehaviorSubject<object>> = {};
 
     function getSerializedStateForChild(childId: string) {
-      return panelStateMap[childId]?.value ?? { rawState: {} };
+      return panelStateMap[childId]?.value ?? {};
     }
 
     return {
@@ -66,9 +66,9 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         serializedState,
       }: {
         panelType: string;
-        serializedState: SerializedPanelState<object>;
+        serializedState: object;
       }) => {
-        createNewEmbeddable(panelType, serializedState.rawState);
+        createNewEmbeddable(panelType, serializedState);
       },
       disableTriggers: true,
       // this is required to disable inline editing now enabled by default
@@ -78,10 +78,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       lastSavedStateForChild$: (childId: string) => panelStateMap[childId] ?? of(undefined),
       // Canvas auto saves so lastSavedState is the same as currentState
       getLastSavedStateForChild: getSerializedStateForChild,
-      setSerializedStateForChild: (
-        childId: string,
-        serializePanelState: SerializedPanelState<object>
-      ) => {
+      setSerializedStateForChild: (childId: string, serializePanelState: object) => {
         if (!panelStateMap[childId]) {
           panelStateMap[childId] = new BehaviorSubject(serializePanelState);
           return;

@@ -46,40 +46,38 @@ export const pinnedControlSchema = schema.object({
   ),
 });
 
-export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(
-    // order will be determined by the array
-    schema.oneOf([
-      schema
-        .allOf([
-          schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
-          schema.object({ config: optionsListDSLControlSchema }),
-          pinnedControlSchema,
-        ])
-        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
-      schema
-        .allOf([
-          schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
-          schema.object({ config: rangeSliderControlSchema }),
-          pinnedControlSchema,
-        ])
-        .extendsDeep({ unknowns: 'allow' }),
-      schema
-        .allOf([
-          schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-          schema.object({ config: timeSliderControlSchema }),
-          pinnedControlSchema,
-        ])
-        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
-      schema.allOf([
-        schema.object({ type: schema.literal(ESQL_CONTROL) }),
-        schema.object({ config: optionsListESQLControlSchema }),
+export const controlsGroupSchema = schema.arrayOf(
+  // order will be determined by the array
+  schema.oneOf([
+    schema
+      .allOf([
+        schema.object({ type: schema.literal(OPTIONS_LIST_CONTROL) }),
+        schema.object({ config: optionsListDSLControlSchema }),
         pinnedControlSchema,
-      ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
-    ]),
-    {
-      defaultValue: [],
-      meta: { description: 'An array of control panels and their state in the control group.' },
-    }
-  ),
-});
+      ])
+      .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `parentField` and `enhancements`
+    schema
+      .allOf([
+        schema.object({ type: schema.literal(RANGE_SLIDER_CONTROL) }),
+        schema.object({ config: rangeSliderControlSchema }),
+        pinnedControlSchema,
+      ])
+      .extendsDeep({ unknowns: 'allow' }),
+    schema
+      .allOf([
+        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+        schema.object({ config: timeSliderControlSchema }),
+        pinnedControlSchema,
+      ])
+      .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
+    schema.allOf([
+      schema.object({ type: schema.literal(ESQL_CONTROL) }),
+      schema.object({ config: optionsListESQLControlSchema }),
+      pinnedControlSchema,
+    ]), // variable controls do not need `unknowns: 'allow'` because they have no legacy values
+  ]),
+  {
+    defaultValue: [],
+    meta: { description: 'An array of control panels and their state in the control group.' },
+  }
+);

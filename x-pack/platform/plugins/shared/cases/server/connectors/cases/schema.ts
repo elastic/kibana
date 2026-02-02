@@ -8,12 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { z } from '@kbn/zod';
 import dateMath from '@kbn/datemath';
-import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
   MAX_TITLE_LENGTH,
+  DEFAULT_MAX_OPEN_CASES,
+  MAX_OPEN_CASES,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -87,6 +88,7 @@ export const CasesConnectorSecretsSchema = z.object({}).strict();
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
+  autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
   groupedAlerts: schema.nullable(
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
@@ -186,6 +188,7 @@ const ZReopenClosedCasesSchema = z.boolean().default(false);
 export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
+    autoPushCase: z.boolean().nullable().default(false),
     groupedAlerts: z
       .array(ZCasesGroupedAlertsSchema)
       .min(0)
@@ -210,10 +213,14 @@ export const ZCasesConnectorRunParamsSchema = z
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),
   subActionParams: schema.object({
+    autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
     templateId: schema.nullable(schema.string()),
+    maximumCasesToOpen: schema.nullable(
+      schema.number({ min: 1, max: MAX_OPEN_CASES, defaultValue: DEFAULT_MAX_OPEN_CASES })
+    ),
   }),
 });
 

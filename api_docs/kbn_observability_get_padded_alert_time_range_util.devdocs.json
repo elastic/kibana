@@ -31,6 +31,8 @@
           "TimeRange"
         ],
         "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               "string"
             ],
             "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,6 +64,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -72,6 +78,8 @@
             "label": "lookBackWindow",
             "description": [],
             "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+            "lineNumber": 18,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -83,6 +91,8 @@
                 "label": "size",
                 "description": [],
                 "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -97,6 +107,8 @@
                   "\"m\" | \"d\" | \"s\" | \"h\""
                 ],
                 "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }

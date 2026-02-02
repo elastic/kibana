@@ -14,13 +14,10 @@ import type {
   StaticToolRegistration,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getToolHandler } from './handler';
 
@@ -30,9 +27,6 @@ const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
   end: 'now',
 };
-
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
 
 export type GetHostsToolResult = OtherResult<{
   total: number;
@@ -45,20 +39,12 @@ export type GetHostsToolResult = OtherResult<{
 
 const getHostsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_LIMIT)
-    .describe(
-      `Maximum number of hosts to return. Defaults to ${DEFAULT_LIMIT}, maximum is ${MAX_LIMIT}.`
-    )
-    .optional(),
+  limit: z.number().int().min(1).max(100).default(20).describe(`Maximum number of hosts to return`),
   kqlFilter: z
     .string()
     .optional()
     .describe(
-      'Optional KQL filter to narrow down results. Examples: "service.name: frontend" (show only hosts running the frontend service), "host.name: web-*", or "cloud.provider: aws".'
+      'KQL filter to narrow down results. Examples: "service.name: frontend", "host.name: web-*", "cloud.provider: aws".'
     ),
 });
 
@@ -67,10 +53,7 @@ export function createGetHostsTool({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): StaticToolRegistration<typeof getHostsSchema> {
@@ -98,12 +81,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       toolParams,
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        limit = DEFAULT_LIMIT,
-        kqlFilter,
-      } = toolParams;
+      const { start, end, limit, kqlFilter } = toolParams;
 
       try {
         const { hosts, total } = await getToolHandler({

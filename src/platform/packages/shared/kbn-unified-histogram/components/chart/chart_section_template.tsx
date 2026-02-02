@@ -93,6 +93,7 @@ export const ChartSectionTemplate = ({
       gutterSize="none"
       responsive={false}
       onClick={handleClick}
+      data-test-subj="unifiedHistogramChartContainer"
     >
       <EuiFlexItem grow={false} css={toolbarContainerCss}>
         <EuiFlexGroup

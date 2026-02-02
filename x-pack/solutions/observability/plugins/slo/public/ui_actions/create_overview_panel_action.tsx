@@ -42,9 +42,7 @@ export function createOverviewPanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_OVERVIEW_EMBEDDABLE_ID,
-            serializedState: {
-              rawState: initialState,
-            },
+            serializedState: initialState,
           },
           {
             displaySuccessMessage: true,

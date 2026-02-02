@@ -42,7 +42,7 @@ describe('Enrich policies tab', () => {
       setDelayResponse(true);
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([]);
 
-      renderHome(httpSetup, {
+      await renderHome(httpSetup, {
         initialEntries: ['/enrich_policies'],
       });
 

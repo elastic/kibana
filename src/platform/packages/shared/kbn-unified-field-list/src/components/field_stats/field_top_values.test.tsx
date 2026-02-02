@@ -13,10 +13,22 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldTopValuesProps } from './field_top_values';
 import { FieldTopValues } from './field_top_values';
-import { getChildrenTextBySelector } from './field_stats.test';
+import type { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+
+// Similar to wrapper.text() but filtered by a selector
+const getChildrenTextBySelector = (wrapper: ReactWrapper, selector: string) => {
+  let text = '';
+  const children = wrapper.find(selector);
+
+  children.forEach((element) => {
+    text += element.text();
+  });
+
+  return text;
+};
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;

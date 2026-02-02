@@ -14,6 +14,7 @@ import type {
   FindSLOInstancesResponse,
   FindSLOTemplatesResponse,
   GetSLOTemplateResponse,
+  SearchSLODefinitionResponse,
   UpdateSLOInput,
 } from '@kbn/slo-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -165,6 +166,33 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async searchDefinitions(
+      roleAuthc: RoleCredentials,
+      params?: {
+        search?: string;
+        size?: number;
+        searchAfter?: string;
+        remoteName?: string;
+      },
+      expectedStatus: number = 200
+    ): Promise<SearchSLODefinitionResponse> {
+      const queryParams: Record<string, string | number> = {};
+      if (params?.search !== undefined) queryParams.search = params.search;
+      if (params?.size !== undefined) queryParams.size = params.size;
+      if (params?.searchAfter !== undefined) queryParams.searchAfter = params.searchAfter;
+      if (params?.remoteName !== undefined) queryParams.remoteName = params.remoteName;
+
+      const { body } = await supertestWithoutAuth
+        .get(`/internal/observability/slos/_search_definitions`)
+        .query(queryParams)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(expectedStatus);
+
+      return body;
+    },
+
     async deleteAllSLOs(roleAuthc: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
@@ -242,7 +270,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
     async findInstances(
       sloId: string,
       params: { search?: string; size?: string; searchAfter?: string },
-      roleAuthc: RoleCredentials
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
     ): Promise<FindSLOInstancesResponse> {
       const { body } = await supertestWithoutAuth
         .get(`/internal/observability/slos/${sloId}/_instances`)
@@ -250,7 +279,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
-        .expect(200);
+        .expect(expectedStatus);
 
       return body;
     },

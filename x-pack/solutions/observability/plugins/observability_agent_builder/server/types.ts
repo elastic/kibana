@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -57,3 +58,8 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
 }
+
+export type ObservabilityAgentBuilderCoreSetup = CoreSetup<
+  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderPluginStart
+>;

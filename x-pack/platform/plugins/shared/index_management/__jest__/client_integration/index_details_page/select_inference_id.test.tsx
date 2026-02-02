@@ -19,6 +19,12 @@ import {
 const mockDispatch = jest.fn();
 const mockNavigateToUrl = jest.fn();
 
+const mockIsAtLeast = jest.fn((level: string) => {
+  // Default: enterprise license, so all levels return true
+  // Individual tests can override this mock implementation
+  return true;
+});
+
 jest.mock('../../../public/application/app_context', () => ({
   ...jest.requireActual('../../../public/application/app_context'),
   useAppContext: jest.fn(() => ({
@@ -119,6 +125,13 @@ jest.mock('../../../public/application/services/api', () => ({
   useLoadInferenceEndpoints: jest.fn(),
 }));
 
+jest.mock('../../../public/hooks/use_license', () => ({
+  useLicense: jest.fn(() => ({
+    isLoading: false,
+    isAtLeast: mockIsAtLeast,
+  })),
+}));
+
 let user: ReturnType<typeof userEvent.setup>;
 
 let restoreConsoleErrorFilter: () => void;
@@ -128,6 +141,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   user = userEvent.setup();
   restoreConsoleErrorFilter = installConsoleTruncationWarningFilter();
+  // Reset to default: enterprise license (all levels return true)
+  mockIsAtLeast.mockImplementation(() => true);
 });
 
 afterEach(async () => {
@@ -396,7 +411,7 @@ describe('SelectInferenceId', () => {
     });
 
     describe('AND .elser-2-elastic is available', () => {
-      it('SHOULD prioritize .elser-2-elastic over other endpoints', async () => {
+      it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
         setupInferenceEndpointsMocks({
           data: [
             { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
@@ -409,6 +424,25 @@ describe('SelectInferenceId', () => {
 
         const button = await screen.findByTestId('inferenceIdButton');
         await waitFor(() => expect(button).toHaveTextContent('.elser-2-elastic'));
+      });
+
+      it('SHOULD fall back to .preconfigured-elser instead of .elser-2-elastic IF has NO enterprise license', async () => {
+        // Mock license to return false for enterprise
+        mockIsAtLeast.mockImplementation((level: string) => level !== 'enterprise');
+
+        setupInferenceEndpointsMocks({
+          data: [
+            { inference_id: '.elser-2-elastic', task_type: 'sparse_embedding' },
+            { inference_id: '.preconfigured-elser', task_type: 'sparse_embedding' },
+            { inference_id: 'endpoint-1', task_type: 'text_embedding' },
+          ] as InferenceAPIConfigResponse[],
+        });
+
+        renderSelectInferenceId({ initialValue: '' });
+
+        const button = await screen.findByTestId('inferenceIdButton');
+        await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
+        expect(button).not.toHaveTextContent('.elser-2-elastic');
       });
     });
   });

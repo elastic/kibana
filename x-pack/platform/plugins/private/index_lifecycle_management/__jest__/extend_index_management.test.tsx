@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import type { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
 import {
@@ -44,13 +44,14 @@ jest.mock('@elastic/eui', () => ({
       themeName: 'EUI_THEME_BOREALIS',
       colors: {
         vis: {
-          euiColorVis1: '#6092C0',
-          euiColorVis2: '#D36086',
-          euiColorVis4: '#CA8EAE',
-          euiColorVis5: '#D6BF57',
-          euiColorVis6: '#B9A888',
-          euiColorVis9: '#E7664C',
+          euiColorVis3: '#BFDBFF',
         },
+        severity: {
+          risk: '#FF995E',
+          warning: '#FCD883',
+          neutral: '#B5E5F2',
+        },
+        backgroundBaseSubdued: '#CAD3E2',
       },
     },
   }),
@@ -65,8 +66,8 @@ const indexWithoutLifecyclePolicy: Index = {
   replica: 1,
   documents: 1,
   documents_deleted: 0,
-  size: '3.4kb',
-  primary_size: '3.4kb',
+  size: 3480,
+  primary_size: 3480,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -85,8 +86,8 @@ const indexWithLifecyclePolicy: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -114,8 +115,8 @@ const indexWithLifecycleError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -147,8 +148,8 @@ const indexWithLifecyclePhaseDefinition: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -181,8 +182,8 @@ const indexWithLifecycleWaitingStep: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -215,8 +216,8 @@ const indexWithNonExistentPolicyError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,

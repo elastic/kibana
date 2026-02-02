@@ -20,6 +20,8 @@
         "label": "InternalNodeServiceStart",
         "description": [],
         "path": "src/core/packages/node/server-internal/src/node_service.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "NodeRoles"
             ],
             "path": "src/core/packages/node/server-internal/src/node_service.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -50,6 +54,8 @@
         "label": "PrebootDeps",
         "description": [],
         "path": "src/core/packages/node/server-internal/src/node_service.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,6 +70,8 @@
               "ILoggingSystem"
             ],
             "path": "src/core/packages/node/server-internal/src/node_service.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

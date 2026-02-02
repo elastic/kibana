@@ -42,6 +42,7 @@ type PanelProps = Pick<
   | 'hideHeader'
   | 'hideInspector'
   | 'getActions'
+  | 'titleHighlight'
 >;
 
 /**
@@ -67,6 +68,7 @@ export function LensRenderer({
   forceDSL,
   hidePanelTitles,
   lastReloadRequestTime,
+  titleHighlight,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -131,6 +133,7 @@ export function LensRenderer({
       showNotifications: false,
       showShadow: false,
       showBadges: false,
+      titleHighlight,
       getActions: async (triggerId, context) => {
         const actions = withDefaultActions
           ? await lensApi?.getTriggerCompatibleActions(triggerId, context)
@@ -139,7 +142,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
     <EmbeddableRenderer<LensSerializedAPIConfig, LensApi>
@@ -158,12 +161,7 @@ export function LensRenderer({
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)
-          getSerializedStateForChild: () => {
-            const transformedState = transformToApiConfig(initialStateRef.current);
-            return {
-              rawState: transformedState,
-            };
-          },
+          getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
           hideTitle$,

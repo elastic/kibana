@@ -123,6 +123,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       requires_input: requiresInput = false,
       path_to_executable: pathToExecutable = undefined,
       tags = [],
+      file_id: fileId,
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
@@ -138,6 +139,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       id,
       name,
       platform: platform as EndpointScript['platform'],
+      fileId,
       fileName,
       fileSize,
       fileHash,
@@ -271,7 +273,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
       if (existingScriptWithSameFile.saved_objects.length > 0) {
         throw new ScriptLibraryError(
-          `The file you are attempting to upload (hash: [${fileStorage.data.hash.sha256}]) already exists and is associated with with a script entry named [${existingScriptWithSameFile.saved_objects[0].attributes.name}] (script ID: [${existingScriptWithSameFile.saved_objects[0].id}])`,
+          `The file you are attempting to upload (hash: [${fileStorage.data.hash.sha256}]) already exists and is associated with a script entry named [${existingScriptWithSameFile.saved_objects[0].attributes.name}] (script ID: [${existingScriptWithSameFile.saved_objects[0].id}])`,
           400
         );
       }

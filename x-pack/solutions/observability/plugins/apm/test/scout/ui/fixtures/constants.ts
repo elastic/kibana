@@ -18,6 +18,7 @@ export const SERVICE_OPBEANS_RUM = 'opbeans-rum';
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const PRODUCTION_ENVIRONMENT = 'production';
 
 export const SERVICE_OTEL_SENDOTLP = 'sendotlp-otel-native-synth';
 export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
@@ -35,6 +36,7 @@ export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
+export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
 // Error constants - based on opbeans synthtrace data
 export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
@@ -43,6 +45,9 @@ export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
 // Span links test data dates
 export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
 export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
+export const SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END = '2022-01-01T00:01:00.000Z';
+export const SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY = 'zzz-producer-internal-only';
+export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
 
 // APM-specific role definitions matching authentication.ts
 export const APM_ROLES = {

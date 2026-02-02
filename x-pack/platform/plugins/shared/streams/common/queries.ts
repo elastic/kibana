@@ -12,15 +12,13 @@ export interface QueryLink {
   'asset.type': 'query';
   'asset.id': string;
   query: StreamQuery;
+  stream_name: string;
 }
 
-type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
-
-export type QueryLinkRequest = OmitFrom<QueryLink, 'asset.uuid'>;
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 
 export type Query = QueryLink & {
   title: string;
-  query: StreamQuery;
 };

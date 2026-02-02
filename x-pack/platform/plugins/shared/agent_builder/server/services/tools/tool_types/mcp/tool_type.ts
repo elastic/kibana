@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
@@ -65,6 +66,35 @@ async function getMcpToolInputSchema({
     return tool?.inputSchema;
   } catch (error) {
     // Connector not found or other error - return undefined so getSchema will throw
+    return undefined;
+  }
+}
+
+/**
+ * Retrieves a specific MCP tool by name by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+export async function getNamedMcpTools({
+  actions,
+  request,
+  connectorId,
+  toolNames,
+  logger,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolNames: string[];
+  logger: Logger;
+}): Promise<Array<{ name: string; description?: string }> | undefined> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    return tools
+      .filter((t) => toolNames.includes(t.name))
+      .map((tool) => ({ name: tool.name, description: tool.description }));
+  } catch (error) {
+    // Connector not found or other error - return undefined
+    logger.error('Error getting named MCP tools: ', error.message ? error.message : String(error));
     return undefined;
   }
 }

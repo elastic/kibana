@@ -28,6 +28,7 @@ Object {
     "transaction.type",
     "processor.name",
     "service.language.name",
+    "service.environment",
     "url.full",
     "transaction.page.url",
     "http.response.status_code",
@@ -40,6 +41,7 @@ Object {
     "user_agent.version",
     "kubernetes.pod.uid",
     "host.hostname",
+    "host.name",
     "container.id",
   ],
   "query": Object {

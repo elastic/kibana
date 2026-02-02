@@ -12,6 +12,7 @@ import type { PrivMonPrivilegesResponse } from '../../../../../common/api/entity
 import { API_VERSIONS, APP_ID, PRIVMON_PRIVILEGE_CHECK_API } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { getReadPrivilegeUserMonitoringPrivileges } from '../privilege_monitoring_privileges';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const privilegesCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -34,24 +35,27 @@ export const privilegesCheckPrivilegeMonitoringRoute = (
         validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse<PrivMonPrivilegesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-        const spaceId = secSol.getSpaceId();
-        const [_, { security }] = await getStartServices();
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<PrivMonPrivilegesResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
+          const spaceId = secSol.getSpaceId();
+          const [_, { security }] = await getStartServices();
 
-        try {
-          const body = await getReadPrivilegeUserMonitoringPrivileges(request, security, spaceId);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
+          try {
+            const body = await getReadPrivilegeUserMonitoringPrivileges(request, security, spaceId);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
 
-          logger.error(`Error checking privilege monitoring privileges: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            logger.error(`Error checking privilege monitoring privileges: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

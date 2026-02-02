@@ -11,13 +11,15 @@ import { esqlCommandRegistry } from '..';
 import { isSubQuery } from '../../../ast/is';
 import { type ESQLCommand, type ESQLAstQueryExpression } from '../../../types';
 import type { ESQLColumnData } from '../types';
+import { UnmappedFieldsStrategy } from '../types';
 import type { IAdditionalFields } from '../registry';
 
 export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[], // will always be empty for FROM
   query: string,
-  additionalFields: IAdditionalFields
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
 ) => {
   const options = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'option');
   const sources = command.args.filter((arg) => !Array.isArray(arg) && arg.type === 'source');
@@ -27,7 +29,9 @@ export const columnsAfter = async (
     ...sources.map((source) =>
       additionalFields.fromFrom({ ...command, args: [source, ...options] })
     ),
-    ...subqueries.map((subquery) => processSubquery(subquery.child, query, additionalFields)),
+    ...subqueries.map((subquery) =>
+      processSubquery(subquery.child, query, additionalFields, unmappedFieldsStrategy)
+    ),
   ];
 
   const results = await Promise.all(promises);
@@ -39,7 +43,8 @@ export const columnsAfter = async (
 async function processSubquery(
   subquery: ESQLAstQueryExpression,
   query: string,
-  additionalFields: IAdditionalFields
+  additionalFields: IAdditionalFields,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy
 ): Promise<ESQLColumnData[]> {
   let columns: ESQLColumnData[] = [];
 
@@ -48,7 +53,13 @@ async function processSubquery(
     const commandDef = esqlCommandRegistry.getCommandByName(subCommand.name);
 
     if (commandDef?.methods?.columnsAfter) {
-      columns = await commandDef.methods.columnsAfter(subCommand, columns, query, additionalFields);
+      columns = await commandDef.methods.columnsAfter(
+        subCommand,
+        columns,
+        query,
+        additionalFields,
+        unmappedFieldsStrategy
+      );
     }
   }
 

@@ -16,6 +16,8 @@
           "[]) => string"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "lineNumber": 49,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,6 +56,8 @@
           "[]) => string"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +73,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "lineNumber": 30,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,6 +96,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -102,6 +112,8 @@
               "SearchResponseIncompleteWarning"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/has_unsupported_downsampled_aggregation_failure.ts",
+            "lineNumber": 12,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,6 +133,8 @@
           "(props: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,6 +149,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge.tsx",
+            "lineNumber": 21,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +170,8 @@
           "(props: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +186,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/badge_popover_content.tsx",
+            "lineNumber": 29,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -187,6 +207,8 @@
           "(props: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -201,6 +223,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/callout.tsx",
+            "lineNumber": 20,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,6 +244,8 @@
           "(props: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -234,6 +260,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+            "lineNumber": 21,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -253,6 +281,8 @@
           "(props: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,6 +297,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+            "lineNumber": 21,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -292,6 +324,8 @@
           "SearchResponseIncompleteWarning"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -317,6 +351,8 @@
           ">>; requestId: string | undefined; }) => boolean | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -332,6 +368,8 @@
               "SearchResponseIncompleteWarning"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,6 +390,8 @@
               ">>; requestId: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-search-response-warnings/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

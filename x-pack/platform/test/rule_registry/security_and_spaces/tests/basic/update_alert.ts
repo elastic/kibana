@@ -50,13 +50,13 @@ export default ({ getService }: FtrProviderContext) => {
 
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
+  const DEFAULT = 'default';
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
   const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_ID = '020202';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
-  const ALERT_VERSION = Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'); // required for optimistic concurrency control
 
   const getAPMIndexName = async (user: User) => {
     const { body: indexNames }: { body: { index_name: string[] | undefined } } =
@@ -65,10 +65,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
+    const observabilityIndex = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(APM_ALERT_INDEX)
     );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(observabilityIndex).to.eql(`${APM_ALERT_INDEX}-${DEFAULT}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
@@ -109,7 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [alertId],
               status: 'closed',
               index,
-              _version: ALERT_VERSION,
             })
             .expect(200);
         });
@@ -138,7 +137,6 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [fakeAlertId],
               status: 'closed',
               index,
-              _version: ALERT_VERSION,
             })
             .expect(404);
         });
@@ -154,7 +152,6 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [alertId],
               status: 'closed',
               index,
-              _version: ALERT_VERSION,
             });
           expect([403, 404]).to.contain(res.statusCode);
         });
@@ -162,16 +159,16 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     describe('Security Solution', () => {
-      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [secOnly, obsSec];
-      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
-      const unauthorized = [
-        // these users are not authorized to update alerts for the Security Solution in any space
-        globalRead,
-        secOnlyRead,
-        obsSecRead,
+      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll, globalRead];
+      const authorizedOnlyInSpace1 = [secOnly, obsSec, secOnlyRead, obsSecRead];
+      const authorizedOnlyInSpace2 = [
+        secOnlySpace2,
+        obsSecAllSpace2,
         secOnlyReadSpace2,
         obsSecReadSpace2,
+      ];
+      const unauthorized = [
+        // these users are not authorized to update alerts for the Security Solution in any space
         obsOnly,
         obsOnlyRead,
         obsOnlySpace2,

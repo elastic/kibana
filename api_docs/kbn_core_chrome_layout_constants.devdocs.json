@@ -34,6 +34,8 @@
           ", fallback?: string | undefined) => string"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "CSSVarName"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 49,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 49,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -92,6 +98,8 @@
           ") => string"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,6 +116,8 @@
               "CSSVarName"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+            "lineNumber": 77,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -135,6 +145,8 @@
           "\"app-fixed-viewport\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -152,6 +164,8 @@
           "\"app-main-scroll\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,6 +181,8 @@
           "\"content\" | \"topBar\" | \"bottomBar\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -182,6 +198,8 @@
           "\"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -197,6 +215,8 @@
           "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\" | \"application.content.height\" | \"application.content.width\" | \"application.content.right\" | \"application.content.top\" | \"application.content.bottom\" | \"application.content.left\" | \"application.content.marginBottom\" | \"application.content.marginRight\" | \"application.topBar.height\" | \"application.topBar.width\" | \"application.topBar.right\" | \"application.topBar.top\" | \"application.topBar.bottom\" | \"application.topBar.left\" | \"application.topBar.marginBottom\" | \"application.topBar.marginRight\" | \"application.bottomBar.height\" | \"application.bottomBar.width\" | \"application.bottomBar.right\" | \"application.bottomBar.top\" | \"application.bottomBar.bottom\" | \"application.bottomBar.left\" | \"application.bottomBar.marginBottom\" | \"application.bottomBar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,6 +232,8 @@
           "\"application\" | \"banner\" | \"navigation\" | \"footer\" | \"header\" | \"sidebar\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -227,6 +249,8 @@
           "\"height\" | \"width\" | \"right\" | \"top\" | \"bottom\" | \"left\" | \"marginBottom\" | \"marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -242,6 +266,8 @@
           "\"application.height\" | \"application.width\" | \"application.right\" | \"application.top\" | \"application.bottom\" | \"application.left\" | \"application.marginBottom\" | \"application.marginRight\" | \"banner.height\" | \"banner.width\" | \"banner.right\" | \"banner.top\" | \"banner.bottom\" | \"banner.left\" | \"banner.marginBottom\" | \"banner.marginRight\" | \"navigation.height\" | \"navigation.width\" | \"navigation.right\" | \"navigation.top\" | \"navigation.bottom\" | \"navigation.left\" | \"navigation.marginBottom\" | \"navigation.marginRight\" | \"footer.height\" | \"footer.width\" | \"footer.right\" | \"footer.top\" | \"footer.bottom\" | \"footer.left\" | \"footer.marginBottom\" | \"footer.marginRight\" | \"header.height\" | \"header.width\" | \"header.right\" | \"header.top\" | \"header.bottom\" | \"header.left\" | \"header.marginBottom\" | \"header.marginRight\" | \"sidebar.height\" | \"sidebar.width\" | \"sidebar.right\" | \"sidebar.top\" | \"sidebar.bottom\" | \"sidebar.left\" | \"sidebar.marginBottom\" | \"sidebar.marginRight\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -259,6 +285,8 @@
           "string[]"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -276,6 +304,8 @@
           "8"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -292,6 +322,8 @@
           "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -303,6 +335,8 @@
             "label": "prop",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -314,6 +348,8 @@
                 "label": "'data-eui-includes-in-flyout-focus-trap'",
                 "description": [],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -327,6 +363,8 @@
             "label": "selector",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -341,6 +379,8 @@
         "label": "layoutLevels",
         "description": [],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -354,6 +394,8 @@
               "// Base application content layer"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -367,6 +409,8 @@
               "// Primary layout components that should appear above content"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,6 +422,8 @@
             "label": "footer",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,6 +437,8 @@
               "// 999 is chosen to be the same as old EuiCollapsibleNavBeta for backwards compatibility"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,6 +452,8 @@
               "// Interactive layout components that need higher priority than euiFlyout (1000)"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -415,6 +465,8 @@
             "label": "banner",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,6 +480,8 @@
               "// Application-level bars that appear within main content"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -439,6 +493,8 @@
             "label": "applicationBottomBar",
             "description": [],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,6 +508,8 @@
               "// Debug and development tools - highest priority"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

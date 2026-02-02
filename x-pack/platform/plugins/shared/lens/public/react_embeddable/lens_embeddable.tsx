@@ -55,7 +55,7 @@ export const createLensEmbeddableFactory = (
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
 
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
@@ -63,7 +63,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      const initialRuntimeState = await deserializeState(services, initialState.rawState);
+      const initialRuntimeState = await deserializeState(services, initialState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -173,11 +173,11 @@ export const createLensEmbeddableFactory = (
           return comparators;
         },
         onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved?.rawState);
-          dashboardConfig.reinitializeState(lastSaved?.rawState);
-          searchContextConfig.reinitializeState(lastSaved?.rawState);
+          actionsConfig.reinitializeState(lastSaved);
+          dashboardConfig.reinitializeState(lastSaved);
+          searchContextConfig.reinitializeState(lastSaved);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
+          const lastSavedRuntimeState = await deserializeState(services, lastSaved);
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });

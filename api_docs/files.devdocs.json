@@ -26,6 +26,8 @@
           "<M>"
         ],
         "path": "src/platform/plugins/shared/files/common/files_client.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/common/files_client.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -68,6 +72,8 @@
               "(args: { token: string; fileName?: string | undefined; }) => any"
             ],
             "path": "src/platform/plugins/shared/files/common/files_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -79,6 +85,8 @@
                 "label": "args",
                 "description": [],
                 "path": "src/platform/plugins/shared/files/common/files_client.ts",
+                "lineNumber": 29,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -90,6 +98,8 @@
                     "label": "token",
                     "description": [],
                     "path": "src/platform/plugins/shared/files/common/files_client.ts",
+                    "lineNumber": 29,
+                    "columnNumber": 28,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -104,6 +114,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/files/common/files_client.ts",
+                    "lineNumber": 29,
+                    "columnNumber": 43,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -125,6 +137,8 @@
           "\nA factory for creating a {@link ScopedFilesClient}"
         ],
         "path": "src/platform/plugins/shared/files/common/files_client.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,6 +157,8 @@
               "<M>"
             ],
             "path": "src/platform/plugins/shared/files/common/files_client.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -163,6 +179,8 @@
               "<M>"
             ],
             "path": "src/platform/plugins/shared/files/common/files_client.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,6 +197,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/files/common/files_client.ts",
+                "lineNumber": 61,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -283,6 +303,8 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/files/common/files_client.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -516,6 +538,8 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/files/common/files_client.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -532,6 +556,8 @@
         "\nPublic setup-phase contract"
       ],
       "path": "src/platform/plugins/shared/files/public/plugin.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -550,6 +576,8 @@
             "FilesClientFactory"
           ],
           "path": "src/platform/plugins/shared/files/public/plugin.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": true,
           "references": [
@@ -620,6 +648,8 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/files/public/plugin.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -642,6 +672,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/files/public/plugin.ts",
+              "lineNumber": 41,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -688,6 +720,8 @@
         "[]; }"
       ],
       "path": "src/platform/plugins/shared/files/public/plugin.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -727,6 +761,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -749,6 +785,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 61,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -770,6 +808,8 @@
           "(algorithm?: \"md5\" | \"sha1\" | \"sha256\" | \"sha512\") => FileHashTransform"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,6 +824,8 @@
               "\"md5\" | \"sha1\" | \"sha256\" | \"sha512\""
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -804,6 +846,8 @@
           "\nArguments to create an ES file client."
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -817,6 +861,8 @@
               "\nThe name of the ES index that will store file metadata."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -830,6 +876,8 @@
               "\nThe name of the ES index that will store file contents."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -923,7 +971,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -1487,6 +1535,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -1832,6 +1882,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1848,6 +1900,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1864,6 +1918,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1886,6 +1942,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1912,6 +1970,8 @@
           "<Meta>"
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1925,6 +1985,8 @@
               "\nFile name"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1938,6 +2000,8 @@
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1954,6 +2018,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1970,6 +2036,8 @@
               "Meta | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1986,6 +2054,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2002,6 +2072,8 @@
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2018,6 +2090,8 @@
           "\nArguments for a creating a file share"
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2034,6 +2108,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2052,6 +2128,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2075,6 +2153,8 @@
               "<unknown>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2089,6 +2169,8 @@
         "label": "DeleteArg",
         "description": [],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2104,6 +2186,8 @@
               "\nUnique ID of file metadata to delete\n"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2120,6 +2204,8 @@
           "\nArguments to delete a file."
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2133,6 +2219,8 @@
               "\nFile ID."
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2149,6 +2237,8 @@
           "\nDelete file shares for file arguments."
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2162,6 +2252,8 @@
               "\nThe file id to delete the shares for."
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2178,6 +2270,8 @@
           "\nWraps the {@link FileMetadataClient} and {@link BlobStorageClient} client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2191,6 +2285,8 @@
               "See {@link FileMetadata.FileKind}."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2217,6 +2313,8 @@
               "<M>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2234,6 +2332,8 @@
                   "<M>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2270,6 +2370,8 @@
               "<M>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2292,6 +2394,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 82,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2320,6 +2424,8 @@
               "<M>) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2336,6 +2442,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 90,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2360,6 +2468,8 @@
                   "<M>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 90,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2388,6 +2498,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2410,6 +2522,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 96,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2446,6 +2560,8 @@
               "<unknown>[]; total: number; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2469,6 +2585,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 103,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2501,6 +2619,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2517,6 +2637,8 @@
                   "ShareArgs"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+                "lineNumber": 112,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2539,6 +2661,8 @@
               "(args: IdArg) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2556,6 +2680,8 @@
                   "IdArg"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2592,6 +2718,8 @@
               "[]; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2615,6 +2743,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2643,6 +2773,8 @@
           "<M>"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2656,6 +2788,8 @@
               "\nUnique ID of a file, used to locate a file."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2688,6 +2822,8 @@
               " & { FileKind: string; Meta?: M | undefined; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2704,6 +2840,8 @@
           "\nAn abstraction of storage implementation of file object's (i.e., metadata)"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2736,6 +2874,8 @@
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2759,6 +2899,8 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 108,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2795,6 +2937,8 @@
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2817,6 +2961,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 115,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2855,6 +3001,8 @@
               "<unknown> | null)[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2866,6 +3014,8 @@
                 "label": "arg",
                 "description": [],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 122,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2880,6 +3030,8 @@
                       "string[]"
                     ],
                     "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                    "lineNumber": 122,
+                    "columnNumber": 18,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2894,6 +3046,8 @@
                       "true | undefined"
                     ],
                     "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                    "lineNumber": 122,
+                    "columnNumber": 33,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2931,6 +3085,8 @@
               "<unknown> | null)[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2946,6 +3102,8 @@
                   " | { ids: string[]; throwIfNotFound: false; }"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 124,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2982,6 +3140,8 @@
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3005,6 +3165,8 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 132,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3033,6 +3195,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3055,6 +3219,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 138,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3091,6 +3257,8 @@
               "<unknown>[]; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3114,6 +3282,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 144,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3150,6 +3320,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3172,6 +3344,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "lineNumber": 150,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3192,6 +3366,8 @@
           "\nA simple interface for getting an instance of {@link FileServiceStart}"
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3217,6 +3393,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3234,6 +3412,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
+                "lineNumber": 45,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3263,6 +3443,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3281,6 +3463,8 @@
           "\nPublic file service interface."
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3313,6 +3497,8 @@
               "<M>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3336,6 +3522,8 @@
                   "<M>"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3364,6 +3552,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3386,6 +3576,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 40,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3414,6 +3606,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3436,6 +3630,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 47,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3458,6 +3654,8 @@
               ") => Promise<PromiseSettledResult<void>[]>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3474,6 +3672,8 @@
                   "BulkDeleteFilesArgs"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 54,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3510,6 +3710,8 @@
               "<M>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3532,6 +3734,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 61,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3610,6 +3814,8 @@
               "<unknown> | null; })[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3628,6 +3834,8 @@
                   ", \"ids\"> & { throwIfNotFound?: true | undefined; }"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 68,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3704,6 +3912,8 @@
               "<unknown> | null; })[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3720,6 +3930,8 @@
                   ", \"ids\"> & { throwIfNotFound?: true | undefined; format: \"map\"; }"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 70,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3796,6 +4008,8 @@
               "<unknown> | null; })[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3812,6 +4026,8 @@
                   ", \"ids\"> & { throwIfNotFound: false; }"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 73,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3888,6 +4104,8 @@
               "<unknown> | null; })[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3904,6 +4122,8 @@
                   ", \"ids\"> & { throwIfNotFound: false; format: \"map\"; }"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3980,6 +4200,8 @@
               "<unknown> | null; })[]>; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3994,6 +4216,8 @@
                   "BulkGetByIdArgs"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 78,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4030,6 +4254,8 @@
               "<M>[]; total: number; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4052,6 +4278,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 85,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4080,6 +4308,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4097,6 +4327,8 @@
                   "IdArg"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4131,6 +4363,8 @@
               "[]; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4154,6 +4388,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4188,6 +4424,8 @@
               " & { id: string; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4211,6 +4449,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4229,6 +4469,8 @@
               "(args: IdArg) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4246,6 +4488,8 @@
                   "IdArg"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4272,6 +4516,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4298,6 +4544,8 @@
               "<M>>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4314,6 +4562,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
+                "lineNumber": 127,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4334,6 +4584,8 @@
           "\nWe only expose functionality here that do not require you to have a {@link File}\ninstance loaded."
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4358,6 +4610,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4374,6 +4628,8 @@
                   "IdArg"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 23,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4410,6 +4666,8 @@
               "[]; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4432,6 +4690,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4468,6 +4728,8 @@
               " & { id: string; }>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4490,6 +4752,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4510,6 +4774,8 @@
               "(args: IdArg) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4526,6 +4792,8 @@
                   "IdArg"
                 ],
                 "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4561,6 +4829,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4577,6 +4847,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4612,6 +4884,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4628,6 +4902,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4644,6 +4920,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4660,6 +4938,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4676,6 +4956,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4692,6 +4974,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4708,6 +4992,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4724,6 +5010,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4740,6 +5028,8 @@
               "Record<string, string | string[]> | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4756,6 +5046,8 @@
           "\nGet a file"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4769,6 +5061,8 @@
               "\nUnique ID of file metadata"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4785,6 +5079,8 @@
           "\nArguments to get a file by ID."
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4798,6 +5094,8 @@
               "\nFile ID."
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4814,6 +5112,8 @@
           "\nArgs to get usage metrics"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4830,6 +5130,8 @@
               "{ capacity: number; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4863,6 +5165,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4879,6 +5183,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4905,6 +5211,8 @@
           "<M>"
         ],
         "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4918,6 +5226,8 @@
               "\nA unique file ID."
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4942,6 +5252,8 @@
               " | undefined; FileKind?: string | undefined; Meta?: M | undefined; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4958,6 +5270,8 @@
           "\nUpdate file share arguments."
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4971,6 +5285,8 @@
               "\nThe file share ID."
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4987,6 +5303,8 @@
               "{ name?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5003,6 +5321,8 @@
           "\nArguments to update a file"
         ],
         "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5016,6 +5336,8 @@
               "\nFile ID."
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5032,6 +5354,8 @@
               "{ meta: unknown; name: string; alt: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5054,6 +5378,8 @@
           "IdArg"
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5071,6 +5397,8 @@
           "IdArg"
         ],
         "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5087,6 +5415,8 @@
         "\nFiles plugin setup contract"
       ],
       "path": "src/platform/plugins/shared/files/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5113,6 +5443,8 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/files/server/types.ts",
+          "lineNumber": 19,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": true,
           "references": [
@@ -5185,6 +5517,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/files/server/types.ts",
+              "lineNumber": 27,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -5206,6 +5540,8 @@
         "\nFiles plugin start contract"
       ],
       "path": "src/platform/plugins/shared/files/server/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5230,6 +5566,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/files/server/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": true,
           "references": [
@@ -5262,6 +5600,8 @@
           "\nDefines all the settings for supported blob stores.\n\nKey names map to unique blob store implementations and so must not be changed\nwithout a migration"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 253,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5278,6 +5618,8 @@
               "{ index: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5304,6 +5646,8 @@
           "<Meta>"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 176,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5317,6 +5661,8 @@
               "\nThe file ID"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5340,6 +5686,8 @@
               "<Meta>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5372,6 +5720,8 @@
               "<Meta>>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5396,6 +5746,8 @@
                   "<Meta>>"
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 195,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5430,6 +5782,8 @@
               "<Meta>>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5446,6 +5800,8 @@
                   "Readable"
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 205,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5464,6 +5820,8 @@
                   "<unknown> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 206,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5483,6 +5841,8 @@
                   ", \"transforms\">> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 207,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5505,6 +5865,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5525,6 +5887,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5561,6 +5925,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5584,6 +5950,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 231,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5612,6 +5980,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 233,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5638,6 +6008,8 @@
               ") => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5660,6 +6032,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/files/common/types.ts",
+                "lineNumber": 245,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5688,6 +6062,8 @@
               "<Meta>"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5716,6 +6092,8 @@
           "<Meta>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5729,6 +6107,8 @@
               "\nUnique file ID."
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5742,6 +6122,8 @@
               "\nISO string of when this file was created"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5755,6 +6137,8 @@
               "\nISO string of when the file was updated"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5770,6 +6154,8 @@
               "\nFile name.\n"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5786,6 +6172,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5802,6 +6190,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5820,6 +6210,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5836,6 +6228,8 @@
               "Meta | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5852,6 +6246,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5867,6 +6263,8 @@
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5883,6 +6281,8 @@
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5899,6 +6299,8 @@
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5915,6 +6317,8 @@
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5946,6 +6350,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5972,6 +6378,8 @@
               "<unknown>) => number) | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5995,6 +6403,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6013,6 +6423,8 @@
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6029,6 +6441,8 @@
               "(\"md5\" | \"sha1\" | \"sha256\" | \"sha512\")[] | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6060,6 +6474,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 250,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6078,6 +6494,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6094,6 +6512,8 @@
               "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6110,6 +6530,8 @@
           "\nAttributes of a file that represent a serialised version of the file."
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6123,6 +6545,8 @@
               "\nUnique ID share instance"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6136,6 +6560,8 @@
               "\nISO timestamp the share was created"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6149,6 +6575,8 @@
               "\nUnix timestamp (in milliseconds) of when this share expires"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6165,6 +6593,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6178,6 +6608,8 @@
               "\nThe ID of the file this share is linked to"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6194,6 +6626,8 @@
           "\nArguments to pass to share a file"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 151,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6210,6 +6644,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6228,6 +6664,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6244,6 +6682,8 @@
           "\nA collection of generally useful metrics about files."
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 269,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6260,6 +6700,8 @@
               "{ esFixedSizeIndex: { capacity: number; used: number; available: number; }; }"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 273,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6276,6 +6718,8 @@
               "{ AWAITING_UPLOAD: number; UPLOADING: number; READY: number; UPLOAD_ERROR: number; DELETED: number; }"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 295,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6292,6 +6736,8 @@
               "{ [x: string]: number; }"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 299,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6308,6 +6754,8 @@
           "\nArguments for unsharing a file"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 166,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6321,6 +6769,8 @@
               "\nSpecify the share instance to remove"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6337,6 +6787,8 @@
           "\nValues for paginating through results."
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6353,6 +6805,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6369,6 +6823,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/files/common/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6407,6 +6863,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6424,6 +6882,8 @@
           "\"esFixedSizeIndex\""
         ],
         "path": "src/platform/plugins/shared/files/common/constants.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6441,6 +6901,8 @@
           "\"file\""
         ],
         "path": "src/platform/plugins/shared/files/common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6458,6 +6920,8 @@
           "\"none\" | \"br\" | \"gzip\" | \"deflate\""
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6491,6 +6955,8 @@
           " & { FileKind: string; Meta?: Meta | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6517,6 +6983,8 @@
           "<Meta>>"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6534,6 +7002,8 @@
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6560,6 +7030,8 @@
           " & { token: string; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6575,6 +7047,8 @@
           "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
         ],
         "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6592,6 +7066,8 @@
           "\"files\""
         ],
         "path": "src/platform/plugins/shared/files/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6609,6 +7085,8 @@
           "\"files\""
         ],
         "path": "src/platform/plugins/shared/files/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6626,6 +7104,8 @@
           "{ meta: Meta | undefined; name: string; alt: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6643,6 +7123,8 @@
           "{ name?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/files/common/types.ts",
+        "lineNumber": 146,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

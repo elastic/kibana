@@ -135,7 +135,7 @@ describe('Connector type config checks', () => {
         zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
       ).toMatchSnapshot();
       expect(
-        zodToJsonSchema(params.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
+        zodToJsonSchema(params!.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
       ).toMatchSnapshot();
     });
   }

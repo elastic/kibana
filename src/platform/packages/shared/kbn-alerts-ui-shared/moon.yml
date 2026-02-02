@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/controls-schemas'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
+  - '@kbn/kql'
   - '@kbn/es-ui-shared-plugin'
 tags:
   - shared-browser

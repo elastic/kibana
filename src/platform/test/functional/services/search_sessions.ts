@@ -14,6 +14,7 @@ import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { FtrService } from '../ftr_provider_context';
 
+const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
 const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
 const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
@@ -82,6 +83,9 @@ export class SearchSessionsService extends FtrService {
   }
 
   public async openFlyout() {
+    if (await this.testSubjects.exists(APP_MENU_OVERFLOW_BUTTON)) {
+      await this.testSubjects.click(APP_MENU_OVERFLOW_BUTTON);
+    }
     await this.testSubjects.click(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     await this.expectManagementTable();
   }

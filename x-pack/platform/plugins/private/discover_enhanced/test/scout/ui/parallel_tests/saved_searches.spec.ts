@@ -116,10 +116,16 @@ spaceTest.describe(
 
         // change data view
         await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.LOGSTASH);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.LOGSTASH
+        );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view again
         await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.ECOMMERCE);
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
+          testData.DATA_VIEW_NAME.ECOMMERCE
+        );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // create new search again

@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PublishesUnsavedChanges,
-  SerializedPanelState,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import type { PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
 import { areComparatorsEqual, getTitle } from '@kbn/presentation-publishing';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';
 import { combineLatestWith, debounceTime, map, of } from 'rxjs';
-import { isEqual, sortBy } from 'lodash';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 const UNSAVED_CHANGES_DEBOUNCE = 100;
@@ -34,10 +29,10 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   uuid: string;
   parentApi: unknown;
   anyStateChange$: Observable<void>;
-  serializeState: () => SerializedPanelState<StateType>;
+  serializeState: () => StateType;
   getComparators: () => StateComparators<StateType>;
   defaultState?: Partial<StateType>;
-  onReset: (lastSavedPanelState?: SerializedPanelState<StateType>) => MaybePromise<void>;
+  onReset: (lastSavedPanelState?: StateType) => MaybePromise<void>;
   checkRefEquality?: boolean;
 }): PublishesUnsavedChanges => {
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
@@ -53,20 +48,11 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     map(([, lastSavedState]) => {
       const currentState = serializeState();
 
-      // check ref equality
-      if (checkRefEquality) {
-        const lastSavedRefs = sortBy(lastSavedState?.references ?? [], 'id');
-        const currentRefs = sortBy(currentState?.references ?? [], 'id');
-        const equalRefs = isEqual(lastSavedRefs, currentRefs);
-
-        if (!equalRefs) return true;
-      }
-
       // check state equality
       return !areComparatorsEqual(
         getComparators(),
-        lastSavedState?.rawState,
-        currentState.rawState,
+        lastSavedState,
+        currentState,
         defaultState,
         (key: string) => {
           const childApi = (parentApi as Partial<PresentationContainer>).children$?.getValue()[

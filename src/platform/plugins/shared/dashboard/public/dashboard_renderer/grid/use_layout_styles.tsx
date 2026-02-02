@@ -58,7 +58,14 @@ export const useLayoutStyles = () => {
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
       }
 
-      .kbnGridPanel--resizeHandle {
+      // allows embeddables (specifically the control embeddables in this case) to hide the drag handle icon
+      .kbnGridPanel:has(.kbnGridLayout--hideDragHandle) {
+        .kbnGridPanel--resizeHandle::after {
+          display: none !important;
+        }
+      }
+
+      .kbnGridPanel:hover .kbnGridPanel--resizeHandle {
         z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show

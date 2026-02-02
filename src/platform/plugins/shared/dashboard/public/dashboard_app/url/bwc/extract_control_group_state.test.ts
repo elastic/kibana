@@ -39,7 +39,7 @@ describe('extractDashboardState', () => {
       const dashboardState = extractDashboardState({
         controlGroupInput: controlGroupInput94,
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual(controlGroupInput94.controls);
+      expect(dashboardState.pinned_panels).toEqual(controlGroupInput94.controls);
     });
   });
 
@@ -61,7 +61,7 @@ describe('extractDashboardState', () => {
           ],
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -99,7 +99,7 @@ describe('extractDashboardState', () => {
           ],
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -143,7 +143,7 @@ describe('extractDashboardState', () => {
           ],
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -189,7 +189,7 @@ describe('extractDashboardState', () => {
           ],
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -239,7 +239,7 @@ describe('extractDashboardState', () => {
         },
       });
 
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -289,7 +289,7 @@ describe('extractDashboardState', () => {
           },
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -322,7 +322,7 @@ describe('extractDashboardState', () => {
           },
         },
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(dashboardState.pinned_panels).toEqual([
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',

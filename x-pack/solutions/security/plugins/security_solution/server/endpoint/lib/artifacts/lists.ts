@@ -14,10 +14,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EntryFieldType } from '@kbn/securitysolution-utils';
 
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  type ENDPOINT_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -72,7 +69,7 @@ export async function buildArtifact(
 }
 
 export type ArtifactListId =
-  | typeof ENDPOINT_LIST_ID
+  | typeof ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
   | typeof ENDPOINT_ARTIFACT_LISTS.trustedApps.id
   | typeof ENDPOINT_ARTIFACT_LISTS.trustedDevices.id
   | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id

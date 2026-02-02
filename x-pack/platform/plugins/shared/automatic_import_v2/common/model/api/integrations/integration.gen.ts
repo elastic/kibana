@@ -30,6 +30,10 @@ export type CreateAutoImportIntegrationRequestBody = z.infer<
 export const CreateAutoImportIntegrationRequestBody = z
   .object({
     /**
+     * The connector id
+     */
+    connectorId: NonEmptyString,
+    /**
      * The integration id
      */
     integrationId: NonEmptyString,

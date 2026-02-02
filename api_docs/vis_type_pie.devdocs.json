@@ -32,6 +32,8 @@
           ">"
         ],
         "path": "src/platform/plugins/private/vis_types/pie/public/vis_type/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "PieTypeProps"
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/vis_type/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,6 +68,8 @@
         "label": "Dimension",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +81,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,6 +113,8 @@
               "> | undefined; }"
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -119,6 +129,8 @@
         "label": "Dimensions",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +151,8 @@
               }
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,6 +174,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +197,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,6 +220,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -238,6 +258,8 @@
           "2"
         ],
         "path": "src/platform/plugins/private/vis_types/pie/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

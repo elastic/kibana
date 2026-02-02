@@ -7,7 +7,6 @@
 
 import {
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
@@ -35,8 +34,6 @@ export function useStreamsPrivileges() {
   } = useKibana();
 
   const license = useObservable(licensing.license$);
-
-  const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
@@ -71,9 +68,6 @@ export function useStreamsPrivileges() {
       significantEventsDiscovery: license && {
         enabled: significantEventsDiscoveryEnabled,
         available: license.hasAtLeast('enterprise') && significantEventsAvailableForTier,
-      },
-      groupStreams: {
-        enabled: groupStreamsEnabled,
       },
       contentPacks: {
         enabled: contentPacksEnabled,

@@ -18,7 +18,8 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isKeyboardShortcut, isMac } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import { isMac } from '@kbn/shared-ux-utility';
+import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { InspectOverlay } from './overlay/inspect_overlay';
 
 const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
@@ -26,7 +27,7 @@ const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel',
 });
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
-  values: { keyboardShortcut: isMac() ? "⌘ '" : "Ctrl '" },
+  values: { keyboardShortcut: isMac ? "⌘ '" : "Ctrl '" },
   defaultMessage: 'Inspect component {keyboardShortcut}',
 });
 

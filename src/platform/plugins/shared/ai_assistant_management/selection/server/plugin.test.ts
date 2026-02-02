@@ -50,25 +50,16 @@ describe('plugin', () => {
     plugin: AIAssistantManagementSelectionPlugin,
     options: {
       spaces?: ReturnType<typeof spacesMock.createStart>;
-      coreStart?: Partial<{
-        security: { authc: { getCurrentUser: jest.Mock } };
-        featureFlags: { getBooleanValue: jest.Mock };
-      }>;
-      isAiAgentsEnabled?: boolean;
+      coreStart?: Partial<{ security: { authc: { getCurrentUser: jest.Mock } } }>;
     } = {}
   ) => {
     const coreSetup = coreMock.createSetup();
     const spaces = options.spaces ?? spacesMock.createStart();
-    const isAiAgentsEnabled = options.isAiAgentsEnabled ?? true;
-    const coreStart = {
+    const coreStart = options.coreStart ?? {
       security: {
         authc: {
           getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user' }),
         },
-      },
-      ...options.coreStart,
-      featureFlags: options.coreStart?.featureFlags ?? {
-        getBooleanValue: jest.fn().mockResolvedValue(isAiAgentsEnabled),
       },
     };
     coreSetup.getStartServices.mockResolvedValue([coreStart as any, { spaces }, {} as any]);
@@ -126,19 +117,15 @@ describe('plugin', () => {
     describe('chat experience getValue()', () => {
       it('should return config value when provided', async () => {
         const plugin = createPlugin({ preferredChatExperience: AIChatExperience.Agent });
-        const { coreSetup } = setupPlugin(plugin, { isAiAgentsEnabled: true });
+        const { coreSetup } = setupPlugin(plugin);
         const getValue = getChatExperienceGetValue(coreSetup);
 
-        const requestMock = {
-          auth: { isAuthenticated: false },
-        };
-        const result = await getValue!({ request: requestMock as any });
-        expect(result).toBe(AIChatExperience.Agent);
+        await expect(getValue!({ request: {} as any })).resolves.toBe(AIChatExperience.Agent);
       });
 
       it('should return Classic when no request is provided', async () => {
         const plugin = createPlugin();
-        const { coreSetup } = setupPlugin(plugin, { isAiAgentsEnabled: true });
+        const { coreSetup } = setupPlugin(plugin);
         const getValue = getChatExperienceGetValue(coreSetup);
 
         await expect(getValue!()).resolves.toBe(AIChatExperience.Classic);
@@ -156,7 +143,7 @@ describe('plugin', () => {
           const spaces = spacesMock.createStart();
           const mockSpace: Pick<Space, 'solution'> = { solution: solution as any };
           spaces.spacesService.getActiveSpace.mockResolvedValue(mockSpace as Space);
-          const { coreSetup } = setupPlugin(plugin, { spaces, isAiAgentsEnabled: true });
+          const { coreSetup } = setupPlugin(plugin, { spaces });
           const getValue = getChatExperienceGetValue(coreSetup);
 
           const requestMock = {
@@ -170,7 +157,7 @@ describe('plugin', () => {
         const plugin = createPlugin();
         const spaces = spacesMock.createStart();
         spaces.spacesService.getActiveSpace.mockRejectedValue(new Error('something went wrong'));
-        const { coreSetup } = setupPlugin(plugin, { spaces, isAiAgentsEnabled: true });
+        const { coreSetup } = setupPlugin(plugin, { spaces });
         const getValue = getChatExperienceGetValue(coreSetup);
 
         const requestMock = {

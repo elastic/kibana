@@ -53,24 +53,6 @@ describe('Converter Helpers', () => {
 
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
-
-    it('converts group streams', () => {
-      const request: Streams.GroupStream.UpsertRequest = {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          group: {
-            metadata: {},
-            tags: [],
-            members: [],
-          },
-        },
-      };
-
-      const definition = convertUpsertRequestIntoDefinition('group-stream', request);
-
-      expect(Streams.GroupStream.Definition.is(definition)).toEqual(true);
-    });
   });
 
   describe('convertGetResponseIntoUpsertRequest', () => {
@@ -157,26 +139,6 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
-    });
-
-    it('converts group streams', () => {
-      const getResponse: Streams.GroupStream.GetResponse = {
-        stream: {
-          name: 'group-stream',
-          description: '',
-          updated_at: new Date().toISOString(),
-          group: {
-            metadata: {},
-            tags: [],
-            members: [],
-          },
-        },
-        ...emptyAssets,
-      };
-
-      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
-
-      expect(Streams.GroupStream.UpsertRequest.is(upsertRequest)).toEqual(true);
     });
   });
 });

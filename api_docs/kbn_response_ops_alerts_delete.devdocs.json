@@ -14,6 +14,8 @@
           "({ services: { http, notifications }, categoryIds, isDisabled, }: AlertDeleteDescriptiveFormGroupProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "AlertDeleteDescriptiveFormGroupProps"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+            "lineNumber": 26,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -49,6 +53,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+        "lineNumber": 140,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +69,8 @@
               "AlertDeleteProps"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+            "lineNumber": 140,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,6 +98,8 @@
           ") => Promise<string | undefined>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,6 +120,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 18,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -145,6 +157,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,6 +179,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "lineNumber": 20,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -200,6 +216,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -220,6 +238,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 21,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -257,6 +277,8 @@
           ", unknown>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +299,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 20,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -314,6 +338,8 @@
           ", unknown>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +360,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 23,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -375,6 +403,8 @@
           ", unknown>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,6 +425,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 21,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -413,6 +445,8 @@
         "label": "CreateAlertDeleteScheduleParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -429,6 +463,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -449,6 +485,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -463,6 +501,8 @@
         "label": "GetAlertDeleteLastRunParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -479,6 +519,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -493,6 +535,8 @@
         "label": "GetAlertDeletePreviewParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -509,6 +553,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,6 +575,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -543,6 +591,8 @@
         "label": "UseAlertDeleteLastRunParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -554,6 +604,8 @@
             "label": "isEnabled",
             "description": [],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,6 +617,8 @@
             "label": "isOpen",
             "description": [],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +635,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,6 +651,8 @@
         "label": "UseAlertDeletePreviewParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -606,6 +664,8 @@
             "label": "isEnabled",
             "description": [],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -622,6 +682,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,6 +704,8 @@
               }
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,6 +720,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -670,6 +736,8 @@
         "label": "UseAlertDeleteScheduleParams",
         "description": [],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -686,6 +754,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -700,6 +770,8 @@
               "(message?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -714,6 +786,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -736,6 +810,8 @@
               ">) => void"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -753,6 +829,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "lineNumber": 19,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -783,6 +861,8 @@
           }
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

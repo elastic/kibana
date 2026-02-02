@@ -19,12 +19,12 @@ import { findSloDefinitionsRoute } from './find_definitions';
 import { findSLOGroupsRoute } from './find_groups';
 import { findSLORoute } from './find_slo';
 import { getDiagnosisRoute } from './get_diagnosis';
-import { getSLOGroupingsRoute } from './get_groupings';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
 import { getSloBurnRates } from './get_slo_burn_rates';
 import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
+import { getSLOGroupedStatsRoute } from './get_grouped_stats';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { inspectSLORoute } from './inspect_slo';
 import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
@@ -33,6 +33,7 @@ import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
 import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
+import { searchSloDefinitionsRoute } from './search_slo_definitions';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -54,11 +55,11 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getDiagnosisRoute,
     ...getSloBurnRates,
     ...getPreviewData,
-    ...getSLOGroupingsRoute,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOStatsOverview,
+    ...getSLOGroupedStatsRoute,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
     ...repairSLORoute,
@@ -67,5 +68,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOInstancesRoute,
     ...getSLOTemplateRoute,
     ...findSLOTemplatesRoute,
+    ...searchSloDefinitionsRoute,
   };
 };
