@@ -679,141 +679,218 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.only('restorable state', function () {
+    describe.only('restorable state and scoping to a tab', function () {
       afterEach(async () => {
         await browser.clearLocalStorage();
       });
 
-      it('should restore searchValue when switching tabs and scope it to a tab', async () => {
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
-        await discover.findFieldByNameOrValueInDocViewer('geo');
-        await retry.waitFor('first tab filtered fields', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
-        });
+      describe('classic view', () => {
+        it('should restore state for searchValue, showSelectedOnly, pinnedFields when switching tabs', async () => {
+          /* Tab 1 settings: 
+            // searchValue: "geo", 
+            // pinnedFields: ["geo.src"], 
+            // showOnlySelectedFields toggle off
+          */
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-        await discover.findFieldByNameOrValueInDocViewer('.sr');
-        await retry.waitFor('second tab filtered fields', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('geo');
+          await retry.waitFor('first tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('geo.src');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab1.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+
+          /* Tab 2 settings: 
+            // searchValue: ".sr", 
+            // pinnedFields: ["geo.srcdest"], 
+            // showOnlySelectedFields toggle on
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('.sr');
+          await retry.waitFor('second tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          await dataGrid.togglePinActionInFlyout('geo.srcdest');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(false);
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.srcdest')).to.be(true);
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('geo.src');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+          await showOnlySelectedFieldsSwitchTab2.click();
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          // searchValue
+          const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
+          expect(await searchInput.getAttribute('value')).to.be('geo');
+          expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
+
+          // pinnedFields
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+
+          // showOnlySelectedFields
+          const showOnlySelectedFieldsSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(
+            await showOnlySelectedFieldsSwitchTab1AfterSwitch.getAttribute('aria-checked')
+          ).to.be('false');
         });
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
-        expect(await searchInput.getAttribute('value')).to.be('geo');
-        expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
       });
 
-      it('should restore pinnedFields when switching tabs and scope it to a tab', async () => {
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-        await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+      describe('ES|QL view', () => {
+        it('should restore state for searchValue, showSelectedOnly, hideNullValues, pinnedFields when switching tabs', async () => {
+          /* Tab 1 settings: 
+          // searchValue: "geo", 
+          // pinnedFields: ["geo.src"], 
+          // hideNullValues toggle off,
+          // showOnlySelectedFields toggle off
+          */
+          await discover.selectTextBaseLang();
+          await discover.waitUntilTabIsLoaded();
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('geo');
+          await retry.waitFor('first tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+
+          // hideNullValues
+          const hideNullValuesSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1.getAttribute('aria-checked')).to.be('false');
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('geo.src');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab1.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+
+          /* Tab 2 settings: 
+          // searchValue: ".sr", 
+          // pinnedFields: ["geo.srcdest"], 
+          // hideNullValues toggle on,
+          // showOnlySelectedFields toggle on
+          */
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          // searchValue
+          await discover.findFieldByNameOrValueInDocViewer('.sr');
+          await retry.waitFor('second tab filtered fields', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          });
+
+          // pinnedFields
+          await dataGrid.togglePinActionInFlyout('geo.src');
+          await dataGrid.togglePinActionInFlyout('geo.srcdest');
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(false);
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.srcdest')).to.be(true);
+
+          // hideNullValues
+          const hideNullValuesSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('false');
+          await hideNullValuesSwitchTab2.click();
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          // showOnlySelectedFields
+          await unifiedFieldList.clickFieldListItemAdd('geo.src');
+          await discover.waitUntilTabIsLoaded();
+
+          const showOnlySelectedFieldsSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+          await showOnlySelectedFieldsSwitchTab2.click();
+          expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          // Switch back to tab 1 and verify all state is restored and scoped to the tab
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          // searchValue
+          const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
+          expect(await searchInput.getAttribute('value')).to.be('geo');
+          expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
+
+          // pinnedFields
+          expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
+
+          // hideNullValues
+          const hideNullValuesSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1AfterSwitch.getAttribute('aria-checked')).to.be(
+            'false'
+          );
+
+          // showOnlySelectedFields
+          const showOnlySelectedFieldsSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerShowOnlySelectedFieldsSwitch'
+          );
+          expect(
+            await showOnlySelectedFieldsSwitchTab1AfterSwitch.getAttribute('aria-checked')
+          ).to.be('false');
         });
-        await dataGrid.togglePinActionInFlyout('agent');
-        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-        await dataGrid.togglePinActionInFlyout('agent');
-        await dataGrid.togglePinActionInFlyout('bytes');
-        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(false);
-        expect(await dataGrid.isFieldPinnedInFlyout('bytes')).to.be(true);
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
-      });
-
-      it('should restore hideNullValues option when switching tabs and scope it to a tab', async () => {
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-
-        const hideNullValuesSwitchTab1 = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
-        expect(await hideNullValuesSwitchTab1.getAttribute('aria-checked')).to.be('false');
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-
-        const hideNullValuesSwitchTab2 = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
-        expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('false');
-        await hideNullValuesSwitchTab2.click();
-        expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('true');
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        const hideNullValuesSwitchTab1AfterSwitch = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
-        expect(await hideNullValuesSwitchTab1AfterSwitch.getAttribute('aria-checked')).to.be(
-          'false'
-        );
-      });
-
-      it('should restore showOnlySelectedFields option when switching tabs and scope it to a tab', async () => {
-        await unifiedFieldList.clickFieldListItemAdd('bytes');
-        await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('@tags');
-        await discover.waitUntilTabIsLoaded();
-
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-
-        const showOnlySelectedFieldsSwitchTab1 = await testSubjects.find(
-          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
-        );
-        expect(await showOnlySelectedFieldsSwitchTab1.getAttribute('aria-checked')).to.be('false');
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-
-        await unifiedFieldList.clickFieldListItemAdd('bytes');
-        await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('@tags');
-        await discover.waitUntilTabIsLoaded();
-
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-
-        const showOnlySelectedFieldsSwitchTab2 = await testSubjects.find(
-          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
-        );
-        expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be('false');
-
-        await showOnlySelectedFieldsSwitchTab2.click();
-        expect(await showOnlySelectedFieldsSwitchTab2.getAttribute('aria-checked')).to.be('true');
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-
-        const showOnlySelectedFieldsSwitchTab1AfterSwitch = await testSubjects.find(
-          'unifiedDocViewerShowOnlySelectedFieldsSwitch'
-        );
-        expect(
-          await showOnlySelectedFieldsSwitchTab1AfterSwitch.getAttribute('aria-checked')
-        ).to.be('false');
       });
     });
   });
