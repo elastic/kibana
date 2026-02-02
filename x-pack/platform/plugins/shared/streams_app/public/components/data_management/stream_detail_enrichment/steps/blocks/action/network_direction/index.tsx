@@ -13,6 +13,7 @@ import { DestinationIpField } from './network_direction_inputs';
 import { NetworkDirectionTargetField } from './network_direction_inputs';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { FieldsAccordion } from '../optional_fields_accordion';
+import { InternalNetworksSelector } from './internal_networks_selector';
 
 export const NetworkDirectionProcessorForm = () => {
   return (
@@ -20,6 +21,8 @@ export const NetworkDirectionProcessorForm = () => {
       <SourceIpField />
       <DestinationIpField />
       <NetworkDirectionTargetField />
+      <EuiSpacer size="m" />
+      <InternalNetworksSelector />
       <EuiSpacer size="m" />
       <FieldsAccordion>
         <ProcessorConditionEditor />
