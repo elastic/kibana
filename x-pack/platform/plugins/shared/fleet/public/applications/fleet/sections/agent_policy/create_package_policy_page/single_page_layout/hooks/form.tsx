@@ -60,9 +60,14 @@ import {
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import { validatePackagePolicy, validationHasErrors } from '../../services';
+import {
+  validatePackagePolicy,
+  validationHasErrors,
+  getCloudConnectorOption,
+} from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
+import type { RegistryVarGroup } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
@@ -202,19 +207,44 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+/**
+ * Detects the target cloud provider from either:
+ * 1. var_group selections (new approach - provider field in selected option)
+ * 2. Input type matching (legacy approach - input.type contains aws|azure)
+ */
+function detectTargetCsp(
+  packagePolicy: NewPackagePolicy,
+  varGroups: RegistryVarGroup[] | undefined
+): string | undefined {
+  // First, check var_group selections for provider field (new approach)
+  if (varGroups && packagePolicy.var_group_selections) {
+    const cloudConnectorOption = getCloudConnectorOption(
+      varGroups,
+      packagePolicy.var_group_selections
+    );
+    if (cloudConnectorOption.isCloudConnector && cloudConnectorOption.provider) {
+      return cloudConnectorOption.provider;
+    }
+  }
+
+  // Fallback to legacy input type detection
+  const input = packagePolicy.inputs?.find(
+    (pinput: NewPackagePolicyInput) => pinput.enabled === true
+  );
+  return input?.type.match(/aws|azure/)?.[0];
+}
+
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
   setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void
+  setPackagePolicy: (policy: NewPackagePolicy) => void,
+  varGroups?: RegistryVarGroup[]
 ) => {
-  const input = packagePolicy.inputs?.find(
-    (pinput: NewPackagePolicyInput) => pinput.enabled === true
-  );
-  const targetCsp = input?.type.match(/aws|azure/)?.[0];
+  const targetCsp = detectTargetCsp(packagePolicy, varGroups);
 
-  // Making sure that the cloud connector is disabled when switching to GCP
+  // Making sure that the cloud connector is disabled when switching to GCP or unsupported provider
   if (
     !targetCsp &&
     (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
@@ -535,7 +565,8 @@ export function useOnSubmit({
     packagePolicy,
     newAgentPolicy,
     setNewAgentPolicy,
-    setPackagePolicy
+    setPackagePolicy,
+    packageInfo?.var_groups
   );
 
   const onSaveNavigate = useOnSaveNavigate({

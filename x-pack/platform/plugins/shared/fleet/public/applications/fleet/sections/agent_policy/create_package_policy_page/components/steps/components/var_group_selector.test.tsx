@@ -17,6 +17,8 @@ import {
   shouldShowVar,
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
+  getSelectedOption,
+  getCloudConnectorOption,
 } from '../../../services/var_group_helpers';
 
 import { VarGroupSelector } from './var_group_selector';
@@ -445,6 +447,86 @@ describe('VarGroupSelector', () => {
 
       const selections = { test: 'opt1' };
       expect(isVarRequiredByVarGroup('var1', [varGroupWithoutRequired], selections)).toBe(false);
+    });
+  });
+
+  describe('getSelectedOption', () => {
+    it('should return the selected option', () => {
+      const result = getSelectedOption(mockVarGroup, 'direct_access_key');
+      expect(result).toBeDefined();
+      expect(result?.name).toBe('direct_access_key');
+      expect(result?.vars).toEqual(['access_key_id', 'secret_access_key']);
+    });
+
+    it('should return undefined for unknown option name', () => {
+      const result = getSelectedOption(mockVarGroup, 'unknown');
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when selectedOptionName is undefined', () => {
+      const result = getSelectedOption(mockVarGroup, undefined);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return option with provider field', () => {
+      const varGroupWithProvider: RegistryVarGroup = {
+        name: 'auth',
+        title: 'Auth',
+        selector_title: 'Select',
+        options: [
+          { name: 'manual', title: 'Manual', vars: ['key'] },
+          { name: 'aws_connector', title: 'AWS Connector', vars: ['role'], provider: 'aws' },
+        ],
+      };
+
+      const result = getSelectedOption(varGroupWithProvider, 'aws_connector');
+      expect(result?.provider).toBe('aws');
+    });
+  });
+
+  describe('getCloudConnectorOption', () => {
+    const varGroupWithProvider: RegistryVarGroup = {
+      name: 'auth',
+      title: 'Auth',
+      selector_title: 'Select',
+      options: [
+        { name: 'manual', title: 'Manual', vars: ['key'] },
+        { name: 'aws_connector', title: 'AWS Connector', vars: ['role'], provider: 'aws' },
+        { name: 'azure_connector', title: 'Azure Connector', vars: ['tenant'], provider: 'azure' },
+      ],
+    };
+
+    it('should return isCloudConnector: true with provider when cloud connector is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'aws_connector' });
+      expect(result.isCloudConnector).toBe(true);
+      expect(result.provider).toBe('aws');
+    });
+
+    it('should return azure provider when azure connector is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'azure_connector' });
+      expect(result.isCloudConnector).toBe(true);
+      expect(result.provider).toBe('azure');
+    });
+
+    it('should return isCloudConnector: false when non-cloud-connector option is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'manual' });
+      expect(result.isCloudConnector).toBe(false);
+      expect(result.provider).toBeUndefined();
+    });
+
+    it('should return isCloudConnector: false when varGroups is undefined', () => {
+      const result = getCloudConnectorOption(undefined, { auth: 'aws_connector' });
+      expect(result.isCloudConnector).toBe(false);
+    });
+
+    it('should return isCloudConnector: false when varGroups is empty', () => {
+      const result = getCloudConnectorOption([], { auth: 'aws_connector' });
+      expect(result.isCloudConnector).toBe(false);
+    });
+
+    it('should return isCloudConnector: false when no selection matches', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { other_group: 'value' });
+      expect(result.isCloudConnector).toBe(false);
     });
   });
 });

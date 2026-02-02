@@ -159,3 +159,50 @@ export function isVarInSelectedVarGroupOption(
   // If controlled and shouldShowVar returns true, it means it's in a selected option
   return shouldShowVar(varName, varGroups, varGroupSelections);
 }
+
+/**
+ * Gets the full RegistryVarGroupOption object for the currently selected option in a var_group.
+ */
+export function getSelectedOption(
+  varGroup: RegistryVarGroup,
+  selectedOptionName: string | undefined
+): RegistryVarGroupOption | undefined {
+  if (!selectedOptionName) {
+    return undefined;
+  }
+  return varGroup.options.find((opt) => opt.name === selectedOptionName);
+}
+
+export interface CloudConnectorOptionResult {
+  isCloudConnector: boolean;
+  provider?: string;
+}
+
+/**
+ * Checks if any selected var_group option has a `provider` field, indicating Cloud Connector support.
+ * Returns the provider value if found.
+ */
+export function getCloudConnectorOption(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection
+): CloudConnectorOptionResult {
+  if (!varGroups || varGroups.length === 0) {
+    return { isCloudConnector: false };
+  }
+
+  for (const varGroup of varGroups) {
+    const selectedName = varGroupSelections[varGroup.name];
+    if (!selectedName) {
+      continue;
+    }
+
+    const selectedOption = getSelectedOption(varGroup, selectedName);
+    if (selectedOption?.provider) {
+      return {
+        isCloudConnector: true,
+        provider: selectedOption.provider as string,
+      };
+    }
+  }
+  return { isCloudConnector: false };
+}
