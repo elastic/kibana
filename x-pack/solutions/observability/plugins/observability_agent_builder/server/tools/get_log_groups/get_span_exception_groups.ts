@@ -150,6 +150,7 @@ async function getSpanExceptionSamples({
               size: 1,
               _source: false,
               fields: [
+                '@timestamp',
                 '_index',
                 // Error fields
                 ERROR_CULPRIT,
