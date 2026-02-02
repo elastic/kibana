@@ -18,6 +18,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import type { DiscoverServices } from '../../../../build_services';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 describe('getInitialAppState', () => {
   const customQuery = {
@@ -396,12 +397,16 @@ describe('getInitialAppState', () => {
             // Given
             const services = createDiscoverServicesMock();
             services.storage.get = jest.fn().mockReturnValue('esql');
+            services.uiSettings.get = jest.fn().mockReturnValue(true);
 
             // When
             const appState = getInitialAppState({
               initialUrlState: undefined,
               persistedTab: undefined,
-              dataView: dataViewMock,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
               services,
             });
 
@@ -415,6 +420,7 @@ describe('getInitialAppState', () => {
         });
 
         describe.each([
+          { queryMode: 'esql', description: 'esql but esql is disabled' },
           { queryMode: 'classic', description: 'classic' },
           { queryMode: undefined, description: 'unset' },
         ])('when the query mode is $description', ({ queryMode }) => {
@@ -422,6 +428,7 @@ describe('getInitialAppState', () => {
             // Given
             const services = createDiscoverServicesMock();
             services.storage.get = jest.fn().mockReturnValue(queryMode);
+            services.uiSettings.get = jest.fn().mockReturnValue(false);
             services.data.query.queryString.getDefaultQuery = jest
               .fn()
               .mockReturnValue(defaultQuery);
@@ -430,7 +437,10 @@ describe('getInitialAppState', () => {
             const appState = getInitialAppState({
               initialUrlState: undefined,
               persistedTab: undefined,
-              dataView: dataViewMock,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
               services,
             });
 
