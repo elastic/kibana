@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -76,15 +82,20 @@ export function SignificantEventsDiscoveryPage() {
     },
     {
       id: 'queries',
-      label:
-        unbackedQueriesCount > 0
-          ? i18n.translate('xpack.streams.significantEventsDiscovery.queriesTabWithCount', {
-              defaultMessage: 'Queries ({count})',
-              values: { count: unbackedQueriesCount },
-            })
-          : i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
               defaultMessage: 'Queries',
-            }),
+            })}
+          </EuiFlexItem>
+          {unbackedQueriesCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
       href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
       isSelected: tab === 'queries',
     },

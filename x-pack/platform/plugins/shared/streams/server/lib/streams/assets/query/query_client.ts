@@ -323,8 +323,9 @@ export class QueryClient {
 
   /**
    * Returns all query links that are stored but do not have a backing Kibana rule for the given stream.
+   * Used internally by promoteQueries.
    */
-  async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
+  private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
     const filter = [
       ...termQuery(STREAM_NAME, streamName),
       ...termQuery(ASSET_TYPE, 'query'),
@@ -348,10 +349,7 @@ export class QueryClient {
    * Returns the count of all query links across streams that do not have a backing Kibana rule.
    */
   async getUnbackedQueriesCount(): Promise<number> {
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-    ];
+    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
@@ -371,10 +369,7 @@ export class QueryClient {
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
   async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-    ];
+    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,

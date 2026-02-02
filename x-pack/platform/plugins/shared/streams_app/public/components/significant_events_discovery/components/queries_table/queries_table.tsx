@@ -20,6 +20,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -27,8 +28,8 @@ import {
   useFetchSignificantEvents,
   type SignificantEventItem,
 } from '../../../../hooks/use_fetch_significant_events';
-import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import {
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
@@ -46,7 +47,6 @@ import {
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
   PROMOTE_ALL_BUTTON,
-  PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
@@ -54,7 +54,6 @@ import {
   TABLE_CAPTION,
   TITLE_COLUMN,
   getEventsCount,
-  getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
 
@@ -173,11 +172,26 @@ export function QueriesTable() {
         <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
-            title={getPromoteAllCalloutTitle(unbackedCount)}
+            title={i18n.translate(
+              'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle',
+              {
+                defaultMessage:
+                  '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
+                values: { count: unbackedCount },
+              }
+            )}
             iconType="info"
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
+            <p>
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
+                {
+                  defaultMessage:
+                    'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
+                }
+              )}
+            </p>
             <EuiButton
               fill
               onClick={onPromoteAll}

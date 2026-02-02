@@ -15,7 +15,7 @@ import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
-import { useInsightsApi } from '../../../../hooks/use_insights_api';
+import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
@@ -45,7 +45,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     Record<string, TaskResult<OnboardingResult>>
   >({});
   const aiFeatures = useAIFeatures();
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useInsightsApi(
+  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );
   const onStreamStatusUpdate = useCallback(
