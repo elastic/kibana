@@ -7,6 +7,7 @@
 
 import type { MetricCustomIndicator } from '@kbn/slo-schema';
 import { metricCustomDocCountMetric } from '@kbn/slo-schema';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow } from '../transform_generators';
 
 type MetricCustomMetricDef =
@@ -14,12 +15,12 @@ type MetricCustomMetricDef =
   | MetricCustomIndicator['params']['total'];
 
 export class GetCustomMetricIndicatorAggregation {
-  constructor(private indicator: MetricCustomIndicator) {}
+  constructor(private indicator: MetricCustomIndicator, private dataView?: DataView) {}
 
   private buildMetricAggregations(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
     return metricDef.metrics.reduce((acc, metric) => {
       const filter = metric.filter
-        ? getElasticsearchQueryOrThrow(metric.filter)
+        ? getElasticsearchQueryOrThrow(metric.filter, this.dataView)
         : { match_all: {} };
 
       if (metricCustomDocCountMetric.is(metric)) {

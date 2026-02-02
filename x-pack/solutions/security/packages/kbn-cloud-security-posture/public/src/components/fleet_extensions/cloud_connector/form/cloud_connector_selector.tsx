@@ -24,6 +24,7 @@ import {
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '@kbn/cloud-security-posture-common';
+import type { AccountType } from '@kbn/fleet-plugin/public';
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
@@ -36,6 +37,7 @@ interface CloudConnectorSelectorProps {
   cloudConnectorId: string | undefined;
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  accountType?: AccountType;
 }
 
 export const CloudConnectorSelector = ({
@@ -43,8 +45,12 @@ export const CloudConnectorSelector = ({
   cloudConnectorId,
   credentials,
   setCredentials,
+  accountType,
 }: CloudConnectorSelectorProps) => {
-  const { data: cloudConnectors = [] } = useGetCloudConnectors(provider);
+  const { data: cloudConnectors = [] } = useGetCloudConnectors({
+    cloudProvider: provider,
+    accountType,
+  });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);
 
