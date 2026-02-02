@@ -48,7 +48,6 @@ export class ResourceInitializer implements IResourceInitializer {
     const componentTemplate: ClusterPutComponentTemplateRequest = {
       name: componentTemplateName,
       template: {
-        settings: { mode: 'lookup' },
         mappings: this.resourceDefinition.mappings,
       },
       _meta: {
