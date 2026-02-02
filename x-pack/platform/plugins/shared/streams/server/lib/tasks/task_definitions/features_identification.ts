@@ -83,15 +83,19 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 });
 
                 const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
-                  id: identifiedFeatures.map(({ id }) => id)
-                })
+                  id: identifiedFeatures.map(({ id }) => id),
+                });
 
                 const now = Date.now();
                 const features = identifiedFeatures.map((feature) => {
                   const existing = existingFeatures.find(({ id }) => id === feature.id);
                   if (existing) {
                     taskContext.logger.debug(
-                      `Overwriting feature with id [${feature.id}] since it already exists.\nExisting feature: ${JSON.stringify(existing)}\nNew feature: ${JSON.stringify(feature)}`
+                      `Overwriting feature with id [${
+                        feature.id
+                      }] since it already exists.\nExisting feature: ${JSON.stringify(
+                        existing
+                      )}\nNew feature: ${JSON.stringify(feature)}`
                     );
                   }
                   return {
@@ -100,7 +104,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     last_seen: new Date(now).toISOString(),
                     expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
                     uuid: existing?.uuid ?? uuid(),
-                  }
+                  };
                 });
 
                 await featureClient.bulk(

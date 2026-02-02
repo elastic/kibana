@@ -300,26 +300,26 @@ export const featuresTaskRoute = createServerRoute({
     const actionParams =
       body.action === 'schedule'
         ? ({
-          action: body.action,
-          scheduleConfig: {
-            taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
-            taskId,
-            params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
-              const connectorId = await resolveConnectorId({
-                connectorId: body.connector_id,
-                uiSettingsClient,
-                logger,
-              });
-              return {
-                connectorId,
-                start: body.from.getTime(),
-                end: body.to.getTime(),
-                streamName: name,
-              };
-            })(),
-            request,
-          },
-        } as const)
+            action: body.action,
+            scheduleConfig: {
+              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connector_id,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                  streamName: name,
+                };
+              })(),
+              request,
+            },
+          } as const)
         : ({ action: body.action } as const);
 
     return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({

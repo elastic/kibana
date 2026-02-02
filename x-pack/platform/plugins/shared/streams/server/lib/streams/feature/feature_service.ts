@@ -19,7 +19,7 @@ export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<FeatureClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
@@ -45,7 +45,7 @@ export class FeatureService {
           }
 
           return source as unknown as StoredFeature;
-        }
+        },
       }
     );
 

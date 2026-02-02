@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuid } from 'uuid';
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
@@ -48,7 +47,7 @@ export class FeatureClient {
     private readonly clients: {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
     }
-  ) { }
+  ) {}
 
   async clean() {
     await this.clients.storageClient.clean();
@@ -59,18 +58,18 @@ export class FeatureClient {
     const validDeleteIds =
       deleteIds.length > 0
         ? new Set(
-          (
-            await this.clients.storageClient.search({
-              size: deleteIds.length,
-              track_total_hits: false,
-              query: {
-                bool: {
-                  filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+            (
+              await this.clients.storageClient.search({
+                size: deleteIds.length,
+                track_total_hits: false,
+                query: {
+                  bool: {
+                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  },
                 },
-              },
-            })
-          ).hits.hits.flatMap((hit) => hit._id ?? [])
-        )
+              })
+            ).hits.hits.flatMap((hit) => hit._id ?? [])
+          )
         : new Set<string>();
 
     const filteredOperations = operations.filter(
@@ -97,7 +96,7 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[], id?: string[] }
+    filters?: { type?: string[]; id?: string[] }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),

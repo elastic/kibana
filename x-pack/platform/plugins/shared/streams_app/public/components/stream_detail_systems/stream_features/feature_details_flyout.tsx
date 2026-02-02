@@ -33,7 +33,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
 import { InfoPanel } from '../../info_panel';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor, getStatusColor } from './use_stream_features_table';
+import { getConfidenceColor } from './use_stream_features_table';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;
