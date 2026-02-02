@@ -13,7 +13,13 @@ jest.mock('@kbn/inference-tracing', () => ({
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvaluationDataset, Evaluator, RanExperiment } from '../types';
+import type {
+  EvaluationDataset,
+  Evaluator,
+  RanExperiment,
+  ImprovementSuggestionAnalysisResult,
+} from '../types';
+import type { ImprovementSuggestionsService } from '../utils/improvement_suggestions';
 import { KibanaEvalsClient } from './client';
 
 describe('KibanaEvalsClient', () => {
@@ -149,9 +155,18 @@ describe('KibanaEvalsClient', () => {
         expect.objectContaining({
           input: expect.any(Object),
           output: expect.any(Object),
+          evalThreadId: expect.any(String),
         })
       );
+      // Verify evalThreadId is a valid UUID format
+      expect(run.evalThreadId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      );
     });
+
+    // Verify each evalThreadId is unique
+    const evalThreadIds = runEntries.map((r) => r.evalThreadId);
+    expect(new Set(evalThreadIds).size).toBe(evalThreadIds.length);
 
     expect(exp.evaluationRuns).toHaveLength(4 * evaluators.length);
     expect(exp.evaluationRuns.map((r) => r.name).sort()).toEqual([
@@ -223,5 +238,232 @@ describe('KibanaEvalsClient', () => {
     await promise;
 
     expect(maxInFlight).toBe(2);
+  });
+
+  describe('ImprovementSuggestionsService integration', () => {
+    const createMockSuggestionsService = (
+      analyzeResult?: ImprovementSuggestionAnalysisResult
+    ): jest.Mocked<ImprovementSuggestionsService> => {
+      const defaultResult: ImprovementSuggestionAnalysisResult = {
+        suggestions: [
+          {
+            id: 'suggestion-1',
+            category: 'prompt',
+            impact: 'high',
+            confidence: 'high',
+            title: 'Improve system prompt clarity',
+            description: 'The system prompt could be more specific.',
+            evidence: [],
+          },
+        ],
+        summary: {
+          totalSuggestions: 1,
+          byImpact: { high: 1, medium: 0, low: 0 },
+          byCategory: {
+            prompt: 1,
+            tool_selection: 0,
+            response_quality: 0,
+            context_retrieval: 0,
+            reasoning: 0,
+            accuracy: 0,
+            efficiency: 0,
+            other: 0,
+          },
+          topPriority: [],
+        },
+        metadata: {
+          runId: 'run-1',
+          datasetName: 'ds',
+          model: 'gpt-4',
+          analyzedAt: new Date().toISOString(),
+        },
+      };
+
+      return {
+        analyzer: {} as any,
+        tracePreprocessor: null,
+        fetchTrace: jest.fn(),
+        fetchTraces: jest.fn(),
+        analyze: jest.fn().mockResolvedValue(analyzeResult ?? defaultResult),
+        analyzeHeuristic: jest.fn(),
+        analyzeLlm: jest.fn(),
+        analyzeMultiple: jest.fn(),
+        mergeResults: jest.fn(),
+      };
+    };
+
+    it('reports when no improvement suggestions service is configured', () => {
+      const client = createClient();
+      expect(client.hasImprovementSuggestionsService()).toBe(false);
+      expect(client.getImprovementSuggestionsService()).toBeUndefined();
+    });
+
+    it('reports when improvement suggestions service is configured', () => {
+      const mockService = createMockSuggestionsService();
+      const client = createClient({ improvementSuggestionsService: mockService });
+      expect(client.hasImprovementSuggestionsService()).toBe(true);
+      expect(client.getImprovementSuggestionsService()).toBe(mockService);
+    });
+
+    it('throws error when generateImprovementSuggestions is called without service', async () => {
+      const client = createClient();
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      const experiment = await client.runExperiment(
+        { dataset, task: async () => ({ ok: true }) },
+        []
+      );
+
+      await expect(client.generateImprovementSuggestions({ experiment })).rejects.toThrow(
+        'Improvement suggestions require an ImprovementSuggestionsService'
+      );
+    });
+
+    it('throws error when runExperimentWithSuggestions is called without service', async () => {
+      const client = createClient();
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      await expect(
+        client.runExperimentWithSuggestions({ dataset, task: async () => ({ ok: true }) }, [])
+      ).rejects.toThrow('runExperimentWithSuggestions requires an ImprovementSuggestionsService');
+    });
+
+    it('generates improvement suggestions for a completed experiment', async () => {
+      const mockService = createMockSuggestionsService();
+      const client = createClient({ improvementSuggestionsService: mockService });
+
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      const experiment = await client.runExperiment(
+        { dataset, task: async () => ({ result: 'ok' }) },
+        []
+      );
+
+      const suggestions = await client.generateImprovementSuggestions({
+        experiment,
+        additionalContext: 'Test context',
+        focusCategories: ['prompt', 'accuracy'],
+      });
+
+      expect(mockService.analyze).toHaveBeenCalledWith({
+        experiment,
+        model: 'gpt-4',
+        additionalContext: 'Test context',
+        focusCategories: ['prompt', 'accuracy'],
+      });
+      expect(suggestions.suggestions).toHaveLength(1);
+      expect(suggestions.suggestions[0].category).toBe('prompt');
+    });
+
+    it('runs experiment and generates suggestions in a single call', async () => {
+      const mockService = createMockSuggestionsService();
+      const client = createClient({ improvementSuggestionsService: mockService });
+
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [
+          { input: { q: 1 }, output: { expected: 1 } },
+          { input: { q: 2 }, output: { expected: 2 } },
+        ],
+      };
+
+      const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> =
+        [
+          {
+            name: 'AlwaysOne',
+            kind: 'CODE',
+            evaluate: async () => ({ score: 1 }),
+          },
+        ];
+
+      const { experiment, suggestions } = await client.runExperimentWithSuggestions(
+        {
+          dataset,
+          task: async () => ({ value: 42 }),
+          additionalContext: 'Combined workflow test',
+          focusCategories: ['tool_selection'],
+        },
+        evaluators
+      );
+
+      // Verify experiment was run
+      expect(experiment.datasetName).toBe('ds');
+      expect(Object.keys(experiment.runs)).toHaveLength(2);
+      expect(experiment.evaluationRuns).toHaveLength(2);
+
+      // Verify suggestions were generated
+      expect(mockService.analyze).toHaveBeenCalledWith(
+        expect.objectContaining({
+          experiment,
+          additionalContext: 'Combined workflow test',
+          focusCategories: ['tool_selection'],
+        })
+      );
+      expect(suggestions.suggestions).toHaveLength(1);
+    });
+
+    it('uses client model ID when no model is specified in options', async () => {
+      const mockService = createMockSuggestionsService();
+      const client = createClient({ improvementSuggestionsService: mockService });
+
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      const experiment = await client.runExperiment(
+        { dataset, task: async () => ({ ok: true }) },
+        []
+      );
+
+      await client.generateImprovementSuggestions({ experiment });
+
+      expect(mockService.analyze).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'gpt-4', // From the model config in createClient
+        })
+      );
+    });
+
+    it('allows overriding model in generateImprovementSuggestions', async () => {
+      const mockService = createMockSuggestionsService();
+      const client = createClient({ improvementSuggestionsService: mockService });
+
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      };
+
+      const experiment = await client.runExperiment(
+        { dataset, task: async () => ({ ok: true }) },
+        []
+      );
+
+      await client.generateImprovementSuggestions({
+        experiment,
+        model: 'claude-3-opus',
+      });
+
+      expect(mockService.analyze).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'claude-3-opus',
+        })
+      );
+    });
   });
 });

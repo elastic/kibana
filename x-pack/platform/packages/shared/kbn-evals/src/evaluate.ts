@@ -233,10 +233,112 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
   ],
   executorClient: [
-    async ({ phoenixClient }, use) => {
-      await use(phoenixClient);
+    async ({ phoenixClient, log }, use, testInfo) => {
+      const env = ((globalThis as any).process?.env ?? {}) as Record<string, string | undefined>;
+      const debugOnFailureEnabled = env.EVALS_DEBUG_ON_FAILURE !== 'false';
+
+      function safeStringify(value: unknown, maxChars: number): string {
+        try {
+          const str = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+          return str.length > maxChars ? `${str.slice(0, maxChars)}…(truncated)` : str;
+        } catch {
+          return String(value);
+        }
+      }
+
+      function extractActualText(output: unknown): string {
+        const out = output as any;
+        const messages = Array.isArray(out?.messages) ? out.messages : undefined;
+        if (messages && messages.length > 0) {
+          const last = messages[messages.length - 1];
+          if (typeof last?.message === 'string') return last.message;
+        }
+        if (typeof out?.response === 'string') return out.response;
+        if (typeof out?.text === 'string') return out.text;
+        return safeStringify(output, 4000);
+      }
+
+      const wrapped = {
+        ...phoenixClient,
+        runExperiment: async (...args: Parameters<typeof phoenixClient.runExperiment>) => {
+          const experiment = await phoenixClient.runExperiment(...args);
+
+          if (!debugOnFailureEnabled) {
+            return experiment;
+          }
+
+          const failing = experiment.evaluationRuns
+            .map((e) => {
+              const score = e.result?.score;
+              if (typeof score !== 'number' || Number.isNaN(score) || score >= 1) return undefined;
+
+              const runKey = e.runKey;
+              const run = runKey ? experiment.runs?.[runKey] : undefined;
+              const expected = run?.expected ?? null;
+              const actual = run ? extractActualText(run.output) : undefined;
+
+              return {
+                dataset: experiment.datasetName,
+                evaluator: e.name,
+                score,
+                runKey,
+                exampleIndex: e.exampleIndex ?? run?.exampleIndex,
+                repetition: e.repetition ?? run?.repetition,
+                input: run?.input,
+                expected: safeStringify(expected, 4000),
+                actual: actual ? safeStringify(actual, 4000) : undefined,
+                metadata: run?.metadata,
+              };
+            })
+            .filter((x): x is NonNullable<typeof x> => Boolean(x));
+
+          if (failing.length === 0) {
+            return experiment;
+          }
+
+          // Console logs (concise, one per failing evaluator run)
+          for (const f of failing.slice(0, 25)) {
+            log.warning(
+              [
+                `Evals failure (score=${f.score})`,
+                `- dataset: ${f.dataset}`,
+                `- evaluator: ${f.evaluator}`,
+                `- exampleIndex: ${String(f.exampleIndex)}`,
+                `- repetition: ${String(f.repetition)}`,
+                `- expected: ${f.expected}`,
+                `- actual: ${f.actual ?? '(no run linkage available)'}`,
+              ].join('\n')
+            );
+          }
+
+          // Playwright attachment (JSON) for easy debugging
+          const attachment = {
+            dataset: experiment.datasetName,
+            experimentId: experiment.id,
+            totalFailures: failing.length,
+            shownInConsole: Math.min(25, failing.length),
+            failures: failing,
+          };
+
+          try {
+            await testInfo.attach('eval-failures.json', {
+              body: JSON.stringify(attachment, null, 2),
+              contentType: 'application/json',
+            });
+          } catch (err) {
+            log.warning(
+              `Failed to attach eval-failures.json: ${err instanceof Error ? err.message : String(err)}`
+            );
+          }
+
+          return experiment;
+        },
+      };
+
+      await use(wrapped);
     },
-    { scope: 'worker' },
+    // Must be test-scoped so attachments land on the right failing test
+    { scope: 'test' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {

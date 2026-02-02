@@ -20,7 +20,10 @@ import type {
   Example,
   RanExperiment,
   TaskOutput,
+  ImprovementSuggestionAnalysisResult,
+  ImprovementSuggestionCategory,
 } from '../types';
+import type { ImprovementSuggestionsService } from '../utils/improvement_suggestions';
 
 function normalizeExample(example: Example) {
   return {
@@ -39,17 +42,76 @@ function computeDatasetId(dataset: EvaluationDataset): string {
   });
 }
 
+/**
+ * Options for generating improvement suggestions from an experiment.
+ */
+export interface GenerateImprovementSuggestionsOptions {
+  /** The experiment to analyze */
+  experiment: RanExperiment;
+  /** Optional model identifier to include in analysis metadata */
+  model?: string;
+  /** Additional context to guide the analysis (e.g., workflow description) */
+  additionalContext?: string;
+  /** Specific categories to focus on during analysis */
+  focusCategories?: ImprovementSuggestionCategory[];
+}
+
+/**
+ * Options for running an experiment with automatic suggestion generation.
+ */
+export interface RunExperimentWithSuggestionsOptions<
+  TEvaluationDataset extends EvaluationDataset,
+  TTaskOutput extends TaskOutput = TaskOutput
+> {
+  /** The evaluation dataset */
+  dataset: TEvaluationDataset;
+  /** Optional metadata for the experiment */
+  metadata?: Record<string, unknown>;
+  /** The task function to execute for each example */
+  task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+  /** Maximum concurrent task executions */
+  concurrency?: number;
+  /** Whether to trust upstream dataset for ID computation */
+  trustUpstreamDataset?: boolean;
+  /** Additional context for suggestion generation */
+  additionalContext?: string;
+  /** Specific categories to focus on */
+  focusCategories?: ImprovementSuggestionCategory[];
+}
+
+/**
+ * Result of running an experiment with improvement suggestions.
+ */
+export interface ExperimentWithSuggestionsResult {
+  /** The completed experiment */
+  experiment: RanExperiment;
+  /** Improvement suggestions generated from the experiment */
+  suggestions: ImprovementSuggestionAnalysisResult;
+}
+
+/**
+ * Configuration options for the KibanaEvalsClient.
+ */
+export interface KibanaEvalsClientOptions {
+  /** Logger instance for diagnostic output */
+  log: SomeDevLog;
+  /** Model configuration used for evaluations */
+  model: Model;
+  /** Unique identifier for this evaluation run */
+  runId: string;
+  /** Number of times to repeat each example (default: 1) */
+  repetitions?: number;
+  /** Optional improvement suggestions service for analysis */
+  improvementSuggestionsService?: ImprovementSuggestionsService;
+}
+
 export class KibanaEvalsClient implements EvalsExecutorClient {
   private readonly experiments: RanExperiment[] = [];
+  private readonly improvementSuggestionsService?: ImprovementSuggestionsService;
 
-  constructor(
-    private readonly options: {
-      log: SomeDevLog;
-      model: Model;
-      runId: string;
-      repetitions?: number;
-    }
-  ) {}
+  constructor(private readonly options: KibanaEvalsClientOptions) {
+    this.improvementSuggestionsService = options.improvementSuggestionsService;
+  }
 
   async runExperiment<
     TEvaluationDataset extends EvaluationDataset,
@@ -105,6 +167,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
+                evalThreadId: randomUUID(),
               };
 
               this.options.log.info(
@@ -133,6 +196,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
+                  runKey,
+                  exampleIndex,
+                  repetition: rep,
                 });
               });
             })
@@ -164,5 +230,144 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
   async getRanExperiments(): Promise<RanExperiment[]> {
     return this.experiments;
+  }
+
+  /**
+   * Generates improvement suggestions for a completed experiment.
+   *
+   * This method analyzes the experiment results and generates actionable
+   * recommendations for improving the LLM workflow. It requires an
+   * ImprovementSuggestionsService to be configured during client initialization.
+   *
+   * @param options - Options for generating suggestions
+   * @returns Analysis result containing suggestions and summary
+   * @throws Error if no improvement suggestions service was provided
+   *
+   * @example
+   * ```typescript
+   * const experiment = await client.runExperiment({ dataset, task }, evaluators);
+   * const suggestions = await client.generateImprovementSuggestions({
+   *   experiment,
+   *   additionalContext: 'This is a RAG workflow for documentation search',
+   *   focusCategories: ['context_retrieval', 'accuracy'],
+   * });
+   * console.log(suggestions.suggestions);
+   * ```
+   */
+  async generateImprovementSuggestions(
+    options: GenerateImprovementSuggestionsOptions
+  ): Promise<ImprovementSuggestionAnalysisResult> {
+    if (!this.improvementSuggestionsService) {
+      throw new Error(
+        'Improvement suggestions require an ImprovementSuggestionsService. ' +
+          'Provide improvementSuggestionsService in the client configuration.'
+      );
+    }
+
+    const { experiment, model, additionalContext, focusCategories } = options;
+
+    this.options.log.info(
+      `📊 Generating improvement suggestions for experiment "${experiment.id}" (dataset: ${experiment.datasetName})`
+    );
+
+    const result = await this.improvementSuggestionsService.analyze({
+      experiment,
+      model: model ?? this.options.model.id,
+      additionalContext,
+      focusCategories,
+    });
+
+    this.options.log.info(
+      `✅ Generated ${result.suggestions.length} improvement suggestions (${result.summary.byImpact.high ?? 0} high impact)`
+    );
+
+    return result;
+  }
+
+  /**
+   * Runs an experiment and automatically generates improvement suggestions.
+   *
+   * This is a convenience method that combines `runExperiment` and
+   * `generateImprovementSuggestions` into a single call. It requires an
+   * ImprovementSuggestionsService to be configured during client initialization.
+   *
+   * @param options - Options for running the experiment
+   * @param evaluators - Array of evaluators to run on each example
+   * @returns The experiment results and improvement suggestions
+   * @throws Error if no improvement suggestions service was provided
+   *
+   * @example
+   * ```typescript
+   * const { experiment, suggestions } = await client.runExperimentWithSuggestions(
+   *   {
+   *     dataset,
+   *     task,
+   *     additionalContext: 'This evaluates a security assistant workflow',
+   *     focusCategories: ['tool_selection', 'accuracy'],
+   *   },
+   *   evaluators
+   * );
+   * ```
+   */
+  async runExperimentWithSuggestions<
+    TEvaluationDataset extends EvaluationDataset,
+    TTaskOutput extends TaskOutput = TaskOutput
+  >(
+    options: RunExperimentWithSuggestionsOptions<TEvaluationDataset, TTaskOutput>,
+    evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
+  ): Promise<ExperimentWithSuggestionsResult> {
+    if (!this.improvementSuggestionsService) {
+      throw new Error(
+        'runExperimentWithSuggestions requires an ImprovementSuggestionsService. ' +
+          'Provide improvementSuggestionsService in the client configuration.'
+      );
+    }
+
+    const {
+      dataset,
+      metadata,
+      task,
+      concurrency,
+      trustUpstreamDataset,
+      additionalContext,
+      focusCategories,
+    } = options;
+
+    // Run the experiment
+    const experiment = await this.runExperiment(
+      {
+        dataset,
+        metadata,
+        task,
+        concurrency,
+        trustUpstreamDataset,
+      },
+      evaluators
+    );
+
+    // Generate improvement suggestions
+    const suggestions = await this.generateImprovementSuggestions({
+      experiment,
+      additionalContext,
+      focusCategories,
+    });
+
+    return { experiment, suggestions };
+  }
+
+  /**
+   * Checks if the client has an improvement suggestions service configured.
+   * @returns true if improvement suggestions can be generated
+   */
+  hasImprovementSuggestionsService(): boolean {
+    return this.improvementSuggestionsService !== undefined;
+  }
+
+  /**
+   * Gets the improvement suggestions service if configured.
+   * @returns The improvement suggestions service or undefined
+   */
+  getImprovementSuggestionsService(): ImprovementSuggestionsService | undefined {
+    return this.improvementSuggestionsService;
   }
 }

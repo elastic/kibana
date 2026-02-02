@@ -11,6 +11,26 @@ import { hostname } from 'os';
 import type { DatasetScoreWithStats } from './evaluation_stats';
 import type { EvaluationReport } from '../types';
 
+/**
+ * Represents a single evaluation result with explanation for display purposes.
+ */
+export interface EvaluationExplanation {
+  /** Index of the example in the dataset */
+  exampleIndex: number;
+  /** Repetition number */
+  repetition: number;
+  /** The score (0-1 scale) */
+  score: number | null;
+  /** Label from the evaluator */
+  label?: string | null;
+  /** Explanation from the evaluator for the score */
+  explanation?: string;
+  /** Reasoning from the evaluator */
+  reasoning?: string;
+  /** Input question/prompt that was evaluated */
+  inputQuestion?: string;
+}
+
 export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
@@ -43,6 +63,8 @@ export interface EvaluationScoreDocument {
       percentage: number;
     };
     scores: number[];
+    /** Explanations for non-perfect scores (score < 1) */
+    low_score_explanations?: EvaluationExplanation[];
   };
   environment: {
     hostname: string;
@@ -63,6 +85,7 @@ export function parseScoreDocuments(documents: EvaluationScoreDocument[]): Datas
         name: doc.dataset.name,
         numExamples: doc.dataset.examples_count,
         evaluatorScores: new Map(),
+        evaluatorExplanations: new Map(),
         evaluatorStats: new Map(),
         experimentId: doc.experiment_id,
       });
@@ -80,6 +103,11 @@ export function parseScoreDocuments(documents: EvaluationScoreDocument[]): Datas
       count: doc.evaluator.stats.count,
       percentage: doc.evaluator.stats.percentage,
     });
+
+    // Include explanations if available
+    if (doc.evaluator.low_score_explanations && doc.evaluator.low_score_explanations.length > 0) {
+      dataset.evaluatorExplanations.set(doc.evaluator.name, doc.evaluator.low_score_explanations);
+    }
   }
 
   return Array.from(datasetMap.values());
@@ -90,7 +118,7 @@ const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 
 export class EvaluationScoreRepository {
-  constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
+  constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) { }
 
   private async ensureIndexTemplate(): Promise<void> {
     const templateBody = {
@@ -154,6 +182,18 @@ export class EvaluationScoreRepository {
                 scores: {
                   type: 'float',
                   index: false,
+                },
+                low_score_explanations: {
+                  type: 'nested',
+                  properties: {
+                    exampleIndex: { type: 'integer' },
+                    repetition: { type: 'integer' },
+                    score: { type: 'float' },
+                    label: { type: 'keyword' },
+                    explanation: { type: 'text', index: false },
+                    reasoning: { type: 'text', index: false },
+                    inputQuestion: { type: 'text', index: false },
+                  },
                 },
               },
             },
@@ -236,6 +276,9 @@ export class EvaluationScoreRepository {
             continue;
           }
 
+          // Get explanations for low scores if available
+          const lowScoreExplanations = dataset.evaluatorExplanations?.get(evaluatorName) || [];
+
           const document: EvaluationScoreDocument = {
             '@timestamp': timestamp,
             run_id: runId,
@@ -268,6 +311,9 @@ export class EvaluationScoreRepository {
                 percentage: stats.percentage,
               },
               scores,
+              // Include explanations for scores below 100% (limited to first 10 to avoid large docs)
+              low_score_explanations:
+                lowScoreExplanations.length > 0 ? lowScoreExplanations.slice(0, 10) : undefined,
             },
             environment: {
               hostname: hostname(),
@@ -285,7 +331,8 @@ export class EvaluationScoreRepository {
             return {
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
+                // Include experiment_id to ensure uniqueness across feedback loop iterations
+                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.experiment_id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
               },
             };
           },

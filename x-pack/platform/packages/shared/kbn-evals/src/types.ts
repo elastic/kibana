@@ -17,6 +17,7 @@ import type {
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
 import type { DatasetScoreWithStats } from './utils/evaluation_stats';
+import type { PreprocessedTrace } from './utils/improvement_suggestions/trace_preprocessor';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -152,11 +153,25 @@ export interface RanExperiment {
       expected: Example['output'];
       metadata: Example['metadata'];
       output: TaskOutput;
+      /**
+       * Optional thread ID from the evaluation run.
+       * Useful for correlating runs with external conversation/thread systems.
+       */
+      evalThreadId?: string;
     }
   >;
   evaluationRuns: Array<{
     name: string;
     result?: EvaluationResult;
+    /**
+     * Optional linkage back to the originating run.
+     *
+     * - Always populated by the in-Kibana executor.
+     * - May be missing when using the Phoenix-backed executor (depends on Phoenix payload shape).
+     */
+    runKey?: string;
+    exampleIndex?: number;
+    repetition?: number;
   }>;
   experimentMetadata?: Record<string, unknown>;
 }
@@ -174,12 +189,58 @@ export interface ReportDisplayOptions {
    */
   evaluatorDisplayGroups: EvaluatorDisplayGroup[];
 }
+/**
+ * Information about trace links for an evaluation run.
+ */
+export interface TraceLinkInfo {
+  /**
+   * Trace IDs collected from the evaluation runs, keyed by dataset name.
+   * Each dataset maps to an array of trace IDs (one per run/example).
+   */
+  traceIdsByDataset: Map<string, string[]>;
+  /**
+   * Total count of trace IDs collected across all datasets.
+   */
+  totalTraceCount: number;
+  /**
+   * Base URL for viewing traces (e.g., Phoenix UI or APM).
+   * When provided, can be used to construct full trace URLs.
+   */
+  traceBaseUrl?: string;
+  /**
+   * Project ID for trace viewing (used by Phoenix/Langfuse).
+   */
+  projectId?: string;
+  /**
+   * LangSmith configuration for trace viewing.
+   * When provided, generates LangSmith-specific trace URLs.
+   */
+  langsmith?: {
+    /**
+     * LangSmith base URL (defaults to 'https://smith.langchain.com').
+     */
+    baseUrl?: string;
+    /**
+     * LangSmith organization ID.
+     */
+    orgId?: string;
+    /**
+     * LangSmith project ID.
+     */
+    projectId?: string;
+  };
+}
+
 export interface EvaluationReport {
   datasetScoresWithStats: DatasetScoreWithStats[];
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
   runId: string;
+  /**
+   * Optional trace link information for debugging and trace exploration.
+   */
+  traceLinkInfo?: TraceLinkInfo;
 }
 
 export interface EvaluationSpecificWorkerFixtures {
@@ -219,4 +280,210 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
   evaluationAnalysisService: EvaluationAnalysisService;
+}
+
+/**
+ * Category of improvement suggestion indicating the area of the system that can be improved.
+ */
+export type ImprovementSuggestionCategory =
+  | 'prompt'
+  | 'tool_selection'
+  | 'response_quality'
+  | 'context_retrieval'
+  | 'reasoning'
+  | 'accuracy'
+  | 'efficiency'
+  | 'other';
+
+/**
+ * Impact level indicating the potential benefit of implementing the suggestion.
+ */
+export type ImprovementSuggestionImpact = 'high' | 'medium' | 'low';
+
+/**
+ * Confidence level indicating how certain the analysis is about this suggestion.
+ */
+export type ImprovementSuggestionConfidence = 'high' | 'medium' | 'low';
+
+/**
+ * Evidence supporting an improvement suggestion, linking back to specific evaluation results.
+ */
+export interface ImprovementSuggestionEvidence {
+  /**
+   * Name of the evaluator that identified the issue.
+   */
+  evaluatorName: string;
+  /**
+   * Indices of examples that exhibited the issue.
+   */
+  exampleIndices: number[];
+  /**
+   * Relevant score or metric value.
+   */
+  score?: number;
+  /**
+   * Explanation from the evaluator about the issue.
+   */
+  explanation?: string;
+  /**
+   * Additional context or details about the evidence.
+   */
+  details?: Record<string, unknown>;
+}
+
+/**
+ * A single improvement suggestion derived from evaluation results.
+ */
+export interface ImprovementSuggestion {
+  /**
+   * Unique identifier for the suggestion.
+   */
+  id: string;
+  /**
+   * Short descriptive title of the suggestion.
+   */
+  title: string;
+  /**
+   * Detailed description of the issue and proposed improvement.
+   */
+  description: string;
+  /**
+   * Category of the improvement.
+   */
+  category: ImprovementSuggestionCategory;
+  /**
+   * Estimated impact if the suggestion is implemented.
+   */
+  impact: ImprovementSuggestionImpact;
+  /**
+   * Confidence level in this suggestion.
+   */
+  confidence: ImprovementSuggestionConfidence;
+  /**
+   * Evidence from evaluations supporting this suggestion.
+   */
+  evidence: ImprovementSuggestionEvidence[];
+  /**
+   * Concrete action items to implement the improvement.
+   */
+  actionItems?: string[];
+  /**
+   * Optional priority score for ranking suggestions (0-1 scale).
+   */
+  priorityScore?: number;
+  /**
+   * Tags for filtering and categorization.
+   */
+  tags?: string[];
+}
+
+/**
+ * Summary statistics for a collection of improvement suggestions.
+ */
+export interface ImprovementSuggestionSummary {
+  /**
+   * Total number of suggestions.
+   */
+  totalSuggestions: number;
+  /**
+   * Breakdown by impact level.
+   */
+  byImpact: Record<ImprovementSuggestionImpact, number>;
+  /**
+   * Breakdown by category.
+   */
+  byCategory: Record<ImprovementSuggestionCategory, number>;
+  /**
+   * Top priority suggestions (sorted by priorityScore).
+   */
+  topPriority: ImprovementSuggestion[];
+}
+
+/**
+ * Result of analyzing evaluation results to generate improvement suggestions.
+ */
+export interface ImprovementSuggestionAnalysisResult {
+  /**
+   * List of improvement suggestions.
+   */
+  suggestions: ImprovementSuggestion[];
+  /**
+   * Summary statistics.
+   */
+  summary: ImprovementSuggestionSummary;
+  /**
+   * Metadata about the analysis.
+   */
+  metadata: {
+    /**
+     * ID of the evaluation run that was analyzed.
+     */
+    runId: string;
+    /**
+     * Dataset name that was analyzed.
+     */
+    datasetName: string;
+    /**
+     * Model used in the evaluation.
+     */
+    model?: string;
+    /**
+     * Timestamp when the analysis was performed.
+     */
+    analyzedAt: string;
+    /**
+     * Model used to generate the suggestions (if LLM-based).
+     */
+    analyzerModel?: string;
+  };
+}
+
+/**
+ * Correlates an evaluation run with its corresponding trace data.
+ *
+ * This type links evaluation results back to the underlying trace telemetry,
+ * enabling trace-based analysis and debugging of evaluation outcomes.
+ */
+export interface EvalTraceCorrelation {
+  /**
+   * The trace ID associated with this evaluation run.
+   */
+  traceId: string;
+  /**
+   * Index of the example in the dataset (0-based).
+   */
+  exampleIndex: number;
+  /**
+   * Repetition number for this example (when running multiple repetitions).
+   */
+  repetition: number;
+  /**
+   * Key identifying the specific run in the experiment.
+   */
+  runKey: string;
+  /**
+   * The input provided to the task for this evaluation.
+   */
+  input: Example['input'];
+  /**
+   * The expected output/ground truth for validation.
+   */
+  expected?: Example['output'];
+  /**
+   * The actual output produced by the task.
+   */
+  output: TaskOutput;
+  /**
+   * Evaluation results for this run, keyed by evaluator name.
+   */
+  evaluationResults: Record<string, EvaluationResult>;
+  /**
+   * Preprocessed trace data when available.
+   * May be undefined if trace fetching was deferred or failed.
+   */
+  trace?: PreprocessedTrace;
+  /**
+   * Error message if trace fetching failed.
+   */
+  traceError?: string;
 }

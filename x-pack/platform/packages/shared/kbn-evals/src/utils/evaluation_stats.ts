@@ -6,7 +6,8 @@
  */
 
 import { mean, median, deviation, min, max } from 'd3';
-import type { RanExperiment } from '../types';
+import type { RanExperiment, EvaluationResult } from '../types';
+import type { EvaluationExplanation } from './score_repository';
 
 export interface EvaluatorStats {
   mean: number;
@@ -23,12 +24,19 @@ export interface DatasetScore {
   name: string;
   numExamples: number;
   evaluatorScores: Map<string, number[]>;
+  /** Explanations for evaluations with scores below 1.0 */
+  evaluatorExplanations: Map<string, EvaluationExplanation[]>;
   experimentId: string;
 }
 
 export interface DatasetScoreWithStats extends DatasetScore {
   evaluatorStats: Map<string, EvaluatorStats>;
 }
+
+/**
+ * Score threshold below which we capture explanations for display
+ */
+const LOW_SCORE_THRESHOLD = 1.0;
 
 /**
  * Calculate descriptive statistics for a set of scores
@@ -59,6 +67,21 @@ export function calculateEvaluatorStats(scores: number[], totalExamples: number)
 }
 
 /**
+ * Extract input question from example input
+ */
+function extractInputQuestion(input: Record<string, unknown>): string | undefined {
+  // Try common input field names
+  if (typeof input.question === 'string') return input.question;
+  if (typeof input.query === 'string') return input.query;
+  if (typeof input.prompt === 'string') return input.prompt;
+  if (typeof input.message === 'string') return input.message;
+  if (typeof input.text === 'string') return input.text;
+  // Fallback to JSON stringified (truncated)
+  const json = JSON.stringify(input);
+  return json.length > 200 ? json.slice(0, 200) + '...' : json;
+}
+
+/**
  * Process experiments into dataset scores with aggregated evaluator scores
  */
 export async function processExperimentsToDatasetScores(
@@ -69,6 +92,7 @@ export async function processExperimentsToDatasetScores(
     const numExamples = runs ? Object.keys(runs).length : 0;
 
     const evaluatorScores = new Map<string, number[]>();
+    const evaluatorExplanations = new Map<string, EvaluationExplanation[]>();
 
     if (evaluationRuns) {
       evaluationRuns.forEach((evalRun) => {
@@ -77,6 +101,30 @@ export async function processExperimentsToDatasetScores(
           evaluatorScores.set(evalRun.name, []);
         }
         evaluatorScores.get(evalRun.name)!.push(score);
+
+        // Capture explanations for scores below threshold
+        if (score < LOW_SCORE_THRESHOLD && evalRun.result) {
+          if (!evaluatorExplanations.has(evalRun.name)) {
+            evaluatorExplanations.set(evalRun.name, []);
+          }
+
+          // Get input question from the run data
+          const runKey = evalRun.runKey;
+          const runData = runKey && runs ? runs[runKey] : null;
+          const inputQuestion = runData?.input
+            ? extractInputQuestion(runData.input as Record<string, unknown>)
+            : undefined;
+
+          evaluatorExplanations.get(evalRun.name)!.push({
+            exampleIndex: evalRun.exampleIndex ?? 0,
+            repetition: evalRun.repetition ?? 0,
+            score: evalRun.result.score ?? null,
+            label: evalRun.result.label,
+            explanation: evalRun.result.explanation,
+            reasoning: evalRun.result.reasoning,
+            inputQuestion,
+          });
+        }
       });
     }
 
@@ -85,6 +133,7 @@ export async function processExperimentsToDatasetScores(
       name: datasetName ?? datasetId,
       numExamples,
       evaluatorScores,
+      evaluatorExplanations,
       experimentId: id ?? '',
     };
   });
