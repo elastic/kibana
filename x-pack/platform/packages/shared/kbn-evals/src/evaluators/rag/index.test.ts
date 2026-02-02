@@ -459,44 +459,13 @@ describe('RAG Evaluators', () => {
   });
 
   describe('multi-K evaluation with createRagEvaluators', () => {
-    it('should create evaluators for each K value when k is an array', () => {
+    it('should create evaluators for each K value, deduplicate, and sort', () => {
       const multiKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: [5, 10],
-      };
-
-      const evaluators = createRagEvaluators(multiKConfig);
-
-      expect(evaluators).toHaveLength(6);
-      expect(evaluators.map((e) => e.name)).toEqual([
-        'Precision@5',
-        'Recall@5',
-        'F1@5',
-        'Precision@10',
-        'Recall@10',
-        'F1@10',
-      ]);
-    });
-
-    it('should create 3 evaluators when k is a single number (backward compatibility)', () => {
-      const singleKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
-        ...config,
-        k: 5,
-      };
-
-      const evaluators = createRagEvaluators(singleKConfig);
-
-      expect(evaluators).toHaveLength(3);
-      expect(evaluators.map((e) => e.name)).toEqual(['Precision@5', 'Recall@5', 'F1@5']);
-    });
-
-    it('should deduplicate and sort K values', () => {
-      const duplicateKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
         ...config,
         k: [10, 5, 10, 20, 5],
       };
 
-      const evaluators = createRagEvaluators(duplicateKConfig);
+      const evaluators = createRagEvaluators(multiKConfig);
 
       expect(evaluators).toHaveLength(9);
       expect(evaluators.map((e) => e.name)).toEqual([
@@ -510,6 +479,18 @@ describe('RAG Evaluators', () => {
         'Recall@20',
         'F1@20',
       ]);
+    });
+
+    it('should create 3 evaluators when k is a single number (backward compatibility)', () => {
+      const singleKConfig: RagEvaluatorConfig<TestOutput, TestReferenceOutput> = {
+        ...config,
+        k: 5,
+      };
+
+      const evaluators = createRagEvaluators(singleKConfig);
+
+      expect(evaluators).toHaveLength(3);
+      expect(evaluators.map((e) => e.name)).toEqual(['Precision@5', 'Recall@5', 'F1@5']);
     });
 
     it('should calculate metrics correctly for different K values', async () => {
@@ -564,8 +545,8 @@ describe('RAG Evaluators', () => {
       }
     });
 
-    it('should parse comma-separated K values from env var', () => {
-      process.env.RAG_EVAL_K = '5,10,20';
+    it('should parse comma-separated K values with mixed spacing', () => {
+      process.env.RAG_EVAL_K = '5, 10,20';
 
       const evaluators = createRagEvaluators(config);
 
@@ -580,19 +561,6 @@ describe('RAG Evaluators', () => {
         'Precision@20',
         'Recall@20',
         'F1@20',
-      ]);
-    });
-
-    it('should handle env var with spaces around values', () => {
-      process.env.RAG_EVAL_K = '5, 10, 20';
-
-      const evaluators = createRagEvaluators(config);
-
-      expect(evaluators).toHaveLength(9);
-      expect(evaluators.map((e) => e.name).slice(0, 3)).toEqual([
-        'Precision@5',
-        'Recall@5',
-        'F1@5',
       ]);
     });
 
@@ -610,32 +578,36 @@ describe('RAG Evaluators', () => {
       expect(evaluators.map((e) => e.name)).toEqual(['Precision@3', 'Recall@3', 'F1@3']);
     });
 
-    it('should use config k when env var is invalid', () => {
+    it('should throw error when env var is completely invalid', () => {
       process.env.RAG_EVAL_K = 'invalid';
 
-      const evaluators = createRagEvaluators({ ...config, k: 7 });
-
-      expect(evaluators).toHaveLength(3);
-      expect(evaluators.map((e) => e.name)).toEqual(['Precision@7', 'Recall@7', 'F1@7']);
+      expect(() => createRagEvaluators({ ...config, k: 7 })).toThrow(
+        'Invalid RAG_EVAL_K value(s): "invalid". All values must be positive integers.'
+      );
     });
 
-    it('should filter out invalid values from comma-separated env var', () => {
-      process.env.RAG_EVAL_K = '5,invalid,10,-1,0,20';
+    it('should throw error when env var contains any invalid values', () => {
+      process.env.RAG_EVAL_K = '5,invalid,10';
 
-      const evaluators = createRagEvaluators(config);
+      expect(() => createRagEvaluators(config)).toThrow(
+        'Invalid RAG_EVAL_K value(s): "invalid". All values must be positive integers.'
+      );
+    });
 
-      expect(evaluators).toHaveLength(9);
-      expect(evaluators.map((e) => e.name)).toEqual([
-        'Precision@5',
-        'Recall@5',
-        'F1@5',
-        'Precision@10',
-        'Recall@10',
-        'F1@10',
-        'Precision@20',
-        'Recall@20',
-        'F1@20',
-      ]);
+    it('should throw error for zero or negative values', () => {
+      process.env.RAG_EVAL_K = '5,0,-1,10';
+
+      expect(() => createRagEvaluators(config)).toThrow(
+        'Invalid RAG_EVAL_K value(s): "0", "-1". All values must be positive integers.'
+      );
+    });
+
+    it('should throw error for floating point values', () => {
+      process.env.RAG_EVAL_K = '5,10.5,20';
+
+      expect(() => createRagEvaluators(config)).toThrow(
+        'Invalid RAG_EVAL_K value(s): "10.5". All values must be positive integers.'
+      );
     });
   });
 });

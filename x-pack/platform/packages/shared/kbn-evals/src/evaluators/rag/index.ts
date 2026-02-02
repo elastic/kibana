@@ -31,18 +31,37 @@ function shouldFilterByGroundTruthIndices(config: {
 }
 
 /**
- * Returns K values from RAG_EVAL_K env var (comma-separated) or config.
+ * Parses and validates RAG_EVAL_K env var. Throws if any value is invalid.
  */
+function parseRagEvalKEnvVar(envK: string): number[] {
+  const rawValues = envK.split(',').map((v) => v.trim());
+  const invalidValues: string[] = [];
+  const parsedValues: number[] = [];
+
+  for (const raw of rawValues) {
+    const parsed = parseInt(raw, 10);
+    if (isNaN(parsed) || parsed <= 0 || String(parsed) !== raw) {
+      invalidValues.push(raw);
+    } else {
+      parsedValues.push(parsed);
+    }
+  }
+
+  if (invalidValues.length > 0) {
+    throw new Error(
+      `Invalid RAG_EVAL_K value(s): ${invalidValues.map((v) => `"${v}"`).join(', ')}. ` +
+        `All values must be positive integers. Got: RAG_EVAL_K="${envK}"`
+    );
+  }
+
+  return parsedValues;
+}
+
+/** Returns K values from RAG_EVAL_K env var (comma-separated) or config. */
 function getEffectiveK(configK: number | number[]): number[] {
   const envK = process.env.RAG_EVAL_K;
   if (envK !== undefined) {
-    const parsed = envK
-      .split(',')
-      .map((v) => parseInt(v.trim(), 10))
-      .filter((n) => !isNaN(n) && n > 0);
-    if (parsed.length > 0) {
-      return parsed;
-    }
+    return parseRagEvalKEnvVar(envK);
   }
   return Array.isArray(configK) ? configK : [configK];
 }
