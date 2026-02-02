@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import type { RecursivePartial } from '@kbn/utility-types';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { createHtmlPortalNode } from 'react-reverse-portal';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
@@ -36,6 +36,8 @@ import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import type { BurnRateRuleParams } from '../../../typings';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import { transformCreateSLOFormToCreateSLOInput } from '../helpers/process_slo_form_values';
+import { EquivalentApiRequest } from '../components/common/equivalent_api_request';
+import { SLOInspect } from '../components/common/slo_inspect/slo_inspect';
 
 const STEP_DEFINE_SLI = 0;
 const STEP_SET_OBJECTIVES = 1;
@@ -54,6 +56,14 @@ export default function CreateSLOFormFlyout({
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
   const [currentStep, setCurrentStep] = useState(STEP_DEFINE_SLI);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (scrollTargetRef.current) {
+      scrollTargetRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }
+  }, [currentStep]);
 
   const form = useForm<CreateSLOForm>({
     defaultValues: formInitialValues ?? SLO_EDIT_FORM_DEFAULT_VALUES,
@@ -205,17 +215,26 @@ export default function CreateSLOFormFlyout({
   const isFirstStep = currentStep === STEP_DEFINE_SLI;
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="m" maxWidth={620} ownFocus>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
-          <h3 id="flyoutTitle">
-            <FormattedMessage defaultMessage="Create SLO" id="xpack.slo.add.flyoutTitle" />
-          </h3>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <FormProvider {...form}>
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby="flyoutTitle"
+        size="m"
+        maxWidth={620}
+        ownFocus
+        session="start"
+        flyoutMenuProps={{ title: 'Create SLO' }}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
+            <h3 id="flyoutTitle">
+              <FormattedMessage defaultMessage="Create SLO" id="xpack.slo.add.flyoutTitle" />
+            </h3>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <FormProvider {...form}>
+        <EuiFlyoutBody>
+          <div ref={scrollTargetRef} />
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiStepsHorizontal steps={steps} size="xs" />
@@ -223,72 +242,80 @@ export default function CreateSLOFormFlyout({
 
             <EuiFlexItem grow={true}>{renderStepContent()}</EuiFlexItem>
           </EuiFlexGroup>
-        </FormProvider>
-      </EuiFlyoutBody>
+        </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              disabled={isLoading}
-              data-test-subj="sloFormCancelButton"
-            >
-              {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              {!isFirstStep && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={handleBack}
-                    disabled={isLoading}
-                    data-test-subj="sloFormBackButton"
-                  >
-                    {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
-                      defaultMessage: 'Back',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {isFirstStep ? (
+                <EuiButtonEmpty
+                  onClick={onClose}
+                  disabled={isLoading}
+                  data-test-subj="sloFormCancelButton"
+                >
+                  {i18n.translate('xpack.slo.sloEdit.flyout.cancelButton', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  onClick={handleBack}
+                  disabled={isLoading}
+                  data-test-subj="sloFormBackButton"
+                >
+                  {i18n.translate('xpack.slo.sloEdit.flyout.backButton', {
+                    defaultMessage: 'Back',
+                  })}
+                </EuiButtonEmpty>
               )}
+            </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                {isLastStep ? (
-                  <EuiButton
-                    fill
-                    onClick={handleSubmit}
-                    isLoading={isLoading}
-                    data-test-subj="sloFormSubmitButton"
-                  >
-                    {i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
-                      defaultMessage: 'Create SLO',
-                    })}
-                  </EuiButton>
-                ) : (
-                  <EuiButton
-                    fill
-                    onClick={handleNext}
-                    disabled={
-                      (currentStep === STEP_DEFINE_SLI && !isIndicatorSectionValid) ||
-                      (currentStep === STEP_SET_OBJECTIVES && !isObjectiveSectionValid)
-                    }
-                    data-test-subj="sloFormNextButton"
-                  >
-                    {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
-                      defaultMessage: 'Next',
-                    })}
-                  </EuiButton>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s">
+                {isLastStep && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EquivalentApiRequest disabled={isLoading} isEditMode={false} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SLOInspect disabled={isLoading} />
+                    </EuiFlexItem>
+                  </>
                 )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+                <EuiFlexItem grow={false}>
+                  {isLastStep ? (
+                    <EuiButton
+                      fill
+                      onClick={handleSubmit}
+                      isLoading={isLoading}
+                      data-test-subj="sloFormSubmitButton"
+                    >
+                      {i18n.translate('xpack.slo.sloEdit.flyout.createButton', {
+                        defaultMessage: 'Create SLO',
+                      })}
+                    </EuiButton>
+                  ) : (
+                    <EuiButton
+                      fill
+                      onClick={handleNext}
+                      disabled={
+                        (currentStep === STEP_DEFINE_SLI && !isIndicatorSectionValid) ||
+                        (currentStep === STEP_SET_OBJECTIVES && !isObjectiveSectionValid)
+                      }
+                      data-test-subj="sloFormNextButton"
+                    >
+                      {i18n.translate('xpack.slo.sloEdit.flyout.nextButton', {
+                        defaultMessage: 'Next',
+                      })}
+                    </EuiButton>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </FormProvider>
   );
 }
 

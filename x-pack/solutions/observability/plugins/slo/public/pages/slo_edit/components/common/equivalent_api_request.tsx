@@ -52,7 +52,12 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
 
   if (isFlyoutVisible) {
     flyout = (
-      <EuiFlyout aria-labelledby={flyoutTitleId} ownFocus onClose={() => setIsFlyoutVisible(false)}>
+      <EuiFlyout
+        aria-labelledby={flyoutTitleId}
+        ownFocus
+        onClose={() => setIsFlyoutVisible(false)}
+        session="start"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={flyoutTitleId}>
@@ -95,9 +100,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
         <EuiFlyoutFooter>
           <EuiButtonEmpty
             data-test-subj="o11yEquivalentApiRequestCloseButton"
-            iconType="cross"
             onClick={() => setIsFlyoutVisible(false)}
-            flush="left"
           >
             {i18n.translate('xpack.slo.equivalentApiRequest.closeButtonEmptyLabel', {
               defaultMessage: 'Close',
