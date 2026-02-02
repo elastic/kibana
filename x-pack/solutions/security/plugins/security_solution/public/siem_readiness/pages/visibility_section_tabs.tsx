@@ -13,15 +13,18 @@ import { CoverageTab } from './tabs/coverage_tab/coverage_tab';
 import { QualityTab } from './tabs/quality/quality_tab';
 import { ContinuityTab } from './tabs/continuity/continuity_tab';
 import { RetentionTab } from './tabs/retention/retention_tab';
+import type { CategoryOption } from './components/configuration_panel';
 
 interface VisibilitySectionTabsProps {
   selectedTabId: VisibilityTabId;
   onTabSelect: (tabId: VisibilityTabId) => void;
+  selectedCategories: CategoryOption[];
 }
 
 export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
   selectedTabId,
   onTabSelect,
+  selectedCategories,
 }) => {
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -29,7 +32,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.tab.title', {
         defaultMessage: 'Coverage',
       }),
-      content: <CoverageTab />,
+      content: <CoverageTab selectedCategories={selectedCategories} />,
     },
     {
       id: 'quality',

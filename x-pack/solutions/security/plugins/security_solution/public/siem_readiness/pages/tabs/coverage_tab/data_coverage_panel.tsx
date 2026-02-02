@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -27,7 +27,6 @@ import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../components/integrations_selectable_popover';
 import type { CategoryOption } from '../../components/configuration_panel';
-import { CategoryConfigurationPanel } from '../../components/configuration_panel';
 
 const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'] as const;
 
@@ -69,19 +68,15 @@ const buildMissingCategoriesDescription = (
   );
 };
 
+interface DataCoveragePanelProps {
+  selectedCategories: CategoryOption[];
+}
+
 // Component
-export const DataCoveragePanel: React.FC = () => {
+export const DataCoveragePanel: React.FC<DataCoveragePanelProps> = ({ selectedCategories }) => {
   const basePath = useBasePath();
   const { getReadinessCategories, getIntegrations } = useSiemReadinessApi();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-
-  // State for category filtering
-  const [selectedCategories, setSelectedCategories] = useState<CategoryOption[]>([
-    ...CATEGORY_ORDER,
-  ]);
-
-  // State for showing configuration modal
-  const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
 
   const getCategoryIntegrationUrl = useCallback(
     (category: string): string => {
@@ -255,22 +250,6 @@ export const DataCoveragePanel: React.FC = () => {
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
-                iconType="gear"
-                onClick={() => setIsConfigModalVisible(true)}
-                data-test-subj="configurationsButton"
-              >
-                {i18n.translate(
-                  'xpack.securitySolution.siemReadiness.coverage.dataCoverage.configurations',
-                  {
-                    defaultMessage: 'Configurations',
-                  }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconSide="right"
-                size="s"
                 iconType="plusInCircle"
                 onClick={handleCreateCase}
                 data-test-subj="createNewCaseButton"
@@ -352,13 +331,6 @@ export const DataCoveragePanel: React.FC = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* Configuration Modal */}
-      <CategoryConfigurationPanel
-        isVisible={isConfigModalVisible}
-        onClose={() => setIsConfigModalVisible(false)}
-        selectedCategories={selectedCategories}
-        onSelectionChange={setSelectedCategories}
-      />
     </EuiPanel>
   );
 };
