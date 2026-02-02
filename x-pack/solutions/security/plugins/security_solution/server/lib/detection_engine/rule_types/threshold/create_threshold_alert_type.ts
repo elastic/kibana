@@ -8,6 +8,7 @@
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThresholdRuleParams } from '../../rule_schema';
@@ -17,6 +18,10 @@ import type { SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { getFilter } from '../utils/get_filter';
 import { esqlExecutor } from '../esql/esql';
+import { buildThresholdSignalHistory } from './build_signal_history';
+import { getThresholdSignalHistory } from './get_threshold_signal_history';
+import { getSignalHistory } from './utils';
+import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 
 export const createThresholdAlertType = (): SecurityAlertType<
   ThresholdRuleParams,
@@ -63,8 +68,28 @@ export const createThresholdAlertType = (): SecurityAlertType<
     solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, startedAt, state } = execOptions;
-
+      const { tuple, completeRule, spaceId, ruleDataClient, aggregatableTimestampField } =
+        sharedParams;
       const ruleParams = sharedParams.completeRule.ruleParams;
+
+      const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
+        ? { signalHistory: state.signalHistory, searchErrors: [] }
+        : await getThresholdSignalHistory({
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            frameworkRuleId: completeRule.alertId,
+            bucketByFields: ruleParams.threshold.field,
+            spaceId,
+            ruleDataClient,
+            esClient: services.scopedClusterClient.asCurrentUser,
+          });
+
+      const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
+      const bucketFilters = await getThresholdBucketFilters({
+        signalHistory: validSignalHistory,
+        aggregatableTimestampField,
+      });
+
       const { threshold } = ruleParams;
       const byFields = threshold?.field?.join(',') ?? '';
 
@@ -81,8 +106,10 @@ export const createThresholdAlertType = (): SecurityAlertType<
         ? ` | WHERE threshold.cardinality >= ${value}`
         : '';
 
+      const timestampCommand = `, ${TIMESTAMP} = MAX(${aggregatableTimestampField})`;
+
       const countCommand = `| WHERE threshold.count >= ${threshold.value}`;
-      const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}`;
+      const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}${timestampCommand}`;
       const aggrByCommand = byFields ? `${aggrCommand} BY ${byFields}` : aggrCommand;
 
       const esqlQuery = [
@@ -97,7 +124,7 @@ export const createThresholdAlertType = (): SecurityAlertType<
 
       const esFilter = await getFilter({
         type: ruleParams.type,
-        filters: ruleParams.filters || [],
+        filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
         language: ruleParams.language,
         query: ruleParams.query,
         savedId: ruleParams.savedId,
@@ -124,8 +151,25 @@ export const createThresholdAlertType = (): SecurityAlertType<
           sharedParams.scheduleNotificationResponseActionsService,
         filters: esFilter,
       });
-      return resultEsql;
-      // return { resultEsql, state: buildThresholdAlertStateHistory(state, []) };
+
+      // console.log('Esql Result:', JSON.stringify(resultEsql, null, 2));
+
+      const alerts = resultEsql.createdSignals ?? [];
+      const newSignalHistory = buildThresholdSignalHistory({
+        alerts: alerts.map(({ _id, _index, ...rest }) => ({ _id, _index, _source: rest })),
+      });
+
+      return {
+        ...resultEsql,
+        state: {
+          ...state,
+          initialized: true,
+          signalHistory: {
+            ...validSignalHistory,
+            ...newSignalHistory,
+          },
+        },
+      };
 
       const result = await thresholdExecutor({
         sharedParams,
