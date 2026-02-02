@@ -1413,7 +1413,8 @@ describe('Cases webhook service', () => {
     });
 
     it('it should NOT throw if the request status is a 204 and is empty', async () => {
-      requestMock.mockImplementation(() =>
+      // Initial mock for the update call
+      requestMock.mockImplementationOnce(() =>
         createAxiosResponse({
           data: undefined,
           headers: { ['content-type']: 'text/html' },
@@ -1421,11 +1422,21 @@ describe('Cases webhook service', () => {
         })
       );
 
+      // Second mock for the getIncident call inside updateIncident
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
       await expect(service.updateIncident(incident)).resolves.toEqual({
         id: '1',
-        title: undefined,
+        title: 'CK-1',
         pushedDate: mockTime.toISOString(),
-        url: 'https://coolsite.net/browse/undefined',
+        url: 'https://coolsite.net/browse/CK-1',
       });
     });
   });
