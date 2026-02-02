@@ -100,10 +100,9 @@ export const useBulkActions = ({
   const {
     timelinePrivileges: { crud: canCreateTimelines },
     rulesPrivileges: {
-      rules: { edit: canEditRules, read: canReadRules },
+      rules: { edit: canEditRules },
       enableDisable: { edit: canEnableDisableRules },
       investigationGuide: { edit: canEditInvestigationGuides },
-      customHighlightedFields: { edit: canEditCustomHighlightedFields },
     },
   } = useUserPrivileges();
 
