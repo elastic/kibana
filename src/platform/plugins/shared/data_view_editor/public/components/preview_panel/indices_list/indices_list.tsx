@@ -77,7 +77,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
     this.resetPageTo0();
-    this.closePerPageControl();
     this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
   };
 
@@ -87,7 +86,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     return (
       <EuiTablePagination
-        id="customizablePagination"
         activePage={page}
         itemsPerPage={perPage}
         compressed={false}
