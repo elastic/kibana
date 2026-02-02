@@ -33,7 +33,7 @@ export function createESQLQuery({
   splitAccessors = [],
   whereStatements = [],
 }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index } = metric;
+  const { name: metricField, instrument, index, type } = metric;
   const source = timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {
@@ -45,6 +45,7 @@ export function createESQLQuery({
     ...whereCommands,
     stats(
       `${createMetricAggregation({
+        type,
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
