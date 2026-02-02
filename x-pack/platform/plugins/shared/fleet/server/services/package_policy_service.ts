@@ -26,6 +26,7 @@ import type {
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
+  PackagePolicyAssetsMap,
 } from '../../common';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
@@ -147,6 +148,14 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,

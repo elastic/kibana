@@ -247,10 +247,16 @@ export const storedPackagePoliciesToAgentInputs = async (
         await getPackagePolicySavedObjectType(),
         packagePolicy.id
       );
+      const versionInputs = packagePolicySO?.attributes.inputs_for_versions?.[agentVersion];
+      if (!versionInputs) {
+        span?.end();
+        throw new Error(
+          `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}`
+        );
+      }
       packagePolicyWithUpdatedInputs = {
         ...packagePolicy,
-        inputs:
-          packagePolicySO?.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
+        inputs: versionInputs,
       };
       span?.end();
     }

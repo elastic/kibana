@@ -24,8 +24,12 @@ import pMap from 'p-map';
 
 import type { AgentPolicy } from '../../common/types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, packagePolicyService } from '../services';
+import { getPackageInfo } from '../services/epm/packages';
+import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
+import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
+import { reassignAgents } from '../services/agents/reassign';
 import { splitVersionSuffixFromPolicyId } from '../../common/services/version_specific_policies_utils';
 import { AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
 
@@ -105,7 +109,7 @@ export class VersionSpecificPolicyAssignmentTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(
+    this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Started with interval of [${this.taskInterval}]`
     );
 
@@ -159,7 +163,7 @@ export class VersionSpecificPolicyAssignmentTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info('[VersionSpecificPolicyAssignmentTask] runTask() started');
+    this.logger.debug('[VersionSpecificPolicyAssignmentTask] runTask() started');
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -182,7 +186,7 @@ export class VersionSpecificPolicyAssignmentTask {
   };
 
   private endRun(msg: string = '') {
-    this.logger.info(
+    this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] runTask() ended${msg ? ': ' + msg : ''}`
     );
   }
@@ -199,7 +203,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions:true`,
       perPage: AGENT_POLICIES_BATCHSIZE,
-      fields: ['id', 'revision', 'has_agent_version_conditions'],
+      fields: ['id', 'revision'],
       spaceId: '*',
     });
 
@@ -291,7 +295,7 @@ export class VersionSpecificPolicyAssignmentTask {
     ).toISOString();
 
     // Query 1: Agents on parent policy (newly enrolled or need initial assignment)
-    const parentPolicyKuery = `policy_id:"${agentPolicyId}" AND NOT policy_id:*${AGENT_POLICY_VERSION_SEPARATOR}*`;
+    const parentPolicyKuery = `policy_id:"${agentPolicyId}"`;
 
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
@@ -410,13 +414,50 @@ export class VersionSpecificPolicyAssignmentTask {
     // Deploy the parent policy with version-specific policies for each version found
     const versionsToCreate = agentVersionGroups.map((group) => group.minorVersion);
 
-    this.logger.info(
+    this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Creating version-specific policies for versions: ${versionsToCreate.join(
         ', '
       )} under parent policy ${parentPolicyId}`
     );
 
     try {
+      // Compile version-specific inputs for package policies with agent version conditions
+      const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+        soClient,
+        parentPolicyId
+      );
+
+      for (const packagePolicy of packagePolicies) {
+        if (!packagePolicy.package) {
+          continue;
+        }
+
+        const pkgInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        });
+
+        const assetsMap = await getAgentTemplateAssetsMap({
+          logger: this.logger,
+          packageInfo: pkgInfo,
+          savedObjectsClient: soClient,
+        });
+
+        if (hasAgentVersionConditionInInputTemplate(assetsMap)) {
+          this.logger.debug(
+            `[VersionSpecificPolicyAssignmentTask] Compiling version-specific inputs for package policy ${packagePolicy.id}`
+          );
+          await packagePolicyService.compilePackagePolicyForVersions(
+            soClient,
+            pkgInfo,
+            assetsMap,
+            packagePolicy,
+            versionsToCreate
+          );
+        }
+      }
+
       // Deploy the agent policy with specific versions
       // This will create the version-specific policies in .fleet-policies index
       await agentPolicyService.deployPolicies(soClient, [parentPolicyId], undefined, {
@@ -458,14 +499,11 @@ export class VersionSpecificPolicyAssignmentTask {
     const { minorVersion, agentPolicyId, agentIds } = versionGroup;
     const targetPolicyId = `${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}${minorVersion}`;
 
-    this.logger.info(
+    this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} agents to versioned policy ${targetPolicyId}`
     );
 
     try {
-      // Import reassignAgents dynamically to avoid circular dependency
-      const { reassignAgents } = await import('../services/agents');
-
       await reassignAgents(
         soClient,
         esClient,
