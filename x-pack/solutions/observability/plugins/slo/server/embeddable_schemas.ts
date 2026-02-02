@@ -52,3 +52,27 @@ export const sloOverviewEmbeddableSchema = schema.allOf(
 );
 
 export type SloOverviewConfig = TypeOf<typeof sloOverviewEmbeddableSchema>;
+
+const sloAlertsStateSchema = schema.object({
+  slos: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      instance_id: schema.string(),
+      name: schema.string(),
+      group_by: schema.string(),
+    }),
+    { defaultValue: [] }
+  ),
+  show_all_group_by_instances: schema.maybe(schema.boolean()),
+});
+
+export const sloAlertsEmbeddableSchema = schema.allOf(
+  [sloAlertsStateSchema, serializedTitlesSchema],
+  {
+    meta: {
+      description: 'SLO alerts embeddable schema',
+    },
+  }
+);
+
+export type SloAlertsConfig = TypeOf<typeof sloAlertsEmbeddableSchema>;
