@@ -8,12 +8,7 @@
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import {
-  SERVICE_NAME,
-  CONTAINER_ID,
-  KUBERNETES_POD_NAME,
-  HOST_NAME,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, CONTAINER_ID, HOST_NAME } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const getInfrastructureData = async ({
@@ -31,43 +26,47 @@ export const getInfrastructureData = async ({
   start: number;
   end: number;
 }) => {
-  const response = await apmEventClient.search('get_service_infrastructure', {
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { term: { [SERVICE_NAME]: serviceName } },
-          ...rangeQuery(start, end),
-          ...environmentQuery(environment),
-          ...kqlQuery(kuery),
-        ],
+  const response = await apmEventClient.search(
+    'get_service_infrastructure',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
       },
-    },
-    aggs: {
-      containerIds: {
-        terms: {
-          field: CONTAINER_ID,
-          size: 500,
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
       },
-      hostNames: {
-        terms: {
-          field: HOST_NAME,
-          size: 500,
+      aggs: {
+        containerIds: {
+          terms: {
+            field: CONTAINER_ID,
+            size: 500,
+          },
         },
-      },
-      podNames: {
-        terms: {
-          field: KUBERNETES_POD_NAME,
-          size: 500,
+        hostNames: {
+          terms: {
+            field: HOST_NAME,
+            size: 500,
+          },
+        },
+        podNames: {
+          terms: {
+            field: 'k8s.pod.name',
+            size: 500,
+          },
         },
       },
     },
-  });
+    { skipProcessorEventFilter: true }
+  );
 
   return {
     containerIds:

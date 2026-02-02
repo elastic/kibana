@@ -25,9 +25,10 @@ type HostMetricsField =
   | 'system.cpu.total.norm.pct'
   | 'system.memory.total'
   | 'system.memory.used.pct';
+// | 'metrics.system.cpu.logical.count';
 
 const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
-  sourceFilter: `event.module: "system"`,
+  sourceFilter: 'event.module: "system"',
   groupByField: 'host.name',
   metricsMap: {
     'system.cpu.cores': { aggregation: 'max', field: 'system.cpu.cores' },
@@ -43,6 +44,34 @@ const hostsMetricsQueryConfig: MetricsQueryOptions<HostMetricsField> = {
   },
 };
 
+type HostMetricsFieldsOtel =
+  | 'metrics.system.cpu.logical.count'
+  | 'metrics.system.cpu.utilization'
+  | 'metrics.system.memory.limit'
+  | 'metrics.system.memory.utilization';
+
+const hostsMetricsQueryConfigOtel: MetricsQueryOptions<HostMetricsFieldsOtel> = {
+  sourceFilter: '', // todo: does this make sense?
+  groupByField: 'host.name',
+  metricsMap: {
+    'metrics.system.cpu.logical.count': {
+      aggregation: 'max',
+      field: 'metrics.system.cpu.logical.count',
+    },
+    'metrics.system.cpu.utilization': {
+      aggregation: 'avg',
+      field: 'metrics.system.cpu.utilization',
+    },
+    'metrics.system.memory.limit': {
+      aggregation: 'max',
+      field: 'metrics.system.memory.limit',
+    },
+    'metrics.system.memory.utilization': {
+      aggregation: 'avg',
+      field: 'metrics.system.memory.utilization',
+    },
+  },
+};
 export const metricByField = createMetricByFieldLookup(hostsMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
 
@@ -58,6 +87,7 @@ export function useHostMetricsTable({
   timerange,
   kuery,
   metricsClient,
+  schema,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<HostNodeMetricsRow>>({
@@ -70,8 +100,12 @@ export function useHostMetricsTable({
     [kuery]
   );
 
+  const { options: hostMetricsOptionsOtel } = useMemo(
+    () => metricsToApiOptions(hostsMetricsQueryConfigOtel, kuery),
+    [kuery]
+  );
   const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
-    metricsExplorerOptions: hostMetricsOptions,
+    metricsExplorerOptions: schema === 'semconv' ? hostMetricsOptionsOtel : hostMetricsOptions,
     timerange,
     transform: seriesToHostNodeMetricsRow,
     sortState,

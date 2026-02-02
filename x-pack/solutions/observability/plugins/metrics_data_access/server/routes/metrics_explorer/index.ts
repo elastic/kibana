@@ -23,6 +23,7 @@ import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framew
 
 export const initMetricExplorerRoute = (framework: KibanaFramework) => {
   const validateBody = createRouteValidationFunction(metricsExplorerRequestBodyRT);
+
   framework.registerRoute(
     {
       method: 'post',

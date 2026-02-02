@@ -34,6 +34,7 @@ describe('usePodMetricsTable hook', () => {
         timerange: { from: 'now-30d', to: 'now' },
         kuery,
         metricsClient: createMetricsClientMock({}),
+        schema: null,
       })
     );
 

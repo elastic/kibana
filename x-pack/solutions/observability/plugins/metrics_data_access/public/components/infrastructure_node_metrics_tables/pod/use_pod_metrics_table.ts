@@ -37,6 +37,25 @@ const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   },
 };
 
+type PodMetricsFieldsOtel =
+  | 'metrics.k8s.pod.cpu_limit_utilization'
+  | 'metrics.k8s.pod.memory_limit_utilization';
+
+const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
+  sourceFilter: '',
+  groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
+  metricsMap: {
+    'metrics.k8s.pod.cpu_limit_utilization': {
+      aggregation: 'avg',
+      field: 'metrics.k8s.pod.cpu_limit_utilization', // this is an optional field. the CPU Utilization will need to be calculated from other fields
+    },
+    'metrics.k8s.pod.memory_limit_utilization': {
+      aggregation: 'avg',
+      field: 'metrics.k8s.pod.memory_limit_utilization', // this is an optional field. the CPU Utilization will need to be calculated from other fields
+    },
+  },
+};
+
 export const metricByField = createMetricByFieldLookup(podMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
 
@@ -51,6 +70,7 @@ export function usePodMetricsTable({
   timerange,
   kuery,
   metricsClient,
+  schema,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<PodNodeMetricsRow>>({
@@ -63,8 +83,13 @@ export function usePodMetricsTable({
     [kuery]
   );
 
+  const { options: podMetricsOptionsOtel } = useMemo(
+    () => metricsToApiOptions(podMetricsQueryConfigOtel, kuery),
+    [kuery]
+  );
+
   const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
-    metricsExplorerOptions: podMetricsOptions,
+    metricsExplorerOptions: schema === 'semconv' ? podMetricsOptionsOtel : podMetricsOptions,
     timerange,
     transform: seriesToPodNodeMetricsRow,
     sortState,

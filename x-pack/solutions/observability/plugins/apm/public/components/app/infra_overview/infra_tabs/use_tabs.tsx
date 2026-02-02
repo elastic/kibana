@@ -10,8 +10,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
+import { HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
 import { buildKqlFilter } from './build_kql_filter';
 
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
@@ -29,12 +30,14 @@ export function useTabs({
   containerIds,
   podNames,
   hostNames,
+  schema,
   start,
   end,
 }: {
   containerIds: string[];
   podNames: string[];
   hostNames: string[];
+  schema: DataSchemaFormat;
   start: string;
   end: string;
 }) {
@@ -52,8 +55,18 @@ export function useTabs({
     [start, end]
   );
 
+  const k8sFilterFields = useMemo(() => {
+    if (schema === 'semconv') {
+      return 'k8s.pod.name';
+    }
+    return 'kubernetes.pod.name';
+  }, [schema]);
+
   const hostsFilter = useMemo(() => buildKqlFilter(HOST_NAME, hostNames), [hostNames]);
-  const podsFilter = useMemo(() => buildKqlFilter(KUBERNETES_POD_NAME, podNames), [podNames]);
+  const podsFilter = useMemo(
+    () => buildKqlFilter(k8sFilterFields, podNames),
+    [k8sFilterFields, podNames]
+  );
   const containersFilter = useMemo(
     () => buildKqlFilter(CONTAINER_ID, containerIds),
     [containerIds]
@@ -66,6 +79,7 @@ export function useTabs({
         ContainerMetricsTable({
           timerange,
           kuery: containersFilter,
+          schema,
         })}
     </>
   );
@@ -77,6 +91,7 @@ export function useTabs({
         PodMetricsTable({
           timerange,
           kuery: podsFilter,
+          schema,
         })}
     </>
   );
@@ -88,6 +103,7 @@ export function useTabs({
         HostMetricsTable({
           timerange,
           kuery: hostsFilter,
+          schema,
         })}
     </>
   );
