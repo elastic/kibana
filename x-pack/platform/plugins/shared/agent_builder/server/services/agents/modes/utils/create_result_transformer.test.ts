@@ -91,7 +91,7 @@ describe('createResultTransformer', () => {
 
       expect(toolWithSummarizer.summarizeToolReturn).toHaveBeenCalledWith(toolCall);
       expect(result).toHaveLength(1);
-      expect(result[0].data).toEqual({ summary: 'Summarized 2 results', __cleaned__: true });
+      expect(result[0].data).toEqual({ summary: 'Summarized 2 results', _summary: true });
     });
 
     it('falls back to original results when summarizeToolReturn returns null', async () => {
@@ -196,7 +196,7 @@ describe('createResultTransformer', () => {
       expect(result[0].type).toBe(ToolResultType.fileReference);
       expect(result[0].data).toMatchObject({
         filepath: '/tool_calls/search/call-1/result-1.json',
-        __cleaned__: true,
+        _summary: true,
       });
     });
 
@@ -343,7 +343,7 @@ describe('createResultTransformer', () => {
         {
           tool_result_id: 'result-1',
           type: ToolResultType.other,
-          data: { already: 'cleaned', __cleaned__: true },
+          data: { already: 'cleaned', _summary: true },
         },
       ]);
 
@@ -352,7 +352,7 @@ describe('createResultTransformer', () => {
       // Should not call summarizer for already cleaned results
       expect(toolWithSummarizer.summarizeToolReturn).not.toHaveBeenCalled();
       expect(result).toHaveLength(1);
-      expect(result[0].data).toEqual({ already: 'cleaned', __cleaned__: true });
+      expect(result[0].data).toEqual({ already: 'cleaned', _summary: true });
     });
 
     it('adds cleaned marker to summarized results', async () => {
@@ -383,7 +383,7 @@ describe('createResultTransformer', () => {
 
       expect(result[0].data).toMatchObject({
         summary: 'data',
-        __cleaned__: true,
+        _summary: true,
       });
     });
   });

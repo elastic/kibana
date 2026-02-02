@@ -21,17 +21,17 @@ export const FILE_REFERENCE_TOKEN_THRESHOLD = 500;
  * Marker to identify cleaned/transformed tool results.
  * Prevents double-processing if results are transformed multiple times.
  */
-const CLEANED_MARKER = '__cleaned__';
+const SUMMARY_MARKER = '_summary';
 
 /**
- * Checks if a result has already been cleaned/transformed.
+ * Checks if a result has already been summarized/transformed.
  */
-const isCleanedResult = (data: unknown): boolean => {
+const isSummaryResult = (data: unknown): boolean => {
   return (
     typeof data === 'object' &&
     data !== null &&
-    CLEANED_MARKER in data &&
-    (data as Record<string, unknown>)[CLEANED_MARKER] === true
+    SUMMARY_MARKER in data &&
+    (data as Record<string, unknown>)[SUMMARY_MARKER] === true
   );
 };
 
@@ -41,7 +41,7 @@ const isCleanedResult = (data: unknown): boolean => {
 const areAllResultsCleaned = (results: ToolResult[]): boolean => {
   return results.every((result) => {
     if ('data' in result) {
-      return isCleanedResult(result.data);
+      return isSummaryResult(result.data);
     }
     return false;
   });
@@ -53,12 +53,12 @@ const areAllResultsCleaned = (results: ToolResult[]): boolean => {
 const markResultAsCleaned = (result: ToolResult): ToolResult => {
   if ('data' in result && typeof result.data === 'object' && result.data !== null) {
     const data = result.data as Record<string, unknown>;
-    if (!isCleanedResult(data)) {
+    if (!isSummaryResult(data)) {
       return {
         ...result,
         data: {
           ...data,
-          [CLEANED_MARKER]: true,
+          [SUMMARY_MARKER]: true,
         },
       } as ToolResult;
     }
@@ -179,7 +179,7 @@ const tryFilestoreSubstitution = async ({
   threshold: number;
 }): Promise<ToolResult> => {
   // Skip if already cleaned
-  if ('data' in result && isCleanedResult(result.data)) {
+  if ('data' in result && isSummaryResult(result.data)) {
     return result;
   }
 
