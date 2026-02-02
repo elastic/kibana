@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+
+// Using '::' as separator - unlikely to appear in normal IDs (UUIDs use '-')
+export const SPACE_ID_SEPARATOR = '::';
+export const SYSTEM_SPACE_PROPERTY = 'kibana.space_ids';
+
+/** Check if an ID contains the space separator. */
+export function containsSpaceSeparator(id: string): boolean {
+  return id.includes(SPACE_ID_SEPARATOR);
+}
+
+/**
+ * Validate that an ID does NOT contain the space separator.
+ * Used in space-agnostic mode to prevent injection attacks.
+ */
+export function rejectSpacePrefixedId(id: string): void {
+  if (containsSpaceSeparator(id)) {
+    throw new Error(
+      `Invalid document ID: IDs cannot contain '${SPACE_ID_SEPARATOR}' when operating without a space. ` +
+        `Provide a 'space' parameter to work with space-bound documents.`
+    );
+  }
+}
+
+/** Generate a space-prefixed ID. Only called when space is defined. */
+export function generateSpacePrefixedId(space: string, id?: string): string {
+  const docId = id ?? uuidv4();
+  return `${space}${SPACE_ID_SEPARATOR}${docId}`;
+}
+
+/** Extract space from a prefixed ID. Throws if ID has no prefix. */
+export function extractSpaceFromId(id: string): { space: string; rawId: string } {
+  const separatorIndex = id.indexOf(SPACE_ID_SEPARATOR);
+  if (separatorIndex === -1) {
+    throw new Error(`Invalid document ID format: missing space prefix '${SPACE_ID_SEPARATOR}'`);
+  }
+  return {
+    space: id.substring(0, separatorIndex),
+    rawId: id.substring(separatorIndex + SPACE_ID_SEPARATOR.length),
+  };
+}
+
+/** Validate that the ID belongs to the expected space. */
+export function validateSpaceInId(id: string, expectedSpace: string): void {
+  const { space } = extractSpaceFromId(id);
+  if (space !== expectedSpace) {
+    throw new Error(`Space mismatch: document belongs to '${space}', not '${expectedSpace}'`);
+  }
+}
+
+/** Add kibana.space_ids property to document. Only called when space is defined. */
+export function decorateDocumentWithSpace<T>(
+  doc: T,
+  space: string
+): T & { [SYSTEM_SPACE_PROPERTY]: string[] } {
+  return { ...doc, [SYSTEM_SPACE_PROPERTY]: [space] };
+}
+
+/** Build ES term filter for a specific space. */
+export function buildSpaceFilter(space: string) {
+  return { term: { [SYSTEM_SPACE_PROPERTY]: space } };
+}
+
+/** Build ES filter to exclude space-bound documents (for space-agnostic searches). */
+export function buildSpaceAgnosticFilter() {
+  return { bool: { must_not: { exists: { field: SYSTEM_SPACE_PROPERTY } } } };
+}

@@ -20,6 +20,12 @@ export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRun
   fields?: Array<Exclude<keyof SearchRuntimeMappings, number | symbol>>;
   track_total_hits?: boolean | number;
   size?: number;
+  /**
+   * Optional space identifier. When provided, results are filtered to only include
+   * documents belonging to this space. When undefined, only space-agnostic documents
+   * are returned.
+   */
+  space?: string;
 }
 
 export type ClientSearchResponse<
@@ -27,13 +33,25 @@ export type ClientSearchResponse<
   TSearchRequest extends OmitIndexProp<api.SearchRequest>
 > = api.SearchResponse<TDocument, TSearchRequest>;
 
-export type ClientGetRequest = OmitIndexProp<api.GetRequest & api.SearchRequest>;
+export type ClientGetRequest = OmitIndexProp<api.GetRequest & api.SearchRequest> & {
+  /**
+   * Optional space identifier. When provided, validates that the document ID
+   * belongs to this space. When undefined, rejects space-prefixed IDs.
+   */
+  space?: string;
+};
 export type ClientGetResponse<TDocument> = api.GetResponse<TDocument>;
 export type ClientGet<TDocumentType> = (
   request: ClientGetRequest
 ) => Promise<ClientGetResponse<TDocumentType>>;
 
-export type ClientIndexRequest<TDocument> = OmitIndexProp<api.IndexRequest<TDocument>>;
+export type ClientIndexRequest<TDocument> = OmitIndexProp<api.IndexRequest<TDocument>> & {
+  /**
+   * Optional space identifier. When provided, prefixes the document ID with the space
+   * and adds kibana.space_ids property. When undefined, rejects space-prefixed IDs.
+   */
+  space?: string;
+};
 export type ClientIndexResponse = api.IndexResponse;
 export type ClientIndex<FullDocumentType> = (
   request: ClientIndexRequest<FullDocumentType>
@@ -55,6 +73,12 @@ export type ClientBulkRequest<TDocument> = Omit<
     | api.BulkUpdateAction<TDocument, Partial<TDocument>>
     | TDocument
   )[];
+  /**
+   * Optional space identifier. When provided, prefixes document IDs for create/index
+   * operations and validates IDs for update/delete operations. When undefined, rejects
+   * space-prefixed IDs.
+   */
+  space?: string;
 };
 export type ClientBulkResponse = api.BulkResponse;
 export type ClientBulk<TDocumentType> = (
