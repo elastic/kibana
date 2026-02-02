@@ -29,6 +29,8 @@ export const selectHasChanges = createSelector(
   (detail) => detail.yamlString !== detail.workflow?.yaml
 );
 
+export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
+
 export const selectYamlDocument = createSelector(
   selectYamlComputed,
   (computed) => computed?.yamlDocument

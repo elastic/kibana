@@ -39,6 +39,7 @@ import {
   selectHasChanges,
   selectIsExecutionsTab,
   selectIsSavingYaml,
+  selectIsYamlSynced,
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -106,6 +107,7 @@ export const WorkflowDetailHeader = React.memo(
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
+    const isYamlSynced = useSelector(selectIsYamlSynced);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -301,7 +303,9 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
+                    disabled={
+                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
+                    }
                     isLoading={isSaving}
                     data-test-subj="saveWorkflowHeaderButton"
                   >

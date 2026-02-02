@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect, KibanaCodeEditorWrapper, tags, spaceTest as test } from '@kbn/scout';
 
 const demoYaml = `
@@ -28,32 +27,25 @@ test.describe('Create and save a workflow', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('should display dashboard', async ({ pageObjects, page }) => {
-    // await pageObjects.collapsibleNav.clickItem('Workflows');
+  test('should display dashboard', async ({ page }) => {
     await page.gotoApp('workflows');
     await page.testSubj.click('createWorkflowButton');
     const yamlEditor = page.testSubj.locator('workflowYamlEditor');
     const kbnCodeEditorWrapper = new KibanaCodeEditorWrapper(page);
     await expect(yamlEditor).toBeVisible();
+
+    // Set the editor value
     await kbnCodeEditorWrapper.setCodeEditorValue(demoYaml);
-    // await setYamlEditorValue(page, demoYaml);
-    console.log('current value', await kbnCodeEditorWrapper.getCodeEditorValue());
+
+    // Wait for debounced changes to sync to Redux (data-yaml-synced="true")
+    // This ensures the save button is enabled and will save the latest value
+    await expect(page.locator('[data-yaml-synced="true"]')).toBeVisible({ timeout: 5000 });
+
+    // Now the save button should be enabled and clicking it will save the correct value
     await page.testSubj.click('saveWorkflowHeaderButton');
-    // await page.keyboard.press('ControlOrMeta+S');
     await page.testSubj.waitForSelector('workflowSavedChangesBadge');
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
     await expect(page.getByRole('link', { name: 'Dummy workflow' })).toBeVisible();
   });
 });
-async function setYamlEditorValue(page: ScoutPage, yaml: string) {
-  // Clean previous content
-  await page.getByTestId('workflowYamlEditor').click();
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Backspace');
-  // Fill with new condition
-  await page.getByTestId('workflowYamlEditor').getByRole('textbox').fill(yaml);
-  // Clean trailing content
-  await this.page.keyboard.press('Shift+Control+ArrowDown');
-  await this.page.keyboard.press('Backspace');
-}
