@@ -36,18 +36,6 @@ var elasticsearch = require('@elastic/elasticsearch');
 var Client = elasticsearch.Client;
 
 var requestTimeoutMs = 30000;
-var BASE_QUERY = {
-  bool: {
-    must: [
-      { match_all: {} },
-      {
-        range: {
-          '@timestamp': { gte: 'now-24h', lte: 'now' },
-        },
-      },
-    ],
-  },
-};
 
 /**
  * Read Kibana config for destination Elasticsearch (same approach as otel_demo).
@@ -123,7 +111,7 @@ function parseConfig(log) {
   }
   var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose', c: 'config' },
-    boolean: ['help', 'verbose', 'no-verify-certs'],
+    boolean: ['help', 'verbose', 'no-verify-certs', 'translate-timestamps'],
     string: [
       'config',
       'source-host',
@@ -135,6 +123,8 @@ function parseConfig(log) {
       'random-seed',
       'target-index',
       'batch-size',
+      'from',
+      'to',
     ],
   });
 
@@ -154,6 +144,9 @@ function parseConfig(log) {
   var randomSeed = get('random-seed', 'SYNC_RANDOM_SEED', undefined);
   var targetIndex = get('target-index', 'SYNC_TARGET_INDEX', 'logs-generic-default');
   var batchSize = get('batch-size', 'SYNC_BATCH_SIZE', '100');
+  var from = get('from', 'SYNC_FROM', undefined);
+  var to = get('to', 'SYNC_TO', undefined);
+  var translateTimestamps = opts['translate-timestamps'] || false;
 
   var destEsConfig = readKibanaConfig(opts.config, log);
   var destHost;
@@ -180,6 +173,9 @@ function parseConfig(log) {
     batchSize: parseInt(batchSize, 10),
     noVerifyCerts: opts['no-verify-certs'] || false,
     verbose: opts.verbose || false,
+    from: from,
+    to: to,
+    translateTimestamps: translateTimestamps,
   };
 
   if (!config.sourceHost || !config.sourceApiKey) {
@@ -202,6 +198,20 @@ function parseConfig(log) {
   }
   if (config.randomSeed !== null && Number.isNaN(config.randomSeed)) {
     console.error('Error: --random-seed must be an integer.');
+    process.exit(1);
+  }
+  if ((config.from && !config.to) || (!config.from && config.to)) {
+    console.error('Error: Both --from and --to must be provided.');
+    process.exit(1);
+  }
+  if (config.from && config.to) {
+    if (new Date(config.from) >= new Date(config.to)) {
+      console.error('Error: --from must be before --to.');
+      process.exit(1);
+    }
+  }
+  if (config.translateTimestamps && (!config.from || !config.to)) {
+    console.error('Error: --translate-timestamps can only be used with --from and --to.');
     process.exit(1);
   }
 
@@ -247,13 +257,25 @@ function pingCluster(client, label, log) {
     });
 }
 
-function search(sourceClient, config, cycleNumber, log) {
+function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
   var size = config.size;
   var indexPattern = config.indexPattern;
+
+  var timeRange = {
+    gte: startTime ? startTime.toISOString() : 'now-24h',
+    lte: endTime ? endTime.toISOString() : 'now',
+  };
+
+  var query = {
+    bool: {
+      must: [{ match_all: {} }, { range: { '@timestamp': timeRange } }],
+    },
+  };
+
   var body;
   if (config.sampleMode === 'recent') {
     body = {
-      query: BASE_QUERY,
+      query: query,
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: size,
     };
@@ -263,7 +285,7 @@ function search(sourceClient, config, cycleNumber, log) {
     body = {
       query: {
         function_score: {
-          query: BASE_QUERY,
+          query: query,
           functions: [{ random_score: { seed: seed } }],
           score_mode: 'sum',
         },
@@ -310,12 +332,17 @@ function stripDataStreamFields(doc) {
   }
 }
 
-function transform(docs, targetIndex) {
+function transform(docs, config, timeOffset) {
   for (var i = 0; i < docs.length; i++) {
     var doc = docs[i];
     stripDataStreamFields(doc);
-    if (targetIndex) {
-      doc._index = targetIndex;
+    if (config.targetIndex) {
+      doc._index = config.targetIndex;
+    }
+    if (config.translateTimestamps && timeOffset && doc._source && doc._source['@timestamp']) {
+      var originalTimestamp = new Date(doc._source['@timestamp']);
+      var newTimestamp = new Date(originalTimestamp.getTime() + timeOffset);
+      doc._source['@timestamp'] = newTimestamp.toISOString();
     }
   }
 }
@@ -419,10 +446,15 @@ function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, batchSiz
   });
 }
 
-function runSyncCycle(sourceClient, destClient, config, cycleNumber, log) {
-  return search(sourceClient, config, cycleNumber, log).then(function (docs) {
+function runSyncCycle(sourceClient, destClient, config, cycleNumber, log, startTime, endTime) {
+  return search(sourceClient, config, cycleNumber, log, startTime, endTime).then(function (docs) {
     if (docs.length === 0) return 0;
-    transform(docs, config.targetIndex);
+
+    var timeOffset;
+    if (config.translateTimestamps && config.from) {
+      timeOffset = new Date().getTime() - new Date(config.from).getTime();
+    }
+    transform(docs, config, timeOffset);
 
     if (config.targetIndex) {
       return uploadDocumentsToStream(destClient, docs, config.targetIndex, config.batchSize, log);
@@ -479,6 +511,9 @@ Sync options:
   SYNC_RANDOM_SEED             or  --random-seed      For random mode
   SYNC_TARGET_INDEX            or  --target-index     Single target index/stream (default: logs-generic-default)
   SYNC_BATCH_SIZE              or  --batch-size       (default: 100)
+  SYNC_FROM                    or  --from             Start of the time range for syncing (ISO 8601 format)
+  SYNC_TO                      or  --to               End of the time range for syncing (ISO 8601 format)
+  --translate-timestamps       Translate log timestamps to the current time, maintaining relative intervals. Requires --from and --to.
 
 Other:
   --config, -c                 Path to Kibana config (default: config/kibana.dev.yml)
@@ -491,7 +526,7 @@ Other:
 function main() {
   var opts = getopts(process.argv.slice(2), {
     alias: { h: 'help', v: 'verbose' },
-    boolean: ['help', 'verbose'],
+    boolean: ['help', 'verbose', 'translate-timestamps'],
   });
   if (opts.help) {
     showHelp();
@@ -530,14 +565,46 @@ function main() {
       return;
     }
     cycle += 1;
-    runSyncCycle(sourceClient, destClient, config, cycle, log)
+
+    var startTime;
+    var endTime;
+    if (config.from && config.to) {
+      var loopStartTime = new Date(config.from);
+      var loopEndTime = new Date(config.to);
+      var currentSyncTime = new Date(
+        loopStartTime.getTime() + cycle * config.intervalSeconds * 1000
+      );
+
+      if (currentSyncTime >= loopEndTime) {
+        log('Sync finished for the specified time range.');
+        process.exit(0);
+        return;
+      }
+
+      startTime = currentSyncTime;
+      endTime = new Date(currentSyncTime.getTime() + config.intervalSeconds * 1000);
+      if (endTime > loopEndTime) {
+        endTime = loopEndTime;
+      }
+    }
+
+    runSyncCycle(sourceClient, destClient, config, cycle, log, startTime, endTime)
       .then(function (pushed) {
-        log('Cycle ' + cycle + ': pushed ' + pushed + ' documents');
+        var timeInfo = '';
+        if (startTime && endTime) {
+          timeInfo = ' for ' + startTime.toISOString() + ' to ' + endTime.toISOString();
+        }
+        log('Cycle ' + cycle + ': pushed ' + pushed + ' documents' + timeInfo);
+
         if (shutdownRequested) {
           log('Sync stopped.');
           process.exit(0);
         } else {
-          setTimeout(loop, config.intervalSeconds * 1000);
+          if (config.from && config.to) {
+            loop();
+          } else {
+            setTimeout(loop, config.intervalSeconds * 1000);
+          }
         }
       })
       .catch(function (err) {
@@ -546,7 +613,11 @@ function main() {
           log('Sync stopped.');
           process.exit(0);
         } else {
-          setTimeout(loop, config.intervalSeconds * 1000);
+          if (config.from && config.to) {
+            loop();
+          } else {
+            setTimeout(loop, config.intervalSeconds * 1000);
+          }
         }
       });
   }
