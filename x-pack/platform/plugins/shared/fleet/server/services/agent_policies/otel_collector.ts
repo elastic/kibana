@@ -10,6 +10,7 @@ import type {
   FullAgentPolicyInput,
   OTelCollectorComponentID,
   OTelCollectorConfig,
+  OTelCollectorPipeline,
   OTelCollectorPipelineID,
   PackageInfo,
   RegistryPolicyInputOnlyTemplate,
@@ -17,7 +18,6 @@ import type {
 import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
-import { isInputOnlyPolicyTemplate } from '../../../common/services/policy_template';
 import { pkgToPkgKey } from '../epm/registry';
 
 // Generate OTel Collector policy
@@ -50,7 +50,8 @@ export function generateOtelcolConfig(
             ? (input as FullAgentPolicyInput).data_stream.namespace
             : 'default',
           suffix,
-          packageInfo
+          packageInfo,
+          stream.service?.pipelines
         );
         return appendOtelComponents(
           {
@@ -127,35 +128,60 @@ function generateOtelTypeTransforms(
   };
 }
 
+function extractSignalTypesFromPipelines(
+  pipelines: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
+): string[] {
+  const signalTypes = new Set<string>();
+  Object.keys(pipelines).forEach((pipelineId) => {
+    const signalType = getSignalType(pipelineId);
+    if (signalType && ['logs', 'metrics', 'traces'].includes(signalType)) {
+      signalTypes.add(signalType);
+    }
+  });
+  return Array.from(signalTypes);
+}
+
+function getDynamicSignalTypesVar(packageInfo?: PackageInfo): boolean {
+  if (!packageInfo) {
+    return false;
+  }
+
+  const inputOnlyTemplate = packageInfo.policy_templates?.find(
+    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
+  ) as RegistryPolicyInputOnlyTemplate | undefined;
+
+  return inputOnlyTemplate?.dynamic_signal_types === true;
+}
+
 function generateOTelAttributesTransform(
   type: string,
   dataset: string,
   namespace: string,
   suffix: string,
-  packageInfo?: PackageInfo
+  packageInfo?: PackageInfo,
+  streamPipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
 ): Record<OTelCollectorComponentID, any> {
-  // Check if package has multiple signal types defined
-  const availableTypes =
-    (
-      packageInfo?.policy_templates?.find(
-        (template) =>
-          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
-      ) as RegistryPolicyInputOnlyTemplate
-    )?.available_types ?? [];
-  const hasMultipleAvailableTypes = availableTypes && availableTypes.length > 1;
+  const dynamicSignalTypes = getDynamicSignalTypesVar(packageInfo);
 
   let transformStatements: Record<string, any> = {};
-  // If package has multiple signal types, generate transform with statements only for the available types
-  if (hasMultipleAvailableTypes) {
-    availableTypes.forEach((availableType) => {
-      const typeTransforms = generateOtelTypeTransforms(availableType, dataset, namespace);
+
+  if (dynamicSignalTypes && streamPipelines) {
+    // When dynamic_signal_types is true, extract signal types from pipeline IDs
+    // and generate transforms for each. This allows the collector to route data
+    // to the appropriate datastreams based on the pipelines configured in the policy.
+    // Index templates for all signal types (logs, metrics, traces) are created during
+    // package installation, and this transform ensures data is only routed to indices
+    // matching the actual pipeline signal types.
+    const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
+    // Generate transforms for each signal type found in pipelines
+    signalTypes.forEach((signalType) => {
+      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
       Object.assign(transformStatements, typeTransforms);
     });
   } else {
-    // Single signal type
+    // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);
   }
-
   return {
     [`transform/${suffix}-routing`]: transformStatements,
   };
@@ -324,5 +350,8 @@ function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorCompon
 }
 
 function getSignalType(id: string): string {
-  return id.substring(0, id.indexOf('/'));
+  const slashIndex = id.indexOf('/');
+  // If there's a '/', return the part before it (e.g., 'logs' from 'logs/otlp')
+  // If there's no '/', return the whole string (e.g., 'logs')
+  return slashIndex > 0 ? id.substring(0, slashIndex) : id;
 }

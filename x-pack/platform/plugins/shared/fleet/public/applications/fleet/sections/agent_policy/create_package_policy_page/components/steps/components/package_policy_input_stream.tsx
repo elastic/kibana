@@ -8,7 +8,7 @@
 import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
-import { uniq, capitalize } from 'lodash';
+import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,6 +32,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../../../../../../../common/constants';
 
 import { sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
@@ -113,40 +114,27 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
-    const availableTypes = useMemo(() => {
-      const templatesWithAvailableTypes = packageInfo?.policy_templates?.filter(
+
+    // Check if package uses dynamic_signal_types
+    const dynamicSignalTypes = useMemo(() => {
+      const inputOnlyTemplate = packageInfo?.policy_templates?.find(
         (template) =>
-          isInputOnlyPolicyTemplate(template) &&
-          template?.available_types &&
-          template?.available_types?.length > 0
-      );
-      return (
-        (templatesWithAvailableTypes as RegistryPolicyInputOnlyTemplate[])?.[0]?.available_types ??
-        []
-      );
+          isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
+      ) as RegistryPolicyInputOnlyTemplate | undefined;
+
+      return inputOnlyTemplate?.dynamic_signal_types === true;
     }, [packageInfo?.policy_templates]);
 
-    // Get the default data stream type - use first available type if available_types is defined, otherwise fallback to logs
-    const defaultDataStreamType = availableTypes.length > 0 ? availableTypes[0] : 'logs';
-
     const customDataStreamTypeVarValue =
-      customDataStreamTypeVar?.value ||
-      packagePolicyInputStream.data_stream.type ||
-      defaultDataStreamType;
+      customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
 
-    // Filter available types to only show options that are present in available_types
     const dataStreamTypeOptions = useMemo(() => {
-      return availableTypes.length > 0
-        ? availableTypes.map((type) => ({
-            id: type,
-            label: capitalize(type),
-          }))
-        : [
-            { id: 'logs', label: 'Logs' },
-            { id: 'metrics', label: 'Metrics' },
-            { id: 'traces', label: 'Traces' },
-          ];
-    }, [availableTypes]);
+      return [
+        { id: 'logs', label: 'Logs' },
+        { id: 'metrics', label: 'Metrics' },
+        { id: 'traces', label: 'Traces' },
+      ];
+    }, []);
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -427,7 +415,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   </EuiFlexItem>
                   {isShowingAdvanced ? (
                     <>
-                      {packageInfo.type === 'input' && (
+                      {packageInfo.type === 'input' && !dynamicSignalTypes && (
                         <EuiFlexItem>
                           <EuiFormRow
                             label={
