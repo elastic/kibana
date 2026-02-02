@@ -8,9 +8,9 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export async function deleteMarkdown(requestCtx: RequestHandlerContext, id: string): Promise<void> {
   const { core } = await requestCtx.resolve(['core']);
-  await core.savedObjects.client.delete(MARKDOWN_EMBEDDABLE_TYPE, id);
+  await core.savedObjects.client.delete(MARKDOWN_SAVED_OBJECT_TYPE, id);
 }

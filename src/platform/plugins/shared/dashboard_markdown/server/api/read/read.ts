@@ -9,7 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { MarkdownSavedObjectAttributes } from '../../markdown_saved_object';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getMarkdownCRUResponseBody } from '../../saved_object_utils';
 import type { MarkdownReadResponseBody } from './types';
 
@@ -26,7 +26,7 @@ export async function read(
 
     alias_target_id,
   } = await core.savedObjects.client.resolve<MarkdownSavedObjectAttributes>(
-    MARKDOWN_EMBEDDABLE_TYPE,
+    MARKDOWN_SAVED_OBJECT_TYPE,
     id
   );
 

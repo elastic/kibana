@@ -10,7 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { registerRoutes } from './api/register_routes';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
 import { markdownEmbeddableSchema } from './schemas';
 import type { MarkdownState } from '.';
 import { markdownSavedObjectType } from './markdown_saved_object';
@@ -26,7 +26,7 @@ export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> 
     });
 
     plugins.contentManagement.register({
-      id: MARKDOWN_EMBEDDABLE_TYPE,
+      id: MARKDOWN_SAVED_OBJECT_TYPE,
       storage: new MarkdownStorage(),
       version: { latest: 1 },
     });
