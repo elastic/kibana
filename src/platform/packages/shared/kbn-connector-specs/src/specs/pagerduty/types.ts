@@ -325,12 +325,12 @@ export interface ListEscalationPoliciesInput {
   offset?: number;
   total?: boolean;
   query?: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface GetEscalationPolicyInput {
   id: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface ListIncidentsInput {
@@ -339,7 +339,7 @@ export interface ListIncidentsInput {
   total?: boolean;
   dateRange?: string;
   incidentKey?: string;
-  include?: string;
+  include?: string[];
   statuses?: string;
   serviceIds?: string;
   since?: string;
@@ -351,7 +351,7 @@ export interface ListIncidentsInput {
 
 export interface GetIncidentInput {
   id: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface IncidentIdPaginationInput {
@@ -359,7 +359,7 @@ export interface IncidentIdPaginationInput {
   limit?: number;
   offset?: number;
   total?: boolean;
-  include?: string;
+  include?: string[];
 }
 
 export interface ListSchedulesInput {
@@ -367,13 +367,13 @@ export interface ListSchedulesInput {
   offset?: number;
   total?: boolean;
   query?: string;
-  include?: string;
+  include?: string[];
   timeZone?: string;
 }
 
 export interface GetScheduleInput {
   id: string;
-  include?: string;
+  include?: string[];
   timeZone?: string;
 }
 
@@ -386,7 +386,7 @@ export interface ListOnCallsInput {
   escalationPolicyIds?: string;
   since?: string;
   until?: string;
-  include?: string;
+  include?: string[];
   timeZone?: string;
 }
 
@@ -395,12 +395,12 @@ export interface ListUsersInput {
   offset?: number;
   total?: boolean;
   query?: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface GetUserInput {
   id: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface ListTeamsInput {
@@ -408,10 +408,10 @@ export interface ListTeamsInput {
   offset?: number;
   total?: boolean;
   query?: string;
-  include?: string;
+  include?: string[];
 }
 
 export interface GetTeamInput {
   id: string;
-  include?: string;
+  include?: string[];
 }

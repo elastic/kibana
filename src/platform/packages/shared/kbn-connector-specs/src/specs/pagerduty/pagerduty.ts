@@ -42,7 +42,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         offset: z.number().optional(),
         total: z.boolean().optional(),
         query: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.ListEscalationPoliciesInput) => {
         const queryParams = buildPaginationParams(input);
@@ -72,7 +72,7 @@ export const PagerDutyConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         id: z.string(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.GetEscalationPolicyInput) => {
         const queryParams = buildPaginationParams(input);
@@ -109,7 +109,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         total: z.boolean().optional(),
         dateRange: z.string().optional(),
         incidentKey: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
         statuses: z.string().optional(),
         serviceIds: z.string().optional(),
         since: z.string().optional(),
@@ -163,11 +163,10 @@ export const PagerDutyConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         id: z.string(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.GetIncidentInput) => {
-        // Parse and filter the include parameter
-        const includeValues = input.include ? input.include.split(',').map((v) => v.trim()) : [];
+        const includeValues = (input.include ?? []).map((v: string) => v.trim());
         const apiIncludes: string[] = [];
         const additionalData: {
           alerts?: Awaited<ReturnType<typeof listAlertsForIncidentHandler>>;
@@ -214,7 +213,7 @@ export const PagerDutyConnector: ConnectorSpec = {
 
         // Build query params for the main API call (only non-filtered includes)
         const queryParams = buildPaginationParams({
-          include: apiIncludes.length > 0 ? apiIncludes.join(',') : undefined,
+          include: apiIncludes.length > 0 ? apiIncludes : undefined,
         });
         const response = await ctx.client.get(`https://api.pagerduty.com/incidents/${input.id}`, {
           params: queryParams,
@@ -238,7 +237,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         limit: z.number().optional(),
         offset: z.number().optional(),
         total: z.boolean().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: listAlertsForIncidentHandler,
     },
@@ -251,7 +250,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         limit: z.number().optional(),
         offset: z.number().optional(),
         total: z.boolean().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: listNotesForIncidentHandler,
     },
@@ -264,7 +263,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         limit: z.number().optional(),
         offset: z.number().optional(),
         total: z.boolean().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: listRelatedIncidentsHandler,
     },
@@ -277,7 +276,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         limit: z.number().optional(),
         offset: z.number().optional(),
         total: z.boolean().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: listPastIncidentsHandler,
     },
@@ -290,7 +289,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         offset: z.number().optional(),
         total: z.boolean().optional(),
         query: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
         timeZone: z.string().optional(),
       }),
       handler: async (ctx, input: PD.ListSchedulesInput) => {
@@ -323,11 +322,11 @@ export const PagerDutyConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         id: z.string(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
         timeZone: z.string().optional(),
       }),
       handler: async (ctx, input: PD.GetScheduleInput) => {
-        const queryParams = buildPaginationParams({ ...input, include: undefined });
+        const queryParams = buildPaginationParams(input);
         if (input.timeZone) {
           queryParams.time_zone = input.timeZone;
         }
@@ -352,7 +351,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         escalationPolicyIds: z.string().optional(),
         since: z.string().optional(),
         until: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
         timeZone: z.string().optional(),
       }),
       handler: async (ctx, input: PD.ListOnCallsInput) => {
@@ -432,7 +431,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         offset: z.number().optional(),
         total: z.boolean().optional(),
         query: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.ListUsersInput) => {
         const queryParams = buildPaginationParams(input);
@@ -462,7 +461,7 @@ export const PagerDutyConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         id: z.string(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.GetUserInput) => {
         const queryParams = buildPaginationParams(input);
@@ -481,7 +480,7 @@ export const PagerDutyConnector: ConnectorSpec = {
         offset: z.number().optional(),
         total: z.boolean().optional(),
         query: z.string().optional(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.ListTeamsInput) => {
         const queryParams = buildPaginationParams(input);
@@ -511,7 +510,7 @@ export const PagerDutyConnector: ConnectorSpec = {
       isTool: false,
       input: z.object({
         id: z.string(),
-        include: z.string().optional(),
+        include: z.array(z.string()).optional(),
       }),
       handler: async (ctx, input: PD.GetTeamInput) => {
         const queryParams = buildPaginationParams(input);
@@ -700,7 +699,7 @@ interface PaginationParams {
   limit?: number;
   offset?: number;
   total?: boolean;
-  include?: string;
+  include?: string[];
 }
 
 /**
@@ -717,8 +716,8 @@ function buildPaginationParams(params: PaginationParams): Record<string, string>
   if (params.total !== undefined) {
     queryParams.total = params.total.toString();
   }
-  if (params.include) {
-    queryParams.include = params.include;
+  if (params.include?.length) {
+    queryParams.include = params.include.join(',');
   }
   return queryParams;
 }

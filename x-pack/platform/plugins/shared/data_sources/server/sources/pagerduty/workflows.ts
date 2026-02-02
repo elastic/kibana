@@ -23,9 +23,9 @@ inputs:
     required: false
     description: 'Free-text search string that searches across name and description fields (e.g., "production" or "on-call")'
   - name: include
-    type: string
+    type: array
     required: false
-    description: 'Comma-separated list of related resources to include (e.g., "teams,services")'
+    description: 'List of related resources to include (e.g., teams, services)'
 steps:
   - name: list-escalation-policies
     type: pagerduty-v2.listEscalationPolicies
@@ -34,7 +34,7 @@ steps:
       limit: \${{inputs.limit}}
       offset: \${{inputs.offset}}
       query: "\${{inputs.query}}"
-      include: "\${{inputs.include}}"
+      include: \${{inputs.include}}
 `;
 }
 
@@ -54,9 +54,9 @@ inputs:
       type: string
       description: 'The type of item to retrieve, one of: schedule, incident, escalation_policy, user, team'
     include:
-      type: string
+      type: array
       description: |
-         Comma-separated list of related resources to include.  Valid values by type:
+         List of related resources to include.  Valid values by type:
             schedule - N/A
             incident - past (get past instances of this incident), related (get related incidents), alerts (triggered by the incident), notes (notes attached to the incident), acknowledgers, assignees, priorities, services, teams, users
             escalation_policy - services, teams, targets
@@ -90,7 +90,7 @@ steps:
             connector-id: ${stackConnectorId}
             with:
               id: "\${{inputs.id}}"
-              include: "\${{inputs.include}}"
+              include: \${{inputs.include}}
         else:
           - name: if-escalation-policy
             type: if
@@ -101,7 +101,7 @@ steps:
                 connector-id: ${stackConnectorId}
                 with:
                   id: "\${{inputs.id}}"
-                  include: "\${{inputs.include}}"
+                  include: \${{inputs.include}}
             else:
               - name: if-user
                 type: if
@@ -112,7 +112,7 @@ steps:
                     connector-id: ${stackConnectorId}
                     with:
                       id: "\${{inputs.id}}"
-                      include: "\${{inputs.include}}"
+                      include: \${{inputs.include}}
               - name: if-team
                 type: if
                 condition: "\${{ inputs.item_type == 'team' }}"
@@ -122,7 +122,7 @@ steps:
                     connector-id: ${stackConnectorId}
                     with:
                       id: "\${{inputs.id}}"
-                      include: "\${{inputs.include}}"
+                      include: \${{inputs.include}}
 `;
 }
 
@@ -176,7 +176,7 @@ steps:
       since: "\${{inputs.since}}"
       until: "\${{inputs.until}}"
       urgencies: "\${{inputs.urgencies}}"
-      include: "\${{inputs.include}}"
+      include: \${{inputs.include}}
 `;
 }
 
@@ -199,9 +199,9 @@ inputs:
     required: false
     description: 'Free-text search string that searches across name and description fields (e.g., "primary" or "weekend")'
   - name: include
-    type: string
+    type: array
     required: false
-    description: 'Comma-separated list of related resources to include'
+    description: 'List of related resources to include'
   - name: time_zone
     type: string
     required: false
@@ -214,7 +214,7 @@ steps:
       limit: \${{inputs.limit}}
       offset: \${{inputs.offset}}
       query: "\${{inputs.query}}"
-      include: "\${{inputs.include}}"
+      include: \${{inputs.include}}
       timeZone: "\${{inputs.time_zone}}"
 
 `;
@@ -347,9 +347,9 @@ inputs:
     required: false
     description: 'End of time range for on-call periods (ISO 8601 format)'
   - name: include
-    type: string
+    type: array
     required: false
-    description: 'Comma-separated list of related resources to include'
+    description: 'List of related resources to include'
   - name: time_zone
     type: string
     required: false
@@ -366,7 +366,7 @@ steps:
       escalationPolicyIds: "\${{inputs.escalation_policy_ids}}"
       since: "\${{inputs.since}}"
       until: "\${{inputs.until}}"
-      include: "\${{inputs.include}}"
+      include: \${{inputs.include}}
       timeZone: "\${{inputs.time_zone}}"
 `;
 }
