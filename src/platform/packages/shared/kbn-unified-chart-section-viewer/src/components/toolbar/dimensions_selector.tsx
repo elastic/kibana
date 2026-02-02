@@ -107,7 +107,6 @@ export const DimensionsSelector = ({
         key: dimension.name,
       };
     });
-    
     return sortBy(mappedOptions, (option) => {
       if (option.checked === 'on') {
         const selectionIndex = localSelection.findIndex((dim) => dim.name === option.value);
@@ -115,20 +114,13 @@ export const DimensionsSelector = ({
       }
       return Infinity;
     });
-  }, [
-    dimensions,
-    selectedNamesSet,
-    localSelection,
-    intersectingDimensions,
-    singleSelection,
-  ]);
+  }, [dimensions, selectedNamesSet, localSelection, intersectingDimensions, singleSelection]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
       const dimensionMap = new Map(dimensions.map((d) => [d.name, d]));
-      
       const newSelection = opts
         .map((opt) => dimensionMap.get(opt.value))
         .filter((d): d is Dimension => d !== undefined)
