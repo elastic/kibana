@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import React from 'react';
 
 import {
@@ -21,6 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { rulesAppRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+
 import { AssetTitleMap } from '../../../constants';
 import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
@@ -28,11 +30,33 @@ import { KibanaAssetType } from '../../../../../types';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
+/**
+ * Transforms the appLink to use the new unified rules app URL when the feature flag is enabled.
+ * When the rules app is registered (unifiedRulesPage feature flag is enabled), URLs pointing to
+ * the legacy triggersActions page are redirected to /app/rules.
+ */
+const getTransformedAppLink = (appLink: string | undefined, isUnifiedRulesPageEnabled: boolean) => {
+  if (!appLink) return appLink;
+  if (!isUnifiedRulesPageEnabled) return appLink;
+
+  // Transform legacy triggersActions URLs to the new rules app URL
+  if (appLink.startsWith(triggersActionsRoute)) {
+    return appLink.replace(triggersActionsRoute, rulesAppRoute);
+  }
+
+  return appLink;
+};
+
 export const AssetsAccordion: FunctionComponent<{
   type: DisplayedAssetType;
   savedObjects: GetBulkAssetsResponse['items'];
 }> = ({ savedObjects, type }) => {
-  const { http } = useStartServices();
+  const { http, application } = useStartServices();
+
+  const isUnifiedRulesPageEnabled = useMemo(
+    () => application?.isAppRegistered?.('rules') ?? false,
+    [application]
+  );
 
   const isDashboard = type === KibanaAssetType.dashboard;
 
@@ -71,6 +95,7 @@ export const AssetsAccordion: FunctionComponent<{
             }
 
             const title = soTitle ?? id;
+            const transformedAppLink = getTransformedAppLink(appLink, isUnifiedRulesPageEnabled);
             return (
               <Fragment key={id}>
                 <EuiSplitPanel.Inner
@@ -80,8 +105,8 @@ export const AssetsAccordion: FunctionComponent<{
                 >
                   <EuiText size="m">
                     <p>
-                      {appLink ? (
-                        <EuiLink href={http.basePath.prepend(appLink)}>{title}</EuiLink>
+                      {transformedAppLink ? (
+                        <EuiLink href={http.basePath.prepend(transformedAppLink)}>{title}</EuiLink>
                       ) : (
                         title
                       )}
