@@ -135,7 +135,7 @@ describe('useOpenInDiscoverSectionAction', () => {
       expect.objectContaining({
         href,
         label: OPEN_IN_DISCOVER_LABEL,
-        ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
+        ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
         icon: 'discoverApp',
         dataTestSubj,
         onClick: expect.any(Function),
