@@ -20,6 +20,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -62,6 +63,8 @@ export async function getAlertAiInsight({
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AiInsightResult> {
+  const urlPrefix = core.http.basePath.get(request);
+
   const relatedContext = await fetchAlertContext({
     core,
     plugins,
@@ -74,6 +77,7 @@ export async function getAlertAiInsight({
     inferenceClient,
     connectorId,
     alertDoc,
+    urlPrefix,
     context: relatedContext,
   });
 
@@ -208,11 +212,13 @@ async function fetchAlertContext({
 
 function generateAlertSummary({
   inferenceClient,
+  urlPrefix,
   connectorId,
   alertDoc,
   context,
 }: {
   inferenceClient: InferenceClient;
+  urlPrefix: string;
   connectorId: string;
   alertDoc: AlertDocForInsight;
   context: string;
@@ -242,6 +248,8 @@ function generateAlertSummary({
     3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
+
+    ${getEntityLinkingInstructions({ urlPrefix })}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;

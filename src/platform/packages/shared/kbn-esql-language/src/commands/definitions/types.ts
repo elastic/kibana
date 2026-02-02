@@ -208,9 +208,11 @@ export enum PromQLFunctionDefinitionTypes {
   PROMQL_SCALAR = 'promql_scalar',
 }
 
+export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
+
 export interface PromQLFunctionParameter {
   name: string;
-  type: string;
+  type: PromQLFunctionParamType;
   optional: boolean;
   description?: string;
 }
