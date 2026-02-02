@@ -23,11 +23,7 @@ import {
 type PodMetricsField = 'kubernetes.pod.cpu.usage.limit.pct' | 'kubernetes.pod.memory.usage.bytes';
 
 const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
-  sourceFilter: {
-    term: {
-      'event.dataset': 'kubernetes.pod',
-    },
-  },
+  sourceFilter: `event.dataset: "kubernetes.pod"`,
   groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
   metricsMap: {
     'kubernetes.pod.cpu.usage.limit.pct': {
@@ -53,7 +49,7 @@ export interface PodNodeMetricsRow {
 
 export function usePodMetricsTable({
   timerange,
-  filterClauseDsl,
+  kuery,
   metricsClient,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -63,8 +59,8 @@ export function usePodMetricsTable({
   });
 
   const { options: podMetricsOptions } = useMemo(
-    () => metricsToApiOptions(podMetricsQueryConfig, filterClauseDsl),
-    [filterClauseDsl]
+    () => metricsToApiOptions(podMetricsQueryConfig, kuery),
+    [kuery]
   );
 
   const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({

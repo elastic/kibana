@@ -27,8 +27,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { useKibana } from '../hooks/use_kibana';
+import { useLoadConnectors, useKibana } from '..';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 

@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from '../layout.types';
 import type { EmotionFn } from '../types';
 
 const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {

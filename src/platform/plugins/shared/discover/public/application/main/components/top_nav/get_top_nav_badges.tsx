@@ -31,17 +31,6 @@ export const getTopNavBadges = ({
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
-  if (services.spaces && !isMobile) {
-    entries.push({
-      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
-        defaultMessage: 'Check out context-aware Discover',
-      }),
-      renderCustomBadge: ({ badgeText }) => (
-        <SolutionsViewBadge badgeText={badgeText} services={services} />
-      ),
-    });
-  }
-
   if (isManaged) {
     entries.push(
       getManagedContentBadge(
@@ -51,6 +40,17 @@ export const getTopNavBadges = ({
         })
       )
     );
+  }
+
+  if (services.spaces && !isMobile) {
+    entries.push({
+      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
+        defaultMessage: 'Check out context-aware Discover',
+      }),
+      renderCustomBadge: ({ badgeText }) => (
+        <SolutionsViewBadge badgeText={badgeText} services={services} />
+      ),
+    });
   }
 
   return entries;
