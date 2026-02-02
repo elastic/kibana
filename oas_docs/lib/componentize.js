@@ -12,6 +12,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const yaml = require('js-yaml');
 const cloneDeep = require('lodash/cloneDeep');
+const { ToolingLog } = require('@kbn/tooling-log');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { createComponentNameGenerator } = require('./component_name_generator');
 const { createProcessSchema } = require('./process_schema');
@@ -222,7 +223,10 @@ function processResponseSchemas(
 const componentizeObjectSchemas = async (
   relativeFilePath,
   {
-    log = console,
+    log = new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    }),
     extractPrimitives = STRATEGY_DEFAULTS.extractPrimitives,
     removeProperties = STRATEGY_DEFAULTS.removeProperties,
     extractEmpty = STRATEGY_DEFAULTS.extractEmpty,

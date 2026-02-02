@@ -22,7 +22,7 @@ describe('componentizeObjectSchemas', () => {
     mockLog = {
       info: jest.fn(),
       debug: jest.fn(),
-      warn: jest.fn(),
+      warning: jest.fn(),
       error: jest.fn(),
     };
   });
@@ -1007,7 +1007,7 @@ describe('componentizeObjectSchemas', () => {
       await expect(componentizeObjectSchemas(testFile, { log: mockLog })).resolves.not.toThrow(); // we might want to throw though
 
       // Should warn about max depth
-      expect(mockLog.warn).toHaveBeenCalledWith(expect.stringContaining('Max depth reached'));
+      expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('Max depth reached'));
     });
   });
 
