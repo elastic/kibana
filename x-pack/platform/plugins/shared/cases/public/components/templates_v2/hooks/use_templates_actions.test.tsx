@@ -15,6 +15,7 @@ import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
 import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
+import { useExportTemplate } from './use_export_template';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
 jest.mock('../../../common/navigation/hooks', () => ({
@@ -25,12 +26,14 @@ jest.mock('../../../common/navigation/hooks', () => ({
 jest.mock('./use_delete_template');
 jest.mock('./use_update_template');
 jest.mock('./use_create_template');
+jest.mock('./use_export_template');
 jest.mock('../../../common/use_cases_toast');
 
 const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
 const useDeleteTemplateMock = useDeleteTemplate as jest.Mock;
 const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
 const useCreateTemplateMock = useCreateTemplate as jest.Mock;
+const useExportTemplateMock = useExportTemplate as jest.Mock;
 const useCasesToastMock = useCasesToast as jest.Mock;
 
 describe('useTemplatesActions', () => {
@@ -56,6 +59,7 @@ describe('useTemplatesActions', () => {
   const deleteTemplateMock = jest.fn();
   const setDefaultTemplateMock = jest.fn();
   const cloneTemplateMock = jest.fn();
+  const exportTemplateMock = jest.fn();
   const showSuccessToastMock = jest.fn();
 
   beforeEach(() => {
@@ -74,6 +78,10 @@ describe('useTemplatesActions', () => {
     });
     useCreateTemplateMock.mockReturnValue({
       mutate: cloneTemplateMock,
+      isLoading: false,
+    });
+    useExportTemplateMock.mockReturnValue({
+      mutate: exportTemplateMock,
       isLoading: false,
     });
     useCasesToastMock.mockReturnValue({
@@ -101,6 +109,7 @@ describe('useTemplatesActions', () => {
     expect(result.current).toHaveProperty('isDeleting');
     expect(result.current).toHaveProperty('isSettingDefault');
     expect(result.current).toHaveProperty('isCloning');
+    expect(result.current).toHaveProperty('isExporting');
   });
 
   it('handleEdit navigates to edit template page', () => {
@@ -202,7 +211,7 @@ describe('useTemplatesActions', () => {
     expect(showSuccessToastMock).toHaveBeenCalledWith('Template Template 1 was set as default');
   });
 
-  it('handleExport is a function', () => {
+  it('handleExport calls exportTemplate mutation with template id', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     expect(typeof result.current.handleExport).toBe('function');
@@ -211,7 +220,7 @@ describe('useTemplatesActions', () => {
       result.current.handleExport(mockTemplate);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Export template:', mockTemplate);
+    expect(exportTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.key });
   });
 
   it('handleDelete sets templateToDelete', () => {

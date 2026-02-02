@@ -11,6 +11,7 @@ import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
 import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
+import { useExportTemplate } from './use_export_template';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import * as i18n from '../../templates/translations';
 
@@ -35,6 +36,8 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
     disableDefaultSuccessToast: true,
   });
+
+  const { mutate: exportTemplate, isLoading: isExporting } = useExportTemplate();
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -78,11 +81,12 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     [setDefaultTemplate]
   );
 
-  const handleExport = useCallback((template: Template) => {
-    // TODO: Implement export functionality
-    // eslint-disable-next-line no-console
-    console.log('Export template:', template);
-  }, []);
+  const handleExport = useCallback(
+    (template: Template) => {
+      exportTemplate({ templateId: template.key });
+    },
+    [exportTemplate]
+  );
 
   const handleDelete = useCallback((template: Template) => {
     setTemplateToDelete(template);
@@ -111,5 +115,6 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     isDeleting,
     isSettingDefault,
     isCloning,
+    isExporting,
   };
 };
