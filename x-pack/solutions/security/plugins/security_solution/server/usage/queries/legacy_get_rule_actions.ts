@@ -36,7 +36,7 @@ export const legacyGetRuleActions = async ({
 }: LegacyGetRuleActionsOptions) => {
   const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: legacyRuleActionsSavedObjectType,
-    fields: ['params', 'ruleThrottle'],
+    fields: ['params', 'references', 'ruleThrottle'],
     perPage: maxPerPage,
     namespaces: ['*'],
   };
