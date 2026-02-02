@@ -15,6 +15,7 @@ export const featureStatusSchema = z.enum(featureStatus);
 export interface BaseFeature {
   type: string;
   name: string;
+  title?: string;
   description: string;
   value: Record<string, any>;
   confidence: number;
@@ -33,6 +34,7 @@ export interface Feature extends BaseFeature {
 export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   type: z.string(),
   name: z.string(),
+  title: z.string().optional(),
   description: z.string(),
   value: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(100),
