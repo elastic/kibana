@@ -23,8 +23,8 @@ import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 
 export const StorageDetails: FunctionComponent<{
-  primarySize: Index['primary_size'];
-  size: Index['size'];
+  primarySize: string;
+  size: string;
   primary: Index['primary'];
   replica: Index['replica'];
 }> = ({ primarySize, size, primary, replica }) => {
