@@ -9,7 +9,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { maxSize } from '@kbn/files-plugin/common/default_image_file_kind';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
