@@ -1,10 +1,12 @@
 # API Integration Tests for Observability Agent Builder
 
+> **See also**: [Tool Development Guidelines](../../../../plugins/observability_agent_builder/server/tools/AGENTS.md) for tool design principles, APM data types, and ECS/OTel compatibility.
+
 ## Running Tests
 
 ```bash
 node scripts/functional_test_runner \
-  --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts 
+  --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts
 ```
 
 ### Running tests for a specific tool:
@@ -14,7 +16,6 @@ node scripts/functional_test_runner \
   --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts \
   --grep "<tool_name>"
 ```
-
 
 ## Test Structure Guidelines
 

@@ -229,6 +229,7 @@ Test your tool directly via the API:
 curl -X POST http://localhost:5601/api/agent_builder/tools/_execute \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
     "tool_id": "observability.<tool_name>",
@@ -244,6 +245,7 @@ Test your tools end-to-end by chatting with the Observability agent:
 curl -X POST http://localhost:5601/api/agent_builder/converse \
   -u elastic:changeme \
   -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
     "input": "What services are experiencing issues?",
