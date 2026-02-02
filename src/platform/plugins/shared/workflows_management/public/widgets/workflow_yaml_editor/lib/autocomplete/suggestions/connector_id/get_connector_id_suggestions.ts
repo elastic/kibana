@@ -9,7 +9,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestionsItems } from './get_connector_id_suggestions_items';
-import type { MonacoInsertPosition } from '../../../../../../entities/workflows/store';
+import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export function getConnectorIdSuggestions({
@@ -44,7 +44,7 @@ export function getConnectorIdSuggestions({
       endColumn: line.length + 1,
     };
     // Pass the insert position for the "Create connector" command
-    const insertPosition: MonacoInsertPosition = {
+    const insertPosition: LineColumnPosition = {
       lineNumber,
       column: valueStartColumn,
     };
@@ -57,7 +57,7 @@ export function getConnectorIdSuggestions({
   }
 
   // No existing value - use the range as-is
-  const insertPosition: MonacoInsertPosition = {
+  const insertPosition: LineColumnPosition = {
     lineNumber,
     column: range.startColumn,
   };

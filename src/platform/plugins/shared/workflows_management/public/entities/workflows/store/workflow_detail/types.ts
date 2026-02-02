@@ -47,7 +47,7 @@ export interface WorkflowDetailState {
     connectorType?: string;
     connectorIdToEdit?: string;
     /** Position in Monaco editor where the flyout was opened from (for inserting connector ID) */
-    insertPosition?: MonacoInsertPosition;
+    insertPosition?: LineColumnPosition;
   };
 }
 
@@ -61,7 +61,10 @@ export interface ComputedData {
   workflowDefinition?: WorkflowYaml | null;
 }
 
-export interface MonacoInsertPosition {
+/**
+ * Position in a text document (1-based line and column, matching Monaco editor).
+ */
+export interface LineColumnPosition {
   lineNumber: number;
   column: number;
 }

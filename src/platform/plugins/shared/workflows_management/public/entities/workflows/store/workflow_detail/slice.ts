@@ -9,7 +9,7 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import type { ActiveTab, ComputedData, MonacoInsertPosition, WorkflowDetailState } from './types';
+import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
@@ -85,7 +85,7 @@ const workflowDetailSlice = createSlice({
     // Connector flyout actions
     openCreateConnectorFlyout: (
       state,
-      action: { payload: { connectorType: string; insertPosition?: MonacoInsertPosition } }
+      action: { payload: { connectorType: string; insertPosition?: LineColumnPosition } }
     ) => {
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },

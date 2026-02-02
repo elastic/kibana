@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import type { MonacoInsertPosition } from '../../../../../../entities/workflows/store';
+import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
 
 /**
  * Generate connector-id suggestions for a specific connector type
@@ -20,7 +20,7 @@ export function getConnectorIdSuggestionsItems(
   connectorType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
-  insertPosition?: MonacoInsertPosition
+  insertPosition?: LineColumnPosition
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -58,7 +58,7 @@ export function getConnectorIdSuggestionsItems(
   });
 
   // Use provided insertPosition or calculate from range
-  const finalInsertPosition: MonacoInsertPosition =
+  const finalInsertPosition: LineColumnPosition =
     insertPosition ??
     ('startLineNumber' in range
       ? { lineNumber: range.startLineNumber, column: range.startColumn }

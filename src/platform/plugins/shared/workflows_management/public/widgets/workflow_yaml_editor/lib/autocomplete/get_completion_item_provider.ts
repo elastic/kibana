@@ -14,7 +14,7 @@ import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
 import { openCreateConnectorFlyout } from '../../../../entities/workflows/store';
 import type {
-  MonacoInsertPosition,
+  LineColumnPosition,
   WorkflowDetailState,
 } from '../../../../entities/workflows/store';
 
@@ -87,7 +87,7 @@ export function getCompletionItemProvider(
   // Note: This should ideally be registered once, but Monaco's command system handles duplicates
   monaco.editor.registerCommand(
     'workflows.editor.action.createConnector',
-    (_, connectorType: string, insertPosition?: MonacoInsertPosition) => {
+    (_, connectorType: string, insertPosition?: LineColumnPosition) => {
       if (connectorType) {
         dispatch(openCreateConnectorFlyout({ connectorType, insertPosition }));
       }

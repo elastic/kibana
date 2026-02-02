@@ -10,7 +10,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
-import type { MonacoInsertPosition } from '../../../../entities/workflows/store';
+import type { LineColumnPosition } from '../../../../entities/workflows/store';
 import {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
@@ -24,7 +24,7 @@ export enum WorkflowAction {
 type WorkflowHoverClickAction =
   | {
       action: WorkflowAction.OpenConnectorCreationFlyout;
-      params: { connectorType: string; insertPosition: MonacoInsertPosition };
+      params: { connectorType: string; insertPosition: LineColumnPosition };
     }
   | {
       action: WorkflowAction.OpenConnectorEditFlyout;
@@ -79,7 +79,7 @@ export function useMonacoHoverClickInterceptor(
       if (action === WorkflowAction.OpenConnectorCreationFlyout) {
         const connectorType = actionElement.getAttribute('data-connector-type');
         if (connectorType) {
-          let insertPosition: MonacoInsertPosition | undefined;
+          let insertPosition: LineColumnPosition | undefined;
           const lineNumberAttr = actionElement.getAttribute('data-line-number');
           const columnAttr = actionElement.getAttribute('data-column');
           if (lineNumberAttr && columnAttr) {
