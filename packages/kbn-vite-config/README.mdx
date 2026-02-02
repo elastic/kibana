@@ -1,0 +1,160 @@
+---
+id: kbn-vite-config
+title: '@kbn/vite-config'
+slug: /kibana-dev-docs/kbn-vite-config
+---
+
+# @kbn/vite-config
+
+Shared Vite configuration and plugins for Kibana packages and plugins.
+
+## Overview
+
+This package provides a consistent Vite configuration that mirrors Kibana's webpack setup, enabling a gradual migration from webpack to Vite. It includes:
+
+- **Module resolution** for `@kbn/*` packages using the Kibana package map
+- **Legacy import support** for `kibana/public`, `kibana/server`, and root-relative paths
+- **Theme handling** for SCSS with Kibana theme support
+- **Asset loaders** for `.peggy`, `.text`, and raw file imports
+- **Bundle externals** for shared dependencies
+
+## Usage
+
+### Basic Package Configuration
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { createKbnViteConfig } from '@kbn/vite-config';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnViteConfig({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+    entry: './src/index.ts',
+  })
+);
+```
+
+### Browser Package
+
+```typescript
+import { defineConfig } from 'vite';
+import { createKbnBrowserConfig } from '@kbn/vite-config';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnBrowserConfig({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+    entry: './public/index.ts',
+  })
+);
+```
+
+### Node.js Package
+
+```typescript
+import { defineConfig } from 'vite';
+import { createKbnNodeConfig } from '@kbn/vite-config';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+export default defineConfig(
+  createKbnNodeConfig({
+    repoRoot: REPO_ROOT,
+    packageRoot: __dirname,
+    entry: './server/index.ts',
+  })
+);
+```
+
+## Plugins
+
+### kbnResolverPlugin
+
+Resolves `@kbn/*` imports using the Kibana package map.
+
+```typescript
+import { kbnResolverPlugin } from '@kbn/vite-config';
+
+plugins: [kbnResolverPlugin({ repoRoot: REPO_ROOT })];
+```
+
+### kbnExternalsPlugin
+
+Externalizes shared dependencies similar to `@kbn/ui-shared-deps-src`.
+
+```typescript
+import { kbnExternalsPlugin, DEFAULT_SHARED_EXTERNALS } from '@kbn/vite-config';
+
+plugins: [
+  kbnExternalsPlugin({
+    externals: DEFAULT_SHARED_EXTERNALS,
+  }),
+];
+```
+
+### kbnStylesPlugin
+
+Handles SCSS with Kibana theme support.
+
+```typescript
+import { kbnStylesPlugin } from '@kbn/vite-config';
+
+plugins: [
+  kbnStylesPlugin({
+    repoRoot: REPO_ROOT,
+    themeTags: ['k7light', 'k7dark'],
+  }),
+];
+```
+
+### kbnPeggyPlugin
+
+Compiles `.peggy` grammar files (parser generator).
+
+```typescript
+import { kbnPeggyPlugin } from '@kbn/vite-config';
+
+plugins: [kbnPeggyPlugin()];
+```
+
+### kbnDotTextPlugin
+
+Imports `.text` files as strings.
+
+```typescript
+import { kbnDotTextPlugin } from '@kbn/vite-config';
+
+plugins: [kbnDotTextPlugin()];
+```
+
+## Configuration Options
+
+### KbnViteConfigOptions
+
+| Option         | Type                                           | Description                                                     |
+| -------------- | ---------------------------------------------- | --------------------------------------------------------------- |
+| `repoRoot`     | `string`                                       | The root directory of the Kibana repository                     |
+| `packageRoot`  | `string`                                       | The root directory of the package being built                   |
+| `isProduction` | `boolean`                                      | Whether this is a production build (default: based on NODE_ENV) |
+| `isBrowser`    | `boolean`                                      | Whether this build is for the browser (default: true)           |
+| `plugins`      | `PluginOption[]`                               | Additional Vite plugins to include                              |
+| `aliases`      | `Record<string, string>`                       | Additional resolve aliases                                      |
+| `entry`        | `string \| string[] \| Record<string, string>` | Entry points for the build                                      |
+| `outDir`       | `string`                                       | Output directory relative to packageRoot (default: 'target')    |
+| `external`     | `(string \| RegExp)[]`                         | External dependencies to exclude from bundling                  |
+| `react`        | `boolean`                                      | Enable React support (default: true)                            |
+
+## Migration from Webpack
+
+This package is designed to facilitate gradual migration from webpack to Vite. Key differences to note:
+
+1. **Module resolution**: Vite uses esbuild for development and Rollup for production, both of which have different resolution algorithms than webpack.
+
+2. **Hot Module Replacement**: Vite's HMR is native and faster than webpack's, but may require updates to HMR-specific code.
+
+3. **CSS handling**: Vite handles CSS differently. The `kbnStylesPlugin` attempts to maintain compatibility with the existing SCSS setup.
+
+4. **Code splitting**: Vite uses Rollup's code splitting, which may produce different chunks than webpack.

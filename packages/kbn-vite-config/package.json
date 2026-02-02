@@ -1,0 +1,21 @@
+{
+  "name": "@kbn/vite-config",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "main": "./target/index.cjs",
+  "module": "./target/index.js",
+  "types": "./target/packages/kbn-vite-config/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./target/packages/kbn-vite-config/index.d.ts",
+      "import": "./target/index.js",
+      "require": "./target/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "postinstall": "node scripts/build.cjs"
+  }
+}
