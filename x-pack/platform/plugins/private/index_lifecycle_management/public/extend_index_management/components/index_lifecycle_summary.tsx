@@ -25,8 +25,9 @@ import {
 } from '@elastic/eui';
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
+import type { IndexDetailsTab } from '@kbn/index-management-shared-types';
 import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import type { Index } from '../../../common/types';
 import type { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
 import { usePhaseColors } from '../../application/lib';
