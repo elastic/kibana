@@ -204,6 +204,9 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -299,10 +302,10 @@ export const performBulkActionRoute = (
                   await validateBulkDuplicateRule({ mlAuthz, rule });
 
                   await validateRuleResponseActions({
-                    endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
-                    endpointService: ctx.securitySolution.getEndpointService(),
+                    endpointAuthz,
+                    endpointService,
                     rulePayload: {},
-                    spaceId: ctx.securitySolution.getSpaceId(),
+                    spaceId,
                     existingRule: rule,
                   });
 
