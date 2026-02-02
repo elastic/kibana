@@ -154,40 +154,28 @@ export const listAllFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Lists all features across streams',
-    description: 'Fetches all features, optionally filtered by stream names',
+    description: 'Fetches all features the user has access to',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: z.object({
-      streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
-        .describe('Stream names to filter features'),
-      type: z.string().optional().describe('Feature type to filter'),
-    }),
-  }),
   handler: async ({
-    params,
     request,
     getScopedClients,
     server,
   }): Promise<{ features: FeatureWithStream[] }> => {
-    const { featureClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { featureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { hits: features } = await featureClient.getAllFeatures({
-      streams: params.query.streamNames,
-      type: params.query.type ? [params.query.type] : [],
-    });
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams.map((stream) => stream.name);
+
+    const { hits: features } = await featureClient.getAllFeatures(streamNames);
 
     return {
       features,

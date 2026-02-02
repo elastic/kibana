@@ -21,17 +21,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { upperFirst } from 'lodash';
 import React, { useState, useCallback } from 'react';
-import {
-  useFetchFeatures,
-  type FeatureWithStream,
-} from '../../../hooks/use_fetch_features';
+import { useFetchFeatures, type FeatureWithStream } from '../../../hooks/use_fetch_features';
 import { LoadingPanel } from '../../loading_panel';
 import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FeatureDetailsFlyout } from '../../stream_detail_systems/stream_features/feature_details_flyout';
-import {
-  getConfidenceColor,
-} from '../../stream_detail_systems/stream_features/use_stream_features_table';
+import { getConfidenceColor } from '../../stream_detail_systems/stream_features/use_stream_features_table';
 
 export function FeaturesTable() {
   const { euiTheme } = useEuiTheme();
@@ -156,9 +150,6 @@ export function FeaturesTable() {
               )}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -197,10 +188,7 @@ export function FeaturesTable() {
         />
       </EuiFlexItem>
       {selectedFeature && (
-        <FeatureDetailsFlyout
-          feature={selectedFeature}
-          onClose={handleCloseFlyout}
-        />
+        <FeatureDetailsFlyout feature={selectedFeature} onClose={handleCloseFlyout} />
       )}
     </EuiFlexGroup>
   );

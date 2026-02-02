@@ -15,8 +15,6 @@ export interface FeatureWithStream extends Feature {
 }
 
 interface UseFetchFeaturesOptions {
-  streamNames?: string[];
-  type?: string;
   query?: string;
 }
 
@@ -25,7 +23,7 @@ interface FetchFeaturesResult {
 }
 
 export const useFetchFeatures = (options: UseFetchFeaturesOptions = {}) => {
-  const { streamNames, type, query } = options;
+  const { query } = options;
   const {
     dependencies: {
       start: {
@@ -39,28 +37,16 @@ export const useFetchFeatures = (options: UseFetchFeaturesOptions = {}) => {
     signal,
   }: QueryFunctionContext): Promise<FetchFeaturesResult | undefined> => {
     const response = await streamsRepositoryClient.fetch('GET /internal/streams/_features', {
-      params: {
-        query: {
-          streamNames,
-          type,
-        },
-      },
       signal: signal ?? null,
     });
 
     let features = response.features as FeatureWithStream[];
 
-    // Filter by query if provided (case-insensitive search on name, title, and description)
+    // Filter by query if provided (case-insensitive search on name and value only)
     if (query?.trim()) {
       const searchQuery = query.trim().toLowerCase();
       features = features.filter((feature) => {
-        const searchableFields = [
-          feature.name,
-          feature.title,
-          feature.description,
-          feature.type,
-          feature.stream_name,
-        ]
+        const searchableFields = [feature.name, feature.value]
           .filter(Boolean)
           .map((field) => String(field).toLowerCase());
 
@@ -72,7 +58,7 @@ export const useFetchFeatures = (options: UseFetchFeaturesOptions = {}) => {
   };
 
   return useQuery<FetchFeaturesResult | undefined, Error>({
-    queryKey: ['features', 'all', streamNames, type, query],
+    queryKey: ['features', 'all', query],
     queryFn: fetchFeatures,
     onError: showFetchErrorToast,
   });

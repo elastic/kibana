@@ -164,10 +164,7 @@ export class FeatureClient {
     });
   }
 
-  async getAllFeatures(filters?: {
-    streams?: string[];
-    type?: string[];
-  }): Promise<{ hits: FeatureWithStream[]; total: number }> {
+  async getAllFeatures(streams: string[]): Promise<{ hits: FeatureWithStream[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       {
         bool: {
@@ -180,18 +177,9 @@ export class FeatureClient {
       },
     ];
 
-    if (filters?.streams?.length) {
+    if (streams.length) {
       filterClauses.push({
-        terms: { [STREAM_NAME]: filters.streams },
-      });
-    }
-
-    if (filters?.type?.length) {
-      filterClauses.push({
-        bool: {
-          should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
-          minimum_should_match: 1,
-        },
+        terms: { [STREAM_NAME]: streams },
       });
     }
 
