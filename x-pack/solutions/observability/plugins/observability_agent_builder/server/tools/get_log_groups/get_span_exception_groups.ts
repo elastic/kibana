@@ -46,6 +46,7 @@ export async function getSpanExceptionGroups({
   includeFirstSeen,
   size,
   logger,
+  fields,
 }: {
   apmEventClient: ApmEventClient;
   startMs: number;
@@ -55,6 +56,7 @@ export async function getSpanExceptionGroups({
   includeFirstSeen: boolean;
   size: number;
   logger: Logger;
+  fields: string[];
 }) {
   const spanExceptionSamples = await getSpanExceptionSamples({
     apmEventClient,
@@ -64,6 +66,7 @@ export async function getSpanExceptionGroups({
     includeStackTrace,
     size,
     logger,
+    fields,
   });
 
   const [firstSeenMap, downstreamServiceMap] = await Promise.all([
@@ -89,7 +92,7 @@ export async function getSpanExceptionGroups({
     const downstreamServiceResource = downstreamServiceMap.get(groupId);
     const firstSeen = firstSeenMap.get(groupId);
 
-    return { ...sample, firstSeen, downstreamServiceResource };
+    return { type: 'spanException' as const, ...sample, firstSeen, downstreamServiceResource };
   });
 }
 
@@ -101,6 +104,7 @@ async function getSpanExceptionSamples({
   includeStackTrace,
   size,
   logger,
+  fields,
 }: {
   apmEventClient: ApmEventClient;
   startMs: number;
@@ -109,6 +113,7 @@ async function getSpanExceptionSamples({
   includeStackTrace: boolean;
   size: number;
   logger: Logger;
+  fields: string[];
 }) {
   logger.debug(`Fetching span exception samples, kqlFilter: ${kqlFilter ?? 'none'}`);
 
@@ -173,6 +178,7 @@ async function getSpanExceptionSamples({
 
                 // Stack trace if requested
                 ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
+                ...fields,
               ],
               sort: [{ '@timestamp': 'desc' as const }],
             },

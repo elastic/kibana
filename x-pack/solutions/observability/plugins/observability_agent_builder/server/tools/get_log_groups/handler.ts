@@ -60,6 +60,7 @@ export async function getToolHandler({
       includeStackTrace,
       includeFirstSeen,
       size,
+      fields,
     }),
     getLogExceptionGroups({
       core,
@@ -86,9 +87,9 @@ export async function getToolHandler({
     }),
   ]);
 
-  return {
-    spanExceptionGroups: orderBy(spanExceptionGroups, ['count'], ['desc']),
-    logExceptionGroups: orderBy(logExceptionGroups, ['count'], ['desc']),
-    nonExceptionLogGroups: orderBy(nonExceptionLogGroups, ['count'], ['desc']),
-  };
+  return orderBy(
+    [...spanExceptionGroups, ...logExceptionGroups, ...nonExceptionLogGroups],
+    (group) => group.count,
+    ['desc']
+  );
 }

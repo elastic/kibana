@@ -108,5 +108,6 @@ export async function getNonExceptionLogGroupsWithQuery({
     size,
     messageField: 'message',
     fields: ['message', '@timestamp', 'log.level', ...fields],
+    type: 'log',
   });
 }

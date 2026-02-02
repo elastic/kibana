@@ -101,5 +101,6 @@ export async function getLogExceptionGroups({
       ...fields,
     ],
     messageField: EXCEPTION_MESSAGE,
+    type: 'logException',
   });
 }

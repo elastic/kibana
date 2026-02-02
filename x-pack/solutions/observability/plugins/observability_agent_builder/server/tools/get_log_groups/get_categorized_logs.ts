@@ -48,6 +48,7 @@ export async function getCategorizedLogs({
   size,
   fields,
   messageField,
+  type,
 }: {
   esClient: IScopedClusterClient;
   index: string[];
@@ -56,6 +57,7 @@ export async function getCategorizedLogs({
   size: number;
   fields: string[];
   messageField: string;
+  type: 'log' | 'logException';
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -101,6 +103,7 @@ export async function getCategorizedLogs({
       : undefined;
 
     return {
+      type,
       pattern: bucket.key,
       count: bucket.doc_count,
       lastSeen,
