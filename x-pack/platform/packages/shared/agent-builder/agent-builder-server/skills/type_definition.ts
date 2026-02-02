@@ -89,7 +89,7 @@ export interface SkillTypeDefinition<
    */
   referencedContent?: {
     /**
-     * Name of the content. Also used as the file name `<reference-name>.md`. 
+     * Name of the content. Also used as the file name `<reference-name>.md`.
      * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
      * [basePath]/[name]/[relativePath]/[reference-name] must be unique.
      */
@@ -101,7 +101,7 @@ export interface SkillTypeDefinition<
      * - "." - stores reference content in the same directory as the skill
      * - "./[directory]" - stores reference content in the "[directory]" directory
      * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
-     * 
+     *
      * Examples:
      * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
      * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
@@ -140,17 +140,37 @@ export const skillTypeDefinitionSchema = z.object({
   name: z
     .string()
     .max(64, 'Name must be at most 64 characters')
-    .regex(/^[a-z0-9-_]+$/, 'Name must contain only lowercase letters, numbers, underscores, and hyphens'),
+    .regex(
+      /^[a-z0-9-_]+$/,
+      'Name must contain only lowercase letters, numbers, underscores, and hyphens'
+    ),
   description: z
     .string()
     .min(1, 'Description must be non-empty')
     .max(1024, 'Description must be at most 1024 characters'),
   body: z.string().min(1, 'Body must be non-empty'),
-  referencedContent: z.array(z.object({
-    name: z.string().min(1, 'Name must be non-empty').max(64, 'Name must be at most 64 characters').regex(/^[a-z0-9-_]+$/, 'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'),
-    relativePath: z.string().min(1, 'Relative path must be non-empty').regex(/^(?:\.|\.\/[a-z0-9-_]+)$/, 'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'),
-    body: z.string().min(1, 'Body must be non-empty'),
-  })).optional(),
+  referencedContent: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .min(1, 'Name must be non-empty')
+          .max(64, 'Name must be at most 64 characters')
+          .regex(
+            /^[a-z0-9-_]+$/,
+            'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'
+          ),
+        relativePath: z
+          .string()
+          .min(1, 'Relative path must be non-empty')
+          .regex(
+            /^(?:\.|\.\/[a-z0-9-_]+)$/,
+            'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
+          ),
+        body: z.string().min(1, 'Body must be non-empty'),
+      })
+    )
+    .optional(),
 });
 
 /**

@@ -6,7 +6,8 @@
  */
 
 import { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
-import { validateSkillTypeDefinition, SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 
 // Mock the validation function
 jest.mock('@kbn/agent-builder-server/skills', () => {
