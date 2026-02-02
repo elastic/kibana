@@ -129,12 +129,12 @@ export function useYamlValidation(
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
-          ...validateVariablesInternal(
+          ...(await validateVariablesInternal(
             variableItems,
             workflowGraph,
             workflowDefinition,
             yamlDocument
-          ),
+          )),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
         );
       }

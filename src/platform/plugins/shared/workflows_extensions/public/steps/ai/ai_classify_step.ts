@@ -23,7 +23,7 @@ export const AiClassifyStepDefinition: PublicStepDefinition = {
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) =>
-        buildStructuredOutputSchema(input as z.infer<AiClassifyStepInputSchema>),
+        Promise.resolve(buildStructuredOutputSchema(input as z.infer<AiClassifyStepInputSchema>)),
     },
   },
   icon: React.lazy(() =>

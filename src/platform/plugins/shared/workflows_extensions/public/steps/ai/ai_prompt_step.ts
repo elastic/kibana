@@ -28,16 +28,16 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
         const typedInput = input as z.infer<typeof InputSchema>;
 
         if (!typedInput.schema) {
-          return AiPromptOutputSchema;
+          return Promise.resolve(AiPromptOutputSchema);
         }
 
         const zodSchema = fromJSONSchema(typedInput.schema);
 
         if (!zodSchema) {
-          return AiPromptOutputSchema;
+          return Promise.resolve(AiPromptOutputSchema);
         }
 
-        return getStructuredOutputSchema(zodSchema);
+        return Promise.resolve(getStructuredOutputSchema(zodSchema));
       },
     },
   },
