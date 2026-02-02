@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getApiKeyHeader = (apiKey?: string) => {
-  return apiKey ? { Authorization: `ApiKey ${apiKey}` } : undefined;
-};
+export const SAVED_OBJECT_REF_NAME = 'savedObjectRef';

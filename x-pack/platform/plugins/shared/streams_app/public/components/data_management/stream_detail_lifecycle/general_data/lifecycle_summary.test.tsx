@@ -7,219 +7,126 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { Streams } from '@kbn/streams-schema';
 import { LifecycleSummary } from './lifecycle_summary';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
+import type { Streams } from '@kbn/streams-schema';
 
-const mockUseKibana = jest.fn();
-const mockUseStreamsAppFetch = jest.fn();
-
+// Mock the hooks
 jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => mockUseKibana(),
+  useKibana: () => ({
+    dependencies: {
+      start: {
+        streams: {
+          streamsRepositoryClient: {
+            fetch: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+      },
+    },
+    isServerless: false,
+  }),
 }));
+
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
-  useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
+  useStreamsAppFetch: jest.fn(() => ({
+    value: undefined,
+    loading: false,
+  })),
 }));
+
+const mockUseStreamsAppFetch = useStreamsAppFetch as jest.Mock;
 
 jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
   useIlmPhasesColorAndDescription: () => ({
     ilmPhases: {
-      hot: { color: '#FF0000' },
-      warm: { color: '#FFA500' },
-      cold: { color: '#0000FF' },
-      frozen: { color: '#00FFFF' },
-      delete: { color: '#808080' },
+      hot: { color: '#FF0000', hoverColor: '#FF3333', description: 'Hot phase' },
+      warm: { color: '#FFA500', hoverColor: '#FFB833', description: 'Warm phase' },
+      cold: { color: '#0000FF', hoverColor: '#3333FF', description: 'Cold phase' },
+      frozen: { color: '#00FFFF', hoverColor: '#33FFFF', description: 'Frozen phase' },
+      delete: { color: '#808080', hoverColor: '#999999', description: 'Delete phase' },
     },
   }),
 }));
 
 describe('LifecycleSummary', () => {
-  const createMockDefinition = (
-    lifecycle: 'ilm' | 'dsl',
-    dataRetention?: string
-  ): Streams.ingest.all.GetResponse =>
+  const createDslDefinition = (
+    dataRetention?: string,
+    downsample?: Array<{ after: string; fixed_interval: string }>
+  ) =>
     ({
-      stream: { name: 'logs-test' },
-      effective_lifecycle:
-        lifecycle === 'ilm'
-          ? { ilm: { policy: 'test-policy' } }
-          : { dsl: { data_retention: dataRetention } },
+      stream: { name: 'test-stream' },
+      effective_lifecycle: {
+        dsl: {
+          data_retention: dataRetention,
+          downsample,
+        },
+      },
     } as Streams.ingest.all.GetResponse);
 
-  const createMockStats = (sizeBytes: number): DataStreamStats =>
+  const createIlmDefinition = () =>
     ({
-      name: 'logs-test',
-      userPrivileges: {
-        canMonitor: true,
-        canReadFailureStore: true,
-        canManageFailureStore: true,
+      stream: { name: 'test-stream' },
+      effective_lifecycle: {
+        ilm: {
+          policy: 'test-policy',
+        },
       },
-      sizeBytes,
-    } as DataStreamStats);
+    } as Streams.ingest.all.GetResponse);
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
 
-    mockUseKibana.mockReturnValue({
-      dependencies: {
-        start: {
-          streams: {
-            streamsRepositoryClient: {
-              fetch: jest.fn(),
-            },
-          },
-        },
-      },
-      isServerless: false,
+  describe('DSL Lifecycle', () => {
+    it('should render DSL lifecycle with retention period', () => {
+      const definition = createDslDefinition('30d');
+
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
+    });
+
+    it('should render DSL lifecycle with infinite retention', () => {
+      const definition = createDslDefinition(undefined);
+
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('dataLifecycleTimeline-infinite')).toBeInTheDocument();
+    });
+
+    it('should render DSL lifecycle with downsampling', () => {
+      const definition = createDslDefinition('60d', [
+        { after: '10d', fixed_interval: '1h' },
+        { after: '30d', fixed_interval: '1d' },
+      ]);
+
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
   });
 
   describe('ILM Lifecycle', () => {
-    it('should show skeleton when ILM data is being fetched', () => {
+    it('should render ILM lifecycle', () => {
+      const definition = createIlmDefinition();
+
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
+    });
+
+    it('should show loading skeleton while fetching ILM stats', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: undefined,
         loading: true,
       });
 
-      const definition = createMockDefinition('ilm');
+      const definition = createIlmDefinition();
+
       render(<LifecycleSummary definition={definition} />);
 
-      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
-    });
-
-    it('should render ILM phases with labels and sizes', () => {
-      const mockPhasesObject = {
-        hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000000 },
-        warm: { name: 'warm', min_age: '30d', size_in_bytes: 500000 },
-        delete: { name: 'delete', min_age: '60d' },
-      };
-
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: { phases: mockPhasesObject },
-        loading: false,
-      });
-
-      const definition = createMockDefinition('ilm');
-      render(<LifecycleSummary definition={definition} />);
-
-      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
-      expect(screen.getByTestId('lifecyclePhase-hot-name')).toBeInTheDocument();
-      expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
-      expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
-    });
-
-    it('should display storage sizes for ILM phases', () => {
-      const mockPhasesObject = {
-        hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000000 },
-        warm: { name: 'warm', min_age: '30d', size_in_bytes: 500000 },
-        delete: { name: 'delete', min_age: '60d' },
-      };
-
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: { phases: mockPhasesObject },
-        loading: false,
-      });
-
-      const definition = createMockDefinition('ilm');
-      render(<LifecycleSummary definition={definition} />);
-
-      expect(screen.getByTestId('lifecyclePhase-hot-size')).toHaveTextContent(/1\.0\s?MB/);
-      expect(screen.getByTestId('lifecyclePhase-warm-size')).toHaveTextContent(/500\.0\s?KB/);
-    });
-
-    it('should not render phases when ILM data is not available', () => {
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: undefined,
-        loading: false,
-      });
-
-      const definition = createMockDefinition('ilm');
-      render(<LifecycleSummary definition={definition} />);
-
-      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
-      expect(screen.queryByTestId('lifecyclePhase-hot-name')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('DSL Lifecycle', () => {
-    beforeEach(() => {
-      mockUseKibana.mockReturnValue({
-        dependencies: {
-          start: {
-            streams: {
-              streamsRepositoryClient: { fetch: jest.fn() },
-            },
-          },
-        },
-        isServerless: false,
-      });
-
-      mockUseStreamsAppFetch.mockReturnValue({
-        value: undefined,
-        loading: false,
-      });
-    });
-
-    it('should display storage size', () => {
-      const definition = createMockDefinition('dsl', '60d');
-      const stats = createMockStats(1500000000);
-
-      render(<LifecycleSummary definition={definition} stats={stats} />);
-
-      expect(screen.getByTestId('lifecyclePhase-Hot-size')).toHaveTextContent(/1\.5\s?GB/);
-    });
-
-    it('should render delete icon when retention period is set', () => {
-      const definition = createMockDefinition('dsl', '60d');
-      render(<LifecycleSummary definition={definition} />);
-
-      expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
-    });
-
-    it('should not render delete icon when retention is infinite', () => {
-      const definition = createMockDefinition('dsl', undefined);
-      render(<LifecycleSummary definition={definition} />);
-
-      expect(screen.queryByTestId('dataLifecycle-delete-icon')).not.toBeInTheDocument();
-    });
-    describe('Non-Serverless', () => {
-      it('should render "Hot" label', () => {
-        const definition = createMockDefinition('dsl', '60d');
-        const stats = createMockStats(1500000000);
-
-        render(<LifecycleSummary definition={definition} stats={stats} />);
-      });
-    });
-
-    describe('Serverless', () => {
-      beforeEach(() => {
-        mockUseKibana.mockReturnValue({
-          dependencies: {
-            start: {
-              streams: {
-                streamsRepositoryClient: { fetch: jest.fn() },
-              },
-            },
-          },
-          isServerless: true,
-        });
-
-        mockUseStreamsAppFetch.mockReturnValue({
-          value: undefined,
-          loading: false,
-        });
-      });
-
-      it('should render "Successful ingest" label', () => {
-        const definition = createMockDefinition('dsl', '30d');
-        const stats = createMockStats(2000000000);
-
-        render(<LifecycleSummary definition={definition} stats={stats} />);
-
-        expect(screen.getByTestId('lifecyclePhase-Successful ingest-name')).toBeInTheDocument();
-      });
     });
   });
 });

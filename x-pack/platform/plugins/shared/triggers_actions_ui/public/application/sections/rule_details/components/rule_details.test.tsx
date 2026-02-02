@@ -322,25 +322,30 @@ describe('rule_details', () => {
         .toMatchInlineSnapshot(`
         <EuiPanel
           borderRadius="none"
+          className="euiCallOut euiCallOut--danger"
           color="danger"
-          css="unknown styles"
           data-test-subj="ruleErrorBanner"
           grow={false}
           paddingSize="s"
           panelRef={null}
         >
-          <p
-            className="euiCallOutHeader__title"
+          <EuiTitle
+            css="unknown styles"
+            size="xxs"
           >
-            <EuiIcon
-              aria-hidden="true"
-              color="inherit"
-              css="unknown styles"
-              size="m"
-              type="error"
-            />
-            Cannot run rule
-          </p>
+            <p
+              className="euiCallOutHeader__title"
+            >
+              <EuiIcon
+                aria-hidden="true"
+                color="inherit"
+                css="unknown styles"
+                size="m"
+                type="error"
+              />
+              Cannot run rule
+            </p>
+          </EuiTitle>
           <EuiSpacer
             size="s"
           />
