@@ -24,6 +24,20 @@ import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 import { getPartitionFillColor } from '../colors/color_mapping_accessors';
 
+function getColorCategoriesForChart(
+  chartType: ChartTypes,
+  columns: Partial<BucketColumns>[],
+  rows: DatatableRow[]
+) {
+  // the mosaic configures the main categories in the second column, instead of the first
+  // as it happens in all the other partition types.
+  // Independently from the bucket aggregation used, the categories will always be casted
+  // as string to make it nicely working with a text input field, avoiding a field
+  const accessor =
+    chartType === ChartTypes.MOSAIC && columns.length === 2 ? columns[1]?.id : columns[0]?.id;
+  return accessor ? getColorCategories(rows, [accessor]) : [];
+}
+
 export const getLayers = (
   chartType: ChartTypes,
   columns: Array<Partial<BucketColumns>>,
@@ -47,12 +61,7 @@ export const getLayers = (
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
   }
-
-  const categories =
-    chartType === ChartTypes.MOSAIC && columns.length === 2
-      ? getColorCategories(rows, columns[1]?.id)
-      : getColorCategories(rows, columns[0]?.id);
-
+  const categories = getColorCategoriesForChart(chartType, columns, rows);
   const colorIndexMap = new Map(categories.map((c, i) => [String(c), i]));
 
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
@@ -146,14 +155,8 @@ function getColorFromMappingFactory(
   ) {
     return undefined;
   }
-  // the mosaic configures the main categories in the second column, instead of the first
-  // as it happens in all the other partition types.
-  // Independently from the bucket aggregation used, the categories will always be casted
-  // as string to make it nicely working with a text input field, avoiding a field
-  const categories =
-    chartType === ChartTypes.MOSAIC && columns.length === 2
-      ? getColorCategories(rows, columns[1]?.id)
-      : getColorCategories(rows, columns[0]?.id);
+
+  const categories = getColorCategoriesForChart(chartType, columns, rows);
   return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
     type: 'categories',
     categories,

@@ -9,12 +9,21 @@ import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MB } from '@kbn/file-upload-common/src/constants';
+import { FileUploadTelemetryService } from '@kbn/file-upload-common';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';
+import { hasSidecarFiles } from '../utils';
 
 export type OnFileSelectParameters = GeoFilePreview & {
   indexName: string;
   importer: GeoFileImporter;
+  getFilesTelemetry: () => {
+    total_files: number;
+    total_size_bytes: number;
+    main_file_size: number;
+    main_file_extension: string;
+    sidecar_files: Array<{ size: number; extension: string }>;
+  };
 };
 
 interface Props {
@@ -28,6 +37,7 @@ interface State {
   isLoadingPreview: boolean;
   importer: GeoFileImporter | null;
   previewSummary: string | null;
+  file: File | null;
 }
 
 export class GeoFilePicker extends Component<Props, State> {
@@ -39,6 +49,7 @@ export class GeoFilePicker extends Component<Props, State> {
     isLoadingPreview: false,
     importer: null,
     previewSummary: null,
+    file: null,
   };
 
   async componentDidMount() {
@@ -58,6 +69,7 @@ export class GeoFilePicker extends Component<Props, State> {
       isLoadingPreview: false,
       importer: null,
       previewSummary: null,
+      file: null,
     });
 
     if (files && files.length) {
@@ -68,6 +80,7 @@ export class GeoFilePicker extends Component<Props, State> {
           {
             defaultIndexName: file.name.split('.')[0].toLowerCase(),
             importer,
+            file,
           },
           this._loadFilePreview
         );
@@ -116,11 +129,35 @@ export class GeoFilePicker extends Component<Props, State> {
           : null,
     });
 
-    if (preview) {
+    if (preview && this.state.importer && this.state.file) {
       this.props.onSelect({
         ...preview,
         importer: this.state.importer,
         indexName: this.state.defaultIndexName ? this.state.defaultIndexName : 'features',
+        getFilesTelemetry: () => {
+          const mainFile = this.state.file!;
+          const mainFileExtension = FileUploadTelemetryService.getFileExtension(mainFile.name);
+
+          // Get sidecar files if available
+          const sidecarFiles = hasSidecarFiles(this.state.importer)
+            ? this.state.importer.getSidecarFiles?.() ?? []
+            : [];
+
+          const totalFiles = 1 + sidecarFiles.length;
+          const totalSize =
+            mainFile.size + sidecarFiles.reduce((total, file) => total + file.size, 0);
+
+          return {
+            total_files: totalFiles,
+            total_size_bytes: totalSize,
+            main_file_size: mainFile.size,
+            main_file_extension: mainFileExtension,
+            sidecar_files: sidecarFiles.map((file) => ({
+              size: file.size,
+              extension: FileUploadTelemetryService.getFileExtension(file.name),
+            })),
+          };
+        },
       });
     }
   };

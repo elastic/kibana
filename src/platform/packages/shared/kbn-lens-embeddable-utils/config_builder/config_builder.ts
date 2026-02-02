@@ -45,6 +45,10 @@ import {
   fromAPItoLensState as fromRegionMapAPItoLensState,
   fromLensStateToAPI as fromRegionMapLensStateToAPI,
 } from './transforms/charts/region_map';
+import {
+  fromAPItoLensState as fromDatatableAPItoLensState,
+  fromLensStateToAPI as fromDatatableLensStateToAPI,
+} from './transforms/charts/datatable';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
@@ -57,6 +61,7 @@ const compatibilityMap: Record<string, string> = {
   lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tagcloud',
   lnsChoropleth: 'region_map',
+  lnsDatatable: 'datatable',
 };
 
 /**
@@ -94,6 +99,10 @@ const apiConvertersByChart = {
   region_map: {
     fromAPItoLensState: fromRegionMapAPItoLensState,
     fromLensStateToAPI: fromRegionMapLensStateToAPI,
+  },
+  datatable: {
+    fromAPItoLensState: fromDatatableAPItoLensState,
+    fromLensStateToAPI: fromDatatableLensStateToAPI,
   },
 } as const;
 

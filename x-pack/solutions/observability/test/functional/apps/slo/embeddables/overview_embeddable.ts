@@ -56,8 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can select an SLO', async () => {
-        await sloUi.common.assertOverviewSloSelectorExists();
-        await sloUi.common.setComboBoxSloSelection();
+        await sloUi.common.assertSloDefinitionSelectorExists();
+        await sloUi.common.setComboBoxSloDefinitionSelection();
+        await sloUi.common.assertSloInstanceSelectorExists();
+        await sloUi.common.setComboBoxSloInstanceSelection();
         await sloUi.common.clickOverviewCofigurationSaveButton();
       });
 

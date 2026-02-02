@@ -76,6 +76,18 @@ export const stepMachine = setup({
         isUpdated: true,
       };
     }),
+    changeParent: assign(({ context }, { parentId }: { parentId: string | null }) => {
+      const updatedStep = {
+        ...context.step,
+        parentId,
+      };
+
+      return {
+        step: updatedStep,
+        previousStep: updatedStep,
+        isUpdated: true,
+      };
+    }),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),
@@ -88,6 +100,13 @@ export const stepMachine = setup({
       ({ context }) => context.parentRef,
       ({ context }) => ({
         type: 'step.change',
+        id: context.step.customIdentifier,
+      })
+    ),
+    forwardParentChangeEventToParent: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.parentChanged',
         id: context.step.customIdentifier,
       })
     ),
@@ -166,6 +185,12 @@ export const stepMachine = setup({
               actions: [
                 { type: 'changeDescription', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
+              ],
+            },
+            'step.changeParent': {
+              actions: [
+                { type: 'changeParent', params: ({ event }) => event },
+                { type: 'forwardParentChangeEventToParent' },
               ],
             },
             'step.delete': '#deleted',

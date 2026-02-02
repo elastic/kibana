@@ -5,18 +5,31 @@
  * 2.0.
  */
 
+import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect, newestValue } from './field_retention_operations';
 
-export const SERVICE_IDENTITY_FIELD = 'service.name';
-
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
-  identityFields: [{ field: SERVICE_IDENTITY_FIELD, mapping: { type: 'keyword' } }],
+  identityField: {
+    calculated: true,
+    defaultIdField: 'service.entity.id',
+    defaultIdFieldMapping: { type: 'keyword' },
+    requiresOneOfFields: ['service.name'],
+
+    /*
+      Implements the following rank
+      1. service.entity.id    --> implemented as the default id field
+      2. service.name
+    */
+    esqlEvaluation: `CASE(${esqlIsNotNullOrEmpty('service.name')}, service.name, NULL)`,
+  },
   indexPatterns: [],
+  entityTypeFallback: 'Service',
   fields: [
+    collect({ source: 'service.name' }),
     collect({ source: 'service.address' }),
     collect({ source: 'service.environment' }),
     collect({ source: 'service.ephemeral_id' }),

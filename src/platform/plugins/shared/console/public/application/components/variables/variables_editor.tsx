@@ -271,6 +271,9 @@ export const VariablesEditor = (props: Props) => {
         noItemsMessage={i18n.translate('console.variablesPage.table.noItemsMessage', {
           defaultMessage: 'No variables have been added yet',
         })}
+        tableCaption={i18n.translate('console.variablesPage.variablesTable.caption', {
+          defaultMessage: 'Defined Variables',
+        })}
       />
 
       {isAddingVariable && (
