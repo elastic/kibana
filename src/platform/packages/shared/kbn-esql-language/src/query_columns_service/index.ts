@@ -190,7 +190,7 @@ export class QueryColumns {
         getPolicies,
         this.originalQueryText,
         this.unmappedFieldsStrategy,
-        this.resourceRetriever?.getTimeseriesIndices
+        this.resourceRetriever
       );
     }
 
@@ -221,7 +221,7 @@ export class QueryColumns {
       getPolicies,
       this.originalQueryText,
       this.unmappedFieldsStrategy,
-      this.resourceRetriever?.getTimeseriesIndices
+      this.resourceRetriever
     );
 
     return availableFields;

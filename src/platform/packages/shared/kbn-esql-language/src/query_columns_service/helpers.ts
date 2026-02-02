@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -82,6 +82,10 @@ function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWi
     return fetchFields(BasicPrettyPrinter.command(command));
   };
 }
+
+function createGetPromQLFields(resourceRetriever?: ESQLCallbacks) {
+  return () => resourceRetriever?.getTimeseriesIndices?.() ?? Promise.resolve({ indices: [] });
+}
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
   const metadata = await getEcsMetadata(resourceRetriever);
@@ -150,7 +154,7 @@ export async function getCurrentQueryAvailableColumns(
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
   originalQueryText: string,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy,
-  getDefaultPromqlIndexes?: () => Promise<{ indices: IndexAutocompleteItem[] }>
+  resourceRetriever?: ESQLCallbacks
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -161,12 +165,13 @@ export async function getCurrentQueryAvailableColumns(
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
   const getFromFields = createGetFromFields(fetchFields);
+  const getPromQLFields = createGetPromQLFields(resourceRetriever);
 
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
-    getDefaultPromqlIndexes,
+    fromProql: getPromQLFields,
   };
 
   const previousCommands = commands.slice(0, -1);

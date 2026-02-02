@@ -68,7 +68,7 @@ describe('PROMQL columnsAfter', () => {
       fromFrom,
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
-      getDefaultPromqlIndexes: () =>
+      fromProql: () =>
         Promise.resolve({
           indices: [
             { name: 'metrics-tsdb', mode: 'time_series' as const, aliases: [] },

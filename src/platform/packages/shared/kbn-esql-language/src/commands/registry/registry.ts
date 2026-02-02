@@ -155,7 +155,7 @@ export interface IAdditionalFields {
   fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
-  getDefaultPromqlIndexes?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  fromProql?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
 }
 
 /**

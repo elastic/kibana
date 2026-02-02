@@ -18,7 +18,7 @@ export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[],
   _query: string,
-  { fromFrom, getDefaultPromqlIndexes }: IAdditionalFields
+  { fromFrom, fromProql: getDefaultPromqlIndexes }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
   const sourceColumns = await getSourceColumns(promqlCommand, fromFrom, getDefaultPromqlIndexes);
@@ -41,7 +41,7 @@ export const columnsAfter = async (
 async function getSourceColumns(
   command: ESQLAstPromqlCommand,
   fromFrom: IAdditionalFields['fromFrom'],
-  getDefaultPromqlIndexes: IAdditionalFields['getDefaultPromqlIndexes']
+  getDefaultPromqlIndexes: IAdditionalFields['fromProql']
 ): Promise<ESQLColumnData[]> {
   const indexName = getIndexFromPromQLParams(command);
 
