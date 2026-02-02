@@ -7,7 +7,7 @@
 
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { converseApiSuite } from './converse';
+import { runConverseTests } from './converse';
 
 /**
  * Environment variable for EIS CCM API key (set by CI from Vault)
@@ -49,20 +49,23 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Agent Builder - LLM Smoke tests', function () {
-    // Preconfigured connectors from Vault (existing behavior)
+    // Preconfigured connectors from Vault
     describe('Preconfigured Connector Smoke Tests', function () {
+      this.timeout(300000);
       const connectors = getAvailableConnectors();
 
-      connectors.forEach((connector) => {
-        describe(`Connector "${connector.id}"`, () => {
-          converseApiSuite(connector, providerContext);
-        });
+      it('should pass converse tests for all preconfigured connectors', async () => {
+        for (const connector of connectors) {
+          log.info(`Testing connector "${connector.id}"...`);
+          await runConverseTests(connector.id, supertest);
+          log.info(`✅ ${connector.id}: All tests passed`);
+        }
       });
     });
 
     // EIS Dynamic Tests (discovers and tests all EIS models via Cloud Connected Mode)
     describe('EIS Dynamic Smoke Tests', function () {
-      this.timeout(300000); // 5 min for all EIS model tests
+      this.timeout(600000); // 10 min for all EIS model tests
 
       const eisChatModels: EisChatModel[] = [];
       const createdConnectorIds: string[] = [];
@@ -161,21 +164,8 @@ export default function (providerContext: FtrProviderContext) {
 
         for (const model of eisChatModels) {
           log.info(`Testing ${model.modelId}...`);
-
-          // Simple message (for now) WIP
-          const response = await supertest
-            .post('/api/agent_builder/converse')
-            .set('kbn-xsrf', 'true')
-            .send({
-              input: 'Hello',
-              connector_id: model.connectorId,
-            })
-            .expect(200);
-
-          if (!response.body.response?.message?.length) {
-            throw new Error(`${model.modelId}: No response message received`);
-          }
-          log.info(`✅ ${model.modelId}: Got response`);
+          await runConverseTests(model.connectorId!, supertest);
+          log.info(`✅ ${model.modelId}: All tests passed`);
         }
       });
     });
