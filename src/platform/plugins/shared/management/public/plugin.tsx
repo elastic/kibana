@@ -28,6 +28,7 @@ import type {
   ManagementSetup,
   ManagementStart,
   NavigationCardsSubject,
+  AutoOpsStatusHook,
 } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -90,8 +91,17 @@ export class ManagementPlugin
     hideLinksTo: [],
     extendCardNavDefinitions: {},
   });
+  private autoOpsStatusHook?: AutoOpsStatusHook;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+
+  private registerAutoOpsStatusHook = (hook: AutoOpsStatusHook) => {
+    this.autoOpsStatusHook = hook;
+  };
+
+  private getAutoOpsStatusHook = () => {
+    return this.autoOpsStatusHook;
+  };
 
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
@@ -158,6 +168,7 @@ export class ManagementPlugin
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
           chromeStyle$,
+          getAutoOpsStatusHook: managementPlugin.getAutoOpsStatusHook,
         });
       },
     });
@@ -171,6 +182,7 @@ export class ManagementPlugin
     return {
       sections: this.managementSections.setup(),
       locator,
+      registerAutoOpsStatusHook: this.registerAutoOpsStatusHook,
     };
   }
 
