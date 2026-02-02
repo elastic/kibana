@@ -67,9 +67,7 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
         factor: 2, // Exponential backoff: 1s, 2s, 4s
         onFailedAttempt: (error) => {
           server.logger.debug(
-            `Attempt ${error.attemptNumber} to fetch Synthetics locations failed. ${
-              RETRY_COUNT - error.attemptNumber + 1
-            } retries remaining.`
+            `Attempt ${error.attemptNumber} to fetch Synthetics locations failed. ${error.retriesLeft} retries remaining.`
           );
         },
       }
