@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, type FC } from 'react';
-import { useSavedSearch } from '../../state_management/discover_state_provider';
+import React, { memo, type FC, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { PatternAnalysisTable, type PatternAnalysisTableProps } from './pattern_analysis_table';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const PatternAnalysisTab: FC<Omit<PatternAnalysisTableProps, 'query' | 'filters'>> = memo(
   (props) => {
-    const savedSearch = useSavedSearch();
+    const services = useDiscoverServices();
+    const searchSourceUpdate = useObservable(props.stateContainer.getSearchSourceUpdates$());
+
+    const savedSearch = useMemo(() => {
+      const newSavedSearch = services.savedSearch.getNew();
+      if (searchSourceUpdate?.value) {
+        newSavedSearch.searchSource = searchSourceUpdate.value;
+      }
+      return newSavedSearch;
+    }, [searchSourceUpdate, services.savedSearch]);
+
+    if (!searchSourceUpdate?.value) {
+      return null;
+    }
 
     return (
       <PatternAnalysisTable

@@ -17,7 +17,7 @@ import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
-import type { TabState } from './types';
+import type { TabState, SearchSourceChangeType } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
 
@@ -34,7 +34,7 @@ export interface UnifiedHistogramConfig {
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
-  searchSource?: ISearchSource;
+  searchSourceState: { changeType: SearchSourceChangeType; value: ISearchSource } | undefined;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
@@ -99,7 +99,7 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-    searchSource$: new BehaviorSubject<ISearchSource | undefined>(undefined),
+    searchSourceState$: new BehaviorSubject<TabRuntimeState['searchSourceState']>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };
@@ -124,7 +124,7 @@ export const selectTabRuntimeInternalState = (
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
-  const searchSource = tabRuntimeState?.searchSource$.getValue();
+  const searchSource = tabRuntimeState?.searchSourceState$.getValue()?.value;
 
   if (!searchSource || !stateContainer) {
     return undefined;

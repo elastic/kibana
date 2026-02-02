@@ -31,7 +31,7 @@ import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
-import type { TabState, TabStateGlobalState } from '../types';
+import { SearchSourceChangeType, type TabState, type TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
@@ -73,7 +73,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       stateContainer$,
       customizationService$,
       scopedEbtManager$,
-      searchSource$,
+      searchSourceState$,
     } = selectTabRuntimeState(runtimeStateManager, tabId);
 
     /**
@@ -311,14 +311,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Update state containers
      */
 
-    // TODO: remove
-    stateContainer.savedSearchState.set(services.savedSearch.getNew());
-
     // Make sure app state is completely reset
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
-    searchSource$.next(searchSource);
+    searchSourceState$.next({ changeType: SearchSourceChangeType.reset, value: searchSource });
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 

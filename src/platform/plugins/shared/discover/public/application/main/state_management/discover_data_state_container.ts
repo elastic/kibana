@@ -41,6 +41,7 @@ import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
+import { SearchSourceChangeType } from './redux/types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -222,7 +223,11 @@ export function getDataStateContainer({
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
   // Make sure to clean up the ES|QL state when the saved search changes
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
-  tabRuntimeState.searchSource$.subscribe(cleanupEsql);
+  tabRuntimeState.searchSourceState$.subscribe((state) => {
+    if (state?.changeType === SearchSourceChangeType.reset) {
+      cleanupEsql();
+    }
+  });
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -264,7 +269,7 @@ export function getDataStateContainer({
           }
 
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
-          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$, searchSource$ } =
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
@@ -280,6 +285,10 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
+          // get the latest search source instance
+          const searchSource = internalState.dispatch(
+            injectCurrentTab(internalStateActions.updateSearchSourceState)()
+          );
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
@@ -287,7 +296,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            searchSource: searchSource$.getValue()!,
+            searchSource,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,

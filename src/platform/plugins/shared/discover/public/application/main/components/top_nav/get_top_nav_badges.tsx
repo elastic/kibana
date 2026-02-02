@@ -11,7 +11,6 @@ import React from 'react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
 
@@ -20,16 +19,14 @@ import { SolutionsViewBadge } from './solutions_view_badge';
  */
 export const getTopNavBadges = ({
   isMobile,
-  stateContainer,
+  isManaged,
   services,
 }: {
   isMobile: boolean;
-  stateContainer: DiscoverStateContainer;
+  isManaged: boolean;
   services: DiscoverServices;
 }): ChromeBreadcrumbsBadge[] => {
   const entries: ChromeBreadcrumbsBadge[] = [];
-
-  const isManaged = stateContainer.savedSearchState.getState().managed;
 
   if (isManaged) {
     entries.push(

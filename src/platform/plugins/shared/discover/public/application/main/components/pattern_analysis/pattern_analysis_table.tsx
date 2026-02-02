@@ -19,7 +19,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { PATTERN_ANALYSIS_LOADED } from './constants';
 
 export type PatternAnalysisTableProps = EmbeddablePatternAnalysisInput & {
-  stateContainer?: DiscoverStateContainer;
+  stateContainer: DiscoverStateContainer;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   renderViewModeToggle: (patternCount?: number) => React.ReactElement;
 };

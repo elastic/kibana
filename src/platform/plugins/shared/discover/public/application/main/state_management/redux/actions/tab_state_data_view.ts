@@ -59,13 +59,9 @@ export const setDataView: InternalStateThunkActionCreator<
 export const assignNextDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function assignNextDataViewThunkFn(dispatch, _, { runtimeStateManager }) {
+  function assignNextDataViewThunkFn(dispatch) {
     dispatch(setDataView({ tabId, dataView }));
     dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
-
-    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const savedSearchState = stateContainer$.getValue()?.savedSearchState.getState();
-    savedSearchState?.searchSource.setField('index', dataView);
   };
 
 /**

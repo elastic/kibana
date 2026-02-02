@@ -50,7 +50,7 @@ const buildShareOptions = async ({
   const { dataView, isEsqlMode } = discoverParams;
 
   const searchSourceSharingData = await getSharingData(
-    stateContainer.savedSearchState.getState().searchSource,
+    stateContainer.getSearchSource(),
     currentTab.appState,
     services,
     isEsqlMode

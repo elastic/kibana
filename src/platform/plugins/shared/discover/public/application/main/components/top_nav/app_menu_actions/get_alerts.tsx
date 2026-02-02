@@ -67,12 +67,10 @@ const CreateAlertFlyout: React.FC<{
     }
     return {
       searchType: 'searchSource',
-      searchConfiguration: stateContainer.savedSearchState
-        .getState()
-        .searchSource.getSerializedFields(),
+      searchConfiguration: stateContainer.getSearchSource().getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
+  }, [isEsqlMode, stateContainer, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({

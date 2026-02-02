@@ -10,6 +10,7 @@
 import { combineLatest, merge, startWith } from 'rxjs';
 import {
   connectToQueryState,
+  type ISearchSource,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
@@ -21,6 +22,7 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
 import type { DiscoverAppState } from '../types';
+import { SearchSourceChangeType } from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
@@ -33,6 +35,7 @@ import {
   isDataSourceType,
 } from '../../../../../../common/data_sources';
 import { updateSearchSource } from '../../utils/update_search_source';
+import { searchSourceComparator } from '../selectors/unsaved_changes';
 
 /**
  * Initializing state containers and start subscribing to changes triggering e.g. data fetching
@@ -51,12 +54,13 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, appStateContainer, globalStateContainer } = createUrlSyncObservables({
-      tabId,
-      dispatch,
-      getState,
-      internalState$: getInternalState$(),
-    });
+    const { appState$, appStateContainer, globalState$, globalStateContainer } =
+      createUrlSyncObservables({
+        tabId,
+        dispatch,
+        getState,
+        internalState$: getInternalState$(),
+      });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -92,8 +96,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         subscription.unsubscribe();
       };
     };
-
-    const savedSearchContainer = stateContainer.savedSearchState;
 
     const initializeAndSyncUrlState = () => {
       addLog('[appState] initialize state and sync with URL');
@@ -224,23 +226,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       };
     };
 
-    const syncLocallyPersistedTabState = () =>
-      dispatch(
-        internalStateActions.syncLocallyPersistedTabState({
-          tabId,
-        })
-      );
-
-    // This needs to be the first thing that's wired up because initializeAndSyncUrlState is pulling the current state from the URL which
-    // might change the time filter and thus needs to re-check whether the saved search has changed.
-    const timefilerUnsubscribe = merge(
-      services.timefilter.getTimeUpdate$(),
-      services.timefilter.getRefreshIntervalUpdate$()
-    ).subscribe(() => {
-      savedSearchContainer.updateTimeRange(); // TODO: refactor
-      syncLocallyPersistedTabState();
-    });
-
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
     const unsubscribeUrlTracking = initializeUrlTracking();
 
@@ -250,7 +235,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
-        savedSearchState: savedSearchContainer, // TODO: refactor
         dataState: stateContainer.dataState,
         internalState: stateContainer.internalState,
         runtimeStateManager,
@@ -259,30 +243,43 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       })
     );
 
-    const tabAttributesSubscription = createTabAttributesObservable({
+    // synching the changes with Local Storage
+    const tabAttributes$ = createTabAttributesObservable({
       tabId,
       internalState$: getInternalState$(),
       getState,
-    }).subscribe(syncLocallyPersistedTabState);
+    });
+
+    const tabStateSubscription = merge(tabAttributes$, appState$, globalState$).subscribe(() => {
+      addLog('[tabSync] tab state changes trigger Local Storage sync');
+      dispatch(
+        internalStateActions.syncLocallyPersistedTabState({
+          tabId,
+        })
+      );
+    });
+
+    // syncing the changes with the current search source
+    const searchSourceSubscription = merge(
+      tabRuntimeState.currentDataView$,
+      appState$,
+      globalState$
+    ).subscribe(() => {
+      // TODO: reduce the number of updates by checking what actually changed
+      dispatch(
+        updateSearchSourceState({
+          tabId,
+        })
+      );
+    });
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = stateContainer.dataState.subscribe();
 
-    // updates saved search when query or filters change, triggers data fetching
+    // // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$, searchSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      const searchSource = searchSource$.getValue();
-      if (searchSource) {
-        updateSearchSource({
-          searchSource,
-          dataView: currentDataView$.getValue(),
-          appState: getAppState(),
-          globalState: getCurrentTab().globalState,
-          services,
-          useFilterAndQueryServices: true,
-        });
-      }
-      addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
+      addLog('[tabSync] filter changes triggers data fetching');
+      // TODO: check if it's still needed
       dispatch(
         internalStateActions.fetchData({
           tabId,
@@ -309,13 +306,13 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     );
 
     const unsubscribeFn = () => {
-      tabAttributesSubscription.unsubscribe();
+      tabStateSubscription.unsubscribe();
+      searchSourceSubscription.unsubscribe();
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();
       unsubscribeUrlTracking();
       filterUnsubscribe.unsubscribe();
-      timefilerUnsubscribe.unsubscribe();
     };
 
     tabRuntimeState.unsubscribeFn$.next(unsubscribeFn);
@@ -330,4 +327,55 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
     const unsubscribeFn = tabRuntimeState.unsubscribeFn$.getValue();
     unsubscribeFn?.();
     tabRuntimeState.unsubscribeFn$.next(undefined);
+  };
+
+/**
+ * Update the search source based on the current state
+ * @param tabId
+ */
+export const updateSearchSourceState: InternalStateThunkActionCreator<
+  [TabActionPayload],
+  ISearchSource
+> = ({ tabId }) =>
+  function updateSearchSourceStateThunkFn(dispatch, getState, { services, runtimeStateManager }) {
+    const tabState = selectTab(getState(), tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+
+    if (!stateContainer) {
+      throw new Error('State container is not initialized');
+    }
+
+    const { currentDataView$, searchSourceState$ } = tabRuntimeState;
+
+    const searchSource =
+      searchSourceState$.getValue()?.value ?? services.data.search.searchSource.createEmpty();
+
+    const searchSourceUpdated = searchSource.createCopy();
+
+    addLog('[tabSync] search source update');
+
+    updateSearchSource({
+      searchSource: searchSourceUpdated,
+      dataView: currentDataView$.getValue(),
+      appState: tabState.appState,
+      globalState: tabState.globalState,
+      services,
+    });
+
+    if (
+      searchSourceComparator(
+        searchSource.getSerializedFields(),
+        searchSourceUpdated.getSerializedFields()
+      )
+    ) {
+      return searchSource;
+    }
+
+    searchSourceState$.next({
+      changeType: SearchSourceChangeType.update,
+      value: searchSourceUpdated,
+    });
+
+    return searchSourceUpdated;
   };

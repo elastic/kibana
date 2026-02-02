@@ -213,6 +213,11 @@ export interface DiscoverInternalState {
   };
 }
 
+export enum SearchSourceChangeType {
+  reset = 'reset',
+  update = 'update',
+}
+
 export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);

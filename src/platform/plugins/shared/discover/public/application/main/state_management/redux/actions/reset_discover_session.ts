@@ -19,7 +19,7 @@ import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
-import type { DiscoverAppState } from '../types';
+import { type DiscoverAppState, SearchSourceChangeType } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(
   'internalState/resetDiscoverSession',
@@ -65,6 +65,11 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           if (dataView) {
             dispatch(setDataView({ tabId: tab.id, dataView }));
           }
+
+          tabRuntimeState.searchSourceState$.next({
+            changeType: SearchSourceChangeType.reset,
+            value: persistedTabSearchSource,
+          });
 
           initialAppState = getInitialAppState({
             initialUrlState: undefined,

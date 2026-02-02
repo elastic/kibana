@@ -93,7 +93,7 @@ export const selectHasUnsavedChanges = (
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
-      searchSource: tabRuntimeState?.searchSource$.getValue(), // TODO: remove?
+      searchSource: tabRuntimeState?.searchSourceState$.getValue()?.value, // TODO: remove?
       services,
     });
 
@@ -171,7 +171,7 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
     ? searchSource.index.id
     : searchSource.index;
 
-const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
   searchSourceB
 ) => {

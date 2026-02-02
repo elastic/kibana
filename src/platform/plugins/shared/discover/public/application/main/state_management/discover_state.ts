@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { Observable } from 'rxjs';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import { selectTabRuntimeState } from './redux';
 import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { getSavedSearchContainer } from './discover_saved_search_container';
+import type { SearchSourceChangeType } from './redux/types';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -77,13 +79,23 @@ export interface DiscoverStateContainer {
    */
   getCurrentTab: () => TabState;
   /**
+   * Gets the searchSource of the current tab
+   */
+  getSearchSource: () => ISearchSource;
+  /**
+   * Gets observable for search source updates of the current tab
+   */
+  getSearchSourceUpdates$: () => Observable<
+    | {
+        changeType: SearchSourceChangeType;
+        value: ISearchSource;
+      }
+    | undefined
+  >;
+  /**
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
-  /**
-   * State of saved search, the saved object of Discover
-   */
-  savedSearchState: DiscoverSavedSearchContainer;
   /**
    * State of url, allows updating and subscribing to url changes
    */
@@ -113,15 +125,17 @@ export function getDiscoverStateContainer({
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  /**
-   * Saved Search State Container, the persisted saved object of Discover
-   */
-  const savedSearchContainer = getSavedSearchContainer({
-    services,
-    getCurrentTab,
-    runtimeStateManager,
-  });
+  const getSearchSource = (): ISearchSource => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    return (
+      tabRuntimeState.searchSourceState$.getValue()?.value ??
+      services.data.search.searchSource.createEmpty()
+    );
+  };
+  const getSearchSourceUpdates$ = () => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    return tabRuntimeState.searchSourceState$;
+  };
 
   const dataStateContainer = getDataStateContainer({
     services,
@@ -137,9 +151,10 @@ export function getDiscoverStateContainer({
     internalStateActions,
     injectCurrentTab,
     getCurrentTab,
+    getSearchSource,
+    getSearchSourceUpdates$,
     runtimeStateManager,
     dataState: dataStateContainer,
-    savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
     customizationContext,

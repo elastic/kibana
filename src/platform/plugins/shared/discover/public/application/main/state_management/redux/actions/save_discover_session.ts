@@ -68,7 +68,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const searchSource = tabRuntimeState.searchSource$.getValue();
+        const searchSource = tabRuntimeState.searchSourceState$.getValue()?.value;
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
         const updatedTab: DiscoverSessionTab = cloneDeep(

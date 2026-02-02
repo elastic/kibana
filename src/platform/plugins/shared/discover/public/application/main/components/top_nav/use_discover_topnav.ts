@@ -37,11 +37,11 @@ export const useDiscoverTopNav = ({
   const topNavBadges = useMemo(
     () =>
       getTopNavBadges({
-        stateContainer,
         services,
         isMobile,
+        isManaged: Boolean(persistedDiscoverSession?.managed),
       }),
-    [stateContainer, services, isMobile]
+    [services, isMobile, persistedDiscoverSession]
   );
 
   const dataView = useCurrentDataView();
