@@ -82,21 +82,9 @@ export const PagerDutyConnector: ConnectorSpec = {
         );
 
         const data = response.data;
-        if (data.escalation_policy) {
-          return {
-            escalation_policy: transformEscalationPolicy(data.escalation_policy),
-          };
-        }
-        if (data.escalation_policies) {
-          return {
-            limit: data.limit,
-            offset: data.offset,
-            total: data.total,
-            more: data.more,
-            escalation_policies: data.escalation_policies.map(transformEscalationPolicy),
-          };
-        }
-        return data;
+        return {
+          escalation_policy: transformEscalationPolicy(data.escalation_policy),
+        };
       },
     },
 
@@ -385,7 +373,9 @@ export const PagerDutyConnector: ConnectorSpec = {
           params: queryParams,
         });
 
-        const data = response.data as PD.PagerDutyOnCallsResponse;
+        const data = response.data as PD.PagerDutyListResponseData & {
+          oncalls: PD.PagerDutyOnCall[];
+        };
         const transformOnCall = (oncall: PD.PagerDutyOnCall): PD.TransformedOnCall => ({
           user: oncall.user
             ? {
@@ -410,16 +400,13 @@ export const PagerDutyConnector: ConnectorSpec = {
           end: oncall.end,
         });
 
-        if (data.oncalls) {
-          return {
-            limit: data.limit,
-            offset: data.offset,
-            total: data.total,
-            more: data.more,
-            oncalls: data.oncalls.map(transformOnCall),
-          };
-        }
-        return data;
+        return {
+          limit: data.limit,
+          offset: data.offset,
+          total: data.total,
+          more: data.more,
+          oncalls: data.oncalls.map(transformOnCall),
+        };
       },
     },
 
