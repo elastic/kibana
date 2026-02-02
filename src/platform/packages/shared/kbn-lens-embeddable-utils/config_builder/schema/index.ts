@@ -30,8 +30,11 @@ import type {
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import type { PartitionState } from './charts/partition';
 import { partitionStateSchema } from './charts/partition';
+import type { MosaicState } from './charts/mosaic';
+import type { TreemapState } from './charts/treemap';
+import type { WaffleState } from './charts/waffle';
+import type { PieState } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -61,8 +64,11 @@ export type LensApiState =
   | HeatmapState
   | TagcloudState
   | RegionMapState
-  | PartitionState
-  | DatatableState;
+  | DatatableState
+  | PieState
+  | MosaicState
+  | TreemapState
+  | WaffleState;
 
 export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
