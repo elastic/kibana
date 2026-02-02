@@ -159,6 +159,8 @@ export const validateRuleImportResponseActions = async ({
           spaceId,
           rulePayload: rule,
         });
+
+        response.valid.push(rule);
       } catch (error) {
         response.errors.push({
           id: rule.id,
