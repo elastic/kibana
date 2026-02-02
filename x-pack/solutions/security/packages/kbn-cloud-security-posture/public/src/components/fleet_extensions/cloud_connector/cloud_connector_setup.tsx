@@ -54,7 +54,20 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     templateName
   );
 
-  const { data: cloudConnectors } = useGetCloudConnectors(cloudProvider);
+  // Use the cloud connector setup hook
+  const {
+    newConnectionCredentials,
+    existingConnectionCredentials,
+    updatePolicyWithNewCredentials,
+    updatePolicyWithExistingCredentials,
+    accountTypeFromInputs,
+  } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider);
+
+  // Get filtered cloud connectors based on provider and account type
+  const { data: cloudConnectors } = useGetCloudConnectors({
+    cloudProvider,
+    accountType: accountTypeFromInputs,
+  });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
@@ -65,14 +78,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
         : TABS.NEW_CONNECTION
     );
   }, [cloudConnectorsCount]);
-
-  // Use the cloud connector setup hook
-  const {
-    newConnectionCredentials,
-    existingConnectionCredentials,
-    updatePolicyWithNewCredentials,
-    updatePolicyWithExistingCredentials,
-  } = useCloudConnectorSetup(input, newPolicy, updatePolicy);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
   if (!newPolicy.supports_cloud_connector) {
@@ -151,6 +156,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
+          accountType={accountTypeFromInputs}
         />
       ),
     },

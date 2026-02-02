@@ -1,0 +1,314 @@
+{
+  "lastModified": "2026-01-30T09:08:53.934Z",
+  "sha1": "5bfab31cd30f09f121666c3aad5f28ecae58b7d6",
+  "tests": [
+    {
+      "id": "1c8c85aed319853-a4c7c49ef896953",
+      "title": "Homepage - Admin API keys button should be enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-ab69ce47467029e",
+      "title": "Homepage - Admin Should open connection details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-2982e3d66e6e02d",
+      "title": "Homepage - Admin Should create API key through the modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-d8d6fb775952a63",
+      "title": "Homepage - Admin should have embedded dev console that can be toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-939cf10bf16d67f",
+      "title": "Homepage - Admin should show Elasticsearch endpoint with copy functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-1a22aaf73f8f833",
+      "title": "Homepage - Admin should show checkmark feedback when copy button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-b4f1cbc943741b1",
+      "title": "Homepage - Admin navigation cards should navigate to correct places",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-0eb16b3f96901e9",
+      "title": "Homepage - Admin should display Getting Started banner with title and button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-0580067ff5bcfd8",
+      "title": "Homepage - Admin Get started button should navigate to getting started page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-447286b9bdfaee7",
+      "title": "Homepage - Admin should display all body links with external documentation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 151,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-cd20c7648c01376",
+      "title": "Homepage - Admin body links should have external target attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-59e30e1c3b44243",
+      "title": "Homepage - Admin body links should navigate to correct URLs when clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 178,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-14fe8224ffdaafd",
+      "title": "Homepage - Viewer should not be able to see manage button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-2f0b6f5b90d58d5",
+      "title": "Homepage - Viewer Navigation cards should navigate to correct places",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-84e53ec73bf118c",
+      "title": "Homepage - Viewer Get started banner should move user back to getting started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-0a32eeb2ede6fbb",
+      "title": "Homepage - Viewer API keys button should be disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-b6457ecf33dfae4",
+      "title": "Homepage - Viewer should have embedded dev console that can be toggled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-dec0774fb6407be",
+      "title": "Homepage - Viewer should show Elasticsearch endpoint with copy functionality",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-41a9dd0d03aad59",
+      "title": "Homepage - Viewer should show checkmark feedback when copy button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-0dbfc61246106ec",
+      "title": "Homepage - Viewer should display all body links with external documentation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-4de42b8dbe40a91",
+      "title": "Homepage - Viewer body links should have external target attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-5e1de212dd5bdf1",
+      "title": "Homepage - Viewer body links should navigate to correct URLs when clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@svlSearch",
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 152,
+        "column": 7
+      }
+    }
+  ]
+}

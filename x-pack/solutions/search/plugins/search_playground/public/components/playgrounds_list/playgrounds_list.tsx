@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +24,7 @@ import { PlaygroundsListEmptyState } from './empty_state';
 import type { PlaygroundsTableProps } from './playgrounds_table';
 import { PlaygroundsTable } from './playgrounds_table';
 import type { PlaygroundListObject } from '../../types';
+import { PlaygroundDeprecationNotice } from './playground_deprecation_notice';
 
 function PlaygroundListObjectFieldToSortField(field: string): 'updated_at' {
   // SO Index does not currently allow sorting on name, update this when we update SO index settings
@@ -120,6 +121,8 @@ export const PlaygroundsList = () => {
         ]}
       />
       <KibanaPageTemplate.Section color="plain">
+        <PlaygroundDeprecationNotice />
+        <EuiSpacer />
         <PlaygroundsTable
           playgroundsData={data}
           onChange={onTablePageChange}
