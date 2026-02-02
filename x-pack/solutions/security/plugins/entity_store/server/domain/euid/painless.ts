@@ -7,6 +7,7 @@
 
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { isEuidField, isEuidSeparator } from './commons';
 
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
@@ -17,7 +18,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   if (identityField.euidFields.length === 1) {
     const first = identityField.euidFields[0][0];
-    if (first.separator !== undefined) {
+    if (isEuidSeparator(first)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     const field = first.field;
@@ -42,16 +43,16 @@ function painlessFieldNonEmpty(field: string): string {
 }
 
 function buildPainlessCondition(composedField: EuidAttribute[]): string {
-  const fieldAttrs = composedField.filter((a): a is { field: string } => a.field !== undefined);
+  const fieldAttrs = composedField.filter((attr) => isEuidField(attr));
   return fieldAttrs.map((a) => painlessFieldNonEmpty(a.field)).join(' && ');
 }
 
 function buildPainlessValueExpr(composedField: EuidAttribute[]): string {
-  if (composedField.length === 1 && composedField[0].field !== undefined) {
+  if (composedField.length === 1 && isEuidField(composedField[0])) {
     return `doc['${escapePainlessField(composedField[0].field)}'].value`;
   }
   const parts = composedField.map((attr) => {
-    if (attr.field !== undefined) {
+    if (isEuidField(attr)) {
       return `doc['${escapePainlessField(attr.field)}'].value`;
     }
     return `"${escapePainlessString(attr.separator)}"`;

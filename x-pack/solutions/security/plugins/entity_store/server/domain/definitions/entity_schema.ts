@@ -30,12 +30,10 @@ const fieldSchema = z.object({
 
 const euidFieldSchema = z.object({
   field: z.string(),
-  separator: z.literal(undefined),
 });
 
 const euidSeparatorSchema = z.object({
   separator: z.string(),
-  field: z.literal(undefined),
 });
 
 // Any field used in the euid calculation must be mapped in the fields array,

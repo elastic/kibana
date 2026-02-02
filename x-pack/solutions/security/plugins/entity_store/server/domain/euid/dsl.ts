@@ -6,13 +6,9 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
+import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getFieldValue } from './memory';
-
-interface FieldValue {
-  [key: string]: string;
-}
+import { getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
 
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
@@ -45,44 +41,4 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   return dsl;
-}
-
-export function getFieldsToBeFilteredOn(
-  doc: any,
-  euidFields: EuidAttribute[][]
-): { values: FieldValue; rankingPosition: number } {
-  for (let i = 0; i < euidFields.length; i++) {
-    const composedFields = euidFields[i];
-    const fieldAttrs = composedFields.filter((attr) => attr.field !== undefined);
-    const composedFieldValues = fieldAttrs.reduce(
-      (acc, attr) => ({
-        ...acc,
-        [attr.field!]: getFieldValue(doc, attr.field!),
-      }),
-      {}
-    );
-
-    if (Object.values(composedFieldValues).every((v) => v !== undefined)) {
-      return { values: composedFieldValues, rankingPosition: i };
-    }
-  }
-  return { values: {}, rankingPosition: -1 };
-}
-
-export function getFieldsToBeFilteredOut(
-  euidFields: EuidAttribute[][],
-  fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
-): string[] {
-  const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
-  const fieldsNotInTheId = euidFieldsBeforeRanking
-    .flatMap((composedFields) => composedFields.map((attr) => attr.field))
-    .filter((field) => field !== undefined);
-
-  const toFilterOut: string[] = [];
-  for (const field of fieldsNotInTheId) {
-    if (!Object.keys(fieldsToBeFilteredOn.values).includes(field) && !toFilterOut.includes(field)) {
-      toFilterOut.push(field);
-    }
-  }
-  return toFilterOut;
 }

@@ -8,7 +8,12 @@
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../esql/strings';
-import { getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './dsl';
+import {
+  getFieldsToBeFilteredOn,
+  getFieldsToBeFilteredOut,
+  isEuidField,
+  isEuidSeparator,
+} from './commons';
 
 export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
   if (!doc) {
@@ -45,9 +50,15 @@ export function getEuidEsqlEvaluation(entityType: EntityType) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
+  if (identityField.euidFields.length > 0) {
+    if (isEuidSeparator(identityField.euidFields[0][0])) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+  }
+
   // If only one field is defined, it must exist, no CASE logic is needed
   if (identityField.euidFields.length === 1) {
-    if (identityField.euidFields[0][0].separator) {
+    if (isEuidSeparator(identityField.euidFields[0][0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
 
@@ -56,22 +67,26 @@ export function getEuidEsqlEvaluation(entityType: EntityType) {
 
   const euidLogic = identityField.euidFields.map((composedField) => {
     if (composedField.length === 1) {
-      if (composedField[0].separator) {
+      if (isEuidSeparator(composedField[0])) {
         throw new Error('Separator found in single field, invalid euid logic definition');
       }
     }
 
     const caseBooleanOp = composedField
-      .filter((field) => field.field)
+      .filter(isEuidField)
       .map((field) => `${esqlIsNotNullOrEmpty(field.field)}`)
       .join(' AND ');
+
+    if (isEuidSeparator(composedField[0])) {
+      throw new Error('The first field of a composed field cannot be a separator');
+    }
 
     if (composedField.length === 1) {
       return `(${caseBooleanOp}), ${composedField[0].field}`;
     }
 
     const evaluations = composedField
-      .map((field) => (field.field ? field.field : `"${field.separator}"`))
+      .map((field) => (isEuidField(field) ? field.field : `"${field.separator}"`))
       .join(', ');
 
     const concatLogic = `CONCAT(${evaluations})`;

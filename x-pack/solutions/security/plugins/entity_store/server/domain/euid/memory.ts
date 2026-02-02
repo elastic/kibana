@@ -7,6 +7,7 @@
 
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { getFieldValue, isEuidField } from './commons';
 
 export function getEuidFromObject(entityType: EntityType, doc: any) {
   if (!doc) {
@@ -25,7 +26,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
 function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {
   for (const composedFields of euidFields) {
     const composedFieldValues = composedFields.map((attr) => {
-      if (attr.field !== undefined) {
+      if (isEuidField(attr)) {
         return getFieldValue(doc, attr.field);
       }
       return attr.separator;
@@ -36,33 +37,4 @@ function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string
     }
   }
   return [];
-}
-
-export function getFieldValue(doc: any, field: string): string | undefined {
-  const brokenFields = field.split('.');
-
-  let fieldInObject = doc;
-  for (const brokenField of brokenFields) {
-    fieldInObject = fieldInObject[brokenField];
-    if (!fieldInObject) {
-      return undefined;
-    }
-  }
-
-  // In theory we should not have multi valued fields.
-  // However, it can still happen that elasticsearch
-  // client returns an array of values.
-  if (Array.isArray(fieldInObject)) {
-    if (fieldInObject.length > 0) {
-      return fieldInObject[0];
-    } else {
-      throw new Error(`Field ${field} is an array but has no values`);
-    }
-  }
-
-  if (typeof fieldInObject === 'object') {
-    throw new Error(`Field ${field} is an object, can't convert to value`);
-  }
-
-  return String(fieldInObject);
 }

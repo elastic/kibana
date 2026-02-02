@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export function esqlIsNotNullOrEmpty(field?: string) {
+export function esqlIsNotNullOrEmpty(field: string) {
   return `${field} IS NOT NULL AND ${field} != ""`;
 }
 
-export function esqlIsNullOrEmpty(field?: string) {
+export function esqlIsNullOrEmpty(field: string) {
   return `(${field} IS NULL OR ${field} == "")`;
 }
