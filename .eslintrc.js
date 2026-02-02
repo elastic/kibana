@@ -2367,6 +2367,13 @@ module.exports = {
       },
     },
     {
+      // Ensure correct expect import path in solutions scout API tests
+      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_expect_import': 'error',
+      },
+    },
+    {
       // Restrict fs imports in production code (exclude test files, scripts, etc.)
       files: [
         'src/platform/plugins/shared/**/*.ts',

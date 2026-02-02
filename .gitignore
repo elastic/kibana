@@ -19,6 +19,8 @@ target
 /build
 .jruby
 .idea
+.cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml
 *.log

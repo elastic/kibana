@@ -2220,6 +2220,8 @@
       "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
+      "@kbn/yarn-install-scripts": ["packages/kbn-yarn-install-scripts"],
+      "@kbn/yarn-install-scripts/*": ["packages/kbn-yarn-install-scripts/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       "@kbn/zod": ["src/platform/packages/shared/kbn-zod"],
