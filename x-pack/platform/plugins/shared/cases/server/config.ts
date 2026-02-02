@@ -50,8 +50,8 @@ export const ConfigSchema = schema.object({
   analytics: schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: true }),
       }),
     }),
   }),
