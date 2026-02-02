@@ -81,6 +81,7 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) =>
       getToasts().addSuccess(successMessage);
       routing.navigate(`/follower_indices`, {
         name: encodeURIComponent(name),
+        ...(isUpdating ? {} : { waitForActive: 'true' }),
       });
     },
   });

@@ -14,12 +14,12 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { isTimeRangeAbsoluteTime } from '../../../lib/time_utils';
 import { TimeTypeSection } from './time_type_section';
 import type { IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
@@ -55,11 +55,12 @@ export const LinkContent = ({
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAbsoluteTime, setIsAbsoluteTime] = useState(true);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
   const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+  const isAbsoluteTimeByDefault = isTimeRangeAbsoluteTime(timeRange);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
   const { delegatedShareUrlHandler, draftModeCallOut: DraftModeCallout } = objectConfig;
 
@@ -123,20 +124,23 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked);
-    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
-      urlToCopy.current = undefined;
-    }
-  };
+  const handleTimeTypeChange = useCallback(
+    (isAbsolute: boolean) => {
+      if (urlToCopy?.current && isAbsolute !== isAbsoluteTime) {
+        urlToCopy.current = undefined;
+      }
+      setIsAbsoluteTime(isAbsolute);
+    },
+    [isAbsoluteTime]
+  );
 
   return (
     <>
       <EuiForm>
         <TimeTypeSection
           timeRange={timeRange}
-          isAbsoluteTime={isAbsoluteTime}
-          changeTimeType={changeTimeType}
+          onTimeTypeChange={handleTimeTypeChange}
+          isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
         />
         {isDirty && DraftModeCallout && (
           <>

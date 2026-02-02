@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -161,5 +161,8 @@
     "@kbn/serverless-common-settings",
     "@kbn/management-settings-ids",
     "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/reporting-test-routes",
+    "@kbn/alerting-types",
+    "@kbn/setup-node-env",
   ]
 }

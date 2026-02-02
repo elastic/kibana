@@ -18,7 +18,7 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
@@ -26,12 +26,11 @@ import { ScoutJestReporterOptions } from './options';
 import {
   datasources,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
   ScoutEventsReport,
   ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
 } from '../../..';
 
 /**
@@ -62,6 +61,10 @@ export class ScoutJestReporter extends BaseReporter {
     this.report = new ScoutEventsReport(this.scoutLog);
     this.baseTestRunInfo = {
       id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
       config: {
         category: reporterOptions.configCategory,
       },
@@ -77,16 +80,16 @@ export class ScoutJestReporter extends BaseReporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
-
+    const areas = this.getOwnerAreas(fileOwners);
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
@@ -149,7 +152,7 @@ export class ScoutJestReporter extends BaseReporter {
         type: test.result.ancestorTitles.length <= 1 ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.result.fullName),
+        id: computeTestID(path.relative(REPO_ROOT, test.filePath), test.result.fullName),
         title: test.result.title,
         tags: [],
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.filePath)),
@@ -236,7 +239,6 @@ export class ScoutJestReporter extends BaseReporter {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.scoutLog);
     } catch (e) {
       // Log the error but don't propagate it
       this.scoutLog.error(e);

@@ -6,7 +6,7 @@
  */
 
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { DEFAULT_PAGE_VALUE, Page, Paginate } from '../../common/pagination';
 import { useKibana } from './use_kibana';

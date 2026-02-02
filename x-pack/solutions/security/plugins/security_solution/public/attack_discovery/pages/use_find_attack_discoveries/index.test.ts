@@ -6,8 +6,8 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as ReactQuery from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import { useQueryClient, QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 
@@ -17,6 +17,8 @@ import { ERROR_FINDING_ATTACK_DISCOVERIES } from './translations';
 import * as useKibanaFeatureFlagsModule from '../use_kibana_feature_flags';
 
 const mockAddError = jest.fn();
+const useQueryClientMock = useQueryClient as unknown as jest.MockedFn<typeof useQueryClient>;
+
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: mockAddError,
@@ -111,11 +113,9 @@ describe('useFindAttackDiscoveries', () => {
 describe('useInvalidateFindAttackDiscoveries', () => {
   it('returns a function that calls invalidateQueries', () => {
     const invalidateQueries = jest.fn();
-    jest
-      .spyOn(ReactQuery, 'useQueryClient')
-      .mockReturnValue({ invalidateQueries } as unknown as ReturnType<
-        typeof ReactQuery.useQueryClient
-      >);
+    useQueryClientMock.mockReturnValue({ invalidateQueries } as unknown as ReturnType<
+      typeof useQueryClient
+    >);
 
     const { result } = renderHook(() => useInvalidateFindAttackDiscoveries());
     result.current();

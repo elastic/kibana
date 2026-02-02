@@ -8,7 +8,6 @@
 import { DEFAULT_APP_CATEGORIES, type Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export const API_PRIVILEGES = {
@@ -43,7 +42,6 @@ export function registerFeatures({
         defaultMessage: 'Reporting',
       }),
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [],
       privileges: {
         all: { savedObject: { all: [], read: [] }, ui: [] },
@@ -91,7 +89,6 @@ export function registerFeatures({
       }
     ),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     privileges: {
       all: {

@@ -235,14 +235,3 @@ export const AgentPolicySchema = schema.object({
   updated_at: schema.string(),
   updated_by: schema.string(),
 });
-
-export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
-  currentVersions: schema.arrayOf(
-    schema.object({
-      version: schema.string(),
-      agents: schema.number(),
-      failedUpgradeAgents: schema.number(),
-    })
-  ),
-  totalAgents: schema.number(),
-});

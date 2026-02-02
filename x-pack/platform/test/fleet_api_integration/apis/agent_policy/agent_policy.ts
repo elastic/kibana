@@ -9,7 +9,9 @@ import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { cleanFleetIndices } from '../space_awareness/helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -694,7 +696,7 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
@@ -1203,7 +1205,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1264,7 +1266,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1425,7 +1427,7 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
@@ -1486,7 +1488,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1604,7 +1605,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1959,6 +1959,17 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      before(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
       it('should get auto upgrade agents status', async () => {
         const {
           body: { item: policyWithAgents },
@@ -1974,7 +1985,28 @@ export default function (providerContext: FtrProviderContext) {
         await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
+          action_id: 'test-action-automatic',
         });
+        await generateAgent(providerContext, 'healthy', 'agent-3', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_DOWNLOADING',
+          target_version: '8.16.3',
+          action_id: 'test-action-automatic',
+        });
+        await generateAgent(providerContext, 'inactive', 'agent-4', policyWithAgents.id, '8.16.1');
+        await es.index({
+          index: '.fleet-actions',
+          refresh: 'wait_for',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            expiration: new Date().toISOString(),
+            agents: ['agent-2', 'agent-3'],
+            action_id: 'test-action-automatic',
+            data: {},
+            is_automatic: true,
+            type: 'UPGRADE',
+          },
+        });
+
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')
@@ -1983,17 +2015,21 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           currentVersions: [
             {
-              agents: 2,
+              agents: 3,
               failedUpgradeAgents: 0,
+              inProgressUpgradeAgents: 0,
               version: '8.16.1',
             },
             {
               agents: 0,
-              failedUpgradeAgents: 1,
               version: '8.16.3',
+              failedUpgradeAgents: 1,
+              failedUpgradeActionIds: ['test-action-automatic'],
+              inProgressUpgradeAgents: 1,
+              inProgressUpgradeActionIds: ['test-action-automatic'],
             },
           ],
-          totalAgents: 2,
+          totalAgents: 3,
         });
 
         await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);

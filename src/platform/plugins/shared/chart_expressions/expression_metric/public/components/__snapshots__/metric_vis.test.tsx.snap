@@ -3,7 +3,7 @@
 exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with breakdown-by and max dimension 1`] = `
 Array [
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },
@@ -33,7 +33,7 @@ Array [
     "value": 13.242513020833334,
   },
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },
@@ -63,7 +63,7 @@ Array [
     "value": 13.242513020833334,
   },
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },
@@ -193,17 +193,17 @@ Array [
 exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with just max dimension 1`] = `
 Array [
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },
   Object {
-    "max": 29.984375,
+    "max": 28.984375,
     "min": 0,
     "value": 13.6328125,
   },

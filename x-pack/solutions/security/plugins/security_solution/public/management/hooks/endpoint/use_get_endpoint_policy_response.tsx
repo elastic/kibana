@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult, UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 import type { GetHostPolicyResponse } from '../../../../common/endpoint/types';

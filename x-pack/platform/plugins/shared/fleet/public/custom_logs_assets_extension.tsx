@@ -24,7 +24,7 @@ export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
-      url: logsLocator.getRedirectUrl({}),
+      url: logsLocator?.getRedirectUrl({}) ?? '',
       description: i18n.translate('xpack.fleet.assets.customLogs.description', {
         defaultMessage: 'View Custom logs data in Logs Explorer',
       }),

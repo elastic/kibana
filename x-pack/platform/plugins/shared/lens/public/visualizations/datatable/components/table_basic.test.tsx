@@ -135,7 +135,6 @@ describe('DatatableComponent', () => {
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
-      renderMode: 'edit' as const,
       interactive: true,
       syncColors: false,
       renderComplete,
@@ -183,8 +182,8 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
-    renderDatatableComponent({ renderMode: 'view' });
+  test('it should render hide, reset, and sort actions on header', async () => {
+    renderDatatableComponent();
     await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)

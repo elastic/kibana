@@ -142,6 +142,7 @@ const createCellRenderer =
       return <FieldStatusBadge status={status} />;
     }
 
+    // @ts-expect-error upgrade typescript v5.9.3
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
 

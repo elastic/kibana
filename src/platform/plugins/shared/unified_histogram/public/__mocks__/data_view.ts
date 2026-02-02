@@ -110,7 +110,7 @@ export const buildDataViewMock = ({
     toMinimalSpec: () => ({}),
   } as unknown as DataView;
 
-  dataView.isTimeBased = () => !!timeFieldName;
+  dataView.isTimeBased = (() => !!timeFieldName) as DataView['isTimeBased'];
 
   return dataView;
 };

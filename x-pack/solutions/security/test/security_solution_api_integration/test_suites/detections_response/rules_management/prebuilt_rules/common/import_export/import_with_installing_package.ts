@@ -7,15 +7,15 @@
 
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   importRulesWithSuccess,
-  createPrebuiltRulesPackage,
   installFleetPackageByUpload,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   PREBUILT_RULE_ASSET_A,
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const retryService = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI Import prebuilt rules when the package is not installed', () => {
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const {
         body: { data: importedRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {},
         })
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await retryService.tryWithRetries(
         'installSecurityDetectionEnginePackage',
         async () => {
-          const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+          const securityDetectionEnginePackageBuffer = await generatePrebuiltRulesPackageBuffer({
             packageName: PREBUILT_RULES_PACKAGE_NAME,
             // Use a high version to avoid conflicts with real packages
             // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await installFleetPackageByUpload({
             getService,
-            packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+            packageBuffer: securityDetectionEnginePackageBuffer,
           });
         },
         {
@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const {
         body: { data: importedRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {},
         })

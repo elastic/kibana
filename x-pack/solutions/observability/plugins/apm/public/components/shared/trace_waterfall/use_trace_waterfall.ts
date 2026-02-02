@@ -7,9 +7,26 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+
+const FALLBACK_WARNING = i18n.translate(
+  'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
+  {
+    defaultMessage:
+      'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
+  }
+);
+
+const INSTRUMENTATION_WARNING = i18n.translate(
+  'xpack.apm.traceWaterfallItem.euiCallOut.aDuplicatedSpanWasLabel',
+  {
+    defaultMessage:
+      'A duplicated span was detected. This indicates a problem with how your services have been instrumented, as span IDs are meant to be unique.',
+  }
+);
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
@@ -21,28 +38,40 @@ export interface TraceWaterfallItem extends TraceItem {
 
 export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
   const waterfall = useMemo(() => {
-    const serviceColorsMap = getServiceColors(traceItems);
-    const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
-    const { rootItem, traceState, orphans } = getRootItemOrFallback(
-      traceParentChildrenMap,
-      traceItems
-    );
-    const traceWaterfall = rootItem
-      ? getTraceWaterfall({
-          rootItem,
-          parentChildMap: traceParentChildrenMap,
-          orphans,
-          serviceColorsMap,
-        })
-      : [];
+    try {
+      const serviceColorsMap = getServiceColors(traceItems);
+      const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
+      const { rootItem, traceState, orphans } = getRootItemOrFallback(
+        traceParentChildrenMap,
+        traceItems
+      );
 
-    return {
-      rootItem,
-      traceState,
-      traceWaterfall,
-      duration: getTraceWaterfallDuration(traceWaterfall),
-      maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
-    };
+      const traceWaterfall = rootItem
+        ? getTraceWaterfall({
+            rootItem,
+            parentChildMap: traceParentChildrenMap,
+            orphans,
+            serviceColorsMap,
+          })
+        : [];
+
+      return {
+        rootItem,
+        traceState,
+        message: traceState !== TraceDataState.Full ? FALLBACK_WARNING : undefined,
+        traceWaterfall,
+        duration: getTraceWaterfallDuration(traceWaterfall),
+        maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
+      };
+    } catch (e) {
+      return {
+        traceState: TraceDataState.Invalid,
+        message: INSTRUMENTATION_WARNING,
+        traceWaterfall: [],
+        duration: 0,
+        maxDepth: 0,
+      };
+    }
   }, [traceItems]);
 
   return waterfall;
@@ -92,6 +121,7 @@ export enum TraceDataState {
   Full = 'full',
   Partial = 'partial',
   Empty = 'empty',
+  Invalid = 'invalid',
 }
 
 export function getRootItemOrFallback(
@@ -154,6 +184,8 @@ export function getTraceWaterfall({
 }): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
+  const visitor = new Set<string>([rootItem.id]);
+
   reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
   function getTraceWaterfallItem(
@@ -173,9 +205,19 @@ export function getTraceWaterfall({
     const sortedChildren =
       parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
 
-    const flattenedChildren = sortedChildren.flatMap((child) =>
-      getTraceWaterfallItem(child, depth + 1, traceWaterfallItem)
-    );
+    const flattenedChildren = sortedChildren.flatMap((child) => {
+      // Check if we have encountered the trace item before.
+      // If we have visited the trace item before, then the child waterfall items are already
+      // present in the flattened list, so we throw an error to alert the user of duplicated
+      // spans. This should guard against circular or unusual links between spans.
+      if (visitor.has(child.id)) {
+        throw new Error('Duplicate span id detected');
+      }
+
+      // If we haven't visited it before, then we can process the waterfall item.
+      visitor.add(child.id);
+      return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
+    });
 
     return [traceWaterfallItem, ...flattenedChildren];
   }

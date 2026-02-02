@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { Agent } from 'supertest';
+import type { Agent, Response } from 'supertest';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -39,6 +39,8 @@ import {
   PostFleetServerHostsResponse,
   PostOutputRequest,
   GetOneOutputResponse,
+  GetSettingsResponse,
+  PutSettingsRequest,
 } from '@kbn/fleet-plugin/common/types';
 import {
   GetUninstallTokenResponse,
@@ -46,6 +48,22 @@ import {
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
 import { testUsers } from '../test_users';
+
+function expectStatusCode200(res: Response) {
+  if (res.statusCode === 200) {
+    return;
+  }
+
+  if (res.statusCode === 404) {
+    throw new Error('404 "Not Found"');
+  } else {
+    throw new Error(
+      `${res.statusCode}${res.body?.error ? ` "${res.body?.error}"` : ''}${
+        res.body?.message ? ` ${res.body?.message}` : ''
+      }`
+    );
+  }
+}
 
 export class SpaceTestApiClient {
   constructor(
@@ -374,6 +392,27 @@ export class SpaceTestApiClient {
       .expect(200);
 
     return res;
+  }
+  // Settings
+  async getSettings(spaceId?: string): Promise<GetSettingsResponse> {
+    const res = await this.supertest.get(`${this.getBaseUrl(spaceId)}/api/fleet/settings`);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+  async putSettings(
+    data: PutSettingsRequest['body'],
+    spaceId?: string
+  ): Promise<GetSettingsResponse> {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/settings`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
   }
   // Space Settings
   async getSpaceSettings(spaceId?: string): Promise<GetSpaceSettingsResponse> {

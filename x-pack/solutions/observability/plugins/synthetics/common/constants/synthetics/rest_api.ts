@@ -23,6 +23,9 @@ export enum SYNTHETICS_API_URLS {
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
+  PRIVATE_LOCATIONS_CLEANUP = `/internal/synthetics/private_locations/_cleanup`,
+  SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
+  SYNC_GLOBAL_PARAMS_SETTINGS = `/internal/synthetics/sync_global_params/_settings`,
 
   PINGS = '/internal/synthetics/pings',
   MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
@@ -42,6 +45,7 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
   FILTERS = '/internal/synthetics/monitor/filters',
+  TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
 

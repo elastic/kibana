@@ -27,7 +27,7 @@ import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
 
-const MAX_CALLS = 5;
+const MAX_CALLS = 8;
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -64,9 +64,17 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
     const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
+    const availableTools = Object.keys(tools ?? {});
+    const hasTools = !functionLimitReached && availableTools.length > 0;
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
-
+    const hasToolBlock = hasTools
+      ? `**IMPORTANT**: If there is a tool suitable for answering the user's question, use that tool,
+preferably with a natural language reply included. DO NOT attempt to call any other tools
+that are not explicitly listed as available. Only use the following available tools: ${availableTools.join(
+          ', '
+        )}`
+      : '**IMPORTANT**: There are no tools available to use. Do not attempt to call any tools.';
     return merge(
       of<
         OutputCompleteEvent<
@@ -97,6 +105,8 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           suitable for answering the user's question, use that tool, preferably
           with a natural language reply included.
 
+          ${hasToolBlock}
+          
           Format any ES|QL query as follows:
           \`\`\`esql
           <query>

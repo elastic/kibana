@@ -9,12 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  DEFAULT_LOG_VIEW,
-  getLogsLocatorsFromUrlService,
-  getNodeQuery,
-  type LogViewReference,
-} from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorsFromUrlService, getNodeQuery } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
@@ -22,7 +17,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
@@ -34,9 +28,6 @@ export const Logs = () => {
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { logs } = useDataViewsContext();
-
-  const { reference: logViewReference } = logs ?? {};
 
   const {
     services: {
@@ -51,7 +42,7 @@ export const Logs = () => {
       share: { url },
     },
   } = useKibanaContextForPlugin();
-  const { logsLocator } = getLogsLocatorsFromUrlService(url)!;
+  const { logsLocator } = getLogsLocatorsFromUrlService(url);
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -90,33 +81,26 @@ export const Logs = () => {
     setTextQuery(e.target.value);
   }, []);
 
-  const logView: LogViewReference = useMemo(
-    () => (logViewReference ? logViewReference : DEFAULT_LOG_VIEW),
-    [logViewReference]
-  );
-
   const logsUrl = useMemo(() => {
     const nodeQuery = getNodeQuery({
       nodeField: findInventoryFields(asset.type).id,
       nodeId: asset.id,
       filter: textQueryDebounced,
     });
-    return logsLocator.getRedirectUrl({
+    return logsLocator?.getRedirectUrl({
       filter: nodeQuery.query,
       timeRange: {
         startTime: state.startTimestamp,
         endTime: state.currentTimestamp,
       },
-      logView,
     });
   }, [
     logsLocator,
     asset.id,
     asset.type,
+    textQueryDebounced,
     state.startTimestamp,
     state.currentTimestamp,
-    textQueryDebounced,
-    logView,
   ]);
 
   return (

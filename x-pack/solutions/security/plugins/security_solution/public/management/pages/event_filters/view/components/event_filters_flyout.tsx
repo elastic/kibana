@@ -34,7 +34,7 @@ import type {
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EventFiltersForm } from './form';
 
-import { getInitialExceptionFromEvent } from '../utils';
+import { getInitialExceptionFromEvent, osTypeBasedOnAgentType } from '../utils';
 import { useHttp, useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../../common/translations';
@@ -89,6 +89,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     useEffect(() => {
       const enrichEvent = async () => {
         if (!data || !data._index) return;
+
         const searchResponse = await lastValueFrom(
           search.search({
             params: {
@@ -103,16 +104,23 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             },
           })
         );
-        setEnrichedData({
+        const enriched = {
           ...data,
           host: {
             ...data.host,
             os: {
               ...(data?.host?.os || {}),
-              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.type],
             },
           },
-        });
+        };
+        setEnrichedData(enriched);
+
+        // Update the exception with the correct OS from enriched data
+        setException((prevException) => ({
+          ...prevException,
+          os_types: osTypeBasedOnAgentType(enriched) as Array<'windows' | 'linux' | 'macos'>,
+        }));
       };
 
       if (data) {
@@ -242,7 +250,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
         <EuiFlyoutBody>
           <EventFiltersForm
-            allowSelectOs={!data}
+            allowSelectOs
             error={undefined}
             disabled={false}
             item={exception}

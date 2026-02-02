@@ -8,12 +8,12 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
 import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),
@@ -84,8 +84,9 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         newParam
       )) as SavedObject<SyntheticsParams>;
 
-      await runSynPrivateLocationMonitorsTaskSoon({
+      await asyncGlobalParamsPropagation({
         server,
+        paramsSpacesToSync: existingParam.namespaces || [spaceId],
       });
 
       return { id: responseId, key, tags, description, namespaces, value };

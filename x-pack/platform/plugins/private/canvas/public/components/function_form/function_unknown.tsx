@@ -31,5 +31,6 @@ export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
 );
 
 FunctionUnknown.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   argType: PropTypes.string,
 };

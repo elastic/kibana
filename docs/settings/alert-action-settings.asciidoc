@@ -130,6 +130,9 @@ to validate the server.
 The contents of one or more PEM-encoded certificate files in multiline format.
 This configuration can be used for environments where the files cannot be made available.
 
+[[action-config-email-maximum-body-length]] `xpack.actions.email.maximum_body_length`  {ess-icon}::
+The maximum length of an email body in bytes. Values longer than this length will be truncated. The default is 25MB, the maximum is 25MB.
+
 [[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
 A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
 +

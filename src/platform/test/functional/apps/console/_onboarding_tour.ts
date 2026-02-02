@@ -109,7 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.console.skipTourIfExists();
 
-      // Verify that tour is hiddern
+      // Wait for the skip button to be removed, indicating tour has closed
+      await testSubjects.waitForDeleted('consoleSkipTourButton');
+
+      // Verify that tour is hidden
       await expectAllStepsHidden();
 
       // Re-run tour

@@ -281,6 +281,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a monitor
       operationId: get-synthetic-monitor
@@ -441,6 +444,9 @@ paths:
                     "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
                     "locations": ["united_kingdom"]
                   }
+      responses:
+       "200":
+          description: OK
   /api/synthetics/monitors/_bulk_delete:
     post:
       summary: Delete monitors
@@ -669,6 +675,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a parameter
       operationId: get-parameter
@@ -781,7 +790,7 @@ paths:
                       "tags": ["authentication", "security", "updated"]
                     }
   /api/synthetics/params/_bulk_delete:
-    delete:
+    post:
       summary: Delete parameters
       operationId: delete-parameters
       description: >
@@ -988,6 +997,9 @@ paths:
             type: string
             minLength: 1
             maxLength: 1024
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a private location
       operationId: get-private-location
@@ -1214,6 +1226,8 @@ components:
             synthetics_args:
               type: array
               description: Synthetics agent CLI arguments.
+              items:
+                type: string
             type:
               type: string
               description: The monitor type.
@@ -1227,7 +1241,7 @@ components:
           required:
             - type
             - url
-          additionalproperties: true
+          additionalProperties: true
           properties:
             check:
               type: objects

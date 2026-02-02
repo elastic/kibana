@@ -34,25 +34,8 @@ actions:
 
             If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
-            To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html).
-# Add some tag descriptions and displayNames
-  - target: '$.tags[?(@.name=="alerting")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
-        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.
-        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
-      externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/guide/en/kibana/8.x/alerting-getting-started.html
-      x-displayName: "Alerting"
-  - target: '$.tags[?(@.name=="streams")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
-      x-displayName: "Streams"
+            To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/8.19/xpack-spaces.html).
+# Add tag descriptions that are specific to the Stack APIs
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
     update:
@@ -62,26 +45,26 @@ actions:
         You can also send cases to external incident management systems by configuring connectors.
       externalDocs:
         description: Cases documentation
-        url: https://www.elastic.co/guide/en/kibana/8.x/cases.html
-      x-displayName: "Cases"
-  - target: '$.tags[?(@.name=="connectors")]'
+        url: https://www.elastic.co/guide/en/kibana/8.19/cases.html
+      x-displayName: 'Cases'
+  # - target: '$.tags[?(@.name=="Fleet remote synced integrations")]'
+  #   description: Change tag description and add external docs link
+  #   update:
+  #     description: >
+  #       Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
+  # 
+  #       * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
+  #       
+  #       * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
+  #     externalDocs:
+  #       description: Automatic integrations synchronization documentation
+  #       url: https://www.elastic.co/docs/reference/fleet/automatic-integrations-synchronization
+  - target: '$.tags[?(@.name=="Fleet service tokens")]'
     description: Change tag description and displayName
     update:
       description: >
-        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
-        Alerting rules can use connectors to run actions when rule conditions are met.
-      externalDocs:
-        description: Connector documentation
-        url: https://www.elastic.co/guide/en/kibana/8.x/action-types.html
-      x-displayName: "Connectors"
-  - target: '$.tags[?(@.name=="data views")]'
-    description: Change displayName
-    update:
-      x-displayName: "Data views"
-  - target: '$.tags[?(@.name=="ml")]'
-    description: Change displayName
-    update:
-      x-displayName: "Machine learning"
+        Enables you to create tokens for Fleet service authentication and authorization.
+      x-displayName: 'Fleet service tokens'
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
@@ -89,29 +72,7 @@ actions:
       description: Manage the roles that grant Elasticsearch and Kibana privileges.
       externalDocs:
         description: Kibana role management
-        url: https://www.elastic.co/guide/en/kibana/8.x/kibana-role-management.html
-  - target: '$.tags[?(@.name=="slo")]'
-    description: Change displayName
-    update:
-      x-displayName: "Service level objectives"
-  - target: '$.tags[?(@.name=="spaces")]'
-    description: Change displayName
-    update:
-      x-displayName: "Spaces"
-      description: Manage your Kibana spaces.
-      externalDocs:
-        url: https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html
-        description: Space overview
-  - target: '$.tags[?(@.name=="system")]'
-    description: Change displayName and description
-    update:
-      x-displayName: "System"
-      description: >
-        Get information about the system status, resource usage, features, and installed plugins.
-  - target: '$.tags[?(@.name=="user session")]'
-    description: Change displayName
-    update:
-      x-displayName: "User session management"
+        url: https://www.elastic.co/guide/en/kibana/8.19/kibana-role-management.html
   - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:
@@ -123,17 +84,23 @@ actions:
         For example, use:
 
         * [Data views](../group/endpoint-data-views)
-        * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
-        * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+        * [Spaces](../group/endpoint-spaces)
+        * [Short URLs](../group/endpoint-short-url)
 
-        Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
+        Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
   - target: '$.tags[?(@.name=="synthetics")]'
     description: Add tag info
     update:
         x-displayName: Synthetics
+        description: Synthetics APIs enable you to check the status of your services and applications.
         externalDocs:
           description: Synthetic monitoring
-          url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
+          url: https://www.elastic.co/guide/en/observability/8.19/monitor-uptime-synthetics.html
+  - target: '$.tags[?(@.name=="user session")]'
+    description: Change tag description
+    update:
+      description: >
+        Enables you to invalidate user sessions for security and session management purposes.
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

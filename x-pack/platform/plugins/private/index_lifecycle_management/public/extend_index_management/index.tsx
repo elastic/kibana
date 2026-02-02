@@ -171,13 +171,13 @@ export const ilmFilterExtension = (indices: Index[]) => {
         options: [
           {
             value: true,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
               defaultMessage: 'Managed',
             }),
           },
           {
             value: false,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
               defaultMessage: 'Unmanaged',
             }),
           },

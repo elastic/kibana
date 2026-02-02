@@ -1685,7 +1685,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
-          monitors: [{ ...httpProjectMonitors.monitors[1], id: projectMonitors.monitors[0].id }],
+          monitors: [
+            {
+              ...httpProjectMonitors.monitors[1],
+              id: projectMonitors.monitors[0].id,
+              maintenance_windows: [],
+            },
+          ],
         })
         .expect(200);
       expect(body).eql({
@@ -1712,6 +1718,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: projectMonitors.monitors[0].id,
               locations: [],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1803,6 +1810,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...httpProjectMonitors.monitors[1],
               locations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1838,6 +1846,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               hash: 'ekrjelkjrelkjre',
               id: httpProjectMonitors.monitors[1].id,
               locations: ['does not exist'],
+              maintenance_windows: [],
               privateLocations: [testPrivateLocationName],
               name: 'My Monitor 3',
               response: {
@@ -1882,6 +1891,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               locations: [],
               privateLocations: ['does not exist'],
+              maintenance_windows: [],
             },
           ],
         })
@@ -1930,6 +1940,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',
@@ -1961,6 +1972,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...httpProjectMonitors.monitors[1],
               privateLocations: [],
               locations: [],
+              maintenance_windows: [],
             },
           ],
         })
@@ -2007,6 +2019,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               type: 'http',
               urls: ['http://localhost:9200'],
               locations: [],
+              maintenance_windows: [],
               params: {
                 testGlobalParam2: 'testGlobalParamOverwrite',
                 testLocal1: 'testLocalParamsValue',

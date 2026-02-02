@@ -9,8 +9,7 @@
 
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { LensAttributes, LensConfig, LensConfigOptions } from './types';
+import { DataViewsCommon, LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
   buildHeatmap,
@@ -21,8 +20,6 @@ import {
   buildXY,
   buildPartitionChart,
 } from './charts';
-
-export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export class LensConfigBuilder {
   private charts = {

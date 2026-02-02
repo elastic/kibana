@@ -25,6 +25,7 @@ describe('streamFactory', () => {
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
+      'Content-Type': 'text/event-stream; charset=utf-8',
     });
     expect(responseWithHeaders.body).toBeInstanceOf(PassThrough);
     end();
@@ -88,6 +89,7 @@ describe('streamFactory', () => {
     // @ts-ignore
     responseWithHeaders.body.write = jest.fn((chunk, callback) => {
       setImmediate(() => {
+        // @ts-expect-error
         if (callback) callback(null);
         responseWithHeaders.body.emit('drain');
       });

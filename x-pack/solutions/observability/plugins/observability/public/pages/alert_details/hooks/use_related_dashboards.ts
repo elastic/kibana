@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { ALERTS_API_URLS } from '../../../../common/constants';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 

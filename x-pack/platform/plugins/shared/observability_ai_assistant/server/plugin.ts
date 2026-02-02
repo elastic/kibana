@@ -14,7 +14,6 @@ import {
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
@@ -31,6 +30,10 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
+import { registerUsageCollector } from './collectors/usage';
+import { toolCallEvent } from './analytics/tool_call';
+import { conversationDeleteEvent } from './analytics/conversation_delete';
+import { conversationDuplicateEvent } from './analytics/conversation_duplicate';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -62,7 +65,6 @@ export class ObservabilityAIAssistantPlugin
       }),
       order: 8600,
       category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
       minimumLicense: 'enterprise',
@@ -142,7 +144,12 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
+    // Register telemetry
+    registerUsageCollector(plugins.usageCollection, core);
     core.analytics.registerEventType(recallRankingEvent);
+    core.analytics.registerEventType(toolCallEvent);
+    core.analytics.registerEventType(conversationDeleteEvent);
+    core.analytics.registerEventType(conversationDuplicateEvent);
 
     return {
       service,

@@ -43,6 +43,7 @@ describe('getTableActions', () => {
       setLoading,
       assignableTypes,
       capabilities: createTagCapabilities(caps),
+      // @ts-expect-error upgrade typescript v5.9.3
       fetchTags,
       canceled$: new Observable<void>(),
     });

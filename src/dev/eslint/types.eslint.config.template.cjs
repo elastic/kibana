@@ -27,7 +27,17 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['server/**/*', '*functional*/**/*', '*api_integration*/**/*'],
+      files: [
+        'server/**/*',
+        '*functional*/**/*',
+        '*api_integration*/**/*',
+        'src/playwright/page_objects/**/*',
+        'test/scout/**/*',
+        // when tsconfig.json is defined in 'scout/test/ui|api' folders
+        'parallel_tests/**/*.spec.ts',
+        'tests/**/*.spec.ts',
+        'fixtures/page_objects/**/*'
+      ],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.
         // We'll tackle /public eventually.

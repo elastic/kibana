@@ -16,49 +16,73 @@ import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
 describe('TabbedModal', () => {
   const modalOnCloseHandler = jest.fn();
 
+  interface TabState {
+    inputText: string;
+  }
+
+  const getTabDefinition = (
+    actionHandlerFn: (args: { state: TabState }) => void
+  ): IModalTabDeclaration<TabState> => ({
+    id: 'logUserInput',
+    name: 'log user input',
+    reducer(state = { inputText: '' }, action) {
+      switch (action.type) {
+        case 'UPDATE_TEXT_VALUE':
+          return {
+            ...state,
+            inputText: action.payload,
+          };
+        default:
+          return state;
+      }
+    },
+    content: ({ state, dispatch }) => {
+      const onChange = (e: { target: { value: any } }) => {
+        dispatch({ type: 'UPDATE_TEXT_VALUE', payload: e.target.value });
+      };
+
+      return (
+        <EuiFieldText
+          data-test-subj="log-user-input-field"
+          placeholder="Placeholder text"
+          value={state.inputText}
+          onChange={onChange}
+          aria-label="Use aria labels when no actual label is in use"
+        />
+      );
+    },
+    modalActionBtn: {
+      id: 'logUserMessage',
+      dataTestSubj: 'log-user-message',
+      label: 'log user message',
+      handler: actionHandlerFn,
+    },
+  });
+
+  it('renders correctly', () => {
+    const tabDefinition = getTabDefinition(jest.fn());
+
+    render(
+      <TabbedModal
+        tabs={[tabDefinition]}
+        defaultSelectedTabId="logUserInput"
+        onClose={modalOnCloseHandler}
+      />
+    );
+
+    // we assert this value exists because we target this className to override some styles
+    const overlayMask = document.querySelector('.euiOverlayMask');
+
+    expect(overlayMask).toBeInTheDocument();
+    expect(overlayMask?.querySelector('[id^="tabbedModal"]')).toBeInTheDocument();
+  });
+
   describe('modal configuration', () => {
     const mockedHandlerFn = jest.fn();
 
-    const tabDefinition: IModalTabDeclaration<{
-      inputText: string;
-    }> = {
-      id: 'logUserInput',
-      name: 'log user input',
-      reducer(state = { inputText: '' }, action) {
-        switch (action.type) {
-          case 'UPDATE_TEXT_VALUE':
-            return {
-              ...state,
-              inputText: action.payload,
-            };
-          default:
-            return state;
-        }
-      },
-      content: ({ state, dispatch }) => {
-        const onChange = (e: { target: { value: any } }) => {
-          dispatch({ type: 'UPDATE_TEXT_VALUE', payload: e.target.value });
-        };
-
-        return (
-          <EuiFieldText
-            data-test-subj="log-user-input-field"
-            placeholder="Placeholder text"
-            value={state.inputText}
-            onChange={onChange}
-            aria-label="Use aria labels when no actual label is in use"
-          />
-        );
-      },
-      modalActionBtn: {
-        id: 'logUserMessage',
-        dataTestSubj: 'log-user-message',
-        label: 'log user message',
-        handler: mockedHandlerFn,
-      },
-    };
-
     it("when a single tab definition is passed it simply renders it's content into the modal component without tabs", async () => {
+      const tabDefinition = getTabDefinition(mockedHandlerFn);
+
       render(
         <TabbedModal
           tabs={[tabDefinition]}
@@ -77,6 +101,8 @@ describe('TabbedModal', () => {
     });
 
     it('renders the tabbed modal with tabs for tab definition with length greater than 1', async () => {
+      const tabDefinition = getTabDefinition(mockedHandlerFn);
+
       render(
         <TabbedModal
           tabs={[tabDefinition, { ...tabDefinition, id: 'anotherTab', name: 'another tab' }]}

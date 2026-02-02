@@ -105,9 +105,6 @@ export function extractRegionId(url: string) {
   const match = (url ?? '').match(/https:\/\/.*?\.([a-z\-0-9]+)\.amazonaws\.com/);
   if (match) {
     return match[1];
-  } else {
-    // fallback to us-east-1
-    return 'us-east-1';
   }
 }
 

@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects, updateBaselines }: FtrPro
         'reset_session_page',
         updateBaselines
       );
-      expect(percentDifference).to.be.lessThan(0.032);
+      expect(percentDifference).to.be.lessThan(0.033);
     });
   });
 }

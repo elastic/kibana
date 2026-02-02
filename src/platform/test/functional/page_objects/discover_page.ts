@@ -116,6 +116,11 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async waitUntilTabIsLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   public async getColumnHeaders() {
     const isLegacy = await this.useLegacyTable();
     if (isLegacy) {

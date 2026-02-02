@@ -30,7 +30,7 @@ import {
 import {
   OnSaveProps,
   SaveResult,
-  SavedObjectSaveModal,
+  SavedObjectSaveModalWithSaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -113,7 +113,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           }
         };
         showSaveModal(
-          <SavedObjectSaveModal
+          <SavedObjectSaveModalWithSaveResult
             onSave={onSave}
             onClose={() => {}}
             title={lastTitle ?? ''}

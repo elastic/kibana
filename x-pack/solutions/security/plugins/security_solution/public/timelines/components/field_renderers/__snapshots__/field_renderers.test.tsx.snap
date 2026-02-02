@@ -94,39 +94,60 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
   display: inline-block;
 }
 
-<div
-    data-test-subj="cellActions-renderContent-host.id"
+<span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+    data-test-subj="DefaultFieldRendererComponent"
   >
-    <div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
       <div
-        class="euiPopover emotion-euiPopover-inline-block"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <div>
-          <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
-          >
-            <span
-              class="c0"
-              data-test-subj="render-content-host.id"
+        <div
+          data-test-subj="cellActions-renderContent-host.id"
+        >
+          <div>
+            <div
+              class="euiPopover emotion-euiPopover-inline-block"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-              >
-                <button
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="securitySolutionFlyoutLink"
-                  type="button"
+              <div>
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-b19a781f683541a7a25ee345133aa399"
+                  tabindex="-1"
                 >
-                  b19a781f683541a7a25ee345133aa399
-                </button>
-              </span>
-            </span>
+                  <span
+                    class="c0"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        b19a781f683541a7a25ee345133aa399
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+       
     </div>
-  </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      />
+    </div>
+  </span>
 </DocumentFragment>
 `;
 

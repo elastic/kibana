@@ -33,7 +33,7 @@ export function getSearchParamsFromRequest(
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = { preference: getEsPreference(getConfig) };
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { track_total_hits, ...body } = searchRequest.body;
   const dataView = typeof searchRequest.index !== 'string' ? searchRequest.index : undefined;
   const index = dataView?.title ?? `${searchRequest.index}`;

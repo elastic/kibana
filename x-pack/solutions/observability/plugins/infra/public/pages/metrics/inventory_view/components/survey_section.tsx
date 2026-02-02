@@ -12,7 +12,7 @@ import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { SurveyKubernetes } from './survey_kubernetes';
 
-const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_url';
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory';
 
 export const SurveySection = () => {
   const { nodeType } = useWaffleOptionsContext();
@@ -29,6 +29,7 @@ export const SurveySection = () => {
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={document.location.pathname}
         />
       )}
     </>

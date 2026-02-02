@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -122,7 +122,9 @@
     "@kbn/response-ops-rule-params",
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
-    "@kbn/esql"
+    "@kbn/esql",
+    "@kbn/react-query",
+    "@kbn/core-elasticsearch-server-utils",
   ],
   "exclude": [
     "target/**/*"

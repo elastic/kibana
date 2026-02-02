@@ -19,8 +19,6 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
-
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -215,7 +213,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       name: SEARCH_PRODUCT_NAME,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ...PLUGIN_IDS],
       catalogue: PLUGIN_IDS,
       privileges: {
@@ -248,7 +245,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       }),
       order: 3,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', APPLICATIONS_PLUGIN.ID],
       catalogue: [APPLICATIONS_PLUGIN.ID],
       privileges: {
@@ -277,7 +273,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       name: ANALYTICS_PLUGIN.NAME,
       order: 4,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
       privileges: {

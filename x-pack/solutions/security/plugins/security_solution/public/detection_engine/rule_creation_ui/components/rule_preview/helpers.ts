@@ -125,6 +125,7 @@ export const getIsRulePreviewDisabled = ({
     return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
   }
   if (ruleType === 'machine_learning') {
+    // @ts-expect-error upgrade typescript v5.9.3
     return !machineLearningJobId ?? machineLearningJobId?.length === 0;
   }
   if (

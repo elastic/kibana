@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -45,6 +45,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/deeplinks-analytics",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

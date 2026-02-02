@@ -27,7 +27,10 @@ const getServerlessTag = (projectType: string): string => {
   if (!projectType) {
     throw new Error(`'projectType' is required to determine tags for 'serverless' mode.`);
   }
-  const tag = tagsByMode.serverless[projectType as 'security' | 'es' | 'oblt'];
+  const tag =
+    tagsByMode.serverless[
+      projectType as 'security' | 'security-essentials' | 'security-ease' | 'es' | 'oblt'
+    ];
   if (!tag) {
     throw new Error(`No tags found for projectType: '${projectType}'.`);
   }

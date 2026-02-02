@@ -53,6 +53,8 @@ import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
 
+export const COMPARE_DEBOUNCE = 100;
+
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
@@ -111,7 +113,7 @@ export function initializeUnifiedSearchManager(
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[]) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
-      unifiedSearchFilters$.next(unifiedSearchFilters);
+      unifiedSearchFilters$.next(cleanFiltersForSerialize(unifiedSearchFilters));
     }
   }
 
@@ -203,7 +205,7 @@ export function initializeUnifiedSearchManager(
           query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
         }),
         set: ({ filters: newFilters, query: newQuery }) => {
-          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
+          setUnifiedSearchFilters(newFilters);
           setQuery(newQuery);
         },
         state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
@@ -343,8 +345,14 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       controlGroupReload$,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
-          debounceTime(100),
+        return combineLatest([
+          unifiedSearchFilters$,
+          query$,
+          refreshInterval$,
+          timeRange$,
+          timeRestore$,
+        ]).pipe(
+          debounceTime(COMPARE_DEBOUNCE),
           map(([filters, query, refreshInterval, timeRange]) => ({
             filters: filters ?? DEFAULT_DASHBOARD_STATE.filters,
             query: query ?? DEFAULT_DASHBOARD_STATE.query,

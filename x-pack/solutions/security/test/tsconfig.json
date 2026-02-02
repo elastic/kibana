@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -24,9 +24,11 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
+    "@kbn/security-solution-test-api-clients",
+    "@kbn/detections-response-ftr-services",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -57,18 +59,9 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/task-manager-plugin",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-endpoint-exceptions-common",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/osquery-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
     "@kbn/kubernetes-security-plugin",
     "@kbn/es-query"
   ]

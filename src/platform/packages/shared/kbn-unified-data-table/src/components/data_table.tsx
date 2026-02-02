@@ -913,6 +913,7 @@ export const UnifiedDataTable = ({
         customGridColumnsConfiguration,
         onResize,
         sortedColumns,
+        dataGridRef,
       }),
     [
       cellActionsHandling,

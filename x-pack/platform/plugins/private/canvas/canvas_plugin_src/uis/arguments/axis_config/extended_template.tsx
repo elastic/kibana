@@ -8,14 +8,12 @@
 import React, { Fragment, ChangeEvent, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import immutable from 'object-path-immutable';
+import { set } from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAstExpression } from '../../../../types';
 import { ArgumentStrings } from '../../../../i18n/ui';
 
 const { AxisConfig: strings } = ArgumentStrings;
-
-const { set } = immutable;
 
 const defaultExpression: ExpressionAstExpression = {
   type: 'expression',

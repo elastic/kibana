@@ -6,8 +6,8 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ERROR_ID, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ERROR_ID, SPAN_ID, ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getEventMetadata({
@@ -23,7 +23,7 @@ export async function getEventMetadata({
   start: number;
   end: number;
 }) {
-  const fieldName = getFieldName(processorEvent);
+  const fieldNames = getFieldNames(processorEvent);
   const response = await apmEventClient.search('get_event_metadata', {
     apm: {
       events: [processorEvent],
@@ -32,7 +32,15 @@ export async function getEventMetadata({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [...rangeQuery(start, end), { term: { [fieldName]: id } }],
+          filter: [
+            ...rangeQuery(start, end),
+            {
+              bool: {
+                should: fieldNames.flatMap((fieldName) => termQuery(fieldName, id)),
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
       },
       size: 1,
@@ -45,16 +53,16 @@ export async function getEventMetadata({
   return response.hits.hits[0].fields;
 }
 
-function getFieldName(processorEvent: ProcessorEvent) {
+function getFieldNames(processorEvent: ProcessorEvent) {
   switch (processorEvent) {
     case ProcessorEvent.error:
-      return ERROR_ID;
+      return [ERROR_ID, ID];
 
     case ProcessorEvent.transaction:
-      return TRANSACTION_ID;
+      return [TRANSACTION_ID];
 
     case ProcessorEvent.span:
-      return SPAN_ID;
+      return [SPAN_ID];
 
     default:
       throw new Error('Unknown processor event');

@@ -622,6 +622,7 @@ export interface InstallFailedAttempt {
 
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   INSTALL_ML_MODEL = 'install_ml_model',

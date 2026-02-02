@@ -52,7 +52,8 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('@ess @serverless event route', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/235716
+  describe.skip('@ess @serverless event route', function () {
     let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     let adminSupertest: TestAgent;

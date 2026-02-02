@@ -431,6 +431,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -445,6 +453,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -457,6 +473,14 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parentKey: '',
+                parentNode: {
+                  childNode: {},
+                },
+                resolvedDocument,
+              },
               parentKey: 'childNode',
               parentNode: resolvedDocument.document,
             });
@@ -497,6 +521,16 @@ describe('processDocument', () => {
             expect(context).toEqual({
               resolvedDocument,
               isRootNode: false,
+              parent: {
+                isRootNode: true,
+                parent: undefined,
+                parentKey: '',
+                parentNode: {
+                  node: referencingNode,
+                  refNode: referencedNode,
+                },
+                resolvedDocument,
+              },
               parentKey: 'node',
               parentNode: resolvedDocument.document,
             });

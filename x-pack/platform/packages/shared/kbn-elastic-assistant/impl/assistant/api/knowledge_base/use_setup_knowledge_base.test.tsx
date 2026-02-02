@@ -8,7 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from './api';
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { useMutation as _useMutation } from '@kbn/react-query';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const postKnowledgeBaseMock = _postKnowledgeBase as jest.Mock;

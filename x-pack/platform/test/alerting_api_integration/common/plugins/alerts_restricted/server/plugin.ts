@@ -12,7 +12,6 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineAlertTypes } from './alert_types';
 
 export interface FixtureSetupDeps {
@@ -43,7 +42,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
         { ruleTypeId: 'test.noop', consumers: ['alertsRestrictedFixture', ALERTING_FEATURE_ID] },
       ],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],

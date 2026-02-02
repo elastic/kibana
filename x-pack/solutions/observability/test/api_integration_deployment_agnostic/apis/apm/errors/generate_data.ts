@@ -26,12 +26,14 @@ export async function generateData({
   start,
   end,
   overrides,
+  withoutErrorId = false,
 }: {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
   overrides?: Partial<ApmFields>;
+  withoutErrorId?: boolean;
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'go' })
@@ -56,7 +58,7 @@ export async function generateData({
           .overrides(overrides ? overrides : {})
           .errors(
             serviceGoProdInstance
-              .error({ message: `Error ${index}`, type: transaction.name })
+              .error({ message: `Error ${index}`, type: transaction.name, withoutErrorId })
               .timestamp(timestamp)
           )
           .duration(1000)

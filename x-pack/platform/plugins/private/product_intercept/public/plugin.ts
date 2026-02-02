@@ -89,6 +89,6 @@ export class ProductInterceptPublicPlugin implements Plugin {
       this.interceptSubscription,
       this.trialInterceptSubscription,
       this.upgradeInterceptSubscription,
-    ]?.forEach((subscription) => subscription?.unsubscribe());
+    ].forEach((subscription) => subscription?.unsubscribe());
   }
 }

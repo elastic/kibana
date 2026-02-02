@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { QueryClientConfig } from '@tanstack/react-query';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClientConfig } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import merge from 'lodash/merge';
 import { EuiButtonIcon } from '@elastic/eui';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';

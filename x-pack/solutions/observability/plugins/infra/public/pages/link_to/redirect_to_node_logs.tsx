@@ -35,7 +35,7 @@ export const RedirectToNodeLogs = ({
   const time = getTimeFromLocation(location);
 
   useEffect(() => {
-    nodeLogsLocator.navigate(
+    nodeLogsLocator?.navigate(
       {
         nodeField: findInventoryFields(nodeType).id,
         nodeId,

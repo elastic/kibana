@@ -68,5 +68,14 @@ describe('IP Overview Component', () => {
 
       expect(container.children[0]).toMatchSnapshot();
     });
+
+    test('it renders host id', () => {
+      const { container } = render(
+        <TestProviders>
+          <IpOverview {...mockProps} data={mockData.complete} />
+        </TestProviders>
+      );
+      expect(container).toHaveTextContent('b19a781f683541a7a25ee345133aa399');
+    });
   });
 });

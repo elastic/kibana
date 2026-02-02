@@ -8,7 +8,7 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getInternalRuleTypes } from '../apis/get_internal_rule_types';
 import { queryKeys } from '../query_keys';
 

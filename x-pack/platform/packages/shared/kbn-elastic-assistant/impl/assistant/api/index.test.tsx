@@ -76,7 +76,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
         }
       );
     });
@@ -88,7 +88,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...streamingDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"screenContext":{"timeZone":"America/New_York"}}',
         }
       );
     });
@@ -159,7 +159,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"screenContext":{"timeZone":"America/New_York"},"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"screenContext":{"timeZone":"America/New_York"},"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
         }
       );
     });

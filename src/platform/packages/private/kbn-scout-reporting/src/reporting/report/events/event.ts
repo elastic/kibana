@@ -43,7 +43,7 @@ export interface ScoutReportEventInfo {
  */
 export interface ScoutReporterInfo {
   name: string;
-  type: 'jest' | 'ftr' | 'playwright';
+  type: 'jest' | 'ftr' | 'playwright' | 'cypress';
 }
 
 /**
@@ -60,12 +60,23 @@ export interface ScoutFileInfo {
  */
 export interface ScoutTestRunInfo {
   id: string;
+  target: {
+    type: string;
+    mode: string;
+  };
+  fully_parallel?: boolean;
   config?: {
     file?: ScoutFileInfo;
     category?: ScoutTestRunConfigCategory;
   };
   status?: string;
   duration?: number;
+  tests?: {
+    passes?: number;
+    pending?: number;
+    failures?: number;
+    total?: number;
+  };
 }
 
 /**
@@ -111,4 +122,7 @@ export interface ScoutReportEvent {
   test_run: ScoutTestRunInfo;
   suite?: ScoutSuiteInfo;
   test?: ScoutTestInfo;
+  process?: {
+    uptime?: number;
+  };
 }

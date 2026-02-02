@@ -210,7 +210,7 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
 
 export const convertToBuildEsQuery = ({
   config,
-  dataView, // New dataview prepended with feature flag to enable easy cleanup
+  dataView, // New dataview with newDataViewPickerEnabled
   dataViewSpec, // Account for the case where sourcerer is active, but this can just use dataView
   queries,
   filters,
@@ -225,10 +225,11 @@ export const convertToBuildEsQuery = ({
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
   try {
+    const newDataViewExists = dataView?.id && dataView?.getIndexPattern();
     return [
       JSON.stringify(
         buildEsQuery(
-          dataView ?? (dataViewSpecToViewBase(dataViewSpec) as DataView),
+          newDataViewExists ? dataView : (dataViewSpecToViewBase(dataViewSpec) as DataView),
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {

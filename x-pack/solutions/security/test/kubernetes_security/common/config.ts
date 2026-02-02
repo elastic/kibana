@@ -23,6 +23,7 @@ export function createTestConfig(settings: Settings) {
 
     return {
       testFiles,
+      testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
       servers: xPackAPITestsConfig.get('servers'),
       services: xPackAPITestsConfig.get('services'),
       junit: {

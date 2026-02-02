@@ -9,6 +9,12 @@
 
 import { ScoutPage, expect } from '..';
 
+export enum DateUnitSelector {
+  Seconds = 's',
+  Minutes = 'm',
+  Hours = 'h',
+}
+
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
 
@@ -68,5 +74,31 @@ export class DatePicker {
       `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
+  }
+
+  async getTimeConfig(): Promise<{ start: string; end: string }> {
+    await this.showStartEndTimes();
+    const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
+    const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
+    return { start, end };
+  }
+
+  async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
+    // Check if refresh is already running
+    const toggleButton = this.page.testSubj.locator('superDatePickerToggleRefreshButton');
+    const isPaused = (await toggleButton.getAttribute('aria-checked')) === 'false';
+    if (isPaused) {
+      await toggleButton.click();
+    }
+    // Set interval
+    const intervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    await intervalInput.clear();
+    await intervalInput.fill(interval.toString());
+    const timeUnit = this.page.testSubj.locator('superDatePickerRefreshIntervalUnitsSelect');
+    await timeUnit.selectOption({ value: dateUnit });
+    await intervalInput.press('Enter');
+
+    await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
   }
 }

@@ -124,7 +124,7 @@ describe('Service Overview', () => {
       cy.getByTestSubj('waterfall').should('exist');
       cy.getByTestSubj('accordionWaterfall').should('exist');
       cy.getByTestSubj('accordionWaterfall').click();
-      cy.contains('h4', 'Transaction details');
+      cy.contains('h2', 'Transaction details');
       cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
       cy.getByTestSubj('apmTransactionDetailLinkLink').contains(
         'oteldemo.AdServiceEdotSynth/GetAds'

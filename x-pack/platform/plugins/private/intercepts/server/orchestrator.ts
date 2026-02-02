@@ -15,10 +15,11 @@ import {
   type IContextProvider,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { parseIntervalAsMillisecond } from '@kbn/task-manager-plugin/server/lib/intervals';
 import { InterceptTriggerService } from './services/intercept_trigger';
 import { InterceptUserInteractionService } from './services/intercept_user_interaction';
-import { TRIGGER_INFO_API_ROUTE } from '../common/constants';
+import { TRIGGER_INFO_API_ROUTE, USAGE_COLLECTION_DOMAIN_ID } from '../common/constants';
 import type { TriggerInfo } from '../common/types';
 
 interface InterceptTriggerRouteContext extends RequestHandlerContext {
@@ -26,19 +27,26 @@ interface InterceptTriggerRouteContext extends RequestHandlerContext {
 }
 
 interface InterceptTriggerCoreSetup {
+  logger: Logger;
   kibanaVersion: string;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class InterceptsTriggerOrchestrator {
   private logger?: Logger;
+  usageCollector?: ReturnType<UsageCollectionSetup['createUsageCounter']>;
   private interceptTriggerService = new InterceptTriggerService();
   private interceptUserInteractionService = new InterceptUserInteractionService();
 
-  setup(core: CoreSetup, logger: Logger, { kibanaVersion }: InterceptTriggerCoreSetup) {
+  setup(core: CoreSetup, { kibanaVersion, logger, usageCollection }: InterceptTriggerCoreSetup) {
     this.logger = logger;
 
-    const { fetchRegisteredTask } = this.interceptTriggerService.setup(core, this.logger, {
+    this.usageCollector = this.setupUsageCollection(usageCollection);
+
+    const { fetchRegisteredTask } = this.interceptTriggerService.setup(core, {
       kibanaVersion,
+      usageCollector: this.usageCollector,
+      logger: this.logger,
     });
 
     this.interceptUserInteractionService.setup(core, this.logger);
@@ -139,5 +147,13 @@ export class InterceptsTriggerOrchestrator {
         });
       },
     ];
+  }
+
+  private setupUsageCollection(usageCollection?: UsageCollectionSetup) {
+    if (!usageCollection) {
+      return;
+    }
+
+    return usageCollection?.createUsageCounter(USAGE_COLLECTION_DOMAIN_ID);
   }
 }

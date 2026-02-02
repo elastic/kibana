@@ -23,7 +23,6 @@ export const AISettings: React.FC = () => {
   const {
     application,
     data: { dataViews },
-    settings,
     docLinks,
     notifications: { toasts },
     featureFlags,
@@ -66,7 +65,6 @@ export const AISettings: React.FC = () => {
           dataViews={dataViews}
           onTabChange={onTabChange}
           currentTab={currentTab}
-          settings={settings}
         />
       </DefaultAiConnectorSettingsContextProvider>
     </AssistantSpaceIdProvider>

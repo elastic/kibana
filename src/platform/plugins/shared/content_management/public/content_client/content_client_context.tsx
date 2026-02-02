@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ContentClient } from './content_client';
 
 const ContentClientContext = React.createContext<ContentClient>(null as unknown as ContentClient);

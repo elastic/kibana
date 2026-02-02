@@ -421,8 +421,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearEditorText();
       });
 
-      // Failing in CI: https://github.com/elastic/kibana/issues/229438
-      it.skip('autocompletes ESQL inside triple quotes query', async () => {
+      it('autocompletes ESQL inside triple quotes query', async () => {
         await PageObjects.console.enterText(`POST _query\n`);
         await PageObjects.console.enterText(`{\n\t"query": """`);
         await PageObjects.console.sleepForDebouncePeriod();

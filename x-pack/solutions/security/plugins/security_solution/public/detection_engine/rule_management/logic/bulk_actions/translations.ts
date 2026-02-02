@@ -84,7 +84,7 @@ export function explainBulkEditSuccess(
   summary: BulkActionSummary
 ): string {
   const dataViewSkipDetail =
-    summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : null;
+    summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : '';
   if (
     editPayload.some(
       (x) =>

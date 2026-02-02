@@ -23,6 +23,7 @@ describe('getTopNavBadges()', function () {
   test('should not return the unsaved changes badge if no changes', () => {
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: false,
+      isMobile: false,
       services: discoverServiceMock,
       stateContainer,
       topNavCustomization: undefined,
@@ -33,6 +34,7 @@ describe('getTopNavBadges()', function () {
   test('should return the unsaved changes badge when has changes', async () => {
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
+      isMobile: false,
       services: discoverServiceMock,
       stateContainer,
       topNavCustomization: undefined,
@@ -62,6 +64,7 @@ describe('getTopNavBadges()', function () {
     discoverServiceMockReadOnly.capabilities.discover.save = false;
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
+      isMobile: false,
       services: discoverServiceMockReadOnly,
       stateContainer,
       topNavCustomization: undefined,
@@ -86,6 +89,7 @@ describe('getTopNavBadges()', function () {
     test('should return the managed badge when managed saved search', () => {
       const topNavBadges = getTopNavBadges({
         hasUnsavedChanges: false,
+        isMobile: false,
         services: discoverServiceMock,
         stateContainer: stateContainerWithManagedSavedSearch,
         topNavCustomization: undefined,
@@ -98,6 +102,7 @@ describe('getTopNavBadges()', function () {
     test('should not show save in unsaved changed badge', async () => {
       const topNavBadges = getTopNavBadges({
         hasUnsavedChanges: true,
+        isMobile: false,
         services: discoverServiceMock,
         stateContainer: stateContainerWithManagedSavedSearch,
         topNavCustomization: undefined,
@@ -116,6 +121,7 @@ describe('getTopNavBadges()', function () {
   test('should not return the unsaved changes badge when disabled in customization', () => {
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
+      isMobile: false,
       services: discoverServiceMock,
       stateContainer,
       topNavCustomization: {
@@ -138,6 +144,7 @@ describe('getTopNavBadges()', function () {
     test('should return the solutions view badge when spaces is enabled', () => {
       const topNavBadges = getTopNavBadges({
         hasUnsavedChanges: false,
+        isMobile: false,
         services: discoverServiceWithSpacesMock,
         stateContainer,
         topNavCustomization: undefined,

@@ -8,7 +8,6 @@ import { uniq } from 'lodash';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { ServiceHealthStatusesResponse } from './get_health_statuses';
-import type { ServicesWithoutTransactionsResponse } from './get_services_without_transactions';
 import type { ServiceAlertsResponse } from './get_service_alerts';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -28,24 +27,14 @@ export interface MergedServiceStat {
 
 export function mergeServiceStats({
   serviceStats,
-  servicesWithoutTransactions,
   healthStatuses,
   alertCounts,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
-  servicesWithoutTransactions: ServicesWithoutTransactionsResponse['services'];
   healthStatuses: ServiceHealthStatusesResponse;
   alertCounts: ServiceAlertsResponse;
 }): MergedServiceStat[] {
-  const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
-
-  const servicesWithOnlyMetricDocuments = servicesWithoutTransactions.filter(
-    ({ serviceName }) => !foundServiceNames.includes(serviceName)
-  );
-
-  const allServiceNames = foundServiceNames.concat(
-    servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
-  );
+  const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
   // make sure to exclude health statuses from services
   // that are not found in APM data
@@ -54,12 +43,7 @@ export function mergeServiceStats({
   );
 
   return joinByKey(
-    asMutableArray([
-      ...serviceStats,
-      ...servicesWithoutTransactions,
-      ...matchedHealthStatuses,
-      ...alertCounts,
-    ] as const),
+    asMutableArray([...serviceStats, ...matchedHealthStatuses, ...alertCounts] as const),
     'serviceName',
     function merge(a, b) {
       const aEnvs = 'environments' in a ? a.environments : [];

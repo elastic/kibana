@@ -199,9 +199,7 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
-                    service.logger.error(
-                      'User is not allowed to access Synthetics service. Please contact support.'
-                    );
+                    service.logger.debug('User is not allowed to access Synthetics service.');
                   }
                 }
               } catch (e) {
@@ -318,10 +316,12 @@ export class SyntheticsService {
   }
 
   async getOutput({ inspect }: { inspect: boolean } = { inspect: false }) {
-    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
+      server: this.server,
+    });
     // do not check for api key validity if inspecting
     if (!isValid && !inspect) {
-      this.server.logger.error(
+      this.server.logger.debug(
         'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
       );
       this.invalidApiKeyError = true;
@@ -419,7 +419,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows();
+    const maintenanceWindows = await this.getMaintenanceWindows(ALL_SPACES_ID);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -648,7 +648,7 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows() {
+  async getMaintenanceWindows(spaceId: string) {
     const { savedObjects } = this.server.coreStart;
     const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
 
@@ -661,6 +661,7 @@ export class SyntheticsService {
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
+      namespaces: [spaceId],
     });
     return mws.data;
   }

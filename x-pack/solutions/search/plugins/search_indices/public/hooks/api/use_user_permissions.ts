@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
 import type { UserStartPrivilegesResponse } from '../../../common/types';

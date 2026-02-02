@@ -60,6 +60,7 @@ export const UserDetailsPanel = ({
     user,
     tabs,
     path,
+    scopeId,
     hasMisconfigurationFindings,
     hasNonClosedAlerts
   );
@@ -87,6 +88,7 @@ const useSelectedTab = (
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
+  scopeId: string,
   hasMisconfigurationFindings?: boolean,
   hasNonClosedAlerts?: boolean
 ) => {
@@ -110,6 +112,7 @@ const useSelectedTab = (
         path: {
           tab: tabId,
         },
+        scopeId,
       },
     });
   };

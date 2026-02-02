@@ -43,7 +43,12 @@ export class FilterBar {
     );
     await this.page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
     // set value
-    await this.page.testSubj.locator('filterParams').locator('input').fill(options.value);
+    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+    await expect(filterParamsInput).not.toHaveAttribute('disabled');
+    // await this.page.waitForTimeout(100); // wait for input to be ready
+    await expect(filterParamsInput).toBeEditable();
+    await filterParamsInput.focus();
+    await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
     // save filter
     await this.page.testSubj.click('saveFilter');
 

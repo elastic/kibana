@@ -1,5 +1,9 @@
 # @kbn-doc-linker partial
-
+title: APM transaction duration
+description: >
+  The parameters for the APM transaction duration rule.
+  These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+type: object
 required:
   - windowSize
   - windowUnit

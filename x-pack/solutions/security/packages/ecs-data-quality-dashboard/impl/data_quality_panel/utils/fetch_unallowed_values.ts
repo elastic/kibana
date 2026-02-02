@@ -21,7 +21,6 @@ export const isBucket = (maybeBucket: unknown): maybeBucket is Bucket =>
   typeof (maybeBucket as Bucket).key === 'string' &&
   typeof (maybeBucket as Bucket).doc_count === 'number';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const getUnallowedValueCount = ({ doc_count, key }: Bucket): UnallowedValueCount => ({
   count: doc_count,
   fieldName: key,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import React, { FC, PropsWithChildren, useCallback, useContext, useMemo } from 'react';
 import type { UserProfile } from '@kbn/user-profile-components';

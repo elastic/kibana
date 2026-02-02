@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';

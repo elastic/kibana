@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
@@ -24,6 +24,7 @@ import {
   PROCESSOR_NAME,
   SERVICE_NAME,
   TIMESTAMP_US,
+  ID,
   TRACE_ID,
   TRANSACTION_ID,
   ERROR_STACK_TRACE,
@@ -76,12 +77,12 @@ export async function getErrorSampleDetails({
   end: number;
 }): Promise<Partial<ErrorSampleDetailsResponse>> {
   const requiredFields = asMutableArray([
+    ID,
     AGENT_NAME,
     PROCESSOR_EVENT,
     TIMESTAMP_US,
     AT_TIMESTAMP,
     SERVICE_NAME,
-    ERROR_ID,
     ERROR_GROUP_ID,
   ] as const);
 
@@ -97,6 +98,7 @@ export async function getErrorSampleDetails({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    ERROR_ID,
     URL_FULL,
     HTTP_REQUEST_METHOD,
     HTTP_RESPONSE_STATUS_CODE,
@@ -125,6 +127,12 @@ export async function getErrorSampleDetails({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            {
+              bool: {
+                should: [...termQuery(ERROR_ID, errorId), ...termQuery(ID, errorId)],
+                minimum_should_match: 1,
+              },
+            },
           ],
         },
       },
@@ -171,6 +179,7 @@ export async function getErrorSampleDetails({
       },
       error: {
         ...errorFromFields.error,
+        id: errorFromFields.error?.id ?? errorFromFields[ID],
         exception:
           (source?.error.exception?.length ?? 0) > 0
             ? source?.error.exception

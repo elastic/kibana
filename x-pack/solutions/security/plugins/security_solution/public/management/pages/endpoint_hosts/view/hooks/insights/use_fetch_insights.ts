@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';

@@ -21,12 +21,14 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
-export interface SaveModalDashboardProps {
+export interface SaveModalDashboardProps<T = void> {
   documentInfo: SaveModalDocumentInfo;
   canSaveByReference: boolean;
   objectType: string;
   onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
+  onSave: (
+    props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }
+  ) => Promise<T>;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   // include a message if the user has to copy on save
   mustCopyOnSaveMessage?: string;

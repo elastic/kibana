@@ -15,7 +15,7 @@ import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_p
 import { useHttp } from '../../../../common/lib/kibana';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { mockStatsNode } from '../../right/mocks/mock_analyzer_data';
 

@@ -85,23 +85,23 @@ export const getSections = ({
   );
 
   // Logs hrefs
-  const podLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+  const podLogsHref = logsLocators.nodeLogsLocator?.getRedirectUrl({
     nodeField: findInventoryFields('pod').id,
     nodeId: podId!,
     time,
   });
-  const containerLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+  const containerLogsHref = logsLocators.nodeLogsLocator?.getRedirectUrl({
     nodeField: findInventoryFields('container').id,
     nodeId: containerId!,
     time,
   });
-  const hostLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+  const hostLogsHref = logsLocators.nodeLogsLocator?.getRedirectUrl({
     nodeField: findInventoryFields('host').id,
     nodeId: hostName!,
     time,
   });
 
-  const traceLogsHref = logsLocators.traceLogsLocator.getRedirectUrl({
+  const traceLogsHref = logsLocators.traceLogsLocator?.getRedirectUrl({
     traceId: transaction.trace.id!,
     time,
   });

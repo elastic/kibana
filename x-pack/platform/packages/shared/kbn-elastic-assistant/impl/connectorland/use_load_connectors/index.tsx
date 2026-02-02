@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { useEffect } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { AIConnector } from '../connector_selector';
+import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
+import type { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
-
 /**
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
  */
@@ -26,6 +26,7 @@ export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
   inferenceEnabled?: boolean;
+  settings: SettingsStart;
 }
 
 const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
@@ -34,6 +35,7 @@ export const useLoadConnectors = ({
   http,
   toasts,
   inferenceEnabled = false,
+  settings,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
   useEffect(() => {
     if (inferenceEnabled && !actionTypes.includes('.inference')) {
@@ -45,9 +47,10 @@ export const useLoadConnectors = ({
     QUERY_KEY,
     async () => {
       const connectors = await loadConnectors({ http });
-      return connectors.reduce((acc: AIConnector[], connector) => {
+
+      const allAiConnectors = connectors.flatMap((connector) => {
         if (!connector.isMissingSecrets && actionTypes.includes(connector.actionTypeId)) {
-          acc.push({
+          const aiConnector: AIConnector = {
             ...connector,
             apiProvider:
               !connector.isPreconfigured &&
@@ -55,10 +58,16 @@ export const useLoadConnectors = ({
               connector?.config?.apiProvider
                 ? (connector?.config?.apiProvider as OpenAiProviderType)
                 : undefined,
-          });
+          };
+          return [aiConnector];
         }
-        return acc;
-      }, []);
+        return [];
+      });
+
+      return getAvailableAiConnectors({
+        allAiConnectors,
+        settings,
+      });
     },
     {
       retry: false,

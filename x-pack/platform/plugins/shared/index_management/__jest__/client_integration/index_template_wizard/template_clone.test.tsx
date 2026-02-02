@@ -103,10 +103,10 @@ describe('<TemplateClone />', () => {
           body: JSON.stringify({
             name: `${templateToClone.name}-copy`,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            indexMode,
             priority,
             version,
             allowAutoCreate,
+            indexMode,
             _kbnMeta,
             template,
           }),

@@ -109,6 +109,7 @@ export const useQueryAlerts = <Hit, Aggs>({
           setAlerts({
             data: alertResponse,
             response: JSON.stringify(alertResponse, null, 2),
+            // @ts-expect-error upgrade typescript v5.9.3
             request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
             setQuery,
             refetch: fetchData,

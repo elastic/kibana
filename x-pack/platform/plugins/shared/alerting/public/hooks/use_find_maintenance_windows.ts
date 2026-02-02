@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
 import { type MaintenanceWindowStatus } from '../../common';

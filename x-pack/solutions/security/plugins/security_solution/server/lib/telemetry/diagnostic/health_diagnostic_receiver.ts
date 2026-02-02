@@ -33,7 +33,7 @@ import {
 } from './health_diagnostic_circuit_breakers.types';
 import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
   private readonly logger: TelemetryLogger;
@@ -160,7 +160,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
       finalize(() => {
         this.client.closePointInTime({ id: pitId }).catch((error) => {
-          this.logger.warn('>> closePointInTime error', { error });
+          this.logger.warn('>> closePointInTime error', withErrorMessage(error));
         });
       })
     );
@@ -203,52 +203,60 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     }
     const tiers = query.tiers;
 
-    return (
-      await this.client.ilm
-        .explainLifecycle({
-          index: query.index,
-          only_managed: false,
-          filter_path: ['indices.*.phase'],
-        })
-        .then((response) => {
-          if (response.indices === undefined) {
-            this.logger.debug(
-              'Got an empty response while explaining lifecycle. Asumming serverless.',
-              {
-                index: query.index,
-              } as LogMeta
-            );
-            return [query.index];
-          } else {
-            const indices = Object.entries(response.indices).map(([indexName, stats]) => {
-              if ('phase' in stats && stats.phase) {
-                if (tiers.includes(stats.phase)) {
-                  return indexName;
-                } else {
-                  this.logger.debug('Index is not in the expected phases', {
-                    phase: stats.phase,
-                    index: indexName,
-                    tiers,
-                  } as LogMeta);
-                  return '';
-                }
+    return this.client.ilm
+      .explainLifecycle({
+        index: query.index,
+        only_managed: false,
+        filter_path: ['indices.*.phase'],
+      })
+      .then((response) => {
+        if (response.indices === undefined) {
+          this.logger.debug(
+            'Got an empty response while explaining lifecycle. Asumming serverless.',
+            {
+              index: query.index,
+            } as LogMeta
+          );
+          return [query.index];
+        } else {
+          const indices = Object.entries(response.indices).map(([indexName, stats]) => {
+            if ('phase' in stats && stats.phase) {
+              if (tiers.includes(stats.phase)) {
+                return indexName;
               } else {
-                // should not happen, but just in case
-                this.logger.debug('Index is not managed by an ILM', {
+                this.logger.debug('Index is not in the expected phases', {
+                  phase: stats.phase,
                   index: indexName,
                   tiers,
                 } as LogMeta);
                 return '';
               }
-            });
-            this.logger.debug('Indices managed by ILM', {
-              queryName: query.name,
-              tiers: query.tiers,
-              indices,
-            } as LogMeta);
-            return indices;
-          }
-        })
-    ).filter((indexName) => indexName !== '');
+            } else {
+              // should not happen, but just in case
+              this.logger.debug('Index is not managed by an ILM', {
+                index: indexName,
+                tiers,
+              } as LogMeta);
+              return '';
+            }
+          });
+          this.logger.debug('Indices managed by ILM', {
+            queryName: query.name,
+            tiers: query.tiers,
+            indices,
+          } as LogMeta);
+          return indices;
+        }
+      })
+      .then((indices) => {
+        return indices.filter((indexName) => indexName !== '');
+      })
+      .catch((error) => {
+        this.logger.info(
+          'Error while checking ILM status, assuming serverless',
+          withErrorMessage(error)
+        );
+        return [query.index];
+      });
   }
 }

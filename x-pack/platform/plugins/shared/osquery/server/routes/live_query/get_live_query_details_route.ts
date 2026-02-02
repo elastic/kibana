@@ -36,7 +36,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
       path: '/api/osquery/live_queries/{id}',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
     })

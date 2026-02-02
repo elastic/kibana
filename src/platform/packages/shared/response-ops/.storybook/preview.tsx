@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { Decorator } from '@storybook/react';
 

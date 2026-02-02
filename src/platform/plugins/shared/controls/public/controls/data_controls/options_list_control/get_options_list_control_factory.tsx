@@ -232,15 +232,14 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
           let newFilter: Filter | undefined;
-          if (dataView && field) {
-            if (existsSelected) {
-              newFilter = buildExistsFilter(field, dataView);
-            } else if (selectedOptions && selectedOptions.length > 0) {
-              newFilter =
-                selectedOptions.length === 1
-                  ? buildPhraseFilter(field, selectedOptions[0], dataView)
-                  : buildPhrasesFilter(field, selectedOptions, dataView);
-            }
+          if (!dataView || !field) return;
+          if (existsSelected) {
+            newFilter = buildExistsFilter(field, dataView);
+          } else if (selectedOptions && selectedOptions.length > 0) {
+            newFilter =
+              selectedOptions.length === 1
+                ? buildPhraseFilter(field, selectedOptions[0], dataView)
+                : buildPhrasesFilter(field, selectedOptions, dataView);
           }
           if (newFilter) {
             newFilter.meta.key = field?.name;
@@ -346,7 +345,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (key == null || !field) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -374,7 +373,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (key == null || !field) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );

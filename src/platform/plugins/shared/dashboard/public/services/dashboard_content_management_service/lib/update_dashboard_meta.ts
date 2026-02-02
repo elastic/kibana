@@ -15,6 +15,7 @@ import type {
 } from '../../../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { getDashboardContentManagementCache } from '..';
 
 export interface UpdateDashboardMetaProps {
   id: DashboardUpdateIn['id'];
@@ -46,4 +47,6 @@ export const updateDashboardMeta = async ({
     data: { title, description },
     options: { references },
   });
+
+  getDashboardContentManagementCache().deleteDashboard(id);
 };

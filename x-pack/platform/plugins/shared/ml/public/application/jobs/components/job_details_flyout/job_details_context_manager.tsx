@@ -17,7 +17,7 @@ export const JobInfoFlyoutsManager = () => {
     useContext(JobInfoFlyoutsContext);
   const [globalState] = useUrlState('_g');
   const end = useMemo(
-    () => moment(globalState?.time?.to).unix() * 1000 ?? 0,
+    () => moment(globalState?.time?.to ?? 0).unix() * 1000,
     [globalState?.time?.to]
   );
 

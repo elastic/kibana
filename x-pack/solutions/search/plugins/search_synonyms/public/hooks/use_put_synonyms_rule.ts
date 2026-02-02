@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { SynonymsPutSynonymRuleResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from './use_kibana';
 

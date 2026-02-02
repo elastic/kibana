@@ -48,7 +48,7 @@ export const SaveModal = ({
 }: {
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
-  onSave: (props: ModalOnSaveProps) => void;
+  onSave: (props: ModalOnSaveProps) => Promise<void>;
   title: string;
   description: string;
   tags: string[];
@@ -60,7 +60,9 @@ export const SaveModal = ({
 
   return (
     <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+      onSave={async (props) => {
+        await onSave({ ...props, closeModal, newTags: selectedTags });
+      }}
       onClose={closeModal}
       title={title}
       description={description}

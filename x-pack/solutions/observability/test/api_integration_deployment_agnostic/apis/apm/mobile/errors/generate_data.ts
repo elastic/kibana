@@ -25,11 +25,13 @@ export async function generateData({
   serviceName,
   start,
   end,
+  withoutErrorId = false,
 }: {
   apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
+  withoutErrorId?: boolean;
 }) {
   const serviceGoProdInstance = apm
     .service({ name: serviceName, environment: 'production', agentName: 'swift' })
@@ -66,6 +68,7 @@ export async function generateData({
                   message: `Error ${index}`,
                   type: transaction.name,
                   culprit: `Error culprit ${index}`,
+                  withoutErrorId,
                 })
                 .timestamp(timestamp)
             )

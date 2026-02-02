@@ -15,7 +15,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
   const { readConfigFile } = ftrConfigProviderContext;
 
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.base.ts')
+    require.resolve('@kbn/test-suites-xpack-security/functional/config.base')
   );
 
   return generateConfig({

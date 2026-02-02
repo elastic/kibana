@@ -180,6 +180,13 @@ module.exports = {
           disallowedMessage:
             'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
         },
+        {
+          from: '@tanstack/react-query',
+          to: '@kbn/react-query',
+          exact: true,
+          disallowedMessage:
+            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
+        },
       ],
     ],
 
@@ -330,6 +337,7 @@ module.exports = {
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
     '@kbn/css/no_css_color': 'warn',
+    '@kbn/imports/no_direct_handlebars_import': 'error',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
