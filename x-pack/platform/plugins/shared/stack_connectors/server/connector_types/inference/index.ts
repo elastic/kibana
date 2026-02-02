@@ -105,6 +105,17 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       } catch (e) {
         /* throws error if inference endpoint by id does not exist */
       }
+
+      // For 'elastic' provider (EIS), endpoints are managed externally via CCM.
+      // Allow creating connectors that reference existing EIS endpoints without error.
+      const isElasticProvider = provider === ServiceProviderKeys.elastic;
+      if (isElasticProvider && inferenceExists) {
+        logger.debug(
+          `Inference endpoint "${config?.inferenceId}" already exists (EIS managed). Skipping endpoint creation.`
+        );
+        return;
+      }
+
       if (!isUpdate && inferenceExists) {
         throw new Error(
           `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
