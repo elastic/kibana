@@ -13,12 +13,12 @@ import type {
   OTelCollectorPipeline,
   OTelCollectorPipelineID,
   PackageInfo,
-  RegistryPolicyInputOnlyTemplate,
 } from '../../../common/types';
 import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
+import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
@@ -141,18 +141,6 @@ function extractSignalTypesFromPipelines(
   return Array.from(signalTypes);
 }
 
-function getDynamicSignalTypesVar(packageInfo?: PackageInfo): boolean {
-  if (!packageInfo) {
-    return false;
-  }
-
-  const inputOnlyTemplate = packageInfo.policy_templates?.find(
-    (template) => 'input' in template && template.input === OTEL_COLLECTOR_INPUT_TYPE
-  ) as RegistryPolicyInputOnlyTemplate | undefined;
-
-  return inputOnlyTemplate?.dynamic_signal_types === true;
-}
-
 function generateOTelAttributesTransform(
   type: string,
   dataset: string,
@@ -161,7 +149,7 @@ function generateOTelAttributesTransform(
   packageInfo?: PackageInfo,
   streamPipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
 ): Record<OTelCollectorComponentID, any> {
-  const dynamicSignalTypes = getDynamicSignalTypesVar(packageInfo);
+  const dynamicSignalTypes = hasDynamicSignalTypes(packageInfo);
 
   let transformStatements: Record<string, any> = {};
 
