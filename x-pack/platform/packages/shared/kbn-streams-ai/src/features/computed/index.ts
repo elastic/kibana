@@ -50,7 +50,7 @@ export function getComputedFeatureInstructions(): string {
 }
 
 /**
- * Converts a generator and its computed value into a full ComputedBaseFeature.
+ * Converts a generator and its computed value into a full BaseFeature.
  * Enforces that name = type.
  */
 function toComputedFeature(
