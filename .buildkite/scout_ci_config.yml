@@ -3,7 +3,10 @@ plugins:
   enabled:
     - apm
     - console
+    - cloud_security_posture
     - discover_enhanced
+    - entity_store
+    - fleet
     - index_management
     - infra
     - maps
@@ -13,15 +16,14 @@ plugins:
     - profiling
     - search_getting_started
     - search_homepage
+    - security
     - security_solution
     - slo
     - spaces
     - streams
     - streams_app
-    - workflows_extensions
     - transform
-    - fleet
-    - entity_store
+    - workflows_extensions
   disabled:
 
 packages:

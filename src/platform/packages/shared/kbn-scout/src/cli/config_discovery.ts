@@ -82,6 +82,23 @@ const filterModulesByTargetTags = (
     .filter((module) => module.configs.length > 0);
 };
 
+const CUSTOM_SERVERS_PATH_PATTERN = /\/test\/scout_[^/]+/;
+
+const filterModulesByCustomServerPaths = (
+  modules: ModuleDiscoveryInfo[],
+  includeCustomServersOnly: boolean
+): ModuleDiscoveryInfo[] => {
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => {
+        const isCustomServerConfig = CUSTOM_SERVERS_PATH_PATTERN.test(config.path);
+        return includeCustomServersOnly ? isCustomServerConfig : !isCustomServerConfig;
+      }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
 // Logs discovered modules in non-flattened format
 const logDiscoveredModules = (modules: ModuleDiscoveryInfo[], log: ToolingLog): void => {
   const { plugins: pluginCount, packages: packageCount } = countModulesByType(modules);
@@ -203,11 +220,21 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
+  const includeCustomServersOnly = flagsReader.boolean('custom-servers');
+
+  if (includeCustomServersOnly && target !== 'all') {
+    log.error('The --custom-servers flag is only supported with --target all.');
+    return;
+  }
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
   // Filter modules by target tags and compute server run flags
-  const filteredModules = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
+  const filteredModules = filterModulesByCustomServerPaths(
+    filteredModulesByTags,
+    includeCustomServersOnly
+  );
   // Handle output based on flatten flag
   if (flatten) {
     handleFlattenedOutput(filteredModules, flagsReader, log);
@@ -246,6 +273,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                        - 'all': deployment-agnostic tags (default)
                        - 'mki': serverless-only tags
                        - 'ech': stateful-only tags
+    --custom-servers   Only return configs under 'test/scout_*' (local only)
     --validate         Validate that all discovered modules are registered in Scout CI config
     --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten          Output configs in flattened format grouped by mode, group, and scout command
@@ -258,6 +286,9 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Discover serverless-only configs
     node scripts/scout discover-playwright-configs --target mki
 
+    # Discover local custom-server configs only
+    node scripts/scout discover-playwright-configs --custom-servers
+
     # Validate discovered configs against CI configuration
     node scripts/scout discover-playwright-configs --validate
 
@@ -269,8 +300,14 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   `,
   flags: {
     string: ['target'],
-    boolean: ['save', 'validate', 'flatten'],
-    default: { target: 'all', save: false, validate: false, flatten: false },
+    boolean: ['save', 'validate', 'flatten', 'custom-servers'],
+    default: {
+      target: 'all',
+      save: false,
+      validate: false,
+      flatten: false,
+      'custom-servers': false,
+    },
   },
   run: ({ flagsReader, log }) => {
     runDiscoverPlaywrightConfigs(flagsReader, log);
