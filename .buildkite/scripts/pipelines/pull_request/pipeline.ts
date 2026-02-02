@@ -95,7 +95,8 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
     .join('\n');
 
   return [
-    `steps:`,
+    // NOTE: `getPipeline()` strips `steps:` from YAML fragments so they can be concatenated
+    // under the single top-level `steps:` key. This must follow that convention.
     `  - group: Kibana Evals`,
     `    key: kibana-evals`,
     `    depends_on:`,
