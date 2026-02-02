@@ -10,10 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { SavedDashboardPanel } from '../../../dashboard_saved_object';
 
-export function panelBwc(
-  panel: SavedDashboardPanel,
-  panelReferences: SavedObjectReference[]
-) {
+export function panelBwc(panel: SavedDashboardPanel, panelReferences: SavedObjectReference[]) {
   const { id, panelRefName, title, type, ...rest } = panel;
 
   function getPanelType() {
