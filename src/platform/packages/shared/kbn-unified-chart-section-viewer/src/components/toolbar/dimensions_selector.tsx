@@ -21,7 +21,7 @@ import {
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
-import { debounce } from 'lodash';
+import { debounce, sortBy } from 'lodash';
 import type { Dimension } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
@@ -99,11 +99,7 @@ export const DimensionsSelector = ({
       };
     });
     // Sort so that selected options appear first
-    return mappedOptions.sort((a, b) => {
-      const aSelected = a.checked === 'on' ? 0 : 1;
-      const bSelected = b.checked === 'on' ? 0 : 1;
-      return aSelected - bSelected;
-    });
+    return sortBy(mappedOptions, (option) => (option.checked === 'on' ? 0 : 1));
   }, [
     dimensions,
     selectedNamesSet,
