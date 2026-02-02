@@ -112,6 +112,30 @@ used by the ES|QL plugin and other consumers.
 - Commands: definitions and registry for ES|QL commands.
 - Composer API: safe, parameterized ES|QL builder for app code.
 
+### kbn-esql-language data flow
+```mermaid
+flowchart LR
+  Grammar["ESQL grammar (synced from Elasticsearch)"] --> Parser["Parser (ANTLR)"]
+  Query["ESQL query text"] --> Parser
+  Parser --> CST["CST"]
+  CST --> AST["ESQL AST"]
+
+  Builder["Builder API"] --> AST
+  Composer["Composer API"] --> AST
+  Walker["Walker/Mutate"] --> AST
+  AST --> PrettyPrint["Pretty printing"]
+
+  Definitions["Definitions"] --> Registry["Commands registry"]
+  Registry --> Validation["Validation"]
+  Registry --> Autocomplete["Autocomplete/Suggest"]
+  Callbacks["ESQL callbacks: sources/fields"] --> Validation
+  Callbacks --> Autocomplete
+
+  AST --> Validation
+  AST --> Autocomplete
+  AST --> Hover["Hover/Signature help"]
+```
+
 ### Key behavior
 - Parser produces partial AST even with invalid queries; `withFormatting` attaches
   comments/whitespace to nodes for editor features.
