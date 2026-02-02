@@ -19,10 +19,10 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { getDispatchableAlertEventsQuery } from './queries';
-import type { AlertEpisode } from './types';
+import type { AlertEpisode, DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
 export interface DispatcherServiceContract {
-  run({ previousStartedAt }: { previousStartedAt?: Date }): Promise<{ startedAt: Date }>;
+  run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
 }
 
 @injectable()
@@ -33,23 +33,29 @@ export class DispatcherService implements DispatcherServiceContract {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async run({ previousStartedAt = new Date() }: { previousStartedAt?: Date } = {}) {
+  public async run({
+    previousStartedAt = new Date(),
+    abortController,
+  }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
     const { query } = getDispatchableAlertEventsQuery();
 
     // TODO: Use QueryService as soon as it uses esClient instead of data plugin client
-    const result = await this.esClient.esql.query({
-      query,
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: moment(previousStartedAt)
-              .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-              .toISOString(),
+    const result = await this.esClient.esql.query(
+      {
+        query,
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: moment(previousStartedAt)
+                .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+                .toISOString(),
+            },
           },
         },
       },
-    });
+      { signal: abortController?.signal }
+    );
 
     const dispatchableAlertEvents = queryResponseToRecords<AlertEpisode>({
       columns: result.columns,

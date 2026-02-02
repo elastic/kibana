@@ -20,3 +20,16 @@ export interface AlertEpisode {
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
 }
+
+export interface DispatcherExecutionParams {
+  previousStartedAt?: Date;
+  abortController?: AbortController;
+}
+
+export interface DispatcherExecutionResult {
+  startedAt: Date;
+}
+
+export interface DispatcherTaskState {
+  previousStartedAt?: string;
+}
