@@ -407,83 +407,8 @@ describe('convertPreviousRounds', () => {
       expect(secondHumanMessage.content).not.toContain('<attachments>');
     });
   });
-});
 
-describe('conversationToLangchainMessages with resultTransformer', () => {
-  const now = new Date().toISOString();
-
-  const makeRoundInput = (
-    message: string,
-    attachments: ProcessedAttachment[] = []
-  ): ProcessedRoundInput => ({
-    message,
-    attachments,
-  });
-  const makeAssistantResponse = (message: string) => ({ message });
-  const makeToolCallWithResult = (
-    id: string,
-    toolId: string,
-    params: any,
-    results: ToolResult[]
-  ): ToolCallWithResult => ({
-    tool_call_id: id,
-    tool_id: toolId,
-    params,
-    results,
-  });
-  const makeToolCallStep = (toolCall: ToolCallWithResult): ToolCallStep => ({
-    ...toolCall,
-    type: ConversationRoundStepType.toolCall,
-  });
-
-  const createConversation = (
-    parts: Partial<ProcessedConversation> = {}
-  ): ProcessedConversation => {
-    return {
-      nextInput: { message: '', attachments: [] },
-      previousRounds: [],
-      attachments: [],
-      attachmentTypes: [],
-      attachmentStateManager: createAttachmentStateManager([], {
-        getTypeDefinition: (type: string) =>
-          ({
-            id: type,
-            validate: (input: unknown) => ({ valid: true, data: input }),
-            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
-      }),
-      ...parts,
-    };
-  };
-
-  const createRound = (
-    parts: Partial<ProcessedConversationRound> = {}
-  ): ProcessedConversationRound => {
-    return {
-      id: 'round-1',
-      status: ConversationRoundStatus.completed,
-      input: {
-        message: '',
-        attachments: [],
-      },
-      steps: [],
-      response: {
-        message: 'Response',
-      },
-      started_at: new Date().toISOString(),
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-      model_usage: {
-        connector_id: 'unknown',
-        llm_calls: 1,
-        input_tokens: 12,
-        output_tokens: 42,
-      },
-      ...parts,
-    };
-  };
-
-  describe('custom resultTransformer', () => {
+  describe('with resultTransformer', () => {
     it('applies custom transformer to tool call results', async () => {
       const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
         {
