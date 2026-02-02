@@ -15,10 +15,11 @@ export interface SkillEntryMeta {
 
 export type SkillFileEntry<TData extends object = object> = FileEntry<TData, SkillEntryMeta>;
 
-
 export interface SkillReferencedContentEntryMeta {
   skill_id: string;
 }
 
-export type SkillReferencedContentFileEntry<TData extends object = object> = FileEntry<TData, SkillReferencedContentEntryMeta>;
-
+export type SkillReferencedContentFileEntry<TData extends object = object> = FileEntry<
+  TData,
+  SkillReferencedContentEntryMeta
+>;

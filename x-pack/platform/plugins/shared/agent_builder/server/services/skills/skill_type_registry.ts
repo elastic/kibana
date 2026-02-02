@@ -36,7 +36,9 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
     });
 
     if (this.skillFullPaths.has(fullPath)) {
-      throw new Error(`Skill with path ${skill.basePath} and name ${skill.name} already registered`);
+      throw new Error(
+        `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+      );
     }
     this.skillFullPaths.add(fullPath);
 
@@ -52,7 +54,6 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   }
 
   list() {
-    return [...this.skills.values()]
+    return [...this.skills.values()];
   }
 }
-

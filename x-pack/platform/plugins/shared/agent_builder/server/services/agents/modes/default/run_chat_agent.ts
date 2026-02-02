@@ -8,15 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
-import {
-  isStreamEvent,
-  type ToolIdMapping,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
-import { ToolManager, ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
@@ -133,14 +131,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       type: ToolManagerToolType.browser,
       tools: browserApiTools ?? [],
     }),
-    toolManager.addTool({
-      type: ToolManagerToolType.executable,
-      tools: dynamicTools,
-      logger,
-      eventEmitter,
-    }, {
-      dynamic: true,
-    })
+    toolManager.addTool(
+      {
+        type: ToolManagerToolType.executable,
+        tools: dynamicTools,
+        logger,
+        eventEmitter,
+      },
+      {
+        dynamic: true,
+      }
+    ),
   ]);
 
   const cycleLimit = 10;

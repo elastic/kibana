@@ -18,6 +18,7 @@ import {
   createReasoningEvent,
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import type { PromptFactory } from './prompts';
@@ -42,7 +43,6 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
-import { ToolManager } from '@kbn/agent-builder-server/runner';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -73,7 +73,6 @@ export const createAgentGraph = ({
   const init = async () => {
     return {};
   };
-
 
   const researchAgent = async (state: StateType) => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
@@ -145,7 +144,7 @@ export const createAgentGraph = ({
       );
     }
 
-    lastAction.tool_calls.forEach(toolCall => toolManager.recordToolUse(toolCall.toolName))
+    lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});

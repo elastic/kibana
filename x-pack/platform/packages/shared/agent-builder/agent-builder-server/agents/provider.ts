@@ -82,7 +82,7 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
-    /**
+  /**
    * Skills service to interact with skills.
    */
   skills: SkillsService;

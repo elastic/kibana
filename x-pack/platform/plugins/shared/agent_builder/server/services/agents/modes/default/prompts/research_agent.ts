@@ -9,6 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getSkillsInstructions } from '../../../../skills/prompts';
 import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
@@ -16,8 +17,7 @@ import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions, FILESTORE_ENABLED } from '../../../../runner/store';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-import { getSkillsInstructions } from '@kbn/agent-builder-plugin/server/services/skills/prompts';
-import { SKILLS_ENABLED } from '@kbn/agent-builder-plugin/server/services/skills/constants';
+import { SKILLS_ENABLED } from '../../../../skills/constants';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),

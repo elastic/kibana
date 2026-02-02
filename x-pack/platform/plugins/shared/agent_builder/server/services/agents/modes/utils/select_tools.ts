@@ -109,7 +109,7 @@ export const selectTools = async ({
 
   return {
     staticTools: [...dedupedStaticTools.values()],
-    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools]
+    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools],
   };
 };
 

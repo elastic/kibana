@@ -44,7 +44,7 @@ import { createPromptManager, getAgentPromptStorageState } from './utils/prompts
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
-import { SkillServiceStart } from '../skills';
+import type { SkillServiceStart } from '../skills';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -166,7 +166,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
   }): ScopedRunner => {
-    const { resultStore, skillsStore, filestore } = createStore({ conversation,  runnerDeps });
+    const { resultStore, skillsStore, filestore } = createStore({ conversation, runnerDeps });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -188,7 +188,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       stateManager,
       promptManager,
       filestore,
-      toolManager
+      toolManager,
     };
     return createScopedRunner(allDeps);
   };

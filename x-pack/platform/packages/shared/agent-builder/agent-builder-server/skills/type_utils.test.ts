@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Directory, FileDirectory, FilePathsFromStructure } from './type_utils';
+import type { Directory, FileDirectory, FilePathsFromStructure } from './type_utils';
 
 /**
  * Test directory structure - different from the actual structure to verify
@@ -184,4 +183,3 @@ describe('FilePathsFromStructure type', () => {
     });
   });
 });
-

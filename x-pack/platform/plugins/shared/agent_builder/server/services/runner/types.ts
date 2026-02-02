@@ -16,7 +16,7 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { TrackingService } from '../../telemetry';
-import { SkillServiceStart } from '../skills';
+import type { SkillServiceStart } from '../skills';
 
 export interface RunnerFactoryDeps {
   // core services

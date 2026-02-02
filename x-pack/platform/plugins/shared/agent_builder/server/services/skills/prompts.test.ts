@@ -19,7 +19,11 @@ describe('getSkillsInstructions', () => {
     grep: jest.fn(),
   });
 
-  const createSkillFileEntry = (path: string, skillName: string, skillDescription: string): SkillFileEntry => ({
+  const createSkillFileEntry = (
+    path: string,
+    skillName: string,
+    skillDescription: string
+  ): SkillFileEntry => ({
     type: 'file',
     path,
     content: {
@@ -71,7 +75,9 @@ describe('getSkillsInstructions', () => {
 
       const lines = result.split('\n');
       expect(lines[0]).toBe('## SKILLS');
-      expect(lines[1]).toBe('Load a skill to get detailed instructions for a specific task. No skills are currently available.');
+      expect(lines[1]).toBe(
+        'Load a skill to get detailed instructions for a specific task. No skills are currently available.'
+      );
     });
   });
 
@@ -202,7 +208,9 @@ describe('getSkillsInstructions', () => {
       expect(skillBlock).toBeDefined();
       expect(skillBlock).toContain('path="skills/platform/core/complex-skill/SKILL.md"');
       expect(skillBlock).toContain('<name>complex-skill</name>');
-      expect(skillBlock).toContain('<description>A complex skill with a longer description that explains what it does</description>');
+      expect(skillBlock).toContain(
+        '<description>A complex skill with a longer description that explains what it does</description>'
+      );
     });
   });
 
