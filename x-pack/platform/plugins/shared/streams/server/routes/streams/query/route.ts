@@ -146,10 +146,6 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
-    if (Streams.QueryStream.Definition.is(definition)) {
-      throw badData(`The query stream "${name}" already exists.`);
-    }
-
     // Get existing assets and attachments to preserve them
     const [assets, attachments] = await Promise.all([
       queryClient.getAssets(name),
