@@ -13,11 +13,12 @@ export type FeatureStatus = (typeof featureStatus)[number];
 export const featureStatusSchema = z.enum(featureStatus);
 
 export interface BaseFeature {
+  id: string;
   type: string;
-  name: string;
+  subtype?: string;
   title?: string;
   description: string;
-  value: Record<string, any>;
+  properties: Record<string, string>;
   confidence: number;
   evidence: string[];
   tags: string[];
@@ -25,18 +26,19 @@ export interface BaseFeature {
 }
 
 export interface Feature extends BaseFeature {
-  id: string;
+  uuid: string;
   status: FeatureStatus;
   last_seen: string;
   expires_at?: string;
 }
 
 export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+  id: z.string(),
   type: z.string(),
-  name: z.string(),
+  subtype: z.string().optional(),
   title: z.string().optional(),
   description: z.string(),
-  value: z.record(z.string(), z.any()),
+  properties: z.record(z.string(), z.string()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()),
   tags: z.array(z.string()),
@@ -45,7 +47,7 @@ export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
 
 export const featureSchema: z.Schema<Feature> = baseFeatureSchema.and(
   z.object({
-    id: z.string(),
+    uuid: z.string(),
     status: featureStatusSchema,
     last_seen: z.string(),
     expires_at: z.string().optional(),
