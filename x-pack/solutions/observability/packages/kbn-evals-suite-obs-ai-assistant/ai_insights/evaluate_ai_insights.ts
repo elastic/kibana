@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
   type EvaluationDataset,
+  type Example,
 } from '@kbn/evals';
 import { AiInsightClient, type AiInsightResponse } from '../src/clients/ai_insight_client';
 
