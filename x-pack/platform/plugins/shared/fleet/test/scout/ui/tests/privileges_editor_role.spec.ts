@@ -40,13 +40,16 @@ test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () =>
     await expect(fleetHome.getAddAgentButton()).toBeVisible();
   });
 
-  // This scenario is not working as expected on ECH for 'Editor' role
   // https://github.com/elastic/kibana/issues/251216
-  test.skip('It should show a callout with missing privileges if fleet server is not setup', async ({
+  test('It should show a callout with missing privileges if fleet server is not setup', async ({
     browserAuth,
     pageObjects,
     page,
   }) => {
+    test.skip(
+      config.isCloud === true,
+      `This scenario is not working as expected on ECH for 'Editor' role`
+    );
     // Mock the fleet setup API to indicate fleet server is NOT ready
     await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({
