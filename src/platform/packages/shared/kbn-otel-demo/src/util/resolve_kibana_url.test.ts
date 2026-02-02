@@ -19,7 +19,7 @@ describe('resolveKibanaUrl', () => {
     jest.clearAllMocks();
   });
 
-  it('should detect and append dev mode base path when redirect location matches 3-letter pattern', async () => {
+  it('should detect and append dev mode base path when redirect location is a relative path', async () => {
     mockFetch.mockResolvedValue({
       status: 302,
       headers: {
@@ -37,6 +37,20 @@ describe('resolveKibanaUrl', () => {
         'kbn-xsrf': 'true',
       },
     });
+  });
+
+  it('should detect and append dev mode base path when redirect location is a full URL', async () => {
+    // node-fetch returns full URLs in the location header, not just the path
+    mockFetch.mockResolvedValue({
+      status: 302,
+      headers: {
+        get: jest.fn().mockReturnValue('http://localhost:5601/wmy'),
+      },
+    });
+
+    const result = await resolveKibanaUrl('http://localhost:5601');
+
+    expect(result).toBe('http://localhost:5601/wmy');
   });
 
   it('should return original URL when response is not a redirect', async () => {
@@ -118,6 +132,19 @@ describe('resolveKibanaUrl', () => {
       status: 302,
       headers: {
         get: jest.fn().mockReturnValue('/ab'),
+      },
+    });
+
+    const result = await resolveKibanaUrl('http://localhost:5601');
+
+    expect(result).toBe('http://localhost:5601');
+  });
+
+  it('should not match full URL with non-base-path pattern', async () => {
+    mockFetch.mockResolvedValue({
+      status: 302,
+      headers: {
+        get: jest.fn().mockReturnValue('http://localhost:5601/app/home'),
       },
     });
 

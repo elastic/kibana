@@ -36,13 +36,25 @@ export async function resolveKibanaUrl(kibanaHostname: string, log?: ToolingLog)
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('location') ?? '';
 
+      // Extract the pathname from the location header
+      // The location can be either a relative path ("/abc") or a full URL ("http://localhost:5601/abc")
+      let pathname: string;
+      try {
+        // If it's a full URL, parse it and extract the pathname
+        const url = new URL(location);
+        pathname = url.pathname;
+      } catch {
+        // If parsing fails, assume it's already a relative path
+        pathname = location;
+      }
+
       // Check if it looks like a dev mode base path (3-letter pattern like /abc)
       // The pattern matches paths like "/abc" where abc is any 3 word characters
-      const hasBasePath = /^\/\w{3}$/.test(location);
+      const hasBasePath = /^\/\w{3}$/.test(pathname);
 
       if (hasBasePath) {
-        const resolvedUrl = `${kibanaHostname}${location}`;
-        log?.debug(`Detected dev mode base path: ${location}`);
+        const resolvedUrl = `${kibanaHostname}${pathname}`;
+        log?.debug(`Detected dev mode base path: ${pathname}`);
         log?.debug(`Resolved Kibana URL: ${resolvedUrl}`);
         return resolvedUrl;
       }
