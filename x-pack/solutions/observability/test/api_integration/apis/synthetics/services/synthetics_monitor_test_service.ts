@@ -156,9 +156,12 @@ export class SyntheticsMonitorTestService {
     return deleteResponse;
   }
 
-  async createMaintenanceWindow() {
+  async createMaintenanceWindow(spaceId?: string) {
+    const path = spaceId
+      ? `/s/${spaceId}/internal/alerting/rules/maintenance_window`
+      : '/internal/alerting/rules/maintenance_window';
     const response = await this.supertest
-      .post(`/internal/alerting/rules/maintenance_window`)
+      .post(path)
       .set('kbn-xsrf', 'foo')
       .send({
         title: 'test-maintenance-window',

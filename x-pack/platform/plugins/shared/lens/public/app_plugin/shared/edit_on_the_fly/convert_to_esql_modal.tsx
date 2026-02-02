@@ -210,10 +210,10 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
   return (
     <EuiConfirmModal
       aria-label={i18n.translate('xpack.lens.config.switchToQueryModeAriaLabel', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       title={i18n.translate('xpack.lens.config.switchToQueryModeTitle', {
-        defaultMessage: 'Switch to Query mode',
+        defaultMessage: 'Switch to query mode',
       })}
       onCancel={onCancel}
       cancelButtonText={i18n.translate('xpack.lens.config.cancelButtonTextButtonLabel', {
@@ -242,7 +242,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         iconType="warning"
         size="s"
         title={i18n.translate('xpack.lens.config.queryModeWarningDescription', {
-          defaultMessage: 'Once query mode is activated you cannot switch back to visual mode.',
+          defaultMessage: `Once you save the chart after switching to query mode, you can't switch back.`,
         })}
       />
 
