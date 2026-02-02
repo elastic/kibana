@@ -9,7 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
-import { ALL_ENTITY_TYPES, EntityType } from '../../domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { wrapMiddlewares } from '../middleware';
 
 const bodySchema = z.object({

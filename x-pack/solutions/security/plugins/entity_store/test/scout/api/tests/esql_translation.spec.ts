@@ -17,7 +17,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getEuidEsqlFilterBasedOnDocument } from '../../../../server/domain/euid/esql';
+import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;

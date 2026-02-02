@@ -6,7 +6,7 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
+import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;

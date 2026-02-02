@@ -9,7 +9,6 @@ import assert from 'node:assert';
 
 import type { EntityType } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
-import { getEntityDefinitionId } from '../assets/latest_index';
 import { hostEntityDefinition } from './host';
 import { userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
@@ -21,6 +20,9 @@ const entitiesDefinitionRegistry = {
   service: serviceEntityDefinition,
   generic: genericEntityDefinition,
 } as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+
+export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
+  `security_${entityType}_${space}`;
 
 export function getEntityDefinition(type: EntityType, namespace: string): ManagedEntityDefinition {
   const definition = getEntityDefinitionWithoutId(type);

@@ -16,9 +16,9 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getEuidPainlessEvaluation } from '../../../../server/domain/euid/painless';
-import { getEuidFromObject } from '../../../../server/domain/euid/memory';
-import { EntityType } from '../../../../server/domain/definitions/entity_schema';
+import { getEuidPainlessEvaluation } from '../../../../common/domain/euid/painless';
+import { getEuidFromObject } from '../../../../common/domain/euid/memory';
+import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 function toRuntimeFieldEmitScript(painless: string): string {
   return `String euid_eval(def doc) { ${painless} } 

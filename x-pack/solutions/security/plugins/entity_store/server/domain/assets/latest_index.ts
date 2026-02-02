@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { getEntityDefinitionId } from '../../../common/domain/definitions/registry';
 import { getEntityIndexPattern, ENTITY_LATEST, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
-import type { EntityType } from '../definitions/entity_schema';
+import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
 // Mostly copied from
 // - x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/elasticsearch_assets/entity_index.ts
@@ -17,6 +18,3 @@ export const getLatestEntitiesIndexName = (entityType: EntityType, namespace: st
     dataset: ENTITY_LATEST,
     definitionId: getEntityDefinitionId(entityType, namespace),
   });
-
-export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
-  `security_${entityType}_${space}`;

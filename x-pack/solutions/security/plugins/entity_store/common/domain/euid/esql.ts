@@ -7,7 +7,7 @@
 
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../esql/strings';
+import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,

@@ -9,8 +9,11 @@ import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
-} from '../definitions/entity_schema';
-import { getEuidEsqlEvaluation, getEuidEsqlDocumentsContainsIdFilter } from '../euid/esql';
+} from '../../../common/domain/definitions/entity_schema';
+import {
+  getEuidEsqlEvaluation,
+  getEuidEsqlDocumentsContainsIdFilter,
+} from '../../../common/domain/euid/esql';
 
 export const HASHED_ID = 'entity.hashedId';
 const HASH_ALG = 'MD5';

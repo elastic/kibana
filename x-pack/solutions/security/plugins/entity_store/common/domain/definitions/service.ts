@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { esqlIsNotNullOrEmpty } from '../logs_extraction/esql_strings';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';

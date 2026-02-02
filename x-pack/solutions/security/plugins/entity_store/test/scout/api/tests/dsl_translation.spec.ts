@@ -17,7 +17,7 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getEuidDslFilterBasedOnDocument } from '../../../../server/domain/euid/dsl';
+import { getEuidDslFilterBasedOnDocument } from '../../../../common/domain/euid/dsl';
 
 function getTotal(hits: { total?: number | { value: number } }): number {
   const total = hits.total;
