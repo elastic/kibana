@@ -45,8 +45,6 @@ ${skill.body}`
 export const createSkillEntries = (skill: SkillTypeDefinition): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill })
 
-
-
   return [{
     type: 'file',
     path: getSkillEntryPath({
