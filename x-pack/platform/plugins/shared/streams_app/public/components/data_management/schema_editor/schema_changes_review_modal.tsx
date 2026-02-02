@@ -342,85 +342,41 @@ export function SchemaChangesReviewModal({
         <EuiModalHeaderTitle>{confirmChangesTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {Streams.WiredStream.GetResponse.is(definition) ? (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate(
-              'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
-              {
-                defaultMessage: 'Schema edits affect all dependent streams.',
-              }
-            )}
-            iconType="info"
-          />
-        ) : null}
-        <EuiSpacer size="m" />
-        <EuiText>
-          {i18n.translate(
-            'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
-            {
-              defaultMessage: 'Some fields below will be updated.',
-            }
-          )}
-        </EuiText>
-        <EuiSpacer size="m" />
-        {(hasBlockingSimulationErrors || hasNonBlockingSimulationErrors) && (
+        {/* Combined callout for wired streams - shows dependent streams message with conflict status */}
+        {Streams.WiredStream.GetResponse.is(definition) && (
           <>
             <EuiCallOut
               announceOnMount
               title={i18n.translate(
-                'xpack.streams.schemaEditor.confirmChangesModal.simulationErrorCalloutTitle',
+                'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
                 {
-                  defaultMessage: 'Some fields are failing when simulating ingestion.',
+                  defaultMessage: 'Schema edits affect all dependent streams.',
                 }
               )}
-              iconType="warning"
-              color="warning"
+              iconType={fieldConflicts.length > 0 ? 'warning' : 'info'}
+              color={fieldConflicts.length > 0 ? 'warning' : undefined}
+              data-test-subj={
+                isSimulating
+                  ? 'streamsAppSchemaChangesCheckingConflicts'
+                  : fieldConflicts.length > 0
+                  ? 'streamsAppSchemaChangesFieldConflictsWarning'
+                  : 'streamsAppSchemaChangesNoConflicts'
+              }
             >
-              {simulationError}
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {/* Conflicts checking section - only shown for wired streams */}
-        {Streams.WiredStream.GetResponse.is(definition) && (
-          <>
-            {isSimulating ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  title={
-                    <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiLoadingSpinner size="s" />
-                      <span>
-                        {i18n.translate(
-                          'xpack.streams.schemaEditor.confirmChangesModal.checkingConflictsTitle',
-                          {
-                            defaultMessage: 'Checking for conflicts...',
-                          }
-                        )}
-                      </span>
-                    </EuiFlexGroup>
-                  }
-                  color="primary"
-                  data-test-subj="streamsAppSchemaChangesCheckingConflicts"
-                />
-                <EuiSpacer size="m" />
-              </>
-            ) : fieldConflicts.length > 0 ? (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  title={i18n.translate(
-                    'xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsCalloutTitle',
-                    {
-                      defaultMessage: 'Some fields have conflicting types in other streams',
-                    }
-                  )}
-                  iconType="warning"
-                  color="warning"
-                  data-test-subj="streamsAppSchemaChangesFieldConflictsWarning"
-                >
+              {isSimulating ? (
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiLoadingSpinner size="s" />
+                  <span>
+                    {i18n.translate(
+                      'xpack.streams.schemaEditor.confirmChangesModal.checkingConflictsTitle',
+                      {
+                        defaultMessage: 'Checking for conflicts...',
+                      }
+                    )}
+                  </span>
+                </EuiFlexGroup>
+              ) : fieldConflicts.length > 0 ? (
+                <>
                   <EuiText size="s">
                     <FormattedMessage
                       id="xpack.streams.schemaEditor.confirmChangesModal.fieldConflictsDescription"
@@ -478,26 +434,46 @@ export function SchemaChangesReviewModal({
                       </ul>
                     </EuiAccordion>
                   ))}
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            ) : (
-              <>
-                <EuiCallOut
-                  announceOnMount
-                  title={i18n.translate(
+                </>
+              ) : (
+                <EuiText size="s">
+                  {i18n.translate(
                     'xpack.streams.schemaEditor.confirmChangesModal.noConflictsTitle',
                     {
-                      defaultMessage: 'No conflicts across streams found',
+                      defaultMessage: 'No conflicts found.',
                     }
                   )}
-                  iconType="check"
-                  color="success"
-                  data-test-subj="streamsAppSchemaChangesNoConflicts"
-                />
-                <EuiSpacer size="m" />
-              </>
-            )}
+                </EuiText>
+              )}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiText>
+          {i18n.translate(
+            'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
+            {
+              defaultMessage: 'Some fields below will be updated.',
+            }
+          )}
+        </EuiText>
+        <EuiSpacer size="m" />
+        {(hasBlockingSimulationErrors || hasNonBlockingSimulationErrors) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.simulationErrorCalloutTitle',
+                {
+                  defaultMessage: 'Some fields are failing when simulating ingestion.',
+                }
+              )}
+              iconType="warning"
+              color="warning"
+            >
+              {simulationError}
+            </EuiCallOut>
+            <EuiSpacer size="m" />
           </>
         )}
         <EuiBasicTable items={changes} columns={fieldColumns} />
