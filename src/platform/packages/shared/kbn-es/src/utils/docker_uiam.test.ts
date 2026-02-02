@@ -187,7 +187,7 @@ describe(`#runUiamContainer()`, () => {
             "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
             "--name",
             "uiam",
-            "docker.elastic.co/cloud-ci/uiam:git-1171ce2fde41",
+            "docker.elastic.co/kibana-ci/uiam:latest-verified",
           ],
         ],
         Array [
@@ -312,7 +312,7 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(30);
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
 
     execa.mockClear();
 
@@ -326,7 +326,7 @@ describe(`#runUiamContainer()`, () => {
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
-    expect(execa.mock.calls.slice(1)).toHaveLength(30);
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
   });
 });
 
