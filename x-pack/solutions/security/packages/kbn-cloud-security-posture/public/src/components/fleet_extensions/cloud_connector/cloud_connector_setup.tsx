@@ -61,7 +61,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
     accountTypeFromInputs,
-  } = useCloudConnectorSetup(input, newPolicy, updatePolicy, cloudProvider);
+  } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider);
 
   // Get filtered cloud connectors based on provider and account type
   const { data: cloudConnectors } = useGetCloudConnectors({
