@@ -36,6 +36,10 @@ export const performMatchSearch = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<PerformMatchSearchResponse> => {
+  // Quick and dirty toggle to demonstrate different combinations returning highlights, snippets, or both
+  const includeHighlights = true;
+  const includeSnippets = true;
+
   const textFields = fields.filter((field) => field.type === 'text');
   const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
   const allSearchableFields = [...textFields, ...semanticTextFields];
@@ -51,14 +55,16 @@ export const performMatchSearch = async ({
         fields: allSearchableFields.map((field) => field.path),
       },
     },
-    highlight: {
-      number_of_fragments: 5,
-      fragment_size: 500,
-      pre_tags: [''],
-      post_tags: [''],
-      order: 'score',
-      fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
-    },
+    ...(includeHighlights && {
+      highlight: {
+        number_of_fragments: 5,
+        fragment_size: 500,
+        pre_tags: [''],
+        post_tags: [''],
+        order: 'score',
+        fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
+      },
+    }),
   };
 
   logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
@@ -78,55 +84,59 @@ export const performMatchSearch = async ({
   const searchResults = response.hits.hits.map((hit) => ({
     id: hit._id!,
     index: hit._index!,
-    highlights: Object.entries(hit.highlight ?? {}).reduce((acc, [_field, highlights]) => {
-      acc.push(...highlights);
-      return acc;
-    }, [] as string[]),
+    highlights: includeHighlights
+      ? Object.entries(hit.highlight ?? {}).reduce((acc, [_field, highlights]) => {
+          acc.push(...highlights);
+          return acc;
+        }, [] as string[])
+      : [],
   }));
 
   // TOP_SNIPPETS does not yet support multi-valued input. So here, we're hacking in
-  // snippet generation by calling `TOP_SNIPPETS` once for each searchable field in each 
+  // snippet generation by calling `TOP_SNIPPETS` once for each searchable field in each
   // returned document. Yes, this is horribly inefficient, but this is a POC after all ;)
   const results = await Promise.all(
     searchResults.map(async (result) => {
       const snippets: string[] = [];
 
-      for (const field of allSearchableFields) {
-        try {
-          const fieldName = field.path.includes(' ') ? `\`${field.path}\`` : field.path;
-          const indexName = result.index.includes(' ') ? `\`${result.index}\`` : result.index;
-          const esqlQuery = interpolateEsqlQuery(
-            `FROM ${indexName} METADATA _id | WHERE _id == ?docId | EVAL snippets = TOP_SNIPPETS(${fieldName}, ?term, {"num_snippets": 5}) | MV_EXPAND snippets | KEEP snippets`,
-            {
-              docId: result.id,
-              term,
+      if (includeSnippets) {
+        for (const field of allSearchableFields) {
+          try {
+            const fieldName = field.path.includes(' ') ? `\`${field.path}\`` : field.path;
+            const indexName = result.index.includes(' ') ? `\`${result.index}\`` : result.index;
+            const esqlQuery = interpolateEsqlQuery(
+              `FROM ${indexName} METADATA _id | WHERE _id == ?docId | EVAL snippets = TOP_SNIPPETS(${fieldName}, ?term, {"num_snippets": 5}) | MV_EXPAND snippets | KEEP snippets`,
+              {
+                docId: result.id,
+                term,
+              }
+            );
+
+            logger.info(`Running TOP_SNIPPETS query: ${esqlQuery}`);
+
+            const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
+
+            logger.info(
+              `TOP_SNIPPETS response for doc="${result.id}", field="${field.path}": ${JSON.stringify(esqlResponse)}`
+            );
+
+            if (esqlResponse.values.length > 0 && esqlResponse.values[0][0] != null) {
+              const snippetValue = esqlResponse.values[0][0];
+              if (Array.isArray(snippetValue)) {
+                snippets.push(
+                  ...snippetValue.filter((s): s is string => typeof s === 'string')
+                );
+              } else if (typeof snippetValue === 'string') {
+                snippets.push(snippetValue);
+              }
             }
-          );
-
-          logger.info(`Running TOP_SNIPPETS query: ${esqlQuery}`);
-
-          const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
-
-          logger.info(
-            `TOP_SNIPPETS response for doc="${result.id}", field="${field.path}": ${JSON.stringify(esqlResponse)}`
-          );
-
-          if (esqlResponse.values.length > 0 && esqlResponse.values[0][0] != null) {
-            const snippetValue = esqlResponse.values[0][0];
-            if (Array.isArray(snippetValue)) {
-              snippets.push(
-                ...snippetValue.filter((s): s is string => typeof s === 'string')
-              );
-            } else if (typeof snippetValue === 'string') {
-              snippets.push(snippetValue);
-            }
+          } catch (error) {
+            logger.info(
+              `TOP_SNIPPETS failed for document id="${result.id}", field="${field.path}": ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
           }
-        } catch (error) {
-          logger.info(
-            `TOP_SNIPPETS failed for document id="${result.id}", field="${field.path}": ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
         }
       }
 
