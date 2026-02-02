@@ -114,12 +114,9 @@ export function DiagnosticsIndices() {
         items={invalidIndices}
         rowHeader="index"
         columns={columns}
-        tableCaption={i18n.translate(
-          'xpack.apm.diagnostics.indicesTab.invalidIndicesCaption',
-          {
-            defaultMessage: 'Indices with problems',
-          }
-        )}
+        tableCaption={i18n.translate('xpack.apm.diagnostics.indicesTab.invalidIndicesCaption', {
+          defaultMessage: 'Indices with problems',
+        })}
       />
 
       <EuiSpacer />
@@ -132,12 +129,9 @@ export function DiagnosticsIndices() {
         items={validIndices}
         rowHeader="index"
         columns={columns}
-        tableCaption={i18n.translate(
-          'xpack.apm.diagnostics.indicesTab.validIndicesCaption',
-          {
-            defaultMessage: 'Indices without problems',
-          }
-        )}
+        tableCaption={i18n.translate('xpack.apm.diagnostics.indicesTab.validIndicesCaption', {
+          defaultMessage: 'Indices without problems',
+        })}
       />
     </>
   );
