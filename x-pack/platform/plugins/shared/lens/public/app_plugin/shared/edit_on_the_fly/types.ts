@@ -45,8 +45,6 @@ export interface EditConfigPanelProps {
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
-  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
-  datasourceId: 'formBased' | 'textBased';
   /** Embeddable output observable, useful for dashboard flyout  */
   dataLoading$?: PublishingSubject<boolean | undefined>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
@@ -72,8 +70,8 @@ export interface EditConfigPanelProps {
   navigateToLensEditor?: () => void;
   /** If set to true it displays a header on the flyout */
   displayFlyoutHeader?: boolean;
-  /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
-  canEditTextBasedQuery?: boolean;
+  /** If true, hides the ES|QL editor in the flyout */
+  hideTextBasedEditor?: boolean;
   /** The flyout is used for adding a new panel by scratch */
   isNewPanel?: boolean;
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
@@ -99,7 +97,6 @@ export interface LayerConfigurationProps {
   lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
-  datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
   hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
@@ -111,7 +108,6 @@ export interface LayerConfigurationProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
-  canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
 }
 

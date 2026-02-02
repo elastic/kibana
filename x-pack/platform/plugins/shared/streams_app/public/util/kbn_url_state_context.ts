@@ -10,6 +10,10 @@ import createContainer from 'constate';
 import { useState } from 'react';
 import { useKibana } from '../hooks/use_kibana';
 
+/**
+ * Creates a URL state storage for components that need to persist state to URL params
+ * (e.g., pageState for Data Quality, enrichment state, etc.)
+ */
 const useKbnUrlStateStorageFromRouter = () => {
   const {
     appParams: { history },
@@ -19,14 +23,16 @@ const useKbnUrlStateStorageFromRouter = () => {
     },
   } = useKibana();
 
-  const [urlStateStorage] = useState(() =>
-    createKbnUrlStateStorage({
+  const [urlStateStorage] = useState(() => {
+    const storage = createKbnUrlStateStorage({
       history,
       useHash: uiSettings.get('state:storeInSessionStorage'),
       useHashQuery: false,
       ...withNotifyOnErrors(toasts),
-    })
-  );
+    });
+
+    return storage;
+  });
 
   return urlStateStorage;
 };
