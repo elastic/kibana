@@ -10,50 +10,43 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiBadge,
   EuiButtonIcon,
   EuiCode,
   EuiPanel,
   useEuiTheme,
+  EuiLink,
+  EuiSkeletonText,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+import { css as cssReact } from '@emotion/react';
 import { Streams, getEsqlViewName, isChildOf } from '@kbn/streams-schema';
 import { useDebounceFn } from '@kbn/react-hooks';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { NestedView } from '../../nested_view';
 import { InlineQueryStreamForm } from '../../query_streams/inline_query_stream_form';
 import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { useQueryStreamCreation } from './query_stream_creation_context';
+import { QueryStreamBadge } from '../../stream_badges';
 
 interface IdleQueryStreamEntryProps {
   streamName: string;
   onEdit?: (name: string) => void;
-  isLast: boolean;
-  isFirst: boolean;
 }
 
 /**
  * Displays an existing query stream in idle state
  */
-export function IdleQueryStreamEntry({
-  streamName,
-  onEdit,
-  isLast,
-  isFirst,
-}: IdleQueryStreamEntryProps) {
+export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntryProps) {
   const { euiTheme } = useEuiTheme();
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const router = useStreamsAppRouter();
+
+  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   // Fetch the full stream details to get the ES|QL query
   const streamDetailsFetch = useStreamsAppFetch(
@@ -66,62 +59,88 @@ export function IdleQueryStreamEntry({
     [streamsRepositoryClient, streamName]
   );
 
-  const viewName = getEsqlViewName(streamName);
   const esqlQuery =
     streamDetailsFetch.value && Streams.QueryStream.GetResponse.is(streamDetailsFetch.value)
       ? streamDetailsFetch.value.stream.query.esql
-      : `FROM ${viewName}`;
+      : `FROM ${getEsqlViewName(streamName)}`;
 
   return (
-    <NestedView last={isLast} first={isFirst}>
-      <EuiPanel
-        color="subdued"
-        hasShadow={false}
-        hasBorder
-        paddingSize="m"
-        className={css`
-          display: flex;
-          flex-direction: column;
-          gap: ${euiTheme.size.s};
-        `}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{streamName}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.streams.queryStreamEntry.queryStreamBadge', {
-                defaultMessage: 'Query stream',
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      data-test-subj={`queryStream-${streamName}`}
+      className={css`
+        overflow: hidden;
+        border: ${euiTheme.border.thin};
+        padding: ${euiTheme.size.m} 16px;
+        border-radius: ${euiTheme.size.s};
+      `}
+    >
+      {streamDetailsFetch.loading || !streamDetailsFetch.value ? (
+        <EuiSkeletonText lines={3} />
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiLink
+              href={router.link('/{key}/management/{tab}', {
+                path: { key: streamDetailsFetch.value.stream.name, tab: 'partitioning' },
               })}
-            </EuiBadge>
+              data-test-subj="streamsAppQueryStreamEntryButton"
+              css={cssReact`
+              min-width: 0;
+            `}
+            >
+              <EuiText
+                size="xs"
+                component="p"
+                className="eui-textTruncate"
+                css={cssReact`
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+              >
+                {streamDetailsFetch.value.stream.name}
+              </EuiText>
+            </EuiLink>
+            <EuiFlexItem grow />
+            <QueryStreamBadge />
+            {onEdit && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="pencil"
+                  aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
+                    defaultMessage: 'Edit query stream',
+                  })}
+                  onClick={() => onEdit(streamName)}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              overflow: hidden;
+              padding: ${euiTheme.size.xs} 0px;
+            `}
+          >
+            <EuiCodeBlock
+              language="esql"
+              paddingSize="m"
+              fontSize="m"
+              css={css`
+                min-height: 100px;
+              `}
+            >
+              {esqlQuery}
+            </EuiCodeBlock>
           </EuiFlexItem>
-          <EuiFlexItem grow />
-          {onEdit && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="pencil"
-                aria-label={i18n.translate('xpack.streams.queryStreamEntry.editButtonAriaLabel', {
-                  defaultMessage: 'Edit query stream',
-                })}
-                onClick={() => onEdit(streamName)}
-              />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
-        <EuiCode
-          language="sql"
-          className={css`
-            white-space: pre-wrap;
-            word-break: break-word;
-          `}
-        >
-          {streamDetailsFetch.loading ? '...' : esqlQuery}
-        </EuiCode>
-      </EuiPanel>
-    </NestedView>
+      )}
+    </EuiPanel>
   );
 }
 

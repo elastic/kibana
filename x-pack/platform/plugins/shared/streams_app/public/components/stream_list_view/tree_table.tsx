@@ -513,14 +513,22 @@ export function StreamsTreeTable({
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
             <DiscoverBadgeButton
-              hasDataStream={!!item.data_stream}
+              hasDataStream={
+                console.log(
+                  item.stream,
+                  Streams.QueryStream.GetResponse.is({ stream: item.stream })
+                ) ||
+                !!item.data_stream ||
+                Streams.QueryStream.GetResponse.is({
+                  stream: item.stream,
+                } as Streams.all.GetResponse)
+              }
               definition={
                 {
                   stream: item.stream,
                   index_mode: item.data_stream?.index_mode,
-                } as Streams.ingest.all.GetResponse
+                } as Streams.all.GetResponse
               }
-              isWiredStream={item.type === 'wired'}
             />
           ),
         },

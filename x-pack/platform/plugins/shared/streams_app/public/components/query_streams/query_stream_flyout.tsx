@@ -15,9 +15,11 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +62,7 @@ export function QueryStreamFlyout({
   initialEsql,
   disableSubmitWhenLoading = false,
 }: QueryStreamFlyoutProps) {
-  const { dependencies } = useKibana();
+  const { core, dependencies } = useKibana();
   const { data } = dependencies.start;
 
   const { timeState } = useTimefilter();
@@ -170,6 +172,17 @@ export function QueryStreamFlyout({
                       tabIndex={0}
                       paddingSize="l"
                     >
+                      <EuiText component="p" size="s">
+                        {i18n.translate('xpack.streams.queryStreamFlyout.description', {
+                          defaultMessage: 'Use ES|QL to define your stream',
+                        })}
+                      </EuiText>
+                      <EuiLink href={core.docLinks.links.query.queryESQL} target="_blank">
+                        {i18n.translate('xpack.streams.queryStreamFlyout.viewDocumentation', {
+                          defaultMessage: 'View documentation',
+                        })}
+                      </EuiLink>
+                      <EuiSpacer size="m" />
                       <QueryStreamForm>
                         {showNameField && (
                           <QueryStreamForm.StreamName

@@ -121,11 +121,11 @@ export function QueryStreamDetailManagement({
         paddingSize="l"
         bottomBorder="extended"
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="baseline">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <DiscoverBadgeButton definition={definition} />
               <QueryStreamBadge />
+              <DiscoverBadgeButton definition={definition} hasDataStream />
             </EuiFlexGroup>
           </EuiFlexGroup>
         }

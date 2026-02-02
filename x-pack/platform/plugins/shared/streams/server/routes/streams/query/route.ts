@@ -142,8 +142,8 @@ const upsertQueryStreamRoute = createServerRoute({
       throw error;
     }
 
-    if (!Streams.QueryStream.Definition.is(definition)) {
-      throw badData(`Cannot update query capabilities of non-query stream`);
+    if (definition && !Streams.QueryStream.Definition.is(definition)) {
+      throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
     // Get existing assets and attachments to preserve them

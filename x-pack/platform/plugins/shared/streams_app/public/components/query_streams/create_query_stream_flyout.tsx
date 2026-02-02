@@ -21,7 +21,7 @@ export function CreateQueryStreamFlyout({ onQueryStreamCreated }: CreateQueryStr
 
   return (
     <>
-      <EuiButton onClick={toggleFlyout} size="s">
+      <EuiButton onClick={toggleFlyout} size="s" fill>
         {i18n.translate('xpack.streams.streamsListView.createQueryStreamButtonLabel', {
           defaultMessage: 'Create Query stream',
         })}

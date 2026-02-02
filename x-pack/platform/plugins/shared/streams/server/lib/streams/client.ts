@@ -342,6 +342,7 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -376,6 +377,7 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: new Date().toISOString(),
+            query_streams: [],
             query,
           },
         },

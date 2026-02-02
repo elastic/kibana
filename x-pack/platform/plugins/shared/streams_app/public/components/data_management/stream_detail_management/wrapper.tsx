@@ -170,7 +170,6 @@ export function Wrapper({
                         Streams.ClassicStream.GetResponse.is(definition) &&
                         definition.data_stream_exists
                       }
-                      isWiredStream={Streams.WiredStream.GetResponse.is(definition)}
                       spellOut
                     />
                   )}

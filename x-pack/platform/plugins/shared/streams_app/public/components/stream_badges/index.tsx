@@ -178,12 +178,10 @@ export function LifecycleBadge({
 export function DiscoverBadgeButton({
   definition,
   hasDataStream = false,
-  isWiredStream,
   spellOut = false,
 }: {
   definition: Streams.all.GetResponse;
   hasDataStream?: boolean;
-  isWiredStream: boolean;
   spellOut?: boolean;
 }) {
   const {
@@ -194,7 +192,7 @@ export function DiscoverBadgeButton({
   const esqlQuery = getDiscoverEsqlQuery({
     definition: definition.stream,
     indexMode: Streams.ingest.all.GetResponse.is(definition) ? definition.index_mode : undefined,
-    includeMetadata: isWiredStream,
+    includeMetadata: Streams.WiredStream.GetResponse.is(definition),
   });
   const useUrl = share.url.locators.useUrl;
 
