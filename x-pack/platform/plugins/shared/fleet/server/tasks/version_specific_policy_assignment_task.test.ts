@@ -13,9 +13,12 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
-import type { Agent, AgentPolicy } from '../types';
+import { getPackageInfo } from '../services/epm/packages';
+import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
+import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
+import type { Agent, AgentPolicy, PackagePolicy } from '../types';
 
 import {
   VersionSpecificPolicyAssignmentTask,
@@ -25,6 +28,9 @@ import {
 
 jest.mock('../services');
 jest.mock('../services/agents');
+jest.mock('../services/epm/packages');
+jest.mock('../services/epm/packages/get');
+jest.mock('../services/utils/version_specific_policies');
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -41,10 +47,19 @@ const MOCK_TASK_INSTANCE = {
 };
 
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockedGetPackageInfo = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
+const mockedGetAgentTemplateAssetsMap = getAgentTemplateAssetsMap as jest.MockedFunction<
+  typeof getAgentTemplateAssetsMap
+>;
+const mockedHasAgentVersionConditionInInputTemplate =
+  hasAgentVersionConditionInInputTemplate as jest.MockedFunction<
+    typeof hasAgentVersionConditionInInputTemplate
+  >;
 
 const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
   jest.fn().mockResolvedValue(
@@ -142,6 +157,18 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       jest
         .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
         .mockReturnValue({} as any);
+
+      // Default mocks for package policy compilation
+      mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
+      mockPackagePolicyService.compilePackagePolicyForVersions = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      mockedGetPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+      } as any);
+      mockedGetAgentTemplateAssetsMap.mockResolvedValue(new Map() as any);
+      mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
     });
 
     afterEach(() => {
@@ -398,6 +425,101 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       // Should not throw
       await expect(runTask()).resolves.not.toThrow();
     });
+
+    it('Should compile version-specific inputs for package policies with agent version conditions', async () => {
+      const agentPolicies = [
+        {
+          id: 'policy-1',
+          revision: 5,
+          has_agent_version_conditions: true,
+        },
+      ] as AgentPolicy[];
+
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+
+      const mockPackagePolicy = {
+        id: 'package-policy-1',
+        name: 'test-package-policy',
+        package: {
+          name: 'test-package',
+          version: '1.0.0',
+        },
+      } as PackagePolicy;
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+
+      mockPackagePolicyService.findAllForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue([mockPackagePolicy]);
+      mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(true);
+
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: 2,
+        agents,
+        page: 1,
+        perPage: 2,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      // Should compile version-specific inputs before deploying
+      expect(mockPackagePolicyService.compilePackagePolicyForVersions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ name: 'test-package', version: '1.0.0' }),
+        expect.anything(),
+        mockPackagePolicy,
+        ['8.18']
+      );
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalled();
+    });
+
+    it('Should not compile version-specific inputs for package policies without agent version conditions', async () => {
+      const agentPolicies = [
+        {
+          id: 'policy-1',
+          revision: 5,
+          has_agent_version_conditions: true,
+        },
+      ] as AgentPolicy[];
+
+      const agents = generateAgents(2, 'policy-1', '8.18.0');
+
+      const mockPackagePolicy = {
+        id: 'package-policy-1',
+        name: 'test-package-policy',
+        package: {
+          name: 'test-package',
+          version: '1.0.0',
+        },
+      } as PackagePolicy;
+
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+      mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+
+      mockPackagePolicyService.findAllForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue([mockPackagePolicy]);
+      mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
+
+      mockedGetAgentsByKuery.mockResolvedValue({
+        total: 2,
+        agents,
+        page: 1,
+        perPage: 2,
+      });
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      // Should NOT compile version-specific inputs
+      expect(mockPackagePolicyService.compilePackagePolicyForVersions).not.toHaveBeenCalled();
+      // But should still deploy
+      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalled();
+    });
   });
 
   describe('Version extraction', () => {
@@ -408,6 +530,18 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       jest
         .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
         .mockReturnValue({} as any);
+
+      // Default mocks for package policy compilation
+      mockPackagePolicyService.findAllForAgentPolicy = jest.fn().mockResolvedValue([]);
+      mockPackagePolicyService.compilePackagePolicyForVersions = jest
+        .fn()
+        .mockResolvedValue(undefined);
+      mockedGetPackageInfo.mockResolvedValue({
+        name: 'test-package',
+        version: '1.0.0',
+      } as any);
+      mockedGetAgentTemplateAssetsMap.mockResolvedValue(new Map() as any);
+      mockedHasAgentVersionConditionInInputTemplate.mockReturnValue(false);
     });
 
     afterEach(() => {
