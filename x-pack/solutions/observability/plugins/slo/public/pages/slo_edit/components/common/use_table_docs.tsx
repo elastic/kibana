@@ -29,7 +29,7 @@ export const useTableDocs = ({
   const errorMessages = getFieldState(name).error?.message;
   const filter = watch(name) as QuerySchema;
 
-  const esFilter = getElasticsearchQueryOrThrow(filter);
+  const esFilter = getElasticsearchQueryOrThrow(filter, dataView);
 
   const { data, loading, error } = useEsSearch(
     {
