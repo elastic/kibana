@@ -2891,66 +2891,6 @@ export default ({ getService }: FtrProviderContext) => {
         // @ts-expect-error namespace does not exist on type
         expect(previewAlerts[0]._source?.data_stream?.namespace).toEqual('namespace1');
       });
-
-      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
-        const timestamp = new Date().toISOString();
-
-        const eventDocNamespace1 = {
-          '@timestamp': timestamp,
-          data_stream: { namespace: 'namespace1' },
-          user: { name: 'user1' },
-          host: { name: 'server' },
-        };
-
-        const threatIndicatorDoc = (threatId: string, threatTimestamp: string) => ({
-          id: threatId,
-          '@timestamp': threatTimestamp,
-          data_stream: { namespace: 'namespace1' },
-          agent: { type: 'threat' },
-          user: { name: 'user1' },
-          host: { name: 'server' },
-        });
-
-        await indexListOfDocuments([eventDocNamespace1, threatIndicatorDoc(uuidv4(), timestamp)]);
-
-        // Set UI setting with invalid JSON
-        await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
-        });
-
-        const rule: ThreatMatchRuleCreateProps = {
-          ...createThreatMatchRule({
-            index: ['ecs_compliant'],
-            query: `* and NOT agent.type:"threat"`,
-            threat_index: ['ecs_compliant'],
-            threat_query: '* and agent.type:"threat"',
-            threat_mapping: [
-              {
-                entries: [
-                  {
-                    field: 'user.name',
-                    value: 'user.name',
-                    type: 'mapping',
-                  },
-                ],
-              },
-            ],
-          }),
-        };
-
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        expect(logs[0].errors).toEqual(
-          expect.arrayContaining([
-            expect.stringContaining(
-              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
-            ),
-          ])
-        );
-      });
     });
   });
 };

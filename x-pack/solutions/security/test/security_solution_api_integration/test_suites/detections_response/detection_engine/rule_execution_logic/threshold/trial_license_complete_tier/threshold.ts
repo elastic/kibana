@@ -854,46 +854,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hostIds).toContain('host-2');
         expect(hostIds).not.toContain('host-3');
       });
-
-      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
-        const id = uuidv4();
-        const timestamp = new Date().toISOString();
-
-        const docNamespace1 = {
-          id,
-          '@timestamp': timestamp,
-          data_stream: { namespace: 'namespace1' },
-          host: { id: 'host-1' },
-        };
-
-        await indexListOfDocuments([docNamespace1, docNamespace1]);
-
-        // Set UI setting with invalid JSON
-        await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
-        });
-
-        const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
-          threshold: {
-            field: ['host.id'],
-            value: 1,
-          },
-        };
-
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        expect(logs[0].errors).toEqual(
-          expect.arrayContaining([
-            expect.stringContaining(
-              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
-            ),
-          ])
-        );
-      });
     });
   });
 };

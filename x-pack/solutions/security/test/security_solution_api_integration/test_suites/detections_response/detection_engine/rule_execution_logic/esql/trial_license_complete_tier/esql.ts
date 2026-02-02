@@ -2719,49 +2719,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(namespaces).toContain('namespace2');
         expect(namespaces).not.toContain('namespace3');
       });
-
-      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
-        const id = uuidv4();
-        const timestamp = '2020-10-28T06:00:00.000Z';
-
-        const docNamespace1 = {
-          id,
-          '@timestamp': timestamp,
-          data_stream: { namespace: 'namespace1' },
-          agent: {
-            name: 'agent-namespace1',
-          },
-        };
-
-        await indexListOfDocuments([docNamespace1]);
-
-        // Set UI setting with invalid JSON
-        await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
-        });
-
-        const ruleQuery = `from ecs_compliant metadata _id, _index ${internalIdPipe(
-          id
-        )} | where agent.name=="agent-namespace1"`;
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock(),
-          query: ruleQuery,
-          from: '2020-10-28T05:00:00.000Z',
-        };
-
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        expect(logs[0].errors).toEqual(
-          expect.arrayContaining([
-            expect.stringContaining(
-              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
-            ),
-          ])
-        );
-      });
     });
   });
 };

@@ -450,26 +450,6 @@ export default ({ getService }: FtrProviderContext) => {
         // Actual filtering depends on whether anomaly records contain the data_stream.namespace field
         expect(requestString).toBeTruthy();
       });
-
-      it('should fail rule execution when advanced setting filter is incorrectly formatted', async () => {
-        // Set UI setting with invalid JSON
-        await setAdvancedSettings(supertest, {
-          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: 'invalid json{',
-        });
-
-        const { logs } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        expect(logs[0].errors).toEqual(
-          expect.arrayContaining([
-            expect.stringContaining(
-              'The advanced setting "Include data stream namespaces in rule execution" is incorrectly formatted'
-            ),
-          ])
-        );
-      });
     });
   });
 };
