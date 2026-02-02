@@ -45,6 +45,7 @@ test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () =>
     browserAuth,
     pageObjects,
     page,
+    config,
   }) => {
     test.skip(
       config.isCloud === true,
