@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { DataLifecycleSummary } from './data_lifecycle_summary';
 import { type LifecyclePhase } from './lifecycle_types';
 
@@ -14,7 +14,7 @@ describe('DataLifecycleSummary', () => {
   describe('Loading State', () => {
     it('should show skeleton when data is being fetched', () => {
       const phases: LifecyclePhase[] = [];
-      render(<DataLifecycleSummary phases={phases} loading={true} />);
+      render(<DataLifecycleSummary phases={phases} loading={true} canManageLifecycle />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('DataLifecycleSummary', () => {
   describe('Empty State', () => {
     it('should render title with no phases when phases array is empty', () => {
       const phases: LifecyclePhase[] = [];
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByText('0d')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-hot-name')).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByText('0s')).toBeInTheDocument();
     });
@@ -119,7 +119,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByTestId('lifecyclePhase-Main phase-name')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-Main phase-size')).toHaveTextContent('2.0 GB');
@@ -139,7 +139,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByTestId('lifecyclePhase-Main phase-name')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycle-delete-icon')).not.toBeInTheDocument();
@@ -156,7 +156,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByText('∞')).toBeInTheDocument();
     });
@@ -179,7 +179,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
@@ -208,7 +208,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
@@ -233,7 +233,13 @@ describe('DataLifecycleSummary', () => {
         { fixed_interval: '5d', after: '40d' },
       ];
 
-      render(<DataLifecycleSummary phases={phases} downsampleSteps={downsampleSteps} />);
+      render(
+        <DataLifecycleSummary
+          phases={phases}
+          downsampleSteps={downsampleSteps}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('downsamplingPhase-1d-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1d-interval')).toHaveTextContent('1d');
@@ -255,9 +261,51 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} />);
+      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
 
       expect(screen.queryByTestId('downsamplingPhase-1d-label')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ILM actions', () => {
+    it('should show remove actions for ILM phases and downsampling steps', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          name: 'hot',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: 5,
+          downsample: { after: '0d', fixed_interval: '1h' },
+        },
+        {
+          color: '#FFA500',
+          name: 'warm',
+          label: 'warm',
+          size: '500.0 KB',
+          grow: 3,
+          min_age: '30d',
+        },
+      ];
+
+      render(
+        <DataLifecycleSummary
+          phases={phases}
+          isIlm
+          onRemovePhase={jest.fn()}
+          onRemoveDownsampleStep={jest.fn()}
+          canManageLifecycle
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+      expect(screen.getByTestId('downsamplingPopover-step1-removeButton')).toBeInTheDocument();
+
+      const warmPhaseButton = screen
+        .getByTestId('lifecyclePhase-warm-name')
+        .closest('[role="button"]');
+      fireEvent.click(warmPhaseButton!);
+      expect(screen.getByTestId('lifecyclePhase-warm-removeButton')).toBeInTheDocument();
     });
   });
 });

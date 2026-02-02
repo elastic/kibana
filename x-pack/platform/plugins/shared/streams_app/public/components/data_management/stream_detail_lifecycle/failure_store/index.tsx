@@ -145,7 +145,7 @@ export const StreamDetailFailureStore = ({
                 )}
               />
             )}
-            {data.isLoading || failureStoreEnabled ? (
+            {failureStoreEnabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}

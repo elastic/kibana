@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -16,12 +17,13 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { formatBytes } from '../../helpers/format_bytes';
-import { isZeroAge } from '../../helpers/format_size_units';
 import { LifecyclePhaseButton } from './lifecycle_phase_button';
+import { isZeroAge } from '../../helpers/format_size_units';
 
 interface BaseLifecyclePhaseProps {
   color?: string;
@@ -34,6 +36,11 @@ interface BaseLifecyclePhaseProps {
   searchableSnapshot?: string;
   size?: string;
   sizeInBytes?: number;
+  isIlm?: boolean;
+  onRemovePhase?: (phaseName: string) => void;
+  canManageLifecycle: boolean;
+  isRemoveDisabled?: boolean;
+  removeDisabledReason?: string;
 }
 
 interface DeleteLifecyclePhaseProps extends BaseLifecyclePhaseProps {
@@ -62,6 +69,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     searchableSnapshot,
     size,
     sizeInBytes,
+    isIlm = false,
+    onRemovePhase,
+    canManageLifecycle,
+    isRemoveDisabled = false,
+    removeDisabledReason,
   } = props;
   const isDelete = props.isDelete === true;
 
@@ -99,28 +111,74 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle data-test-subj={`lifecyclePhase-${label}-popoverTitle`}>
-        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.streams.streamDetailLifecycle.phasePopoverTitleLabel', {
-              defaultMessage: '{phase} phase',
-              values: { phase: capitalize(label) },
-            })}
-          </EuiFlexItem>
-          {isReadOnly && (
-            <EuiFlexItem grow={false} data-test-subj={`lifecyclePhase-${label}-readOnly`}>
-              <EuiIconTip
-                type="readOnly"
-                size="m"
-                content={i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyTooltip', {
-                  defaultMessage: 'Read only',
+            <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.streams.streamDetailLifecycle.phasePopoverTitleLabel', {
+                  defaultMessage: '{phase} phase',
+                  values: { phase: capitalize(label) },
                 })}
-                aria-label={i18n.translate(
-                  'xpack.streams.streamDetailLifecycle.readOnlyAriaLabel',
-                  {
-                    defaultMessage: 'Read only',
-                  }
-                )}
-              />
+              </EuiFlexItem>
+              {isReadOnly && (
+                <EuiFlexItem grow={false} data-test-subj={`lifecyclePhase-${label}-readOnly`}>
+                  <EuiIconTip
+                    type="readOnly"
+                    size="m"
+                    content={i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyTooltip', {
+                      defaultMessage: 'Read only',
+                    })}
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailLifecycle.readOnlyAriaLabel',
+                      {
+                        defaultMessage: 'Read only',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {isIlm && label !== 'hot' && onRemovePhase && canManageLifecycle && (
+            <EuiFlexItem grow={false}>
+              {isRemoveDisabled && removeDisabledReason ? (
+                <EuiToolTip content={removeDisabledReason}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    size="s"
+                    display="base"
+                    color="danger"
+                    isDisabled
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                      {
+                        defaultMessage: 'Remove {phase} phase',
+                        values: { phase: label ?? '' },
+                      }
+                    )}
+                    data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                  />
+                </EuiToolTip>
+              ) : (
+                <EuiButtonIcon
+                  iconType="trash"
+                  size="s"
+                  display="base"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                    {
+                      defaultMessage: 'Remove {phase} phase',
+                      values: { phase: label ?? '' },
+                    }
+                  )}
+                  data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                  onClick={() => {
+                    closePopover();
+                    onRemovePhase(label ?? '');
+                  }}
+                />
+              )}
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

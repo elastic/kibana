@@ -30,6 +30,7 @@ describe('LifecycleBar', () => {
           phases={phases}
           gridTemplateColumns="5fr 3fr"
           phaseColumnSpans={[1, 1]}
+          canManageLifecycle
         />
       );
 
@@ -49,6 +50,7 @@ describe('LifecycleBar', () => {
           phases={phases}
           gridTemplateColumns="5fr 3fr"
           phaseColumnSpans={[1, 1]}
+          canManageLifecycle
         />
       );
 
@@ -68,10 +70,37 @@ describe('LifecycleBar', () => {
           phases={phases}
           gridTemplateColumns="1fr 50px"
           phaseColumnSpans={[1, 1]}
+          canManageLifecycle
         />
       );
 
       expect(screen.getByTestId('dataLifecycle-delete-icon')).toBeInTheDocument();
+    });
+
+    it('should render remove button in popover for ILM non-hot phase', () => {
+      const phases: LifecyclePhase[] = [
+        { grow: 5, name: 'hot', label: 'hot', color: '#FF0000' },
+        { grow: 3, name: 'warm', label: 'warm', color: '#FFA500' },
+      ];
+
+      render(
+        <LifecycleBar
+          {...defaultProps}
+          phases={phases}
+          gridTemplateColumns="5fr 3fr"
+          phaseColumnSpans={[1, 1]}
+          isIlm
+          onRemovePhase={jest.fn()}
+          canManageLifecycle
+        />
+      );
+
+      const warmPhaseButton = screen
+        .getByTestId('lifecyclePhase-warm-name')
+        .closest('[role="button"]');
+      fireEvent.click(warmPhaseButton!);
+
+      expect(screen.getByTestId('lifecyclePhase-warm-removeButton')).toBeInTheDocument();
     });
   });
 
@@ -88,6 +117,7 @@ describe('LifecycleBar', () => {
           phases={phases}
           onPhaseClick={onPhaseClick}
           phaseColumnSpans={[1]}
+          canManageLifecycle
         />
       );
 
@@ -111,6 +141,7 @@ describe('LifecycleBar', () => {
           gridTemplateColumns="5fr 3fr"
           phaseColumnSpans={[1, 1]}
           onPhaseClick={onPhaseClick}
+          canManageLifecycle
         />
       );
 
