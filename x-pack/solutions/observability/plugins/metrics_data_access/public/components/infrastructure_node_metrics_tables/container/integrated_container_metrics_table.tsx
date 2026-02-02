@@ -14,11 +14,13 @@ import { useContainerMetricsTable } from './use_container_metrics_table';
 function HookedContainerMetricsTable({
   timerange,
   kuery,
+  schema,
   metricsClient,
 }: UseNodeMetricsTableOptions) {
   const containerMetricsTableProps = useContainerMetricsTable({
     timerange,
     kuery,
+    schema,
     metricsClient,
   });
   return <ContainerMetricsTable {...containerMetricsTableProps} />;
@@ -28,6 +30,7 @@ function ContainerMetricsTableWithProviders({
   timerange,
   kuery,
   sourceId,
+  schema,
   metricsClient,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
@@ -36,6 +39,7 @@ function ContainerMetricsTableWithProviders({
       <HookedContainerMetricsTable
         timerange={timerange}
         kuery={kuery}
+        schema={schema}
         metricsClient={metricsClient}
       />
     </CoreProviders>

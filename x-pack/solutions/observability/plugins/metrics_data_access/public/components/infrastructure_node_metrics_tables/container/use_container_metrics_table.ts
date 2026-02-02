@@ -39,6 +39,25 @@ const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = 
   },
 };
 
+type ContainerMetricsFieldsOtel =
+  | 'metrics.k8s.container.cpu_limit_utilization'
+  | 'metrics.k8s.container.memory_limit_utilization';
+
+const containerMetricsQueryConfigOtel: MetricsQueryOptions<ContainerMetricsFieldsOtel> = {
+  sourceFilter: '',
+  groupByField: 'container.id',
+  metricsMap: {
+    'metrics.k8s.container.cpu_limit_utilization': {
+      aggregation: 'avg',
+      field: 'metrics.k8s.container.cpu_limit_utilization',
+    },
+    'metrics.k8s.container.memory_limit_utilization': {
+      aggregation: 'avg',
+      field: 'metrics.k8s.container.memory_limit_utilization',
+    },
+  },
+};
+
 export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
 const unpackMetric = makeUnpackMetric(metricByField);
 
@@ -52,6 +71,7 @@ export function useContainerMetricsTable({
   timerange,
   kuery,
   metricsClient,
+  schema,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<ContainerNodeMetricsRow>>({
@@ -64,8 +84,14 @@ export function useContainerMetricsTable({
     [kuery]
   );
 
+  const { options: containerMetricsOptionsOtel } = useMemo(
+    () => metricsToApiOptions(containerMetricsQueryConfigOtel, kuery),
+    [kuery]
+  );
+
   const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
-    metricsExplorerOptions: containerMetricsOptions,
+    metricsExplorerOptions:
+      schema === 'semconv' ? containerMetricsOptionsOtel : containerMetricsOptions,
     timerange,
     transform: seriesToContainerNodeMetricsRow,
     sortState,

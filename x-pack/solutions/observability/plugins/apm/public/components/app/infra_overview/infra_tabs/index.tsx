@@ -32,12 +32,20 @@ export function InfraTabs() {
   } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const schema = useMemo(() => {
+    if (hasOpenTelemetryPrefix(agentName)) {
+      return 'semconv';
+    }
+    return 'ecs';
+  }, [agentName]);
+
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
           params: {
             path: { serviceName },
+            schema,
             query: {
               environment,
               kuery,
@@ -48,17 +56,10 @@ export function InfraTabs() {
         });
       }
     },
-    [environment, kuery, serviceName, start, end]
+    [environment, kuery, schema, serviceName, start, end]
   );
 
   const { containerIds, podNames, hostNames } = data;
-
-  const schema = useMemo(() => {
-    if (hasOpenTelemetryPrefix(agentName)) {
-      return 'semconv';
-    }
-    return 'ecs';
-  }, [agentName]);
 
   const tabs = useTabs({
     containerIds,
