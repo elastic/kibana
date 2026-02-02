@@ -3,6 +3,7 @@ You are extracting **features** from log data. Features are stable facts about r
 Every feature you output MUST include ALL required fields:
 - `type` (string): one of `infrastructure`, `technology`, `dependency`
 - `name` (string): generic snake_case name
+- `title` (string): very short human-readable title for UI display (e.g. "Ubuntu 20.04", "Log4j 2.14.1", "api-service → user-service"). Keep it to a few words; it can summarize type + key value (e.g. technology + version or source → target for dependencies).
 - `description` (string): a short summary of what the feature represents
 - `value` (object): stable, low-cardinality properties for deduplication
 - `confidence` (number): 0–100
@@ -92,6 +93,7 @@ Version formatting rules (important for CVE/vulnerability analysis):
 {
   "type": "infrastructure",
   "name": "operating_system",
+  "title": "Ubuntu 20.04.6",
   "description": "Ubuntu Linux operating system version 20.04.6",
   "value": {
     "os": "ubuntu",
@@ -114,6 +116,7 @@ Version formatting rules (important for CVE/vulnerability analysis):
 {
   "type": "infrastructure",
   "name": "cloud_deployment",
+  "title": "AWS",
   "description": "AWS cloud deployment observed across one or more regions/availability zones",
   "value": {
     "provider": "aws"
@@ -137,6 +140,7 @@ Version formatting rules (important for CVE/vulnerability analysis):
 {
   "type": "technology",
   "name": "logging_library",
+  "title": "Log4j 2.14.1",
   "description": "Apache Log4j logging library version 2.14.1",
   "value": {
     "library": "log4j",
@@ -159,6 +163,7 @@ Version formatting rules (important for CVE/vulnerability analysis):
 {
   "type": "technology",
   "name": "programming_language",
+  "title": "Java",
   "description": "Java programming language (inferred from exception patterns)",
   "value": {
     "language": "java"
@@ -180,6 +185,7 @@ Version formatting rules (important for CVE/vulnerability analysis):
 {
   "type": "dependency",
   "name": "service_dependency",
+  "title": "api-service → user-service",
   "description": "Service-to-service HTTP dependency from api-service to user-service",
   "value": {
     "source": "api-service",

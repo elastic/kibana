@@ -10,11 +10,12 @@
 import type {
   ESQLAst,
   ESQLAstAllCommands,
+  ESQLAstExpression,
   ESQLAstPromqlCommand,
   ESQLLocation,
   ESQLMessage,
 } from '../../../types';
-import { isIdentifier } from '../../../ast/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import { sourceExists } from '../../definitions/utils/sources';
@@ -219,7 +220,7 @@ function collectPromqlParamValues(
         continue;
       }
 
-      const rawValue = entry.value.text?.trim() ?? '';
+      const rawValue = getPromqlParamValueText(entry.value);
       const value = looksLikePromqlParamAssignment(rawValue) ? '' : rawValue;
 
       values.set(key, {
@@ -245,6 +246,24 @@ function collectPromqlParamValues(
   return values;
 }
 
+function getPromqlParamValueText(value: ESQLAstExpression | undefined): string {
+  if (!value) return '';
+
+  const text = value.text?.trim();
+  if (text) return text;
+
+  if (isList(value)) {
+    const parts = value.values
+      .map((item) => item.text?.trim() || (isIdentifier(item) || isSource(item) ? item.name : ''))
+      .filter(Boolean);
+
+    return parts.join(',');
+  }
+
+  if (isIdentifier(value) || isSource(value)) return value.name;
+
+  return '';
+}
 /*
  * Extracts the PromQL query text from the AST.
  *
@@ -314,7 +333,7 @@ function getPromqlQueryTail(command: ESQLAstPromqlCommand): string {
         continue;
       }
 
-      const rawValue = entry.value.text ?? '';
+      const rawValue = getPromqlParamValueText(entry.value);
       const keyPrefix = `${key}=`;
       const valuePrefix = `${keyPrefix}${rawValue}`;
       const lowerRest = rest.toLowerCase();

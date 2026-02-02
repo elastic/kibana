@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import type { AccountType } from '@kbn/fleet-plugin/public';
 import type { AzureCloudConnectorCredentials } from '../types';
 import { AZURE_PROVIDER } from '../constants';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
@@ -17,7 +18,8 @@ export const AzureReusableConnectorForm: React.FC<{
   isEditPage: boolean;
   credentials: AzureCloudConnectorCredentials;
   setCredentials: (credentials: AzureCloudConnectorCredentials) => void;
-}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
+  accountType?: AccountType;
+}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId, accountType }) => {
   return (
     <>
       <EuiSpacer size="m" />
@@ -33,6 +35,7 @@ export const AzureReusableConnectorForm: React.FC<{
         cloudConnectorId={cloudConnectorId}
         credentials={credentials}
         setCredentials={setCredentials}
+        accountType={accountType}
       />
       <EuiSpacer size="m" />
     </>
