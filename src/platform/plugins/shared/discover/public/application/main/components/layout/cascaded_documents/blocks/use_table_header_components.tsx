@@ -20,6 +20,7 @@ import {
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ESQLDataGroupNode } from './types';
 
@@ -93,10 +94,8 @@ function CascadeGroupingSelectionPopover({
       closePopover={closeSelectionPopover}
       panelPaddingSize="none"
       button={
-        <EuiFilterGroup compressed>
+        <EuiFilterGroup css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
-            size="s"
-            iconSide="left"
             iconType="inspect"
             color="text"
             onClick={toggleSelectionPopover}
@@ -169,7 +168,6 @@ export function useEsqlDataCascadeHeaderComponent({
           {viewModeToggle && (
             <EuiFlexItem>
               {React.cloneElement(viewModeToggle!, {
-                hitsTotalToDisplay: availableColumns.length,
                 hitCounterLabel: i18n.translate('discover.dataCascade.header.resultLabel', {
                   defaultMessage: 'group',
                 }),
