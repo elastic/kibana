@@ -48,7 +48,7 @@ export const getCurrentAppTitleAndId = (core: CoreStart) => {
   }
 
   return {
-    title,
-    id: match?.id,
+    title: title ?? 'Kibana',
+    id: match?.id ?? 'Kibana',
   };
 };

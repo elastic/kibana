@@ -16,6 +16,13 @@ export interface FeedbackRegistryEntry {
    * Unique identifier for the feedback entry.
    */
   id: string;
+  /**
+   * Sort order for displaying the feedback entry.
+   */
+  order: number;
+  /**
+   * The question text.
+   */
   question: string;
   /**
    * Represents the label shown above the feedback text area.

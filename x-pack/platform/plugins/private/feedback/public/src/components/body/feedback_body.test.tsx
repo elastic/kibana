@@ -16,16 +16,15 @@ const coreStartMock = coreMock.createStart();
 
 const propsMock = {
   handleChangeCsatOptionId: jest.fn(),
-  handleChangeExperienceFeedbackText: jest.fn(),
-  handleChangeGeneralFeedbackText: jest.fn(),
+  handleChangeQuestionAnswer: jest.fn(),
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
   email: '',
   questions: feedbackRegistry.get(DEFAULT_REGISTRY_ID) || [],
   allowEmailContact: false,
   selectedCsatOptionId: '',
-  experienceFeedbackText: '',
-  generalFeedbackText: '',
+  questionAnswers: {},
+  appTitle: 'Test App',
   core: coreStartMock,
 };
 
@@ -45,26 +44,38 @@ describe('FeedbackBody', () => {
   });
 
   it('should render feedback text inside textarea', async () => {
+    const questions = feedbackRegistry.get(DEFAULT_REGISTRY_ID) || [];
+    const questionId = questions[0]?.id || 'test-question';
+
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} experienceFeedbackText="Test feedback" />);
+      renderWithI18n(
+        <FeedbackBody
+          {...propsMock}
+          questions={questions}
+          questionAnswers={{ [questionId]: 'Test feedback' }}
+        />
+      );
     });
 
     const body = screen.getByTestId('feedbackBody');
 
     expect(body).toBeInTheDocument();
 
-    const feedbackTextarea = screen.getByTestId('feedbackExperienceTextArea');
+    const feedbackTextarea = screen.getByTestId(`feedback-${questionId}-text-area`);
 
     expect(feedbackTextarea).toBeInTheDocument();
     expect(feedbackTextarea).toHaveValue('Test feedback');
   });
 
-  it('should call handleChangeExperienceFeedbackText when feedback text is changed', async () => {
+  it('should call handleChangeQuestionAnswer when feedback text is changed', async () => {
+    const questions = feedbackRegistry.get(DEFAULT_REGISTRY_ID) || [];
+    const questionId = questions[0]?.id || 'test-question';
+
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} questions={[]} />);
+      renderWithI18n(<FeedbackBody {...propsMock} questions={questions} />);
     });
 
-    const feedbackTextarea = screen.getByTestId('feedbackExperienceTextArea');
+    const feedbackTextarea = screen.getByTestId(`feedback-${questionId}-text-area`);
 
     expect(feedbackTextarea).toBeInTheDocument();
 
@@ -72,6 +83,7 @@ describe('FeedbackBody', () => {
       target: { value: 'Test feedback' },
     });
 
-    expect(propsMock.handleChangeExperienceFeedbackText).toHaveBeenCalledTimes(1);
+    expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledWith(questionId, 'Test feedback');
+    expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledTimes(1);
   });
 });

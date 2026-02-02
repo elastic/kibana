@@ -31,18 +31,15 @@ export const FeedbackContainer = ({
   hideFeedbackContainer,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
-  const [generalFeedbackText, setGeneralFeedbackText] = useState('');
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({});
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
   const [allowEmailContact, setAllowEmailContact] = useState(true);
   const [email, setEmail] = useState('');
   const [solutionView, setSolutionView] = useState<string | null>(null);
 
-  const appDetails = getCurrentAppTitleAndId(core);
+  const { title: appTitle, id: appId } = getCurrentAppTitleAndId(core);
 
-  const questions = getQuestions(appDetails?.id);
-
-  const [firstQuestion, secondQuestion] = questions;
+  const questions = getQuestions(appId);
 
   useEffect(() => {
     const solutionSub = core.chrome.getActiveSolutionNavId$().subscribe((solutionId) => {
@@ -56,19 +53,17 @@ export const FeedbackContainer = ({
 
   const isSendFeedbackButtonDisabled =
     !selectedCsatOptionId &&
-    experienceFeedbackText.trim().length === 0 &&
-    generalFeedbackText.trim().length === 0;
+    Object.values(questionAnswers).every((answer) => answer.trim().length === 0);
 
   const handleChangeCsatOptionId = (optionId: string) => {
     setSelectedCsatOptionId(optionId);
   };
 
-  const handleChangeExperienceFeedbackText = (feedback: string) => {
-    setExperienceFeedbackText(feedback);
-  };
-
-  const handleChangeGeneralFeedbackText = (feedback: string) => {
-    setGeneralFeedbackText(feedback);
+  const handleChangeQuestionAnswer = (questionId: string, answer: string) => {
+    setQuestionAnswers((prev) => ({
+      ...prev,
+      [questionId]: answer,
+    }));
   };
 
   const handleChangeAllowEmailContact = (allow: boolean) => {
@@ -86,22 +81,17 @@ export const FeedbackContainer = ({
   const submitFeedback = async () => {
     try {
       const eventData: FeedbackSubmittedEventData = {
-        app_id: appDetails?.id || 'unknown',
+        app_id: appId,
         user_email: allowEmailContact && email ? email : undefined,
         allow_email_contact: allowEmailContact,
         solution: getSolutionType(),
         organization_id: organizationId,
         csat_score: Number(selectedCsatOptionId) || undefined,
-        first_question: {
-          id: firstQuestion?.id,
-          question: firstQuestion?.question,
-          answer: experienceFeedbackText.trim() || 'N/A',
-        },
-        second_question: {
-          id: secondQuestion?.id,
-          question: secondQuestion?.question,
-          answer: generalFeedbackText.trim() || 'N/A',
-        },
+        questions: questions.map((question) => ({
+          id: question.id,
+          question: question.question,
+          answer: questionAnswers[question.id]?.trim() || 'N/A',
+        })),
       };
 
       core.analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, eventData);
@@ -137,16 +127,14 @@ export const FeedbackContainer = ({
       <FeedbackHeader />
       <FeedbackBody
         core={core}
-        experienceFeedbackText={experienceFeedbackText}
-        generalFeedbackText={generalFeedbackText}
+        questionAnswers={questionAnswers}
         selectedCsatOptionId={selectedCsatOptionId}
         allowEmailContact={allowEmailContact}
         questions={questions}
-        appTitle={appDetails?.title}
+        appTitle={appTitle}
         email={email}
         handleChangeCsatOptionId={handleChangeCsatOptionId}
-        handleChangeExperienceFeedbackText={handleChangeExperienceFeedbackText}
-        handleChangeGeneralFeedbackText={handleChangeGeneralFeedbackText}
+        handleChangeQuestionAnswer={handleChangeQuestionAnswer}
         handleChangeAllowEmailContact={handleChangeAllowEmailContact}
         handleChangeEmail={handleChangeEmail}
       />

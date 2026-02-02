@@ -18,6 +18,7 @@ export const feedbackRegistry: FeedbackRegistry = new Map([
     [
       {
         id: DEFAULT_EXPERIENCE_QUESTION_ID,
+        order: 1,
         placeholder: {
           i18nId: 'xpack.feedbackRegistry.defaultExperiencePlaceholder',
           defaultMessage: 'Describe your experience',
@@ -30,6 +31,7 @@ export const feedbackRegistry: FeedbackRegistry = new Map([
       },
       {
         id: DEFAULT_GENERAL_QUESTION_ID,
+        order: 2,
         label: {
           i18nId: 'xpack.feedbackRegistry.defaultGeneralLabel',
           defaultMessage: 'Anything else you would like to share about Elastic overall?',

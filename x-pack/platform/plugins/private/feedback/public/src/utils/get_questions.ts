@@ -10,8 +10,8 @@ import { DEFAULT_REGISTRY_ID, feedbackRegistry } from '@kbn/feedback-registry/co
 
 export const getQuestions = (appId?: string): FeedbackRegistryEntry[] => {
   if (appId && feedbackRegistry.has(appId)) {
-    return feedbackRegistry.get(appId) || [];
+    return feedbackRegistry.get(appId)?.sort((a, b) => a.order - b.order) || [];
   }
 
-  return feedbackRegistry.get(DEFAULT_REGISTRY_ID) || [];
+  return feedbackRegistry.get(DEFAULT_REGISTRY_ID)?.sort((a, b) => a.order - b.order) || [];
 };

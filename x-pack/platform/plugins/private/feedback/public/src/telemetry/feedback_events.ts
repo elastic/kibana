@@ -20,8 +20,7 @@ export interface FeedbackSubmittedEventData {
   user_email?: string;
   solution?: string;
   csat_score?: number;
-  first_question?: FeedbackQuestion;
-  second_question?: FeedbackQuestion;
+  questions?: FeedbackQuestion[];
   organization_id?: string;
   allow_email_contact: boolean;
 }
@@ -56,17 +55,16 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
       optional: true,
     },
   },
-  first_question: {
-    type: 'pass_through',
-    _meta: {
-      description: 'The first feedback question and answer',
-      optional: true,
+  questions: {
+    type: 'array',
+    items: {
+      type: 'pass_through',
+      _meta: {
+        description: 'Individual feedback question and answer',
+      },
     },
-  },
-  second_question: {
-    type: 'pass_through',
     _meta: {
-      description: 'The general feedback text from the user',
+      description: 'Array of feedback questions and answers',
       optional: true,
     },
   },

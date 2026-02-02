@@ -19,30 +19,26 @@ import { CsatButtons } from './csat_buttons';
 interface Props {
   core: CoreStart;
   selectedCsatOptionId: string;
-  experienceFeedbackText: string;
-  generalFeedbackText: string;
+  questionAnswers: Record<string, string>;
   allowEmailContact: boolean;
   email: string;
   questions: FeedbackRegistryEntry[];
-  appTitle?: string;
+  appTitle: string;
   handleChangeCsatOptionId: (optionId: string) => void;
-  handleChangeExperienceFeedbackText: (feedback: string) => void;
-  handleChangeGeneralFeedbackText: (feedback: string) => void;
+  handleChangeQuestionAnswer: (questionId: string, answer: string) => void;
   handleChangeAllowEmailContact: (allow: boolean) => void;
   handleChangeEmail: (email: string) => void;
 }
 export const FeedbackBody = ({
   core,
   selectedCsatOptionId,
-  experienceFeedbackText,
-  generalFeedbackText,
+  questionAnswers,
   allowEmailContact,
   email,
-  questions: [firstQuestion, secondQuestion],
+  questions,
   appTitle,
   handleChangeCsatOptionId,
-  handleChangeExperienceFeedbackText,
-  handleChangeGeneralFeedbackText,
+  handleChangeQuestionAnswer,
   handleChangeAllowEmailContact,
   handleChangeEmail,
 }: Props) => {
@@ -63,59 +59,36 @@ export const FeedbackBody = ({
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
           <EuiSpacer size="m" />
-          <FeedbackTextArea
-            value={experienceFeedbackText}
-            handleChangeValue={handleChangeExperienceFeedbackText}
-            testId="feedbackExperienceTextArea"
-            label={
-              firstQuestion?.label
-                ? i18n.translate(firstQuestion.label.i18nId, {
-                    defaultMessage: firstQuestion.label.defaultMessage,
-                  })
-                : undefined
-            }
-            aria-label={
-              firstQuestion?.ariaLabel
-                ? i18n.translate(firstQuestion.ariaLabel.i18nId, {
-                    defaultMessage: firstQuestion.ariaLabel.defaultMessage,
-                  })
-                : undefined
-            }
-            placeholder={
-              firstQuestion?.placeholder
-                ? i18n.translate(firstQuestion.placeholder.i18nId, {
-                    defaultMessage: firstQuestion.placeholder.defaultMessage,
-                  })
-                : undefined
-            }
-          />
-          <EuiSpacer size="l" />
-          <FeedbackTextArea
-            value={generalFeedbackText}
-            handleChangeValue={handleChangeGeneralFeedbackText}
-            testId="feedbackGeneralTextArea"
-            label={
-              secondQuestion?.label
-                ? i18n.translate(secondQuestion.label.i18nId, {
-                    defaultMessage: secondQuestion.label.defaultMessage,
-                  })
-                : undefined
-            }
-            aria-label={
-              secondQuestion?.ariaLabel
-                ? i18n.translate(secondQuestion.ariaLabel.i18nId, {
-                    defaultMessage: secondQuestion.ariaLabel.defaultMessage,
-                  })
-                : undefined
-            }
-            placeholder={
-              secondQuestion?.placeholder
-                ? i18n.translate(secondQuestion.placeholder.i18nId, {
-                    defaultMessage: secondQuestion.placeholder.defaultMessage,
-                  })
-                : undefined
-            }
-          />
+          {questions.length > 0 &&
+            questions.map((question) => (
+              <FeedbackTextArea
+                key={question.id}
+                value={questionAnswers[question.id] || ''}
+                handleChangeValue={(value) => handleChangeQuestionAnswer(question.id, value)}
+                testId={`feedback-${question.id}-text-area`}
+                label={
+                  question?.label
+                    ? i18n.translate(question.label.i18nId, {
+                        defaultMessage: question.label.defaultMessage,
+                      })
+                    : undefined
+                }
+                aria-label={
+                  question?.ariaLabel
+                    ? i18n.translate(question.ariaLabel.i18nId, {
+                        defaultMessage: question.ariaLabel.defaultMessage,
+                      })
+                    : undefined
+                }
+                placeholder={
+                  question?.placeholder
+                    ? i18n.translate(question.placeholder.i18nId, {
+                        defaultMessage: question.placeholder.defaultMessage,
+                      })
+                    : undefined
+                }
+              />
+            ))}
           <EmailSection
             allowEmailContact={allowEmailContact}
             email={email}

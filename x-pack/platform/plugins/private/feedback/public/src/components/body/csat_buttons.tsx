@@ -43,7 +43,7 @@ const options = [
 
 interface Props {
   selectedCsatOptionId: string;
-  appTitle?: string;
+  appTitle: string;
   handleChangeCsatOptionId: (optionId: string) => void;
 }
 
@@ -68,7 +68,7 @@ export const CsatButtons = ({
       label={i18n.translate('feedback.body.csatButtons.titleText', {
         defaultMessage: 'How would you rate your experience with {appTitle}?',
         values: {
-          appTitle: appTitle ? appTitle : 'Elastic',
+          appTitle,
         },
       })}
     >
