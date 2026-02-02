@@ -9,12 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { schema } from '@kbn/config-schema';
 
-// slo_id is optional, it's required when overview_mode is 'single'
 const sloOverviewStateSchema = schema.object(
   {
-    slo_id: schema.maybe(schema.string()),
+    slo_id: schema.maybe(schema.string()), // slo_id is optional, it's required when overview_mode is 'single'
     slo_instance_id: schema.maybe(schema.string()),
-    show_all_group_by_instances: schema.maybe(schema.boolean()),
     remote_name: schema.maybe(schema.string()),
     overview_mode: schema.maybe(schema.oneOf([schema.literal('single'), schema.literal('groups')])),
     group_filters: schema.maybe(
