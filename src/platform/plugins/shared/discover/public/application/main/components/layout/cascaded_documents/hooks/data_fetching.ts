@@ -9,7 +9,7 @@
 
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { type ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import { useCallback, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
@@ -18,6 +18,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { v5 as uuidv5 } from 'uuid';
 import { isNil } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import useLatest from 'react-use/lib/useLatest';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
@@ -124,6 +125,15 @@ export const useGroupedCascadeData = ({
   );
 };
 
+const useStableHandler = <T extends (...args: Parameters<T>) => ReturnType<T>>(handler: T): T => {
+  const latestHandler = useLatest(handler);
+  const [stableHandler] = useState(() => (...args: Parameters<T>) => {
+    return latestHandler.current?.(...args);
+  });
+
+  return stableHandler as T;
+};
+
 export function useDataCascadeRowExpansionHandlers({
   dataView,
 }: {
@@ -142,76 +152,51 @@ export function useDataCascadeRowExpansionHandlers({
   /**
    * Callback invoked when a group node gets expanded, used to fetch data for group nodes.
    */
-  const onCascadeGroupNodeExpanded = useCallback<
+  const onCascadeGroupNodeExpanded = useStableHandler<
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
     >
-  >(
-    ({ row, nodePath, nodePathMap }) => {
-      return cascadedDocumentsFetcher.fetchCascadedDocuments({
-        nodeId: row.id,
-        nodeType: 'group',
-        nodePath,
-        nodePathMap,
-        query: esqlQuery,
-        esqlVariables,
-        timeRange,
-        dataView,
-      }) as unknown as Promise<ESQLDataGroupNode[]>;
-    },
-    [cascadedDocumentsFetcher, dataView, esqlQuery, esqlVariables, timeRange]
-  );
+  >(() => Promise.resolve([]));
 
   /**
    * Callback invoked when a group node gets collapsed, cancels any pending requests for the group node if necessary.
    */
-  const onCascadeGroupNodeCollapsed = useCallback<
+  const onCascadeGroupNodeCollapsed = useStableHandler<
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeCollapsed']
     >
-  >(
-    ({ row }) => {
-      cascadedDocumentsFetcher.cancelFetch(row.id);
-    },
-    [cascadedDocumentsFetcher]
-  );
+  >(() => {});
 
   /**
    * Callback invoked when a leaf node gets expanded, used to fetch data for leaf nodes.
    */
-  const onCascadeLeafNodeExpanded = useCallback<
+  const onCascadeLeafNodeExpanded = useStableHandler<
     NonNullable<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
     >['onCascadeLeafNodeExpanded']
-  >(
-    ({ row, nodePath, nodePathMap }) => {
-      return cascadedDocumentsFetcher.fetchCascadedDocuments({
-        nodeId: row.id,
-        nodeType: 'leaf',
-        nodePath,
-        nodePathMap,
-        query: esqlQuery,
-        esqlVariables,
-        timeRange,
-        dataView,
-      });
-    },
-    [cascadedDocumentsFetcher, dataView, esqlQuery, esqlVariables, timeRange]
-  );
+  >(({ row, nodePath, nodePathMap }) => {
+    return cascadedDocumentsFetcher.fetchCascadedDocuments({
+      nodeId: row.id,
+      nodeType: 'leaf',
+      nodePath,
+      nodePathMap,
+      query: esqlQuery,
+      esqlVariables,
+      timeRange,
+      dataView,
+    });
+  });
 
   /**
    * Callback invoked when a leaf node gets collapsed, cancels any pending requests for the leaf node if necessary.
    */
-  const onCascadeLeafNodeCollapsed = useCallback<
+  const onCascadeLeafNodeCollapsed = useStableHandler<
     NonNullable<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
     >
-  >(
-    ({ row }) => {
-      cascadedDocumentsFetcher.cancelFetch(row.id);
-    },
-    [cascadedDocumentsFetcher]
-  );
+  >(({ row }) => {
+    cascadedDocumentsFetcher.cancelFetch(row.id);
+  });
 
   return {
     onCascadeGroupNodeExpanded,
