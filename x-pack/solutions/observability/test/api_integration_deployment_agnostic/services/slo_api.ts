@@ -392,11 +392,12 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       roleAuthc: RoleCredentials,
       params?: { size?: number; searchAfter?: string; problematic?: boolean; allSpaces?: boolean }
     ): Promise<GetHealthScanResultsResponse> {
-      const queryParams: Record<string, string | number | boolean> = {};
-      if (params?.size !== undefined) queryParams.size = params.size;
-      if (params?.searchAfter) queryParams.searchAfter = params.searchAfter;
-      if (params?.problematic !== undefined) queryParams.problematic = params.problematic;
-      if (params?.allSpaces !== undefined) queryParams.allSpaces = params.allSpaces;
+      const queryParams = {
+        ...(params?.size !== undefined && { size: params.size }),
+        ...(params?.searchAfter && { searchAfter: params.searchAfter }),
+        ...(params?.problematic !== undefined && { problematic: params.problematic }),
+        ...(params?.allSpaces !== undefined && { allSpaces: params.allSpaces }),
+      };
 
       const { body } = await supertestWithoutAuth
         .get(`/internal/observability/slos/_health/scans/${scanId}`)
