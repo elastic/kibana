@@ -17,10 +17,11 @@ test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
     await pageObjects.homepage.goto();
   });
 
-  test('should not be able to see manage button', async ({ pageObjects }) => {
+  test('should not be able to see manage button', async ({ pageObjects, samlAuth }) => {
     const headerLeftGroup = await pageObjects.homepage.getHeaderLeftGroup();
+    const userData = await samlAuth.session.getUserData('viewer');
 
-    await expect(headerLeftGroup).toContainText('Welcome, test viewer');
+    await expect(headerLeftGroup).toContainText(`Welcome, ${userData?.full_name}`);
     await expect(headerLeftGroup).not.toContainText('Manage');
   });
 
