@@ -33,17 +33,19 @@ interface QueryRuleMetadataEditorProps {
     metadata?: FieldError;
   };
   inputRef?: React.Ref<HTMLInputElement>;
+  criteriaValue: QueryRulesQueryRuleCriteria;
 }
 
 export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = ({
   onRemove,
-  criteria,
+  // criteria,
   onChange,
   error,
   inputRef,
+  criteriaValue,
 }) => {
-  const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
-
+  const [metadataField, setMetadataField] = useState<string>(criteriaValue.metadata || '');
+  // console.log('criteria?.values', criteriaValue);
   return (
     <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
       <EuiFlexGroup direction="row">
@@ -83,7 +85,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
             }
             isInvalid={!!error?.metadata}
             error={error?.metadata ? error.metadata.message : undefined}
-            isDisabled={criteria.type === 'always'}
+            isDisabled={criteriaValue?.type === 'always'}
           >
             <EuiFieldText
               isInvalid={!!error?.metadata}
@@ -101,7 +103,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
               }}
               onBlur={() => {
                 onChange({
-                  ...criteria,
+                  ...criteriaValue,
                   metadata: metadataField,
                 });
               }}
@@ -214,11 +216,11 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     ]}
                     onChange={(e) => {
                       onChange({
-                        ...criteria,
+                        ...criteriaValue,
                         type: e.target.value as QueryRulesQueryRuleCriteria['type'],
                       });
                     }}
-                    value={criteria.type}
+                    value={criteriaValue.type}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -257,12 +259,12 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     </EuiFlexGroup>
                   }
                   isInvalid={!!error?.values}
-                  isDisabled={criteria.type === 'always'}
+                  isDisabled={criteriaValue.type === 'always'}
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
                     isInvalid={!!error?.values}
-                    isDisabled={criteria.type === 'always'}
+                    isDisabled={criteriaValue.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
                     fullWidth
                     aria-label={i18n.translate(
@@ -271,19 +273,21 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         defaultMessage: 'Select or create new values',
                       }
                     )}
-                    selectedOptions={criteria?.values?.map((value) => ({ label: value }))}
+                    selectedOptions={criteriaValue?.values?.map((value: any) => ({ label: value }))}
                     options={
-                      criteria?.values ? criteria.values.map((value) => ({ label: value })) : []
+                      criteriaValue?.values
+                        ? criteriaValue?.values?.map((value: any) => ({ label: value }))
+                        : []
                     }
                     onCreateOption={(newOption) => {
                       onChange({
-                        ...criteria,
-                        values: [...(criteria.values || []), newOption],
+                        ...criteriaValue,
+                        values: [...(criteriaValue.values || []), newOption],
                       });
                     }}
                     onChange={(selectedOptions) => {
                       onChange({
-                        ...criteria,
+                        ...criteriaValue,
                         values: selectedOptions.map((option) => option.label),
                       });
                     }}

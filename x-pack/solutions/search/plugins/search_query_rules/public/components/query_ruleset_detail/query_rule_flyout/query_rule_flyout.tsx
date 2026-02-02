@@ -82,6 +82,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setCriteriaCalloutActive,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
+    update,
   } = useQueryRuleFlyoutState({
     createMode,
     rulesetId,
@@ -90,7 +91,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     setIsFormDirty,
     onSave,
   });
-
+  console.log('formState', formState);
   const {
     services: { application },
   } = useKibana();
@@ -326,17 +327,26 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                           <Controller
                             control={control}
                             name={`criteria.${index}`}
-                            render={({ field: { onChange } }) => (
-                              <QueryRuleMetadataEditor
-                                criteria={field}
-                                key={field.id}
-                                onRemove={() => {
-                                  remove(index);
-                                }}
-                                error={isQueryRuleFieldError(error) ? error : undefined}
-                                onChange={onChange}
-                              />
-                            )}
+                            // name={`criteria.${index}`}
+                            render={({ field: { onChange, value, ref }, fieldState }) => {
+                              return (
+                                <div ref={ref}>
+                                  <QueryRuleMetadataEditor
+                                    criteria={field}
+                                    key={field.id}
+                                    onRemove={() => {
+                                      remove(index);
+                                    }}
+                                    error={isQueryRuleFieldError(error) ? error : undefined}
+                                    onChange={onChange}
+                                    // onChange={(newCriteria) => {
+                                    //   update(index, newCriteria);
+                                    // }}
+                                    criteriaValue={value}
+                                  />
+                                </div>
+                              );
+                            }}
                           />
                           <EuiSpacer size="m" />
                         </React.Fragment>
