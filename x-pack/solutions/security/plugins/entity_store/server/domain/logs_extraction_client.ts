@@ -86,7 +86,6 @@ export class LogsExtractionClient {
         engineDescriptor,
         opts,
         delayMs,
-
         entityDefinition,
       });
 
