@@ -139,10 +139,17 @@ describe('AutomaticImportSetupService', () => {
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
+      const mockGetAllDataStreams = jest
+        .fn()
+        .mockResolvedValue([
+          { job_info: { status: 'completed' } },
+          { job_info: { status: 'completed' } },
+        ]);
       const mockUpdateIntegration = jest.fn().mockResolvedValue({});
 
       (service as any).savedObjectService = {
         getIntegration: mockGetIntegration,
+        getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
       };
 
@@ -153,6 +160,7 @@ describe('AutomaticImportSetupService', () => {
       });
 
       expect(mockGetIntegration).toHaveBeenCalledWith('integration-123');
+      expect(mockGetAllDataStreams).toHaveBeenCalledWith('integration-123');
       expect(mockUpdateIntegration).toHaveBeenCalledTimes(1);
 
       const [updateData, expectedVersion] = mockUpdateIntegration.mock.calls[0];
@@ -167,6 +175,40 @@ describe('AutomaticImportSetupService', () => {
       expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
     });
 
+    it('should not approve integration if any data stream is not completed', async () => {
+      const mockGetIntegration = jest.fn().mockResolvedValue({
+        integration_id: 'integration-123',
+        created_by: 'creator',
+        status: 'pending',
+        metadata: { title: 't', description: 'd', version: '0.0.1' },
+      });
+      const mockGetAllDataStreams = jest
+        .fn()
+        .mockResolvedValue([
+          { job_info: { status: 'completed' } },
+          { job_info: { status: 'processing' } },
+        ]);
+      const mockUpdateIntegration = jest.fn();
+
+      (service as any).savedObjectService = {
+        getIntegration: mockGetIntegration,
+        getAllDataStreams: mockGetAllDataStreams,
+        updateIntegration: mockUpdateIntegration,
+      };
+
+      await expect(
+        service.approveIntegration({
+          integrationId: 'integration-123',
+          authenticatedUser: { username: 'approver-user' } as any,
+          version: '1.2.3',
+        })
+      ).rejects.toThrow(
+        'Cannot approve integration integration-123 until all data streams are completed'
+      );
+
+      expect(mockUpdateIntegration).not.toHaveBeenCalled();
+    });
+
     it('should propagate errors from saved object service', async () => {
       const mockGetIntegration = jest.fn().mockResolvedValue({
         integration_id: 'integration-123',
@@ -174,12 +216,16 @@ describe('AutomaticImportSetupService', () => {
         status: 'pending',
         metadata: { title: 't', description: 'd', version: '0.0.1' },
       });
+      const mockGetAllDataStreams = jest
+        .fn()
+        .mockResolvedValue([{ job_info: { status: 'completed' } }]);
       const mockUpdateIntegration = jest
         .fn()
         .mockRejectedValue(new Error('Failed to update integration'));
 
       (service as any).savedObjectService = {
         getIntegration: mockGetIntegration,
+        getAllDataStreams: mockGetAllDataStreams,
         updateIntegration: mockUpdateIntegration,
       };
 

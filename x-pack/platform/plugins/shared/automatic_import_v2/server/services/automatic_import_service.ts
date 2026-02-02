@@ -201,6 +201,16 @@ export class AutomaticImportService {
 
     const existing = await this.savedObjectService.getIntegration(integrationId);
 
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    const hasIncompleteDataStreams = dataStreams.some(
+      (dataStream) => dataStream.job_info?.status !== TASK_STATUSES.completed
+    );
+    if (hasIncompleteDataStreams) {
+      throw new Error(
+        `Cannot approve integration ${integrationId} until all data streams are completed`
+      );
+    }
+
     const updateData: IntegrationAttributes = {
       ...existing,
       status: TASK_STATUSES.approved,
