@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { getCurrentAppTitleAndId, getQuestions } from '../utils';
 import { FeedbackHeader } from './header';
 import { FeedbackBody } from './body/feedback_body';
@@ -27,7 +28,7 @@ export const FeedbackContainer = ({ core, cloud, hideFeedbackContainer }: Props)
   const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
   const [generalFeedbackText, setGeneralFeedbackText] = useState('');
   const [selectedCsatOptionId, setSelectedCsatOptionId] = useState('');
-  const [allowEmailContact, setAllowEmailContact] = useState(false);
+  const [allowEmailContact, setAllowEmailContact] = useState(true);
   const [email, setEmail] = useState('');
   const [solutionView, setSolutionView] = useState<string | null>(null);
 
@@ -97,6 +98,18 @@ export const FeedbackContainer = ({ core, cloud, hideFeedbackContainer }: Props)
       };
 
       core.analytics.reportEvent(FEEDBACK_SUBMITTED_EVENT_TYPE, eventData);
+
+      core.notifications.toasts.addSuccess({
+        title: i18n.translate('feedback.submissionSuccessToast.title', {
+          defaultMessage: 'Thanks for your feedback!',
+        }),
+        text: i18n.translate('feedback.submissionSuccessToast.text', {
+          defaultMessage:
+            'If you remember anything else, you can always come back and submit it again.',
+        }),
+      });
+
+      hideFeedbackContainer();
     } catch (error) {
       // Silently fail
     }

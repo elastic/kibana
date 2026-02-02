@@ -88,15 +88,15 @@ export const CsatButtons = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" css={labelsCss}>
           <EuiFlexItem>
             <EuiText size="xs">
-              {i18n.translate('feedback.body.csatButtons.notSatisfiedLabel', {
-                defaultMessage: 'Very dissatisfied',
+              {i18n.translate('feedback.body.csatButtons.veryNegativeLabel', {
+                defaultMessage: 'Very negative',
               })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem css={rightLabelCss}>
             <EuiText size="xs">
-              {i18n.translate('feedback.body.csatButtons.verySatisfiedLabel', {
-                defaultMessage: 'Very satisfied',
+              {i18n.translate('feedback.body.csatButtons.veryPositiveLabel', {
+                defaultMessage: 'Very positive',
               })}
             </EuiText>
           </EuiFlexItem>

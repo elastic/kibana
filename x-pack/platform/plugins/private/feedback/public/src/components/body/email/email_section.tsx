@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import type { SecurityServiceStart } from '@kbn/core/public';
 import { EmailInput } from './email_input';
 import { EmailConsentCheck } from './email_consent_check';
@@ -27,15 +26,9 @@ export const EmailSection = ({
   handleChangeAllowEmailContact,
   handleChangeEmail,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
-  const sectionCss = css`
-    height: ${euiTheme.size.xxxl};
-  `;
-
   return (
-    <EuiFormRow fullWidth css={sectionCss}>
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EmailConsentCheck
             allowEmailContact={allowEmailContact}

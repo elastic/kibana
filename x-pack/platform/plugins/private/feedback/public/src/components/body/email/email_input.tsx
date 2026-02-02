@@ -41,5 +41,5 @@ export const EmailInput = ({ email, security, handleChangeEmail }: Props) => {
     fetchEmail();
   }, [security, email, handleChangeEmail]);
 
-  return <EuiFieldText onChange={handleChange} type="email" value={email} compressed />;
+  return <EuiFieldText onChange={handleChange} type="email" value={email} fullWidth />;
 };

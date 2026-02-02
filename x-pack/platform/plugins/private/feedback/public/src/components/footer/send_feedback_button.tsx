@@ -36,6 +36,7 @@ export const SendFeedbackButton = ({ isSendFeedbackButtonDisabled, submitFeedbac
         data-test-subj="feedbackFooterSendFeedbackButton"
         disabled={isSendFeedbackButtonDisabled}
         onClick={handleSubmit}
+        iconType="send"
       >
         <FormattedMessage id="feedback.footer.sendFeedbackButton" defaultMessage="Send" />
       </EuiButton>

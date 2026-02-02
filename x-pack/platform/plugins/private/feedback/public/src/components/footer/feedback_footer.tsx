@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SessionDataDisclaimer } from './session_data_disclaimer';
 import { SendFeedbackButton } from './send_feedback_button';
 import { CancelButton } from './cancel_button';
 
@@ -31,10 +30,7 @@ export const FeedbackFooter = ({
 
   return (
     <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFooter">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={true}>
-          <SessionDataDisclaimer />
-        </EuiFlexItem>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
         <EuiFlexItem grow={false}>
           <CancelButton hideFeedbackContainer={hideFeedbackContainer} />
         </EuiFlexItem>

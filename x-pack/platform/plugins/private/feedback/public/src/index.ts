@@ -17,7 +17,6 @@ export { FeedbackTextArea } from './components';
 export { SessionInfoDisclaimer } from './components';
 export { FeedbackBody } from './components';
 
-export { SessionDataDisclaimer } from './components';
 export { CancelButton } from './components';
 export { SendFeedbackButton } from './components';
 export { FeedbackFooter } from './components';

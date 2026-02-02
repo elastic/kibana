@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { SessionDataDisclaimer } from './session_data_disclaimer';
 export { CancelButton } from './cancel_button';
 export { SendFeedbackButton } from './send_feedback_button';
 

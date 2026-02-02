@@ -125,6 +125,7 @@ export const FeedbackBody = ({
           />
         </EuiForm>
       </EuiFlexItem>
+      <EuiSpacer size="m" />
       <EuiFlexItem>
         <SessionInfoDisclaimer />
       </EuiFlexItem>
