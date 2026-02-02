@@ -489,12 +489,15 @@ export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
 
   /**
-   * The list can be a literal list (uses square brackets) or a tuple list (uses
-   * round brackets). If not specified, the list is assumed to be a literal list.
+   * Represents various types of lists in ES|QL language.
+   *
+   * - `literal` - a literal list using square brackets, e.g. `[1, 2, 3]`
+   * - `tuple` - a tuple list using round brackets, e.g. `(a, b, c)`
+   * - `bare` - a bare list without any enclosing brackets, e.g. `a, b, c`
    *
    * @default 'literal'
    */
-  subtype?: 'literal' | 'tuple';
+  subtype?: 'literal' | 'tuple' | 'bare';
 
   values: ESQLAstExpression[];
 }

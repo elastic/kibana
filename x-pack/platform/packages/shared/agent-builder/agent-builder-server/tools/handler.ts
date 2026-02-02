@@ -129,15 +129,15 @@ export interface ToolHandlerContext {
    */
   attachments: AttachmentStateManager;
   /**
-   * Skills service to interact with skills.
+   * File store to access data from the agent's virtual filesystem
    */
+  filestore: IToolFileStore;
+  /**
+ * Skills service to interact with skills.
+ */
   skills: SkillsService;
   /**
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
-  /**
-   * File store to access data from the agent's virtual filesystem
-   */
-  filestore: IToolFileStore;
 }
