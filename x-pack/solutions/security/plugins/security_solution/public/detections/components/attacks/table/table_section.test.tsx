@@ -21,8 +21,9 @@ import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_h
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
-import { groupingOptions, groupingSettings } from './grouping_configs';
+import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { useGroupStats } from './grouping_settings/use_group_stats';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
@@ -36,6 +37,7 @@ jest.mock('../../alerts_table/alerts_grouping', () => ({
 jest.mock('./empty_results_prompt', () => ({
   EmptyResultsPrompt: jest.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
 }));
+jest.mock('./grouping_settings/use_group_stats');
 
 const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 const dataView: DataView = createStubDataView({ spec: dataViewSpec });
@@ -45,6 +47,7 @@ const mockUseAttackGroupHandler = useAttackGroupHandler as jest.Mock;
 const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
+const mockUseGroupStats = useGroupStats as jest.Mock;
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
@@ -63,6 +66,10 @@ describe('<TableSection />', () => {
     mockUseAttackGroupHandler.mockReturnValue({
       getAttack: jest.fn(),
       isLoading: false,
+    });
+    mockUseGroupStats.mockReturnValue({
+      aggregations: jest.fn(),
+      renderer: jest.fn(),
     });
     mockGroupedAlertsTable.mockImplementation((props) => (
       <div data-test-subj="mock-grouped-alerts-table">
@@ -491,6 +498,24 @@ describe('<TableSection />', () => {
           enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });
+    });
+
+    it('passes correct accordionExtraActionGroupStats to GroupedAlertsTable', () => {
+      const mockStats = { aggregations: jest.fn(), renderer: jest.fn() };
+      mockUseGroupStats.mockReturnValue(mockStats);
+
+      render(
+        <TestProviders>
+          <TableSection {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(mockGroupedAlertsTable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accordionExtraActionGroupStats: mockStats,
+        }),
+        expect.anything()
+      );
     });
   });
 });

@@ -393,6 +393,28 @@
   "entity-discovery-api-key": [
     "apiKey"
   ],
+  "entity-engine-descriptor-v2": [
+    "error",
+    "error.action",
+    "error.message",
+    "logExtractionState",
+    "logExtractionState.additionalIndexPattern",
+    "logExtractionState.delay",
+    "logExtractionState.docsLimit",
+    "logExtractionState.fieldHistoryLength",
+    "logExtractionState.filter",
+    "logExtractionState.frequency",
+    "logExtractionState.lastExecutionTimestamp",
+    "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationTimestamp",
+    "logExtractionState.timeout",
+    "status",
+    "type",
+    "versionState",
+    "versionState.isMigratedFromV1",
+    "versionState.state",
+    "versionState.version"
+  ],
   "entity-engine-status": [
     "fieldHistoryLength",
     "filter",
