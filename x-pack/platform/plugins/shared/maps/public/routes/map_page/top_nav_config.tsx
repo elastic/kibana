@@ -98,7 +98,7 @@ export function getTopNavConfig({
     }
   );
 
-  if (savedMap.hasSaveAndReturnConfig()) {
+  if (savedMap.hasOriginatingApp()) {
     topNavConfigs.push({
       label: i18n.translate('xpack.maps.topNav.cancel', {
         defaultMessage: 'Cancel',
@@ -171,7 +171,6 @@ export function getTopNavConfig({
             props: OnSaveProps & {
               dashboardId?: string | null;
               addToLibrary: boolean;
-              returnToOrigin?: boolean;
             }
           ): Promise<SaveResult> => {
             try {
@@ -198,8 +197,6 @@ export function getTopNavConfig({
               ...props,
               tags,
               saveByReference: props.addToLibrary,
-              // Only return to origin if explicitly requested via the modal toggle
-              returnToOrigin: props.returnToOrigin,
               history,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
@@ -218,8 +215,7 @@ export function getTopNavConfig({
 
         let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
-        // Show simplified modal only when editing an existing embedded by-value panel
-        if (savedMap.hasOriginatingApp() && savedMap.isByValue() && savedMap.getSavedObjectId()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -228,10 +224,14 @@ export function getTopNavConfig({
               }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
-              returnToOriginSwitchLabel={i18n.translate('xpack.maps.topNav.updatePanel', {
-                defaultMessage: 'Update panel on {originatingAppName}',
-                values: { originatingAppName: savedMap.getOriginatingAppName() },
-              })}
+              returnToOriginSwitchLabel={
+                savedMap.isByValue()
+                  ? i18n.translate('xpack.maps.topNav.updatePanel', {
+                      defaultMessage: 'Update panel on {originatingAppName}',
+                      values: { originatingAppName: savedMap.getOriginatingAppName() },
+                    })
+                  : undefined
+              }
               options={tagSelector}
             />
           );

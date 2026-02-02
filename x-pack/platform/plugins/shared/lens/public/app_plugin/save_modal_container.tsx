@@ -182,8 +182,6 @@ export function SaveModalContainer({
     isSaveable && application.capabilities.visualize_v2.save
   );
 
-  const isEmbedded = isLegacyEditorEmbeddable(initialContext);
-
   return (
     <SaveModal
       originatingApp={originatingApp}
@@ -202,7 +200,6 @@ export function SaveModalContainer({
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
       returnToOrigin={redirectToOrigin != null}
       managed={Boolean(managed)}
-      isEmbedded={isEmbedded}
     />
   );
 }

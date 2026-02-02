@@ -36,7 +36,6 @@ export interface Props {
   onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => Promise<void>;
 
   managed: boolean;
-  isEmbedded?: boolean;
 }
 
 export const SaveModal = (props: Props) => {
@@ -55,10 +54,9 @@ export const SaveModal = (props: Props) => {
     onSave,
     returnToOrigin,
     managed,
-    isEmbedded,
   } = props;
 
-  if (originatingApp && returnToOrigin !== false && isEmbedded) {
+  if (originatingApp && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
         savedObjectsTagging={savedObjectsTagging}

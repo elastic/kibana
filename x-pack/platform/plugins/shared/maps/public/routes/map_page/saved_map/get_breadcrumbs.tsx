@@ -41,15 +41,13 @@ export function getBreadcrumbs({
   if (originatingApp && getAppNameFromId) {
     breadcrumbs.push({
       onClick: () => {
-        // When navigating back to Dashboard, always go to the Viz tab, not the specific dashboard
-        const path = originatingApp === 'dashboards' ? '#/list/visualizations' : undefined;
-        getNavigateToApp()(originatingApp, { path });
+        getNavigateToApp()(originatingApp);
       },
       text: getAppNameFromId(originatingApp),
     });
   }
 
-  if (!isByValue && !originatingApp) {
+  if (!isByValue) {
     breadcrumbs.push({
       text: APP_NAME,
       onClick: async () => {
