@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Aggregators, AggType } from "@kbn/observability-plugin/common/custom_threshold_rule/types";
-import { MetricExpression } from "../../../types";
-import { COMPARATORS } from "@kbn/alerting-comparators";
-import { generateChartTitleAndTooltip } from "./generate_chart_title_and_tooltip";
-
-
+import type { AggType } from '../../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
+import type { MetricExpression } from '../../../types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { generateChartTitleAndTooltip } from './generate_chart_title_and_tooltip';
 
 describe('generateChartTitleAndTooltip', () => {
-
   describe('alerts based on custom threshold rule', () => {
     const buildCriterion = (criterion: Partial<MetricExpression> = {}): MetricExpression => ({
       metrics: [
@@ -24,12 +22,9 @@ describe('generateChartTitleAndTooltip', () => {
       ...criterion,
     });
 
-
     it('should generate correct title and tooltip when using COUNT aggregation without equation and without filter', () => {
       const criterion = buildCriterion({
-        metrics: [
-          { name: 'A', aggType: Aggregators.COUNT as unknown as AggType },
-        ],
+        metrics: [{ name: 'A', aggType: Aggregators.COUNT as unknown as AggType }],
         equation: undefined,
       });
 
@@ -41,9 +36,7 @@ describe('generateChartTitleAndTooltip', () => {
 
     it('should generate correct title and tooltip when using COUNT aggregation with equation and without filter', () => {
       const criterion = buildCriterion({
-        metrics: [
-          { name: 'A', aggType: Aggregators.COUNT as unknown as AggType },
-        ]
+        metrics: [{ name: 'A', aggType: Aggregators.COUNT as unknown as AggType }],
       });
 
       const { title, tooltip } = generateChartTitleAndTooltip(criterion);
@@ -55,8 +48,12 @@ describe('generateChartTitleAndTooltip', () => {
     it('should generate correct title and tooltip when using COUNT aggregation with equation and filter', () => {
       const criterion = buildCriterion({
         metrics: [
-          { name: 'A', aggType: Aggregators.COUNT as unknown as AggType, filter: 'status_code:500' },
-        ]
+          {
+            name: 'A',
+            aggType: Aggregators.COUNT as unknown as AggType,
+            filter: 'status_code:500',
+          },
+        ],
       });
 
       const { title, tooltip } = generateChartTitleAndTooltip(criterion);
@@ -67,9 +64,7 @@ describe('generateChartTitleAndTooltip', () => {
 
     it('should generate correct title and tooltip when using SUM aggregation with equation and wihout filter', () => {
       const criterion = buildCriterion({
-        metrics: [
-          { name: 'A', aggType: Aggregators.SUM as unknown as AggType, field: 'bytes' },
-        ]
+        metrics: [{ name: 'A', aggType: Aggregators.SUM as unknown as AggType, field: 'bytes' }],
       });
 
       const { title, tooltip } = generateChartTitleAndTooltip(criterion);
@@ -81,8 +76,13 @@ describe('generateChartTitleAndTooltip', () => {
     it('should generate correct title and tooltip when using SUM aggregation with equation and filter', () => {
       const criterion = buildCriterion({
         metrics: [
-          { name: 'A', aggType: Aggregators.SUM as unknown as AggType, field: 'bytes', filter: 'status_code:200' },
-        ]
+          {
+            name: 'A',
+            aggType: Aggregators.SUM as unknown as AggType,
+            field: 'bytes',
+            filter: 'status_code:200',
+          },
+        ],
       });
 
       const { title, tooltip } = generateChartTitleAndTooltip(criterion);
@@ -90,5 +90,5 @@ describe('generateChartTitleAndTooltip', () => {
       expect(title).toBe('Equation result for sum (bytes, status_code:200) > 100');
       expect(tooltip).toBe('Equation result for sum (bytes, status_code:200) > 100');
     });
-  })
+  });
 });

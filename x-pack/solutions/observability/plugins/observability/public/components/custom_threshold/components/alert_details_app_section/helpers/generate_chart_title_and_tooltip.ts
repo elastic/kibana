@@ -19,9 +19,10 @@ const resolveMetricDisplay = (metric: MetricExpression['metrics'][0]) => {
     return `${metric.aggType} (${metric.field}, ${metric.filter})`;
   }
 
-  return `${metric.aggType} (${metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-    })`
-}
+  return `${metric.aggType} (${
+    metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
+  })`;
+};
 export const generateChartTitleAndTooltip = (
   criterion: MetricExpression,
   chartTitleLimit = CHART_TITLE_LIMIT
@@ -29,8 +30,7 @@ export const generateChartTitleAndTooltip = (
   const metricNameResolver: Record<string, string> = {};
 
   criterion.metrics.forEach(
-    (metric) =>
-      (metricNameResolver[metric.name] = resolveMetricDisplay(metric))
+    (metric) => (metricNameResolver[metric.name] = resolveMetricDisplay(metric))
   );
 
   let equation = criterion.equation
