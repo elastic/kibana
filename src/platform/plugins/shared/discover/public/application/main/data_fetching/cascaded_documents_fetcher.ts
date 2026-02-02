@@ -24,6 +24,7 @@ interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
 }
 
 export interface CascadedDocumentsStateManager {
+  getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
 }
@@ -112,6 +113,10 @@ export class CascadedDocumentsFetcher {
   }
 
   cancelFetch(nodeId: string, reason: AbortReason = AbortReason.CANCELED) {
+    if (!this.stateManager.getIsActiveInstance()) {
+      return;
+    }
+
     const abortController = this.abortControllers.get(nodeId);
 
     if (abortController) {
