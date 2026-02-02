@@ -384,7 +384,10 @@ function QueryModeChildrenList() {
         <EuiFlexGroup direction="column" gutterSize="xs">
           {childQueryStreamNames.map((streamName, pos) => (
             <EuiFlexItem key={streamName} grow={false}>
-              <NestedView last={pos === childQueryStreamNames.length - 1} first={pos === 0}>
+              <NestedView
+                last={pos === childQueryStreamNames.length - 1 && !isCreating}
+                first={pos === 0}
+              >
                 <IdleQueryStreamEntry streamName={streamName} />
               </NestedView>
             </EuiFlexItem>
