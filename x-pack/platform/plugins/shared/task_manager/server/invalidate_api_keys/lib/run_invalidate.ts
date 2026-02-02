@@ -21,7 +21,8 @@ export interface SavedObjectTypesToQuery {
 
 interface RunInvalidateOpts {
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
-  invalidateApiKeyFn?: ApiKeyInvalidationFn | UiamApiKeyInvalidationFn;
+  invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -33,6 +34,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
   const {
     encryptedSavedObjectsClient,
     invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
     logger,
     removalDelay,
     savedObjectsClient,
@@ -47,7 +49,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
     // we should have deleted the deletable keys and added keys still in use to the excluded list
     const filter = getFindFilter({
-      removalDelay: '1s',
+      removalDelay,
       excludedSOIds: [...excludedSOIds],
       savedObjectType,
     });
@@ -61,17 +63,20 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     });
 
     if (apiKeysToInvalidate.total > 0) {
-      const { apiKeyIdsToExclude, apiKeyIdsToInvalidate } = await getApiKeyIdsToInvalidate({
-        apiKeySOsPendingInvalidation: apiKeysToInvalidate,
-        encryptedSavedObjectsClient,
-        savedObjectsClient,
-        savedObjectType,
-        savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
-      });
+      const { apiKeyIdsToExclude, apiKeyIdsToInvalidate, uiamApiKeysToInvalidate } =
+        await getApiKeyIdsToInvalidate({
+          apiKeySOsPendingInvalidation: apiKeysToInvalidate,
+          encryptedSavedObjectsClient,
+          savedObjectsClient,
+          savedObjectType,
+          savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
+        });
       apiKeyIdsToExclude.forEach(({ id }) => excludedSOIds.add(id));
       totalInvalidated += await invalidateApiKeysAndDeletePendingApiKeySavedObject({
         apiKeyIdsToInvalidate,
+        uiamApiKeysToInvalidate,
         invalidateApiKeyFn,
+        invalidateUiamApiKeyFn,
         logger,
         savedObjectsClient,
         savedObjectType,

@@ -180,6 +180,15 @@ export const enabledRuleForBulkOpsWithActions1 = {
   ],
 };
 
+export const enabledRuleForBulkOpsWithActions1WithUiam = {
+  ...enabledRuleForBulkOpsWithActions1,
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions1.attributes,
+    uiamApiKey: Buffer.from('essu_uiam').toString('base64'),
+    uiamApiKeyId: 'uiam123',
+  },
+};
+
 export const enabledRuleForBulkOpsWithActions2 = {
   ...defaultRuleForBulkDelete,
   id: 'id2',
@@ -208,6 +217,14 @@ export const enabledRuleForBulkOpsWithActions2 = {
       type: 'action',
     },
   ],
+};
+
+export const enabledRuleForBulkOpsWithActions2WithUiam = {
+  ...enabledRuleForBulkOpsWithActions2,
+  attributes: {
+    ...enabledRuleForBulkOpsWithActions2.attributes,
+    uiamApiKey: Buffer.from('uiam123:abc').toString('base64'),
+  },
 };
 
 export const disabledRuleForBulkOpsWithActions1 = {

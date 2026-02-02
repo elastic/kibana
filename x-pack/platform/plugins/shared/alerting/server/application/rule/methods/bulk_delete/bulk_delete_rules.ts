@@ -92,7 +92,8 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       })
   );
 
-  const [apiKeysToInvalidate, taskIdsToDelete] = accListSpecificForBulkOperation;
+  const [apiKeysToInvalidate, taskIdsToDelete, uiamApiKeysToInvalidate] =
+    accListSpecificForBulkOperation;
 
   const [result] = await Promise.allSettled([
     tryToRemoveTasks({
@@ -106,7 +107,17 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
     bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
+      {
+        apiKeys: apiKeysToInvalidate,
+        ...(uiamApiKeysToInvalidate
+          ? {
+              uiamApiKeys: uiamApiKeysToInvalidate.map((key) => {
+                const [uiamApiKeyId, uiamApiKey] = key.split(':');
+                return { uiamApiKeyId, uiamApiKey };
+              }),
+            }
+          : {}),
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     ),
@@ -169,6 +180,8 @@ const bulkDeleteWithOCC = async (
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
+  const uiamApiKeyToRuleIdMapping: Record<string, { uiamApiKey: string; uiamApiKeyId: string }> =
+    {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
@@ -178,8 +191,13 @@ const bulkDeleteWithOCC = async (
       for await (const response of rulesFinder.find()) {
         await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
         for (const rule of response.saved_objects) {
-          if (rule.attributes.apiKey && !rule.attributes.apiKeyCreatedByUser) {
-            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+          const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = rule.attributes;
+
+          if (apiKey && !apiKeyCreatedByUser) {
+            apiKeyToRuleIdMapping[rule.id] = apiKey;
+          }
+          if (uiamApiKey && uiamApiKeyId) {
+            uiamApiKeyToRuleIdMapping[rule.id] = { uiamApiKey, uiamApiKeyId };
           }
           const ruleName = rule.attributes.name;
           if (ruleName) {
@@ -238,6 +256,7 @@ const bulkDeleteWithOCC = async (
 
   const deletedRuleIds: string[] = [];
   const apiKeysToInvalidate: string[] = [];
+  const uiamApiKeysToInvalidate: string[] = []; // accListSpecificForBulkOperation doesn't support array of objects therefore we keep uiam keys as array of ":" separated strings
   const taskIdsToDelete: string[] = [];
   const errors: BulkOperationError[] = [];
 
@@ -245,6 +264,13 @@ const bulkDeleteWithOCC = async (
     if (status.error === undefined) {
       if (apiKeyToRuleIdMapping[status.id]) {
         apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+      }
+      if (uiamApiKeyToRuleIdMapping[status.id]) {
+        uiamApiKeysToInvalidate.push(
+          `${uiamApiKeyToRuleIdMapping[status.id].uiamApiKeyId}:${
+            uiamApiKeyToRuleIdMapping[status.id].uiamApiKey
+          }`
+        );
       }
       if (taskIdToRuleIdMapping[status.id]) {
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
@@ -266,6 +292,10 @@ const bulkDeleteWithOCC = async (
   return {
     errors,
     rules,
-    accListSpecificForBulkOperation: [apiKeysToInvalidate, taskIdsToDelete],
+    accListSpecificForBulkOperation: [
+      apiKeysToInvalidate,
+      taskIdsToDelete,
+      ...(uiamApiKeysToInvalidate.length > 0 ? [uiamApiKeysToInvalidate] : []),
+    ],
   };
 };

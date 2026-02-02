@@ -173,12 +173,8 @@ export const ruleDomainSchema = schema.object({
   apiKey: schema.nullable(schema.string()),
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
-  uiam: schema.maybe(
-    schema.object({
-      apiKey: schema.string(),
-      id: schema.string(),
-    })
-  ),
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  uiamApiKeyId: schema.maybe(schema.nullable(schema.string())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
@@ -221,6 +217,7 @@ export const ruleSchema = schema.object({
   updatedAt: dateSchema,
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
+  uiamApiKeyId: schema.maybe(schema.nullable(schema.string())),
   throttle: schema.maybe(schema.nullable(schema.string())),
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),

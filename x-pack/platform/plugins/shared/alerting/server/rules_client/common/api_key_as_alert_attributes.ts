@@ -16,26 +16,18 @@ import type { RuleDomain } from '../../application/rule/types';
 export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
-  createdByUser: boolean,
-  existingApiKey: string | null
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiam'> {
+  createdByUser: boolean
+): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyId'> {
   if (apiKey && apiKey.apiKeysEnabled) {
+    const uiamApiKey = apiKey.uiamResult?.api_key;
+    const uiamApiKeyId = apiKey.uiamResult?.id;
     // TODO use from security plugin
-    if (apiKey.result.api_key.startsWith('essu_')) {
-      return {
-        apiKeyOwner: username,
-        apiKey: existingApiKey,
-        apiKeyCreatedByUser: createdByUser,
-        uiam: {
-          id: apiKey.result.id,
-          apiKey: apiKey.result.api_key,
-        },
-      };
-    }
     return {
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
+      ...(uiamApiKey ? { uiamApiKey } : {}),
+      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
     };
   }
   return {
@@ -49,24 +41,19 @@ export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiam'> {
+): Pick<
+  RuleDomain,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyId'
+> {
   if (apiKey && apiKey.apiKeysEnabled) {
-    // TODO use from security plugin
-    if (apiKey.result.api_key.startsWith('essu_')) {
-      return {
-        apiKeyOwner: username,
-        apiKey: null,
-        apiKeyCreatedByUser: createdByUser,
-        uiam: {
-          id: apiKey.result.id,
-          apiKey: apiKey.result.api_key,
-        },
-      };
-    }
+    const uiamApiKey = apiKey.uiamResult?.api_key;
+    const uiamApiKeyId = apiKey.uiamResult?.id;
     return {
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
+      ...(uiamApiKey ? { uiamApiKey } : {}),
+      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
     };
   }
   return {

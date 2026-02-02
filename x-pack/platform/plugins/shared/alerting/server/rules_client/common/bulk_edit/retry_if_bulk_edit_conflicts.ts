@@ -25,6 +25,7 @@ const MaxIdsNumberInRetryFilter = 1000;
 
 export interface BulkEditOperationResult {
   apiKeysToInvalidate: string[];
+  uiamApiKeysToInvalidate?: { uiamApiKey: string; uiamApiKeyId: string }[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
@@ -34,6 +35,7 @@ export type BulkEditOperation = (filter: KueryNode | null) => Promise<BulkEditOp
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
+  uiamApiKeysToInvalidate?: { uiamApiKey: string; uiamApiKeyId: string }[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
   skipped: BulkEditActionSkipResult[];
@@ -62,12 +64,14 @@ export const retryIfBulkEditConflicts = async (
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
   accErrors: BulkOperationError[] = [],
-  accSkipped: BulkEditActionSkipResult[] = []
+  accSkipped: BulkEditActionSkipResult[] = [],
+  accUiamApiKeysToInvalidate: { uiamApiKey: string; uiamApiKeyId: string }[] = []
 ): Promise<ReturnRetry> => {
   // run the operation, return if no errors or throw if not a conflict error
   try {
     const {
       apiKeysToInvalidate: localApiKeysToInvalidate,
+      uiamApiKeysToInvalidate: localUiamApiKeysToInvalidate,
       resultSavedObjects,
       errors: localErrors,
       rules: localRules,
@@ -86,6 +90,10 @@ export const retryIfBulkEditConflicts = async (
 
     const results = [...accResults, ...resultSavedObjects.filter((res) => res.error === undefined)];
     const apiKeysToInvalidate = [...accApiKeysToInvalidate, ...localApiKeysToInvalidate];
+    const uiamApiKeysToInvalidate = accUiamApiKeysToInvalidate.concat(
+      localUiamApiKeysToInvalidate || []
+    );
+
     const errors = [...accErrors, ...localErrors];
     // Create array of unique skipped rules by id
     const skipped = [
@@ -95,6 +103,7 @@ export const retryIfBulkEditConflicts = async (
     if (conflictErrorMap.size === 0) {
       return {
         apiKeysToInvalidate,
+        uiamApiKeysToInvalidate,
         results,
         errors,
         skipped,
@@ -116,9 +125,11 @@ export const retryIfBulkEditConflicts = async (
 
       return {
         apiKeysToInvalidate,
+        uiamApiKeysToInvalidate,
         results,
         errors: [...errors, ...conflictErrors],
         skipped,
+        ...(uiamApiKeysToInvalidate ? { uiamApiKeysToInvalidate } : {}),
       };
     }
 
@@ -144,7 +155,8 @@ export const retryIfBulkEditConflicts = async (
             apiKeysToInvalidate,
             results,
             errors,
-            skipped
+            skipped,
+            uiamApiKeysToInvalidate
           ),
         {
           concurrency: 1,
@@ -155,11 +167,14 @@ export const retryIfBulkEditConflicts = async (
         return {
           results: [...acc.results, ...item.results],
           apiKeysToInvalidate: [...acc.apiKeysToInvalidate, ...item.apiKeysToInvalidate],
+          uiamApiKeysToInvalidate: (acc.uiamApiKeysToInvalidate || []).concat(
+            item.uiamApiKeysToInvalidate || []
+          ),
           errors: [...acc.errors, ...item.errors],
           skipped: [...acc.skipped, ...item.skipped],
         };
       },
-      { results: [], apiKeysToInvalidate: [], errors: [], skipped: [] }
+      { results: [], apiKeysToInvalidate: [], errors: [], skipped: [], uiamApiKeysToInvalidate: [] }
     );
   } catch (err) {
     throw err;

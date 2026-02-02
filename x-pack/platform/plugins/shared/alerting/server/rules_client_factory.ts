@@ -214,28 +214,32 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        let createAPIKeyResult;
+        let createUiamApiKeyResult;
 
         if (this.isServerless) {
-          createAPIKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, { name });
-        } else {
-          createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
-            request,
-            {
-              name,
-              role_descriptors: {},
-              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-            }
-          );
+          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+            name: `uiam-${name}`,
+          });
         }
 
-        if (!createAPIKeyResult) {
+        const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
+          request,
+          {
+            name,
+            role_descriptors: {},
+            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+          }
+        );
+
+        // TODO should we return partial success  here  if one  of the two  creations fail?
+        if (!createAPIKeyResult || (this.isServerless && !createUiamApiKeyResult)) {
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
           result: createAPIKeyResult,
+          ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },
       async getActionsClient() {

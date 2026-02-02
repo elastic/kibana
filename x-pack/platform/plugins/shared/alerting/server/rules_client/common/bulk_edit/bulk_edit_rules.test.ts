@@ -130,6 +130,8 @@ const existingDecryptedRule: SavedObject<RawRule> = {
     ...existingRule.attributes,
     apiKey: MOCK_API_KEY_1,
     apiKeyCreatedByUser: false,
+    uiamApiKey: 'uiam-key',
+    uiamApiKeyId: '111',
   },
 };
 
@@ -467,6 +469,33 @@ describe('bulkEditRules', () => {
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: [MOCK_API_KEY_1] },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
+  test('should call bulkMarkApiKeysForInvalidation with UIAM API keys if there are uiamApiKeysToInvalidate', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+        rules.push(existingDecryptedRule);
+        apiKeysMap.set('1', {
+          oldApiKey: MOCK_API_KEY_1,
+          oldApiKeyCreatedByUser: false,
+          oldUiamApiKey: 'old-uia-key',
+          oldUiamApiKeyId: '111',
+        });
+      }),
+      shouldInvalidateApiKeys: true,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [MOCK_API_KEY_1],
+        uiamApiKeys: [{ uiamApiKey: 'old-uia-key', uiamApiKeyId: '111' }],
+      },
       logger,
       unsecuredSavedObjectsClient
     );

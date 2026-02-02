@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { rawApiKeyPendingInvalidationSchema as rawApiKeyPendingInvalidationSchemaV1 } from './v1';
-export { rawApiKeyPendingInvalidationSchema as rawApiKeyPendingInvalidationSchemaV2 } from './v2';
+import { schema } from '@kbn/config-schema';
+
+export const rawApiKeyPendingInvalidationSchema = schema.object({
+  apiKeyId: schema.string(),
+  createdAt: schema.string(),
+  uiamApiKey: schema.maybe(schema.string()),
+});

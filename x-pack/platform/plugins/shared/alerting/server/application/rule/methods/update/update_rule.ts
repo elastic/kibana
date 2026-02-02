@@ -114,8 +114,17 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    uiamApiKey,
+    uiamApiKeyId,
+    apiKeyCreatedByUser,
+  } = originalRuleSavedObject.attributes;
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -210,9 +219,12 @@ async function updateWithOCC<Params extends RuleParams = never>(
   }
 
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKey && !updateResult.uiamApiKey && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: [apiKey],
+            ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -339,13 +351,14 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = updatedRuleAttributes;
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
+        apiKeys: apiKey && !apiKeyCreatedByUser ? [apiKey] : [],
+        // UIAM APIKeys cannot be created byt the user, so no need to check apiKeyCreatedByUser flag
+        ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
       },
       context.logger,
       context.unsecuredSavedObjectsClient

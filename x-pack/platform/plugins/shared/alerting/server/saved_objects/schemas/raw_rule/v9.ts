@@ -9,10 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV8 } from './v8';
 
 export const rawRuleSchema = rawRuleSchemaV8.extends({
-  uiam: schema.maybe(
-    schema.object({
-      id: schema.string(),
-      apiKey: schema.string(),
-    })
-  ),
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+  uiamApiKeyId: schema.maybe(schema.nullable(schema.string())),
 });

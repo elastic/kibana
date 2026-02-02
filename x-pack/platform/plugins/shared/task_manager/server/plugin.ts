@@ -20,16 +20,12 @@ import type {
   CoreSetup,
   Logger,
   CoreStart,
-  KibanaRequest,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  InvalidateAPIKeysParams,
-  InvalidateUiamAPIKeyParams,
-} from '@kbn/security-plugin-types-server';
+import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -71,10 +67,7 @@ import {
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
-import type {
-  ApiKeyInvalidationFn,
-  UiamApiKeyInvalidationFn,
-} from './invalidate_api_keys/invalidate_api_keys_task';
+import type { ApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
@@ -110,13 +103,7 @@ export type TaskManagerStartContract = Pick<
   } & {
     getRegisteredTypes: () => string[];
     registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
-    registerApiKeyInvalidateFn: ({
-      classic,
-      uiam,
-    }: {
-      classic?: ApiKeyInvalidationFn;
-      uiam?: UiamApiKeyInvalidationFn;
-    }) => void;
+    registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -162,7 +149,7 @@ export class TaskManagerPlugin
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
-  private invalidateApiKeyFn?: { classic?: ApiKeyInvalidationFn; uiam?: UiamApiKeyInvalidationFn };
+  private invalidateApiKeyFn?: ApiKeyInvalidationFn;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -181,17 +168,9 @@ export class TaskManagerPlugin
     return backgroundTasks && !migrator && !ui;
   }
 
-  private invalidateApiKey(
-    params: InvalidateAPIKeysParams | InvalidateUiamAPIKeyParams,
-    request?: KibanaRequest
-  ) {
+  private invalidateApiKey(params: InvalidateAPIKeysParams) {
     if (this.invalidateApiKeyFn) {
-      if ('id' in params && request) {
-        return this.invalidateApiKeyFn.uiam?.(request, { id: params.id });
-      }
-      if ('ids' in params && !request) {
-        return this.invalidateApiKeyFn.classic?.(params);
-      }
+      return this.invalidateApiKeyFn(params);
     }
   }
 
@@ -492,8 +471,8 @@ export class TaskManagerPlugin
       registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
         taskStore.registerEncryptedSavedObjectsClient(client);
       },
-      registerApiKeyInvalidateFn: ({ classic, uiam }) => {
-        this.invalidateApiKeyFn = { classic, uiam };
+      registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
+        this.invalidateApiKeyFn = fn;
       },
     };
   }

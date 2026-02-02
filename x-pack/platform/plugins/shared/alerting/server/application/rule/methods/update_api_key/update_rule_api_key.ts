@@ -31,6 +31,8 @@ export async function updateRuleApiKey(
 async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateApiKeyParams) {
   let oldApiKeyToInvalidate: string | null = null;
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
+  let oldUiamApiKeyToInvalidate: string | undefined | null;
+  let oldUiamApiKeyId: string | undefined | null;
   let attributes: RawRule;
   let version: string | undefined;
 
@@ -51,6 +53,8 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       );
     oldApiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
+    oldUiamApiKeyToInvalidate = decryptedAlert.attributes.uiamApiKey;
+    oldUiamApiKeyId = decryptedAlert.attributes.uiamApiKeyId;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
   } catch (e) {
@@ -120,13 +124,13 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       version,
     });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = updateAttributes;
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys:
-          updateAttributes.apiKey && !updateAttributes.apiKeyCreatedByUser
-            ? [updateAttributes.apiKey]
-            : [],
+        apiKeys: apiKey && !apiKeyCreatedByUser ? [apiKey] : [],
+        ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
       },
       context.logger,
       context.unsecuredSavedObjectsClient
@@ -134,9 +138,21 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     throw e;
   }
 
-  if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
+  if (
+    (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) ||
+    (oldUiamApiKeyToInvalidate && oldUiamApiKeyId)
+  ) {
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: [oldApiKeyToInvalidate] },
+      {
+        apiKeys: oldApiKeyToInvalidate && !oldApiKeyCreatedByUser ? [oldApiKeyToInvalidate] : [],
+        ...(oldUiamApiKeyToInvalidate && oldUiamApiKeyId
+          ? {
+              uiamApiKeys: [
+                { uiamApiKey: oldUiamApiKeyToInvalidate, uiamApiKeyId: oldUiamApiKeyId },
+              ],
+            }
+          : {}),
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

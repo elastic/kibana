@@ -77,8 +77,13 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     );
   } catch (e) {
     // Avoid unused API key
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = rawRule;
+
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: rawRule.apiKey && !rawRule.apiKeyCreatedByUser ? [rawRule.apiKey] : [] },
+      {
+        apiKeys: apiKey && !apiKeyCreatedByUser ? [apiKey] : [],
+        ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
+      },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

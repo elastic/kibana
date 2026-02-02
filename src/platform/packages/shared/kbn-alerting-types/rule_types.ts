@@ -247,6 +247,8 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
+  uiamApiKeyId?: string | null;
+  uiamApiKey?: string | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;

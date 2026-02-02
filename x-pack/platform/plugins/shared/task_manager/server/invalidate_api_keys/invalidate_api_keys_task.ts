@@ -53,7 +53,7 @@ export async function scheduleInvalidateApiKeyTask(
 interface RegisterInvalidateApiKeyTaskOpts {
   configInterval: string;
   coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>;
-  invalidateApiKeyFn?: ApiKeyInvalidationFn | UiamApiKeyInvalidationFn;
+  invalidateApiKeyFn?: ApiKeyInvalidationFn;
   logger: Logger;
   removalDelay: string;
   taskTypeDictionary: TaskTypeDictionary;

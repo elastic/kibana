@@ -9,25 +9,38 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
+interface BulkInvalidateAPIKeyParams {
+  apiKeys: string[];
+  uiamApiKeys?: { uiamApiKey: string; uiamApiKeyId: string }[];
+}
+
 export const bulkMarkApiKeysForInvalidation = async (
-  { apiKeys }: { apiKeys: string[] },
+  { apiKeys, uiamApiKeys = [] }: BulkInvalidateAPIKeyParams,
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
-    if (apiKeys.length === 0) {
+    if (apiKeys.length === 0 && uiamApiKeys.length === 0) {
       return;
     }
 
     try {
-      const apiKeyIds = apiKeys.map(
-        (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]
-      );
+      const combinedApiKeys: { id: string; uiamApiKey?: string }[] = apiKeys.map((apiKey) => ({
+        id: Buffer.from(apiKey, 'base64').toString().split(':')[0],
+      }));
+      uiamApiKeys.forEach(({ uiamApiKey, uiamApiKeyId }) => {
+        combinedApiKeys.push({
+          id: uiamApiKeyId,
+          uiamApiKey,
+        });
+      });
+
       await savedObjectsClient.bulkCreate(
-        apiKeyIds.map((apiKeyId) => ({
+        combinedApiKeys.map(({ id, uiamApiKey }) => ({
           attributes: {
-            apiKeyId,
+            apiKeyId: id,
             createdAt: new Date().toISOString(),
+            ...(uiamApiKey ? { uiamApiKey } : {}),
           },
           type: API_KEY_PENDING_INVALIDATION_TYPE,
         }))

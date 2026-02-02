@@ -35,7 +35,10 @@ import {
 } from '../../../application/rule/transforms';
 import { getMappedParams } from '../mapped_params_utils';
 
-type ApiKeyAttributes = Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>;
+type ApiKeyAttributes = Pick<
+  RawRule,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyId'
+>;
 type RuleType = ReturnType<RuleTypeRegistry['get']>;
 
 export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
@@ -73,6 +76,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     apiKeysMap.set(rule.id, {
       oldApiKey: rule.attributes.apiKey,
       oldApiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
+      oldUiamApiKey: rule.attributes.uiamApiKey,
+      oldUiamApiKeyId: rule.attributes.uiamApiKeyId,
     });
   }
 
@@ -222,10 +227,13 @@ async function prepareApiKeys(
 
   // collect generated API keys
   if (apiKeyAttributes.apiKey) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = apiKeyAttributes;
+
     apiKeysMap.set(rule.id, {
       ...apiKeysMap.get(rule.id),
-      newApiKey: apiKeyAttributes.apiKey,
-      newApiKeyCreatedByUser: apiKeyAttributes.apiKeyCreatedByUser,
+      newApiKey: apiKey,
+      newApiKeyCreatedByUser: apiKeyCreatedByUser,
+      ...(uiamApiKey ? { newUiamApiKey: uiamApiKey, newUiamApiKeyId: uiamApiKeyId } : {}),
     });
   }
 
