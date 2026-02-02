@@ -200,7 +200,16 @@ export function ServiceMap({
         <EuiPanel hasBorder={true} paddingSize="none">
           <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <ReactFlowServiceMap height={heightWithPadding} nodes={data.nodes} edges={data.edges} />
+            <ReactFlowServiceMap
+              height={heightWithPadding}
+              nodes={data.nodes}
+              edges={data.edges}
+              serviceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
           </div>
         </EuiPanel>
       </>
