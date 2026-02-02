@@ -13,7 +13,7 @@ exports[`Port renders correctly against snapshot 1`] = `
   >
     443
     <span
-      class="emotion-EuiExternalLinkIcon"
+      class="css-1j75qc1"
       data-euiicon-type="popout"
       role="presentation"
     />
