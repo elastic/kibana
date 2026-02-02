@@ -7,12 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRestorableStateProvider } from '@kbn/restorable-state';
-
-export interface CascadedDocumentsRestorableState {
-  availableCascadeGroups: string[];
-  selectedCascadeGroups: string[];
-}
-
-export const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<CascadedDocumentsRestorableState>();
+export { DashboardControlsRenderer } from './dashboard_controls_renderer';
