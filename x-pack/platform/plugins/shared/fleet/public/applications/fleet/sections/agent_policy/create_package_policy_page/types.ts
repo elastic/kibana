@@ -9,7 +9,7 @@ import type { EuiStepProps } from '@elastic/eui';
 
 import type React from 'react';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../../common';
+import type { AgentPolicy, NewPackagePolicy } from '../../../../../../common';
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
@@ -49,7 +49,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   pkgVersion?: string;
   integration?: string;
   pkgLabel?: string;
-  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
   noBreadcrumb?: boolean;
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
