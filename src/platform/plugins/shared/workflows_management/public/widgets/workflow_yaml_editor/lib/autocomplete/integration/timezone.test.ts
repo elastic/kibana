@@ -21,7 +21,8 @@ async function getSuggestions(
     connectorTypes
   );
   const completionProvider = getCompletionItemProvider(
-    () => fakeAutocompleteContextParams.editorState
+    () => fakeAutocompleteContextParams.editorState,
+    jest.fn()
   );
 
   const result = await completionProvider.provideCompletionItems(

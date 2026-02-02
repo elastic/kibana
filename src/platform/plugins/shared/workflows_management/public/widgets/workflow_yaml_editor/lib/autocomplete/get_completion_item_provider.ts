@@ -13,10 +13,7 @@ import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
 import { openCreateConnectorFlyout } from '../../../../entities/workflows/store';
-import type {
-  LineColumnPosition,
-  WorkflowDetailState,
-} from '../../../../entities/workflows/store';
+import type { LineColumnPosition, WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
