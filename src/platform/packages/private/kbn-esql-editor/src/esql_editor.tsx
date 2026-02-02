@@ -464,22 +464,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const styles = useMemo(
     () =>
-      esqlEditorStyles(
-        theme.euiTheme,
-        editorHeight,
-        Boolean(editorMessages.errors.length),
-        Boolean(editorMessages.warnings.length),
-        Boolean(editorIsInline),
-        Boolean(hasOutline)
-      ),
-    [
-      theme.euiTheme,
-      editorHeight,
-      editorMessages.errors.length,
-      editorMessages.warnings.length,
-      editorIsInline,
-      hasOutline,
-    ]
+      esqlEditorStyles(theme.euiTheme, editorHeight, Boolean(editorIsInline), Boolean(hasOutline)),
+    [theme.euiTheme, editorHeight, editorIsInline, hasOutline]
   );
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
