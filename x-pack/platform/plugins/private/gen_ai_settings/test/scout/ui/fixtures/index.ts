@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest } from '@kbn/scout';
+import type {
+  ScoutPage,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
+import { test as baseTest, spaceTest as spaceBaseTest } from '@kbn/scout';
 
 import type { GenAiSettingsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
 export interface GenAiSettingsTestFixtures extends ScoutTestFixtures {
+  pageObjects: GenAiSettingsPageObjects;
+}
+
+export interface GenAiSettingsParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: GenAiSettingsPageObjects;
 }
 
@@ -26,6 +36,16 @@ export const test = baseTest.extend<GenAiSettingsTestFixtures, ScoutWorkerFixtur
     },
     use: (pageObjects: GenAiSettingsPageObjects) => Promise<void>
   ) => {
+    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    await use(extendedPageObjects);
+  },
+});
+
+export const spaceTest = spaceBaseTest.extend<
+  GenAiSettingsParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async ({ pageObjects, page }, use) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },

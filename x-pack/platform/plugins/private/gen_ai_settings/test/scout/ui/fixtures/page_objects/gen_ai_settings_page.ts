@@ -18,7 +18,7 @@ export class GenAiSettingsPage {
    */
   async navigateTo() {
     await this.page.gotoApp('management');
-    await this.page.testSubj.click('app-card-genAiSettings');
+    await this.page.testSubj.click('genAiSettings');
     await this.waitForPageToLoad();
   }
 
@@ -33,72 +33,51 @@ export class GenAiSettingsPage {
    * Get the chat experience field row element
    */
   getChatExperienceField() {
-    return this.page.testSubj.locator('field-aiAssistant:preferredChatExperience');
+    return this.page.testSubj.locator(
+      'management-settings-editField-aiAssistant:preferredChatExperience'
+    );
   }
 
   /**
-   * Get the chat experience dropdown/select element
+   * Get the Agent confirmation modal container
    */
-  getChatExperienceSelect() {
-    return this.getChatExperienceField().locator('select');
+  getConfirmModal() {
+    return this.page.testSubj.locator('confirmModalTitleText');
   }
 
   /**
-   * Select a chat experience option
-   * @param value - 'classic' or 'agent'
+   * Get the confirm button in the Agent confirmation modal
    */
-  async selectChatExperience(value: 'classic' | 'agent') {
-    const select = this.getChatExperienceSelect();
-    await select.selectOption({ value });
+  getConfirmModalConfirmButton() {
+    return this.page.testSubj.locator('confirmModalConfirmButton');
   }
 
   /**
-   * Get the confirmation modal element (appears when selecting Agent mode)
+   * Get the cancel button in the Agent confirmation modal
    */
-  getConfirmationModal() {
-    return this.page.testSubj.locator('confirmModal');
-  }
-
-  /**
-   * Click the confirm button in the Agent confirmation modal
-   */
-  async confirmAgentSelection() {
-    await this.page.testSubj.click('confirmModalConfirm');
-  }
-
-  /**
-   * Click the cancel button in the Agent confirmation modal
-   */
-  async cancelAgentSelection() {
-    await this.page.testSubj.click('confirmModalCancel');
+  getConfirmModalCancelButton() {
+    return this.page.testSubj.locator('confirmModalCancelButton');
   }
 
   /**
    * Get the save button in the bottom bar
    */
   getSaveButton() {
-    return this.page.testSubj.locator('genAiSettingsSaveBar-saveButton');
+    return this.page.testSubj.locator('genAiSettingsSaveBarBottomBarActionsButton');
   }
 
   /**
-   * Click the save button
+   * Get the bottom bar container element
    */
-  async clickSave() {
-    await this.getSaveButton().click();
+  getSaveButtonBottomBar() {
+    return this.page.testSubj.locator('genAiSettingsSaveBarBottomBar');
   }
 
   /**
-   * Get the discard changes button
+   * Get the documentation section element (only visible in Agent mode)
    */
-  getDiscardButton() {
-    return this.page.testSubj.locator('genAiSettingsSaveBar-discardButton');
-  }
-
-  /**
-   * Check if the documentation section is visible (only in Agent mode)
-   */
-  async isDocumentationSectionVisible() {
-    return this.page.testSubj.isVisible('documentationSection');
+  getDocumentationSection() {
+    return this.page.testSubj.locator('documentationSection');
   }
 
   /**
@@ -112,24 +91,78 @@ export class GenAiSettingsPage {
    * Get the AI Assistant Visibility field
    */
   getAiAssistantVisibilityField() {
-    return this.page.testSubj.locator('field-aiAssistant:preferredAIAssistantType');
+    return this.page.testSubj.locator(
+      'management-settings-editField-aiAssistant:preferredAIAssistantType'
+    );
   }
 
   /**
-   * Check if AI Assistant Visibility setting is visible
+   * Get the AI Assistants side nav button
    */
-  async isAiAssistantVisibilityVisible() {
-    try {
-      return await this.getAiAssistantVisibilityField().isVisible();
-    } catch {
-      return false;
-    }
+  getAIAssistantsSideNavButton() {
+    return this.page.testSubj.locator('aiAssistantManagementSelection');
   }
 
   /**
-   * Get the default AI connector field
+   * Get the AI Assistant nav button
    */
-  getDefaultConnectorField() {
-    return this.page.testSubj.locator('connectorsSection');
+  getAiAssistantNavButton() {
+    return this.page.testSubj.locator('aiAssistantHeaderButton');
+  }
+
+  /**
+   * Get the AI Agent nav button
+   */
+  getAIAgentNavControlButton() {
+    return this.page.testSubj.locator('AgentBuilderNavControlButton');
+  }
+
+  /**
+   * Get the card selection modal element
+   */
+  getCardSelectionModal() {
+    return this.page.testSubj.locator('aiAssistantModalTitle');
+  }
+
+  /**
+   * Get the selection modal apply button
+   */
+  getSelectionModalApplyButton() {
+    return this.page.testSubj.locator('aiAssistantApplyButton');
+  }
+
+  /**
+   * Get the selection modal cancel button
+   */
+  getSelectionModalCancelButton() {
+    return this.page.testSubj.locator('aiAssistantCancelButton');
+  }
+
+  /**
+   * Get the Observability card element
+   */
+  getObservabilityCard() {
+    return this.page.testSubj.locator('aiAssistantObservabilityCard');
+  }
+
+  /**
+   * Get the Security card element
+   */
+  getSecurityCard() {
+    return this.page.testSubj.locator('aiAssistantSecurityCard');
+  }
+
+  /**
+   * Get the AI Agent card element
+   */
+  getAIAgentCard() {
+    return this.page.testSubj.locator('aiAssistantAgentCard');
+  }
+
+  /**
+   * Get the AI Agent flyout element
+   */
+  getAIAgentFlyout() {
+    return this.page.testSubj.locator('agent-builder-conversation-flyout-wrapper');
   }
 }
