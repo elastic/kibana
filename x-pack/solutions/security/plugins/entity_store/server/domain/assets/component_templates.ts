@@ -50,7 +50,7 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
 });
 
 export const getUpdatesComponentTemplateName = (type: string, namespace: string) =>
-  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
+  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
   definition: EntityDefinition,
