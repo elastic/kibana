@@ -6,8 +6,8 @@
  */
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 export function useGetArtifact(

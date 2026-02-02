@@ -530,6 +530,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 1),
           version: '8.18.0',
+          force: true,
         }
       );
     });

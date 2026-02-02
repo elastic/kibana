@@ -12,7 +12,7 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
   useInfiniteQuery,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,

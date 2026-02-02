@@ -11,8 +11,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
@@ -118,9 +117,15 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
 
           <EuiFlexItem grow={false}>
             {error && (
-              <EuiToolTip position="top" content={error}>
-                <EuiIcon type="warning" color="warning" data-test-subj="preview-warning" />
-              </EuiToolTip>
+              <EuiIconTip
+                content={error}
+                position="top"
+                type="warning"
+                color="warning"
+                iconProps={{
+                  'data-test-subj': 'preview-warning',
+                }}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

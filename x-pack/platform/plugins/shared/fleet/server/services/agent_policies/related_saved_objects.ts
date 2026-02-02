@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, FleetProxy } from '../../types';
 import { outputService } from '../output';
 
 import { getDownloadSourceForAgentPolicy } from '../../routes/agent/source_uri_utils';
@@ -90,13 +90,9 @@ export async function fetchRelatedSavedObjects(
   logger.debug(`fetching list of fleet-server proxies`);
   const proxies = proxyIds.length ? await bulkGetFleetProxies(soClient, proxyIds) : [];
 
-  let downloadSourceProxyUri: string | null = null;
-
+  let downloadSourceProxy: FleetProxy | undefined;
   if (downloadSourceProxyId) {
-    const downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
-    if (downloadSourceProxy) {
-      downloadSourceProxyUri = downloadSourceProxy.url;
-    }
+    downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
   }
 
   logger.debug(`Returning related saved objects for policy [${agentPolicy.id}]`);
@@ -107,7 +103,7 @@ export async function fetchRelatedSavedObjects(
     dataOutput,
     monitoringOutput,
     downloadSource,
-    downloadSourceProxyUri,
+    downloadSourceProxy,
     fleetServerHost: fleetServerHosts,
   };
 }

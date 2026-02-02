@@ -50,7 +50,7 @@ export const MonitorStatusCol = ({
             </>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+          <EuiText tabIndex={0} size="xs" color="subdued" className="eui-textNoWrap">
             {getCheckedLabel(timestamp)}
           </EuiText>
         </EuiToolTip>

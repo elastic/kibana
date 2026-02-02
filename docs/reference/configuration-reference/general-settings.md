@@ -302,10 +302,6 @@ $$$savedObjects-maxImportPayloadBytes$$$ `savedObjects.maxImportPayloadBytes`
 $$$server-basePath$$$ `server.basePath`
 :   Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
-% TBD: Applicable only to Elastic Cloud?
-
 $$$server-publicBaseUrl$$$ `server.publicBaseUrl`
 :   The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
@@ -318,8 +314,8 @@ $$$server-compression$$$ `server.compression.enabled`
 `server.cors.allowCredentials`
 :   Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-`server.cors.allowOrigin`
-:   experimental::[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
+`server.cors.allowOrigin` {applies_to}`stack: preview`
+:   List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
 
 `server.compression.referrerWhitelist`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**

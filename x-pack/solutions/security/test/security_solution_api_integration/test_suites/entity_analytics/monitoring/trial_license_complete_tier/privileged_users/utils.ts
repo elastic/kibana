@@ -10,14 +10,14 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const log = getService('log');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

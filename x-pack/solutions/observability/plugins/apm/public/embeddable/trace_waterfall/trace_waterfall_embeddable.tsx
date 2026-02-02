@@ -6,13 +6,15 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
 import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 import { getServiceLegends } from '../../components/shared/trace_waterfall/use_trace_waterfall';
 import { WaterfallLegendType } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -41,6 +43,19 @@ export function TraceWaterfallEmbeddable({
 
   if (isPending(status)) {
     return <Loading />;
+  }
+
+  if (data === undefined) {
+    return (
+      <EuiCallOut
+        data-test-subj="TraceWaterfallEmbeddableNoData"
+        color="danger"
+        size="s"
+        title={i18n.translate('xpack.apm.traceWaterfallEmbeddable.noDataCalloutLabel', {
+          defaultMessage: 'Trace waterfall could not be loaded.',
+        })}
+      />
+    );
   }
 
   return (

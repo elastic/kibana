@@ -7,8 +7,8 @@
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { Config } from '@kbn/test';
+import { SUITE_TAGS } from '@kbn/test-suites-xpack-security-endpoint/configs/config.base';
 import { SecuritySolutionEndpointRegistryHelpers } from '../services/common';
-import { SUITE_TAGS } from '../../../security_solution_endpoint/configs/config.base';
 
 export const generateConfig = async ({
   baseConfig,

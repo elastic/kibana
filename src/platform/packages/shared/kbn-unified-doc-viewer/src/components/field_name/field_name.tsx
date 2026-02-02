@@ -89,6 +89,7 @@ export function FieldName({
               )}
             >
               <EuiBadge
+                tabIndex={0}
                 title=""
                 className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"

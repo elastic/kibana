@@ -92,7 +92,9 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
         agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
         inProgressText: getAction(action.type, action.actionId).inProgressText,
         reassignText:
-          action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
+          action.type === 'POLICY_REASSIGN' && action.newPolicyId
+            ? ` to ${action.newPolicyId}`
+            : '',
         upgradeText: action.type === 'UPGRADE' ? ` to version ${action.version}` : '',
         failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
         automaticIcon: isAutomatic ? (

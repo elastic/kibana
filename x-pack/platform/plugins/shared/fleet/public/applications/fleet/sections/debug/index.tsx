@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { i18n } from '@kbn/i18n';

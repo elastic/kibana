@@ -199,7 +199,7 @@ export function JobSelector({
           <EuiFlexItem />
 
           <EuiFlexItem grow={false}>
-            <FeedBackButton jobIds={selectedIds} page={page} />
+            <FeedBackButton jobIds={selectedIds} />
           </EuiFlexItem>
 
           {canGetJobs ? (

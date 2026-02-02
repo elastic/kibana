@@ -41,7 +41,6 @@ describe('dedupeAggs', () => {
 
     const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { sum, last_value, average } = operationDefinitionMap;
 
     const operations = [sum, last_value, average];

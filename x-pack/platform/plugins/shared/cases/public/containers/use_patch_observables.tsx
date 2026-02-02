@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { UpdateObservableRequest } from '../../common/types/api';
 import { patchObservable } from './api';
 import * as i18n from './translations';

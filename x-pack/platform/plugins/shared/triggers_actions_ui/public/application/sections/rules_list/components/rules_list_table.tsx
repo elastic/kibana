@@ -10,6 +10,10 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
+  getRuleDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +37,8 @@ import {
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
 
 import {
   SELECT_ALL_RULES,
@@ -405,13 +411,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>

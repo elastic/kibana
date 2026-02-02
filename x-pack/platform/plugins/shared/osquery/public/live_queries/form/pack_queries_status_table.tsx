@@ -171,7 +171,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     (id: string) => (
       <div css={truncateTooltipTextCss}>
         <EuiToolTip content={id} display="block">
-          <>{id}</>
+          <span tabIndex={0}>{id}</span>
         </EuiToolTip>
       </div>
     ),

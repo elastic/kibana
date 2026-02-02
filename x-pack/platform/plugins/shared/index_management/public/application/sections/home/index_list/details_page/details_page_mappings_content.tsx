@@ -228,6 +228,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       setIsUpdatingMappings(true);
       try {
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          await ml?.mlApi?.savedObjects.syncSavedObjects();
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;

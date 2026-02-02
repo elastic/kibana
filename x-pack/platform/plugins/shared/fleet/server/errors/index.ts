@@ -21,6 +21,7 @@ export {
 export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
+  FleetVersionConflictError,
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';

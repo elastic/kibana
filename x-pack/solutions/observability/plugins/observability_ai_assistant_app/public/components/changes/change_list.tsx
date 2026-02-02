@@ -204,6 +204,7 @@ function getColumns({
                 overflow: hidden;
                 text-overflow: ellipsis;
               `}
+              tabIndex={0}
             >
               {label}
             </EuiText>

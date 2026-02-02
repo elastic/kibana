@@ -91,7 +91,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         ).sort();
         expectSnapshot(serviceNames).toMatchInline(`
               Array [
-                "auditbeat",
                 "opbeans-dotnet",
                 "opbeans-go",
                 "opbeans-java",

@@ -127,7 +127,15 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
 
   const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
-    if (mappedSolutions && !mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`))) {
+    if (
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
+    ) {
       continue;
     }
     try {
@@ -287,6 +295,13 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
@@ -306,8 +321,16 @@ export async function pickTestGroupRunOrder() {
       return patterns;
     }
 
-    return LIMIT_SOLUTIONS.flatMap((solution: string) =>
-      patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+    );
+
+    return (
+      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+      )
+        // When applying the solution filter, still allow platform tests
+        .concat(platformPatterns)
     );
   };
 
@@ -406,7 +429,7 @@ export async function pickTestGroupRunOrder() {
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
         names,
       })),
     ],
@@ -487,13 +510,11 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
-            },
+            agents: expandAgentQueue('n2-4-spot', 110),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -511,10 +532,11 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue('n2-4-spot', 105),
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -547,8 +569,8 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
-                  agents: expandAgentQueue(queue),
+                  timeout_in_minutes: 120,
+                  agents: expandAgentQueue(queue, 105),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
@@ -567,59 +589,6 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
-    ].flat()
-  );
-}
-
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
-  }
-
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
-  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsWithScoutConfigs.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
-  }
-
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
-    title: plugin,
-    key: plugin,
-    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
-    group: rawScoutConfigs[plugin].group,
-  }));
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        depends_on: ['build'],
-        steps: scoutGroups.map(
-          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
-            label: `Scout: [ ${group} / ${title} ] plugin`,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
-              ],
-            },
-          })
-        ),
-      },
     ].flat()
   );
 }

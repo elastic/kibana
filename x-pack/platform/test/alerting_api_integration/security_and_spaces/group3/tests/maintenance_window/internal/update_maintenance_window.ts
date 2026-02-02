@@ -169,6 +169,61 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
       expect(updatedMW.title).eql('test-maintenance-window-new');
       expect(updatedMW.duration).eql(60 * 1000);
       expect(updatedMW.r_rule).eql(newRRule);
+      expect(updatedMW.status).to.eql('upcoming');
+      expect(updatedMW.title).eql('test-maintenance-window-new');
+      expect(updatedMW.category_ids).eql(['management']);
+    });
+
+    it('should update expiration date if new start date is after it', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: moment.utc().add(1, 'hour').toISOString(), // for the status to be "upcoming"
+            tzid: 'UTC',
+            count: 1,
+          },
+        })
+        .expect(200);
+
+      expect(createdMaintenanceWindow.status).to.eql('upcoming');
+
+      objectRemover.add(
+        'space1',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const newRRule = {
+        dtstart: moment.utc().add(1, 'day').toISOString(), // after the previous
+        tzid: 'CET',
+        count: 5,
+      };
+
+      const { body: updatedMW } = await supertest
+        .post(
+          `${getUrlPrefix('space1')}/internal/alerting/rules/maintenance_window/${
+            createdMaintenanceWindow.id
+          }`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window-new',
+          r_rule: newRRule,
+          category_ids: ['management'],
+          enabled: false,
+        })
+        .expect(200);
+
+      expect(updatedMW.title).eql('test-maintenance-window-new');
+      expect(updatedMW.duration).eql(60 * 60 * 1000);
+      expect(updatedMW.r_rule).eql(newRRule);
+      expect(updatedMW.status).to.eql('upcoming');
       expect(updatedMW.title).eql('test-maintenance-window-new');
       expect(updatedMW.category_ids).eql(['management']);
     });

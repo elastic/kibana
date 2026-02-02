@@ -9,7 +9,6 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -35,7 +34,6 @@ import { ManagementSettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;
-  settings: SettingsStart;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
 }
@@ -45,7 +43,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, settings }) => {
+  ({ dataViews, onTabChange, currentTab: selectedSettingsTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -53,6 +51,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled },
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -65,8 +64,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');

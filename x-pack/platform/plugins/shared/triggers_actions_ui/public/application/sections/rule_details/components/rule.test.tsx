@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { shallow } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import type { Capabilities } from '@kbn/core/public';

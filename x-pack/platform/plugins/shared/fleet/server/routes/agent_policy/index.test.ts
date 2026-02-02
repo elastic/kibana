@@ -69,7 +69,7 @@ jest.mock('../../services', () => ({
 }));
 
 jest.mock('../../services/agents', () => ({
-  getLatestAvailableAgentVersion: jest.fn().mockResolvedValue('1.0.0'),
+  getLatestAgentAvailableDockerImageVersion: jest.fn().mockResolvedValue('1.0.0'),
 }));
 
 describe('schema validation', () => {
@@ -212,7 +212,7 @@ describe('schema validation', () => {
           hosts: ['host'],
           ca_sha256: 'ca_sha256',
           proxy_url: 'proxy_url',
-          proxy_headers: 'proxy_headers',
+          proxy_headers: { ProxyHeader1: 'Test' },
           key: 'value',
         },
       },
@@ -227,7 +227,7 @@ describe('schema validation', () => {
       fleet: {
         hosts: ['host'],
         proxy_url: 'proxy_url',
-        proxy_headers: 'proxy_headers',
+        proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           verification_mode: 'verification_mode',
           certificate_authorities: ['certificate_authorities'],
@@ -516,7 +516,7 @@ describe('schema validation', () => {
           hosts: ['host'],
           ca_sha256: 'ca_sha256',
           proxy_url: 'proxy_url',
-          proxy_headers: 'proxy_headers',
+          proxy_headers: { ProxyHeader1: 'Test' },
           key: 'value',
         },
       },
@@ -531,7 +531,7 @@ describe('schema validation', () => {
       fleet: {
         hosts: ['host'],
         proxy_url: 'proxy_url',
-        proxy_headers: 'proxy_headers',
+        proxy_headers: { ProxyHeader1: 'Test' },
         ssl: {
           verification_mode: 'verification_mode',
           certificate_authorities: ['certificate_authorities'],

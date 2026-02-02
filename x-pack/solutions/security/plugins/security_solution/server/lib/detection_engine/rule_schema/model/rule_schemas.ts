@@ -95,19 +95,33 @@ export const InvestigationFieldsCombined = z.union([
   LegacyInvestigationFields,
 ]);
 
+export type ExternalRuleSourceCamelCased = z.infer<typeof ExternalRuleSourceCamelCased>;
+export const ExternalRuleSourceCamelCased = z.object({
+  type: z.literal('external'),
+  isCustomized: IsExternalRuleCustomized,
+  customizedFields: z
+    .array(
+      z.object({
+        fieldName: z.string(),
+      })
+    )
+    .optional(),
+  hasBaseVersion: z.boolean().optional(),
+});
+
+export type InternalRuleSourceCamelCased = z.infer<typeof InternalRuleSourceCamelCased>;
+export const InternalRuleSourceCamelCased = z.object({
+  type: z.literal('internal'),
+});
+
 /**
  * This is the same type as RuleSource, but with the keys in camelCase. Intended
  * for internal use only (not for API responses).
  */
 export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
 export const RuleSourceCamelCased = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('external'),
-    isCustomized: IsExternalRuleCustomized,
-  }),
-  z.object({
-    type: z.literal('internal'),
-  }),
+  ExternalRuleSourceCamelCased,
+  InternalRuleSourceCamelCased,
 ]);
 
 // Conversion to an interface has to be disabled for the entire file; otherwise,

@@ -6,6 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import pRetry from 'p-retry';
 
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -44,9 +45,6 @@ export class PolicyWatcher {
       this.endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     const fleetServices = this.endpointServices.getInternalFleetServices();
     const esClient = this.endpointServices.getInternalEsClient();
-    const soClient = isSpacesEnabled
-      ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
-      : this.endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
 
     this.logger.debug(
       `Checking endpoint policies for compliance with license level [${license.type}]`
@@ -59,19 +57,42 @@ export class PolicyWatcher {
       total: number;
       page: number;
       perPage: number;
-    };
+    } = { items: [], total: 0, page: 0, perPage: 0 };
     do {
       try {
-        response = await fleetServices.packagePolicy.list(soClient, {
-          page: page++,
-          perPage: 100,
-          kuery: fleetServices.endpointPolicyKuery,
-          spaceId: isSpacesEnabled ? '*' : undefined,
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Unable to verify endpoint policies in line with license change: failed to fetch package policies: ${e.message}`
+        await pRetry(
+          async () => {
+            const soClient = isSpacesEnabled
+              ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
+              : this.endpointServices.savedObjects.createInternalScopedSoClient({
+                  readonly: false,
+                });
+
+            response = await fleetServices.packagePolicy.list(soClient, {
+              page: page++,
+              perPage: 100,
+              kuery: fleetServices.endpointPolicyKuery,
+              spaceId: isSpacesEnabled ? '*' : undefined,
+            });
+          },
+          {
+            retries: 3,
+            minTimeout: 1000,
+            maxTimeout: 5000,
+            onFailedAttempt: (error) => {
+              if (error.retriesLeft) {
+                this.logger.debug(
+                  `attempt ${error.attemptNumber} to fetch endpoint policies failed. Trying again. [ERROR: ${error.message}]`
+                );
+                return;
+              }
+              this.logger.warn(
+                `Unable to verify endpoint policies in line with license change: failed to fetch package policies: ${error.message}`
+              );
+            },
+          }
         );
+      } catch {
         return;
       }
 
@@ -99,35 +120,37 @@ export class PolicyWatcher {
                   spaceId: policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID,
                   readonly: false,
                 })
-              : soClient;
+              : this.endpointServices.savedObjects.createInternalScopedSoClient({
+                  readonly: false,
+                });
 
-            try {
-              await fleetServices.packagePolicy.update(
-                soClientForPolicyUpdate,
-                esClient,
-                policy.id,
-                updatePolicy
-              );
-
-              totalUpdates++;
-            } catch (e) {
-              // try again for transient issues
-              this.logger.debug(
-                `First attempt to update endpoint policy [${policy.id}] failed. Trying again. [ERROR: ${e.message}]`
-              );
-              try {
+            await pRetry(
+              async () => {
                 await fleetServices.packagePolicy.update(
                   soClientForPolicyUpdate,
                   esClient,
                   policy.id,
                   updatePolicy
                 );
-                totalUpdates++;
-              } catch (ee) {
-                this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
-                this.logger.warn(ee);
+              },
+              {
+                retries: 3,
+                minTimeout: 1000,
+                maxTimeout: 5000,
+                onFailedAttempt: (error) => {
+                  if (error.retriesLeft) {
+                    this.logger.debug(
+                      `attempt ${error.attemptNumber} to update endpoint policy [${policy.id}] failed. Trying again. [ERROR: ${error.message}]`
+                    );
+                    return;
+                  }
+                  this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
+                  this.logger.warn(error.message);
+                },
               }
-            }
+            );
+
+            totalUpdates++;
           }
         } catch (error) {
           this.logger.warn(

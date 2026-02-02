@@ -12,6 +12,8 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_EMAIL_BODY_LENGTH,
+  MAX_EMAIL_BODY_LENGTH,
 } from '../common';
 
 export enum AllowedHosts {
@@ -124,6 +126,9 @@ export const configSchema = schema.object({
     schema.object(
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        maximum_body_length: schema.maybe(
+          schema.number({ min: 0, defaultValue: DEFAULT_EMAIL_BODY_LENGTH })
+        ),
         services: schema.maybe(
           schema.object(
             {
@@ -225,6 +230,21 @@ export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig
     const tmp: Record<string, unknown> = originalConfig;
     delete tmp.proxyOnlyHosts;
     return tmp as ActionsConfig;
+  }
+
+  if (originalConfig.email && originalConfig.email.maximum_body_length != null) {
+    const emailMaximumBodyLength = originalConfig.email.maximum_body_length;
+    if (emailMaximumBodyLength === 0) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length is set to 0 and will result in sending empty emails`
+      );
+    }
+
+    if (emailMaximumBodyLength > MAX_EMAIL_BODY_LENGTH) {
+      logger.warn(
+        `The configuration xpack.actions.email.maximum_body_length value ${emailMaximumBodyLength} is larger than the maximum setting of ${MAX_EMAIL_BODY_LENGTH} and the maximum value will be used instead`
+      );
+    }
   }
 
   return originalConfig;

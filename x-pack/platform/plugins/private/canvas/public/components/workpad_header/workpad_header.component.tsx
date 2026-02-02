@@ -225,6 +225,7 @@ export const WorkpadHeader: FC<Props> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* @ts-expect-error upgrade typescript v5.9.3 */}
               <RefreshControl />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -239,11 +240,14 @@ export const WorkpadHeader: FC<Props> = ({
 };
 
 WorkpadHeader.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   isWriteable: PropTypes.bool,
   commit: PropTypes.func.isRequired,
   onSetWriteable: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   canUserWrite: PropTypes.bool,
   renderEmbedPanel: PropTypes.func.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   elements: PropTypes.object.isRequired,
   addElement: PropTypes.func.isRequired,
 };

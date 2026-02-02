@@ -17,7 +17,8 @@ import {
 import type { ListsPluginRouter } from '../types';
 
 import { buildSiemResponse, getExceptionListClient } from './utils';
-import { validateExceptionListSize } from './validate';
+import { endpointDisallowedFields } from './endpoint_disallowed_fields';
+import { validateEndpointExceptionItemEntries, validateExceptionListSize } from './validate';
 
 export const createEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -63,37 +64,54 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
               body: `exception list item id: "${itemId}" already exists`,
               statusCode: 409,
             });
-          } else {
-            const createdList = await exceptionLists.createEndpointListItem({
-              comments,
-              description,
-              entries,
-              itemId,
-              meta,
-              name,
-              osTypes,
-              tags,
-              type,
-            });
+          }
 
-            const { success, data, error } = CreateEndpointListItemResponse.safeParse(createdList);
-            if (success === false) {
-              return siemResponse.error({ body: stringifyZodError(error), statusCode: 500 });
-            } else {
-              const listSizeError = await validateExceptionListSize(
-                exceptionLists,
-                ENDPOINT_LIST_ID,
-                'agnostic'
-              );
-              if (listSizeError != null) {
-                await exceptionLists.deleteExceptionListItemById({
-                  id: createdList.id,
-                  namespaceType: 'agnostic',
-                });
-                return siemResponse.error(listSizeError);
-              }
-              return response.ok({ body: data ?? {} });
+          const error = validateEndpointExceptionItemEntries(entries);
+          if (error != null) {
+            return siemResponse.error(error);
+          }
+          for (const entry of entries) {
+            if (endpointDisallowedFields.includes(entry.field)) {
+              return siemResponse.error({
+                body: `cannot add endpoint exception item on field ${entry.field}`,
+                statusCode: 400,
+              });
             }
+          }
+
+          const createdList = await exceptionLists.createEndpointListItem({
+            comments,
+            description,
+            entries,
+            itemId,
+            meta,
+            name,
+            osTypes,
+            tags,
+            type,
+          });
+
+          const {
+            success,
+            data,
+            error: parseError,
+          } = CreateEndpointListItemResponse.safeParse(createdList);
+          if (success === false) {
+            return siemResponse.error({ body: stringifyZodError(parseError), statusCode: 500 });
+          } else {
+            const listSizeError = await validateExceptionListSize(
+              exceptionLists,
+              ENDPOINT_LIST_ID,
+              'agnostic'
+            );
+            if (listSizeError != null) {
+              await exceptionLists.deleteExceptionListItemById({
+                id: createdList.id,
+                namespaceType: 'agnostic',
+              });
+              return siemResponse.error(listSizeError);
+            }
+            return response.ok({ body: data ?? {} });
           }
         } catch (err) {
           const error = transformError(err);

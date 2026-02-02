@@ -41,7 +41,6 @@ import type {
 import type {
   MappingRuntimeFields,
   QueryDslQueryContainer,
-  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
@@ -112,6 +111,29 @@ export interface CasesService {
   };
 }
 
+interface AlertsTableEmptyState {
+  /**
+   * The message title for the empty state prompt
+   */
+  messageTitle?: string;
+  /**
+   * The message body for the empty state prompt
+   */
+  messageBody?: string;
+  /**
+   * The height variant for the empty state prompt
+   */
+  height?: 'tall' | 'short' | 'flex';
+  /**
+   * The style variant for the empty state prompt.
+   *
+   * `subdued` shows a subtle background color and with a distinct centered panel.
+   * `transparent` shows a transparent background and a less prominent center panel.
+   * @default `subdued`
+   */
+  variant?: 'subdued' | 'transparent';
+}
+
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   ? (args: Props & AP) => ReactNode
   : T extends ComponentClass<infer Props>
@@ -130,6 +152,12 @@ export interface AlertWithLegacyFormats {
   ecsAlert: any;
 }
 
+export interface AlertsTableSortCombinations {
+  [field: string]: {
+    order: 'asc' | 'desc';
+  };
+}
+
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
   /**
@@ -142,13 +170,31 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   columns?: EuiDataGridProps['columns'];
   /**
+   * Columns change callback
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onColumnsChange?: (newColumns: EuiDataGridProps['columns']) => void;
+  /**
+   * An array of column ids to show in the table
+   */
+  visibleColumns?: string[];
+  /**
+   * Visible columns change callback.
+   *
+   * This is a controllable state: provide a non-undefined value and this onChange
+   * callback to control it, otherwise the table will manage it internally.
+   */
+  onVisibleColumnsChange?: (newVisibleColumns: string[]) => void;
+  /**
    * A boolean expression or list of ids to refine the alerts search query
    */
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   /**
    * The initial sort configuration
    */
-  initialSort?: SortCombinations[];
+  initialSort?: AlertsTableSortCombinations[];
   /**
    * The initial page size. Allowed values are 10, 20, 50, 100
    */
@@ -191,27 +237,10 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   dynamicRowHeight?: boolean;
 
-  emptyState?: {
-    /**
-     * The message title for the empty state prompt
-     */
-    messageTitle?: string;
-    /**
-     * The message body for the empty state prompt
-     */
-    messageBody?: string;
-    /**
-     * The height variant for the empty state prompt
-     */
-    height?: 'tall' | 'short' | 'flex';
-    /**
-     * The style variant for the empty state prompt.
-     *
-     * `subdued` shows a subtle background color and with a distinct centered panel.
-     * `transparent` shows a transparent background and a less prominent center panel.
-     * @default `subdued`
-     */
-    variant?: 'subdued' | 'transparent';
+  emptyState?: AlertsTableEmptyState;
+
+  errorState?: AlertsTableEmptyState & {
+    onResetToPreviousState?: () => void;
   };
   /**
    * If true, the links in default cells, flyout and row actions will open in a new tab
@@ -277,9 +306,9 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   lastReloadRequestTime?: number;
   /**
    * A storage provider where to persist the table configuration
-   * @default new Storage(window.localStorage)
+   * @default new LocalStorageWrapper(window.localStorage)
    */
-  configurationStorage?: IStorageWrapper;
+  configurationStorage?: IStorageWrapper | null;
   /**
    * Dependencies
    */
@@ -458,17 +487,16 @@ export interface PublicAlertsDataGridProps
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
-  extends PublicAlertsDataGridProps {
+  extends PublicAlertsDataGridProps,
+    Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];
   leadingControlColumns?: EuiDataGridControlColumn[];
   trailingControlColumns?: EuiDataGridControlColumn[];
-  visibleColumns: string[];
   'data-test-subj': string;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onChangeVisibleColumns: (newColumns: string[]) => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   showInspectButton?: boolean;
@@ -481,7 +509,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  sort: SortCombinations[];
+  sort: AlertsTableSortCombinations[];
   alertsQuerySnapshot?: EsQuerySnapshot;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   flyoutAlertIndex: number;

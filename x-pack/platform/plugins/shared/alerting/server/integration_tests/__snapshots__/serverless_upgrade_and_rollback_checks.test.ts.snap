@@ -6097,6 +6097,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -6768,6 +6786,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -7502,6 +7538,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8154,6 +8208,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8862,6 +8934,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -9571,6 +9661,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -10280,6 +10388,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },

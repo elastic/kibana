@@ -56,7 +56,7 @@ export interface AlertSummaryProps {
   /**
    * Value of securitySolution:defaultAIConnector
    */
-  defaultConnectorId: string;
+  defaultConnectorId: string | undefined;
   /**
    * The context for the prompt
    */
@@ -93,7 +93,7 @@ export const AlertSummary = memo(
       messageAndReplacements,
     } = useAlertSummary({
       alertId,
-      defaultConnectorId,
+      defaultConnectorId: defaultConnectorId || '',
       promptContext,
       showAnonymizedValues,
     });
@@ -101,6 +101,11 @@ export const AlertSummary = memo(
     useEffect(() => {
       setHasAlertSummary(hasAlertSummary);
     }, [hasAlertSummary, setHasAlertSummary]);
+
+    // Don't render the summary UI if no connector ID is available
+    if (!defaultConnectorId) {
+      return <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />;
+    }
 
     return (
       <>

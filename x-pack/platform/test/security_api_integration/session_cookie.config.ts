@@ -18,6 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [resolve(__dirname, './tests/session_cookie')],
+    testConfigCategory: xPackAPITestsConfig.get('testConfigCategory'),
     services,
     servers: xPackAPITestsConfig.get('servers'),
     esTestCluster: {

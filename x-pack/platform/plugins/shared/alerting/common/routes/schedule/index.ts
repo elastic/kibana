@@ -17,3 +17,5 @@ export {
 export { transformCustomScheduleToRRule as transformCustomScheduleToRRuleV1 } from './transforms/custom_to_rrule/v1';
 export { transformRRuleToCustomSchedule as transformRRuleToCustomScheduleV1 } from './transforms/rrule_to_custom/v1';
 export type { ScheduleRequest as ScheduleRequestV1 } from './types/v1';
+
+export { getDurationInMilliseconds } from './transforms/custom_to_rrule/util';

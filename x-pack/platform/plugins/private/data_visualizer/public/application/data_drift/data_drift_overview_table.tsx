@@ -10,13 +10,7 @@ import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
 import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
@@ -154,21 +148,16 @@ export const DataDriftOverviewTable = ({
     },
     {
       field: 'similarityTestPValue',
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.dataVisualizer.dataDrift.pValueTooltip', {
-            defaultMessage:
-              'Indicates how extreme the change is. Lower values indicate greater change.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.dataVisualizer.dataDrift.pValueLabel', {
-              defaultMessage: 'Similarity p-value',
-            })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.dataVisualizer.dataDrift.pValueLabel', {
+        defaultMessage: 'Similarity p-value',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.dataVisualizer.dataDrift.pValueTooltip', {
+          defaultMessage:
+            'Indicates how extreme the change is. Lower values indicate greater change.',
+        }),
+        icon: 'question',
+      },
       'data-test-subj': 'mlDataDriftOverviewTableSimilarityTestPValue',
       sortable: true,
       textOnly: true,

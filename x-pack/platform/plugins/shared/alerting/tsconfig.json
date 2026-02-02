@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -78,7 +78,9 @@
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
-    "@kbn/response-ops-recurring-schedule-form"
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

@@ -28,7 +28,7 @@ export const EditActionName: FC = () => {
   if (!canCreateTransform) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        <>{editActionNameText}</>
+        <span tabIndex={0}>{editActionNameText}</span>
       </EuiToolTip>
     );
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const POLICIES_URL = '/api/fleet/package_policies';

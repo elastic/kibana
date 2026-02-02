@@ -1314,13 +1314,21 @@ export interface HostPolicyResponse {
           };
         };
         artifacts: {
+          /**
+           * The Global artifacts applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           global: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
+          /**
+           * The user defined artifacts (Kibana) applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           user: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
         };
       };

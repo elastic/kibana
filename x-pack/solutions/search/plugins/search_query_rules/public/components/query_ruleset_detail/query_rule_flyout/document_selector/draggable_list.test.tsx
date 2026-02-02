@@ -10,7 +10,7 @@ import React from 'react';
 import { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
 import { OnDragEndResponder } from '@hello-pangea/dnd';
 import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { FieldArrayWithId } from 'react-hook-form';
 import { QueryRuleEditorForm } from '../../../../../common/types';

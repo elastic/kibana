@@ -10,9 +10,9 @@ import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -44,6 +44,7 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -531,7 +532,11 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+
+export const getDefaultAIConnectorSetting = (
+  connectors: Connector[],
+  readonlyMode?: ReadonlyModeType
+): SettingsConfig | null =>
   connectors.length > 0
     ? {
         [DEFAULT_AI_CONNECTOR]: {
@@ -555,6 +560,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           requiresPageReload: true,
           schema: schema.string(),
           solution: 'security',
+          readonlyMode,
+          readonly: readonlyMode !== undefined,
         },
       }
     : null;

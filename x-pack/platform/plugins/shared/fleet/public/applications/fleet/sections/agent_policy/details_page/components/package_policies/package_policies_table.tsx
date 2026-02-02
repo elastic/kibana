@@ -147,9 +147,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;
-                    <EuiToolTip content={packagePolicy.description}>
-                      <EuiIcon type="question" />
-                    </EuiToolTip>
+                    <EuiIconTip content={packagePolicy.description} type="question" />
                   </span>
                 ) : null}
               </EuiLink>
@@ -173,6 +171,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       color="subdued"
                       size="xs"
                       className="eui-textNoWrap"
+                      tabIndex={0}
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"

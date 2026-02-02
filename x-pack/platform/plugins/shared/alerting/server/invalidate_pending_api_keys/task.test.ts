@@ -543,9 +543,7 @@ describe('Invalidate API Keys Task', () => {
         ids: ['abcd====!', 'xyz!==!'],
       });
       expect(internalSavedObjectsRepository.delete).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
-        `Failed to invalidate API Keys [ids=\"abcd====!, xyz!==!\"]`
-      );
+      expect(logger.error).toHaveBeenCalledWith(`Failed to invalidate API Keys [count=\"2\"]`);
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "0"`);
     });

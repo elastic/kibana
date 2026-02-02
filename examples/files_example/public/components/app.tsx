@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 

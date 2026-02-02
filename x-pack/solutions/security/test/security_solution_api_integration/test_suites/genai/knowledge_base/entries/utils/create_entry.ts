@@ -14,9 +14,8 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../../utils/auth/types';
-
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 /**
  * Creates a Knowledge Base Entry

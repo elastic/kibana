@@ -72,6 +72,16 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  integration_policy_edit_from_installed: ({ policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integrations_installed({})[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
+        defaultMessage: 'Installed integrations',
+      }),
+    },
+    { text: policyName },
+  ],
 };
 
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {

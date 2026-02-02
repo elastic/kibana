@@ -38,7 +38,7 @@ describe('chatPromptFactory', () => {
   const mockSavedObjectsClient = {} as unknown as SavedObjectsClientContract;
 
   const baseInputs = {
-    prompt: 'system prompt {citations_prompt} {formattedTime} {knowledgeHistory}',
+    prompt: 'system prompt {citations_prompt} {formattedTime}',
     additionalPrompt: 'additional prompt',
     contentReferencesStore: newContentReferencesStoreMock(),
     kbClient: mockKbClient,
@@ -67,11 +67,13 @@ Annotate your answer with the provided citations. Here are some example response
 
 Only use the citations returned by tools
 
- 2023-10-01T00:00:00Z Knowledge History:
-Citation: {reference(exampleContentReferenceId)}
-test knowledge entry
+ 2023-10-01T00:00:00Z
 
-additional prompt`),
+additional prompt
+
+Knowledge History:
+Citation: {reference(exampleContentReferenceId)}
+test knowledge entry`),
         new HumanMessage('test message'),
         new AIMessage('test response'),
         new HumanMessage('mocked user prompt follow-up question'),
@@ -86,11 +88,13 @@ additional prompt`),
     });
     expect(result.messages).toEqual(
       expect.arrayContaining([
-        new SystemMessage(`system prompt  2023-10-01T00:00:00Z Knowledge History:
+        new SystemMessage(`system prompt  2023-10-01T00:00:00Z
 
-test knowledge entry
+additional prompt
 
-additional prompt`),
+Knowledge History:
+
+test knowledge entry`),
         new HumanMessage('test message'),
         new AIMessage('test response'),
         new HumanMessage('mocked user prompt follow-up question'),
@@ -111,9 +115,11 @@ Annotate your answer with the provided citations. Here are some example response
 
 Only use the citations returned by tools
 
- 2023-10-01T00:00:00Z [No existing knowledge history]
+ 2023-10-01T00:00:00Z
 
-additional prompt`),
+additional prompt
+
+[No existing knowledge history]`),
         new HumanMessage('test message'),
         new AIMessage('test response'),
         new HumanMessage('mocked user prompt follow-up question'),
@@ -137,11 +143,13 @@ Annotate your answer with the provided citations. Here are some example response
 
 Only use the citations returned by tools
 
- 2023-10-01T00:00:00Z Knowledge History:
-Citation: {reference(exampleContentReferenceId)}
-test knowledge entry
+ 2023-10-01T00:00:00Z
 
-additional prompt`),
+additional prompt
+
+Knowledge History:
+Citation: {reference(exampleContentReferenceId)}
+test knowledge entry`),
         new HumanMessage('test message'),
         new AIMessage('test response'),
         new HumanMessage('follow-up question'),

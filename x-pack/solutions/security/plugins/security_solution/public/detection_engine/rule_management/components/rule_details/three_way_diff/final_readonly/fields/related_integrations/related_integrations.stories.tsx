@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
 

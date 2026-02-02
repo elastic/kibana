@@ -37,6 +37,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
+import type { IBasePath } from '@kbn/core/server';
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
@@ -82,6 +83,7 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
+  basePath: IBasePath;
 }
 
 export interface SearchOpts {
@@ -153,6 +155,7 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
+  private basePath: IBasePath;
 
   /**
    * Constructs a new TaskStore.
@@ -188,6 +191,7 @@ export class TaskStore {
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
+    this.basePath = opts.basePath;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -230,7 +234,12 @@ export class TaskStore {
 
     let userScopeAndApiKey;
     try {
-      userScopeAndApiKey = await getApiKeyAndUserScope(taskInstances, request, this.security);
+      userScopeAndApiKey = await getApiKeyAndUserScope(
+        taskInstances,
+        request,
+        this.security,
+        this.basePath
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -953,7 +962,6 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
@@ -976,13 +984,11 @@ export class TaskStore {
 
   public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     const { sort, ...rest } = opts;
     try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
         {
           index: this.index,

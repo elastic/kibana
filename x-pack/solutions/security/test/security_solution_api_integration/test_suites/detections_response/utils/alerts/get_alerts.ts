@@ -14,8 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { getAlertsByIds, waitForRuleStatus } from '@kbn/detections-response-ftr-services';
 import { refreshIndex } from '..';
-import { getAlertsByIds, waitForRuleStatus } from '../../../../config/services/detections_response';
 
 export type GetAlerts = (
   supertest: SuperTest.Agent,

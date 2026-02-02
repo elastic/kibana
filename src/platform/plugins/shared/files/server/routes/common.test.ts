@@ -8,43 +8,29 @@
  */
 
 import type { File } from '../file';
-import { getDownloadHeadersForFile } from './common';
+import { getFileHttpResponseOptions } from './common';
 
 describe('getDownloadHeadersForFile', () => {
-  function expectHeaders({ contentType }: { contentType: string }) {
+  function expectResult({ contentType }: { contentType: string }) {
     return {
-      'content-type': contentType,
-      'cache-control': 'max-age=31536000, immutable',
+      fileContentType: contentType,
+      headers: {
+        'cache-control': 'max-age=31536000, immutable',
+      },
     };
   }
 
   const file = { data: { name: 'test', mimeType: undefined } } as unknown as File;
-  test('no mime type and name from file object', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: undefined })).toEqual(
-      expectHeaders({ contentType: 'application/octet-stream' })
+  test('no mime type', () => {
+    expect(getFileHttpResponseOptions(file)).toEqual(
+      expectResult({ contentType: 'application/octet-stream' })
     );
   });
 
-  test('no mime type and name (without ext)', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: 'myfile' })).toEqual(
-      expectHeaders({ contentType: 'application/octet-stream' })
-    );
-  });
-  test('no mime type and name (with ext)', () => {
-    expect(getDownloadHeadersForFile({ file, fileName: 'myfile.png' })).toEqual(
-      expectHeaders({ contentType: 'image/png' })
-    );
-  });
-  test('mime type and no name', () => {
+  test('mime type', () => {
     const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: undefined })).toEqual(
-      expectHeaders({ contentType: 'application/pdf' })
-    );
-  });
-  test('mime type and name', () => {
-    const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: 'a cool file.pdf' })).toEqual(
-      expectHeaders({ contentType: 'application/pdf' })
+    expect(getFileHttpResponseOptions(fileWithMime)).toEqual(
+      expectResult({ contentType: 'application/pdf' })
     );
   });
 });

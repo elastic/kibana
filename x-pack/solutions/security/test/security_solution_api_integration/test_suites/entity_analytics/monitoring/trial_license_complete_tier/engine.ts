@@ -12,7 +12,7 @@ import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const api = getService('entityAnalyticsApi');
   const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');

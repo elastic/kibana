@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -42,7 +43,7 @@ export const createPrivilegeMonitoringIndicesRoute = (
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<{}>> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const secSol = await context.securitySolution;
         const siemResponse = buildSiemResponse(response);
         const indexName = request.body.name;
@@ -67,6 +68,6 @@ export const createPrivilegeMonitoringIndicesRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

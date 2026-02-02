@@ -33,6 +33,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
   showTimeSeriesDimensions: boolean;
+  'aria-describedby'?: string;
 }
 
 export function FieldSelect({
@@ -47,6 +48,7 @@ export function FieldSelect({
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
   showTimeSeriesDimensions,
+  ['aria-describedby']: ariaDescribedby,
 }: FieldSelectProps) {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
@@ -76,6 +78,7 @@ export function FieldSelect({
     }
 
     function fieldNamesToOptions(items: string[]): FieldOption[] {
+      // @ts-expect-error upgrade typescript v5.9.3
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
@@ -204,6 +207,7 @@ export function FieldSelect({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      aria-describedby={ariaDescribedby}
     />
   );
 }

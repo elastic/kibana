@@ -57,6 +57,7 @@ describe('rule_event_log_list_cell_renderer', () => {
     );
   });
   afterAll(() => {
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = savedLocation;
   });
 
@@ -145,6 +146,7 @@ describe('rule_event_log_list_cell_renderer', () => {
       '/basePath/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
     );
 
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = savedLocation;
   });
 });

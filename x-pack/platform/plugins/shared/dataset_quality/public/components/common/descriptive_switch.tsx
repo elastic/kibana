@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIcon, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
 
 interface DescriptiveSwitchProps {
@@ -35,9 +35,7 @@ export const DescriptiveSwitch = ({
       />
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiText size="xs">{label}</EuiText>
-        <EuiToolTip position="bottom" content={tooltipText}>
-          <EuiIcon tabIndex={0} type="question" size="s" />
-        </EuiToolTip>
+        <EuiIconTip content={tooltipText} position="bottom" type="question" size="s" />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

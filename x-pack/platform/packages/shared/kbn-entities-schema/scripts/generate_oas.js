@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../../../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const swaggerJsdoc = require('swagger-jsdoc');
 const { zodToJsonSchema } = require('zod-to-json-schema');

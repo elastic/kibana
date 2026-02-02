@@ -1,6 +1,6 @@
 {
   "esModuleInterop": true,
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -90,6 +90,7 @@
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
     "@kbn/inference-common",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

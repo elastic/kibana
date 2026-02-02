@@ -25,7 +25,6 @@ import {
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
-  EuiToolTip,
   EuiBetaBadge,
   EuiSplitPanel,
   useEuiTheme,
@@ -630,19 +629,18 @@ export const ActionTypeForm = ({
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {showActionGroupErrorIcon() ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
+                  <EuiIconTip
                     content={i18n.translate(
                       'xpack.triggersActionsUI.sections.actionTypeForm.actionErrorToolTip',
                       { defaultMessage: 'Action contains errors.' }
                     )}
-                  >
-                    <EuiIcon
-                      data-test-subj="action-group-error-icon"
-                      type="warning"
-                      color="danger"
-                      size="m"
-                    />
-                  </EuiToolTip>
+                    type="warning"
+                    color="danger"
+                    size="m"
+                    iconProps={{
+                      'data-test-subj': 'action-group-error-icon',
+                    }}
+                  />
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>

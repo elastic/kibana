@@ -20,7 +20,7 @@ export const TimeToolTip: FunctionComponent<React.PropsWithChildren<TimeToolTipP
 }) => {
   return (
     <EuiToolTip content={moment(timestamp).format('LLL')}>
-      <span>{children ?? moment(timestamp).fromNow()}</span>
+      <span tabIndex={0}>{children ?? moment(timestamp).fromNow()}</span>
     </EuiToolTip>
   );
 };

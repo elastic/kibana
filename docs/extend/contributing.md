@@ -13,7 +13,7 @@ Read [*Getting started*](/extend/development-getting-started.md) to get your env
 * [How we use Git and GitHub](/extend/development-github.md)
 * [Interpreting CI Failures](/extend/interpreting-ci-failures.md)
 * [CI Metrics](/extend/ci-metrics.md)
-* [Documentation during development](/extend/development-documentation.md)
+* [Documentation during development](docs-content://extend/contribute/index.md)
 * [Submitting a pull request](/extend/development-pull-request.md)
 * [Effective issue reporting in {{kib}}](/extend/kibana-issue-reporting.md)
 * [Signing the contributor license agreement](#signing-contributor-agreement)

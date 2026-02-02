@@ -201,6 +201,7 @@ export const PackagePoliciesPage = ({
               }}
               addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
               showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
+              from={embedded ? 'installed-integrations' : undefined}
             />
           ) : (
             <>
@@ -244,6 +245,7 @@ export const PackagePoliciesPage = ({
                       pageSizeOptions: agentlessPageSizeOptions,
                       setPagination: agentlessSetPagination,
                     }}
+                    from={embedded ? 'installed-integrations' : undefined}
                   />
                 </EuiPanel>
               </EuiAccordion>
@@ -290,6 +292,7 @@ export const PackagePoliciesPage = ({
                     }}
                     addAgentToPolicyIdFromParams={addAgentToPolicyIdFromParams}
                     showAddAgentHelpForPolicyId={showAddAgentHelpForPolicyId}
+                    from={embedded ? 'installed-integrations' : undefined}
                   />
                 </EuiPanel>
               </EuiAccordion>

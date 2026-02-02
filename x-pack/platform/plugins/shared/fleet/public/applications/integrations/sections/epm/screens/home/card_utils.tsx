@@ -177,7 +177,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={updateFailedAttempt ? formatAttempt(updateFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.updateFailed"
                 defaultMessage="Update failed"
@@ -207,7 +207,7 @@ export function getIntegrationLabels(item: PackageListItem): React.ReactNode[] {
             }
             content={installFailedAttempt ? formatAttempt(installFailedAttempt) : undefined}
           >
-            <EuiBadge color="danger" iconType="error">
+            <EuiBadge color="danger" iconType="error" tabIndex={0}>
               <FormattedMessage
                 id="xpack.fleet.packageCard.installFailed"
                 defaultMessage="Install failed"

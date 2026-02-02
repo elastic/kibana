@@ -75,19 +75,24 @@ const ConnectorAddModal = ({
 
   const canSave = hasSaveActionsCapability(capabilities);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.subtype
-      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
+
+  const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
+    ? (actionTypeModel?.subtype ?? [])
+        .filter((item) => allActionTypes?.[item.id]?.enabledInConfig)
+        .map((subtypeAction) => ({
           ...actionTypeRegistry.get(subtypeAction.id),
           name: subtypeAction.name,
         }))
-      : [];
+    : [];
 
-  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
-    id: gAction.id,
-    label: gAction.name,
-    'data-test-subj': `${gAction.id}Button`,
-  }));
+  const groupActionButtons =
+    groupActionTypeModel?.length > 1
+      ? groupActionTypeModel.map((gAction) => ({
+          id: gAction.id,
+          label: gAction.name,
+          'data-test-subj': `${gAction.id}Button`,
+        }))
+      : [];
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
@@ -267,6 +272,7 @@ const ConnectorAddModal = ({
                 {actionTypeModel && actionTypeModel.isExperimental && (
                   <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                     <EuiBetaBadge
+                      data-test-subj="betaBadge"
                       label={TECH_PREVIEW_LABEL}
                       tooltipContent={TECH_PREVIEW_DESCRIPTION}
                     />

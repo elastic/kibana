@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseTestFlags } from './flags';
 import { FlagsReader } from '@kbn/dev-cli-runner';
-import * as configValidator from './config_validator';
 import * as testFilesUtils from '../../common/utils';
+import * as configValidator from './config_validator';
+import { parseTestFlags } from './flags';
 
 const validatePlaywrightConfigMock = jest.spyOn(configValidator, 'validatePlaywrightConfig');
 

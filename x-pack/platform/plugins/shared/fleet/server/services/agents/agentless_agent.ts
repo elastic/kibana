@@ -33,9 +33,9 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-  DEFAULT_OUTPUT_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
@@ -70,12 +70,12 @@ class AgentlessAgentService {
     const outputId = isServerless
       ? SERVERLESS_DEFAULT_OUTPUT_ID
       : isCloud
-      ? DEFAULT_OUTPUT_ID
+      ? ECH_AGENTLESS_OUTPUT_ID
       : undefined;
     const fleetServerId = isServerless
       ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
       : isCloud
-      ? DEFAULT_FLEET_SERVER_HOST_ID
+      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
 
     return {

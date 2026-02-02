@@ -82,7 +82,7 @@ export async function getTopDependencySpans({
   const spans = (
     await apmEventClient.search('get_top_dependency_spans', {
       apm: {
-        events: [ProcessorEvent.span],
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
       track_total_hits: false,
       size: MAX_NUM_SPANS,

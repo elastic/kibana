@@ -24,7 +24,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
-  from?: 'fleet-policy-list' | undefined;
+  from?: 'fleet-policy-list' | 'installed-integrations' | undefined;
 }> = ({
   agentPolicies,
   packagePolicy,

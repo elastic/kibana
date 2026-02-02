@@ -9,7 +9,8 @@ import React from 'react';
 
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 interface EndpointsTableProps {
   columns: EuiBasicTableProps<InferenceInferenceEndpointInfo>['columns'];
@@ -34,6 +35,9 @@ export const EndpointsTable: React.FC<EndpointsTableProps> = ({
       onChange={onChange}
       pagination={pagination}
       sorting={sorting}
+      tableCaption={i18n.translate('xpack.searchInferenceEndpoints.endpointsTable.tableCaption', {
+        defaultMessage: 'Inference endpoints',
+      })}
     />
   );
 };

@@ -31,10 +31,10 @@ import type {
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { CSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
@@ -701,7 +701,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       inputType: Extract<
         PostureInput,
         'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-      >
+      >,
+      customShowCloudConnectors?: boolean
     ) => {
       const credentialsTypes: Record<
         Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
@@ -714,7 +715,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       > = {
         'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
           isAgentless,
-          showCloudConnectors,
+          showCloudConnectors: customShowCloudConnectors ?? showCloudConnectors,
           packageInfo,
         }),
         'cloudbeat/cis_gcp': {
@@ -754,7 +755,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const showCloudConnectors =
       cloudConnectorsEnabled &&
       !!cloudConnectorRemoteRoleTemplate &&
-      semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
+      semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS) &&
+      setupTechnology === SetupTechnology.AGENTLESS;
 
     /**
      * - Updates policy inputs by user selection
@@ -1028,6 +1030,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             isAgentless={!!newPolicy?.supports_agentless}
             onSetupTechnologyChange={(value) => {
               updateSetupTechnology(value);
+              // Recalculate showCloudConnectors with the new setup technology value
+              const newShowCloudConnectors =
+                cloudConnectorsEnabled &&
+                !!cloudConnectorRemoteRoleTemplate &&
+                semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS) &&
+                value === SetupTechnology.AGENTLESS;
               updatePolicy(
                 getPosturePolicy(
                   newPolicy,
@@ -1037,7 +1045,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
                     input.type as Extract<
                       PostureInput,
                       'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+                    >,
+                    newShowCloudConnectors
                   )
                 )
               );

@@ -26,12 +26,11 @@ import { ScoutJestReporterOptions } from './options';
 import {
   datasources,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
   ScoutEventsReport,
   ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
 } from '../../..';
 
 /**
@@ -81,16 +80,16 @@ export class ScoutJestReporter extends BaseReporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
-
+    const areas = this.getOwnerAreas(fileOwners);
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
@@ -153,7 +152,7 @@ export class ScoutJestReporter extends BaseReporter {
         type: test.result.ancestorTitles.length <= 1 ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.result.fullName),
+        id: computeTestID(path.relative(REPO_ROOT, test.filePath), test.result.fullName),
         title: test.result.title,
         tags: [],
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.filePath)),
@@ -231,16 +230,24 @@ export class ScoutJestReporter extends BaseReporter {
         ...this.baseTestRunInfo,
         status: results.numFailedTests === 0 ? 'passed' : 'failed',
         duration: Date.now() - results.startTime || 0,
+        tests: {
+          failures: results.numFailedTests,
+          passes: results.numPassedTests,
+          pending: results.numPendingTests,
+          total: results.numTotalTests,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.scoutLog);
     } catch (e) {
       // Log the error but don't propagate it
       this.scoutLog.error(e);

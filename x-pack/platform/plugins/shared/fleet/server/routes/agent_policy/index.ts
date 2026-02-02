@@ -36,6 +36,8 @@ import {
   GetAutoUpgradeAgentsStatusRequestSchema,
   GetAutoUpgradeAgentsStatusResponseSchema,
   CreateAgentAndPackagePolicyRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+  RunAgentPolicyRevisionsCleanupTaskResponseSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
@@ -60,6 +62,7 @@ import {
   GetListAgentPolicyOutputsHandler,
   getAutoUpgradeAgentsStatusHandler,
   createAgentAndPackagePoliciesHandler,
+  RunAgentPolicyRevisionsCleanupTaskHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -423,8 +426,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -463,8 +467,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -498,8 +503,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-            FLEET_API_PRIVILEGES.SETUP,
+            {
+              anyRequired: [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ, FLEET_API_PRIVILEGES.SETUP],
+            },
           ],
         },
       },
@@ -598,5 +604,42 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       GetAgentPolicyOutputsHandler
+    );
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.CLEANUP_REVISIONS_PATTERN,
+      access: 'internal',
+      enableQueryVersion: true,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.AGENTS.READ,
+          ],
+        },
+      },
+      summary: `Run a task to cleanup excess agent policy revisions`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: RunAgentPolicyRevisionsCleanupTaskRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      RunAgentPolicyRevisionsCleanupTaskHandler
     );
 };

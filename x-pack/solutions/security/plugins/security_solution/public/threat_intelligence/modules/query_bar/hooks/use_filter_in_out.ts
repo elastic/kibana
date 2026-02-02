@@ -13,6 +13,7 @@ import type { Indicator } from '../../../../../common/threat_intelligence/types/
 import type { FilterIn, FilterOut } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
 import { useTIDataView } from '../../indicators/hooks/use_ti_data_view';
+import { unwrapValue } from '../../indicators/utils/unwrap_value';
 
 export interface UseFilterInParam {
   /**
@@ -48,13 +49,13 @@ export const useFilterInOut = ({
   const { filterManager } = useIndicatorsFiltersContext();
   const { sourcererDataView } = useTIDataView();
 
-  const { key, value } =
-    typeof indicator === 'string'
-      ? { key: field, value: indicator }
-      : getIndicatorFieldAndValue(indicator, field);
+  const { key } =
+    typeof indicator === 'string' ? { key: field } : getIndicatorFieldAndValue(indicator, field);
+  const value = typeof indicator === 'string' ? indicator : unwrapValue(indicator, field);
 
   const filterFn = useCallback((): void => {
     const existingFilters = filterManager.getFilters();
+
     const newFilters: Filter[] = updateFiltersArray(
       existingFilters,
       key,
@@ -69,7 +70,5 @@ export const useFilterInOut = ({
     return {} as unknown as UseFilterInValue;
   }
 
-  return {
-    filterFn,
-  };
+  return { filterFn };
 };

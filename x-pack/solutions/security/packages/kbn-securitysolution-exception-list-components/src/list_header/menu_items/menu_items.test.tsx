@@ -90,7 +90,24 @@ describe('MenuItems', () => {
     expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
   });
 
-  it('should not render Manage rules', () => {
+  it('should not render Manage rules when read only', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={true}
+        canUserEditList={true}
+        linkedRules={rules}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
+        onManageRules={onManageRules}
+      />
+    );
+
+    expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
+  });
+
+  it('should not render Manage rules if user cannot edit list', () => {
     const wrapper = render(
       <MenuItems
         isReadonly={false}

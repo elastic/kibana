@@ -164,7 +164,12 @@ export interface PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    },
     currentVersion?: string
   ): Promise<PackagePolicy>;
 
@@ -172,12 +177,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: {
-      user?: AuthenticatedUser;
-      skipUnassignFromAgentPolicies?: boolean;
-      force?: boolean;
-      asyncDeploy?: boolean;
-    },
+    options?: PackagePolicyClientDeleteOptions,
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
@@ -288,6 +288,13 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
 
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
+  user?: AuthenticatedUser;
+  skipUnassignFromAgentPolicies?: boolean;
+  force?: boolean;
+  asyncDeploy?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

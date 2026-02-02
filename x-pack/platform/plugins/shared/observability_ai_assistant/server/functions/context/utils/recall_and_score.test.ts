@@ -83,6 +83,8 @@ describe('recallAndScore', () => {
         messages: normalConversationMessages,
         logger: mockLogger,
         signal,
+        scopes: [],
+        connector: undefined,
       });
     });
 
@@ -113,6 +115,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -139,6 +143,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(scoreSuggestions).toHaveBeenCalledWith({
@@ -169,6 +175,8 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(result.relevantDocuments).toEqual([
@@ -197,6 +205,8 @@ describe('recallAndScore', () => {
       messages: contextualInsightsMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(result.relevantDocuments).toEqual([
@@ -222,11 +232,15 @@ describe('recallAndScore', () => {
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
+      scopes: [],
+      connector: undefined,
     });
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
       recallRankingEventType,
-      expect.objectContaining({ scoredDocuments: [{ esScore: 0.8, llmScore: 7 }] })
+      expect.objectContaining({
+        scoredDocuments: [{ esScore: 0.8, llmScore: 7, connector: undefined, scopes: [] }],
+      })
     );
   });
 });

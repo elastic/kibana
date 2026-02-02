@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { asyncMap } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { ITermJoinSource } from '../../sources/join_sources';
 
 interface Props {
@@ -67,9 +67,7 @@ export class TermJoinKeyLabel extends Component<Props, State> {
     return (
       <>
         {this.props.leftFieldName}
-        <EuiToolTip position="bottom" content={content}>
-          <EuiIcon type="link" />
-        </EuiToolTip>
+        <EuiIconTip content={content} type="link" position="bottom" />
       </>
     );
   }

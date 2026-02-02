@@ -9,8 +9,6 @@ import React from 'react';
 
 import { EuiDragDropContext, euiDragDropReorder, EuiDroppable } from '@elastic/eui';
 
-import { BodyRows } from './body_rows';
-
 interface DraggableBodyRowsProps<Item> {
   items: Item[];
   onReorder: (reorderedItems: Item[], items: Item[]) => void;
@@ -23,17 +21,19 @@ export const DraggableBodyRows = <Item extends object>({
   renderItem,
 }: DraggableBodyRowsProps<Item>) => {
   return (
-    <EuiDragDropContext
-      onDragEnd={({ source, destination }) => {
-        if (source && destination) {
-          const reorderedItems = euiDragDropReorder(items, source.index, destination?.index);
-          onReorder(reorderedItems, items);
-        }
-      }}
-    >
-      <EuiDroppable droppableId="ReorderingArea" grow={false}>
-        <BodyRows items={items} renderItem={renderItem} />
-      </EuiDroppable>
-    </EuiDragDropContext>
+    <div role="rowgroup">
+      <EuiDragDropContext
+        onDragEnd={({ source, destination }) => {
+          if (source && destination) {
+            const reorderedItems = euiDragDropReorder(items, source.index, destination?.index);
+            onReorder(reorderedItems, items);
+          }
+        }}
+      >
+        <EuiDroppable droppableId="ReorderingArea" grow={false}>
+          <>{items.map(renderItem)}</>
+        </EuiDroppable>
+      </EuiDragDropContext>
+    </div>
   );
 };

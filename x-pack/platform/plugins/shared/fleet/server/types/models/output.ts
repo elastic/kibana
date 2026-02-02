@@ -73,7 +73,7 @@ const BaseSchema = {
     schema.oneOf([
       schema.literal(null),
       schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
         certificate: schema.maybe(schema.string()),
         key: schema.maybe(schema.string()),
         verification_mode: schema.maybe(
@@ -105,7 +105,7 @@ const BaseSchema = {
       }),
     ])
   ),
-  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
@@ -135,14 +135,16 @@ const PresetSchema = schema.oneOf([
 export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 }),
   preset: schema.maybe(PresetSchema),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
-  hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  hosts: schema.maybe(
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 })
+  ),
   preset: schema.maybe(PresetSchema),
 };
 
@@ -189,14 +191,17 @@ const RemoteElasticSearchUpdateSchema = {
 export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
-  hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+    minSize: 1,
+    maxSize: 10,
+  }),
 };
 
 const LogstashUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 })
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1, maxSize: 10 })
   ),
   secrets: schema.maybe(
     schema.object({
@@ -208,7 +213,10 @@ const LogstashUpdateSchema = {
 export const KafkaSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Kafka),
-  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 }),
+  hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
+    minSize: 1,
+    maxSize: 10,
+  }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
   compression: schema.maybe(
@@ -290,7 +298,9 @@ export const KafkaSchema = {
   ),
   topic: schema.maybe(schema.string()),
   headers: schema.maybe(
-    schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
+    schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+      maxSize: 100,
+    })
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
@@ -310,7 +320,7 @@ const KafkaUpdateSchema = {
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1 })
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1, maxSize: 10 })
   ),
   auth_type: schema.maybe(
     schema.oneOf([

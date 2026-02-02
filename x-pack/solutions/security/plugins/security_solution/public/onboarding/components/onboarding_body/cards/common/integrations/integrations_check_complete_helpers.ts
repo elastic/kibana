@@ -13,26 +13,31 @@ import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/type
 import { AGENT_INDEX } from './constants';
 import type { StartServices } from '../../../../../../types';
 
+const PER_PAGE = 100;
+
 export const getCompleteBadgeText = (installedCount: number) =>
   i18n.translate('xpack.securitySolution.onboarding.integrationsCard.badge.completeText', {
     defaultMessage: '{count} {count, plural, one {integration} other {integrations}} added',
     values: { count: installedCount },
   });
 
-export const getActiveIntegrationList = async (
-  services: StartServices,
-  /**
-   * The list of available integrations to check against.
-   * If provided, only installed integrations that are in this list will be considered complete.
-   * If not provided, all installed integrations will be considered complete.
-   */
-  availableIntegrationNames?: Array<IntegrationCardItem['name']>
+interface GetInstalledPackagesParams {
+  showOnlyActiveDataStreams?: boolean;
+  perPage?: number;
+  searchAfter?: GetInstalledPackagesResponse['searchAfter'];
+}
+
+export const getInstalledPackages = async (
+  { showOnlyActiveDataStreams, perPage, searchAfter }: GetInstalledPackagesParams,
+  services: StartServices
 ) => {
-  const activePackageData = await services.http
+  return services.http
     .get<GetInstalledPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
       query: {
-        showOnlyActiveDataStreams: true,
+        showOnlyActiveDataStreams,
+        perPage,
+        searchAfter: searchAfter ? JSON.stringify(searchAfter) : undefined,
       },
     })
     .catch((err: Error) => {
@@ -45,8 +50,40 @@ export const getActiveIntegrationList = async (
           }
         ),
       });
-      return { items: emptyItems };
+      return { items: emptyItems, total: 0, searchAfter: undefined };
     });
+};
+
+export const getActiveIntegrationList = async (
+  services: StartServices,
+  /**
+   * The list of available integrations to check against.
+   * If provided, only installed integrations that are in this list will be considered complete.
+   * If not provided, all installed integrations will be considered complete.
+   */
+  availableIntegrationNames?: Array<IntegrationCardItem['name']>
+) => {
+  const params: GetInstalledPackagesParams = {
+    showOnlyActiveDataStreams: true,
+    perPage: PER_PAGE,
+    searchAfter: undefined,
+  };
+
+  const activePackageData: GetInstalledPackagesResponse = { items: [], total: 0 };
+
+  while (true) {
+    const activePackageResponse = await getInstalledPackages(params, services);
+    params.searchAfter = activePackageResponse.searchAfter;
+    activePackageData.items.push(...activePackageResponse.items);
+    activePackageData.total = activePackageResponse.total;
+    if (
+      activePackageData.items.length === activePackageResponse.total ||
+      !activePackageResponse?.items?.length ||
+      !activePackageResponse?.searchAfter
+    ) {
+      break;
+    }
+  }
 
   const activePackages =
     activePackageData?.items?.filter((installedPkg) => {

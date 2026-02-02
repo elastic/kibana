@@ -18,6 +18,7 @@ export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompleti
   return {
     type: ChatCompletionEventType.ChatCompletionChunk,
     content: delta.content ?? '',
+    refusal: delta.refusal ?? undefined,
     tool_calls:
       delta.tool_calls?.map((toolCall) => {
         return {

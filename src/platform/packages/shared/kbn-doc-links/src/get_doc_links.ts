@@ -29,7 +29,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
-  const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
   const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
@@ -345,6 +344,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       dynamicIndexSettings: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-modules#dynamic-index-settings`,
       indexTemplates: `${ELASTIC_DOCS}manage-data/data-store/templates`,
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping`,
+      mappingReference: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference`,
       mappingAnalyzer: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/analyzer`,
       mappingCoerce: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/coerce`,
       mappingCopyTo: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/copy-to`,
@@ -619,7 +619,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
       apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
       apmRulesAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-apm-anomaly-rule`,
-      authorization: `${KIBANA_DOCS}alerting-setup.html#alerting-authorization`,
+      authorization: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`,
       emailAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailActionConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailExchangeClientSecretConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-secret`,
@@ -683,6 +683,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       kibanaPrivileges: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges`,
       mappingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles`,
       mappingRolesFieldRules: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/role-mapping-resources#mapping-roles-rule-field`,
+      roles: `${ELASTIC_DOCS}reference/elasticsearch/roles`,
       runAsPrivilege: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#_run_as_privilege`,
       enableElasticSearchSecurityFeatures: `${ELASTIC_DOCS}deploy-manage/security/set-up-minimal-security#_enable_es_security_features`,
     },
@@ -720,6 +721,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createApiKey: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key`
         : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key`,
+      createApiKeyMetadata: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`,
+      createApiKeyRoleDescriptors: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`,
+      createCrossClusterApiKey: `${ELASTICSEARCH_APIS}operation/operation-security-create-cross-cluster-api-key`,
       createPipeline: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
         : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,

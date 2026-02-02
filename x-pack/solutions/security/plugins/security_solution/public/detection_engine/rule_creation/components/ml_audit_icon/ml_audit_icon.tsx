@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 
@@ -38,9 +38,14 @@ const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
   }
 
   return (
-    <EuiToolTip content={message.text}>
-      <EuiIcon data-test-subj="mlJobAuditIcon" type={icon} color={color} />
-    </EuiToolTip>
+    <EuiIconTip
+      content={message.text}
+      type={icon}
+      color={color}
+      iconProps={{
+        'data-test-subj': 'mlJobAuditIcon',
+      }}
+    />
   );
 };
 

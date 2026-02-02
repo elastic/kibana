@@ -208,7 +208,15 @@ export function TrainedModelsDeploymentModal({
       <EuiModalFooter>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty
+              onClick={closeModal}
+              aria-label={i18n.translate(
+                'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonAriaLabel',
+                {
+                  defaultMessage: 'Cancel and close modal',
+                }
+              )}
+            >
               {i18n.translate(
                 'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.cancelButtonLabel',
                 {

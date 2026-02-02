@@ -247,6 +247,12 @@ export const SearchApplicationIndices: React.FC = () => {
         </>
       )}
       <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.indices.tableCaption',
+          {
+            defaultMessage: 'Search application indices',
+          }
+        )}
         items={indices}
         columns={columns}
         rowProps={(index: EnterpriseSearchApplicationIndex) => {

@@ -43,7 +43,7 @@ const ITEMS_SCHEMA = {
 };
 
 interface ExceptionsViewerSearchBarProps {
-  canAddException: boolean;
+  isReadOnly: boolean;
   // Exception list type used to determine what type of item is
   // being created when "onAddExceptionClick" is invoked
   isEndpoint: boolean;
@@ -56,7 +56,7 @@ interface ExceptionsViewerSearchBarProps {
  * Search exception items and take actions (to creat an item)
  */
 const ExceptionsViewerSearchBarComponent = ({
-  canAddException,
+  isReadOnly,
   isEndpoint,
   isSearching,
   onSearch,
@@ -91,7 +91,7 @@ const ExceptionsViewerSearchBarComponent = ({
           onChange={handleOnSearch}
         />
       </EuiFlexItem>
-      {!canAddException && (
+      {!isReadOnly && (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="exceptionsHeaderAddExceptionBtn"

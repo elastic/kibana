@@ -69,6 +69,7 @@ class DocumentationService {
   private bulkApi: string = '';
   private updateExistingDS: string = '';
   private enrichIngestData: string = '';
+  private mappingReference: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -114,6 +115,7 @@ class DocumentationService {
     this.mappingParameters = links.elasticsearch.mappingParameters;
     this.mappingPositionIncrementGap = links.elasticsearch.mappingPositionIncrementGap;
     this.mappingRankFeatureFields = links.elasticsearch.mappingRankFeatureFields;
+    this.mappingReference = links.elasticsearch.mappingReference;
     this.mappingRouting = links.elasticsearch.mappingRouting;
     this.mappingSimilarity = links.elasticsearch.mappingSimilarity;
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
@@ -179,7 +181,7 @@ class DocumentationService {
     ) {
       return undefined;
     }
-    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
+    return `${this.mappingReference}/${typeDefinition.documentation[docType]}`;
   };
   public getMappingTypesLink() {
     return this.mappingFieldDataTypes;

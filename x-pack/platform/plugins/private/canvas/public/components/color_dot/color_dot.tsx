@@ -34,6 +34,7 @@ export const ColorDot: FC<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   children: PropTypes.node,
   value: PropTypes.string,
 };

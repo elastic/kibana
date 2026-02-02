@@ -571,7 +571,7 @@ export function registerConnectorRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       const { advanced_snippet, filtering_rules } = request.body;
       const result = await updateFilteringDraft(client.asCurrentUser, connectorId, {
         advancedSnippet: advanced_snippet,
@@ -643,7 +643,7 @@ export function registerConnectorRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const connectorId = decodeURIComponent(request.params.connectorId);
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       const { is_native } = request.body;
       const result = await putUpdateNative(client.asCurrentUser, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();

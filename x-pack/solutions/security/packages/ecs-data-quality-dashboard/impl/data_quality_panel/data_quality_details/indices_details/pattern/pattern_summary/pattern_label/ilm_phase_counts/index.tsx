@@ -37,7 +37,10 @@ const IlmPhaseCountsComponent: React.FC<Props> = ({ ilmExplainPhaseCounts, patte
               phase,
             })}
           >
-            <EuiBadge color="hollow">{`${phase} (${ilmExplainPhaseCounts[phase]})`}</EuiBadge>
+            <EuiBadge
+              tabIndex={0}
+              color="hollow"
+            >{`${phase} (${ilmExplainPhaseCounts[phase]})`}</EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
       ) : null

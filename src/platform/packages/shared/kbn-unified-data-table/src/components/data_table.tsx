@@ -911,6 +911,7 @@ const InternalUnifiedDataTable = ({
         customGridColumnsConfiguration,
         onResize,
         sortedColumns,
+        dataGridRef,
       }),
     [
       cellActionsHandling,

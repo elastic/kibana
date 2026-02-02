@@ -129,8 +129,13 @@ const escapeLiteralStrings = (data: string): string[] => {
 };
 
 const convertProcessorValueToJson = (data: string): any => {
-  if (!data) {
+  if (data === null || data === undefined) {
     return undefined;
+  }
+
+  // Preserve empty strings
+  if (data === '') {
+    return data;
   }
 
   try {

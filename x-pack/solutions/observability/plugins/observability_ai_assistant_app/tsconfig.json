@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -86,6 +86,7 @@
     "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client",
+    "@kbn/utility-types-jest",
   ],
   "exclude": ["target/**/*"]
 }

@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Fragment, Component, ChangeEvent } from 'react';
-import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
@@ -99,26 +99,22 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
       this.props.showFields && this.state.currentLayerName !== '' ? (
         <EuiFormRow
           label={
-            <EuiToolTip
-              anchorClassName="eui-alignMiddle"
-              content={
-                <>
-                  {preMessage}
-                  {message}
-                  {postMessage}
-                </>
-              }
-            >
-              <span>
-                {i18n.translate(
-                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
-                  {
-                    defaultMessage: 'Fields',
-                  }
-                )}{' '}
-                <EuiIcon type="question" color="subdued" />
-              </span>
-            </EuiToolTip>
+            <span>
+              {i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage', {
+                defaultMessage: 'Fields',
+              })}{' '}
+              <EuiIconTip
+                type="question"
+                color="subdued"
+                content={
+                  <>
+                    {preMessage}
+                    {message}
+                    {postMessage}
+                  </>
+                }
+              />
+            </span>
           }
         >
           <MVTFieldConfigEditor
@@ -149,26 +145,25 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
 
         <ValidatedDualRange
           label={
-            <EuiToolTip
-              anchorClassName="eui-alignMiddle"
-              content={i18n.translate(
-                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
+            <span>
+              {i18n.translate(
+                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
                 {
-                  defaultMessage:
-                    'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
+                  defaultMessage: 'Available levels',
                 }
-              )}
-            >
-              <span>
-                {i18n.translate(
-                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
+              )}{' '}
+              <EuiIconTip
+                type="question"
+                color="subdued"
+                content={i18n.translate(
+                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
                   {
-                    defaultMessage: 'Available levels',
+                    defaultMessage:
+                      'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
                   }
-                )}{' '}
-                <EuiIcon type="question" color="subdued" />
-              </span>
-            </EuiToolTip>
+                )}
+              />
+            </span>
           }
           formRowDisplay="columnCompressed"
           value={[this.state.currentMinSourceZoom, this.state.currentMaxSourceZoom]}

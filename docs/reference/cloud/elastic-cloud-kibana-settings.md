@@ -54,6 +54,15 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 8.19.7+, 9.1.7+, 9.2.1+,9.3+ [ec_version_8_19_7_9_1_7_9_2_1_9_3]
+- {applies_to}`stack: ga 9.3.0`
+- {applies_to}`stack: ga 9.2.1`
+- {applies_to}`stack: ga 9.1.7`
+- {applies_to}`stack: ga 8.19.7`
+
+`xpack.actions.email.maximum_body_length`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
 ### Version 9.1+ [ec_version_9_1]
 ```{applies_to}
 stack: ga 9.1
@@ -73,6 +82,18 @@ stack: ga 9.1
 
 `xpack.banners.linkColor`
 :   The color for the banner link text. Defaults to `#0B64DD`.
+
+`xpack.product_intercept.enabled`
+:   Enable or disable Elastic product feedback prompts. Defaults to `true`.
+
+`xpack.product_intercept.interval`:
+:   Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, 20m, 24h, 7d. Defaults to `90d`.
+
+`xpack.fleet.autoUpgrades.taskInterval`:
+:   Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
+
+`xpack.fleet.autoUpgrades.retryDelays`:
+:   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
 
 ### Version 8.18+ [ec_version_8_18]
 
@@ -383,8 +404,8 @@ $$$csp-strict$$$ `csp.strict`
 `csp.warnLegacyBrowsers`
 :   Shows a warning message after loading Kibana to any browser that does not enforce even rudimentary CSP rules, though Kibana is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled. **Default: `true`**
 
-`csp.disableUnsafeEval`
-:   [preview] Set this to `true` to remove the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression from the `script-src` directive. **Default: `false`**
+`csp.disableUnsafeEval` {applies_to}`stack: preview`
+:   Set this to `true` to remove the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression from the `script-src` directive. **Default: `false`**
 
     By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn’t support [inline partials](https://handlebarsjs.com/guide/partials.md#inline-partials). Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
 
@@ -462,7 +483,7 @@ Support for the The option `auto` was included here, when the config value is se
 
 
 `xpack.screenshotting.capture.timeouts.openUrl`
-:   Specify how long to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
+:   Specify how long to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
 
     Defaults to `30000` (30 seconds).
 

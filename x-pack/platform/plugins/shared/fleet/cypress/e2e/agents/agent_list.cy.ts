@@ -10,10 +10,10 @@ import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import type { CreateAgentPolicyRequest } from '../../../common/types';
+import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
 import { setUISettings } from '../../tasks/ui_settings';
 
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
@@ -85,7 +85,8 @@ function assertTableIsEmpty() {
   cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
 }
 
-describe('View agents list', () => {
+// Flaky tests: https://github.com/elastic/kibana/issues/250728
+describe.skip('View agents list', () => {
   before(() => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();

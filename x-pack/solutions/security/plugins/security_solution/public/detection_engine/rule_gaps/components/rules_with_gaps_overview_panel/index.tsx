@@ -150,7 +150,10 @@ export const RulesWithGapsOverviewPanel = () => {
             <EuiFlexItem grow={false}>
               {inProgressRulesWithGaps && totalRulesWithGaps && (
                 <EuiToolTip position="bottom" content={i18n.RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT}>
-                  <EuiBadge color={totalRulesWithGaps?.total === 0 ? 'success' : 'warning'}>
+                  <EuiBadge
+                    tabIndex={0}
+                    color={totalRulesWithGaps?.total === 0 ? 'success' : 'warning'}
+                  >
                     {totalRulesWithGaps?.total} {'/'} {inProgressRulesWithGaps?.total}
                   </EuiBadge>
                 </EuiToolTip>

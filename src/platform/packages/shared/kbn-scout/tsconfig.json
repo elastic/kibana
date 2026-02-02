@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,10 +28,11 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
+    "@kbn/zod",
+    "@kbn/axe-config",
+    "@kbn/core-http-common",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/projects-solutions-groups",
-    "@kbn/zod",
-    "@kbn/core-http-common"
   ]
 }

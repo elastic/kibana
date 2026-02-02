@@ -303,7 +303,7 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
     const ids = apiKeyIdsToInvalidate.map(({ apiKeyId }) => apiKeyId);
     const response = await invalidateAPIKeys({ ids }, securityPluginStart);
     if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-      logger.error(`Failed to invalidate API Keys [ids="${ids.join(', ')}"]`);
+      logger.error(`Failed to invalidate API Keys [count="${ids.length}"]`);
     } else {
       await Promise.all(
         apiKeyIdsToInvalidate.map(async ({ id, apiKeyId }) => {

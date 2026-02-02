@@ -11,6 +11,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import {
   catchError,
   defer,
@@ -36,6 +37,7 @@ import {
   ToolChoiceType,
 } from '@kbn/inference-common';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -64,7 +66,6 @@ import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
-import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
@@ -79,6 +80,12 @@ import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_o
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 import { addAnonymizationData } from './operators/add_anonymization_data';
+import {
+  conversationDeleteEvent,
+  type ConversationDeleteEvent,
+} from '../../analytics/conversation_delete';
+import type { ConversationDuplicateEvent } from '../../analytics/conversation_duplicate';
+import { conversationDuplicateEvent } from '../../analytics/conversation_duplicate';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -102,6 +109,7 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      analytics: AnalyticsServiceStart;
     }
   ) {}
 
@@ -174,6 +182,10 @@ export class ObservabilityAIAssistantClient {
       index: conversation._index,
       refresh: true,
     });
+    this.dependencies.analytics.reportEvent<ConversationDeleteEvent>(
+      conversationDeleteEvent.eventType,
+      {}
+    );
   };
 
   complete = ({
@@ -208,8 +220,13 @@ export class ObservabilityAIAssistantClient {
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
+        const { namespace } = this.dependencies;
+        const spaceAwarePath = addSpaceIdToPath('/', namespace, '/app/observabilityAIAssistant');
+
+        const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
+
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
+          `This conversation will be persisted in Kibana and available at this url: ${conversationUrl}.`
         );
       }
 
@@ -254,10 +271,27 @@ export class ObservabilityAIAssistantClient {
         shareReplay()
       );
 
+      const connector$ = defer(() =>
+        from(
+          this.dependencies.actionsClient.get({
+            id: connectorId,
+            throwIfSystemAction: true,
+          })
+        ).pipe(
+          catchError((error) => {
+            this.dependencies.logger.debug(
+              `Failed to fetch connector for analytics: ${error.message}`
+            );
+            return of(undefined);
+          }),
+          shareReplay()
+        )
+      );
+
       // we continue the conversation here, after resolving both the materialized
       // messages and the knowledge base instructions
-      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
-        switchMap(([systemMessage, kbUserInstructions]) => {
+      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$, connector$]).pipe(
+        switchMap(([systemMessage, kbUserInstructions, connector]) => {
           // if needed, inject a context function request here
           const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
             ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -292,6 +326,9 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 connectorId,
                 simulateFunctionCalling,
+                analytics: this.dependencies.analytics,
+                connector,
+                scopes: this.dependencies.scopes,
               })
             )
           );
@@ -510,7 +547,6 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(
@@ -635,7 +671,7 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
     const _source = conversation._source!;
-    return this.create({
+    const duplicatedConversation = await this.create({
       ..._source,
       conversation: {
         ..._source.conversation,
@@ -644,6 +680,11 @@ export class ObservabilityAIAssistantClient {
       public: false,
       archived: false,
     });
+    this.dependencies.analytics.reportEvent<ConversationDuplicateEvent>(
+      conversationDuplicateEvent.eventType,
+      {}
+    );
+    return duplicatedConversation;
   };
 
   recall = async ({

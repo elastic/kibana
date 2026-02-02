@@ -12,7 +12,7 @@ import type { CspPage, CspPageNavigationItem } from '../common/navigation/types'
 import { CspSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
-import { QueryClientProviderProps } from '@tanstack/react-query';
+import { QueryClientProviderProps } from '@kbn/react-query';
 
 jest.mock('../pages', () => ({
   Findings: () => <div data-test-subj="Findings">Findings</div>,

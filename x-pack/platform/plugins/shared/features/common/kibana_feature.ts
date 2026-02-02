@@ -14,16 +14,6 @@ import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 
 /**
- * Enum for allowed feature scope values.
- * security - The feature is available in Security Feature Privileges.
- * spaces - The feature is available in the Spaces Visibility Toggles.
- */
-export enum KibanaFeatureScope {
-  Security = 'security',
-  Spaces = 'spaces',
-}
-
-/**
  * Interface for registering a feature.
  * Feature registration allows plugins to hide their applications with spaces,
  * and secure access when configured for security.
@@ -165,11 +155,6 @@ export interface KibanaFeatureConfig {
   hidden?: boolean;
 
   /**
-   * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
-   */
-  scope?: readonly KibanaFeatureScope[];
-
-  /**
    * If defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces.
    */
   readonly deprecated?: Readonly<{
@@ -261,10 +246,6 @@ export class KibanaFeature {
 
   public get reserved() {
     return this.config.reserved;
-  }
-
-  public get scope() {
-    return this.config.scope;
   }
 
   public toRaw() {

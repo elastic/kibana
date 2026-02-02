@@ -535,6 +535,10 @@ export class SecurityPageObject extends FtrService {
     await this.find.clickByButtonText('Update user');
   }
 
+  async backToUsersList() {
+    await this.find.clickByButtonText('Back to users');
+  }
+
   async createUser(user: UserFormValues) {
     await this.clickElasticsearchUsers();
     await this.clickCreateNewUser();
@@ -581,7 +585,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === false;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async activatesUser(user: UserFormValues) {
@@ -595,7 +599,7 @@ export class SecurityPageObject extends FtrService {
         return userResponse[user.username!].enabled === true;
       });
     }
-    await this.submitUpdateUserForm();
+    await this.backToUsersList();
   }
 
   async deleteUser(username: string) {
@@ -711,6 +715,12 @@ export class SecurityPageObject extends FtrService {
       }
     };
 
+    const addDeniedField = async (fields: string[]) => {
+      for (const entry of fields) {
+        await this.comboBox.setCustom('deniedFieldInput0', entry);
+      }
+    };
+
     // clicking the Granted fields and removing the asterix
     if (roleObj.elasticsearch.indices[0].field_security) {
       // Toggle FLS switch
@@ -722,6 +732,9 @@ export class SecurityPageObject extends FtrService {
       );
 
       await addGrantedField(roleObj.elasticsearch.indices[0].field_security!.grant!);
+      if (roleObj.elasticsearch.indices[0].field_security?.except) {
+        await addDeniedField(roleObj.elasticsearch.indices[0].field_security.except);
+      }
     }
 
     if (roleObj.elasticsearch.remote_cluster) {

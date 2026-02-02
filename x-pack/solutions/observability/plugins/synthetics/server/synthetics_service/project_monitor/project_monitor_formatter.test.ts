@@ -123,6 +123,7 @@ describe('ProjectMonitorFormatter', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
+    fleet: { runWithCache: async (cb: any) => await cb() },
   } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -258,7 +259,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -289,7 +290,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -320,7 +321,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },

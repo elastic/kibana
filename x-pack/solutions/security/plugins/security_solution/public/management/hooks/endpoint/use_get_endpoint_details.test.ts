@@ -10,7 +10,7 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointDetails } from './use_get_endpoint_details';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
 
 const useQueryMock = _useQuery as jest.Mock;

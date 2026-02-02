@@ -75,7 +75,6 @@ export const endpointResponseAction = async (
       response.push(
         Promise.all(
           Object.values(getIsolateAlerts(alerts)).map(
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
               logger.info(
                 `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(
@@ -121,7 +120,7 @@ export const endpointResponseAction = async (
           return each(actionAlerts, (actionPerAgent) => {
             return each(
               actionPerAgent,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
+
               ({ endpoint_ids, alert_ids, parameters, error, hosts }: AlertsAction) => {
                 logger.info(
                   `${logMsgPrefix} [${command}] [${endpoint_ids.length}] agent(s): ${stringify(

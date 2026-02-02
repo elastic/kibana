@@ -33,7 +33,7 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -64,11 +64,13 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
   leadingControlColumns: [],
   trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
+  columnVisibility: {
+    visibleColumns: mockColumns.map((c) => c.id),
+    setVisibleColumns: mockOnChangeVisibleColumns,
+  },
   'data-test-subj': 'testTable',
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
   query: {},
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
@@ -443,8 +445,10 @@ describe('AlertsDataGrid', () => {
             toolbarVisibility={{
               showColumnSelector: true,
             }}
-            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
-            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+            columnVisibility={{
+              visibleColumns: mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay),
+              setVisibleColumns: mockOnChangeVisibleColumns,
+            }}
           />
         );
         const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');

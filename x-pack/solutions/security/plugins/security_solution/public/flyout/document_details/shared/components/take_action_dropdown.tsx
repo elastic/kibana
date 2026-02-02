@@ -12,6 +12,7 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getOr } from 'lodash/fp';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
@@ -170,6 +171,13 @@ export const TakeActionDropdown = memo(
       [dataAsNestedObject]
     );
 
+    const isAlertSourceEndpoint = useMemo(() => {
+      const eventModules = getOr([], 'kibana.alert.original_event.module', dataAsNestedObject);
+      const kinds = getOr([], 'kibana.alert.original_event.kind', dataAsNestedObject);
+
+      return eventModules.includes('endpoint') && kinds.includes('alert');
+    }, [dataAsNestedObject]);
+
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
       (action: 'isolateHost' | 'unisolateHost') => {
@@ -194,7 +202,7 @@ export const TakeActionDropdown = memo(
       [onAddExceptionTypeClick]
     );
     const { exceptionActionItems } = useAlertExceptionActions({
-      isEndpointAlert: Boolean(isAgentEndpoint),
+      isEndpointAlert: isAlertSourceEndpoint,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 

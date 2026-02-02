@@ -133,7 +133,7 @@ export const getConversationApiConfig = ({
           actionTypeId: connector.actionTypeId,
           provider: connector.apiProvider ?? connectorApiProvider,
           defaultSystemPromptId: defaultSystemPrompt?.id,
-          model: conversation?.apiConfig?.model ?? connectorModel,
+          model: connectorModel ?? conversation?.apiConfig?.model,
         },
       }
     : ({

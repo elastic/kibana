@@ -20,6 +20,9 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
     async setQuery(query: any) {
       await monacoEditor.setCodeEditorValue(JSON.stringify(query), 0);
     },
+    async setStringQuery(query: any) {
+      await monacoEditor.setCodeEditorValue(query, 0);
+    },
     async getQuery() {
       return JSON.parse(await monacoEditor.getCodeEditorValue(0));
     },
@@ -48,6 +51,9 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       const notification = await testSubjects.find('noShardsNotification');
       const text = await notification.getVisibleText();
       return text.includes('Unable to profile');
+    },
+    async editorHasJsonParseErrorNotification() {
+      return await testSubjects.exists('jsonParseErrorToast');
     },
   };
 }

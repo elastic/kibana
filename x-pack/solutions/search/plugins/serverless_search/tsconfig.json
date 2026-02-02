@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -57,6 +57,7 @@
     "@kbn/security-plugin-types-public",
     "@kbn/deeplinks-search",
     "@kbn/core-application-browser",
-    "@kbn/search-shared-ui"
+    "@kbn/search-shared-ui",
+    "@kbn/react-query"
   ]
 }

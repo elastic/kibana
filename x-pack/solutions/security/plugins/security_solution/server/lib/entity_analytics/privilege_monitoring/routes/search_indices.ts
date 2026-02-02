@@ -18,6 +18,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 // Return a subset of all indices that contain the user.name field
 const LIMIT = 20;
@@ -45,8 +46,7 @@ export const searchPrivilegeMonitoringIndicesRoute = (
           },
         },
       },
-
-      async (context, request, response): Promise<IKibanaResponse<{}>> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const secSol = await context.securitySolution;
         const siemResponse = buildSiemResponse(response);
         const query = request.query.searchQuery;
@@ -72,6 +72,6 @@ export const searchPrivilegeMonitoringIndicesRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

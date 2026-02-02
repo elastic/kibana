@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import { Subject } from 'rxjs';
 import { LicenseService } from '../../../../common/license';
 import { PolicyWatcher } from './license_watch';
@@ -16,6 +17,17 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../mocks';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+jest.mock('p-retry', () => {
+  const originalPRetry = jest.requireActual('p-retry');
+  return jest.fn().mockImplementation((fn, options) => {
+    return originalPRetry(fn, options);
+  });
+});
+
+const pRetryMock = jest.mocked(pRetry);
 
 const MockPackagePolicyWithEndpointPolicy = (
   cb?: (p: PolicyConfig) => PolicyConfig
@@ -131,5 +143,168 @@ describe('Policy-Changing license watcher', () => {
       packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
+  });
+
+  describe('retry logic', () => {
+    beforeEach(() => {
+      pRetryMock.mockClear();
+    });
+
+    it('retries package policy list operations on failure', async () => {
+      pRetryMock.mockImplementationOnce((fn: any, options: any) => {
+        const mockError = {
+          message: 'Network error',
+          attemptNumber: 1,
+          retriesLeft: 2,
+        };
+        options.onFailedAttempt(mockError);
+
+        const mockError2 = {
+          message: 'Network error',
+          attemptNumber: 2,
+          retriesLeft: 1,
+        };
+        options.onFailedAttempt(mockError2);
+
+        // finally succeed
+        return Promise.resolve(fn());
+      });
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [MockPackagePolicyWithEndpointPolicy()],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Gold);
+
+      expect(pRetry).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+          onFailedAttempt: expect.any(Function),
+        })
+      );
+    });
+
+    it('retries package policy update operations on failure', async () => {
+      const CustomMessage = 'Custom string';
+
+      pRetryMock.mockImplementation((fn: any, options: any) => {
+        if (fn.name === 'bound list') {
+          return Promise.resolve(fn());
+        }
+
+        // simulate retry
+        const mockError = {
+          message: 'Update failed',
+          attemptNumber: 1,
+          retriesLeft: 2,
+        };
+        options.onFailedAttempt(mockError);
+
+        return Promise.resolve(fn());
+      });
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.popup.malware.message = CustomMessage;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Basic);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+      expect(pRetry).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+          onFailedAttempt: expect.any(Function),
+        })
+      );
+    });
+
+    it('logs retry attempts for package policy list failures', async () => {
+      const loggerSpy = jest.spyOn(endpointServiceMock.createLogger(), 'debug');
+
+      pRetryMock.mockImplementationOnce((fn: any, options: any) => {
+        // simulate a failed attempt
+        const mockError = {
+          message: 'Network timeout',
+          attemptNumber: 1,
+          retriesLeft: 2,
+        };
+        options.onFailedAttempt(mockError);
+
+        // then succeed
+        return Promise.resolve(fn());
+      });
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Gold);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'attempt 1 to fetch endpoint policies failed. Trying again. [ERROR: Network timeout]'
+      );
+    });
+
+    it('logs retry attempts for package policy update failures', async () => {
+      const loggerSpy = jest.spyOn(endpointServiceMock.createLogger(), 'debug');
+
+      pRetryMock.mockImplementation((fn: any, options: any) => {
+        if (fn.name === 'bound list') {
+          return Promise.resolve(fn());
+        }
+
+        // simulate retry
+        const mockError = {
+          message: 'Update timeout',
+          attemptNumber: 1,
+          retriesLeft: 2,
+        };
+        options.onFailedAttempt(mockError);
+
+        return Promise.resolve(fn());
+      });
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.popup.malware.message = 'Custom';
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Basic);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('attempt 1 to update endpoint policy')
+      );
+    });
   });
 });

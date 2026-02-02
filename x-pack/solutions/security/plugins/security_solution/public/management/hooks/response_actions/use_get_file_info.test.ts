@@ -17,7 +17,7 @@ import type {
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import { useQuery as _useQuery } from '@kbn/react-query';
 
 const useQueryMock = _useQuery as jest.Mock;
 

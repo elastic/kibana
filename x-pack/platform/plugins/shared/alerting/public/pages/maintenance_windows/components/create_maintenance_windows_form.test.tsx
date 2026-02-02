@@ -12,6 +12,7 @@ import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
 import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
+import moment from 'moment';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../services/rule_api', () => ({
@@ -98,8 +99,8 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(result.queryByTestId('timezone-field')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
@@ -118,6 +119,35 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.getByTestId('timezone-field')).toBeInTheDocument();
+  });
+
+  it('renders the timezone field for any non-"Browser" kibana setting value', async () => {
+    useUiSetting.mockReturnValue('America/Los_Angeles');
+
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    expect(await screen.findByTestId('title-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('date-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('timezone-field')).toBeInTheDocument();
+  });
+
+  it('should render the guessed timezone when kibana timezone is undefined', async () => {
+    useUiSetting.mockReturnValue(undefined);
+    jest.spyOn(moment.tz, 'guess').mockReturnValue('America/Los_Angeles');
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    expect(await screen.findByTestId('title-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('date-field')).toBeInTheDocument();
+    expect(await screen.findByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+
+    const timezoneInput = within(await screen.findByTestId('timezone-field')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
   it('should initialize the form when no initialValue provided', () => {

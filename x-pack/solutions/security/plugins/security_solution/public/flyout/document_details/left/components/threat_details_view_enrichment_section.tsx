@@ -9,12 +9,11 @@ import React, { memo, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -158,9 +157,7 @@ export const EnrichmentSection = memo(
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={tooltip}>
-                  <EuiIcon type="info" size="m" />
-                </EuiToolTip>
+                <EuiIconTip content={tooltip} type="info" size="m" />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />

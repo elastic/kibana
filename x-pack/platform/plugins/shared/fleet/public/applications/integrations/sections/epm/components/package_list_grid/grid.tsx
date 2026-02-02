@@ -167,6 +167,7 @@ export const GridColumn = ({
                               key={item.id}
                               // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                               css={css`
+                                min-width: 0;
                                 & > .euiPopover,
                                 & > .euiPopover > .euiCard {
                                   height: 100%;

@@ -11,9 +11,13 @@ import React from 'react';
 import { apm } from '@elastic/apm-rum';
 
 import { getErrorBoundaryLabels } from '../../lib';
-import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
+import {
+  BaseErrorBoundary,
+  type BaseErrorBoundaryState,
+  type BaseErrorBoundaryProps,
+} from './base_error_boundary';
 
 interface SectionErrorBoundaryProps {
   sectionName: string;
@@ -38,22 +42,11 @@ export const KibanaSectionErrorBoundary = (
   return <SectionErrorBoundaryInternal {...props} services={services} />;
 };
 
-interface ErrorBoundaryState {
-  error: null | Error;
-  errorInfo: null | Partial<React.ErrorInfo>;
-  componentName: null | string;
-  isFatal: null | boolean;
-}
-
-interface ServiceContext {
-  services: KibanaErrorBoundaryServices;
-}
-
-class SectionErrorBoundaryInternal extends React.Component<
-  React.PropsWithChildren<SectionErrorBoundaryProps> & ServiceContext,
-  ErrorBoundaryState
+class SectionErrorBoundaryInternal extends BaseErrorBoundary<
+  React.PropsWithChildren<SectionErrorBoundaryProps> & BaseErrorBoundaryProps,
+  BaseErrorBoundaryState
 > {
-  constructor(props: SectionErrorBoundaryProps & ServiceContext) {
+  constructor(props: SectionErrorBoundaryProps & BaseErrorBoundaryProps) {
     super(props);
 
     this.state = {
@@ -64,15 +57,24 @@ class SectionErrorBoundaryInternal extends React.Component<
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     apm.captureError(error, {
       labels: getErrorBoundaryLabels('SectionFatalReactError'),
     });
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
-    const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
-    this.setState({ error, errorInfo, componentName: name, isFatal });
+    // Enqueue the error instead of registering it immediately
+    const enqueuedError = this.props.services.errorService.enqueueError(error, errorInfo);
+    const { id: errorId, isFatal, name } = enqueuedError;
+
+    this.setState({
+      error,
+      errorInfo,
+      componentName: name,
+      isFatal,
+      errorId,
+    });
   }
 
   render() {

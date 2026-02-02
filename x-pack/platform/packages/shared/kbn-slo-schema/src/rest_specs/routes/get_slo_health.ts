@@ -13,6 +13,7 @@ const fetchSLOHealthResponseSchema = t.array(
     sloId: sloIdSchema,
     sloInstanceId: allOrAnyString,
     sloRevision: t.number,
+    sloName: t.string,
     state: stateSchema,
     health: t.type({
       overall: healthStatusSchema,

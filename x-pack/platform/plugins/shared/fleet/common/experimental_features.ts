@@ -17,6 +17,7 @@ const _allowedExperimentalValues = {
   enabledUpgradeAgentlessDeploymentsTask: true,
   enableAgentMigrations: false,
   enablePackageRollback: false,
+  enableFleetPolicyRevisionsCleanupTask: true,
 };
 
 /**

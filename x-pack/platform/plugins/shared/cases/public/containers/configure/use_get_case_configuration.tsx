@@ -9,12 +9,15 @@ import type { CasesConfigurationUI } from '../types';
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 import { getConfigurationByOwner } from './utils';
 
-export const useGetCaseConfiguration = () => {
+export const useGetCaseConfiguration = ({
+  keepPreviousData,
+}: { keepPreviousData?: boolean } = {}) => {
   const { owner } = useCasesContext();
 
   return useGetCaseConfigurationsQuery<CasesConfigurationUI>({
     select: (data: CasesConfigurationUI[] | null) =>
       getConfigurationByOwner({ configurations: data, owner: owner[0] }),
+    keepPreviousData,
   });
 };
 

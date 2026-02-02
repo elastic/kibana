@@ -68,7 +68,7 @@ export class ServiceMapPage {
     // Try to click with force if normal click fails due to tooltip interference
     try {
       await button.click({ timeout: 5000 });
-    } catch (error) {
+    } catch {
       // If normal click fails, try with force to bypass tooltip interference
       await button.click({ force: true, timeout: 5000 });
     }

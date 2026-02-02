@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useUiTracker, useUrlState } from '@kbn/observability-shared-plugin/public';
 import type {
   MutationContext,

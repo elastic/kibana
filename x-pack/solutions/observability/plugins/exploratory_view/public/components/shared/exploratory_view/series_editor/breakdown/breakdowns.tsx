@@ -92,7 +92,7 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
           value: id,
           dropdownDisplay: (
             <EuiToolTip content={BREAKDOWN_UNAVAILABLE}>
-              <>{label}</>
+              <span tabIndex={0}>{label}</span>
             </EuiToolTip>
           ),
           disabled: true,

@@ -139,6 +139,7 @@ export const WorkpadTable = ({
       items={workpads}
       columns={columns}
       message={strings.getNoWorkpadsFoundMessage()}
+      tableCaption={strings.getTableCaption()}
       search={search}
       sorting={{
         sort: {
@@ -180,6 +181,10 @@ const strings = {
   getWorkpadSearchPlaceholder: () =>
     i18n.translate('xpack.canvas.workpadTable.searchPlaceholder', {
       defaultMessage: 'Find workpad',
+    }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.workpadTable.table.caption', {
+      defaultMessage: 'Canvas workpads list',
     }),
   getTableCreatedColumnTitle: () =>
     i18n.translate('xpack.canvas.workpadTable.table.createdColumnTitle', {

@@ -380,6 +380,9 @@ export interface DocLinks {
     createRoleMappingTemplates: string;
     createRollupJobsRequest: string;
     createApiKey: string;
+    createApiKeyMetadata: string;
+    createApiKeyRoleDescriptors: string;
+    createCrossClusterApiKey: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -485,6 +488,7 @@ export interface DocLinks {
     kibanaPrivileges: string;
     mappingRoles: string;
     mappingRolesFieldRules: string;
+    roles: string;
     runAsPrivilege: string;
     enableElasticSearchSecurityFeatures: string;
   }>;

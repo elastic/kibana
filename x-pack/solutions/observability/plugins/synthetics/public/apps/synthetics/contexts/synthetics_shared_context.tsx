@@ -12,7 +12,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Subject } from 'rxjs';
 import { Store } from 'redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';

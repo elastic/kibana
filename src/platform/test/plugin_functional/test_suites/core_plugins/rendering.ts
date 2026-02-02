@@ -11,7 +11,8 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {
@@ -60,11 +61,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       }
       return JSON.parse(injectedMetadata.getAttribute('data')!);
     });
-  const getUserSettings = () =>
-    browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
-        .legacyMetadata.uiSettings.user;
-    });
   const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
   const getRenderingSession = () =>
@@ -72,7 +68,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240348
+  describe.skip('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       // This retry loop to get the injectedMetadata is to overcome flakiness
       // (see comment in getInjectedMetadata)
@@ -470,44 +467,70 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect({ extra, missing }).to.eql({ extra: [], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
-    // FLAKY
-    it.skip('renders "core" application', async () => {
+    it('renders "core" application', async () => {
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
+      let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core');
-
-      const [loadingMessage, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getUserSettings(),
-      ]);
+      await retry.tryWithRetries(
+        'injectedMetadata',
+        async () => {
+          await browser.refresh();
+          [injectedMetadata, loadingMessage] = await Promise.all([
+            getInjectedMetadata(),
+            findLoadingMessage(),
+          ]);
+          expect(injectedMetadata).to.not.be.empty();
+        },
+        { retryCount: 5 }
+      );
+      const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
       expect(userSettings).to.not.be.empty();
+      expect(loadingMessage).to.not.be.empty();
 
-      await find.waitForElementStale(loadingMessage);
+      await find.waitForElementStale(loadingMessage!);
 
       expect(await exists('renderingHeader')).to.be(true);
     });
 
-    // FLAKY
-    it.skip('renders "core" application without user settings', async () => {
+    it('renders "core" application without user settings', async () => {
+      // This retry loop to get the injectedMetadata is to overcome flakiness
+      // (see comment in getInjectedMetadata)
+      let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
+      let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core?isAnonymousPage=true');
+      await retry.tryWithRetries(
+        'injectedMetadata',
+        async () => {
+          await browser.refresh();
+          [injectedMetadata, loadingMessage] = await Promise.all([
+            getInjectedMetadata(),
+            findLoadingMessage(),
+          ]);
+          expect(injectedMetadata).to.not.be.empty();
+        },
+        { retryCount: 5 }
+      );
+      const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
-      const [loadingMessage, userSettings] = await Promise.all([
-        findLoadingMessage(),
-        getUserSettings(),
-      ]);
+      expect(userSettings).to.be.empty();
+      expect(loadingMessage).to.not.be.empty();
 
       expect(userSettings).to.be.empty();
 
-      await find.waitForElementStale(loadingMessage);
+      await find.waitForElementStale(loadingMessage!);
 
       expect(await exists('renderingHeader')).to.be(true);
     });
 
-    // FLAKY
-    it.skip('navigates between standard application and one with custom appRoute', async () => {
+    it('navigates between standard application and one with custom appRoute', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
+      await testSubjects.click('skipWelcomeScreen');
 
-      await navigateToApp('App Status');
+      await navigateToApp('App Status Start Page');
       expect(await exists('appStatusApp')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
 
@@ -515,19 +538,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(await exists('appStatusApp')).to.be(false);
       expect(await exists('renderingHeader')).to.be(true);
 
-      await navigateToApp('App Status');
+      await navigateToApp('App Status Start Page');
       expect(await exists('appStatusApp')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
 
       expect(await getRenderingSession()).to.eql([
-        '/app/app_status',
+        '/app/app_status_start',
         '/render/core',
-        '/app/app_status',
+        '/app/app_status_start',
       ]);
     });
 
-    // FLAKY
-    it.skip('navigates between applications with custom appRoutes', async () => {
+    it('navigates between applications with custom appRoutes', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
 

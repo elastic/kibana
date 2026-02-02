@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
@@ -52,6 +53,8 @@ export const TreeNode: FunctionComponent<Props> = ({
 }) => {
   const stringSelector = useMemo(() => processorInfo.selector.join('.'), [processorInfo.selector]);
   const styles = useStyles({ level });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const handlers = useMemo((): Handlers => {
     return {
       onMove: () => {
@@ -83,12 +86,13 @@ export const TreeNode: FunctionComponent<Props> = ({
           processors={processor.onFailure}
         />
         <AddProcessorButton
+          ref={buttonRef}
           data-test-subj={stringSelector}
           renderButtonAsLink
           onClick={() =>
             onAction({
               type: 'addProcessor',
-              payload: { target: processorInfo.selector.concat('onFailure') },
+              payload: { target: processorInfo.selector.concat('onFailure'), buttonRef },
             })
           }
         />

@@ -14,6 +14,7 @@ import { DeleteEntityEngineRequestQuery } from '../../../../../common/api/entity
 import type { DeleteMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -45,26 +46,28 @@ export const deletePrivilegeMonitoringEngineRoute = (
           },
         },
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<DeleteMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<DeleteMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-
-        try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().delete(request.query.data);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error deleting privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const body = await secSol.getPrivilegeMonitoringDataClient().delete(request.query.data);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error deleting privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

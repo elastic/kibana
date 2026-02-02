@@ -14,11 +14,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiIcon,
+  EuiIconTip,
   EuiCallOut,
   EuiLoadingElastic,
   EuiInMemoryTable,
-  EuiToolTip,
   EuiText,
   EuiSpacer,
   EuiLoadingSpinner,
@@ -102,9 +101,13 @@ export class RelationshipsClass extends Component<
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={modalTitleId}>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
-              </EuiToolTip>
+              <EuiIconTip
+                position="top"
+                content={typeLabel}
+                type={savedObject.meta.icon || 'apps'}
+                size="m"
+                aria-label={typeLabel}
+              />
               &nbsp;&nbsp;
               {savedObject.meta.title || getDefaultTitle(savedObject)}
             </h2>
@@ -225,6 +228,9 @@ export class RelationshipsClass extends Component<
       },
     ];
 
+    const { savedObject } = this.props;
+    const savedObjectTitle = savedObject.meta.title || getDefaultTitle(savedObject);
+
     return (
       <>
         <EuiCallOut
@@ -245,6 +251,13 @@ export class RelationshipsClass extends Component<
           rowProps={() => ({
             'data-test-subj': `invalidRelationshipsTableRow`,
           })}
+          tableCaption={i18n.translate(
+            'savedObjectsManagement.objectsTable.relationships.invalidRelationshipsTableCaption',
+            {
+              defaultMessage: 'Invalid relationships for {title}',
+              values: { title: savedObjectTitle },
+            }
+          )}
         />
         <EuiSpacer />
       </>
@@ -286,14 +299,16 @@ export class RelationshipsClass extends Component<
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={object.meta.icon || 'apps'}
-                size="s"
-                data-test-subj="relationshipsObjectType"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              position="top"
+              content={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              aria-label={typeLabel}
+              iconProps={{
+                'data-test-subj': 'relationshipsObjectType',
+              }}
+            />
           );
         },
       },
@@ -404,6 +419,8 @@ export class RelationshipsClass extends Component<
       ] as SearchFilterConfig[],
     };
 
+    const savedObjectTitle = savedObject.meta.title || getDefaultTitle(savedObject);
+
     return (
       <>
         <EuiCallOut>
@@ -432,6 +449,13 @@ export class RelationshipsClass extends Component<
           rowProps={() => ({
             'data-test-subj': `relationshipsTableRow`,
           })}
+          tableCaption={i18n.translate(
+            'savedObjectsManagement.objectsTable.relationships.relationshipsTableCaption',
+            {
+              defaultMessage: 'Saved objects related to {title}',
+              values: { title: savedObjectTitle },
+            }
+          )}
         />
       </>
     );

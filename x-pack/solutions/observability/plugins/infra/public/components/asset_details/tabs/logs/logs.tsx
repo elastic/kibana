@@ -9,12 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  DEFAULT_LOG_VIEW,
-  getLogsLocatorFromUrlService,
-  getNodeQuery,
-  type LogViewReference,
-} from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService, getNodeQuery } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import moment from 'moment';
@@ -23,7 +18,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
@@ -35,9 +29,6 @@ export const Logs = () => {
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { logs } = useDataViewsContext();
-
-  const { reference: logViewReference } = logs ?? {};
 
   const {
     services: {
@@ -91,11 +82,6 @@ export const Logs = () => {
     setTextQuery(e.target.value);
   }, []);
 
-  const logView: LogViewReference = useMemo(
-    () => (logViewReference ? logViewReference : DEFAULT_LOG_VIEW),
-    [logViewReference]
-  );
-
   const logsUrl = useMemo(() => {
     return logsLocator.getRedirectUrl({
       query: getNodeQuery({
@@ -107,16 +93,14 @@ export const Logs = () => {
         from: moment(state.startTimestamp).toISOString(),
         to: moment(state.currentTimestamp).toISOString(),
       },
-      logView,
     });
   }, [
     logsLocator,
-    asset.id,
     asset.type,
+    asset.id,
+    textQueryDebounced,
     state.startTimestamp,
     state.currentTimestamp,
-    textQueryDebounced,
-    logView,
   ]);
 
   return (

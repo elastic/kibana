@@ -302,6 +302,9 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                   'data-test-subj': 'roleMappingRow',
                 };
               }}
+              tableCaption={i18n.translate('xpack.security.management.roleMappings.tableCaption', {
+                defaultMessage: 'Role mappings list',
+              })}
             />
           );
         }}

@@ -12,7 +12,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
-import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import { ranges, TelemetryTimelineFetcher, newTelemetryLogger, withErrorMessage } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
@@ -84,7 +84,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
 
         return counter;
       } catch (error) {
-        logger.error('could not complete task', { error });
+        log.error('could not complete task', withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }

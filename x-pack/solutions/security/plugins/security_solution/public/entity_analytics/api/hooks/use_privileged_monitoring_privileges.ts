@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { PrivMonPrivilegesResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import { useEntityAnalyticsRoutes } from '../api';

@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -39,27 +40,30 @@ export const healthCheckPrivilegeMonitoringRoute = (
         validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
+          try {
+            const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
 
-          logger.error(`Error checking privilege monitoring health: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            logger.error(`Error checking privilege monitoring health: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

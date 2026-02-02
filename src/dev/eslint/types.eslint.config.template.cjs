@@ -50,6 +50,12 @@ module.exports = {
         'ui_capabilities/**/*',
         'upgrade/apps/**/*',
         'usage_collection/test_suites/**/*',
+        'src/playwright/page_objects/**/*',
+        'test/scout/**/*',
+        // when tsconfig.json is defined in 'scout/test/ui|api' folders
+        'parallel_tests/**/*.spec.ts',
+        'tests/**/*.spec.ts',
+        'fixtures/page_objects/**/*',
       ],
       rules: {
         // Let's focus on server-side errors first to avoid server crashes.

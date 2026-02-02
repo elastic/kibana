@@ -31,7 +31,7 @@ export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disa
         position="top"
         content={createCapabilityFailureMessage('canCreateTransformAlerts')}
       >
-        <>{crateAlertRuleActionNameText}</>
+        <span tabIndex={0}>{crateAlertRuleActionNameText}</span>
       </EuiToolTip>
     );
   }

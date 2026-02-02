@@ -30,7 +30,6 @@ import {
 } from '../translations';
 import type { EmbeddableAlertsTableQuery } from '../types';
 import { NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ } from '../constants';
-import { InMemoryStorage } from '../utils/in_memory_storage';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
@@ -40,7 +39,6 @@ export interface EmbeddableAlertsTableProps {
   services: AlertsTableProps['services'];
 }
 
-const inMemoryStorage = new InMemoryStorage();
 const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
   ...column,
   actions: false,
@@ -160,9 +158,8 @@ export const EmbeddableAlertsTable = ({
       openLinksInNewTab={true}
       flyoutOwnsFocus={true}
       flyoutPagination={false}
-      // Saves the configuration in memory in case we want to add a shared configuration saved in
-      // the panel config in the future (and avoid localStorage migrations or deletions tasks)
-      configurationStorage={inMemoryStorage}
+      // Disable configuration persistence
+      configurationStorage={null}
       // Disable columns customziation
       browserFields={{}}
       services={services}

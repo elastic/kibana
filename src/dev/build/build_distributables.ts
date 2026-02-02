@@ -24,7 +24,6 @@ export interface BuildOptions {
   downloadFreshNode: boolean;
   downloadCloudDependencies: boolean;
   initialize: boolean;
-  buildCanvasShareableRuntime: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
@@ -71,11 +70,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
-    // Build before copying source files
-    if (options.buildCanvasShareableRuntime) {
-      await globalRun(Tasks.BuildCanvasShareableRuntime);
-    }
-
     await globalRun(Tasks.CopyLegacySource);
 
     await globalRun(Tasks.CreateEmptyDirsAndFiles);

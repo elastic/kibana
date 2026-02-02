@@ -51,7 +51,7 @@ export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps)
           </EuiFlexGroup>
         }
       >
-        <span>{getOrEmptyTagFromValue(displayValue)}</span>
+        <span tabIndex={0}>{getOrEmptyTagFromValue(displayValue)}</span>
       </EuiToolTip>
     </TruncatableText>
   );

@@ -5,7 +5,13 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceStart,
+  CoreSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+} from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { isEmpty, last, merge, repeat, size } from 'lodash';
@@ -108,6 +114,7 @@ describe('Observability AI Assistant client', () => {
     search: jest.fn(),
     index: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -132,9 +139,11 @@ describe('Observability AI Assistant client', () => {
     getInstructions: jest.fn(),
   } as any;
 
+  const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
+
   let llmSimulator: LlmSimulator;
 
-  function createClient() {
+  function createClient(namespace: string = 'default') {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -178,6 +187,16 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
 
+    actionsClientMock.get.mockResolvedValue({
+      id: 'test-connector-id',
+      name: 'Test Connector',
+      actionTypeId: '.gen-ai',
+      config: { apiProvider: 'OpenAI' },
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+    } as any);
+
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
       core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
@@ -195,6 +214,7 @@ describe('Observability AI Assistant client', () => {
         name: 'johndoe',
       },
       scopes: ['observability'],
+      analytics: analyticsMock,
     });
   }
 
@@ -1647,6 +1667,127 @@ describe('Observability AI Assistant client', () => {
 
         expect(messages[2].message.content).toBe('Looks like the function call failed');
       });
+    });
+  });
+  describe('when deleting a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test' },
+                user: { name: 'johndoe' },
+                messages: [],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.delete.mockResolvedValue({} as any);
+
+      await client.delete('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_delete',
+        expect.objectContaining({})
+      );
+    });
+  });
+  describe('when duplicating a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test Conversation' },
+                user: { name: 'johndoe' },
+                messages: [],
+                public: false,
+                archived: false,
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.index.mockResolvedValue({ _id: 'new-conversation-id' } as any);
+
+      await client.duplicateConversation('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_duplicate',
+        expect.objectContaining({})
+      );
+    });
+  });
+  describe('space-aware links', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (functionClientMock as any).registerInstruction = jest.fn();
+      inferenceClientMock.chatComplete.mockImplementation(
+        () => new Observable((sub) => sub.complete())
+      );
+    });
+
+    const runWithNamespace = async (namespace: string) => {
+      // client = createClient(namespace);
+      client = createClient();
+      (client as any).dependencies.namespace = namespace;
+      (
+        await client.complete({
+          functionClient: functionClientMock,
+          connectorId: 'foo',
+          messages: [],
+          signal: new AbortController().signal,
+          persist: true,
+          kibanaPublicUrl: 'http://localhost:5601',
+          title: 'Generated title',
+        })
+      ).subscribe({});
+
+      await nextTick();
+    };
+
+    it('generates a link without space segment for default space', async () => {
+      await runWithNamespace('default');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining('http://localhost:5601/app/observabilityAIAssistant/conversations/')
+      );
+      expect(functionClientMock.registerInstruction).not.toHaveBeenCalledWith(
+        expect.stringContaining('/s/')
+      );
+    });
+
+    it('generates a link with space segment for non-default space', async () => {
+      const space = 'myspace';
+      await runWithNamespace('myspace');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `http://localhost:5601/s/${space}/app/observabilityAIAssistant/conversations/`
+        )
+      );
     });
   });
 });

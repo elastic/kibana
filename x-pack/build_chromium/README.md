@@ -24,13 +24,26 @@ location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/in
 
 ## Build Script Usage
 
+Note that a git commit hash for Chromium is required for the build.  This is obtained
+by running the following, which
+will print various info, including the git commit hash. 
+
+```sh
+$ node scripts/chromium_version.js <puppeteer version>
+```
+
 The system OS requires a few setup steps:
 1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
-2. The `python` command needs to launch Python 3.
+2. Use `python3` vs `python` (v2)
 3. Recommended: `tmux`, as your ssh session may get interrupted
 
 These commands show how to set up an environment to build:
+
 ```sh
+# Install pre-req tools
+sudo apt update
+sudo apt-get install -y bzip2 git lsb_release python3 binutils pkg-config gperf
+
 # Allow our scripts to use depot_tools commands
 export PATH=$HOME/chromium/depot_tools:$PATH
 
@@ -41,28 +54,23 @@ mkdir ~/chromium && cd ~/chromium
 gsutil cp -r gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
-python ./build_chromium/init.py
+python3 ./build_chromium/init.py
 
-# Run the build script with the path to the chromium src directory, the git commit hash
-python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
+# Run the build script with the Chromium git commit hash and architecture
+# Takes about 30 minutes.
+python3 ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 x64
 
-# Make sure you are using python3, you can state the path explicitly if needed
-/usr/bin/python3 ./build_chromium/build.py 67649b10b92bb182fba357831ef7dd6a1baa5648 x64
+# The build often fails at the last step when copying files to the staging
+# bucket, and if so, you need to copy them manually (see Artifacts below)
+# before doing another build, which will erase the files.
 
-# OR You can build for ARM
-python ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 arm64
+# Then you can build for ARM
+python3 ./build_chromium/build.py 70f5d88ea95298a18a85c33c98ea00e02358ad75 arm64
 ```
 
 **NOTE:** The `init.py` script updates git config to make it more possible for
 the Chromium repo to be cloned successfully. If checking out the Chromium fails
 with "early EOF" errors, the instance could be low on memory or disk space.
-
-## Getting the Commit Hash
-
-If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium that corresponds to the Puppeteer version.
-```
-node scripts/chromium_version.js [PuppeteerVersion]
-```
 
 When bumping the Puppeteer version, make sure you also update the `ChromiumArchivePaths.revision` variable in
 `x-pack/platform/plugins/private/reporting/server/browsers/chromium/paths.ts`.
@@ -88,10 +96,26 @@ settings, including the defaults. Some build flags are documented
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
 The zip files and md5 files are copied to a **staging** bucket in GCP storage.
 
-To publish the built artifacts for bunding in Kibana, copy the files from the `headless_shell_staging` bucket to the `headless_shell` bucket.
+Note these files are "cleaned" after you start another build, so you should ensure the 
+artifacts get copied to the cloud staging folder before starting another build.
+
+The build often fails with a permission error at the last step of the build where
+it copies these files.  Instead, you can copy the files to your local machine,
+then copy them to the staging directory, all from your local machine.
+
+```sh
+$ export VM_NAME=pmuellr-rd-build-chromium-linux-20250918-203527
+$ export VM_PATH=/home/pmuellr/chromium/chromium/src/out/headless
+$ gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" $VM_NAME:$VM_PATH/chromium-"*" .
+...
+$ gsutil cp chromium-* gs://headless_shell_staging
+...
 ```
-gsutil cp gs://headless_shell_staging/chromium-67649b1-linux_arm64.md5 gs://headless_shell/
-gsutil cp gs://headless_shell_staging/chromium-67649b1-linux_arm64.zip gs://headless_shell/
+
+When all the artifacts are in the staging bucket, you copy them all to the `headless_shell` bucket.
+
+```sh
+gsutil cp gs://headless_shell_staging/chromium-67649b1-* gs://headless_shell/
 ```
 
 IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.
@@ -110,45 +134,115 @@ Here's the steps on how to test a Puppeteer upgrade, run these tests on Mac, Win
 
 ## Testing Chromium upgrades on a Windows Machine
 
-Directions on creating a build of Kibana off an existing PR can be found here: 
-https://www.elastic.co/guide/en/kibana/current/building-kibana.html 
-You will need this build to install on your windows device to test the in progress PR. 
+Create a Windows Server VM at GCloud.  There is an an instance template instance-template-20250130-215334-pmuellr-windows you can create a VM from, here: 
+https://console.cloud.google.com/compute/instanceTemplates/list?inv=1&invt=Aboq_Q&project=elastic-kibana-184716 
 
-The default extractor for Windows might give `Path too long errors`. 
-- Install the zipped file onto your C:\ directory in case the path actually is too long. 
-- Use 7Zip or WinZip to extract the contents of the kibana build.
-Reference: This article can be helpful:
-https://www.partitionwizard.com/disk-recovery/error-0x80010135-path-too-long.html  
+Instead of using SSH to connect, you’ll use Remote Desktop (RDP) to open a terminal.  You’ll end up downloading an `.rdp` file, which you can open with the Windows App app (yes, the name of the Mac app is “Windows App”).  When you create the VM, you’ll need to reset the password, which you will need when you connect with RDP.  In addition, the ip address will change each time you restart, so you will need to “edit” the “Device” (the `.RDP` file) from the Windows App to set the ip address.  You should also go in Windows App settings, to set the Credentials from the newly reset password (and the userid you selected).  You can then select this credential in the “Device” settings.  The Device settings also let you set the Redirect folder (under Folders).
 
-For an elasticsearch cluster to base the latest kibana build with, you can use a snapshot.sh bash script to generate the latest build. Create a file called snapshot.sh and put the following into the file: 
+Install nvm via https://github.com/coreybutler/nvm-windows/releases - download the `nvm-setup.exe` program.
 
-```
-runQuery() {
-  curl --silent -XGET https://artifacts-api.elastic.co${1}
-}
-BUILD_HASH=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds | jq -r '.builds[0]')
-echo "Latest build hash :: $BUILD_HASH"
-KBN_DOWNLOAD=$(runQuery /v1/versions/${VERSION}-SNAPSHOT/builds/$BUILD_HASH/projects/elasticsearch/packages/elasticsearch-${VERSION}-SNAPSHOT-windows-x86_64.zip)
-echo $KBN_DOWNLOAD | jq -r '.package.url'
+Get the version of node this branch on your local laptop is using, via:
+
+```sh
+$ cat .nvmrc
+20.18.2
 ```
 
-In the terminal once you have the snapshot.sh file written run: 
-chmod a+x snapshot.sh to make the file executable
-Then set the version variable within the script to what you need by typing the following (in this example 8.8.0):
-VERSION=8.8.0 ./snapshot.sh
+Now install that version of node on Windows:
 
-In the terminal you should see a web address that will give you a download of elasticsearch. 
+```sh
+$ nvm install 20.18.2
+$ nvm use 20.18.2
+```
 
-You may need to disable xpack security in the elasticsearch.yml 
-xpack.security.enabled: false
+From the branch on your local laptop, find the relevant ES build via  yarn es snapshot
 
-Make sure nothing is set in the kibana.yml
+```sh
+$ yarn es snapshot 
+yarn run v1.22.22
+_ node scripts/es snapshot --license trial
+ info Installing from snapshot
+ info version: 9.1.0
+ info install path: /Users/pmuellr/Projects/elastic/kibana-puppeteer-24.1.1/.es/9.1.0
+ info license: trial
+ info Downloading snapshot manifest from  https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.1.0/manifest-latest-verified.json
+ info downloading artifact from https://storage.googleapis.com/kibana-ci-es-snapshots-daily/...
+```
 
-Run `.\bin\elasticsearch.bat` in the elasticsearch directory first and then once it's up run `.\bin\kibana.bat`
+The URL at the bottom is what we want.  Copy that and open the Edge browser in Windows and paste it in the URL bar.  From there, select the URL for the windows build, and download to Windows, then unpack.
 
-Navigate to localhost:5601 and there shouldn't be any prompts to set up security etc. To test PNG reporting, you may need to upload a license. Navigate to https://wiki.elastic.co/display/PM/Internal+License+-+X-Pack+and+Endgame and download the license.json from Internal Licenses. 
+Do a build on your Mac:
 
-Navigate to Stack Management in Kibana and you can upload the license.json from internal licenses. You won't need to restart the cluster and should be able to test the Kibana feature as needed at this point. 
+```sh
+$ node scripts/build \
+  --all-platforms \
+  --skip-os-packages \
+  --skip-canvas-shareable-runtime \
+  --skip-docker-contexts \
+  --skip-cdn-assets \
+  --skip-docker-ubi \
+  --skip-docker-wolfi \
+  --skip-docker-fips \
+  --release
+```
+
+The output we want will be in build/default/kibana-x.y.z-windows-x86_64, but we’ll want a tar.gz of that:
+
+```sh
+cd build/default
+tar -zcvf kibana-9.1.0-windows-x86_64.tar.gz kibana-9.1.0-windows-x86_64
+```
+
+Set your RDP session up with a “redirect folder”, and place the .tar.gz in that folder.  You will need to quit and relaunch RDP after adding the “redirect folder”.  You will eventually be able to see the folder in “My Computer” or such in Windows explorer.  Copy the .tar.gz to a “local” disk, and then unpack with 
+
+```sh
+$ tar -zxvf kibana-9.1.0-windows-x86_64.tar.gz 
+```
+
+Edit `elastichsearch.yml` as follows:
+
+```yaml
+discovery.type: "single-node"
+xpack.ml.enabled: false
+xpack.security.authc.api_key.enabled: true
+```
+
+Change `xpack.security.http.ssl.enabled` from true to false (to run in http instead of https)
+
+Start elasticsearch
+
+```sh
+$ cd ${es dir}
+$ bin/elasticsearch.bat
+...
+```
+
+Reset passwords for elastic and kibana_system
+
+```sh
+bin/elasticsearch-reset-password.bat -u elastic       # login to Kibana with this, so remember it!
+bin/elasticsearch-reset-password.bat -u kibana_system # set in kibana.yml
+```
+
+Edit kibana.yml
+
+```yaml
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "" - get from password reset (see above)
+xpack.security.encryptionKey:              "01234567012345670123456701234567"
+xpack.encryptedSavedObjects.encryptionKey: "01234567012345670123456701234567"
+xpack.reporting.encryptionKey:             "01234567012345670123456701234567"
+```
+
+Start kibana
+
+```sh
+$ cd ${kibana dir}
+$ bin/kibana.bat
+...
+```
+
+Start a trial, ("Stack Management" > "License Management" > "Start a trial") so that reporting is enabled.  Load a sample dataset, to load a dashboard, view the dashboard, then generate a PDF (with and without printing selected) and PNG
 
 ## Resources
 

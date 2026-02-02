@@ -55,6 +55,7 @@ export const SearchIndexPipelines: React.FC = () => {
     isDeleteModalOpen,
     pipelineName,
     defaultPipelineValues,
+    showPipelineSettings,
   } = useValues(PipelinesLogic);
   const {
     closeAddMlInferencePipelineModal,
@@ -94,7 +95,7 @@ export const SearchIndexPipelines: React.FC = () => {
   }, [indexName, revertPipeline]);
 
   useEffect(() => {
-    if (index) {
+    if (index && !showPipelineSettings) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
         isConnectorIndex(index)
@@ -102,7 +103,7 @@ export const SearchIndexPipelines: React.FC = () => {
           : defaultPipelineValues
       );
     }
-  }, [index]);
+  }, [index, showPipelineSettings]);
 
   if (!index) {
     return <></>;

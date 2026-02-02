@@ -69,6 +69,7 @@ export function setupIntersectionObserverMock({
 
 export const mockControlGroupApi = {
   untilInitialized: async () => {},
+  untilFiltersPublished: async () => {},
   filters$: new BehaviorSubject(undefined),
   query$: new BehaviorSubject(undefined),
   timeslice$: new BehaviorSubject(undefined),

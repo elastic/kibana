@@ -65,6 +65,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
           <EuiToolTip content={moment(Number(alert.start)).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}
@@ -105,6 +106,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
           <EuiToolTip content={moment(alert.fields[TIMESTAMP]).format(dateFormat)}>
             <EuiText
+              tabIndex={0}
               css={css`
                 font-weight: ${euiTheme.font.weight.semiBold};
               `}

@@ -71,6 +71,7 @@ export const AlertsSolutionSelector = forwardRef<
       <EuiSuperSelect
         ref={ref}
         isLoading={isLoading}
+        disabled={isLoading}
         isInvalid={isError}
         placeholder={SOLUTION_SELECTOR_PLACEHOLDER}
         options={options}

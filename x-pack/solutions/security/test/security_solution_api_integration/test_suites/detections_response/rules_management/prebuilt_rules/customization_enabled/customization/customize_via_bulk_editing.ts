@@ -13,7 +13,7 @@ import {
   BulkEditActionResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -25,7 +25,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
     ): Promise<BulkEditActionResponse> => {
       const {
         body: { data: prebuiltRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {
             filter: 'alert.attributes.params.immutable: true',
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      const { body: bulkEditResponse } = await securitySolutionApi
+      const { body: bulkEditResponse } = await detectionsApi
         .performRulesBulkAction({
           query: {},
           body: {
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     describe('when base version is available', () => {
-      testCustomizationViaBulkEditing({ hasBaseVersion: false });
+      testCustomizationViaBulkEditing({ hasBaseVersion: true });
     });
 
     describe('when base version is missing', () => {

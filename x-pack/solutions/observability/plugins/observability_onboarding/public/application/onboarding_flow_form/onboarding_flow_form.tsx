@@ -66,7 +66,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
       {
         defaultMessage:
-          'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
+          'Monitor your frontend and backend applications, set up synthetic monitors, and track application performance across your stack',
       }
     ),
     logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
@@ -82,7 +82,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: metricsOnboardingEnabled
         ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
             defaultMessage:
-              'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
+              'Track your host and its services by setting up SLOs, receiving alerts, and remediating performance issues',
           })
         : i18n.translate(
             'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
@@ -103,7 +103,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
             {
               defaultMessage:
-                'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
+                'Monitor your Kubernetes cluster and container workloads using logs, metrics, traces, and profiling data',
             }
           )
         : i18n.translate(
@@ -124,7 +124,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.cloudDescription',
         {
-          defaultMessage: 'Ingest telemetry data from the Cloud for your applications and services',
+          defaultMessage:
+            'Ingest telemetry data from your cloud services to better understand application behavior and ensure service availability',
         }
       ),
       logos: ['azure', 'aws', 'gcp'],

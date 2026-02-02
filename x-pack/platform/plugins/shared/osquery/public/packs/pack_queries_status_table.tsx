@@ -395,7 +395,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <div data-test-subj="last-results-date">
+            <div data-test-subj="last-results-date" tabIndex={0}>
               <FormattedRelative value={timestamp} />
             </div>
           </EuiToolTip>

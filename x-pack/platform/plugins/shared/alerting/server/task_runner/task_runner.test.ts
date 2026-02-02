@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { SavedObject } from '@kbn/core/server';
 import type {
@@ -1659,7 +1660,6 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    alertsClient.getTrackedExecutions.mockResolvedValue([]);
 
     alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
@@ -1808,6 +1808,39 @@ describe('Task Runner', () => {
     );
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
+
+  test('should set authentication errors as user-error', async () => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Response Error"`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'user-error']);
   });
 
   test('should set unexpected errors as framework-error', async () => {
@@ -3352,49 +3385,6 @@ describe('Task Runner', () => {
         tags: ['1', 'test'],
       }
     );
-  });
-
-  test('should remove the oldest execution id and return the tracked executions', async () => {
-    alertsClient.getTrackedExecutions.mockReturnValue(['1111', '2222', '3333', '4444', '5555']);
-    alertsClient.getProcessedAlerts.mockReturnValue({});
-    alertsClient.getSummarizedAlerts.mockResolvedValue({
-      new: {
-        count: 1,
-        data: [mockAAD],
-      },
-      ongoing: { count: 0, data: [] },
-      recovered: { count: 0, data: [] },
-    });
-
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    rulesSettingsService.getSettings.mockResolvedValue({
-      flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, lookBackWindow: 5 },
-      queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
-    });
-
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.trackedExecutions).toEqual([
-      '2222',
-      '3333',
-      '4444',
-      '5555',
-      '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    ]);
   });
 
   test('should return shouldDisableTask when task is enabled but rule is not', async () => {

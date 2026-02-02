@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { KibanaServices } from './types';
 import { fetchActiveMaintenanceWindows } from './api';

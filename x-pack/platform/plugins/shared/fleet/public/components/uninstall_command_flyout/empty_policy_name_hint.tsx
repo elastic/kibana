@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -20,13 +20,14 @@ export const EMPTY_POLICY_NAME_HINT = i18n.translate(
 export const EmptyPolicyNameHint = () => (
   <>
     {'- '}
-    <EuiToolTip content={EMPTY_POLICY_NAME_HINT}>
-      <EuiIcon
-        type="question"
-        color="subdued"
-        aria-label={EMPTY_POLICY_NAME_HINT}
-        data-test-subj="emptyPolicyNameHint"
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      content={EMPTY_POLICY_NAME_HINT}
+      type="question"
+      color="subdued"
+      aria-label={EMPTY_POLICY_NAME_HINT}
+      iconProps={{
+        'data-test-subj': 'emptyPolicyNameHint',
+      }}
+    />
   </>
 );

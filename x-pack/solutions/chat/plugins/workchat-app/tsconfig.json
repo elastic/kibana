@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -38,6 +38,7 @@
     "@kbn/wc-genai-utils",
     "@kbn/workchat-framework-plugin",
     "@kbn/logging",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

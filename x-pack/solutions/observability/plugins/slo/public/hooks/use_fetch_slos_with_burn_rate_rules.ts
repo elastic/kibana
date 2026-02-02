@@ -10,7 +10,7 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import { HttpSetup } from '@kbn/core/public';

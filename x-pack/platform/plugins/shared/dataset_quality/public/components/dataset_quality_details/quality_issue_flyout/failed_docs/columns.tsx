@@ -44,7 +44,7 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
   {
     name: (
       <EuiToolTip content={typeColumnTooltip}>
-        <span>
+        <span tabIndex={0}>
           {`${typeColumnName} `}
           <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
         </span>

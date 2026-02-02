@@ -18,6 +18,8 @@ import type {
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
   MicrosoftDefenderGetLibraryFilesResponse,
+  MicrosoftDefenderEndpointRunScriptParams,
+  MicrosoftDefenderEndpointGetActionsParams,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { merge } from 'lodash';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
@@ -77,6 +79,17 @@ const createMsDefenderClientConstructorOptionsMock = () => {
 const createMsConnectorActionsClientMock = (): ActionsClientMock => {
   const client = responseActionsClientMock.createConnectorActionsClient();
 
+  /**
+   * Tracks the last runscript action to enable dynamic mock responses.
+   * When GET_ACTIONS is called with a matching action ID, the mock returns
+   * the captured script details to simulate MDE's behavior.
+   */
+  const lastAction = {
+    lastRunScriptActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
+    lastRunScriptScriptName: 'test-script.ps1',
+    lastRunScriptComment: 'Action triggered from Elastic Security (action id: test-action-id)',
+  };
+
   (client.getAll as jest.Mock).mockImplementation(async () => {
     const result: ConnectorWithExtraFindData[] = [
       // return a MS connector
@@ -92,6 +105,7 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
   (client.execute as jest.Mock).mockImplementation(
     async (options: Parameters<typeof client.execute>[0]) => {
       const subAction = options.params.subAction;
+      const subActionParams = options.params.subActionParams;
 
       // Mocks for the different connector methods
       switch (subAction) {
@@ -116,20 +130,62 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS:
+          // Dynamic response based on requested action ID
+          // If the requested action ID matches the last runscript action, return a RunScript action
+          // Otherwise, return a generic machine action (for isolate/release/cancel)
+          const getActionsParams = subActionParams as MicrosoftDefenderEndpointGetActionsParams;
+          const requestedActionId = getActionsParams.id?.[0];
+          const isRunScriptAction = requestedActionId === lastAction.lastRunScriptActionId;
+
           return responseActionsClientMock.createConnectorActionExecuteResponse({
             data: {
               '@odata.context': 'some-context',
               '@odata.count': 1,
               total: 1,
               page: 1,
-              pageSize: 0,
-              value: [createMicrosoftMachineActionMock()],
+              pageSize: 1,
+              value: isRunScriptAction
+                ? [
+                    createMicrosoftMachineActionMock({
+                      id: lastAction.lastRunScriptActionId,
+                      type: 'LiveResponse',
+                      status: 'InProgress',
+                      requestorComment: lastAction.lastRunScriptComment,
+                      commands: [
+                        {
+                          index: 0,
+                          startTime: new Date(Date.now() - 10000).toISOString(),
+                          endTime: new Date().toISOString(),
+                          commandStatus: 'InProgress',
+                          errors: [],
+                          command: {
+                            type: 'RunScript',
+                            params: [
+                              { key: 'ScriptName', value: lastAction.lastRunScriptScriptName },
+                            ],
+                          },
+                        },
+                      ],
+                    }),
+                  ]
+                : [createMicrosoftMachineActionMock()],
             },
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT:
+          // Capture values for subsequent GET_ACTIONS calls to enable validation testing
+          const runScriptParams = subActionParams as MicrosoftDefenderEndpointRunScriptParams;
+          const actionId = '5382f7ea-7557-4ab7-9782-d50480024a4e';
+          lastAction.lastRunScriptActionId = actionId;
+          lastAction.lastRunScriptScriptName =
+            runScriptParams.parameters?.scriptName || 'test-script.ps1';
+          lastAction.lastRunScriptComment = runScriptParams.comment || 'test comment';
+
           return responseActionsClientMock.createConnectorActionExecuteResponse({
-            data: createMicrosoftMachineActionMock({ type: 'LiveResponse' }),
+            data: createMicrosoftMachineActionMock({
+              type: 'LiveResponse',
+              id: actionId,
+            }),
           });
 
         case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES:

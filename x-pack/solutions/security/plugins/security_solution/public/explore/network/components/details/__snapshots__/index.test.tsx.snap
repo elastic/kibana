@@ -235,27 +235,48 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <button
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="securitySolutionFlyoutLink"
-                  type="button"
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-b19a781f683541a7a25ee345133aa399"
+                  tabindex="-1"
                 >
-                  b19a781f683541a7a25ee345133aa399
-                </button>
-              </span>
-            </span>
-          </div>
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        b19a781f683541a7a25ee345133aa399
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
@@ -574,27 +595,48 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
         <dd
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
-          <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+          <span
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            data-test-subj="DefaultFieldRendererComponent"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
-                <button
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="securitySolutionFlyoutLink"
-                  type="button"
+                <div
+                  data-provider-id="draggableId.content.default-field-renderer-default-draggable-host-overview-host_id-b19a781f683541a7a25ee345133aa399"
+                  tabindex="-1"
                 >
-                  b19a781f683541a7a25ee345133aa399
-                </button>
-              </span>
-            </span>
-          </div>
+                  <span
+                    class="c1"
+                    data-test-subj="render-content-host.id"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <button
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="securitySolutionFlyoutLink"
+                        type="button"
+                      >
+                        b19a781f683541a7a25ee345133aa399
+                      </button>
+                    </span>
+                  </span>
+                </div>
+              </div>
+               
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              />
+            </div>
+          </span>
         </dd>
         <dt
           class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"

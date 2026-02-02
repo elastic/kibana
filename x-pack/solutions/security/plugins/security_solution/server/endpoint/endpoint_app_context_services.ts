@@ -59,6 +59,7 @@ import type {
 } from './services/fleet/endpoint_fleet_services_factory';
 import { EndpointFleetServicesFactory } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
+import { EndpointError } from '../../common/endpoint/errors';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
@@ -283,7 +284,7 @@ export class EndpointAppContextService {
   }
 
   /**
-   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * SpaceId should be defined if wanting go get back an internal client that is scoped to a given space id
    * @param spaceId
    * @param unscoped
    */
@@ -445,5 +446,19 @@ export class EndpointAppContextService {
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
+    key: TKey
+  ): ConfigType[TKey] {
+    if (!this.startDependencies?.config) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(this.startDependencies.config, key)) {
+      throw new EndpointError(`Missing config value for key: ${key}`);
+    }
+
+    return this.startDependencies.config[key];
   }
 }

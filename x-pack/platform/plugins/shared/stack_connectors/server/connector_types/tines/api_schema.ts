@@ -30,27 +30,28 @@ export const TinesStoriesApiResponseSchema = TinesBaseApiResponseSchema.extends(
   { unknowns: 'ignore' }
 );
 
+// Single Webhook action schema
+export const TinesWebhookApiResponseSchema = schema.object(
+  {
+    id: schema.number(),
+    name: schema.string(),
+    type: schema.string(),
+    story_id: schema.number(),
+    options: schema.object(
+      {
+        path: schema.maybe(schema.string()),
+        secret: schema.maybe(schema.string()),
+      },
+      { unknowns: 'ignore' }
+    ),
+  },
+  { unknowns: 'ignore' }
+);
+
 // Webhooks action schema
 export const TinesWebhooksApiResponseSchema = TinesBaseApiResponseSchema.extends(
   {
-    agents: schema.arrayOf(
-      schema.object(
-        {
-          id: schema.number(),
-          name: schema.string(),
-          type: schema.string(),
-          story_id: schema.number(),
-          options: schema.object(
-            {
-              path: schema.maybe(schema.string()),
-              secret: schema.maybe(schema.string()),
-            },
-            { unknowns: 'ignore' }
-          ),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
+    agents: schema.arrayOf(TinesWebhookApiResponseSchema),
   },
   { unknowns: 'ignore' }
 );
@@ -59,5 +60,6 @@ export const TinesRunApiResponseSchema = schema.object({}, { unknowns: 'ignore' 
 
 export type TinesBaseApiResponse = TypeOf<typeof TinesBaseApiResponseSchema>;
 export type TinesStoriesApiResponse = TypeOf<typeof TinesStoriesApiResponseSchema>;
+export type TinesWebhookApiResponse = TypeOf<typeof TinesWebhookApiResponseSchema>;
 export type TinesWebhooksApiResponse = TypeOf<typeof TinesWebhooksApiResponseSchema>;
 export type TinesRunApiResponse = TypeOf<typeof TinesRunApiResponseSchema>;

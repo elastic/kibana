@@ -101,46 +101,47 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    // github.com/elastic/kibana/issues/177665
     describe('when error sample data is loaded', () => {
-      describe('error sample id', () => {
-        before(async () => {
-          await generateData({ serviceName, start, end, apmSynthtraceEsClient });
-        });
-
-        after(() => apmSynthtraceEsClient.clean());
-
-        describe('return correct data', () => {
-          let errorSampleDetailsResponse: ErrorSampleDetails;
+      [{ withoutErrorId: true }, { withoutErrorId: false }].forEach(({ withoutErrorId }) => {
+        describe(`error sample (${withoutErrorId ? 'without error id' : 'with error id'})`, () => {
           before(async () => {
-            const errorsSamplesResponse = await callErrorGroupSamplesApi({
-              groupId: '0000000000000000000000000Error 1',
+            await generateData({ serviceName, start, end, apmSynthtraceEsClient });
+          });
+
+          after(() => apmSynthtraceEsClient.clean());
+
+          describe('return correct data', () => {
+            let errorSampleDetailsResponse: ErrorSampleDetails;
+            before(async () => {
+              const errorsSamplesResponse = await callErrorGroupSamplesApi({
+                groupId: '0000000000000000000000000Error 1',
+              });
+
+              const errorId = errorsSamplesResponse.body.errorSampleIds[0];
+
+              const response = await callErrorSampleDetailsApi(errorId);
+              errorSampleDetailsResponse = response.body;
             });
 
-            const errorId = errorsSamplesResponse.body.errorSampleIds[0];
+            it('displays correct error grouping_key', () => {
+              expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
+                '0000000000000000000000000Error 1'
+              );
+            });
 
-            const response = await callErrorSampleDetailsApi(errorId);
-            errorSampleDetailsResponse = response.body;
-          });
+            it('displays correct error message', () => {
+              expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal(
+                'Error 1'
+              );
+            });
 
-          it('displays correct error grouping_key', () => {
-            expect(errorSampleDetailsResponse.error.error.grouping_key).to.equal(
-              '0000000000000000000000000Error 1'
-            );
-          });
+            it('displays correct error culprit info', () => {
+              expect(errorSampleDetailsResponse.error.error.culprit).to.equal('Error culprit 1');
+            });
 
-          it('displays correct error message', () => {
-            expect(errorSampleDetailsResponse.error.error.exception?.[0].message).to.equal(
-              'Error 1'
-            );
-          });
-
-          it('displays correct error culprit info', () => {
-            expect(errorSampleDetailsResponse.error.error.culprit).to.equal('Error culprit 1');
-          });
-
-          it('displays correct language name', () => {
-            expect(errorSampleDetailsResponse.error.service.language?.name).to.equal('swift');
+            it('displays correct language name', () => {
+              expect(errorSampleDetailsResponse.error.service.language?.name).to.equal('swift');
+            });
           });
         });
       });

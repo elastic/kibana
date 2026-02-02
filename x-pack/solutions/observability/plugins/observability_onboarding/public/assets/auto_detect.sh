@@ -13,6 +13,11 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
+if ! command -v tar >/dev/null 2>&1; then
+  fail "tar is required to run this script"
+fi
+
+
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then

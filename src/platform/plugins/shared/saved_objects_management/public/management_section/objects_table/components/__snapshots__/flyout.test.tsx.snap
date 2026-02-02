@@ -111,6 +111,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Conflicting data views"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>

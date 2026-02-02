@@ -20,5 +20,9 @@ export { getAgentUploads, getAgentUploadFile, deleteAgentUploadFile } from './up
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';
-export { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
+export {
+  getAvailableVersions,
+  getLatestAvailableAgentVersion,
+  getLatestAgentAvailableDockerImageVersion,
+} from './versions';
 export { getAutoUpgradeAgentsStatus } from './auto_upgrade_agents_status';

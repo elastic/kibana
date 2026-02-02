@@ -231,6 +231,7 @@ export function getDashboardApi({
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
     setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
+    untilControlsInitialized: controlGroupManager.internalApi.untilControlsInitialized,
   };
 
   const searchSessionManager = initializeSearchSessionManager(

@@ -63,7 +63,7 @@ export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ even
             {eventCategories.map((category, idx) => (
               <EuiFlexItem grow={false} key={`event-category-${category}`}>
                 <EuiToolTip content={getEcsAllowedValueDescription('event.category', category)}>
-                  <EuiText size="s">
+                  <EuiText size="s" tabIndex={0}>
                     {category}
                     {idx !== eventCategories.length - 1 && ','}
                   </EuiText>
