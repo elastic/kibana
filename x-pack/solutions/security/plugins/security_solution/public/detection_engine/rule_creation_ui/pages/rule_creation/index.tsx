@@ -113,7 +113,7 @@ MyEuiPanel.displayName = 'MyEuiPanel';
 const CreateRulePageComponent: React.FC = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
