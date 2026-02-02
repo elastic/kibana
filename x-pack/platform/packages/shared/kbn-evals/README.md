@@ -248,6 +248,209 @@ RAG_EVAL_K=5 node scripts/playwright test --config ...
 
 The environment variable takes priority over the value passed to `createRagEvaluators()`.
 
+### Tool Selection Evaluators
+
+Tool selection evaluators verify that an LLM-based workflow selects the correct tools. They measure recall, precision, and order correctness of tool calls.
+
+#### Using Tool Selection Evaluators
+
+```typescript
+import {
+  createToolSelectionEvaluator,
+  createToolSelectionEvaluators,
+  type ExpectedToolSelection,
+} from '@kbn/evals';
+
+// Create a single evaluator
+const toolEvaluator = createToolSelectionEvaluator({
+  extractToolCalls: (output) => output.toolCalls,
+  extractExpectedTools: (expected) => expected.expectedTools,
+});
+
+// Or create all tool selection evaluators at once
+const allToolEvaluators = createToolSelectionEvaluators({
+  extractToolCalls: (output) => output.toolCalls,
+  extractExpectedTools: (expected) => expected.expectedTools,
+});
+```
+
+#### Expected Tools Format
+
+Define expected tools in your dataset examples:
+
+```typescript
+{
+  expectedTools: {
+    tools: ['search', 'retrieve', 'summarize'],
+    orderMatters: true,   // Optional: check if tools are called in order
+    exactMatch: false,    // Optional: fail if extra tools are called
+  },
+}
+```
+
+#### Available Evaluators
+
+| Evaluator                   | Description                                                   |
+| --------------------------- | ------------------------------------------------------------- |
+| `Tool Selection`            | Overall selection correctness (combines recall/precision)      |
+| `Tool Selection Recall`     | Fraction of expected tools that were called                   |
+| `Tool Selection Precision`  | Fraction of called tools that were expected                   |
+| `Tool Selection Order`      | Whether expected tools were called in the correct order       |
+
+### Schema Compliance Evaluators
+
+Schema compliance evaluators validate that tool call parameters conform to expected JSON schemas. They use [AJV](https://ajv.js.org/) for validation.
+
+#### Using Schema Compliance Evaluators
+
+```typescript
+import {
+  createSchemaComplianceEvaluator,
+  createSchemaComplianceEvaluators,
+  type ExpectedToolSchemas,
+} from '@kbn/evals';
+
+const schemaEvaluator = createSchemaComplianceEvaluator({
+  extractToolCalls: (output) => output.toolCalls,
+  extractExpectedSchemas: (expected) => expected.schemas,
+});
+
+// Or create all schema compliance evaluators at once
+const allSchemaEvaluators = createSchemaComplianceEvaluators();
+```
+
+#### Expected Schemas Format
+
+Define expected schemas in your dataset examples:
+
+```typescript
+{
+  expectedSchemas: {
+    schemas: {
+      search: {
+        type: 'object',
+        properties: {
+          query: { type: 'string' },
+          limit: { type: 'number', minimum: 1, maximum: 100 },
+        },
+        required: ['query'],
+      },
+      retrieve: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+    },
+    strictMode: true,  // Optional: fail if tool has no matching schema
+  },
+}
+```
+
+#### Available Evaluators
+
+| Evaluator                   | Description                                                   |
+| --------------------------- | ------------------------------------------------------------- |
+| `Schema Compliance`         | Overall compliance rate with detailed error reporting          |
+| `Schema Compliance Rate`    | Percentage of tool calls passing validation                   |
+| `Parameter Completeness`    | Fraction of required parameters present in tool calls         |
+
+### Improvement Suggestions Service
+
+The improvement suggestions service analyzes evaluation results and generates actionable recommendations for improving your LLM workflows. It supports both heuristic-based and LLM-based analysis.
+
+#### Basic Usage (Heuristics Only)
+
+```typescript
+import { createImprovementSuggestionsService } from '@kbn/evals';
+
+const service = createImprovementSuggestionsService({
+  lowScoreThreshold: 0.7,      // Scores below this are considered low
+  maxSuggestions: 10,          // Maximum suggestions to generate
+});
+
+// Analyze experiment results
+const result = await service.analyze({
+  experiment: ranExperiment,
+  model: 'gpt-4',
+});
+
+console.log(result.suggestions);  // Array of improvement suggestions
+console.log(result.summary);      // Summary by impact and category
+```
+
+#### With LLM Analysis
+
+For deeper analysis, configure an LLM to analyze patterns:
+
+```typescript
+const service = createImprovementSuggestionsService({
+  output: inferenceClient.output,
+  connectorId: 'my-connector',
+  analyzerModel: 'gpt-4',
+  enableHeuristics: true,  // Combine with heuristic analysis
+});
+
+const result = await service.analyze({
+  experiment: ranExperiment,
+  additionalContext: 'This is a RAG workflow for documentation search',
+  focusCategories: ['context_retrieval', 'accuracy'],
+});
+```
+
+#### With Trace Preprocessing
+
+To include trace data in the analysis:
+
+```typescript
+const service = createImprovementSuggestionsService({
+  esClient,
+  traceIndexPattern: 'traces-apm-*',
+  maxSpansPerTrace: 1000,
+});
+
+// Fetch and analyze traces
+const trace = await service.fetchTrace(traceId);
+```
+
+#### Suggestion Categories
+
+Suggestions are categorized by area of improvement:
+
+| Category            | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `prompt`            | System prompt or instruction improvements        |
+| `tool_selection`    | Tool selection accuracy and efficiency           |
+| `response_quality`  | Output formatting and clarity                    |
+| `context_retrieval` | RAG/retrieval performance                        |
+| `reasoning`         | Logical reasoning and problem-solving            |
+| `accuracy`          | Factual correctness and precision                |
+| `efficiency`        | Latency, token usage, and cost optimization      |
+| `other`             | General improvements                             |
+
+#### Suggestion Output Format
+
+```typescript
+interface ImprovementSuggestion {
+  id: string;
+  title: string;
+  description: string;
+  category: ImprovementSuggestionCategory;
+  impact: 'high' | 'medium' | 'low';
+  confidence: 'high' | 'medium' | 'low';
+  evidence: Array<{
+    evaluatorName: string;
+    exampleIndices: number[];
+    score?: number;
+    explanation?: string;
+  }>;
+  actionItems: string[];
+  priorityScore?: number;
+  tags?: string[];
+}
+```
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -506,3 +709,864 @@ telemetry.tracing.exporters:
       project_name: '<my-name>'
       api_key: '<my-api-key>'
 ```
+
+## Running Eval Suites Programmatically
+
+The package provides utilities for running eval suites programmatically via subprocess. This is useful for:
+
+- Orchestrating multiple eval suites in CI/CD pipelines
+- Running eval suites from custom scripts or tools
+- Integrating eval execution into feedback loops
+
+### Running a Single Eval Suite
+
+Use `runEvalSuiteSubprocess` to run an eval suite by spawning a child process:
+
+```typescript
+import { runEvalSuiteSubprocess } from '@kbn/evals';
+
+const result = await runEvalSuiteSubprocess({
+  configPath: 'x-pack/solutions/security/test/security_solution_evals/playwright.config.ts',
+  project: 'azure-gpt4o', // Optional: run specific connector
+  env: {
+    EVALUATION_CONNECTOR_ID: 'my-connector',
+    EVALUATION_REPETITIONS: '3',
+  },
+  workers: 4, // Optional: parallel workers
+  timeout: 30 * 60 * 1000, // Optional: 30 minute timeout
+  log, // Optional: ToolingLog instance for output
+});
+
+if (result.success) {
+  console.log(`Eval suite completed in ${result.durationMs}ms`);
+} else {
+  console.error(`Eval suite failed with exit code ${result.exitCode}`);
+}
+```
+
+### Running Multiple Eval Suites
+
+Use `runMultipleEvalSuites` to run multiple suites sequentially or in parallel:
+
+```typescript
+import { runMultipleEvalSuites } from '@kbn/evals';
+
+const result = await runMultipleEvalSuites({
+  suites: [
+    { configPath: 'path/to/suite1/playwright.config.ts' },
+    { configPath: 'path/to/suite2/playwright.config.ts', project: 'azure-gpt4o' },
+  ],
+  parallel: true, // Run suites in parallel
+  maxParallel: 2, // Maximum concurrent suites
+  stopOnFailure: false, // Continue on failure (sequential mode only)
+  log,
+});
+
+console.log(`${result.successCount}/${result.results.length} suites passed`);
+```
+
+### Creating a Reusable Runner
+
+Use `createEvalSuiteSubprocessRunner` to create a runner with preset defaults:
+
+```typescript
+import { createEvalSuiteSubprocessRunner } from '@kbn/evals';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+const runner = createEvalSuiteSubprocessRunner({
+  log,
+  cwd: REPO_ROOT,
+  defaultEnv: {
+    EVALUATION_CONNECTOR_ID: 'default-connector',
+  },
+  defaultTimeout: 20 * 60 * 1000, // 20 minutes
+});
+
+// Run a single suite
+const result = await runner.run({
+  configPath: 'path/to/playwright.config.ts',
+});
+
+// Run multiple suites
+const batchResult = await runner.runMultiple({
+  suites: [
+    { configPath: 'path/to/suite1/playwright.config.ts' },
+    { configPath: 'path/to/suite2/playwright.config.ts' },
+  ],
+  parallel: true,
+});
+```
+
+### Configuration Options
+
+| Option | Description |
+| ------ | ----------- |
+| `configPath` | Path to the Playwright config file (required) |
+| `project` | Connector ID to filter tests to a specific project |
+| `testFiles` | Array of specific test files to run |
+| `grep` | Pattern to filter tests by name |
+| `grepInvert` | Pattern to exclude tests by name |
+| `env` | Environment variables to pass to the subprocess |
+| `timeout` | Timeout in milliseconds (default: 30 minutes) |
+| `workers` | Number of parallel workers |
+| `headed` | Run in headed (visible browser) mode |
+| `log` | ToolingLog instance for output capture |
+| `cwd` | Working directory for the subprocess |
+| `captureOutput` | Whether to capture stdout/stderr (default: true if log provided) |
+
+## Feedback Loop Orchestrator
+
+The feedback loop orchestrator enables iterative evaluation with automatic improvement suggestions. It runs evaluation cycles, analyzes results, and generates actionable recommendations for improving LLM workflows.
+
+### Basic Usage
+
+```typescript
+import { createFeedbackLoopOrchestrator, createImprovementAnalyzer } from '@kbn/evals';
+
+const orchestrator = createFeedbackLoopOrchestrator({
+  executorClient,
+  maxIterations: 5,
+  minImprovementThreshold: 0.01,
+  onSuggestion: (suggestion, iteration) => {
+    console.log(`Iteration ${iteration}: ${suggestion.title}`);
+  },
+  onIterationComplete: (result) => {
+    console.log(`Iteration ${result.iteration} complete: score ${result.meanScore}`);
+  },
+});
+
+// Run the feedback loop
+const controller = orchestrator.run({
+  dataset,
+  task: myTask,
+  evaluators: myEvaluators,
+  model: 'gpt-4',
+  additionalContext: 'This is a RAG workflow for documentation search',
+});
+
+// Get the final result
+const result = await controller.result;
+console.log(`Improved from ${result.initialScore} to ${result.finalScore}`);
+console.log(`Total suggestions: ${result.allSuggestions.length}`);
+```
+
+### Stopping the Loop
+
+You can stop the feedback loop after the current iteration:
+
+```typescript
+const controller = orchestrator.run({ dataset, task, evaluators });
+
+// Stop after some condition
+setTimeout(() => controller.stop(), 60000);
+
+const result = await controller.result;
+if (result.terminationReason === 'manual_stop') {
+  console.log('Loop was manually stopped');
+}
+```
+
+### Single Iteration Mode
+
+For manual control over iterations:
+
+```typescript
+const iteration1 = await orchestrator.runSingleIteration({
+  dataset,
+  task,
+  evaluators,
+});
+
+// Apply changes based on suggestions...
+
+const iteration2 = await orchestrator.runSingleIteration(
+  { dataset, task, evaluators },
+  2, // iteration number
+  iteration1.meanScore // previous score
+);
+
+// Compare iterations
+const comparison = orchestrator.compareIterations(iteration1, iteration2);
+console.log(`Score delta: ${comparison.scoreDelta}`);
+console.log(`New suggestions: ${comparison.newSuggestions.length}`);
+console.log(`Resolved suggestions: ${comparison.resolvedSuggestions.length}`);
+```
+
+### Termination Reasons
+
+| Reason | Description |
+| ------ | ----------- |
+| `max_iterations` | Reached the configured maximum iterations |
+| `no_improvement` | Score decreased from previous iteration |
+| `converged` | Improvement below the minimum threshold |
+| `manual_stop` | Loop was stopped via `controller.stop()` |
+
+## Eval Trace Correlation Service
+
+The `EvalTraceCorrelationService` links evaluation runs with their corresponding OpenTelemetry trace data, enabling trace-based analysis and debugging.
+
+### Basic Usage
+
+```typescript
+import { createEvalTraceCorrelationService } from '@kbn/evals';
+
+const service = createEvalTraceCorrelationService({
+  esClient,
+  log,
+  indexPattern: 'traces-*',
+  maxSpansPerTrace: 1000,
+});
+
+// Correlate an experiment with trace IDs
+const result = await service.correlateExperiment({
+  experiment,
+  traceIdMap: new Map([
+    ['run-0-0', 'abc123...'],
+    ['run-0-1', 'def456...'],
+  ]),
+});
+
+// Access correlated data
+for (const correlation of result.correlations) {
+  console.log(`Run ${correlation.runKey}:`);
+  console.log(`  LLM calls: ${correlation.trace?.metrics.llmCallCount}`);
+  console.log(`  Total tokens: ${correlation.trace?.metrics.totalTokens}`);
+  console.log(`  Evaluation scores:`, correlation.evaluationResults);
+}
+```
+
+### Automatic Trace ID Extraction
+
+If trace IDs are stored in experiment metadata:
+
+```typescript
+// Extract trace IDs from experiment metadata
+const traceIdMap = service.extractTraceIdsFromExperiment(experiment, 'traceId');
+
+// Correlate with extracted trace IDs
+const result = await service.correlateExperiment({
+  experiment,
+  traceIdMap,
+});
+```
+
+### Batch Correlation
+
+Correlate multiple experiments at once:
+
+```typescript
+const batchResult = await service.batchCorrelate({
+  experiments: [experiment1, experiment2, experiment3],
+  skipMissingTraces: true,
+  continueOnFetchError: true,
+});
+
+console.log(`Correlated ${batchResult.summary.totalCorrelated}/${batchResult.summary.totalRuns} runs`);
+```
+
+### Fetching Individual Traces
+
+```typescript
+// Fetch a single trace
+const trace = await service.fetchTrace('abc123...');
+console.log(`Trace has ${trace.spans.length} spans`);
+
+// Fetch multiple traces
+const traces = await service.fetchTraces(['abc123...', 'def456...']);
+```
+
+## Failed Evaluation Traces
+
+The failed evaluation traces utility helps identify and analyze evaluation runs that didn't meet success criteria.
+
+### Basic Usage
+
+```typescript
+import { getFailedEvaluationTraces, formatFailedEvaluationsSummary } from '@kbn/evals';
+
+// Get traces for failed evaluations
+const result = getFailedEvaluationTraces({
+  correlations,
+});
+
+console.log(formatFailedEvaluationsSummary(result));
+// Output:
+// Failed Evaluations Summary
+// ==================================================
+// Total correlations: 100
+// Failed: 15 (15.0%)
+// Passed: 85
+// 
+// Failures by Evaluator:
+//   correctness: 10
+//   groundedness: 8
+```
+
+### Custom Failure Criteria
+
+```typescript
+const result = getFailedEvaluationTraces({
+  correlations,
+  evaluatorNames: ['correctness', 'groundedness'],
+  failureCriteria: {
+    scoreThreshold: 0.7,  // Scores below 0.7 are failures
+    scoreComparison: 'below',  // 'below', 'belowOrEqual', or 'zero'
+    treatNullScoreAsFailed: true,
+    failureLabels: ['fail', 'incorrect', 'error'],
+  },
+});
+```
+
+### AND vs OR Logic
+
+```typescript
+// OR logic (default): Include if ANY evaluator failed
+const orResult = getFailedEvaluationTraces({
+  correlations,
+  evaluatorNames: ['correctness', 'relevance'],
+});
+
+// AND logic: Include only if ALL specified evaluators failed
+const andResult = getFailedEvaluationTraces({
+  correlations,
+  evaluatorNames: ['correctness', 'relevance'],
+  requireAllEvaluatorsFailed: true,
+});
+```
+
+### Getting Only Trace IDs
+
+For lightweight retrieval when you only need trace IDs:
+
+```typescript
+import { getFailedEvaluationTraceIds } from '@kbn/evals';
+
+const failedTraceIds = getFailedEvaluationTraceIds({
+  correlations,
+  failureCriteria: { scoreThreshold: 0.7 },
+});
+
+// Construct APM URLs
+const apmUrls = failedTraceIds.map(
+  (traceId) => `${apmBaseUrl}/traces?traceId=${traceId}`
+);
+```
+
+### Grouping Failed Correlations
+
+```typescript
+import {
+  groupFailedCorrelationsByEvaluator,
+  groupFailedCorrelationsByCriterion,
+} from '@kbn/evals';
+
+const result = getFailedEvaluationTraces({ correlations });
+
+// Group by evaluator
+const byEvaluator = groupFailedCorrelationsByEvaluator(result.failedCorrelations);
+const correctnessFailures = byEvaluator.get('correctness') || [];
+console.log(`Correctness had ${correctnessFailures.length} failures`);
+
+// Group by criterion
+const byCriterion = groupFailedCorrelationsByCriterion(result.failedCorrelations);
+const scoreBelowThreshold = byCriterion.get('score_below_threshold') || [];
+```
+
+## Result Collection Utilities
+
+Utilities for aggregating and analyzing experiment results.
+
+### Collecting Results
+
+```typescript
+import {
+  collectExperimentResults,
+  createResultCollector,
+} from '@kbn/evals';
+
+// Collect results from a single experiment
+const experimentResults = collectExperimentResults(experiment);
+
+console.log(`Dataset: ${experimentResults.datasetName}`);
+console.log(`Total examples: ${experimentResults.totalExamples}`);
+console.log(`Repetitions: ${experimentResults.repetitions}`);
+
+// Access evaluator summaries
+for (const [name, summary] of experimentResults.evaluatorSummaries) {
+  console.log(`${name}: mean=${summary.meanScore}, pass=${summary.passingCount}/${summary.count}`);
+}
+```
+
+### Result Collector for Multiple Experiments
+
+```typescript
+const collector = createResultCollector();
+
+// Add experiments
+collector.addExperiment(experiment1);
+collector.addExperiment(experiment2);
+
+// Or collect from executor client
+await collector.collectFromClient(executorClient);
+
+// Get aggregated summary
+const summary = collector.getAggregatedSummary();
+console.log(`Total experiments: ${summary.experimentCount}`);
+console.log(`Total results: ${summary.totalResults}`);
+```
+
+### Filtering Results
+
+```typescript
+import { filterResults, getFailingResults, getPassingResults } from '@kbn/evals';
+
+const experimentResults = collectExperimentResults(experiment);
+
+// Filter by various criteria
+const filtered = filterResults(experimentResults.results, {
+  exampleIndex: 0,
+  evaluatorName: 'correctness',
+  minScore: 0.5,
+  passing: false,  // Only failing results
+});
+
+// Get failing results for an evaluator
+const failures = getFailingResults(experimentResults, 'correctness');
+for (const { result, score } of failures) {
+  console.log(`Example ${result.exampleIndex} failed with score ${score}`);
+}
+
+// Get passing results
+const passes = getPassingResults(experimentResults, 'correctness');
+```
+
+### Accessing Results by Example or Repetition
+
+```typescript
+import { getResultsByExample, getResultsByRepetition, getScoresByEvaluator } from '@kbn/evals';
+
+// Get all results for a specific example
+const exampleResults = getResultsByExample(experimentResults, 0);
+
+// Get all results for a specific repetition
+const repetitionResults = getResultsByRepetition(experimentResults, 1);
+
+// Get all scores for an evaluator
+const scores = getScoresByEvaluator(experimentResults, 'correctness');
+console.log(`Scores: ${scores.join(', ')}`);
+```
+
+## Eval Thread ID Utilities
+
+Utilities for generating unique thread IDs for evaluation runs, useful for correlating runs across systems.
+
+### Random Thread IDs
+
+```typescript
+import { generateEvalThreadId } from '@kbn/evals';
+
+// Generate a random UUID
+const threadId = generateEvalThreadId();
+```
+
+### Deterministic Thread IDs
+
+Generate consistent IDs based on evaluation context:
+
+```typescript
+// Deterministic based on evaluation context
+const threadId = generateEvalThreadId({
+  datasetName: 'my-dataset',
+  exampleIndex: 0,
+  repetition: 1,
+  runId: 'run-123',
+});
+
+// The same parameters always generate the same ID
+const threadId2 = generateEvalThreadId({
+  datasetName: 'my-dataset',
+  exampleIndex: 0,
+  repetition: 1,
+  runId: 'run-123',
+});
+
+console.log(threadId === threadId2); // true
+```
+
+### Custom Seed
+
+```typescript
+// Use a custom seed for deterministic generation
+const threadId = generateEvalThreadId({ seed: 'my-custom-seed' });
+```
+
+### Validation
+
+```typescript
+import { isValidEvalThreadId } from '@kbn/evals';
+
+console.log(isValidEvalThreadId('550e8400-e29b-41d4-a716-446655440000')); // true
+console.log(isValidEvalThreadId('invalid-id')); // false
+```
+
+### Parsing Seeds
+
+If you have the original seed string, you can parse it:
+
+```typescript
+import { parseEvalThreadIdSeed } from '@kbn/evals';
+
+const seed = 'dataset:my-dataset|example:0|rep:1|run:run-123';
+const parsed = parseEvalThreadIdSeed(seed);
+// { datasetName: 'my-dataset', exampleIndex: 0, repetition: 1, runId: 'run-123' }
+```
+
+## CI/CD Integration
+
+This section documents common patterns for integrating `@kbn/evals` evaluation suites into CI/CD pipelines.
+
+### Buildkite Integration
+
+Kibana primarily uses Buildkite for CI/CD. Here's how to integrate evaluation suites.
+
+#### Basic Pipeline Structure
+
+Create a pipeline definition in `.buildkite/pipelines/`:
+
+```yaml
+# .buildkite/pipelines/my_evals/evals.yml
+env:
+  FTR_GEN_AI: '1'
+
+steps:
+  - label: '👨‍🔧 Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  - label: '🧑‍🏭 Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+
+  - wait
+
+  - command: .buildkite/scripts/steps/test/ftr_configs.sh
+    env:
+      FTR_CONFIG: 'path/to/your/ftr/config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-my-evals'
+      FTR_GEN_AI: '1'
+    label: My Evaluation Suite
+    key: ftr-my-evals
+    timeout_in_minutes: 50
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+```
+
+#### Running Playwright Evals in Buildkite
+
+For Scout/Playwright-based evals (the standard `@kbn/evals` approach), create a step that runs Playwright:
+
+```yaml
+steps:
+  # ... pre-build and build steps ...
+
+  - command: |
+      node scripts/scout.js start-server --stateful &
+      sleep 60
+      node scripts/playwright test --config path/to/playwright.config.ts
+    env:
+      EVALUATION_CONNECTOR_ID: 'my-connector-id'
+      EVALUATION_REPETITIONS: '3'
+      EVALUATIONS_ES_URL: '${EVALUATIONS_ES_URL}'
+      KIBANA_TESTING_AI_CONNECTORS: '${KIBANA_TESTING_AI_CONNECTORS}'
+    label: My Playwright Evals
+    timeout_in_minutes: 60
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+```
+
+#### Secrets Management in Buildkite
+
+Store sensitive values (API keys, connector configs) as Buildkite secrets:
+
+```yaml
+env:
+  # Reference secrets using Buildkite's secret syntax
+  KIBANA_TESTING_AI_CONNECTORS: '${KIBANA_TESTING_AI_CONNECTORS}'
+  EVALUATIONS_ES_URL: '${EVALUATIONS_ES_URL}'
+  PHOENIX_API_KEY: '${PHOENIX_API_KEY}'
+  PHOENIX_BASE_URL: '${PHOENIX_BASE_URL}'
+```
+
+Secrets are configured in the Buildkite organization settings and injected at runtime.
+
+#### Pull Request Pipeline Integration
+
+Add evaluation runs to PR checks in `.buildkite/pipelines/pull_request/`:
+
+```yaml
+# .buildkite/pipelines/pull_request/my_evals.yml
+steps:
+  - group: My Evaluation Suite
+    key: my-evals
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+    steps:
+      - command: .buildkite/scripts/steps/test/ftr_configs.sh
+        env:
+          FTR_CONFIG: 'path/to/config.ts'
+          FTR_CONFIG_GROUP_KEY: 'ftr-my-evals'
+          FTR_GEN_AI: '1'
+        label: Evaluation Tests
+        timeout_in_minutes: 50
+        agents:
+          machineType: n2-standard-4
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+```
+
+### GitHub Actions Integration
+
+While Kibana primarily uses Buildkite, GitHub Actions can be useful for scheduled runs or simpler workflows.
+
+#### Basic Workflow
+
+```yaml
+# .github/workflows/evals.yml
+name: Evaluation Suite
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  workflow_dispatch:      # Manual trigger
+    inputs:
+      connector_id:
+        description: 'Connector ID to use for evaluations'
+        required: false
+        default: 'default-connector'
+
+jobs:
+  evaluate:
+    name: Run Evaluations
+    runs-on: ubuntu-latest
+    if: github.repository == 'elastic/kibana'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: yarn kbn bootstrap
+
+      - name: Start Elasticsearch
+        run: |
+          node scripts/es snapshot --license trial &
+          sleep 120
+
+      - name: Start Kibana
+        run: |
+          node scripts/kibana --dev &
+          sleep 120
+        env:
+          KIBANA_TESTING_AI_CONNECTORS: ${{ secrets.KIBANA_TESTING_AI_CONNECTORS }}
+
+      - name: Run Evaluations
+        run: |
+          node scripts/playwright test --config path/to/playwright.config.ts
+        env:
+          EVALUATION_CONNECTOR_ID: ${{ inputs.connector_id || 'default-connector' }}
+          EVALUATION_REPETITIONS: '3'
+          EVALUATIONS_ES_URL: ${{ secrets.EVALUATIONS_ES_URL }}
+
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results
+          path: |
+            test-results/
+            playwright-report/
+```
+
+#### Secrets Configuration
+
+Configure secrets in GitHub repository settings:
+
+| Secret | Description |
+| ------ | ----------- |
+| `KIBANA_TESTING_AI_CONNECTORS` | JSON object with connector configurations |
+| `EVALUATIONS_ES_URL` | Elasticsearch URL for storing results |
+| `PHOENIX_API_KEY` | Phoenix API key (if using Phoenix executor) |
+| `PHOENIX_BASE_URL` | Phoenix base URL (if using Phoenix executor) |
+
+#### Matrix Strategy for Multiple Connectors
+
+Run evaluations across multiple models:
+
+```yaml
+jobs:
+  evaluate:
+    strategy:
+      fail-fast: false
+      matrix:
+        connector:
+          - id: 'azure-gpt4o'
+            name: 'Azure GPT-4o'
+          - id: 'bedrock-claude'
+            name: 'Bedrock Claude'
+          - id: 'openai-gpt4'
+            name: 'OpenAI GPT-4'
+    
+    steps:
+      - name: Run Evaluations
+        run: |
+          node scripts/playwright test \
+            --config path/to/playwright.config.ts \
+            --project ${{ matrix.connector.id }}
+```
+
+### Common CI/CD Patterns
+
+#### Environment Variables Reference
+
+| Variable | Description | Required |
+| -------- | ----------- | -------- |
+| `EVALUATION_CONNECTOR_ID` | Default connector for LLM-as-judge evaluations | Recommended |
+| `EVALUATION_REPETITIONS` | Number of times to repeat each example | No (default: 1) |
+| `EVALUATIONS_ES_URL` | Elasticsearch URL for result storage | No (uses test cluster) |
+| `TRACING_ES_URL` | Elasticsearch URL for trace data | No (uses test cluster) |
+| `KIBANA_TESTING_AI_CONNECTORS` | JSON with connector configs | Yes |
+| `KBN_EVALS_EXECUTOR` | Executor type (`phoenix` or default) | No |
+| `PHOENIX_BASE_URL` | Phoenix server URL | Only if using Phoenix |
+| `PHOENIX_API_KEY` | Phoenix API key | Only if using Phoenix |
+| `SELECTED_EVALUATORS` | Comma-separated list of evaluators to run | No (runs all) |
+| `RAG_EVAL_K` | Override K value for RAG evaluators | No |
+
+#### Result Storage Strategy
+
+For persistent result analysis, export to a dedicated Elasticsearch cluster:
+
+```bash
+# In CI environment
+EVALUATIONS_ES_URL=https://evals-cluster.example.com:9243 \
+  node scripts/playwright test --config ...
+```
+
+This allows querying evaluation trends over time independently of test clusters.
+
+#### Scheduled Evaluation Runs
+
+For nightly or weekly comprehensive evaluations:
+
+```yaml
+# Buildkite scheduled pipeline
+steps:
+  - trigger: my-evals-pipeline
+    label: Nightly Evaluation Run
+    build:
+      env:
+        EVALUATION_REPETITIONS: '5'
+        SELECTED_EVALUATORS: 'Correctness,Relevance,Groundedness'
+```
+
+#### Parallel Execution
+
+Leverage parallelism for faster feedback:
+
+```yaml
+# Run multiple eval suites in parallel
+steps:
+  - group: Evaluation Suites
+    steps:
+      - command: node scripts/playwright test --config suite1/playwright.config.ts
+        label: Suite 1
+        parallelism: 2
+      - command: node scripts/playwright test --config suite2/playwright.config.ts  
+        label: Suite 2
+        parallelism: 2
+```
+
+#### Failure Handling
+
+Configure retries for transient failures:
+
+```yaml
+retry:
+  automatic:
+    - exit_status: '-1'   # Agent disconnected
+      limit: 3
+    - exit_status: '*'    # Any other failure
+      limit: 1
+```
+
+#### Conditional Execution
+
+Run evals only when relevant code changes:
+
+```yaml
+# In Buildkite
+if: |
+  build.pull_request.labels includes 'ci:run-evals' ||
+  build.message =~ /\[evals\]/
+```
+
+```yaml
+# In GitHub Actions
+on:
+  pull_request:
+    paths:
+      - 'x-pack/solutions/*/packages/**/evals/**'
+      - 'x-pack/platform/packages/**/kbn-evals/**'
+```
+
+### Best Practices
+
+1. **Use Preemptible/Spot Instances**: Evaluation suites are retry-friendly, making them good candidates for cost savings.
+
+2. **Separate Results Storage**: Export evaluation results to a dedicated cluster to preserve history across test environment resets.
+
+3. **Pin Evaluation Models**: Use `EVALUATION_CONNECTOR_ID` to ensure consistent LLM-as-judge results.
+
+4. **Configure Appropriate Timeouts**: LLM-based evaluations can be slow; set generous timeouts (30-60 minutes).
+
+5. **Use Matrix Builds**: Test across multiple models simultaneously to compare performance.
+
+6. **Archive Artifacts**: Save evaluation reports and traces for post-mortem analysis.
+
+7. **Gate on Regressions**: Consider failing CI if evaluation scores drop below thresholds.
