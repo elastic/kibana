@@ -17,7 +17,6 @@ import {
   CHAT_ICON_SM,
   CONNECTOR_SELECT,
   CONNECTOR_SELECTOR,
-  CONNECTOR_SELECTOR_LIST,
   CONVERSATION_TITLE,
   EMPTY_CONVO,
   WELCOME_SETUP,
@@ -101,7 +100,11 @@ export const selectConnector = (connectorName: string) => {
   const connectorOption = CONNECTOR_SELECT(connectorName);
 
   cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(CONNECTOR_SELECTOR_LIST).should('be.visible').scrollTo('bottom');
+  // The connector list can be visible but not scrollable (e.g. only 1-2 connectors).
+  // In that case Cypress will retry `scrollTo()` until it times out unless we disable the scrollability check.
+  cy.get('[data-test-subj="aiAssistantConnectorSelector"] .euiSelectableList__list')
+    .should('be.visible')
+    .scrollTo('bottom', { ensureScrollable: false });
   cy.get(connectorOption).scrollIntoView();
   cy.get(connectorOption).should('be.visible').click();
   assertConnectorSelected(connectorName);
