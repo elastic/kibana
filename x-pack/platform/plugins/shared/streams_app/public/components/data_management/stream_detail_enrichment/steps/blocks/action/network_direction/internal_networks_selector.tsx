@@ -5,14 +5,40 @@
  * 2.0.
  */
 
-import { EuiCheckableCard, EuiTitle, EuiFormFieldset, EuiSpacer } from '@elastic/eui';
+import { EuiCheckableCard, EuiTitle, EuiFormFieldset, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
+
+const InternalNetworksContent = () => {
+  return (
+    <EuiText>
+      <p>
+        {i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksContent',
+          { defaultMessage: 'Define them manually.' }
+        )}
+      </p>
+    </EuiText>
+  );
+};
+
+const InternalNetworksFieldContent = () => {
+  return (
+    <EuiText>
+      <p>
+        {i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksFieldContent',
+          { defaultMessage: 'Read them from a field.' }
+        )}
+      </p>
+    </EuiText>
+  );
+};
 
 interface InternalNetworksOptions {
   id: string;
   label: string;
-  content?: ReactNode;
+  content: ReactNode;
 }
 
 const internalNetworksOptions: InternalNetworksOptions[] = [
@@ -22,6 +48,7 @@ const internalNetworksOptions: InternalNetworksOptions[] = [
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksLabel',
       { defaultMessage: 'Define them manually.' }
     ),
+    content: <InternalNetworksContent />,
   },
   {
     id: 'internal_networks_field',
@@ -29,6 +56,7 @@ const internalNetworksOptions: InternalNetworksOptions[] = [
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionSelectorInternalNetworksFieldLabel',
       { defaultMessage: 'Read them from a field.' }
     ),
+    content: <InternalNetworksFieldContent />,
   },
 ];
 
@@ -59,12 +87,10 @@ export const InternalNetworksSelector = () => {
             key={id}
             id={id}
             label={label}
-            name={id}
-            value={id}
             checked={selectedOption === id}
             onChange={() => handleOptionChange(id)}
           >
-            {content}
+            {selectedOption === id && content}
           </EuiCheckableCard>
           <EuiSpacer size="s" />
         </>
