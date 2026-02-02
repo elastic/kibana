@@ -1,0 +1,104 @@
+---
+id: kbn-vite-optimizer
+title: '@kbn/vite-optimizer'
+slug: /kibana-dev-docs/kbn-vite-optimizer
+---
+
+# @kbn/vite-optimizer
+
+Vite-based optimizer for building Kibana plugin bundles.
+
+## Status
+
+**Work in Progress** - This package is under development as part of the Vite migration. The webpack-based `@kbn/optimizer` is still the primary build system.
+
+## Overview
+
+This package is the Vite-based replacement for `@kbn/optimizer`. It provides:
+
+- Plugin bundle building using Vite
+- Development server with HMR
+- Cross-bundle dependency handling
+- Theme support for SCSS
+
+## Planned API
+
+### runOptimizer
+
+Main entry point for building all plugin bundles.
+
+```typescript
+import { runOptimizer } from '@kbn/vite-optimizer';
+
+const events$ = runOptimizer({
+  repoRoot: '/path/to/kibana',
+  dist: true,
+  watch: false,
+});
+
+events$.subscribe((event) => {
+  console.log(event);
+});
+```
+
+### buildPlugin
+
+Build a single plugin bundle.
+
+```typescript
+import { buildPlugin } from '@kbn/vite-optimizer';
+
+const result = await buildPlugin({
+  repoRoot: '/path/to/kibana',
+  pluginDir: '/path/to/kibana/src/plugins/my_plugin',
+  manifest: {
+    id: 'myPlugin',
+    requiredPlugins: ['data'],
+  },
+  isProduction: true,
+});
+```
+
+### createDevServer
+
+Create a Vite dev server for development.
+
+```typescript
+import { createDevServer } from '@kbn/vite-optimizer';
+
+const server = await createDevServer({
+  repoRoot: '/path/to/kibana',
+  port: 5173,
+  proxy: {
+    '/api': 'http://localhost:5601',
+  },
+});
+
+console.log(`Dev server running at ${server.getUrl()}`);
+```
+
+## Migration from @kbn/optimizer
+
+The Vite optimizer aims to be a drop-in replacement for the webpack-based optimizer:
+
+| @kbn/optimizer      | @kbn/vite-optimizer      |
+| ------------------- | ------------------------ |
+| `runOptimizer()`    | `runOptimizer()`         |
+| `OptimizerConfig`   | `OptimizerConfig`        |
+| Watch mode          | Watch mode + HMR         |
+| DLL bundles         | Optimized dependencies   |
+| BundleRemotesPlugin | `kbnBundleRemotesPlugin` |
+
+## Known Differences
+
+1. **HMR Support**: Vite provides native HMR, which is faster than webpack's HMR.
+
+2. **Bundle Format**: Vite uses ES modules by default, webpack used CommonJS.
+
+3. **Code Splitting**: Vite uses Rollup's code splitting, which may produce different chunks.
+
+4. **Shared Dependencies**: Instead of DLL bundles, Vite uses dependency pre-bundling.
+
+## Contributing
+
+This package is part of the Vite migration effort. See the [Vite Migration Guide](../../docs/developer/vite-migration-guide.md) for more information.
