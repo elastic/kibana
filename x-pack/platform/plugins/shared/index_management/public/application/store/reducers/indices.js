@@ -13,6 +13,7 @@ import {
   reloadIndicesSuccess,
   loadIndicesStart,
   loadIndicesError,
+  loadIndicesEnrichmentError,
 } from '../actions';
 
 const byId = handleActions(
@@ -101,13 +102,35 @@ const error = handleActions(
       const newState = { ...error };
       return newState;
     },
+    [loadIndicesStart]() {
+      return false;
+    },
+    [loadIndicesSuccess]() {
+      return false;
+    },
   },
   false
+);
+
+const enrichmentErrors = handleActions(
+  {
+    [loadIndicesStart]() {
+      return [];
+    },
+    [loadIndicesEnrichmentError](state, action) {
+      const { source } = action.payload;
+      if (!source) return state;
+      if (state.includes(source)) return state;
+      return [...state, source];
+    },
+  },
+  []
 );
 
 export const indices = combineReducers({
   loading,
   error,
+  enrichmentErrors,
   byId,
   allIds,
 });
