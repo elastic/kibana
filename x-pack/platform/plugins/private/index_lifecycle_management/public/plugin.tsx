@@ -21,6 +21,7 @@ import type {
   StartDependencies,
 } from './types';
 import { IlmLocatorDefinition } from './locator';
+import { indexLifecycleDataEnricher } from './index_lifecycle_data_enricher';
 import { PublicApiService } from './services';
 
 export class IndexLifecycleManagementPlugin
@@ -115,6 +116,7 @@ export class IndexLifecycleManagementPlugin
 
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);
+        indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
       }
 
       plugins.share.url.locators.create(
