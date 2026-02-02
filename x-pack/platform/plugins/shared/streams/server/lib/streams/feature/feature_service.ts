@@ -7,17 +7,20 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import { v4 as uuid } from 'uuid';
+import { featureSchema } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureStorageSettings } from './storage_settings';
 import { featureStorageSettings } from './storage_settings';
+import { FEATURE_ID, FEATURE_PROPERTIES, FEATURE_SUBTYPE, FEATURE_UUID } from './fields';
 
 export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<FeatureClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
@@ -25,7 +28,28 @@ export class FeatureService {
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('features'),
-      featureStorageSettings
+      featureStorageSettings,
+      {
+        migrateSource: (source) => {
+          if (!(FEATURE_ID in source)) {
+            const id = uuid();
+            const migrated: Record<string, unknown> = {
+              ...source,
+              [FEATURE_ID]: id,
+              [FEATURE_UUID]: id,
+              [FEATURE_SUBTYPE]: source['feature.name'],
+              [FEATURE_PROPERTIES]: source['feature.value'],
+            };
+            delete migrated['feature.name'];
+            delete migrated['feature.value'];
+
+            featureSchema.parse(migrated);
+            return migrated as unknown as StoredFeature;
+          }
+
+          return source as unknown as StoredFeature;
+        }
+      }
     );
 
     return new FeatureClient({
