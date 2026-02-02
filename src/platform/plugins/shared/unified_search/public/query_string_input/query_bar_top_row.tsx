@@ -811,8 +811,17 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderDatePicker() ? renderDatePicker() : null}
-              {shouldRenderUpdatebutton() ? button : null}
+              {isQueryLangSelected ? (
+                <>
+                  {shouldRenderUpdatebutton() ? button : null}
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                </>
+              ) : (
+                <>
+                  {shouldRenderDatePicker() ? renderDatePicker() : null}
+                  {shouldRenderUpdatebutton() ? button : null}
+                </>
+              )}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
@@ -877,6 +886,27 @@ export const QueryBarTopRow = React.memo(
             />
           </EuiFlexItem>
         )
+      );
+    }
+
+    function renderEsqlMenuPopover() {
+      if (!Boolean(isQueryLangSelected)) {
+        return null;
+      }
+
+      return (
+        <EuiFlexItem grow={false}>
+          <ESQLMenuPopover
+            onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            onESQLQuerySubmit={(queryString: string) => {
+              onSubmit({
+                query: { esql: queryString } as QT,
+                dateRange: dateRangeRef.current,
+              });
+            }}
+            adHocDataview={props.indexPatterns?.[0]}
+          />
+        </EuiFlexItem>
       );
     }
 
@@ -1005,26 +1035,26 @@ export const QueryBarTopRow = React.memo(
               wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
-              {Boolean(isQueryLangSelected) && (
-                <ESQLMenuPopover
-                  onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
-                  onESQLQuerySubmit={(queryString: string) => {
-                    onSubmit({
-                      query: { esql: queryString } as QT,
-                      dateRange: dateRangeRef.current,
-                    });
-                  }}
-                  adHocDataview={props.indexPatterns?.[0]}
-                />
+              {isQueryLangSelected ? (
+                <>
+                  {renderUpdateButton()}
+                  {/* Optional wrapper for the ES|QL controls elements */}
+                  {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                    <EuiFlexItem grow={false}>
+                      {props.esqlVariablesConfig?.controlsWrapper}
+                    </EuiFlexItem>
+                  )}
+                  {shouldShowDatePickerAsBadge() && props.filterBar}
+                  {renderEsqlMenuPopover()}
+                </>
+              ) : (
+                <>
+                  {renderQueryInput()}
+                  {props.renderQueryInputAppend?.()}
+                  {shouldShowDatePickerAsBadge() && props.filterBar}
+                  {renderUpdateButton()}
+                </>
               )}
-              {/* Optional wrapper for the ES|QL controls elements */}
-              {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                <EuiFlexItem grow={false}>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
-              )}
-              {renderQueryInput()}
-              {props.renderQueryInputAppend?.()}
-              {shouldShowDatePickerAsBadge() && props.filterBar}
-              {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
             {renderTextLangEditor()}
