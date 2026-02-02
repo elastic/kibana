@@ -16,14 +16,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type {
+  TypedLensSerializedState,
   DatasourceMap,
   VisualizationMap,
   LensStoreDeps,
   LensDocument,
+  SupportedDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
 import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
@@ -158,7 +160,6 @@ export async function getEditLensConfiguration(
     updateSuggestion,
     closeFlyout,
     wrapInFlyout,
-    datasourceId,
     panelId,
     savedObjectId,
     dataLoading$,
@@ -166,7 +167,6 @@ export async function getEditLensConfiguration(
     updateByRefInput,
     navigateToLensEditor,
     displayFlyoutHeader,
-    canEditTextBasedQuery,
     isNewPanel,
     hidesSuggestions,
     onApply,
@@ -174,12 +174,20 @@ export async function getEditLensConfiguration(
     isReadOnly,
     parentApi,
     applyButtonLabel,
+    hideTextBasedEditor,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
+
     const [currentAttributes, setCurrentAttributes] =
       useState<TypedLensSerializedState['attributes']>(attributes);
+
+    // Derive datasourceId from currentAttributes so it updates when attributes change
+    // (e.g., after converting from formBased to textBased)
+    const currentDatasourceId = getActiveDatasourceIdFromDoc(
+      currentAttributes
+    ) as SupportedDatasourceId;
 
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
@@ -196,7 +204,7 @@ export async function getEditLensConfiguration(
       },
       [savedObjectId]
     );
-    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
+    const datasourceState = currentAttributes.state.datasourceStates[currentDatasourceId];
     const storeDeps: LensStoreDeps = {
       lensServices,
       datasourceMap,
@@ -219,6 +227,7 @@ export async function getEditLensConfiguration(
           id: panelId ?? generateId(),
         },
         inlineEditing: true,
+        hideTextBasedEditor,
       })
     );
 
@@ -227,7 +236,6 @@ export async function getEditLensConfiguration(
       updatePanelState,
       updateSuggestion,
       closeFlyout,
-      datasourceId,
       coreStart,
       startDependencies,
       dataLoading$,
@@ -237,7 +245,6 @@ export async function getEditLensConfiguration(
       updateByRefInput,
       navigateToLensEditor,
       displayFlyoutHeader,
-      canEditTextBasedQuery,
       hidesSuggestions,
       setCurrentAttributes,
       isNewPanel,
@@ -247,6 +254,7 @@ export async function getEditLensConfiguration(
       parentApi,
       panelId,
       applyButtonLabel,
+      hideTextBasedEditor,
     };
 
     return (
