@@ -89,7 +89,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
-  getRulesAuthz: () => Promise<DetectionRulesAuthz>;
+  getRulesAuthz: () => DetectionRulesAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
