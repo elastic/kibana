@@ -181,8 +181,7 @@ describe('updateRuleApiKey()', () => {
       ...existingEncryptedAlert,
       attributes: {
         ...existingEncryptedAlert.attributes,
-        uiamApiKey: 'old-uiam-abc',
-        uiamApiKeyId: 'old-uiam-123',
+        uiamApiKey: 'old-uiam-234:essu_abc',
       },
     });
 
@@ -190,7 +189,7 @@ describe('updateRuleApiKey()', () => {
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '234', name: '123', api_key: 'abc' },
-      uiamResult: { id: 'uiam-234', name: 'uiam-123', api_key: 'uiam-abc' },
+      uiamResult: { id: 'uiam-234', name: 'uiam-123', api_key: 'essu_abc' },
     });
     await rulesClient.updateRuleApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -204,8 +203,7 @@ describe('updateRuleApiKey()', () => {
         consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
-        uiamApiKey: 'uiam-abc',
-        uiamApiKeyId: 'uiam-234',
+        uiamApiKey: 'uiam-234:essu_abc',
         apiKeyOwner: 'elastic',
         apiKeyCreatedByUser: false,
         revision: 0,
@@ -231,13 +229,7 @@ describe('updateRuleApiKey()', () => {
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw=='],
-        uiamApiKeys: [
-          {
-            uiamApiKey: 'old-uiam-abc',
-            uiamApiKeyId: 'old-uiam-123',
-          },
-        ],
+        apiKeys: ['MTIzOmFiYw==', 'old-uiam-234:essu_abc'],
       },
       expect.any(Object),
       expect.any(Object)

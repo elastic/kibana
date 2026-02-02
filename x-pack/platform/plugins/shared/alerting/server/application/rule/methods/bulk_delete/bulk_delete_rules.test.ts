@@ -254,6 +254,7 @@ describe('bulkDelete', () => {
         find: function* asyncGenerator() {
           yield {
             saved_objects: [
+              enabledRuleForBulkOpsWithActions1,
               enabledRuleForBulkOpsWithActions1WithUiam,
               enabledRuleForBulkOpsWithActions2WithUiam,
             ],
@@ -264,7 +265,8 @@ describe('bulkDelete', () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
-        { id: 'id2', type: 'alert', success: true },
+        { id: 'uiam-1', type: 'alert', success: true },
+        { id: 'uiam-2', type: 'alert', success: true },
       ],
     });
 
@@ -273,8 +275,7 @@ describe('bulkDelete', () => {
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='],
-        uiamApiKeys: [{ uiamApiKey: 'ZXNzdV91aWFt', uiamApiKeyId: 'uiam123' }],
+        apiKeys: ['MTIzOmFiYw==', 'OTc4Onh5eg==', '123:essu_abc', 'NTc2Onh5eg=='],
       },
       expect.anything(),
       expect.anything()

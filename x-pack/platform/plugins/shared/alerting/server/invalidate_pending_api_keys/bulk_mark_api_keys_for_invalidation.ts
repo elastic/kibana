@@ -9,41 +9,40 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
-interface BulkInvalidateAPIKeyParams {
-  apiKeys: string[];
-  uiamApiKeys?: { uiamApiKey: string; uiamApiKeyId: string }[];
-}
-
 export const bulkMarkApiKeysForInvalidation = async (
-  { apiKeys, uiamApiKeys = [] }: BulkInvalidateAPIKeyParams,
+  { apiKeys }: { apiKeys: string[] },
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
-    if (apiKeys.length === 0 && uiamApiKeys.length === 0) {
+    if (apiKeys.length === 0) {
       return;
     }
 
     try {
-      const combinedApiKeys: { id: string; uiamApiKey?: string }[] = apiKeys.map((apiKey) => ({
-        id: Buffer.from(apiKey, 'base64').toString().split(':')[0],
-      }));
-      uiamApiKeys.forEach(({ uiamApiKey, uiamApiKeyId }) => {
-        combinedApiKeys.push({
-          id: uiamApiKeyId,
-          uiamApiKey,
-        });
-      });
-
       await savedObjectsClient.bulkCreate(
-        combinedApiKeys.map(({ id, uiamApiKey }) => ({
-          attributes: {
-            apiKeyId: id,
-            createdAt: new Date().toISOString(),
-            ...(uiamApiKey ? { uiamApiKey } : {}),
-          },
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-        }))
+        apiKeys.map((key) => {
+          let apiKeyId;
+          let apiKeyValue;
+
+          if (key.indexOf('essu_') !== -1) {
+            const [id, val] = key.split(':');
+            apiKeyId = id;
+            apiKeyValue = val;
+          } else {
+            const [id, _] = Buffer.from(key, 'base64').toString().split(':');
+            apiKeyId = id;
+          }
+
+          return {
+            attributes: {
+              apiKeyId,
+              createdAt: new Date().toISOString(),
+              ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+            },
+            type: API_KEY_PENDING_INVALIDATION_TYPE,
+          };
+        })
       );
     } catch (e) {
       logger.error(

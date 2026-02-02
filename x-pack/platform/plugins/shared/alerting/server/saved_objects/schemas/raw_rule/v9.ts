@@ -10,5 +10,4 @@ import { rawRuleSchema as rawRuleSchemaV8 } from './v8';
 
 export const rawRuleSchema = rawRuleSchemaV8.extends({
   uiamApiKey: schema.maybe(schema.nullable(schema.string())),
-  uiamApiKeyId: schema.maybe(schema.nullable(schema.string())),
 });

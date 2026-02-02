@@ -122,7 +122,6 @@ async function updateWithOCC<Params extends RuleParams = never>(
     name,
     apiKey,
     uiamApiKey,
-    uiamApiKeyId,
     apiKeyCreatedByUser,
   } = originalRuleSavedObject.attributes;
 
@@ -218,12 +217,19 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !updateResult.uiamApiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
           {
-            apiKeys: [apiKey],
-            ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
+            apiKeys: apiKeysToInvalidate,
           },
           context.logger,
           context.unsecuredSavedObjectsClient
@@ -339,6 +345,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -351,14 +358,20 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = updatedRuleAttributes;
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysInvalidate.push(apiKey);
+    }
+    if (uiamApiKey) {
+      apiKeysInvalidate.push(uiamApiKey);
+    }
 
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys: apiKey && !apiKeyCreatedByUser ? [apiKey] : [],
-        // UIAM APIKeys cannot be created byt the user, so no need to check apiKeyCreatedByUser flag
-        ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
+        apiKeys: apiKeysInvalidate,
       },
       context.logger,
       context.unsecuredSavedObjectsClient

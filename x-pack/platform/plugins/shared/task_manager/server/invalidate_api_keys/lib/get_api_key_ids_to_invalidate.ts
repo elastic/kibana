@@ -59,10 +59,11 @@ export async function getApiKeyIdsToInvalidate({
 
         const uiamApiKey = decryptedApiKeyPendingInvalidationObject.attributes.uiamApiKey;
         if (uiamApiKey) {
+          const [uiamApiKeyId, uiamApiKeyValue] = uiamApiKey.split(':');
           uiamApiKeys.push({
             id: decryptedApiKeyPendingInvalidationObject.id,
-            apiKeyId: decryptedApiKeyPendingInvalidationObject.attributes.apiKeyId,
-            uiamApiKey: decryptedApiKeyPendingInvalidationObject.attributes.uiamApiKey!,
+            apiKeyId: uiamApiKeyId,
+            uiamApiKey: uiamApiKeyValue!,
           });
         } else {
           apiKeyIds.push({

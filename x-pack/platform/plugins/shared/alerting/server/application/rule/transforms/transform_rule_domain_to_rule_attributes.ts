@@ -48,7 +48,6 @@ export const transformRuleDomainToRuleAttributes = ({
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
     ...(rule.uiamApiKey !== undefined ? { uiamApiKey: rule.uiamApiKey } : {}),
-    ...(rule.uiamApiKeyId !== undefined ? { uiamApiKeyId: rule.uiamApiKeyId } : {}),
     ...(rule.apiKeyCreatedByUser !== undefined
       ? { apiKeyCreatedByUser: rule.apiKeyCreatedByUser }
       : {}),

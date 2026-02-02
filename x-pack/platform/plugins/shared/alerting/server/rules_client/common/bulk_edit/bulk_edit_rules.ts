@@ -157,32 +157,25 @@ export async function bulkEditRules<Params extends RuleParams>(
     { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
   );
 
-  const { apiKeysToInvalidate, uiamApiKeysToInvalidate, results, errors, skipped } =
-    await retryIfBulkEditConflicts(
-      context.logger,
-      options.name,
-      (filterKueryNode: KueryNode | null) =>
-        bulkEditRulesOcc(context, {
-          filter: filterKueryNode,
-          shouldValidateSchedule: options.shouldValidateSchedule,
-          shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
-          updateFn: options.updateFn,
-          paramsModifier: options.paramsModifier,
-          shouldIncrementRevision: options.shouldIncrementRevision,
-        }),
-      finalFilter
-    );
+  const { apiKeysToInvalidate, results, errors, skipped } = await retryIfBulkEditConflicts(
+    context.logger,
+    options.name,
+    (filterKueryNode: KueryNode | null) =>
+      bulkEditRulesOcc(context, {
+        filter: filterKueryNode,
+        shouldValidateSchedule: options.shouldValidateSchedule,
+        shouldInvalidateApiKeys: options.shouldInvalidateApiKeys,
+        updateFn: options.updateFn,
+        paramsModifier: options.paramsModifier,
+        shouldIncrementRevision: options.shouldIncrementRevision,
+      }),
+    finalFilter
+  );
 
-  if (
-    apiKeysToInvalidate.length > 0 ||
-    (uiamApiKeysToInvalidate && uiamApiKeysToInvalidate.length > 0)
-  ) {
+  if (apiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
       {
         apiKeys: apiKeysToInvalidate,
-        ...(uiamApiKeysToInvalidate && uiamApiKeysToInvalidate.length > 0
-          ? { uiamApiKeys: uiamApiKeysToInvalidate }
-          : {}),
       },
       context.logger,
       context.unsecuredSavedObjectsClient

@@ -2143,8 +2143,7 @@ describe('update()', () => {
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
-        apiKeys: ['MjM0OmFiYw=='],
-        uiamApiKeys: [{ uiamApiKey: 'def', uiamApiKeyId: 'uiam-234' }],
+        apiKeys: ['MjM0OmFiYw==', 'uiam-234:def'],
       },
       expect.any(Object),
       expect.any(Object)
@@ -4712,11 +4711,18 @@ describe('update()', () => {
     });
   });
 
-  it('creates UIAM API key as well', async () => {
+  it('creates and invalidates UIAM API key as well', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        uiamApiKey: `001:essu_222`,
+      },
+    });
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
-      uiamResult: { id: '456', name: '456', api_key: 'def' },
+      uiamResult: { id: '456', name: '456', api_key: 'essu_def' },
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -4745,6 +4751,7 @@ describe('update()', () => {
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
+        uiamApiKey: '456:essu_def',
         revision: 1,
         scheduledTaskId: 'task-123',
       },
@@ -4782,7 +4789,7 @@ describe('update()', () => {
 
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw=='],
+        apiKeys: ['MTIzOmFiYw==', '001:essu_222'],
       },
       expect.any(Object),
       expect.any(Object)
@@ -4791,8 +4798,7 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toEqual(
       expect.objectContaining({
         apiKey: 'MTIzOmFiYw==',
-        uiamApiKey: 'def',
-        uiamApiKeyId: '456',
+        uiamApiKey: '456:essu_def',
       })
     );
   });

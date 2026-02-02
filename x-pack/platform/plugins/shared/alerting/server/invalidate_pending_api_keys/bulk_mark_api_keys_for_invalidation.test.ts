@@ -41,10 +41,11 @@ describe('bulkMarkApiKeysForInvalidation', () => {
 
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys: [Buffer.from('123').toString('base64'), Buffer.from('456').toString('base64')],
-        uiamApiKeys: [
-          { uiamApiKeyId: '789', uiamApiKey: 'uiam_key_value_1' },
-          { uiamApiKeyId: '101112', uiamApiKey: 'uiam_key_value_2' },
+        apiKeys: [
+          Buffer.from('123').toString('base64'),
+          Buffer.from('456').toString('base64'),
+          `111:essu_uiam_key_value_1`,
+          `222:essu_uiam_key_value_2`,
         ],
       },
       loggingSystemMock.create().get(),
@@ -61,12 +62,12 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     expect(savedObjects[1]).toHaveProperty('attributes.apiKeyId', '456');
     expect(savedObjects[1]).toHaveProperty('attributes.createdAt', expect.any(String));
     expect(savedObjects[2]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
-    expect(savedObjects[2]).toHaveProperty('attributes.apiKeyId', '789');
-    expect(savedObjects[2]).toHaveProperty('attributes.uiamApiKey', 'uiam_key_value_1');
+    expect(savedObjects[2]).toHaveProperty('attributes.apiKeyId', '111');
+    expect(savedObjects[2]).toHaveProperty('attributes.uiamApiKey', 'essu_uiam_key_value_1');
     expect(savedObjects[2]).toHaveProperty('attributes.createdAt', expect.any(String));
     expect(savedObjects[3]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
-    expect(savedObjects[3]).toHaveProperty('attributes.apiKeyId', '101112');
-    expect(savedObjects[3]).toHaveProperty('attributes.uiamApiKey', 'uiam_key_value_2');
+    expect(savedObjects[3]).toHaveProperty('attributes.apiKeyId', '222');
+    expect(savedObjects[3]).toHaveProperty('attributes.uiamApiKey', 'essu_uiam_key_value_2');
     expect(savedObjects[3]).toHaveProperty('attributes.createdAt', expect.any(String));
   });
 

@@ -21,7 +21,6 @@ interface BulkOperationResult {
   errors: BulkOperationError[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   accListSpecificForBulkOperation: string[][];
-  uiamApiKeysToInvalidate?: { uiamApiKey: string; uiamApiKeyId: string }[];
 }
 
 export const retryIfBulkOperationConflicts = async ({

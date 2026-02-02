@@ -17,7 +17,7 @@ export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyId'> {
+): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
   if (apiKey && apiKey.apiKeysEnabled) {
     const uiamApiKey = apiKey.uiamResult?.api_key;
     const uiamApiKeyId = apiKey.uiamResult?.id;
@@ -26,8 +26,7 @@ export function apiKeyAsAlertAttributes(
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey ? { uiamApiKey } : {}),
-      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
+      ...(uiamApiKey ? { uiamApiKey: `${uiamApiKeyId}:${uiamApiKey}` } : {}),
     };
   }
   return {
@@ -41,19 +40,16 @@ export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<
-  RuleDomain,
-  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyId'
-> {
+): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
   if (apiKey && apiKey.apiKeysEnabled) {
     const uiamApiKey = apiKey.uiamResult?.api_key;
     const uiamApiKeyId = apiKey.uiamResult?.id;
+
     return {
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey ? { uiamApiKey } : {}),
-      ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
+      ...(uiamApiKey ? { uiamApiKey: `${uiamApiKeyId}:${uiamApiKey}` } : {}),
     };
   }
   return {

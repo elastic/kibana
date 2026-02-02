@@ -32,7 +32,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   let oldApiKeyToInvalidate: string | null = null;
   let oldApiKeyCreatedByUser: boolean | undefined | null = false;
   let oldUiamApiKeyToInvalidate: string | undefined | null;
-  let oldUiamApiKeyId: string | undefined | null;
   let attributes: RawRule;
   let version: string | undefined;
 
@@ -54,7 +53,6 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     oldApiKeyToInvalidate = decryptedAlert.attributes.apiKey;
     oldApiKeyCreatedByUser = decryptedAlert.attributes.apiKeyCreatedByUser;
     oldUiamApiKeyToInvalidate = decryptedAlert.attributes.uiamApiKey;
-    oldUiamApiKeyId = decryptedAlert.attributes.uiamApiKeyId;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
   } catch (e) {
@@ -124,34 +122,42 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       version,
     });
   } catch (e) {
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey, uiamApiKeyId } = updateAttributes;
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
 
-    // Avoid unused API key
-    await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys: apiKey && !apiKeyCreatedByUser ? [apiKey] : [],
-        ...(uiamApiKey && uiamApiKeyId ? { uiamApiKeys: [{ uiamApiKey, uiamApiKeyId }] } : {}),
-      },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
+    if (apiKeysToInvalidate.length > 0) {
+      // Avoid unused API key
+      await bulkMarkApiKeysForInvalidation(
+        {
+          apiKeys: apiKeysToInvalidate,
+        },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
+    }
+
     throw e;
   }
 
-  if (
-    (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) ||
-    (oldUiamApiKeyToInvalidate && oldUiamApiKeyId)
-  ) {
+  const oldApiKeysToInvalidate = [];
+  if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
+    oldApiKeysToInvalidate.push(oldApiKeyToInvalidate);
+  }
+  if (oldUiamApiKeyToInvalidate) {
+    oldApiKeysToInvalidate.push(oldUiamApiKeyToInvalidate);
+  }
+
+  if (oldApiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
       {
-        apiKeys: oldApiKeyToInvalidate && !oldApiKeyCreatedByUser ? [oldApiKeyToInvalidate] : [],
-        ...(oldUiamApiKeyToInvalidate && oldUiamApiKeyId
-          ? {
-              uiamApiKeys: [
-                { uiamApiKey: oldUiamApiKeyToInvalidate, uiamApiKeyId: oldUiamApiKeyId },
-              ],
-            }
-          : {}),
+        apiKeys: oldApiKeysToInvalidate,
       },
       context.logger,
       context.unsecuredSavedObjectsClient

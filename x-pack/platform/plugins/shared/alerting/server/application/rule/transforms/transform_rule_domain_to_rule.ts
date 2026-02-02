@@ -37,7 +37,6 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     updatedAt: ruleDomain.updatedAt,
     apiKeyOwner: ruleDomain.apiKeyOwner,
     apiKeyCreatedByUser: ruleDomain.apiKeyCreatedByUser,
-    uiamApiKeyId: ruleDomain.uiamApiKeyId,
     throttle: ruleDomain.throttle,
     muteAll: ruleDomain.muteAll,
     notifyWhen: ruleDomain.notifyWhen,

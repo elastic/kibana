@@ -223,7 +223,6 @@ describe('transformRuleDomainToRule', () => {
       apiKey: MOCK_API_KEY,
       apiKeyOwner: 'user',
       uiamApiKey: 'uiam-api-key',
-      uiamApiKeyId: 'uiam-api-key-id',
       flapping: {
         lookBackWindow: 20,
         statusChangeThreshold: 20,
