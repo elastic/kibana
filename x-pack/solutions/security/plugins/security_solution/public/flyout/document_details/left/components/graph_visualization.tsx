@@ -43,7 +43,7 @@ import {
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../preview/constants';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useToasts, useKibana } from '../../../../common/lib/kibana';
 import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
@@ -68,6 +68,9 @@ export const GraphVisualization: React.FC = memo(() => {
 
   const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications.tours.isEnabled();
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
@@ -296,6 +299,7 @@ export const GraphVisualization: React.FC = memo(() => {
                 to: `${timestamp}||+30m`,
               },
             }}
+            isTourEnabled={isTourEnabled}
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}

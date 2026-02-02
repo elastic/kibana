@@ -92,11 +92,17 @@ export interface ActionsProps extends CommonProps {
    * Warning message to show. Defaults value is undefined.
    */
   searchWarningMessage?: { title: string; content: string };
+
+  /**
+   * Whether to show the tour. Default value is true.
+   */
+  isTourEnabled?: boolean;
 }
 
 // eslint-disable-next-line complexity
 export const Actions = ({
   showToggleSearch = true,
+  isTourEnabled = true,
   showInvestigateInTimeline = true,
   onInvestigateInTimeline,
   onSearchToggle,
@@ -113,7 +119,7 @@ export const Actions = ({
     true
   );
 
-  if (shouldShowSearchBarButtonTour) {
+  if (shouldShowSearchBarButtonTour && isTourEnabled) {
     if (searchFilterCounter > 0) {
       setIsSearchBarTourOpen(true);
       setShouldShowSearchBarButtonTour(false);
