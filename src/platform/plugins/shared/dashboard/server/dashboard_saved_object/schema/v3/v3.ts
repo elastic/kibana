@@ -43,10 +43,10 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV2.extends(
               order: schema.number(),
               width: schema.maybe(schema.string()),
               grow: schema.maybe(schema.boolean()),
-              explicitInput: schema.any(),
-              // explicitInput: schema.object({}, { unknowns: 'allow' }),
+              explicitInput: schema.object({}, { unknowns: 'allow' }),
             })
           ),
+          showApplySelections: schema.maybe(schema.boolean()),
         },
         { unknowns: 'allow' }
       )

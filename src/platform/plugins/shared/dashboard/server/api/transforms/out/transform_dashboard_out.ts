@@ -22,7 +22,7 @@ export function transformDashboardOut(
 ): DashboardState | Partial<DashboardState> {
   const {
     pinned_panels,
-    controlGroupInput: pinnedPanelsOut,
+    controlGroupInput: legacyControls,
     description,
     kibanaSavedObjectMeta,
     optionsJSON,
@@ -41,11 +41,7 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  const pinnedControlsOut = transformPinnedPanelsOut(
-    pinnedPanelsOut,
-    pinned_panels,
-    references ?? []
-  );
+  const pinnedPanelsOut = transformPinnedPanelsOut(legacyControls, pinned_panels, references ?? []);
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -66,7 +62,7 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),
 
-    ...(pinnedControlsOut && { pinned_panels: pinnedControlsOut }),
+    ...(pinnedPanelsOut && { pinned_panels: pinnedPanelsOut }),
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
