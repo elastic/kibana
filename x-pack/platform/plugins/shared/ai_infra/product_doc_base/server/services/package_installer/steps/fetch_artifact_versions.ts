@@ -12,7 +12,6 @@ import {
   type ProductName,
 } from '@kbn/product-doc-common';
 import * as fs from 'fs';
-import fetch from 'node-fetch';
 import Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';

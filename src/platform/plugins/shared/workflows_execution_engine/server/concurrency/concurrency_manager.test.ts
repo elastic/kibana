@@ -442,7 +442,6 @@ describe('ConcurrencyManager', () => {
     it('should skip cancel-in-progress for other strategies', async () => {
       const settings: ConcurrencySettings = {
         key: 'server-1',
-        // strategy is undefined (queue strategy not implemented yet)
         max: 1,
       };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
