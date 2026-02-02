@@ -506,14 +506,17 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
 
       // Custom transformer that modifies all results from a tool call
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
-        return toolCallArg.results.map((result) => ({
-          ...result,
-          data: {
-            ...(result.data as Record<string, unknown>),
-            transformedBy: 'custom',
-            toolId: toolCallArg.tool_id,
-          },
-        }));
+        return toolCallArg.results.map(
+          (result): ToolResult => ({
+            tool_result_id: result.tool_result_id,
+            type: ToolResultType.other,
+            data: {
+              ...(result.data as Record<string, unknown>),
+              transformedBy: 'custom',
+              toolId: toolCallArg.tool_id,
+            },
+          })
+        );
       });
 
       const result = await conversationToLangchainMessages({
@@ -568,7 +571,7 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
       // Transformer that aggregates results
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
         // Aggregate all results into one
-        return [
+        const aggregated: ToolResult[] = [
           {
             tool_result_id: 'aggregated',
             type: ToolResultType.other,
@@ -578,6 +581,7 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
             },
           },
         ];
+        return aggregated;
       });
 
       const result = await conversationToLangchainMessages({
