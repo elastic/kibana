@@ -17,6 +17,8 @@ import type {
   IntegrationResponse,
 } from '../../common';
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   GetAutoImportIntegrationRequestParams,
 } from '../../common';
@@ -31,6 +33,7 @@ export const registerIntegrationRoutes = (
   getAllIntegrationsRoute(router, logger);
   getIntegrationByIdRoute(router, logger);
   createIntegrationRoute(router, logger);
+  approveIntegrationRoute(router, logger);
 };
 
 const getAllIntegrationsRoute = (
@@ -193,6 +196,56 @@ const createIntegrationRoute = (
           return response.ok({ body });
         } catch (err) {
           logger.error(`createIntegrationRoute: Caught error: ${err}`);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const approveIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .post({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}/approve',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestParams),
+            body: buildRouteValidationWithZod(ApproveAutoImportIntegrationRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const authenticatedUser = await getCurrentUser();
+
+          const { integration_id: integrationId } = request.params;
+          const { version } = request.body;
+
+          await automaticImportService.approveIntegration({
+            integrationId,
+            authenticatedUser,
+            version,
+          });
+
+          return response.ok({ body: { message: 'Integration approved successfully' } });
+        } catch (err) {
+          logger.error(`approveIntegrationRoute: Caught error: ${err}`);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
             statusCode: 500,
