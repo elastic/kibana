@@ -158,6 +158,15 @@ export type {
   UserProfileServiceStart,
 } from '@kbn/core-user-profile-server';
 
+export type {
+  UserActivityObject,
+  UserActivityEventType,
+  UserActivityEvent,
+  TrackUserActionParams,
+  UserActivityServiceSetup,
+  UserActivityServiceStart,
+} from '@kbn/core-user-activity-server';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 

@@ -8,6 +8,9 @@
  */
 
 export type {
+  UserActivityObject,
+  UserActivityEventType,
+  UserActivityEvent,
   TrackUserActionParams,
   UserActivityServiceSetup,
   UserActivityServiceStart,

@@ -11,7 +11,7 @@
  * Information about the object being acted upon.
  * @public
  */
-export interface ObjectParams {
+export interface UserActivityObject {
   /** Unique identifier of the object */
   id: string;
   /** Display name of the object */
@@ -25,8 +25,9 @@ export interface ObjectParams {
 /**
  * Event type following ECS (Elastic Common Schema) allowed values.
  * @see https://www.elastic.co/guide/en/ecs/1.12/ecs-allowed-values-event-type.html
+ * @public
  */
-type EventType =
+export type UserActivityEventType =
   | 'access'
   | 'admin'
   | 'allowed'
@@ -49,11 +50,11 @@ type EventType =
  * Information about the action being performed.
  * @public
  */
-export interface EventParams {
+export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: string;
   /** ECS event type categorizing the action */
-  type: EventType;
+  type: UserActivityEventType;
 }
 
 /**
@@ -64,9 +65,9 @@ export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
   message?: string;
   /** Information about the action being performed */
-  event: EventParams;
+  event: UserActivityEvent;
   /** Information about the object being acted upon */
-  object: ObjectParams;
+  object: UserActivityObject;
 }
 
 /**

@@ -42,9 +42,14 @@ const createInternalStartContractMock = (): jest.Mocked<InternalUserActivityServ
   };
 };
 
+/** Mocks for the UserActivityService contracts. */
 export const userActivityServiceMock = {
+  /** Creates a mock for {@link InternalUserActivityServiceSetup}. */
   createInternalSetupContract: createInternalSetupContractMock,
+  /** Creates a mock for {@link InternalUserActivityServiceStart}. */
   createInternalStartContract: createInternalStartContractMock,
+  /** Creates a mock for {@link UserActivityServiceSetup}. */
   createSetupContract: createSetupContractMock,
+  /** Creates a mock for {@link UserActivityServiceStart}. */
   createStartContract: createStartContractMock,
 };
