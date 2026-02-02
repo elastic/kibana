@@ -59,7 +59,7 @@ export function PreviewPanel() {
         <QueryStreamPreviewPanel
           streamName={definition.stream.name}
           documents={queryStreamCreation.documents ?? []}
-          documentsError={queryStreamCreation.documentsError}
+          documentsError={queryStreamCreation.error}
           isLoading={queryStreamCreation.isLoading}
         />
       );

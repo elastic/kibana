@@ -5,39 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
 import type { SampleDocument } from '@kbn/streams-schema';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from './use_kibana';
 import { esqlResultToPlainObjects } from '../util/esql_result_to_plain_objects';
 import { executeEsqlQuery } from './use_execute_esql_query';
 import { useTimefilter } from './use_timefilter';
-
-export interface UseExecuteQueryStreamPreviewResult {
-  /**
-   * Execute an ES|QL query and return the preview documents
-   */
-  executeQuery: (esqlQuery: string) => Promise<void>;
-  /**
-   * Whether a query is currently being executed
-   */
-  isLoading: boolean;
-  /**
-   * Error from the last query execution, if any
-   */
-  error: Error | undefined;
-  /**
-   * Documents returned from the last successful query execution
-   */
-  documents: SampleDocument[] | undefined;
-  /**
-   * Clear the current error
-   */
-  clearError: () => void;
-  /**
-   * Clear the current documents
-   */
-  clearDocuments: () => void;
-}
 
 /**
  * Hook for executing ES|QL queries to preview query stream results.
@@ -61,54 +34,28 @@ export interface UseExecuteQueryStreamPreviewResult {
  * );
  * ```
  */
-export function useExecuteQueryStreamPreview(): UseExecuteQueryStreamPreviewResult {
-  const { dependencies } = useKibana();
-  const { data } = dependencies.start;
+export function useExecuteQueryStreamPreview() {
+  const { data } = useKibana().dependencies.start;
   const { timeState } = useTimefilter();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-  const [documents, setDocuments] = useState<SampleDocument[] | undefined>();
-
-  const executeQuery = useCallback(
+  const [{ value: documents, error, loading: isLoading }, executeQuery] = useAsyncFn(
     async (esqlQuery: string) => {
-      setIsLoading(true);
-      setError(undefined);
+      const result = await executeEsqlQuery({
+        query: esqlQuery,
+        search: data.search.search,
+        start: timeState.start,
+        end: timeState.end,
+      });
 
-      try {
-        const result = await executeEsqlQuery({
-          query: esqlQuery,
-          search: data.search.search,
-          start: timeState.start,
-          end: timeState.end,
-        });
-
-        const plainObjects = esqlResultToPlainObjects<SampleDocument>(result);
-        setDocuments(plainObjects);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error(String(err)));
-        setDocuments(undefined);
-      } finally {
-        setIsLoading(false);
-      }
+      return esqlResultToPlainObjects<SampleDocument>(result);
     },
     [data.search.search, timeState.start, timeState.end]
   );
-
-  const clearError = useCallback(() => {
-    setError(undefined);
-  }, []);
-
-  const clearDocuments = useCallback(() => {
-    setDocuments(undefined);
-  }, []);
 
   return {
     executeQuery,
     isLoading,
     error,
     documents,
-    clearError,
-    clearDocuments,
   };
 }

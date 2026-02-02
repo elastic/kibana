@@ -6,17 +6,9 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import type { SampleDocument } from '@kbn/streams-schema';
 import { useExecuteQueryStreamPreview } from '../../../hooks/use_execute_query_stream_preview';
 
-export interface QueryStreamCreationState {
-  documents: SampleDocument[] | undefined;
-  documentsError: Error | undefined;
-  isLoading: boolean;
-  executeQuery: (esqlQuery: string) => Promise<void>;
-  clearDocuments: () => void;
-  clearError: () => void;
-}
+export type QueryStreamCreationState = ReturnType<typeof useExecuteQueryStreamPreview>;
 
 const QueryStreamCreationContext = createContext<QueryStreamCreationState | null>(null);
 
@@ -25,19 +17,16 @@ const QueryStreamCreationContext = createContext<QueryStreamCreationState | null
  * This shares preview data between the form and preview panel components.
  */
 export function QueryStreamCreationProvider({ children }: { children: React.ReactNode }) {
-  const { executeQuery, isLoading, error, documents, clearError, clearDocuments } =
-    useExecuteQueryStreamPreview();
+  const { executeQuery, isLoading, error, documents } = useExecuteQueryStreamPreview();
 
   const value = useMemo(
     () => ({
       documents,
-      documentsError: error,
+      error,
       isLoading,
       executeQuery,
-      clearDocuments,
-      clearError,
     }),
-    [documents, error, isLoading, executeQuery, clearDocuments, clearError]
+    [documents, error, isLoading, executeQuery]
   );
 
   return (
