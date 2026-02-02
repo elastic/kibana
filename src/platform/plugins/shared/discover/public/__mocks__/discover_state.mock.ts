@@ -43,9 +43,8 @@ import { getInitialAppState } from '../application/main/state_management/utils/g
 import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
-import { filter, firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, timeout } from 'rxjs';
 import { FetchStatus } from '../application/types';
-import { waitFor } from '@testing-library/dom';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -269,11 +268,11 @@ export function getDiscoverInternalStateMock({
       ];
 
       try {
-        await waitFor(
-          () => {
-            expect(fetchLoadingStatuses).toContain(dataMain$.getValue().fetchStatus);
-          },
-          { timeout: 250 }
+        await firstValueFrom(
+          dataMain$.pipe(
+            filter(({ fetchStatus }) => fetchLoadingStatuses.includes(fetchStatus)),
+            timeout({ first: 250 })
+          )
         );
       } catch {
         // eslint-disable-next-line no-console
