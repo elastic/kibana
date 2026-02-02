@@ -65,7 +65,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           outputSchema: schema,
           nextInput: {
             message,
-            attachments
+            attachments,
           },
         });
 

@@ -27,8 +27,8 @@ export const InputSchema = z.object({
    */
   message: z.string().describe('The user input message to send to the agent.'),
   /**
- * Optional attachments to provide to the agent.
- */
+   * Optional attachments to provide to the agent.
+   */
   attachments: z
     .array(
       z.object({
