@@ -35,9 +35,8 @@ export const markdownSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      links: {
-        dynamic: false,
-        properties: {},
+      content: {
+        type: 'text',
       },
     },
   },

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { linksClient } from './links_content_management_client';
 
-const rejectErrorMessage = i18n.translate('links.saveDuplicateRejectedDescription', {
+const rejectErrorMessage = i18n.translate('markdown.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',
 });
 
