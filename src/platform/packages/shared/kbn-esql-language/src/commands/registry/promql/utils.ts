@@ -686,7 +686,7 @@ export const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => req
 /* Matches "param=" or "param =" but not "endpoint=" for param "end". */
 const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
   param,
-  pattern: new RegExp(`\\b${param}\\s*=`, 'i'),
+  pattern: new RegExp(`${param}\\s*=`, 'i'),
 }));
 
 export function getPromqlParamDefinitions(): PromqlParamDefinition[] {
