@@ -22,6 +22,7 @@ import {
 import { Location } from '../types';
 import {
   expectSuggestions,
+  getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   suggest,
 } from '../../../__tests__/commands/autocomplete';
@@ -200,7 +201,13 @@ describe('RERANK Autocomplete', () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' });
 
       await expectRerankSuggestions(query, {
-        contains: [', ', 'WITH { $0 }', '| '], // HD complete with the rest of items
+        contains: [
+          ', ',
+          'WITH { $0 }',
+          '| ',
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.RERANK, 'any', { scalar: true }),
+        ],
       });
     });
 
