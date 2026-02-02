@@ -99,8 +99,8 @@ describe('getSkillsInstructions', () => {
       const result = await getSkillsInstructions({ filesystem });
 
       expect(result).toContain('## SKILLS');
-      expect(result).toContain('Load a skill to get detailed instructions for a specific task');
-      expect(result).toContain('Skills provide specialized knowledge and step-by-step guidance');
+      expect(result).toContain('Load a skill using filestore tools to get detailed instructions for a specific task');
+      expect(result).toContain('Skills provide specialized knowledge and best practices for specific tasks');
       expect(result).toContain('<available_skills>');
       expect(result).toContain('</available_skills>');
     });

@@ -95,7 +95,7 @@ export interface SkillTypeDefinition<
      */
     name: string;
     /**
-     * Relative path of the referenced content. Must start with a dot `.`
+     * Relative path of the referenced content (relative to the skill base path). Must start with a dot `.`
      *
      * Valid relative paths are:
      * - "." - stores reference content in the same directory as the skill

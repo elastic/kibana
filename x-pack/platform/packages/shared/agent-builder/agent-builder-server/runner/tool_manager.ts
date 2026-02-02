@@ -63,7 +63,7 @@ interface ToolManager {
    * This affects LRU eviction for dynamic tools.
    * @param name - the name of the tool to record usage for
    */
-  recordToolUse(name: ToolName): void;
+  recordToolUse(langchainToolName: ToolName): void;
 
   /**
    * Gets the tool id mapping.

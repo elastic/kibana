@@ -88,9 +88,9 @@ export class ToolManager implements IToolManager {
     return Array.from(this.staticTools.values()).concat(this.dynamicTools.values());
   }
 
-  public recordToolUse(name: ToolName): void {
-    if (this.dynamicTools.has(name)) {
-      this.dynamicTools.get(name);
+  public recordToolUse(langchainToolName: ToolName): void {
+    if (this.dynamicTools.has(langchainToolName)) {
+      this.dynamicTools.get(langchainToolName);
     }
   }
 

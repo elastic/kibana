@@ -18,7 +18,7 @@ export const getSkillsInstructions = async ({
     .filter(isSkillFileEntry)
     .toSorted((a, b) => a.path.localeCompare(b.path));
 
-  const description =
+  const skillPrompt =
     skillsFileEntries.length === 0
       ? [
           '## SKILLS',
@@ -27,9 +27,9 @@ export const getSkillsInstructions = async ({
       : [
           '## SKILLS',
           [
-            'Load a skill to get detailed instructions for a specific task.',
-            'Skills provide specialized knowledge and step-by-step guidance.',
-            "Use this when a task matches an available skill's description.",
+            'Load a skill using filestore tools to get detailed instructions for a specific task.',
+            'Skills provide specialized knowledge and best practices for specific tasks.',
+            "Use them when a task matches a skill's description or the skill is useful for the task.",
             'Only the skills listed here are available:',
           ].join(' '),
           '<available_skills>',
@@ -42,5 +42,5 @@ export const getSkillsInstructions = async ({
           '</available_skills>',
         ].join('\n');
 
-  return description;
+  return skillPrompt;
 };
