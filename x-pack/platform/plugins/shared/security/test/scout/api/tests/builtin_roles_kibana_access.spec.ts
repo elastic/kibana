@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import type {
   SecurityGetRoleResponse,
   SecurityGetRoleRole,
@@ -177,17 +179,30 @@ apiTest.describe('Built-in roles Kibana access validation', { tag: ['@ess'] }, (
 
       // Compare with expected roles
       const differences = compareRoleAccessMaps(
-        actualBuiltinRolesWithKibanaAccess,
-        EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS
+        Object.fromEntries(
+          Object.entries(actualBuiltinRolesWithKibanaAccess).map(([key, value]) => [
+            key,
+            value.applications,
+          ])
+        ),
+        Object.fromEntries(
+          Object.entries(EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS).map(([key, value]) => [
+            key,
+            value.applications,
+          ])
+        )
       );
 
       const hasDifferences =
+        // eslint-disable-next-line playwright/no-conditional-in-test
         differences.addedRoles.length > 0 ||
         differences.removedRoles.length > 0 ||
         differences.changedRoles.length > 0;
 
+      // eslint-disable-next-line playwright/no-conditional-in-test
       const errorMessage = hasDifferences ? formatDifferences(differences) : '';
 
+      // eslint-disable-next-line playwright/no-conditional-in-test
       if (hasDifferences) {
         log.error('Built-in roles Kibana access has changed:\n' + errorMessage);
 
@@ -212,9 +227,11 @@ apiTest.describe('Built-in roles Kibana access validation', { tag: ['@ess'] }, (
     const kibanaAppNames = new Set<string>();
 
     for (const [_, role] of Object.entries(rolesResponse)) {
+      // eslint-disable-next-line playwright/no-conditional-in-test
       if (!role.metadata?._reserved) continue;
 
       for (const app of role.applications) {
+        // eslint-disable-next-line playwright/no-conditional-in-test
         if (app.application.startsWith('kibana')) {
           kibanaAppNames.add(app.application);
         }

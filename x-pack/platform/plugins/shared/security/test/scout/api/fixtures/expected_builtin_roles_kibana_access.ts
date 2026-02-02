@@ -43,14 +43,6 @@
  *   - `resources`: Array of resource identifiers (sorted alphabetically)
  */
 
-interface BuiltinRoleKibanaAccess {
-  applications: Array<{
-    application: string;
-    privileges: string[];
-    resources: string[];
-  }>;
-}
-
 /**
  * Map of built-in role names to their expected Kibana access configuration.
  *
@@ -61,7 +53,10 @@ interface BuiltinRoleKibanaAccess {
  * IMPORTANT: This data represents the expected state. If Elasticsearch changes
  * the built-in roles, this file must be updated to reflect those changes.
  */
-export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<string, BuiltinRoleKibanaAccess> = {
+export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
+  string,
+  { applications: Array<{ application: string; privileges: string[]; resources: string[] }> }
+> = {
   // ==========================================================================
   // Core Kibana Roles
   // ==========================================================================
