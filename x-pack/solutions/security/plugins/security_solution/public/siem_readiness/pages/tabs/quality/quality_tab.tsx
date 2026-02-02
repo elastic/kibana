@@ -34,6 +34,7 @@ import {
   getQualityCaseTitle,
   getQualityCaseTags,
 } from './quality_add_case_details';
+import type { CategoryOption } from '../../components/configuration_panel';
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
@@ -42,7 +43,11 @@ interface IndexInfoWithStatus extends IndexInfo, Record<string, unknown> {
   checkedAt: number | undefined;
 }
 
-export const QualityTab: React.FC = () => {
+interface QualityTabProps {
+  selectedCategories: CategoryOption[];
+}
+
+export const QualityTab: React.FC<QualityTabProps> = ({ selectedCategories }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
@@ -56,26 +61,28 @@ export const QualityTab: React.FC = () => {
     return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
   }, [getIndexQualityData]);
 
-  // Prepare categories data with computed status field
+  // Prepare categories data with computed status field, filtered by selected categories
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    return getReadinessCategoriesData.mainCategoriesMap.map((category) => ({
-      category: category.category,
-      items: category.indices.map((index) => {
-        const result = indexDataQualityMap.get(index.indexName);
-        const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-        const isIncompatible = incompatibleCount > 0;
+    return getReadinessCategoriesData.mainCategoriesMap
+      .filter((category) => selectedCategories.includes(category.category as CategoryOption))
+      .map((category) => ({
+        category: category.category,
+        items: category.indices.map((index) => {
+          const result = indexDataQualityMap.get(index.indexName);
+          const incompatibleCount = result?.incompatibleFieldCount ?? 0;
+          const isIncompatible = incompatibleCount > 0;
 
-        return {
-          ...index,
-          status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
-          incompatibleFieldCount: incompatibleCount,
-          checkedAt: result?.checkedAt,
-        };
-      }),
-    }));
-  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap]);
+          return {
+            ...index,
+            status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
+            incompatibleFieldCount: incompatibleCount,
+            checkedAt: result?.checkedAt,
+          };
+        }),
+      }));
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, selectedCategories]);
 
   // Calculate total incompatible indices
   const totalIncompatibleIndices = useMemo(() => {

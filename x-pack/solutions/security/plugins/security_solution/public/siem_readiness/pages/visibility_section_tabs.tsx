@@ -39,7 +39,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.tab.title', {
         defaultMessage: 'Quality',
       }),
-      content: <QualityTab />,
+      content: <QualityTab selectedCategories={selectedCategories} />,
     },
     {
       id: 'continuity',
