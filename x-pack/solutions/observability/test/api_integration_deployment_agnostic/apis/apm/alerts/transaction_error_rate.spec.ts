@@ -243,7 +243,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-describe('create rule with kql query', function () {
+    describe('create rule with kql query', function () {
       this.tags('skipCloud');
 
       let ruleId: string;
