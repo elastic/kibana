@@ -8,14 +8,21 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
-
+import type {
+  ControlsGroupState as PinnedPanelsState,
+  LegacyIgnoreParentSettings,
+} from '@kbn/controls-schemas';
+import { flow } from 'lodash';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import {
-  transformLegacyControlsState,
-  transformPinnedPanelsState,
-} from './transform_controls_state';
 import type { DashboardState } from '../../types';
+
+import type {
+  DashboardPinnedPanelsState as DashboardControlsState,
+  DashboardPinnedPanelsState,
+} from '../../../../common';
+import { embeddableService, logger } from '../../../kibana_services';
+
+type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformControlGroupOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'],
@@ -26,13 +33,23 @@ export function transformControlGroupOut(
     /**
      * >=9.4, pinned panels are stored under the key `pinned_panels` without any JSON bucketing
      */
-    return transformPinnedPanelsState(pinnedPanels.panels, containerReferences);
+    return injectPinnedPanelReferences(
+      flow(transformPinnedPanelsObjectToArray, transformControlProperties)(pinnedPanels.panels),
+      containerReferences
+    );
   } else if (controlGroupInput) {
     /**
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
      */
     const controls = controlGroupInput.panelsJSON
-      ? transformLegacyControlsState(controlGroupInput.panelsJSON, containerReferences)
+      ? injectPinnedPanelReferences(
+          flow(
+            JSON.parse,
+            transformPinnedPanelsObjectToArray,
+            transformControlProperties
+          )(controlGroupInput.panelsJSON),
+          containerReferences
+        )
       : [];
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
@@ -59,4 +76,57 @@ export function transformControlGroupOut(
     return controls;
   }
   return;
+}
+
+/**
+ * Transform functions for serialized pinned panels
+ */
+
+function transformPinnedPanelsObjectToArray(
+  controls: StoredPinnedPanels
+): Array<StoredPinnedPanels[string] & { id: string }> {
+  return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
+}
+
+function transformControlProperties(
+  controls: Array<StoredPinnedPanels[string] & { id: string }>
+): PinnedPanelsState {
+  return controls
+    .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
+    .map(({ explicitInput, id, type, grow, width }) => {
+      return {
+        uid: id,
+        type,
+        ...(grow !== undefined && { grow }),
+        ...(width !== undefined && { width }),
+        config: explicitInput,
+      } as PinnedPanelsState[number];
+    });
+}
+
+function injectPinnedPanelReferences(
+  controls: PinnedPanelsState,
+  containerReferences: Reference[]
+): DashboardPinnedPanelsState {
+  const transformedControls: DashboardControlsState = [];
+  controls.forEach((control) => {
+    const transforms = embeddableService.getTransforms(control.type);
+    const { config, ...rest } = control;
+    if (transforms?.transformOut) {
+      try {
+        transformedControls.push({
+          ...rest,
+          config: transforms.transformOut(config, [], containerReferences, control.uid),
+        } as DashboardControlsState[number]);
+      } catch (transformOutError) {
+        // do not prevent read on transformOutError
+        logger.warn(
+          `Unable to transform "${control.type}" embeddable state on read. Error: ${transformOutError.message}`
+        );
+      }
+    } else {
+      transformedControls.push({ ...rest, config } as DashboardControlsState[number]);
+    }
+  });
+  return transformedControls;
 }
