@@ -35,11 +35,13 @@ import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 export function getInitialAppState({
   initialUrlState,
+  hasGlobalState,
   persistedTab,
   dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState: boolean;
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
@@ -49,6 +51,7 @@ export function getInitialAppState({
     dataView,
     services,
     initialUrlState,
+    hasGlobalState,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
@@ -83,6 +86,7 @@ function getDefaultColumns(
 
 function getDefaultQuery({
   initialUrlState,
+  hasGlobalState,
   persistedTab,
   services,
   dataView,
@@ -91,18 +95,17 @@ function getDefaultQuery({
   services: DiscoverServices;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState: boolean;
 }): Query | AggregateQuery | undefined {
   if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
 
-  // This scenarios are used when we are adding a new tab:
-  //  1. We only have the query set if:
-  //    a. The tab is in ES|QL mode
-  //    b. The tab is in other mode but has some filter in place
-  // 2. We have no query set but we do have a data source if we are in classic mode with no filters
-  if (initialUrlState?.query) return initialUrlState.query;
-  if (initialUrlState?.dataSource) return services.data.query.queryString.getDefaultQuery();
+  // If there is global or app state (_g or _a) in the URL we should respect it and assume it's a classic query
+  // This is also useful to reuse the query mode if we are opening a new tab from an existing one
+  const hasInitialUrlState = Object.keys(initialUrlState || {}).length > 0;
+  if (hasGlobalState || hasInitialUrlState)
+    return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
-  // Fallback to last query mode for new sessions
+  // Lastly fall back to the last selected query mode if available
   const hasEsqlEnabled = services.uiSettings.get(ENABLE_ESQL);
 
   const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
@@ -117,14 +120,22 @@ function getDefaultAppState({
   dataView,
   services,
   initialUrlState,
+  hasGlobalState,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
   initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState: boolean;
 }) {
   const { uiSettings, storage } = services;
-  const query = getDefaultQuery({ persistedTab, services, dataView, initialUrlState });
+  const query = getDefaultQuery({
+    persistedTab,
+    services,
+    dataView,
+    initialUrlState,
+    hasGlobalState,
+  });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
   // we assume the sort array is valid since we can't know for sure
