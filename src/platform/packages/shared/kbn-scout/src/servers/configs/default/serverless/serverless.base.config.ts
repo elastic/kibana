@@ -102,6 +102,8 @@ export const defaultConfig: ScoutServerConfig = {
     sourceArgs: ['--no-base-path', '--env.name=development'],
     serverArgs: [
       `--server.restrictInternalApis=true`,
+      // Enable OpenAPI specification endpoint for schema validation tests
+      '--server.oas.enabled=true',
       `--server.port=${servers.kibana.port}`,
       '--status.allowAnonymous=true',
       `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,

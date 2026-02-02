@@ -13,7 +13,7 @@ import { tags } from '@kbn/scout';
 import { apiTest, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 import snapshot from '../fixtures/schema_snapshot.json';
 
-apiTest.describe('dashboard REST schema', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
