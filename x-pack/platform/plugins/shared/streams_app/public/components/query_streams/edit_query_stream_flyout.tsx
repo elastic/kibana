@@ -59,25 +59,12 @@ export function EditQueryStreamFlyout({ definition, onClose, onSave }: EditQuery
 
   return (
     <QueryStreamFlyout
-      ariaLabelledbyId="edit-query-stream-flyout-title"
       title={i18n.translate('xpack.streams.editQueryStreamFlyout.editQueryStreamTitleLabel', {
         defaultMessage: 'Edit Query Stream: {streamName}',
         values: { streamName },
       })}
       onClose={onClose}
       onSubmit={handleQueryStreamUpdate}
-      submitButtonLabel={i18n.translate('xpack.streams.editQueryStreamFlyout.saveButtonLabel', {
-        defaultMessage: 'Save',
-      })}
-      submitButtonTestSubj="streamsAppEditQueryStreamFlyoutSaveButton"
-      cancelButtonLabel={i18n.translate('xpack.streams.editQueryStreamFlyout.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      })}
-      cancelButtonTestSubj="streamsAppEditQueryStreamFlyoutCancelButton"
-      previewPanelTestSubj="queryStreamPreviewPanel"
-      queryRequiredMessage={i18n.translate('xpack.streams.editQueryStreamFlyout.queryRequired', {
-        defaultMessage: 'Query is required',
-      })}
       initialEsql={resolvedEsql}
       disableSubmitWhenLoading
     />

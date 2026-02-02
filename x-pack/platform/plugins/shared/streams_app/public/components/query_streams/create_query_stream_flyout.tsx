@@ -80,29 +80,12 @@ const CreateQueryStreamFlyoutContent = ({
 
   return (
     <QueryStreamFlyout
-      ariaLabelledbyId="create-query-stream-flyout-title"
       title={i18n.translate('xpack.streams.createQueryStreamFlyout.createQueryStreamTitleLabel', {
         defaultMessage: 'Create Query Stream',
       })}
       onClose={onClose}
       onSubmit={handleQueryStreamCreation}
-      submitButtonLabel={i18n.translate(
-        'xpack.streams.createQueryStreamFlyout.createQueryStreamButtonLabel',
-        { defaultMessage: 'Create Query Stream' }
-      )}
-      submitButtonTestSubj="streamsAppCreateQueryStreamFlyoutCreateButton"
-      cancelButtonLabel={i18n.translate('xpack.streams.createQueryStreamFlyout.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      })}
-      cancelButtonTestSubj="streamsAppCreateQueryStreamFlyoutCancelButton"
-      previewPanelTestSubj="routingPreviewPanel"
       showNameField
-      nameRequiredMessage={i18n.translate('xpack.streams.createQueryStreamFlyout.nameRequired', {
-        defaultMessage: 'Name is required',
-      })}
-      queryRequiredMessage={i18n.translate('xpack.streams.createQueryStreamFlyout.queryRequired', {
-        defaultMessage: 'Query is required',
-      })}
     />
   );
 };

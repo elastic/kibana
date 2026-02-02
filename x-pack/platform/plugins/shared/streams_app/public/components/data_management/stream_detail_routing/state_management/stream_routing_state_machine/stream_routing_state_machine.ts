@@ -128,9 +128,6 @@ export const streamRoutingMachine = setup({
     })),
     setRefreshing: assign(() => ({ isRefreshing: true })),
     clearRefreshing: assign(() => ({ isRefreshing: false })),
-    // Query stream actions
-    setQueryStreamCreating: assign(() => ({ isQueryStreamCreating: true })),
-    resetQueryStreamCreating: assign(() => ({ isQueryStreamCreating: false })),
     notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
   },
   guards: {
@@ -172,8 +169,6 @@ export const streamRoutingMachine = setup({
     editingSuggestionIndex: null,
     editedSuggestion: null,
     isRefreshing: false,
-    // Query stream mode - tracks if we're in creation flow
-    isQueryStreamCreating: false,
   }),
   initial: 'initializing',
   states: {
@@ -682,37 +677,25 @@ export const streamRoutingMachine = setup({
           id: 'queryMode',
           initial: 'idle',
           on: {
-            'childStreams.mode.changeToIngestMode': {
-              target: '#ingestMode',
-              actions: [{ type: 'resetQueryStreamCreating' }],
-            },
+            'childStreams.mode.changeToIngestMode': '#ingestMode',
           },
           states: {
             idle: {
-              id: 'queryModeIdle',
               on: {
                 'queryStream.create': {
                   guard: 'hasManagePrivileges',
                   target: 'creating',
-                  actions: [{ type: 'setQueryStreamCreating' }],
                 },
               },
             },
             creating: {
-              id: 'queryModeCreating',
               on: {
-                'queryStream.cancel': {
-                  target: 'idle',
-                  actions: [{ type: 'resetQueryStreamCreating' }],
-                },
-                'queryStream.save': {
-                  target: 'saving',
-                },
+                'queryStream.cancel': 'idle',
+                'queryStream.save': 'saving',
               },
             },
             saving: {
               invoke: {
-                id: 'createQueryStreamActor',
                 src: 'createQueryStream',
                 input: ({ event }) => {
                   assertEvent(event, 'queryStream.save');
@@ -725,7 +708,6 @@ export const streamRoutingMachine = setup({
                   target: 'idle',
                   actions: [
                     { type: 'notifyQueryStreamSuccess' },
-                    { type: 'resetQueryStreamCreating' },
                     { type: 'setRefreshing' },
                     { type: 'refreshDefinition' },
                   ],

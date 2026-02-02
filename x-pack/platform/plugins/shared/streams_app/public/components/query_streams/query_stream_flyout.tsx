@@ -43,17 +43,9 @@ interface FormState {
 
 interface QueryStreamFlyoutProps {
   title: React.ReactNode;
-  ariaLabelledbyId: string;
   onClose: () => void;
   onSubmit: (formData: FormState, signal: AbortSignal) => Promise<void>;
-  submitButtonLabel: string;
-  submitButtonTestSubj: string;
-  cancelButtonLabel: string;
-  cancelButtonTestSubj: string;
-  previewPanelTestSubj: string;
-  queryRequiredMessage: string;
   showNameField?: boolean;
-  nameRequiredMessage?: string;
   initialName?: string;
   initialEsql?: string;
   disableSubmitWhenLoading?: boolean;
@@ -61,17 +53,9 @@ interface QueryStreamFlyoutProps {
 
 export function QueryStreamFlyout({
   title,
-  ariaLabelledbyId,
   onClose,
   onSubmit,
-  submitButtonLabel,
-  submitButtonTestSubj,
-  cancelButtonLabel,
-  cancelButtonTestSubj,
-  previewPanelTestSubj,
-  queryRequiredMessage,
   showNameField = false,
-  nameRequiredMessage,
   initialName = '',
   initialEsql,
   disableSubmitWhenLoading = false,
@@ -91,11 +75,17 @@ export function QueryStreamFlyout({
   });
 
   register('name', {
-    required: showNameField ? nameRequiredMessage : false,
+    required: showNameField
+      ? i18n.translate('xpack.streams.createQueryStreamFlyout.nameRequired', {
+          defaultMessage: 'Name is required',
+        })
+      : false,
   });
 
   register('esqlQuery', {
-    required: queryRequiredMessage,
+    required: i18n.translate('xpack.streams.queryStreamFlyout.queryRequired', {
+      defaultMessage: 'Query is required',
+    }),
   });
 
   const { name: streamName, esqlQuery } = watch();
@@ -144,10 +134,10 @@ export function QueryStreamFlyout({
   });
 
   return (
-    <EuiFlyout size="l" onClose={onClose} aria-labelledby={ariaLabelledbyId}>
+    <EuiFlyout size="l" onClose={onClose} aria-labelledby="query-stream-flyout-title">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={ariaLabelledbyId}>{title}</h2>
+          <h2 id="query-stream-flyout-title">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
@@ -220,7 +210,7 @@ export function QueryStreamFlyout({
                         flex-direction: column;
                       `}
                     >
-                      <EuiFlexItem grow={false} data-test-subj={previewPanelTestSubj}>
+                      <EuiFlexItem grow={false} data-test-subj="streamsAppQueryStreamPreviewPanel">
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
                           <EuiFlexGroup component="span" gutterSize="s">
                             <EuiIcon type="inspect" />
@@ -252,15 +242,17 @@ export function QueryStreamFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiButtonEmpty
-            data-test-subj={cancelButtonTestSubj}
+            data-test-subj="streamsAppQueryStreamFlyoutCancelButton"
             iconType="cross"
             onClick={onClose}
             flush="left"
           >
-            {cancelButtonLabel}
+            {i18n.translate('xpack.streams.queryStreamFlyout.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            })}
           </EuiButtonEmpty>
           <EuiButton
-            data-test-subj={submitButtonTestSubj}
+            data-test-subj="streamsAppQueryStreamFlyoutSaveButton"
             isLoading={formState.isSubmitting}
             disabled={
               (formState.isSubmitted && !formState.isValid) ||
@@ -269,7 +261,9 @@ export function QueryStreamFlyout({
             }
             onClick={handleFlyoutSubmit}
           >
-            {submitButtonLabel}
+            {i18n.translate('xpack.streams.queryStreamFlyout.saveButtonLabel', {
+              defaultMessage: 'Save',
+            })}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

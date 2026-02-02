@@ -41,14 +41,14 @@ export interface StreamRoutingContext {
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
-  // Query stream mode - tracks if we're in creation flow
-  isQueryStreamCreating: boolean;
 }
 
 export type StreamRoutingEvent =
-  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
   | { type: 'childStreams.mode.changeToIngestMode' }
   | { type: 'childStreams.mode.changeToQueryMode' }
+  | { type: 'queryStream.create' }
+  | { type: 'queryStream.cancel' }
+  | { type: 'queryStream.save'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
@@ -67,11 +67,8 @@ export type StreamRoutingEvent =
       toggle?: boolean;
     }
   | { type: 'routingRule.reviewSuggested'; id: string }
+  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
   | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
   | { type: 'suggestion.changeName'; name: string }
   | { type: 'suggestion.changeCondition'; condition: Condition }
-  | { type: 'suggestion.saveSuggestion' }
-  // Query stream events (user-triggered)
-  | { type: 'queryStream.create' }
-  | { type: 'queryStream.cancel' }
-  | { type: 'queryStream.save'; name: string; esqlQuery: string };
+  | { type: 'suggestion.saveSuggestion' };
