@@ -8,10 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  legacyStoredOptionsListDSLControlSchema,
-  storedOptionsListESQLControlSchema,
-} from './stored_options_list_schema';
+import { storedOptionsListESQLControlSchema } from './stored_options_list_schema';
 import { storedRangeSliderControlSchema } from './stored_range_slider_schema';
 import { storedTimeSliderControlSchema } from './stored_time_slider_schema';
 
