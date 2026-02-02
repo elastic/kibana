@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { useEffect } from 'react';
+import { EuiBetaBadge, EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, Capabilities } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { NotFoundRoute } from './not_found';
@@ -21,6 +25,7 @@ import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
 import { DiscoverMainRoute } from './main';
+import { useDiscoverServices } from '../hooks/use_discover_services';
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;
@@ -46,34 +51,78 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
   );
 };
 
-// this exists as a separate component to allow the tests to gather the routes
-export const DiscoverRoutes = ({
+const DiscoverRoutes = ({
   ...routeProps
 }: Pick<DiscoverRouterProps, 'customizationContext' | 'onAppLeave'>) => {
   return (
     <Routes>
-      <Route path="/context/:dataViewId/:id">
+      <DiscoverRoute path="/context/:dataViewId/:id">
         <ContextAppRoute />
-      </Route>
-      <Route
+      </DiscoverRoute>
+      <DiscoverRoute
         path="/doc/:dataView/:index/:type"
         render={(props) => (
           <Redirect to={`/doc/${props.match.params.dataView}/${props.match.params.index}`} />
         )}
       />
-      <Route path="/doc/:dataViewId/:index">
+      <DiscoverRoute path="/doc/:dataViewId/:index">
         <SingleDocRoute />
-      </Route>
-      <Route path="/viewAlert/:id">
+      </DiscoverRoute>
+      <DiscoverRoute path="/viewAlert/:id">
         <ViewAlertRoute />
-      </Route>
-      <Route path="/view/:id">
+      </DiscoverRoute>
+      <DiscoverRoute path="/view/:id">
         <DiscoverMainRoute {...routeProps} />
-      </Route>
-      <Route path="/" exact>
+      </DiscoverRoute>
+      <DiscoverRoute path="/" exact>
         <DiscoverMainRoute {...routeProps} />
-      </Route>
+      </DiscoverRoute>
       <NotFoundRoute />
     </Routes>
   );
 };
+
+const DiscoverRoute = ({ children, ...props }: PropsWithChildren<RouteProps>) => {
+  const { chrome, capabilities } = useDiscoverServices();
+
+  useEffect(() => {
+    const readOnlyBadge = getReadOnlyBadge({ capabilities });
+
+    if (readOnlyBadge) {
+      chrome.setBreadcrumbsBadges([readOnlyBadge]);
+    }
+
+    return () => {
+      chrome.setBreadcrumbsBadges([]);
+    };
+  }, [capabilities, chrome, props.path]);
+
+  return <Route {...props}>{children}</Route>;
+};
+
+export const getReadOnlyBadge = ({
+  capabilities,
+}: {
+  capabilities: Capabilities;
+}): ChromeBreadcrumbsBadge | undefined =>
+  capabilities.discover_v2.save
+    ? undefined
+    : {
+        badgeText: i18n.translate('discover.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        renderCustomBadge: ({ badgeText }) => {
+          return (
+            <EuiBetaBadge
+              label={badgeText}
+              tooltipContent={i18n.translate('discover.badge.readOnly.tooltip', {
+                defaultMessage: 'Unable to save Discover sessions',
+              })}
+              color="hollow"
+              iconType="glasses"
+              data-test-subj="discover-readonly-badge"
+              css={{ display: 'block' }}
+            />
+          );
+        },
+      };

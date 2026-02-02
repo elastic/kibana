@@ -14,13 +14,6 @@ export const SHOW_ANONYMIZED_LABEL = i18n.translate(
   }
 );
 
-export const EXPAND_BUTTON_ARIAL_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.attacks.tableSection.expandButtonArialLabel',
-  {
-    defaultMessage: 'Open attack details',
-  }
-);
-
 export const LEARN_MORE = i18n.translate(
   'xpack.securitySolution.detectionEngine.attacks.emptyResults.learnMoreLink',
   {

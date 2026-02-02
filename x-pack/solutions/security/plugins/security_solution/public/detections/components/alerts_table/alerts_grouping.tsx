@@ -26,6 +26,7 @@ import type {
   GetGroupStats,
   GroupChildComponentRenderer,
   GroupingArgs,
+  GroupingSort,
   GroupPanelRenderer,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
@@ -118,6 +119,11 @@ export interface AlertsTableComponentProps {
 
   /** Optional function to get additional action buttons to display in group stats before the Take actions button */
   getAdditionalActionButtons?: GetAdditionalActionButtons<AlertsGroupingAggregation>;
+
+  /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
 }
 
 const DEFAULT_PAGE_SIZE = 25;
