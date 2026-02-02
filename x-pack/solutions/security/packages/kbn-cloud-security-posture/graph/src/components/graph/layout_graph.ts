@@ -288,13 +288,26 @@ const alignNodesCenterInPlace = (g: Dagre.graphlib.Graph, filter: (node: string)
         prevNodeY[currNode] = currY;
         setY(currNode, snapped(newY));
       } else if (parents.length === 1) {
-        // There is only one parent, so we just set the current node to the parent's Y position
+        // There is only one parent
         const parent = parents[0].toString();
-        const newY = Y(parent) - Height(currNode) / 2;
 
-        // Log the diff for current node
-        prevNodeY[currNode] = currY;
-        setY(currNode, snapped(newY));
+        // Check if this parent has multiple children (siblings of current node)
+        const siblings = (g.successors(parent)?.filter((sV) => filter(sV.toString())) ?? []).map(
+          (s) => s.toString()
+        );
+
+        if (siblings.length > 1) {
+          // Parent has multiple children - preserve Dagre's original positioning
+          // to avoid overlapping nodes in fan-out scenarios (one label → multiple targets)
+          prevNodeY[currNode] = currY;
+        } else {
+          // Only child - center on parent as before
+          const newY = Y(parent) - Height(currNode) / 2;
+
+          // Log the diff for current node
+          prevNodeY[currNode] = currY;
+          setY(currNode, snapped(newY));
+        }
       }
     } else {
       // No children and no parents, so we just set the current node to its own Y position
