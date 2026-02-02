@@ -244,6 +244,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('create rule with kql query', () => {
+      this.tags('skipCloud');
+
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
@@ -319,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
       });
 
-      it.skip('shows alert count=1 for opbeans-node on service inventory', async () => {
+      it('shows alert count=1 for opbeans-node on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,
