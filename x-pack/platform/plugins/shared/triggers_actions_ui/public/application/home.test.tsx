@@ -17,6 +17,7 @@ import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_feat
 import type { MatchParams } from './home';
 import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
+import { useKibana } from '../common/lib/kibana';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
@@ -39,12 +40,15 @@ jest.mock('@kbn/ebt-tools', () => ({
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
   useGetRuleTypesPermissions: jest.fn().mockReturnValue({
     authorizedToReadAnyRules: true,
+    authorizedToCreateAnyRules: true,
   }),
 }));
 
 const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const queryClient = new QueryClient();
 
@@ -142,5 +146,88 @@ describe('home', () => {
 
     // Just rules
     expect(home.find('span.euiTab__content').length).toBe(1);
+  });
+
+  describe('setHeaderActions', () => {
+    beforeEach(() => {
+      useKibanaMock().services.application.capabilities = {
+        ...useKibanaMock().services.application.capabilities,
+        rulesSettings: {
+          show: true,
+          readFlappingSettingsUI: true,
+          readQueryDelaySettingsUI: true,
+        },
+      };
+    });
+    it('should render the header actions correctly when the user is authorized to create rules', async () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: true,
+      });
+      const props: RouteComponentProps<MatchParams> = {
+        history: createMemoryHistory({
+          initialEntries: ['/rules'],
+        }),
+        location: createLocation('/rules'),
+        match: {
+          isExact: true,
+          path: `/rules`,
+          url: '',
+          params: {
+            section: 'rules',
+          },
+        },
+      };
+
+      render(
+        <IntlProvider locale="en">
+          <Router history={props.history}>
+            <QueryClientProvider client={queryClient}>
+              <TriggersActionsUIHome {...props} />
+            </QueryClientProvider>
+          </Router>
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
+      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
+      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+    });
+
+    it('should not render the create rule button when the user is not authorized to create rules', async () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: false,
+      });
+
+      const props: RouteComponentProps<MatchParams> = {
+        history: createMemoryHistory({
+          initialEntries: ['/rules'],
+        }),
+        location: createLocation('/rules'),
+        match: {
+          isExact: true,
+          path: `/rules`,
+          url: '',
+          params: {
+            section: 'rules',
+          },
+        },
+      };
+
+      render(
+        <IntlProvider locale="en">
+          <Router history={props.history}>
+            <QueryClientProvider client={queryClient}>
+              <TriggersActionsUIHome {...props} />
+            </QueryClientProvider>
+          </Router>
+        </IntlProvider>
+      );
+
+      expect(await screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
+      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+    });
   });
 });

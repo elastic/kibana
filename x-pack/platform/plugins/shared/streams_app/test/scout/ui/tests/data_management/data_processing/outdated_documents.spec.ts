@@ -109,9 +109,20 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(OLD_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    // Set date range within the KQL data source card
+    await kqlDataSourceCard
+      .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+      .click();
+    await pageObjects.datePicker.typeAbsoluteRange({
+      from: oldDocumentsDateRange.from,
+      to: oldDocumentsDateRange.to,
+    });
+    await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeVisible();
@@ -132,9 +143,20 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(NEW_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    // Set date range within the KQL data source card
+    await kqlDataSourceCard
+      .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+      .click();
+    await pageObjects.datePicker.typeAbsoluteRange({
+      from: oldDocumentsDateRange.from,
+      to: oldDocumentsDateRange.to,
+    });
+    await pageObjects.datePicker.waitToBeHidden();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();
@@ -155,8 +177,12 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(EMPTY_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
-    await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await page.getByTestId('querySubmitButton').click();
+    // Scope interactions to the KQL data source card to avoid conflicts with other data sources
+    const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+    await kqlDataSourceCard
+      .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+      .fill('Kql Samples');
+    await kqlDataSourceCard.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();

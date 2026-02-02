@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
@@ -63,16 +64,15 @@ import {
   getMaxAllowedSampleSize,
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
-import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
-import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
-import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
   DocViewerExtensionParams,
+  OpenInNewTabParams,
+  UpdateCascadeGroupingFn,
   UpdateESQLQueryFn,
 } from '../../../../context_awareness';
 import {
@@ -88,6 +88,11 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import {
+  useGetDocumentViewRenderer,
+  type DiscoverGridFlyoutProps,
+} from './helpers/render_document_view';
+import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -177,6 +182,17 @@ function DiscoverDocumentsComponent({
     stateContainer,
   });
 
+  const cascadeConfig = useReadCascadeConfig();
+
+  const registerCascadeRequestsInspectorAdapter = useCallback<
+    NonNullable<ComponentProps<typeof DiscoverGrid>['registerCascadeRequestsInspectorAdapter']>
+  >(
+    (requestAdapter) => {
+      stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
+    },
+    [stateContainer.dataState.inspectorAdapters]
+  );
+
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
       dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
@@ -217,6 +233,8 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
+
+  const documentViewRenderer = useGetDocumentViewRenderer(docViewerRef);
   const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
 
   const setExpandedDoc = useCallback(
@@ -308,12 +326,22 @@ function DiscoverDocumentsComponent({
   );
   const { filters } = useQuerySubscriber({ data: services.data });
 
+  const extensionActions = useMemo(
+    () => ({
+      openInNewTab: (params: OpenInNewTabParams) => {
+        dispatch(internalStateActions.openInNewTabExtPointAction(params));
+      },
+    }),
+    [dispatch]
+  );
+
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
+    extensionActions,
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -322,6 +350,14 @@ function DiscoverDocumentsComponent({
       dispatch(updateESQLQuery({ queryOrUpdater }));
     },
     [dispatch, updateESQLQuery]
+  );
+
+  const updateCascadeGrouping = useCurrentTabAction(internalStateActions.updateCascadeGrouping);
+  const onUpdateCascadeGrouping: UpdateCascadeGroupingFn = useCallback(
+    (groupingUpdater) => {
+      dispatch(updateCascadeGrouping({ groupingOrUpdater: groupingUpdater }));
+    },
+    [dispatch, updateCascadeGrouping]
   );
   const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
     () => ({
@@ -357,39 +393,38 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <DiscoverGridFlyout
-        dataView={dataView}
-        hit={hit}
-        hits={displayedRows}
-        // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        savedSearchId={persistedDiscoverSession?.id}
-        onFilter={onAddFilter}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddColumn={onAddColumnWithTracking}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-        query={query}
-        initialTabId={initialDocViewerTabId}
-        docViewerRef={docViewerRef}
-        docViewerExtensionActions={docViewerExtensionActions}
-        onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={docViewerUiState}
-        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
-      />
-    ),
+    ) =>
+      documentViewRenderer({
+        dataView,
+        hit,
+        hits: displayedRows,
+        // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
+        columns: displayedColumns,
+        columnsMeta: customColumnsMeta,
+        savedSearchId: persistedDiscoverSession?.id!,
+        query,
+        initialTabId: initialDocViewerTabId,
+        onFilter: onAddFilter,
+        onRemoveColumn: onRemoveColumnWithTracking,
+        onAddColumn: onAddColumnWithTracking,
+        setExpandedDoc: expandedDocSetter,
+        onClose: expandedDocSetter.bind(null, undefined),
+        docViewerExtensionActions,
+        onUpdateSelectedTabId,
+        initialDocViewerState: docViewerUiState,
+        onInitialDocViewerStateChange,
+      }),
     [
+      documentViewRenderer,
       dataView,
       persistedDiscoverSession?.id,
+      query,
+      initialDocViewerTabId,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
-      setExpandedDoc,
-      query,
-      initialDocViewerTabId,
       docViewerExtensionActions,
       onUpdateSelectedTabId,
       docViewerUiState,
@@ -431,14 +466,11 @@ function DiscoverDocumentsComponent({
     [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
-  const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
-
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers(cellRendererParams);
-  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
+  }, [cellRendererParams, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -554,7 +586,6 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={onUpdateESQLQuery}
@@ -564,7 +595,11 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            viewModeToggle={viewModeToggle}
             onFullScreenChange={setIsDataGridFullScreen}
+            cascadeConfig={cascadeConfig}
+            onCascadeGroupingChange={onUpdateCascadeGrouping}
+            registerCascadeRequestsInspectorAdapter={registerCascadeRequestsInspectorAdapter}
           />
         </CellActionsProvider>
       </div>

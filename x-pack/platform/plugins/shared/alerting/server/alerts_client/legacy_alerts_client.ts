@@ -71,6 +71,7 @@ export class LegacyAlertsClient<
     trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    delayed: Record<string, Alert<State, Context, ActionGroupIds>>;
   };
 
   private alertFactory?: AlertFactory<
@@ -86,6 +87,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: {},
       recovered: {},
       trackedRecoveredAlerts: {},
+      delayed: {},
     };
   }
 
@@ -222,7 +224,13 @@ export class LegacyAlertsClient<
   }
 
   public getProcessedAlerts(
-    type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
+    type:
+      | 'new'
+      | 'active'
+      | 'trackedActiveAlerts'
+      | 'recovered'
+      | 'trackedRecoveredAlerts'
+      | 'delayed'
   ) {
     if (Object.hasOwn(this.processedAlerts, type)) {
       return this.processedAlerts[type];
@@ -267,6 +275,7 @@ export class LegacyAlertsClient<
       trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
       recoveredAlerts: this.processedAlerts.recovered,
       trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
+      delayedAlerts: this.processedAlerts.delayed,
       alertDelay: opts.alertDelay,
       startedAt: this.startedAtString,
       ruleRunMetricsStore: opts.ruleRunMetricsStore,

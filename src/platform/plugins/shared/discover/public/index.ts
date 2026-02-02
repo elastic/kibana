@@ -23,10 +23,8 @@ export type {
   CustomizationCallback,
   DiscoverCustomization,
   DiscoverCustomizationService,
-  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
-  TopNavCustomization,
 } from './customizations';
 export {
   SEARCH_EMBEDDABLE_TYPE,

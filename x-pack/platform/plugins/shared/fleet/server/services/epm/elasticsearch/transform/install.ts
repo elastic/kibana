@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { load } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 import pMap from 'p-map';
-
-import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 
@@ -50,6 +53,8 @@ import {
   MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 } from '../../../../constants';
+
+import { appContextService } from '../../../app_context';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
@@ -459,10 +464,13 @@ const installTransformsAssets = async (
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = [],
   force?: boolean,
-  authorizationHeader?: HTTPAuthorizationHeader | null
+  request?: KibanaRequest
 ) => {
   let installedTransforms: EsAssetReference[] = [];
-  const username = authorizationHeader?.getUsername();
+
+  const username = request
+    ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+    : undefined;
 
   if (transformPaths.length > 0) {
     const {
@@ -490,7 +498,7 @@ const installTransformsAssets = async (
     // generate api key, and pass es-secondary-authorization in header when creating the transforms.
     const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
       ? await generateTransformSecondaryAuthHeaders({
-          authorizationHeader,
+          request,
           logger,
           pkgName: packageInstallContext.packageInfo.name,
           pkgVersion: packageInstallContext.packageInfo.version,
@@ -669,10 +677,10 @@ interface InstallTransformsParams {
    */
   force?: boolean;
   /**
-   * Authorization header parsed from original Kibana request, used to generate API key from user
+   * Original Kibana request, used to generate API key from user
    * to pass in secondary authorization info to transform
    */
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
 }
 export const installTransforms = async ({
   packageInstallContext,
@@ -681,7 +689,7 @@ export const installTransforms = async ({
   logger,
   force,
   esReferences,
-  authorizationHeader,
+  request,
 }: InstallTransformsParams) => {
   const { paths, packageInfo } = packageInstallContext;
   const transformPaths = paths.filter((path) => isTransform(path));
@@ -733,7 +741,7 @@ export const installTransforms = async ({
     esReferences,
     previousInstalledTransformEsAssets,
     force,
-    authorizationHeader
+    request
   );
 };
 

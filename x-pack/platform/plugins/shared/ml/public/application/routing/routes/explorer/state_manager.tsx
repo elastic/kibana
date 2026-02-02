@@ -116,7 +116,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   return (
     <div className="ml-explorer">
-      <MlPageHeader>
+      <MlPageHeader wrapHeader={true}>
         <PageTitle
           title={i18n.translate('xpack.ml.explorer.pageTitle', {
             defaultMessage: 'Anomaly Explorer',

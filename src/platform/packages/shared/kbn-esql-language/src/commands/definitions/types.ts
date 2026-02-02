@@ -208,9 +208,11 @@ export enum PromQLFunctionDefinitionTypes {
   PROMQL_SCALAR = 'promql_scalar',
 }
 
+export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
+
 export interface PromQLFunctionParameter {
   name: string;
-  type: string;
+  type: PromQLFunctionParamType;
   optional: boolean;
   description?: string;
 }
@@ -360,6 +362,26 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
+  promqlMissingParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlMissingParamValue: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidDateParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidStepParam: {
+    message: string;
+    type: {};
+  };
+  promqlMissingQuery: {
+    message: string;
+    type: {};
+  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
@@ -425,6 +447,18 @@ export interface ValidationErrors {
   joinOnSingleExpression: {
     message: string;
     type: {};
+  };
+  invalidSettingValue: {
+    message: string;
+    type: { value: string; setting: string };
+  };
+  unknownMapParameterName: {
+    message: string;
+    type: { paramName: string };
+  };
+  invalidMapParameterValueType: {
+    message: string;
+    type: { paramName: string; expectedType: string; actualType: string };
   };
 }
 
