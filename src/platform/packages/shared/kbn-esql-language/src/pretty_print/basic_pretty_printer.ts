@@ -270,6 +270,14 @@ export class BasicPrettyPrinter {
         return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
       }
 
+      if (ctx.node.text) {
+        let text = ctx.node.text;
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+
+        return this.decorateWithComments(ctx.node, text || '<UNKNOWN>');
+      }
+
       return '<EXPRESSION>';
     })
 
