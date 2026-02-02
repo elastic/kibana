@@ -57,7 +57,7 @@ tags:
       Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
       **Elastic Agent Builder requires an Enterprise subscription.**
     externalDocs:
-      description: Learn about working with Agent Builder programmatically
+      description: Agent Builder docs
       url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
     x-displayName: Agent Builder
   - name: alerting
@@ -1235,7 +1235,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-agents
       parameters: []
       responses:
@@ -1291,7 +1291,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: post-agent-builder-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1421,7 +1421,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: delete-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1462,7 +1462,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-agents-id
       parameters:
         - description: The unique identifier of the agent to retrieve.
@@ -1512,7 +1512,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: put-agent-builder-agents-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2230,7 +2230,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-converse
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2744,9 +2744,16 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         > warn
-        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
+        To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-mcp
-      parameters: []
+      parameters:
+        - description: Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.
+          in: query
+          name: namespace
+          required: false
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -2799,7 +2806,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-tools
       parameters: []
       responses:
@@ -2962,7 +2969,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: post-agent-builder-tools
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3118,7 +3125,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: post-agent-builder-tools-execute
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3325,7 +3332,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: delete-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3366,7 +3373,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+        Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
       operationId: get-agent-builder-tools-toolid
       parameters:
         - description: The unique identifier of the tool to retrieve.
@@ -3493,7 +3500,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+        Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
       operationId: put-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -61226,6 +61233,7 @@ paths:
                       items:
                         description: Cluster privileges that define the cluster level actions that users can perform.
                         type: string
+                      maxItems: 100
                       type: array
                     indices:
                       items:
@@ -61240,18 +61248,21 @@ paths:
                               items:
                                 description: The document fields that the role members have read access to.
                                 type: string
+                              maxItems: 1000
                               type: array
                             type: object
                           names:
                             items:
                               description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The index level privileges that the role members have for the data streams and indices.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           query:
@@ -61260,6 +61271,7 @@ paths:
                         required:
                           - names
                           - privileges
+                      maxItems: 1000
                       type: array
                     remote_cluster:
                       items:
@@ -61270,17 +61282,20 @@ paths:
                             items:
                               description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                         required:
                           - privileges
                           - clusters
+                      maxItems: 100
                       type: array
                     remote_indices:
                       items:
@@ -61294,6 +61309,7 @@ paths:
                             items:
                               description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           field_security:
@@ -61301,18 +61317,21 @@ paths:
                               items:
                                 description: The document fields that the role members have read access to.
                                 type: string
+                              maxItems: 1000
                               type: array
                             type: object
                           names:
                             items:
                               description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           privileges:
                             items:
                               description: The index level privileges that role members have for the specified indices.
                               type: string
+                            maxItems: 100
                             minItems: 1
                             type: array
                           query:
@@ -61322,11 +61341,13 @@ paths:
                           - clusters
                           - names
                           - privileges
+                      maxItems: 1000
                       type: array
                     run_as:
                       items:
                         description: A user name that the role member can impersonate.
                         type: string
+                      maxItems: 100
                       type: array
                 kibana:
                   items:
@@ -61346,16 +61367,19 @@ paths:
                           - items:
                               description: A base privilege that grants applies to all spaces.
                               type: string
+                            maxItems: 50
                             type: array
                           - items:
                               description: A base privilege that applies to specific spaces.
                               type: string
+                            maxItems: 50
                             type: array
                       feature:
                         additionalProperties:
                           items:
                             description: The privileges that the role member has for the feature.
                             type: string
+                          maxItems: 100
                           type: array
                         type: object
                       spaces:
@@ -61370,6 +61394,7 @@ paths:
                           - items:
                               description: A space that the privilege applies to.
                               type: string
+                            maxItems: 1000
                             type: array
                         default:
                           - '*'
@@ -61434,6 +61459,7 @@ paths:
                             items:
                               description: Cluster privileges that define the cluster level actions that users can perform.
                               type: string
+                            maxItems: 100
                             type: array
                           indices:
                             items:
@@ -61448,18 +61474,21 @@ paths:
                                     items:
                                       description: The document fields that the role members have read access to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   type: object
                                 names:
                                   items:
                                     description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The index level privileges that the role members have for the data streams and indices.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 query:
@@ -61468,6 +61497,7 @@ paths:
                               required:
                                 - names
                                 - privileges
+                            maxItems: 1000
                             type: array
                           remote_cluster:
                             items:
@@ -61478,17 +61508,20 @@ paths:
                                   items:
                                     description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                               required:
                                 - privileges
                                 - clusters
+                            maxItems: 100
                             type: array
                           remote_indices:
                             items:
@@ -61502,6 +61535,7 @@ paths:
                                   items:
                                     description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 field_security:
@@ -61509,18 +61543,21 @@ paths:
                                     items:
                                       description: The document fields that the role members have read access to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   type: object
                                 names:
                                   items:
                                     description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 privileges:
                                   items:
                                     description: The index level privileges that role members have for the specified indices.
                                     type: string
+                                  maxItems: 100
                                   minItems: 1
                                   type: array
                                 query:
@@ -61530,11 +61567,13 @@ paths:
                                 - clusters
                                 - names
                                 - privileges
+                            maxItems: 1000
                             type: array
                           run_as:
                             items:
                               description: A user name that the role member can impersonate.
                               type: string
+                            maxItems: 100
                             type: array
                       kibana:
                         items:
@@ -61554,16 +61593,19 @@ paths:
                                 - items:
                                     description: A base privilege that grants applies to all spaces.
                                     type: string
+                                  maxItems: 50
                                   type: array
                                 - items:
                                     description: A base privilege that applies to specific spaces.
                                     type: string
+                                  maxItems: 50
                                   type: array
                             feature:
                               additionalProperties:
                                 items:
                                   description: The privileges that the role member has for the feature.
                                   type: string
+                                maxItems: 100
                                 type: array
                               type: object
                             spaces:
@@ -61578,6 +61620,7 @@ paths:
                                 - items:
                                     description: A space that the privilege applies to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                               default:
                                 - '*'
@@ -61865,6 +61908,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 overwrite:
                   default: false
@@ -61874,6 +61918,7 @@ paths:
                   items:
                     description: The identifiers of the spaces where you want to copy the specified objects.
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - spaces
@@ -61939,6 +61984,7 @@ paths:
                       - targetSpace
                       - targetType
                       - sourceId
+                  maxItems: 1000
                   type: array
               required:
                 - aliases
@@ -61983,6 +62029,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
               required:
                 - objects
@@ -62033,6 +62080,7 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 retries:
                   additionalProperties:
@@ -62062,6 +62110,7 @@ paths:
                       required:
                         - type
                         - id
+                    maxItems: 1000
                     type: array
                   type: object
               required:
@@ -62120,16 +62169,19 @@ paths:
                     required:
                       - type
                       - id
+                  maxItems: 1000
                   type: array
                 spacesToAdd:
                   items:
                     description: The identifiers of the spaces the saved objects should be added to or removed from.
                     type: string
+                  maxItems: 1000
                   type: array
                 spacesToRemove:
                   items:
                     description: The identifiers of the spaces the saved objects should be added to or removed from.
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - objects
@@ -62232,6 +62284,7 @@ paths:
                   items:
                     description: The list of features that are turned off in the space.
                     type: string
+                  maxItems: 100
                   type: array
                 id:
                   description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
@@ -62357,6 +62410,7 @@ paths:
                   items:
                     description: The list of features that are turned off in the space.
                     type: string
+                  maxItems: 100
                   type: array
                 id:
                   description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
@@ -62873,6 +62927,23 @@ paths:
                                                       description: A non-empty string.
                                                       minLength: 1
                                                       type: string
+                                                    downsample:
+                                                      items:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          after:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                          fixed_interval:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - after
+                                                          - fixed_interval
+                                                      type: array
                                               required:
                                                 - dsl
                                             - additionalProperties: false
@@ -63454,6 +63525,23 @@ paths:
                                                       description: A non-empty string.
                                                       minLength: 1
                                                       type: string
+                                                    downsample:
+                                                      items:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          after:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                          fixed_interval:
+                                                            description: A non-empty string.
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - after
+                                                          - fixed_interval
+                                                      type: array
                                               required:
                                                 - dsl
                                             - additionalProperties: false
@@ -64045,6 +64133,23 @@ paths:
                                           description: A non-empty string.
                                           minLength: 1
                                           type: string
+                                        downsample:
+                                          items:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              after:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
                                   required:
                                     - dsl
                                 - additionalProperties: false
@@ -64258,6 +64363,23 @@ paths:
                                           description: A non-empty string.
                                           minLength: 1
                                           type: string
+                                        downsample:
+                                          items:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              after:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                description: A non-empty string.
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
                                   required:
                                     - dsl
                                 - additionalProperties: false
