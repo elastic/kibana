@@ -22,6 +22,7 @@ export interface FeedbackSubmittedEventData {
   csat_score?: number;
   first_question?: FeedbackQuestion;
   second_question?: FeedbackQuestion;
+  organization_id?: string;
   allow_email_contact: boolean;
 }
 
@@ -74,6 +75,13 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
     _meta: {
       description: 'Whether the user consents to being contacted via email',
       optional: false,
+    },
+  },
+  organization_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The organization id of the user submitting feedback',
+      optional: true,
     },
   },
 };

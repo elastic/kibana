@@ -15,9 +15,10 @@ import { canSendTelemetry } from '../utils';
 interface Props {
   core: CoreStart;
   cloud?: CloudStart;
+  organizationId?: string;
 }
 
-export const FeedbackTriggerButton = ({ core, cloud }: Props) => {
+export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [enabledFeedbackButton, setEnabledFeedbackButton] = useState(false);
 
@@ -30,6 +31,7 @@ export const FeedbackTriggerButton = ({ core, cloud }: Props) => {
             <FeedbackContainer
               core={core}
               cloud={cloud}
+              organizationId={organizationId}
               hideFeedbackContainer={() => {
                 feedbackContainer?.close();
               }}

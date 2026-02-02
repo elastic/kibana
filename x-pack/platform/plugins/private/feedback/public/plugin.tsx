@@ -8,16 +8,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { feedbackSubmittedEventType } from './src/telemetry/feedback_events';
+
+interface FeedbackPluginSetupDependencies {
+  cloud?: CloudSetup;
+}
 
 interface FeedbackPluginStartDependencies {
   cloud?: CloudStart;
 }
 
 export class FeedbackPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+  private organizationId?: string;
+
+  public setup(core: CoreSetup, { cloud }: FeedbackPluginSetupDependencies) {
     core.analytics.registerEventType(feedbackSubmittedEventType);
+    this.organizationId = cloud?.organizationId;
     return {};
   }
 
@@ -32,7 +39,14 @@ export class FeedbackPlugin implements Plugin {
       order: 1001,
       mount: (element) => {
         import('./src/components/feedback_trigger_button').then(({ FeedbackTriggerButton }) => {
-          ReactDOM.render(<FeedbackTriggerButton core={core} cloud={cloud} />, element);
+          ReactDOM.render(
+            <FeedbackTriggerButton
+              core={core}
+              cloud={cloud}
+              organizationId={this.organizationId}
+            />,
+            element
+          );
         });
 
         return () => {

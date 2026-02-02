@@ -20,10 +20,16 @@ import { FEEDBACK_SUBMITTED_EVENT_TYPE, type FeedbackSubmittedEventData } from '
 interface Props {
   core: CoreStart;
   cloud?: CloudStart;
+  organizationId?: string;
   hideFeedbackContainer: () => void;
 }
 
-export const FeedbackContainer = ({ core, cloud, hideFeedbackContainer }: Props) => {
+export const FeedbackContainer = ({
+  core,
+  cloud,
+  organizationId,
+  hideFeedbackContainer,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const [experienceFeedbackText, setExperienceFeedbackText] = useState('');
   const [generalFeedbackText, setGeneralFeedbackText] = useState('');
@@ -84,6 +90,7 @@ export const FeedbackContainer = ({ core, cloud, hideFeedbackContainer }: Props)
         user_email: allowEmailContact && email ? email : undefined,
         allow_email_contact: allowEmailContact,
         solution: getSolutionType(),
+        organization_id: organizationId,
         csat_score: Number(selectedCsatOptionId) || undefined,
         first_question: {
           id: firstQuestion?.id,
