@@ -10,166 +10,138 @@ import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
   BaseOptionalFields,
+  EndpointResponseAction,
+  OsqueryResponseAction,
   ResponseAction,
   RuleResponseAction,
+  RuleResponseEndpointAction,
+  RuleResponseOsqueryAction,
 } from '../../../../../common/api/detection_engine';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
-import { EndpointHttpError } from '../../../errors';
-import type { EndpointScript } from '../../../../../common/endpoint/types';
-import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
+import type { EnabledAutomatedResponseActionsCommands } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
-interface ValidateRuleResponseActionsOptions {
-  spaceId: string;
-  ruleResponseActions: BaseOptionalFields['response_actions'];
-  endpointService: EndpointAppContextService;
-}
+type RuleResponseActions = Pick<BaseOptionalFields, 'response_actions'>;
 
-/**
- * Additional validation of rule response action definitions which do not lend themselves to being
- * included in the API schema (ex. experimental feature flag checks)
- * @param ruleResponseActions
- * @param endpointService
- * @param spaceId
- */
-export const validateRuleResponseActionsPayload = async ({
-  ruleResponseActions,
-  endpointService,
-  spaceId,
-}: ValidateRuleResponseActionsOptions): Promise<void> => {
-  const logger = endpointService.createLogger('validateRuleResponseActionsPayload');
-
-  if (!ruleResponseActions || ruleResponseActions.length === 0) {
-    return;
-  }
-
-  logger.debug(() => `Validating ${ruleResponseActions?.length ?? 0} rule response actions`);
-
-  const isAutomatedRunScriptFeatureEnabled =
-    endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript;
-  const scriptsClient = endpointService.getScriptsLibraryClient(spaceId, 'elastic');
-
-  for (const responseAction of ruleResponseActions) {
-    logger.debug(() => `Rule response action: ${stringify(responseAction)}`);
-
-    // -----------------------------------------------
-    // Validations for RunScript
-    // -----------------------------------------------
-    if (
-      responseAction.action_type_id === ResponseActionTypesEnum['.endpoint'] &&
-      responseAction.params.command === 'runscript'
-    ) {
-      if (!isAutomatedRunScriptFeatureEnabled) {
-        throw new EndpointHttpError('Run script response action is not supported', 400);
-      }
-
-      // Validate that we have valid script IDs
-      for (const [osType, { scriptId, scriptInput }] of Object.entries(
-        responseAction.params?.config ?? {}
-      )) {
-        const msgPrefix = `Runscript [${osType}] response action:`;
-
-        if (scriptId) {
-          let script: EndpointScript;
-
-          try {
-            script = await scriptsClient.get(scriptId);
-          } catch (e) {
-            throw new EndpointHttpError(`${msgPrefix} ${e.message}`, 400, e);
-          }
-
-          if (!script.platform.includes(osType as SupportedHostOsType)) {
-            throw new EndpointHttpError(
-              `${msgPrefix} Script [${script.name}] (id: [${scriptId}]) is not compatible with [${osType}]`,
-              400
-            );
-          }
-
-          if (script.requiresInput && !scriptInput) {
-            throw new EndpointHttpError(
-              `${msgPrefix} Script [${script.name}] (id: [${scriptId}]) requires arguments to be provided`,
-              400
-            );
-          }
-        }
-      }
-    }
-  }
-};
-
-interface ValidateRuleResponseActionsPermissionsOptions<
-  T extends Pick<BaseOptionalFields, 'response_actions'>
-> {
+interface ValidateRuleResponseActionsOptions<T extends RuleResponseActions = RuleResponseActions> {
+  /**
+   * Endpoint Authz can be retrieve via Route context or `endpointService.getEndpointAuthz(httpRequest)`
+   */
   endpointAuthz: EndpointAuthz;
   endpointService: EndpointAppContextService;
-  ruleUpdate: T;
-  /** Existing rule SHOULD ALWAYS be provided for flows that update rules */
+  rulePayload: T;
+  spaceId: string;
+  /**
+   * Updates to existing rule SHOULD ALWAYS pass this value in so that validations
+   * are only applied to the response actions that have changed
+   */
   existingRule?: RuleAlertType | null;
 }
 
 /**
  * Used in Rule Management APIs to validate that users have Authz to Elastic Defend response actions that may
- * be included in rule definitions
+ * be included in rule definitions as well as validate that the response actions payload data is valid.
  */
-export const validateRuleResponseActionsPermissions = async <
-  T extends Pick<BaseOptionalFields, 'response_actions'>
+export const validateRuleResponseActions = async <
+  T extends RuleResponseActions = RuleResponseActions
 >({
   endpointService,
   endpointAuthz,
-  ruleUpdate,
+  spaceId,
+  rulePayload: { response_actions: ruleResponseActions },
   existingRule,
-}: ValidateRuleResponseActionsPermissionsOptions<T>): Promise<void> => {
-  const logger = endpointService.createLogger('validateRuleResponseActionsPermissions');
+}: ValidateRuleResponseActionsOptions<T>): Promise<void> => {
+  const logger = endpointService.createLogger('validateRuleResponseActions');
+  const existingRuleResponseActions = existingRule?.params?.responseActions;
 
+  // FIXME:PT delete this logger - only for dev debug
   logger.debug(
-    () => `Validating response actions permissions for rule payload: ${stringify(ruleUpdate)}`
+    () =>
+      `Validating rule response actions:\nrule payload: ${stringify(
+        ruleResponseActions
+      )}\nexisting rule response actions: ${stringify(existingRuleResponseActions)}`
   );
 
-  if (!rulePayloadContainsResponseActions(ruleUpdate)) {
-    logger.debug(() => `Nothing to do - no response action in payload`);
-    return;
+  if (
+    (!ruleResponseActions || ruleResponseActions.length === 0) &&
+    (!existingRuleResponseActions || existingRuleResponseActions.length === 0)
+  ) {
+    logger.debug(() => `Nothing to do - no response actions in payload or existing rule`);
   }
 
-  // finds elements that are not included in both arrays
-  const symmetricDifference = xorWith<ResponseAction | RuleResponseAction>(
-    ruleUpdate.response_actions,
-    existingRule?.params?.responseActions,
+  const responseActionsToValidate = xorWith<ResponseAction | RuleResponseAction>(
+    ruleResponseActions,
+    existingRuleResponseActions,
     isEqual
   );
 
+  if (responseActionsToValidate.length === 0) {
+    logger.debug(() => `Nothing to do - no changes were made to response actions`);
+    return;
+  }
+
   logger.debug(
-    () => `Validating authz the following rule response actions: ${stringify(symmetricDifference)}`
+    () => `Response actions needing validation: ${stringify(responseActionsToValidate)}`
   );
 
-  symmetricDifference.forEach((action) => {
-    if (!('command' in action?.params)) {
+  for (const actionData of responseActionsToValidate) {
+    if (!isEndpointResponseAction(actionData)) {
+      logger.debug(
+        () =>
+          `Skipping validation for response action - not an action type id not '.endpoint': ${stringify(
+            actionData
+          )}`
+      );
       return;
     }
 
-    const authzPropName =
-      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
-        RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command]
-      ];
+    validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
+  }
 
-    const isValid = endpointAuthz[authzPropName];
-
-    if (!isValid) {
-      throw new CustomHttpRequestError(
-        `User is not authorized to change ${action.params.command} response actions`,
-        403
-      );
-    }
-  });
+  logger.debug(() => `All response actions validated successfully`);
 };
 
-function rulePayloadContainsResponseActions<T extends Pick<BaseOptionalFields, 'response_actions'>>(
-  rule: T
-): boolean {
-  return Boolean(rule && rule?.response_actions && rule.response_actions.length > 0);
-}
+/** @private */
+const validateEndpointResponseActionAuthz = (
+  endpointAuthz: EndpointAuthz,
+  command: EnabledAutomatedResponseActionsCommands
+) => {
+  const authzPropName =
+    RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[
+      RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command]
+    ];
+
+  if (!endpointAuthz[authzPropName]) {
+    throw new CustomHttpRequestError(
+      `User is not authorized to change ${command} response action`,
+      403
+    );
+  }
+};
+
+/**
+ * Type guard that checks if the response action is an EDR response action
+ * @param ruleResponseAction
+ *
+ * @private
+ */
+const isEndpointResponseAction = (
+  ruleResponseAction:
+    | RuleResponseOsqueryAction
+    | RuleResponseEndpointAction
+    | OsqueryResponseAction
+    | EndpointResponseAction
+): ruleResponseAction is EndpointResponseAction | RuleResponseEndpointAction => {
+  return (
+    ('action_type_id' in ruleResponseAction &&
+      ruleResponseAction.action_type_id === ResponseActionTypesEnum['.endpoint']) ||
+    ('actionTypeId' in ruleResponseAction &&
+      ruleResponseAction.actionTypeId === ResponseActionTypesEnum['.endpoint'])
+  );
+};
