@@ -6,6 +6,8 @@
  */
 
 import { isEqual, xorWith } from 'lodash';
+import pMap from 'p-map';
+import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import type {
@@ -17,8 +19,8 @@ import type {
   RuleResponseAction,
   RuleResponseEndpointAction,
   RuleResponseOsqueryAction,
+  RuleToImport,
 } from '../../../../../common/api/detection_engine';
-import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -116,6 +118,64 @@ export const validateRuleResponseActions = async <
   logger.debug(() => `All response actions validated successfully`);
 };
 
+export type ValidateRuleImportResponseActionsOptions = Omit<
+  ValidateRuleResponseActionsOptions,
+  'existingRule' | 'rulePayload'
+> & {
+  rulesToImport: RuleToImport[];
+};
+
+export interface ValidateRuleImportResponseActionsResult {
+  valid: RuleToImport[];
+  errors: BulkError[];
+}
+
+/**
+ * Used from Rule Import API to validate that response actions in the rules to be imported are valid
+ *
+ * @param endpointService
+ * @param endpointAuthz
+ * @param spaceId
+ * @param ruleResponseActions
+ */
+export const validateRuleImportResponseActions = async ({
+  endpointService,
+  endpointAuthz,
+  spaceId,
+  rulesToImport,
+}: ValidateRuleImportResponseActionsOptions): Promise<ValidateRuleImportResponseActionsResult> => {
+  const logger = endpointService.createLogger('validateRuleImportResponseActions');
+  const response: ValidateRuleImportResponseActionsResult = { valid: [], errors: [] };
+
+  logger.debug(() => `Validating response actions for import of [${rulesToImport.length}] rules`);
+
+  await pMap(
+    rulesToImport,
+    async (rule) => {
+      try {
+        await validateRuleResponseActions({
+          endpointAuthz,
+          endpointService,
+          spaceId,
+          rulePayload: rule,
+        });
+      } catch (error) {
+        response.errors.push({
+          id: rule.id,
+          rule_id: rule.rule_id,
+          error: {
+            message: error.message,
+            status_code: error.statusCode,
+          },
+        });
+      }
+    },
+    { concurrency: 20 }
+  );
+
+  return response;
+};
+
 /** @private */
 const validateEndpointResponseActionAuthz = (
   endpointAuthz: EndpointAuthz,
@@ -148,10 +208,8 @@ const isEndpointResponseAction = (
     | EndpointResponseAction
 ): ruleResponseAction is EndpointResponseAction | RuleResponseEndpointAction => {
   return (
-    ('action_type_id' in ruleResponseAction &&
-      ruleResponseAction.action_type_id === ResponseActionTypesEnum['.endpoint']) ||
-    ('actionTypeId' in ruleResponseAction &&
-      ruleResponseAction.actionTypeId === ResponseActionTypesEnum['.endpoint'])
+    ('action_type_id' in ruleResponseAction && ruleResponseAction.action_type_id === '.endpoint') ||
+    ('actionTypeId' in ruleResponseAction && ruleResponseAction.actionTypeId === '.endpoint')
   );
 };
 
