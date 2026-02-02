@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import { feedbackSubmittedEventType } from './src/telemetry/feedback_events';
 
 interface FeedbackPluginSetupDependencies {
@@ -17,6 +18,7 @@ interface FeedbackPluginSetupDependencies {
 
 interface FeedbackPluginStartDependencies {
   cloud?: CloudStart;
+  telemetry: TelemetryPluginStart;
 }
 
 export class FeedbackPlugin implements Plugin {
@@ -28,10 +30,12 @@ export class FeedbackPlugin implements Plugin {
     return {};
   }
 
-  public start(core: CoreStart, { cloud }: FeedbackPluginStartDependencies) {
+  public start(core: CoreStart, { cloud, telemetry }: FeedbackPluginStartDependencies) {
     const isFeedbackEnabled = core.notifications.feedback.isEnabled();
+    const isTelemetryEnabled = telemetry.telemetryService.canSendTelemetry();
+    const isOptedIn = telemetry.telemetryService.getIsOptedIn();
 
-    if (!isFeedbackEnabled) {
+    if (!isFeedbackEnabled || !isTelemetryEnabled || !isOptedIn) {
       return {};
     }
 

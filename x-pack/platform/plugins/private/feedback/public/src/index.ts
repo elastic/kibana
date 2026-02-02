@@ -25,7 +25,7 @@ export { FeedbackContainer } from './components';
 
 export { getUserEmail } from './utils';
 export { getCurrentAppTitleAndId } from './utils';
-export { canSendTelemetry } from './utils';
+export { isTelemetryBeingSent } from './utils';
 export { getQuestions } from './utils';
 
 export { FEEDBACK_SUBMITTED_EVENT_TYPE, feedbackSubmittedEventType } from './telemetry';

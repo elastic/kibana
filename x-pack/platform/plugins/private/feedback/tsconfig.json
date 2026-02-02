@@ -14,7 +14,8 @@
     "@kbn/i18n",
     "@kbn/core-chrome-browser-internal",
     "@kbn/feedback-registry",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/telemetry-plugin"
   ],
   "exclude": [
     "target/**/*",

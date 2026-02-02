@@ -10,7 +10,7 @@ import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { canSendTelemetry } from '../utils';
+import { isTelemetryBeingSent } from '../utils';
 
 interface Props {
   core: CoreStart;
@@ -46,9 +46,9 @@ export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) =>
   useEffect(() => {
     setIsLoading(true);
 
-    canSendTelemetry(core.analytics)
-      .then((canSend) => {
-        if (canSend) {
+    isTelemetryBeingSent(core.analytics)
+      .then((isBeingSent) => {
+        if (isBeingSent) {
           setEnabledFeedbackButton(true);
         }
       })

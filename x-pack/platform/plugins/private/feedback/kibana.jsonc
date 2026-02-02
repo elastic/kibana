@@ -9,8 +9,11 @@
     "id": "feedback",
     "browser": true,
     "server": false,
+    "requiredPlugins": [
+      "telemetry"
+    ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
     ]
   }
 }

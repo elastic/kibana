@@ -7,5 +7,5 @@
 
 export { getUserEmail } from './get_user_email';
 export { getCurrentAppTitleAndId } from './get_current_app_title_and_id';
-export { canSendTelemetry } from './can_send_telemetry';
+export { isTelemetryBeingSent } from './can_send_telemetry';
 export { getQuestions } from './get_questions';

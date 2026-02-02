@@ -8,7 +8,7 @@
 import type { AnalyticsServiceStart, TelemetryCounter } from '@kbn/core/public';
 import { filter, firstValueFrom } from 'rxjs';
 
-export const canSendTelemetry = async (
+export const isTelemetryBeingSent = async (
   analytics: AnalyticsServiceStart
 ): Promise<TelemetryCounter> =>
   firstValueFrom(
