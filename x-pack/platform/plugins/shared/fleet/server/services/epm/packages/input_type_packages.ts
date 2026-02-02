@@ -15,7 +15,11 @@ import type {
   PackageInfo,
   PackagePolicy,
 } from '../../../types';
-import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../../../../common/constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
+} from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
 import { dataStreamService } from '../..';
@@ -107,10 +111,19 @@ export async function installAssetsForInputPackagePolicy(opts: {
     dataStreamType
   );
 
-  if (dataStreamType !== 'metrics' && dataStream.elasticsearch?.index_mode === 'time_series') {
+  const inputType = packagePolicy.inputs[0].type;
+  const isOTelInput = inputType === OTEL_COLLECTOR_INPUT_TYPE;
+  const isMetricsType = dataStreamType === 'metrics';
+
+  // For OTel inputs with metrics type, preserve time_series index mode
+  // For all other cases, only preserve time_series for metrics type
+  const shouldRemoveTimeSeries =
+    !isMetricsType && dataStream.elasticsearch?.index_mode === 'time_series';
+
+  if (shouldRemoveTimeSeries) {
     logger.debug(
       `Ignoring time_series index mode for package "${pkgInfo.name}" ` +
-      `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
+        `because data stream type is "${dataStreamType}" (time_series only wanted with "metrics" type)`
     );
 
     // Remove time_series index mode from dataStream.
@@ -118,6 +131,17 @@ export async function installAssetsForInputPackagePolicy(opts: {
       const { index_mode, ...restElasticsearch } = dataStream.elasticsearch;
       dataStream.elasticsearch = restElasticsearch;
     }
+  } else if (isOTelInput && isMetricsType && !dataStream.elasticsearch?.index_mode) {
+    // For OTel metrics data streams, add time_series index mode if not already present
+    logger.debug(
+      `Adding time_series index mode for OTel package "${pkgInfo.name}" ` +
+        `because data stream type is "${dataStreamType}"`
+    );
+
+    if (!dataStream.elasticsearch) {
+      dataStream.elasticsearch = {};
+    }
+    dataStream.elasticsearch.index_mode = 'time_series';
   }
 
   if (existingDataStreams.length) {
