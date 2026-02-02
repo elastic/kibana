@@ -13,7 +13,6 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './constants';
@@ -24,11 +23,10 @@ import {
   MARKDOWN_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
-import type { MarkdownByReferenceState } from '../server';
+import type { MarkdownEmbeddableState } from '../server';
 
 export interface MarkdownSetupDeps {
   embeddable: EmbeddableSetup;
-  visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
@@ -42,7 +40,7 @@ export class DashboardMarkdownPlugin
 {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
-    { embeddable, visualizations, contentManagement }: MarkdownSetupDeps
+    { embeddable, contentManagement }: MarkdownSetupDeps
   ) {
     embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
       const { markdownEmbeddableFactory } = await import('./async_services');
@@ -58,11 +56,13 @@ export class DashboardMarkdownPlugin
 
       embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel<MarkdownByReferenceState>(
+          container.addNewPanel<MarkdownEmbeddableState>(
             {
               panelType: MARKDOWN_EMBEDDABLE_TYPE,
               serializedState: {
                 savedObjectId: savedObject.id,
+                title: savedObject.attributes.title,
+                description: savedObject.attributes.description,
               },
             },
             {

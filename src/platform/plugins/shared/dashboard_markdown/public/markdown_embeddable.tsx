@@ -62,20 +62,18 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const savedObjectId = (initialState as MarkdownByReferenceState).savedObjectId;
-    const intialMarkdownState = savedObjectId
+    const initialMarkdownState = savedObjectId
       ? await loadFromLibrary(savedObjectId)
       : (initialState as MarkdownByValueState);
 
     const markdownStateManager = initializeStateManager<MarkdownByValueState>(
-      intialMarkdownState,
+      initialMarkdownState,
       defaultMarkdownState
     );
 
     const isByReference = savedObjectId !== undefined;
-    const defaultDescription$ = new BehaviorSubject(
-      isByReference ? initialState.description : undefined
-    );
-    const defaultTitle$ = new BehaviorSubject(isByReference ? initialState.title : undefined);
+    const defaultTitle$ = new BehaviorSubject(initialState.title);
+    const defaultDescription$ = new BehaviorSubject(initialState.description);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
@@ -155,13 +153,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         />
       ),
       // Library transforms
-      saveToLibrary: async (newTitle: string) => {
-        defaultTitle$.next(newTitle);
+      saveToLibrary: async (title: string) => {
         const { id } = await markdownClient.create(
           {
-            content: markdownStateManager.getLatestState().content,
-            title: newTitle,
-            description: titleManager.api.description$!.getValue(),
+            ...titleManager.getLatestState(),
+            ...markdownStateManager.getLatestState(),
+            title,
           },
           []
         );
