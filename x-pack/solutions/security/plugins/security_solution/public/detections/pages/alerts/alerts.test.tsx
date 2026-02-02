@@ -31,8 +31,10 @@ jest.mock('../../components/alerts/wrapper', () => ({
 const doMockRulesPrivileges = ({ read = false }) => {
   (useUserPrivileges as jest.Mock).mockReturnValue({
     rulesPrivileges: {
-      read,
-      edit: false,
+      rules: {
+        read,
+        edit: false,
+      },
     },
   });
 };
