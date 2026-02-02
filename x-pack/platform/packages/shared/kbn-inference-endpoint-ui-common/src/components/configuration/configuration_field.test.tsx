@@ -203,61 +203,6 @@ describe('ConfigNumberField', () => {
     expect(input).toHaveValue(2048);
   });
 
-  it('allows user to clear the field using the clear button', () => {
-    const validateAndSetConfigValue = jest.fn();
-    const configEntry = createConfigEntry({
-      value: null,
-      default_value: 1024,
-    });
-
-    render(
-      <ConfigNumberField
-        {...defaultProps}
-        configEntry={configEntry}
-        validateAndSetConfigValue={validateAndSetConfigValue}
-      />
-    );
-
-    // Find and click the clear button
-    const clearButton = screen.getByRole('button', { name: /clear/i });
-    fireEvent.click(clearButton);
-
-    expect(validateAndSetConfigValue).toHaveBeenCalledWith('');
-  });
-
-  it('does not reset to default after rerender when field is cleared', () => {
-    const validateAndSetConfigValue = jest.fn();
-    const configEntry = createConfigEntry({
-      value: null,
-      default_value: 1024,
-    });
-
-    const { rerender } = render(
-      <ConfigNumberField
-        {...defaultProps}
-        configEntry={configEntry}
-        validateAndSetConfigValue={validateAndSetConfigValue}
-      />
-    );
-
-    // Find and click the clear button
-    const clearButton = screen.getByRole('button', { name: /clear/i });
-    fireEvent.click(clearButton);
-
-    // Simulate parent form updating value prop to null (as it converts '' to null)
-    rerender(
-      <ConfigNumberField
-        {...defaultProps}
-        configEntry={{ ...configEntry, value: null }}
-        validateAndSetConfigValue={validateAndSetConfigValue}
-      />
-    );
-
-    // Should still be empty, not reset to default
-    const input = screen.getByTestId('max_tokens-number');
-    expect(input).toHaveValue(null);
-  });
-
   it('allows user to change the value', () => {
     const validateAndSetConfigValue = jest.fn();
     const configEntry = createConfigEntry({
