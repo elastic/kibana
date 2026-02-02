@@ -12,6 +12,7 @@ import type {
   BaseOptionalFields,
   EndpointResponseAction,
   OsqueryResponseAction,
+  ProcessesParams,
   ResponseAction,
   RuleResponseAction,
   RuleResponseEndpointAction,
@@ -60,12 +61,11 @@ export const validateRuleResponseActions = async <
   const logger = endpointService.createLogger('validateRuleResponseActions');
   const existingRuleResponseActions = existingRule?.params?.responseActions;
 
-  // FIXME:PT delete this logger - only for dev debug
   logger.debug(
     () =>
-      `Validating rule response actions:\nrule payload: ${stringify(
+      `Validating rule response actions in space [${spaceId}]:\nrule payload: ${stringify(
         ruleResponseActions
-      )}\nexisting rule response actions: ${stringify(existingRuleResponseActions)}`
+      )}\nexisting rule response actions: ${stringify(existingRuleResponseActions)}\n`
   );
 
   if (
@@ -102,6 +102,14 @@ export const validateRuleResponseActions = async <
     }
 
     validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
+
+    // Individual response action payload validations
+    switch (actionData.params.command) {
+      case 'kill-process':
+      case 'suspend-process':
+        validateEndpointKillSuspendProcessResponseAction(actionData.params);
+        break;
+    }
   }
 
   logger.debug(() => `All response actions validated successfully`);
@@ -144,4 +152,21 @@ const isEndpointResponseAction = (
     ('actionTypeId' in ruleResponseAction &&
       ruleResponseAction.actionTypeId === ResponseActionTypesEnum['.endpoint'])
   );
+};
+
+/** @private */
+const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: ProcessesParams) => {
+  if (config.overwrite && config.field) {
+    throw new CustomHttpRequestError(
+      `Invalid [${command}] response action configuration: field is not allowed when overwrite is true`,
+      400
+    );
+  }
+
+  if (!config.overwrite && !config.field.trim()) {
+    throw new CustomHttpRequestError(
+      `Invalid [${command}] response action configuration: field is required when overwrite is false`,
+      400
+    );
+  }
 };

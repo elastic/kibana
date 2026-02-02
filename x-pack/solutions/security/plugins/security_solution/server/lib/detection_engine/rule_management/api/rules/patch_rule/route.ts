@@ -13,10 +13,7 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
 } from '@kbn/security-solution-features/constants';
-import {
-  validateRuleResponseActionsPermissions,
-  validateRuleResponseActionsPayload,
-} from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -84,17 +81,12 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             });
           }
 
-          await validateRuleResponseActionsPermissions({
+          await validateRuleResponseActions({
             endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
             endpointService: securitySolutionCtx.getEndpointService(),
-            ruleUpdate: params,
-            existingRule,
-          });
-
-          await validateRuleResponseActionsPayload({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
             spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
           });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });

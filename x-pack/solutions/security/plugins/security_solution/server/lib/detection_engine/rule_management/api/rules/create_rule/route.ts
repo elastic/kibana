@@ -9,10 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
-import {
-  validateRuleResponseActionsPermissions,
-  validateRuleResponseActionsPayload,
-} from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,
@@ -96,15 +93,10 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             ruleId: undefined,
           });
 
-          await validateRuleResponseActionsPermissions({
+          await validateRuleResponseActions({
             endpointAuthz: await ctx.securitySolution.getEndpointAuthz(),
             endpointService: ctx.securitySolution.getEndpointService(),
-            ruleUpdate: request.body,
-          });
-
-          await validateRuleResponseActionsPayload({
-            ruleResponseActions: request.body.response_actions,
-            endpointService: ctx.securitySolution.getEndpointService(),
+            rulePayload: request.body,
             spaceId: ctx.securitySolution.getSpaceId(),
           });
 
