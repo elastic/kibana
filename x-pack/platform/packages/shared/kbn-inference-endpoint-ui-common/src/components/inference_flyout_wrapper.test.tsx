@@ -237,18 +237,25 @@ describe('InferenceFlyout', () => {
       await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
 
       expect(mockMutationFn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          config: expect.objectContaining({
+        {
+          config: {
+            inferenceId: expect.any(String),
             provider: 'elasticsearch',
+            taskType: 'sparse_embedding',
             providerConfig: {
               adaptive_allocations: {
                 enabled: true,
                 min_number_of_allocations: 0,
                 max_number_of_allocations: 10,
               },
+              model_id: '.elser_model_2',
+              num_threads: 1,
             },
-          }),
-        }),
+          },
+          secrets: {
+            providerSecrets: {},
+          },
+        },
         false
       );
     });
