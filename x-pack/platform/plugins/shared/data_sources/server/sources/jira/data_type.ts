@@ -1,6 +1,11 @@
 import { DataSource } from '@kbn/data-catalog-plugin';
 import { i18n } from '@kbn/i18n';
-import { generateSearchIssuesWithJqlWorkflow } from './workflows';
+import {
+  generateGetIssueWorkflow,
+  generateGetProjectWorkflow,
+  generateGetProjectsWorkflow,
+  generateSearchIssuesWithJqlWorkflow,
+} from './workflows';
 
 export const jiraDataSource: DataSource = {
   id: 'jira',
@@ -17,7 +22,19 @@ export const jiraDataSource: DataSource = {
     return [
       {
         content: generateSearchIssuesWithJqlWorkflow(stackConnectorId),
-        shouldGenerateABTool: false,
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGetIssueWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGetProjectsWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
+      },
+      {
+        content: generateGetProjectWorkflow(stackConnectorId),
+        shouldGenerateABTool: true,
       },
     ];
   },
