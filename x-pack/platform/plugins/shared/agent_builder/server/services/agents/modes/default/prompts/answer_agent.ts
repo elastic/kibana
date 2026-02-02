@@ -7,6 +7,11 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import {
+  conversationToLangchainMessages,
+  createFilestoreResultTransformer,
+} from '../../utils/to_langchain_messages';
+import { FILESTORE_ENABLED } from '../../../../runner/store';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
@@ -19,7 +24,14 @@ type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimePar
 export const getAnswerAgentPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions, answerActions } = params;
+  const { actions, answerActions, processedConversation, filestore } = params;
+
+  // Generate initial messages from conversation, with file reference substitution when filestore is enabled
+  const initialMessages = await conversationToLangchainMessages({
+    conversation: processedConversation,
+    resultTransformer: FILESTORE_ENABLED ? createFilestoreResultTransformer(filestore) : undefined,
+  });
+
   return [
     ['system', getAnswerSystemMessage(params)],
     ...initialMessages,
@@ -89,14 +101,21 @@ export const getStructuredAnswerPrompt = async (
     configuration: {
       answer: { instructions: customInstructions },
     },
-    initialMessages,
     conversationTimestamp,
     actions,
     answerActions,
     capabilities,
-    processedConversation: { attachmentTypes },
+    processedConversation,
+    filestore,
   } = params;
+  const { attachmentTypes } = processedConversation;
   const visEnabled = capabilities.visualizations;
+
+  // Generate initial messages from conversation, with file reference substitution when filestore is enabled
+  const initialMessages = await conversationToLangchainMessages({
+    conversation: processedConversation,
+    resultTransformer: FILESTORE_ENABLED ? createFilestoreResultTransformer(filestore) : undefined,
+  });
 
   return [
     [

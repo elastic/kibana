@@ -8,4 +8,4 @@
 /**
  * Forcefully disable the feature while in development.
  */
-export const FILESTORE_ENABLED = false;
+export const FILESTORE_ENABLED = true;

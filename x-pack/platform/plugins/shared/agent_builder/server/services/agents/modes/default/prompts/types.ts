@@ -22,12 +22,10 @@ export interface PromptFactoryParams {
 }
 
 export interface ResearchAgentPromptRuntimeParams {
-  initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
 }
 
 export interface AnswerAgentPromptRuntimeParams {
-  initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
 }

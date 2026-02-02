@@ -22,7 +22,6 @@ import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import {
   addRoundCompleteEvent,
-  conversationToLangchainMessages,
   extractRound,
   prepareConversation,
   selectTools,
@@ -259,11 +258,7 @@ const createInitializerCommand = ({
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
 }): Command => {
-  const initialMessages = conversationToLangchainMessages({
-    conversation,
-  });
-
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
+  const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length
