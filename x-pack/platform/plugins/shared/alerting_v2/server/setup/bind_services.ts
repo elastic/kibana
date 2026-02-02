@@ -11,6 +11,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { RulesClient } from '../lib/rules_client';
+import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { QueryService } from '../lib/services/query_service/query_service';
@@ -18,6 +19,7 @@ import { ResourceManager } from '../lib/services/resource_service/resource_manag
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
+import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
@@ -32,6 +34,7 @@ import type { AlertingServerStartDependencies } from '../types';
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(NotificationPolicyClient).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 
@@ -60,6 +63,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
   );
   bind(RulesSavedObjectService).toSelf().inRequestScope();
+  bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
 
   bind(QueryService)
     .toDynamicValue(({ get }) => {

@@ -10,9 +10,11 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 import { ruleMappings } from './rule_mappings';
-import { ruleModelVersions } from './model_versions';
+import { ruleModelVersions, notificationPolicyModelVersions } from './model_versions';
+import { notificationPolicyMappings } from './notification_policy_mappings';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
+export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
 
 export function registerSavedObjects({
   savedObjects,
@@ -35,6 +37,19 @@ export function registerSavedObjects({
     },
     modelVersions: ruleModelVersions,
   });
+
+  savedObjects.registerType({
+    name: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: notificationPolicyMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: notificationPolicyModelVersions,
+  });
 }
 
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+export type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
