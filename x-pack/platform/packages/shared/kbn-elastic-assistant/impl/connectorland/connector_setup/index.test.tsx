@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { ConnectorSetup } from '.';
 
 const onConversationUpdate = jest.fn();
@@ -18,15 +18,17 @@ const defaultProps = {
   onConversationUpdate,
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
+
 jest.mock('../add_connector_modal', () => ({
   // @ts-ignore
-  AddConnectorModal: ({ onSaveConnector }) => (
+  AddConnectorModal: ({ onSaveConnector, isMissingConnectorPrivileges }) => (
     <>
       <button
         type="button"
         data-test-subj="modal-mock"
         onClick={() => onSaveConnector(newConnector)}
       />
+      {isMissingConnectorPrivileges && <span data-test-subj="modal-missing-privileges-indicator" />}
     </>
   ),
 }));
@@ -90,5 +92,31 @@ describe('ConnectorSetup', () => {
 
     fireEvent.click(getByTestId('modal-mock'));
     expect(setApiConfig).not.toHaveBeenCalled();
+  });
+
+  it('should pass isMissingConnectorPrivileges to AddConnectorModal when user lacks connector write privileges', async () => {
+    const { getByTestId } = render(<ConnectorSetup {...defaultProps} />, {
+      wrapper: ({ children }) => (
+        <TestProviders
+          assistantAvailability={{
+            ...mockAssistantAvailability,
+            hasConnectorsAllPrivilege: false,
+            hasConnectorsReadPrivilege: true,
+          }}
+        >
+          {children}
+        </TestProviders>
+      ),
+    });
+
+    expect(getByTestId('modal-missing-privileges-indicator')).toBeInTheDocument();
+  });
+
+  it('should not pass isMissingConnectorPrivileges to AddConnectorModal when user has connector write privileges', async () => {
+    const { queryByTestId } = render(<ConnectorSetup {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(queryByTestId('modal-missing-privileges-indicator')).not.toBeInTheDocument();
   });
 });
