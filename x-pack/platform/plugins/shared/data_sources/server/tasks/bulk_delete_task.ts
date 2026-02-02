@@ -95,6 +95,7 @@ export class BulkDeleteTask {
               const errors: Array<{ dataSourceId: string; error: string }> = [];
 
               for (const id of dataSourceIds) {
+                abortController.signal.throwIfAborted();
                 try {
                   const dataSource = await savedObjectsClient.get<DataSourceAttributes>(
                     DATA_SOURCE_SAVED_OBJECT_TYPE,
