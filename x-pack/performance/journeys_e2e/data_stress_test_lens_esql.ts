@@ -8,9 +8,12 @@
 import { createDashboardJourney } from '../utils/dashboard_journey';
 
 export const journey = createDashboardJourney({
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
-  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_tsvb_gauge_only_dashboard'],
-  dashboardName: 'Ecommerce Dashboard with TSVB Gauge only',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-TSVB-Gauge-Only-Dashboard',
+  esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
+  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test_esql'],
+  dashboardName: 'Stress Test Dashboard',
+  dashboardLinkSubj: 'dashboardListingTitleLink-Stresstest-(ES|QL)',
   visualizationCount: 1,
+  setup: async (kibanaServer) => {
+    await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
+  },
 });
