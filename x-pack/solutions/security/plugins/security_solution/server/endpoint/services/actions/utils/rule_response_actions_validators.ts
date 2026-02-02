@@ -39,7 +39,7 @@ interface ValidateRuleResponseActionsOptions<T extends RuleResponseActions = Rul
   rulePayload: T;
   spaceId: string;
   /**
-   * Updates to existing rule SHOULD ALWAYS pass this value in so that validations
+   * Updates to an existing rule **SHOULD ALWAYS** pass this value in so that validations
    * are only applied to the response actions that have changed
    */
   existingRule?: RuleAlertType | null;
@@ -73,6 +73,7 @@ export const validateRuleResponseActions = async <
     (!existingRuleResponseActions || existingRuleResponseActions.length === 0)
   ) {
     logger.debug(() => `Nothing to do - no response actions in payload or existing rule`);
+    return;
   }
 
   const responseActionsToValidate = xorWith<ResponseAction | RuleResponseAction>(
@@ -127,7 +128,7 @@ const validateEndpointResponseActionAuthz = (
 
   if (!endpointAuthz[authzPropName]) {
     throw new CustomHttpRequestError(
-      `User is not authorized to change ${command} response action`,
+      `User is not authorized to create/update ${command} response action`,
       403
     );
   }
@@ -158,14 +159,14 @@ const isEndpointResponseAction = (
 const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: ProcessesParams) => {
   if (config.overwrite && config.field) {
     throw new CustomHttpRequestError(
-      `Invalid [${command}] response action configuration: field is not allowed when overwrite is true`,
+      `Invalid [${command}] response action configuration: 'field' is not allowed when 'overwrite' is 'true'`,
       400
     );
   }
 
   if (!config.overwrite && !config.field.trim()) {
     throw new CustomHttpRequestError(
-      `Invalid [${command}] response action configuration: field is required when overwrite is false`,
+      `Invalid [${command}] response action configuration: 'field' is required when 'overwrite' is 'false'`,
       400
     );
   }
