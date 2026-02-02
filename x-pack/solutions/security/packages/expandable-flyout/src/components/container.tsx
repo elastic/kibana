@@ -170,7 +170,7 @@ export const Container: React.FC<ContainerProps> = memo(
       type,
     ]);
 
-    const getFlyoutAriaLabel = useMemo(() => {
+    const flyoutAriaLabel = useMemo(() => {
       const registeredPanel = registeredPanels.find((panel) => panel.key === right?.id);
       return registeredPanel?.['aria-label'];
     }, [registeredPanels, right?.id]);
@@ -224,7 +224,7 @@ export const Container: React.FC<ContainerProps> = memo(
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}
-        aria-label={getFlyoutAriaLabel}
+        aria-label={flyoutAriaLabel}
       >
         <ResizableContainer
           leftComponent={leftComponent as React.ReactElement}
