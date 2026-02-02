@@ -92,7 +92,30 @@ export {
   getFileDataIndexName,
   removeSOAttributes,
   getSortConfig,
+  // Cloud Connector accessor functions
+  getCredentialStorageScope,
+  resolveVarTarget,
+  applyVarsAtTarget,
+  extractRawCredentialVars,
+  readCredentials,
+  writeCredentials,
+  getVarTarget,
+  getCredentialSchema,
+  getAllVarKeys,
+  getAllSupportedVarNames,
+  findFirstVarEntry,
 } from './services';
+
+export type {
+  // Cloud Connector accessor types
+  CloudConnectorVarStorageMode,
+  CloudConnectorVarTarget,
+  CloudConnectorCredentialSchema,
+  ResolvedVarTarget,
+  NormalizedAwsCredentials,
+  NormalizedAzureCredentials,
+  NormalizedCloudConnectorCredentials,
+} from './services/cloud_connectors';
 
 export type { FleetAuthz } from './authz';
 export type {
