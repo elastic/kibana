@@ -14,6 +14,7 @@ import { PackageNotFoundError } from '../../../errors';
 import { dataStreamService } from '../../data_streams';
 
 import { getInstalledPackageWithAssets, getInstallation } from './get';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import {
   installAssetsForInputPackagePolicy,
@@ -57,6 +58,7 @@ jest.mock('../../app_context', () => {
 describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    jest.mocked(installIndexTemplatesAndPipelines).mockClear();
     const mockedLogger = jest.mocked(appContextService.getLogger());
     mockedLogger.debug.mockClear();
     mockedLogger.error.mockClear();
@@ -210,10 +212,16 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Ignoring time_series index mode')
     );
+
+    // Verify index_mode was actually removed
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
 
   it('should preserve time_series index mode for metrics data stream type', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithTimeSeries = {
       type: 'input',
@@ -268,6 +276,11 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       expect.stringContaining('Ignoring time_series index mode')
     );
+
+    // Verify index_mode was preserved
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should use data_stream_type var when provided', async () => {
@@ -324,10 +337,16 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       expect.stringContaining('data stream type is "traces"')
     );
+
+    // Verify index_mode was removed
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
 
   it('should add time_series index mode for OTel metrics data streams when not present', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithoutTimeSeries = {
       type: 'input',
@@ -382,10 +401,16 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       expect.stringContaining('data stream type is "metrics"')
     );
+
+    // Verify index_mode was added
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should preserve existing time_series index mode for OTel metrics data streams', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     const pkgInfoWithTimeSeries = {
       type: 'input',
@@ -444,6 +469,11 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       expect.stringContaining('Adding time_series index mode')
     );
+
+    // Verify index_mode was preserved
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBe('time_series');
   });
 
   it('should not add time_series index mode for non-OTel metrics data streams without it', async () => {
@@ -499,6 +529,11 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       expect.stringContaining('Adding time_series index mode')
     );
+
+    // Verify index_mode was not added
+    const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0];
+    const dataStreams = installCall?.[0]?.onlyForDataStreams;
+    expect(dataStreams?.[0]?.elasticsearch?.index_mode).toBeUndefined();
   });
 });
 
