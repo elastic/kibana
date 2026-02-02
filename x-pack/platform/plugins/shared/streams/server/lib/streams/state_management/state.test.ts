@@ -274,6 +274,9 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
     protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
+    protected doHandleResourceChange(): Promise<StreamChange[]> {
+      return Promise.resolve([]);
+    }
   }
 
   return new StartingStateModifyingStream(
@@ -322,6 +325,9 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
     }
     protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
+    }
+    protected doHandleResourceChange(): Promise<StreamChange[]> {
+      return Promise.resolve([]);
     }
   }
 
@@ -380,6 +386,9 @@ function failingStream(stateDependenciesMock: any) {
     protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new FailingStream(this.definition, this.dependencies);
     }
+    protected doHandleResourceChange(): Promise<StreamChange[]> {
+      return Promise.resolve([]);
+    }
   }
 
   return new FailingStream(
@@ -423,6 +432,9 @@ function flowStream() {
     }
     protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new FlowStream(this.definition, this.dependencies);
+    }
+    protected doHandleResourceChange(): Promise<StreamChange[]> {
+      return Promise.resolve([]);
     }
   }
 

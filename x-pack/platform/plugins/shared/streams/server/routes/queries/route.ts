@@ -102,7 +102,8 @@ const upsertQueryRoute = createServerRoute({
       streamName,
       queries: [{ id: queryId, feature: body.feature }],
     });
-    await queryClient.upsert(streamName, {
+
+    return await streamsClient.upsertQuery(streamName, {
       id: queryId,
       title: body.title,
       feature: body.feature,
@@ -112,10 +113,6 @@ const upsertQueryRoute = createServerRoute({
       severity_score: body.severity_score,
       evidence: body.evidence,
     });
-
-    return {
-      acknowledged: true,
-    };
   },
 });
 
@@ -157,13 +154,9 @@ const deleteQueryRoute = createServerRoute({
       throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
     }
 
-    await queryClient.delete(streamName, queryId);
-
     logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
-    return {
-      acknowledged: true,
-    };
+    return await streamsClient.deleteQuery(streamName, queryId);
   },
 });
 
@@ -220,15 +213,13 @@ const bulkQueriesRoute = createServerRoute({
     );
     await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
 
-    await queryClient.bulk(streamName, operations);
-
     logger
       .get('significant_events')
       .debug(
         `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
       );
 
-    return { acknowledged: true };
+    return await streamsClient.bulkQueries(streamName, operations);
   },
 });
 

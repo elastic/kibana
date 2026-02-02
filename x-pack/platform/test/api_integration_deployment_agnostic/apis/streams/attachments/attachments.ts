@@ -1111,6 +1111,161 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Cascade deletion on stream delete', () => {
+      const CHILD_STREAM_NAME = 'logs.cascade-test';
+
+      before(async () => {
+        await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      after(async () => {
+        await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
+        await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
+      });
+
+      it('unlinks all attachments when the stream is deleted', async () => {
+        // Create a child stream
+        await putStream(apiClient, CHILD_STREAM_NAME, {
+          dashboards: [],
+          rules: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                routing: [],
+                fields: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Link multiple attachments to the child stream
+        await linkAttachment({
+          apiClient,
+          stream: CHILD_STREAM_NAME,
+          type: 'dashboard',
+          id: SEARCH_DASHBOARD_ID,
+        });
+        await linkAttachment({
+          apiClient,
+          stream: CHILD_STREAM_NAME,
+          type: 'rule',
+          id: FIRST_RULE_ID,
+        });
+
+        // Verify attachments are linked
+        const attachmentsBefore = await getAttachments({
+          apiClient,
+          stream: CHILD_STREAM_NAME,
+        });
+        expect(attachmentsBefore.attachments.length).to.eql(2);
+
+        // Delete the stream
+        await deleteStream(apiClient, CHILD_STREAM_NAME);
+
+        // Verify the stream attachment links are removed by checking the dashboard's streamNames
+        // The dashboard should no longer reference the deleted stream
+        const logsAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard'] },
+        });
+
+        // The dashboard might still be linked to logs, but should not reference the deleted child stream
+        const dashboardAttachment = logsAttachments.attachments.find(
+          (a) => a.id === SEARCH_DASHBOARD_ID
+        );
+        if (dashboardAttachment) {
+          expect(dashboardAttachment.streamNames).to.not.contain(CHILD_STREAM_NAME);
+        }
+      });
+
+      it('unlinks child stream attachments when parent deletes the child via cascade', async () => {
+        // Create a child stream
+        await putStream(apiClient, CHILD_STREAM_NAME, {
+          dashboards: [],
+          rules: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                routing: [
+                  {
+                    destination: 'logs.cascade-test.child',
+                    where: { always: {} },
+                    status: 'enabled',
+                  },
+                ],
+                fields: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Create grandchild stream
+        await putStream(apiClient, 'logs.cascade-test.child', {
+          dashboards: [],
+          rules: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                routing: [],
+                fields: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Link attachments to grandchild stream
+        await linkAttachment({
+          apiClient,
+          stream: 'logs.cascade-test.child',
+          type: 'dashboard',
+          id: BASIC_DASHBOARD_ID,
+        });
+
+        // Verify attachment is linked
+        const attachmentsBefore = await getAttachments({
+          apiClient,
+          stream: 'logs.cascade-test.child',
+        });
+        expect(attachmentsBefore.attachments.length).to.eql(1);
+
+        // Delete the parent stream (cascade deletes the grandchild)
+        await deleteStream(apiClient, CHILD_STREAM_NAME);
+
+        // Verify the dashboard no longer references the deleted stream
+        const logsAttachments = await getAttachments({
+          apiClient,
+          stream: 'logs',
+          filters: { types: ['dashboard'] },
+        });
+
+        const basicDashboard = logsAttachments.attachments.find((a) => a.id === BASIC_DASHBOARD_ID);
+        if (basicDashboard) {
+          expect(basicDashboard.streamNames).to.not.contain('logs.cascade-test.child');
+          expect(basicDashboard.streamNames).to.not.contain(CHILD_STREAM_NAME);
+        }
+      });
+    });
+
     describe('requires attachments setting', () => {
       before(async () => {
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);

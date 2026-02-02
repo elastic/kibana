@@ -32,6 +32,7 @@ import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../st
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type {
+  PendingResourceAction,
   StreamChanges,
   StreamChangeStatus,
   ValidationResult,
@@ -593,5 +594,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       );
     }
     return this._effectiveSettings;
+  }
+
+  protected doHandleResourceChange(
+    change: PendingResourceAction,
+    _desiredState: State,
+    _startingState: State
+  ): Promise<StreamChange[]> {
+    // Track the pending resource action - it will be converted to an ElasticsearchAction
+    // during the determineElasticsearchActions phase
+    this._pendingResourceActions.push(change);
+
+    // Resource changes don't cascade to other streams
+    return Promise.resolve([]);
   }
 }

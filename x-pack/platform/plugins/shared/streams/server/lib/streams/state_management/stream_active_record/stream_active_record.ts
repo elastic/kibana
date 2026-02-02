@@ -25,6 +25,9 @@ export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export type StreamChanges = Record<string, boolean>;
 
+// Type for pending resource actions that will be executed
+export type PendingResourceAction = Exclude<StreamChange, { type: 'upsert' } | { type: 'delete' }>;
+
 /**
  * The StreamActiveRecord is responsible for maintaining the change status of a stream
  * And routing change requests (with cascading changes), validation requests and requests to determine Elasticsearch actions
@@ -37,6 +40,7 @@ export abstract class StreamActiveRecord<
   protected _definition: TDefinition;
   protected _changes: StreamChanges = {};
   private _changeStatus: StreamChangeStatus = 'unchanged';
+  protected _pendingResourceActions: PendingResourceAction[] = [];
 
   constructor(definition: TDefinition, dependencies: StateDependencies) {
     this._definition = definition;
@@ -67,7 +71,7 @@ export abstract class StreamActiveRecord<
   }
 
   hasChanged(): boolean {
-    return this.changeStatus !== 'unchanged';
+    return this.changeStatus !== 'unchanged' || this.hasPendingResourceActions();
   }
 
   isDeleted(): boolean {
@@ -84,11 +88,42 @@ export abstract class StreamActiveRecord<
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    if (change.type === 'delete') {
-      return this.delete(change.name, desiredState, startingState);
-    } else {
-      return this.upsert(change.definition, desiredState, startingState);
+    switch (change.type) {
+      case 'delete':
+        return this.delete(change.name, desiredState, startingState);
+      case 'upsert':
+        return this.upsert(change.definition, desiredState, startingState);
+      case 'link_attachment':
+      case 'unlink_attachment':
+      case 'bulk_attachments':
+      case 'upsert_query':
+      case 'delete_query':
+      case 'bulk_queries':
+      case 'upsert_feature':
+      case 'delete_feature':
+      case 'bulk_features':
+        return this.handleResourceChange(change, desiredState, startingState);
+      default:
+        // Exhaustive check - TypeScript will error if we miss a case
+        const _exhaustiveCheck: never = change;
+        throw new Error(`Unknown change type: ${(_exhaustiveCheck as StreamChange).type}`);
     }
+  }
+
+  // Handle resource changes (attachments, queries, features)
+  // These changes are stream-associated but not stream definition changes
+  // They should only be handled by the target stream
+  private async handleResourceChange(
+    change: Exclude<StreamChange, { type: 'upsert' } | { type: 'delete' }>,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
+    // Only handle the change if it targets this stream
+    if (change.name !== this._definition.name) {
+      return [];
+    }
+
+    return this.doHandleResourceChange(change, desiredState, startingState);
   }
 
   private async delete(
@@ -148,17 +183,85 @@ export abstract class StreamActiveRecord<
     startingState: State,
     startingStateStream?: StreamActiveRecord<TDefinition>
   ): Promise<ElasticsearchAction[]> {
+    const actions: ElasticsearchAction[] = [];
+
+    // Add resource actions (attachments, queries, features)
+    actions.push(...this.determineResourceActions());
+
+    // Add stream-level actions based on change status
     if (this.changeStatus === 'upserted') {
       if (startingStateStream) {
-        return this.doDetermineUpdateActions(desiredState, startingState, startingStateStream);
+        actions.push(
+          ...(await this.doDetermineUpdateActions(desiredState, startingState, startingStateStream))
+        );
       } else {
-        return this.doDetermineCreateActions(desiredState);
+        actions.push(...(await this.doDetermineCreateActions(desiredState)));
       }
     } else if (this.changeStatus === 'deleted') {
-      return this.doDetermineDeleteActions();
+      actions.push(...(await this.doDetermineDeleteActions()));
+    } else if (!this.hasPendingResourceActions()) {
+      throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
     }
 
-    throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
+    return actions;
+  }
+
+  // Convert pending resource changes to ElasticsearchActions
+  private determineResourceActions(): ElasticsearchAction[] {
+    return this._pendingResourceActions.map((change): ElasticsearchAction => {
+      switch (change.type) {
+        case 'link_attachment':
+          return {
+            type: 'link_attachment',
+            request: { name: change.name, attachment: change.attachment },
+          };
+        case 'unlink_attachment':
+          return {
+            type: 'unlink_attachment',
+            request: { name: change.name, attachment: change.attachment },
+          };
+        case 'bulk_attachments':
+          return {
+            type: 'bulk_attachments',
+            request: { name: change.name, operations: change.operations },
+          };
+        case 'upsert_query':
+          return {
+            type: 'upsert_query',
+            request: { name: change.name, query: change.query },
+          };
+        case 'delete_query':
+          return {
+            type: 'delete_query',
+            request: { name: change.name, queryId: change.queryId },
+          };
+        case 'bulk_queries':
+          return {
+            type: 'bulk_queries',
+            request: { name: change.name, operations: change.operations },
+          };
+        case 'upsert_feature':
+          return {
+            type: 'upsert_feature',
+            request: { name: change.name, feature: change.feature },
+          };
+        case 'delete_feature':
+          return {
+            type: 'delete_feature',
+            request: { name: change.name, featureId: change.featureId },
+          };
+        case 'bulk_features':
+          return {
+            type: 'bulk_features',
+            request: { name: change.name, operations: change.operations },
+          };
+        default:
+          const _exhaustiveCheck: never = change;
+          throw new Error(
+            `Unknown resource change type: ${(_exhaustiveCheck as StreamChange).type}`
+          );
+      }
+    });
   }
 
   toPrintable(): PrintableStream {
@@ -174,7 +277,21 @@ export abstract class StreamActiveRecord<
     const clonedStream = this.doClone();
     // Carry over any changes not included in the definition
     clonedStream.setChanges(this.getChanges());
+    // Carry over pending resource actions
+    clonedStream.setPendingResourceActions(this.getPendingResourceActions());
     return clonedStream;
+  }
+
+  getPendingResourceActions(): PendingResourceAction[] {
+    return [...this._pendingResourceActions];
+  }
+
+  setPendingResourceActions(actions: PendingResourceAction[]) {
+    this._pendingResourceActions = [...actions];
+  }
+
+  hasPendingResourceActions(): boolean {
+    return this._pendingResourceActions.length > 0;
   }
 
   getChanges(): StreamChanges {
@@ -216,4 +333,11 @@ export abstract class StreamActiveRecord<
     startingStateStream: StreamActiveRecord<TDefinition>
   ): Promise<ElasticsearchAction[]>;
   protected abstract doDetermineDeleteActions(): Promise<ElasticsearchAction[]>;
+
+  // Handle resource-level changes (attachments, queries, features)
+  protected abstract doHandleResourceChange(
+    change: Exclude<StreamChange, { type: 'upsert' } | { type: 'delete' }>,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]>;
 }

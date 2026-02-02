@@ -38,6 +38,7 @@ describe('StreamActiveRecord', () => {
     doDetermineCreateActions = jest.fn().mockImplementation(() => ['create_actions']);
     doDetermineUpdateActions = jest.fn().mockImplementation(() => ['update_actions']);
     doDetermineDeleteActions = jest.fn().mockImplementation(() => ['delete_actions']);
+    doHandleResourceChange = jest.fn().mockImplementation(() => Promise.resolve([]));
   }
 
   it('can be marked as created or deleted', () => {

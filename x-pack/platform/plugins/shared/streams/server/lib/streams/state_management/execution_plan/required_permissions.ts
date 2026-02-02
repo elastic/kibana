@@ -76,6 +76,16 @@ export function getRequiredPermissionsForActions({
     unlink_systems,
     unlink_features,
     update_failure_store,
+    // resource operations (also done by kibana system user)
+    link_attachment,
+    unlink_attachment,
+    bulk_attachments,
+    upsert_query,
+    delete_query,
+    bulk_queries,
+    upsert_feature,
+    delete_feature,
+    bulk_features,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

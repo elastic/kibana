@@ -11,9 +11,11 @@ import type {
   IngestProcessorContainer,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { Feature, IngestStreamLifecycle, StreamQuery, Streams } from '@kbn/streams-schema';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { AttachmentLink, AttachmentBulkOperation } from '../../attachments/types';
+import type { FeatureBulkOperation } from '../../feature/feature_client';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -175,6 +177,81 @@ export interface UpdateIngestSettingsAction {
   };
 }
 
+// Attachment actions
+export interface LinkAttachmentAction {
+  type: 'link_attachment';
+  request: {
+    name: string;
+    attachment: AttachmentLink;
+  };
+}
+
+export interface UnlinkAttachmentAction {
+  type: 'unlink_attachment';
+  request: {
+    name: string;
+    attachment: AttachmentLink;
+  };
+}
+
+export interface BulkAttachmentsAction {
+  type: 'bulk_attachments';
+  request: {
+    name: string;
+    operations: AttachmentBulkOperation[];
+  };
+}
+
+// Query actions
+export interface UpsertQueryAction {
+  type: 'upsert_query';
+  request: {
+    name: string;
+    query: StreamQuery;
+  };
+}
+
+export interface DeleteQueryAction {
+  type: 'delete_query';
+  request: {
+    name: string;
+    queryId: string;
+  };
+}
+
+export interface BulkQueriesAction {
+  type: 'bulk_queries';
+  request: {
+    name: string;
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>;
+  };
+}
+
+// Feature actions
+export interface UpsertFeatureAction {
+  type: 'upsert_feature';
+  request: {
+    name: string;
+    feature: Feature;
+  };
+}
+
+export interface DeleteFeatureAction {
+  type: 'delete_feature';
+  request: {
+    name: string;
+    featureId: string;
+  };
+}
+
+export interface BulkFeaturesAction {
+  type: 'bulk_features';
+  request: {
+    name: string;
+    operations: FeatureBulkOperation[];
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -197,7 +274,16 @@ export type ElasticsearchAction =
   | UnlinkSystemsAction
   | UnlinkFeaturesAction
   | UpdateFailureStoreAction
-  | UpdateIngestSettingsAction;
+  | UpdateIngestSettingsAction
+  | LinkAttachmentAction
+  | UnlinkAttachmentAction
+  | BulkAttachmentsAction
+  | UpsertQueryAction
+  | DeleteQueryAction
+  | BulkQueriesAction
+  | UpsertFeatureAction
+  | DeleteFeatureAction
+  | BulkFeaturesAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -222,4 +308,13 @@ export interface ActionsByType {
   unlink_features: UnlinkFeaturesAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
+  link_attachment: LinkAttachmentAction[];
+  unlink_attachment: UnlinkAttachmentAction[];
+  bulk_attachments: BulkAttachmentsAction[];
+  upsert_query: UpsertQueryAction[];
+  delete_query: DeleteQueryAction[];
+  bulk_queries: BulkQueriesAction[];
+  upsert_feature: UpsertFeatureAction[];
+  delete_feature: DeleteFeatureAction[];
+  bulk_features: BulkFeaturesAction[];
 }

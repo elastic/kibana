@@ -1050,5 +1050,14 @@ function emptyActionsByType(): ActionsByType {
     unlink_features: [],
     update_ingest_settings: [],
     update_failure_store: [],
+    link_attachment: [],
+    unlink_attachment: [],
+    bulk_attachments: [],
+    upsert_query: [],
+    delete_query: [],
+    bulk_queries: [],
+    upsert_feature: [],
+    delete_feature: [],
+    bulk_features: [],
   };
 }

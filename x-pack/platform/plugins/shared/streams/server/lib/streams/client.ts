@@ -24,8 +24,10 @@ import {
   getAncestors,
   getParentId,
 } from '@kbn/streams-schema';
+import type { Feature, StreamQuery } from '@kbn/streams-schema';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
+import type { AttachmentLink, AttachmentBulkOperation } from './attachments/types';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -33,12 +35,12 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
+import type { FeatureClient, FeatureBulkOperation } from './feature';
 import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import type { SystemClient } from './system/system_client';
-import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -803,5 +805,206 @@ export class StreamsClient {
       ),
       this.dependencies.queryClient.syncQueries(name, queries),
     ]);
+  }
+
+  // Attachment operations via state management
+
+  /**
+   * Links an attachment to a stream via state management.
+   */
+  async linkAttachment(
+    streamName: string,
+    attachment: AttachmentLink
+  ): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'link_attachment',
+          name: streamName,
+          attachment,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Unlinks an attachment from a stream via state management.
+   */
+  async unlinkAttachment(
+    streamName: string,
+    attachment: AttachmentLink
+  ): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'unlink_attachment',
+          name: streamName,
+          attachment,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Bulk update attachments for a stream via state management.
+   */
+  async bulkAttachments(
+    streamName: string,
+    operations: AttachmentBulkOperation[]
+  ): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'bulk_attachments',
+          name: streamName,
+          operations,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  // Query operations via state management
+
+  /**
+   * Upserts a query to a stream via state management.
+   */
+  async upsertQuery(streamName: string, query: StreamQuery): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert_query',
+          name: streamName,
+          query,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Deletes a query from a stream via state management.
+   */
+  async deleteQuery(streamName: string, queryId: string): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'delete_query',
+          name: streamName,
+          queryId,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Bulk update queries for a stream via state management.
+   */
+  async bulkQueries(
+    streamName: string,
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
+  ): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'bulk_queries',
+          name: streamName,
+          operations,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  // Feature operations via state management
+
+  /**
+   * Upserts a feature to a stream via state management.
+   */
+  async upsertFeature(streamName: string, feature: Feature): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert_feature',
+          name: streamName,
+          feature,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Deletes a feature from a stream via state management.
+   */
+  async deleteFeature(streamName: string, featureId: string): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'delete_feature',
+          name: streamName,
+          featureId,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
+  }
+
+  /**
+   * Bulk update features for a stream via state management.
+   */
+  async bulkFeatures(
+    streamName: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<{ acknowledged: boolean }> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'bulk_features',
+          name: streamName,
+          operations,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+    return { acknowledged: true };
   }
 }

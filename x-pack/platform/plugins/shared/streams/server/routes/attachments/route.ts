@@ -186,7 +186,7 @@ const linkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertAttachmentsAccess({ uiSettingsClient });
@@ -197,14 +197,10 @@ const linkAttachmentRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await attachmentClient.linkAttachment(streamName, {
+    return await streamsClient.linkAttachment(streamName, {
       id: attachmentId,
       type: attachmentType,
     });
-
-    return {
-      acknowledged: true,
-    };
   },
 });
 
@@ -262,7 +258,7 @@ const unlinkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertAttachmentsAccess({ uiSettingsClient });
@@ -273,14 +269,10 @@ const unlinkAttachmentRoute = createServerRoute({
       path: { attachmentId, attachmentType, streamName },
     } = params;
 
-    await attachmentClient.unlinkAttachment(streamName, {
+    return await streamsClient.unlinkAttachment(streamName, {
       id: attachmentId,
       type: attachmentType,
     });
-
-    return {
-      acknowledged: true,
-    };
   },
 });
 
@@ -370,9 +362,8 @@ const bulkAttachmentsRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    logger,
   }): Promise<BulkUpdateAttachmentsResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertAttachmentsAccess({ uiSettingsClient });
@@ -384,7 +375,7 @@ const bulkAttachmentsRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await attachmentClient.bulk(
+    return await streamsClient.bulkAttachments(
       streamName,
       operations.map((operation) => {
         if ('index' in operation) {
@@ -407,8 +398,6 @@ const bulkAttachmentsRoute = createServerRoute({
         };
       })
     );
-
-    return { acknowledged: true };
   },
 });
 
