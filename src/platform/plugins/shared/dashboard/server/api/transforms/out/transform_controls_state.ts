@@ -35,6 +35,14 @@ export const transformLegacyControlsState: (
   return injectControlReferences(state, containerReferences);
 };
 
+export function transformPinnedPanelsState(
+  controls: StoredPinnedControls,
+  containerReferences: Reference[]
+): Array<StoredPinnedControlState> {
+  const state = flow(transformControlObjectToArray, transformControlProperties)(controls);
+  return injectControlReferences(state, containerReferences);
+}
+
 export function transformControlObjectToArray(
   controls: StoredPinnedControls
 ): Array<StoredPinnedControlState> {

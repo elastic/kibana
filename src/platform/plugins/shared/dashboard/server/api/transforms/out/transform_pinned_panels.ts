@@ -11,9 +11,11 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import { transformLegacyControlsState } from './transform_controls_state';
+import {
+  transformLegacyControlsState,
+  transformPinnedPanelsState,
+} from './transform_controls_state';
 import type { DashboardState } from '../../types';
-import { injectControlReferences } from './transform_controls_state';
 
 export function transformControlGroupOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'],
@@ -21,26 +23,10 @@ export function transformControlGroupOut(
   containerReferences: Reference[]
 ): DashboardState['pinned_panels'] {
   if (pinnedPanels) {
-    console.log({ pinnedPanels });
     /**
      * >=9.4, pinned panels are stored under the key `pinned_panels` without any JSON bucketing
      */
-    const panels = pinnedPanels.panels;
-    return injectControlReferences(
-      Object.entries(panels).map(([id, { explicitInput, order, ...rest }]) => {
-        console.log(rest);
-        return {
-          ...rest,
-          uid: id,
-          config: {
-            // use_global_filters: !ignoreFilters,
-            // ignore_validations: legacyControlGroupOptions.ignoreValidations,
-            ...explicitInput,
-          },
-        };
-      }),
-      containerReferences
-    );
+    return transformPinnedPanelsState(pinnedPanels.panels, containerReferences);
   } else if (controlGroupInput) {
     /**
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
@@ -48,7 +34,6 @@ export function transformControlGroupOut(
     const controls = controlGroupInput.panelsJSON
       ? transformLegacyControlsState(controlGroupInput.panelsJSON, containerReferences)
       : [];
-    console.log({ controls: JSON.stringify(controls) });
     /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
     const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
       controlGroupInput.ignoreParentSettingsJSON
