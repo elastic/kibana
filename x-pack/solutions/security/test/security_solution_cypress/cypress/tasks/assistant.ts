@@ -17,6 +17,7 @@ import {
   CHAT_ICON_SM,
   CONNECTOR_SELECT,
   CONNECTOR_SELECTOR,
+  CONNECTOR_SELECTOR_LIST,
   CONVERSATION_TITLE,
   EMPTY_CONVO,
   WELCOME_SETUP,
@@ -97,8 +98,12 @@ export const createNewChat = () => {
 };
 
 export const selectConnector = (connectorName: string) => {
+  const connectorOption = CONNECTOR_SELECT(connectorName);
+
   cy.get(CONNECTOR_SELECTOR).click();
-  cy.get(CONNECTOR_SELECT(connectorName)).click();
+  cy.get(CONNECTOR_SELECTOR_LIST).should('be.visible').scrollTo('bottom');
+  cy.get(connectorOption).scrollIntoView({ block: 'center' });
+  cy.get(connectorOption).should('be.visible').click();
   assertConnectorSelected(connectorName);
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(2000);
