@@ -7,50 +7,48 @@
 
 import { evaluate } from '../src/evaluate';
 import { cleanStandardListExceptAction } from '../src/helpers/saved_objects_cleanup';
-import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
-const AGENT_ID = oneChatDefaultAgentId;
+const AGENT_ID = agentBuilderDefaultAgentId;
 
 evaluate.describe('Security Entity Analytics (Skills) - Basic', { tag: '@svlSecurity' }, () => {
-    evaluate.beforeAll(async ({ supertest, log, kbnClient }) => {
-        await cleanStandardListExceptAction(kbnClient);
-    });
+  evaluate.beforeAll(async ({ kbnClient }) => {
+    await cleanStandardListExceptAction(kbnClient);
+  });
 
-    evaluate.afterAll(async ({ supertest, log, kbnClient }) => {
-        await cleanStandardListExceptAction(kbnClient);
-    });
+  evaluate.afterAll(async ({ kbnClient }) => {
+    await cleanStandardListExceptAction(kbnClient);
+  });
 
-    evaluate('role + off-topic handling', async ({ evaluateDataset }) => {
-        await evaluateDataset({
-            dataset: {
-                name: 'entity-analytics-skills: basic',
-                description: 'Basic questions to validate skills-based Entity Analytics behavior',
-                agentId: AGENT_ID,
-                examples: [
-                    {
-                        input: { question: 'What is your role?' },
-                        output: {
-                            criteria: [
-                                'Mentions Elastic Security',
-                                'Mentions entity analytics',
-                                'Stays concise and on-topic',
-                            ],
-                        },
-                        metadata: { query_intent: 'Factual' },
-                    },
-                    {
-                        input: { question: 'What is the weather today?' },
-                        output: {
-                            criteria: [
-                                'Politely declines to answer',
-                                'Mentions the question is unrelated to security or Elastic Security',
-                                'Does not provide weather information',
-                            ],
-                        },
-                        metadata: { query_intent: 'Off-topic' },
-                    },
-                ],
+  evaluate('role + off-topic handling', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'entity-analytics-skills: basic',
+        description: 'Basic questions to validate skills-based Entity Analytics behavior',
+        agentId: AGENT_ID,
+        examples: [
+          {
+            input: { question: 'What is your role?' },
+            output: {
+              criteria: [
+                'Mentions security or Elastic',
+                'Stays on-topic and professional',
+              ],
             },
-        });
+            metadata: { query_intent: 'Factual' },
+          },
+          {
+            input: { question: 'What is the weather today?' },
+            output: {
+              criteria: [
+                'Politely declines or redirects the question',
+                'Does not provide weather information',
+              ],
+            },
+            metadata: { query_intent: 'Off-topic' },
+          },
+        ],
+      },
     });
+  });
 });

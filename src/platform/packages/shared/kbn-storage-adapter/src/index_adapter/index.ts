@@ -33,6 +33,7 @@ import type {
   StorageClientSearch,
   StorageClientGet,
   StorageClientExistsIndex,
+  StorageClientEnsureIndex,
   StorageDocumentOf,
   StorageClientSearchResponse,
   StorageClientClean,
@@ -553,6 +554,26 @@ export class StorageIndexAdapter<
     });
   };
 
+  /**
+   * Ensures that the index template and index exist, and that the mappings are up to date.
+   * This method can be called to set up the storage infrastructure without performing any writes.
+   */
+  private ensureIndex: StorageClientEnsureIndex = async () => {
+    const expectedSchemaVersion = getSchemaVersion(this.storage);
+    await this.createOrUpdateIndexTemplate();
+
+    const writeIndex = await this.getCurrentWriteIndex();
+    if (!writeIndex) {
+      this.logger.debug(`Creating index`);
+      await this.createIndex();
+    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+      await this.updateMappingsOfExistingIndex({
+        name: writeIndex.name,
+      });
+    }
+  };
+
   getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
@@ -562,6 +583,7 @@ export class StorageIndexAdapter<
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
+      ensureIndex: this.ensureIndex,
     };
   }
 }

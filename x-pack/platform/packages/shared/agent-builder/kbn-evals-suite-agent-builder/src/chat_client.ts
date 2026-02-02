@@ -8,6 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import pRetry from 'p-retry';
 
 type Messages = { message: string }[];
@@ -22,33 +23,30 @@ interface ConverseFunctionParams {
   options?: Options;
 }
 
-type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
+export type ConverseResult = {
   conversationId?: string;
   messages: Messages;
   errors: any[];
   steps?: any[];
   traceId?: string;
-}>;
+  modelUsage?: RoundModelUsageStats;
+};
+
+type ConverseFunction = (params: ConverseFunctionParams) => Promise<ConverseResult>;
 
 export class AgentBuilderEvaluationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
-  ) {}
+  ) { }
 
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
 
     const { agentId = agentBuilderDefaultAgentId } = options;
 
-    const callConverseApi = async (): Promise<{
-      conversationId?: string;
-      messages: { message: string }[];
-      errors: any[];
-      steps?: any[];
-      traceId?: string;
-    }> => {
+    const callConverseApi = async (): Promise<ConverseResult> => {
       // Use the non-async AgentBuilder API endpoint
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
@@ -61,18 +59,20 @@ export class AgentBuilderEvaluationChatClient {
         }),
       });
 
-      // Extract conversation ID and response from the API response
+      // Extract conversation ID, response, and model usage from the API response
       const chatResponse = response as {
         conversation_id: string;
         trace_id?: string;
         steps: any[];
         response: { message: string };
+        model_usage?: RoundModelUsageStats;
       };
       const {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
         steps,
         trace_id: traceId,
+        model_usage: modelUsage,
       } = chatResponse;
 
       return {
@@ -80,6 +80,7 @@ export class AgentBuilderEvaluationChatClient {
         messages: [...messages, latestResponse],
         steps,
         traceId,
+        modelUsage,
         errors: [],
       };
     };

@@ -15,50 +15,46 @@ export const PLATFORM_ALERTING_RULES_SKILL: Skill = {
   description: 'Find, create, and enable/disable alerting rules safely (no deletes)',
   content: `# Platform Alerting Rules
 
-## What this skill does
-Helps you inspect, create, and manage alerting rules safely.
+## WHEN TO USE THIS TOOL (REQUIRED)
 
-## When to use
-- The user wants to check a rule's configuration/health.
-- The user wants to create a new alerting rule.
-- The user explicitly wants a rule enabled or disabled.
-- The user wants to know what rule types are available.
+You MUST use this tool when the user asks about:
+- Alerting rules (listing, finding, searching)
+- Rule configuration or status
+- Available rule types
+- Enabling/disabling rules
+- Creating new rules
 
-## Inputs to ask the user for
-- **Rule id** (preferred) or identifying details (name, tag, rule type)
-- For create: rule name, type, schedule, and parameters
-- For enable/disable/create: an explicit "yes, do it" confirmation
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+### When listing/finding rules:
+- If rules found: "Found X alerting rules:" then list names, IDs, and enabled status
+- If none: "No alerting rules found matching your criteria."
+
+### When getting a rule:
+Show rule name, ID, type, schedule, and enabled status from tool results.
+
+### When listing rule types:
+List available rule types with their IDs and descriptions.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what alerting rules are without listing them
+- Do NOT describe rule concepts in general
+- Do NOT add suggestions unless asked
 
 ## Tools and operations
 - Use \`platform.core.alerting_rules\`:
   - \`find\`, \`get\`, \`list_types\` (read-only)
-  - \`create\` (**requires \`confirm: true\`**)
-  - \`set_enabled\` (**requires \`confirm: true\`**)
-
-## Safe workflow for inspecting rules
-1) \`find\` the rule(s) and confirm the exact target.
-2) \`get\` and summarize what the rule does.
-
-## Safe workflow for creating rules
-1) \`list_types\` to show available rule types if the user is unsure.
-2) Collect required info: name, alertTypeId, consumer, schedule, params.
-3) Summarize what will be created and require confirmation.
-4) Call \`create\` with \`confirm: true\`.
-
-## Safe workflow for enable/disable
-1) \`find\` or \`get\` the rule to confirm the exact target.
-2) Restate the impact and require confirmation.
-3) Call \`set_enabled\` with \`confirm: true\`.
+  - \`create\` (**requires confirm: true**)
+  - \`set_enabled\` (**requires confirm: true**)
 
 ## Common rule types
 - \`metrics.alert.threshold\` - Metric threshold alerts
 - \`logs.alert.document.count\` - Log threshold alerts
 - \`.index-threshold\` - Index threshold alerts
-- \`xpack.ml.anomaly_detection_alert\` - ML anomaly alerts
-- \`apm.anomaly\` - APM anomaly alerts
-- \`siem.queryRule\` - Security detection rules
 
-Use \`list_types\` to discover all available rule types for the user's license and permissions.
+Use \`list_types\` to discover all available rule types.
 `,
   tools: [createToolProxy({ toolId: platformCoreTools.alertingRules })],
 };

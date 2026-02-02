@@ -4,24 +4,26 @@ Evaluation test suite for the SIEM Entity Analytics **skills-based** agent, buil
 
 ## Overview
 
-This test suite contains evaluation tests specifically for the SIEM Entity Analytics skills-based agent, which provides security analysis capabilities through the Agent Builder API using OneChat skills (`invoke_skill`).
+This test suite contains evaluation tests specifically for the SIEM Entity Analytics skills-based agent, which provides security analysis capabilities through the Agent Builder API using Agent Builder skills (`invoke_skill`).
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../platform/packages/shared/kbn-evals/README.md).
 
 ## Prerequisites
 
-### Configure Phoenix Exporter
+### Configure Phoenix Exporter (Optional)
 
-Configure Phoenix exporter in `kibana.dev.yml`:
+If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
-  phoenix:
-    base_url: 'https://<my-phoenix-host>'
-    public_url: 'https://<my-phoenix-host>'
-    project_name: '<my-name>'
-    api_key: '<my-api-key>'
+  - phoenix:
+      base_url: 'https://<my-phoenix-host>'
+      public_url: 'https://<my-phoenix-host>'
+      project_name: '<my-name>'
+      api_key: '<my-api-key>'
 ```
+
+This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can skip Phoenix configuration.
 
 ### Configure AI Connectors
 
@@ -67,16 +69,39 @@ The `security_entity_analytics` configuration extends the default `--stateful` c
 Run the evaluations:
 
 ```bash
-# Run skills-based SIEM Entity Analytics evaluations (OneAgent skills via invoke_skill)
+# Run all skills-based SIEM Entity Analytics evaluations
 node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.skills.config.ts
+
+# Run specific test files
+node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.skills.config.ts evals_skills/basic.spec.ts
+
+# Run with grep pattern
+node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.skills.config.ts --grep "risk score"
 ```
 
 ### Runtime/parallelism knobs
 
-- `SECURITY_SOLUTION_EVALS_WORKERS`: number of Playwright workers (default: 1)
-- `SECURITY_SOLUTION_EVALS_PHOENIX_CONCURRENCY`: Phoenix experiment concurrency (default: 4)
-- `EVALUATION_CONNECTOR_ID`: defaults to `pmeClaudeV45SonnetUsEast1` in `playwright.skills.config.ts` if unset
-- `HEADED`: set to `true` or `1` to run browsers in headed mode (if browser tests are added)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECURITY_SOLUTION_EVALS_WORKERS` | Number of Playwright workers | `2` |
+| `SECURITY_SOLUTION_EVALS_CONCURRENCY` | Experiment concurrency per worker | `4` |
+| `EVALUATION_CONNECTOR_ID` | AI connector to use | `pmeClaudeV45SonnetUsEast1` |
+| `HEADED` | Set to `true` or `1` for headed browser mode | `false` |
+| `SECURITY_SOLUTION_EVALS_SKIP_CLEANUP` | Set to `true` or `1` to skip cleanup (debug mode) | `false` |
+
+### Parallelization
+
+All tests are designed for safe parallel execution:
+
+- Each worker runs in its own isolated Kibana space (`skills-evals-w1`, `skills-evals-w2`, etc.)
+- Test data is created with worker-specific identifiers to avoid conflicts
+- Anomaly tests create worker-scoped indices (e.g., `.ml-anomalies-security_auth-skills-evals-w1`)
+
+Default: 2 workers. To run with more workers:
+
+```bash
+SECURITY_SOLUTION_EVALS_WORKERS=4 node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.skills.config.ts
+```
 
 ### Interactive/Debugging Mode
 
@@ -110,12 +135,12 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
-          phoenixClient,
+          executorClient,
         })
       );
     },
@@ -148,6 +173,23 @@ evaluate.describe('My Test Suite', { tag: '@svlSecurity' }, () => {
   });
 });
 ```
+
+### Test Structure
+
+The `evals_skills/` directory contains focused test files organized by feature area:
+
+| File | Description | Data Source |
+|------|-------------|-------------|
+| `basic.spec.ts` | Role and off-topic handling | None |
+| `asset_criticality.spec.ts` | Asset criticality queries | Kibana API |
+| `entity_store.spec.ts` | Entity store queries | Worker-scoped index |
+| `privileged_users.spec.ts` | Privileged user monitoring | Worker-scoped index |
+| `risk_score.spec.ts` | Risk score queries | Worker-scoped indices |
+| `anomalies_auth.spec.ts` | Authentication anomalies | Worker-scoped ML indices |
+| `anomalies_data_exfiltration.spec.ts` | Data exfiltration anomalies | Worker-scoped ML indices |
+| `anomalies_lateral_movement.spec.ts` | Lateral movement anomalies | Worker-scoped ML indices |
+| `anomalies_network.spec.ts` | Network anomalies | Worker-scoped ML indices |
+| `anomalies_privileged_access.spec.ts` | Privileged access anomalies | Worker-scoped ML indices |
 
 ### Skills-based suite
 

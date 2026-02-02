@@ -34,12 +34,10 @@
  * @packageDocumentation
  */
 
-export { getLiveQuerySkill } from './live_query_skill';
 export { getOsquerySkill } from './osquery_skill';
+export { getLiveQuerySkill } from './live_query_skill';
 export { getPacksSkill } from './packs_skill';
 export { getSavedQueriesSkill } from './saved_queries_skill';
-export { getResultsSkill } from './results_skill';
-export { getSchemaSkill } from './schema_skill';
 export { getStatusSkill } from './status_skill';
 export type { GetOsqueryAppContextFn } from './utils';
 

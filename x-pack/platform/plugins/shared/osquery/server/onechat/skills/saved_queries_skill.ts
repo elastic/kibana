@@ -21,46 +21,23 @@ const SAVED_QUERIES_SKILL: Omit<Skill, 'tools'> = {
   namespace: 'osquery.saved_queries',
   name: 'Osquery Saved Queries',
   description: 'List and retrieve saved osquery queries',
-  content: `# Osquery Saved Queries Guide
+  content: `# Osquery Saved Queries
 
-This skill provides knowledge about working with saved osquery queries.
+List and get details of saved osquery queries.
 
-## Overview
-Saved queries are reusable osquery SQL queries that can be referenced by ID when running live queries. They help standardize common queries and reduce errors.
+## Response Format (MANDATORY)
 
-## Key Concepts
+### When listing queries:
+- If queries exist: "Found X saved queries:" then list names, IDs, and query SQL
+- If no queries: "No saved queries found."
 
-### Query Properties
-- **id**: Unique identifier for the query
-- **query**: The osquery SQL query string
-- **description**: Human-readable description
-- **interval**: Scheduling interval (if used in packs)
-- **platform**: Target platform (windows, darwin, linux, or all)
-- **ecs_mapping**: ECS field mappings for results
-- **prebuilt**: Whether the query is a prebuilt system query
+### When getting a specific query:
+Show the query details from tool results: name, ID, SQL, platform, description.
 
-## Usage Examples
-
-### List saved queries
-\`\`\`
-tool("list_saved_queries", {
-  page: 1,
-  pageSize: 20
-})
-\`\`\`
-
-### Get a specific saved query
-\`\`\`
-tool("get_saved_query", {
-  saved_query_id: "saved-query-uuid"
-})
-\`\`\`
-
-## Best Practices
-- Use saved queries for frequently used queries
-- Include clear descriptions
-- Specify platform when applicable
-- Use ECS mappings to normalize results
+## FORBIDDEN
+- Do NOT explain what saved queries are
+- Do NOT suggest how to create saved queries
+- Do NOT add any information not in tool results
 `,
 };
 
@@ -254,8 +231,7 @@ const createGetSavedQueryTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
  * - ECS field mappings for result normalization
  * - Prebuilt status for system-provided queries
  *
- * @see {@link getLiveQuerySkill} for running saved queries
- * @see {@link getSchemaSkill} for understanding query table schemas
+ * @see {@link getLiveQuerySkill} for running saved queries and browsing table schemas
  */
 export const getSavedQueriesSkill = (getOsqueryContext: GetOsqueryAppContextFn): Skill => {
   return {

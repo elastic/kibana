@@ -116,39 +116,76 @@ export const PLATFORM_SEARCH_SKILL: Skill = {
     content: `# Platform Search
 
 ## What this skill does
-Helps you run **read-only** investigations over data in Kibana using safe query primitives (ES|QL/KQL/filters) and summarize results.
+Searches data in Kibana using ES|QL/KQL/filters (read-only).
 
 ## When to use
-- You need to answer “what happened?” or “show me examples” using Kibana-visible data.
-- You want a quick summary table, top-N, trends, or correlations.
-
-## Inputs to ask the user for
-- **Time range** (required)
-- **Data source** (index pattern / data view / index prefix)
-- **Filter intent** (host/service/user, environment, severity, etc.)
-- **Output shape** (table columns, top-N, examples)
+- Searching logs, metrics, or other indexed data
+- Finding specific events or documents
+- Running ES|QL queries for aggregations and analysis
 
 ## Tools and operations
 - Use \`platform.search\` (single tool for this skill):
-  - \`operation: "search"\` routes to \`platform.core.search\`
-  - \`operation: "execute_esql"\` routes to \`platform.core.execute_esql\`
+  - \`operation: "search"\` - for natural language search queries
+  - \`operation: "execute_esql"\` - for explicit ES|QL queries
 
-## Relevant fields (required)
-- Always return **only the fields needed** to answer the question.
-- For \`operation: "search"\`, pass \`fields\` when you know the desired output columns (e.g. \`["@timestamp","host.name","user.name","message"]\`).
-- For \`operation: "execute_esql"\`, include an ES|QL \`KEEP\` clause with the minimal set of columns.
+## Response format (CRITICAL - FOLLOW EXACTLY)
+Your response MUST be brief and data-focused:
 
-## Safe workflow
-1) Ask for time range + data source if missing.\n
-2) Start with a narrow query and a small sample.\n
-3) Expand only with explicit user intent.\n
-4) Summarize results with clear counts and example documents/rows.\n
+**If results found:**
+"Found [N] [items]. [Brief summary if aggregation]
 
-## Example
-- **User**: “Show me failed logins in the last 24h for user alice.”\n
-- **Assistant**: Ask for data view/index, run a narrow query, return count + top sources + sample rows.
+[Table or list of data with relevant fields only]"
+
+**If no results or empty data:**
+"No [items] found matching the criteria."
+
+**If search/query failed or index doesn't exist:**
+"No [items] found - the index may not contain matching data."
+
+**If user asks about missing data or how to add data:**
+Briefly explain that data ingestion options include:
+- Setting up Elastic Agent or Beats for log/metric collection
+- Using the Elasticsearch Bulk API for direct indexing
+- Creating a data integration from the Integrations page
+
+**NEVER include in your response:**
+- Explanations of how you searched
+- Descriptions of the query or methodology  
+- The ES|QL or query syntax you used
+- Error stack traces or technical details
+- Suggestions for follow-up queries (unless specifically asked)
+- Disclaimers about the data
+- Explanations of field meanings
+- Apologies or "I'm sorry" phrases
+
+## Examples
+
+Query: "Search for error logs in the last 24 hours from logs-*"
+Response: "Found 3 error logs in the last 24 hours:
+
+| @timestamp | log.level | message |
+|------------|-----------|---------|
+| 2024-01-15T10:23:45Z | error | Connection timeout |
+| 2024-01-15T10:22:30Z | error | Database failed |
+| 2024-01-15T09:15:00Z | error | Auth rejected |"
+
+Query: "Use ES|QL to count events by log level"
+Response: "Event counts by log level:
+
+| log.level | count |
+|-----------|-------|
+| info | 1523 |
+| warn | 89 |
+| error | 12 |"
+
+Query: "Find critical alerts from the last 15 minutes"
+Response: "No critical alerts found in the last 15 minutes."
+
+Query: "I don't see any logs, how can I add data?"
+Response: "You can ingest data using:
+- **Elastic Agent/Beats**: Deploy agents to collect logs/metrics automatically
+- **Bulk API**: Index data directly via POST /_bulk
+- **Integrations**: Add a data integration from Fleet > Integrations"
 `,
     tools: [PLATFORM_SEARCH_TOOL],
 };
-
-

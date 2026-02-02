@@ -7,3 +7,9 @@
 
 export { getResearchAgentPrompt } from './research_agent';
 export { getAnswerAgentPrompt, getStructuredAnswerPrompt } from './answer_agent';
+export {
+  getSkillAwarePromptSection,
+  getCompactSkillContext,
+  getSkillToolSelectionGuidance,
+  getSkillDiscoveryPrompt,
+} from './skill_aware';

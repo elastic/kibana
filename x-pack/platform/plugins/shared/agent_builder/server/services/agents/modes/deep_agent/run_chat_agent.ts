@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
+import { SystemMessage } from '@langchain/core/messages';
 import { isStreamEvent, toolsToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -19,6 +20,7 @@ import {
   selectTools,
   conversationToLangchainMessages,
   prepareConversation,
+  getConversationAttachmentsSystemMessages,
 } from '../utils';
 import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
@@ -58,6 +60,8 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   },
   context
 ) => {
+  // Generate round ID early so attachments created during this round can reference it
+  const roundId = uuidv4();
   const {
     logger,
     request,
@@ -124,9 +128,26 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   const graphRecursionLimit = cycleLimit * 2 + 8;
 
-  const initialMessages = conversationToLangchainMessages({
+  // Convert conversation to langchain messages
+  const conversationMessages = conversationToLangchainMessages({
     conversation: processedConversation,
   });
+
+  // Add versioned attachment content as system messages so the agent can see attachment data
+  // Note: Attachments are stripped from per-round inputs in prepareConversation and migrated to
+  // the versioned attachment system. We present them here via system messages.
+  const attachmentSystemMessages = getConversationAttachmentsSystemMessages(
+    processedConversation.versionedAttachmentPresentation
+  ).map((msg) => {
+    // Convert BaseMessageLike tuple ['system', content] to SystemMessage
+    if (Array.isArray(msg) && msg[0] === 'system') {
+      return new SystemMessage(msg[1] as string);
+    }
+    return msg;
+  });
+
+  // Combine: attachment system messages first, then conversation messages
+  const initialMessages = [...attachmentSystemMessages, ...conversationMessages];
 
   // Convert skills to FileData format for the agent's filesystem
   const now = new Date().toISOString();
@@ -157,7 +178,11 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     // Expose attachment management to skills
     attachments: {
       add: async (params) => {
-        const attachment = await context.attachmentStateManager.add(params);
+        // Include the round ID so the attachment can be rendered with the round that created it
+        const attachment = await context.attachmentStateManager.add({
+          ...params,
+          created_in_round_id: roundId,
+        });
         return {
           id: attachment.id,
           type: attachment.type,
@@ -191,6 +216,8 @@ export const runDeepAgentMode: RunChatAgentFn = async (
         graphName: chatAgentGraphName,
         agentId,
         runId,
+        // Include conversation_id as thread_id for LangSmith thread tracking
+        ...(conversation?.id ? { thread_id: conversation.id, conversation_id: conversation.id } : {}),
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
@@ -226,6 +253,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
       pendingRound: undefined,
       stateManager,
       attachmentStateManager,
+      roundId,
     }),
     shareReplay()
   );

@@ -32,7 +32,7 @@
       "telemetry",
       "cases",
       "spaces",
-      "onechat"
+      "agentBuilder"
     ],
     "requiredBundles": [
       "esUiShared",

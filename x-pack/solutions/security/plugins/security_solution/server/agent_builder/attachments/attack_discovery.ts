@@ -87,17 +87,16 @@ export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition 
     ],
 
     getAgentDescription: () => {
-      return `You have access to an attack discovery with detailed threat analysis. This attack discovery includes:
-- MITRE ATT&CK tactics identified in the attack chain
-- Related alert IDs for investigation
-- Entity summary showing affected hosts and users
+      return `An attack discovery is attached to this conversation. The attack discovery data is included in the <attachment> XML element within the user's message.
 
-ATTACK DISCOVERY DATA:
-{attackDiscoveryData}
+**How to access the attack discovery data:**
+The attack discovery JSON is in the attachment content above. Parse it to extract:
+- Attack title and summary
+- MITRE ATT&CK tactics identified
+- Related alert IDs
+- Entity summary (affected hosts and users)
 
----
-Investigation Steps:
-
+**Investigation steps:**
 1. Review the attack summary and MITRE ATT&CK tactics
 2. Examine the entity summary to identify affected hosts and users
 3. Use the alerts tool to investigate related alerts

@@ -9,15 +9,23 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 process.env.EVALUATION_CONNECTOR_ID ??= 'pmeClaudeV45SonnetUsEast1';
 
-// Default to 1 worker for maximum stability; can be increased once everything is green.
-const DEFAULT_WORKERS = 1;
+/**
+ * Default to 2 workers for parallel execution.
+ *
+ * All tests are designed to run in isolation:
+ * - Each worker runs in its own Kibana space (e.g., `skills-evals-w1`, `skills-evals-w2`)
+ * - Test data is created with worker-specific prefixes to avoid conflicts
+ * - Anomaly tests create worker-scoped ML indices (e.g., `.ml-anomalies-security_auth-skills-evals-w1`)
+ *
+ * Increase workers for faster execution (recommended: 2-4 depending on available resources).
+ */
+const DEFAULT_WORKERS = 2;
 const WORKERS = process.env.SECURITY_SOLUTION_EVALS_WORKERS
-    ? parseInt(process.env.SECURITY_SOLUTION_EVALS_WORKERS, 10)
-    : DEFAULT_WORKERS;
+  ? parseInt(process.env.SECURITY_SOLUTION_EVALS_WORKERS, 10)
+  : DEFAULT_WORKERS;
 
 /**
- * Skills-based eval suite (exercises OneAgent skills via invoke_skill),
- * only suite in this package.
+ * Skills-based eval suite (exercises Agent Builder skills via invoke_skill).
  */
 const config = createPlaywrightEvalsConfig({
     testDir: Path.join(__dirname, './evals_skills'),

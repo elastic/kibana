@@ -60,8 +60,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-                  'Returns the list of machine learning jobs based on the response from the Elasticsearch function, Each job includes id, state, description, datafeed indices, influencers, and bucket_span, its not empty',
-                  `Includes ${jobIds.join(', ')} in the list of machine learning jobs`,
+                  'The response should contain a list of machine learning jobs with id, state, description, datafeed indices, influencers, and bucket_span (not empty)',
+                  `The response should include ${jobIds.join(', ')} in the list of machine learning jobs`,
                 ],
               },
               metadata: {},
@@ -74,8 +74,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats',
-                  `Returns the list of machine learning jobs stats based on the response from the Elasticsearch function, Each job includes processed_record_count, model_size_stats , bucket_count, memory_status, and node information, its not empty`,
-                  `Includes ${jobIds.join(', ')} in the list of machine learning jobs stats`,
+                  `The response should contain job stats with processed_record_count, model_size_stats, bucket_count, memory_status, and node information (not empty)`,
+                  `The response should include ${jobIds.join(', ')} in the list of machine learning jobs stats`,
                 ],
               },
               metadata: {},
@@ -87,8 +87,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-                  'Returns the open machine learning jobs based on the response from the Elasticsearch function, its not empty',
-                  `Includes ${APM_ML_JOB_ID} in the list of open machine learning jobs`,
+                  'The response should contain a list of open machine learning jobs (not empty)',
+                  `The response should include ${APM_ML_JOB_ID} in the list of open machine learning jobs`,
                 ],
               },
               metadata: {},
@@ -100,9 +100,9 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-                  'Returns the closed ML jobs based on the response from the Elasticsearch function, its not empty',
-                  `Includes ${CLOSED_ML_JOB_ID} in the list of closed machine learning jobs`,
-                  `Does not include ${APM_ML_JOB_ID} in the list of closed ML jobs`,
+                  'The response should contain a list of closed ML jobs (not empty)',
+                  `The response should include ${CLOSED_ML_JOB_ID} in the list of closed machine learning jobs`,
+                  `The response should NOT include ${APM_ML_JOB_ID} in the list of closed ML jobs`,
                 ],
               },
               metadata: {},
@@ -114,8 +114,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-                  'Filters jobs whose state is failed or stopped/closed, its not empty',
-                  'Returns those jobs in the response',
+                  'Filters jobs whose state is failed or stopped/closed',
+                  'The response should contain the failed or stopped/closed jobs (may be empty if none exist)',
                 ],
               },
               metadata: {},
@@ -127,7 +127,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   `Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/${APM_ML_JOB_ID}`,
-                  `Returns the details of ML job id ${APM_ML_JOB_ID} based on the response from the Elasticsearch function`,
+                  `The response should contain the details of ML job id ${APM_ML_JOB_ID}`,
                 ],
               },
               metadata: {},
@@ -139,8 +139,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or uses the query function',
-                  'Filters jobs by the service name, its not empty',
-                  `Includes ${APM_ML_JOB_ID} in the list of open machine learning jobs`,
+                  'Filters jobs by the service name',
+                  `The response should include ${APM_ML_JOB_ID} in the list of open machine learning jobs`,
                 ],
               },
               metadata: {},
@@ -152,7 +152,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   `Checks ml/anomaly_detectors/${APM_ML_JOB_ID}/_stats and ml/anomaly_detectors/${CLOSED_ML_JOB_ID}/_stats for state=open/closed`,
-                  'Returns the last time the job ran by reading data_counts.latest_record_timestamp or timing stats for last run time',
+                  'The response should contain whether each job is running and the last time each job ran (from data_counts.latest_record_timestamp or timing stats)',
                 ],
               },
               metadata: {},
@@ -179,9 +179,9 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
-                    'Returns a list of anomalies found based on the response from the Elasticsearch function, there are more than 0 anomalies',
-                    `Includes job with ID ${jobIds.join(', ')} in the anomalies`,
+                    'Calls the Elasticsearch function or tries to find anomalies by running ES|QL queries',
+                    'The response should contain a list of anomalies found (more than 0)',
+                    `The response should include anomalies from job IDs: ${jobIds.join(', ')}`,
                   ],
                 },
                 metadata: {},
@@ -192,8 +192,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
-                    `Returns a list of anomalies found based on the response from the Elasticsearch function. Includes job with ID ${listJobIds} in the anomalies, there are more than 0 anomalies`,
+                    'Calls the Elasticsearch function or tries to find anomalies by running ES|QL queries',
+                    `The response should contain a list of anomalies (more than 0) from job IDs: ${listJobIds}`,
                   ],
                 },
                 metadata: {},
@@ -204,8 +204,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Calls the Elasticsearch tool or try to find anomalies by running ES|QL queries score > 50',
-                    'Returns timestamp, job_id, and score. Links anomalies to their respective ML jobs. There are more than 0 anomalies',
+                    'Calls the Elasticsearch tool or tries to find anomalies by running ES|QL queries with score > 50',
+                    'The response should contain timestamp, job_id, and score for each anomaly, linked to their respective ML jobs (more than 0 anomalies)',
                   ],
                 },
                 metadata: {},
@@ -217,7 +217,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     `Fetches ml/anomaly_detectors/${APM_ML_JOB_ID} or uses the query function`,
-                    'Provides summary and probable causes based on influencers/fields',
+                    'The response should contain a summary and probable causes based on influencers/fields',
                   ],
                 },
                 metadata: {},
@@ -230,7 +230,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                   criteria: [
                     'Fetches anomalies for the given service/application',
                     'Analyzes influencer fields to infer probable cause',
-                    'Returns a summary of anomalies with likely causes',
+                    'The response should contain a summary of anomalies with their likely causes',
                   ],
                 },
                 metadata: {},
@@ -243,8 +243,8 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Queries ml/anomaly_detectors/_results or uses the query function to fetch recent anomalies',
-                    'Identifies highest influencer_score field/value',
-                    'Provides reasoning of probable root cause',
+                    'The response should identify the highest influencer_score field/value',
+                    'The response should contain reasoning about the probable root cause',
                   ],
                 },
                 metadata: {},
@@ -270,7 +270,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the Elasticsearch tool or executes a query on the ML jobs alerts',
-                  'Provides a summary of the alerts including job_id, severity, and timestamp',
+                  'The response should contain a summary of alerts including job_id, severity, and timestamp',
                 ],
               },
               metadata: {},
@@ -284,7 +284,7 @@ evaluate.describe('Machine learning', { tag: '@svlOblt' }, () => {
                 criteria: [
                   'Executes a query on the ML alerts index or uses the Elasticsearch API',
                   'Filters by timestamp within the last 1 hour',
-                  'Returns job_id and severity',
+                  'The response should contain job_id and severity for each alert',
                 ],
               },
               metadata: {},

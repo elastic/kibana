@@ -15,15 +15,40 @@ export const PLATFORM_UI_SETTINGS_SKILL: Skill = {
   description: 'Inspect advanced settings (read-only; sensitive values redacted by default)',
   content: `# Platform UI Settings
 
-## What this skill does
-Helps you inspect advanced settings (uiSettings) to explain behavior differences (time defaults, formatting, etc.).
+## WHEN TO USE THIS TOOL (REQUIRED)
+
+You MUST use this tool when the user asks about:
+- UI settings or advanced settings
+- Kibana settings or configuration
+- Default values (time zone, date format, etc.)
+- User-provided or registered settings
+
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+### When getting settings:
+- Show the setting name, value, and description from tool results
+- If multiple settings: list as a table with Name, Value, Description
+
+### When no settings found:
+"No settings found matching your criteria."
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what UI settings are in general
+- Do NOT describe settings without fetching them
+- Do NOT add suggestions unless asked
 
 ## Tools and operations
-- Use \`${platformCoreTools.uiSettings}\`:\n
-  - \`get\`, \`get_all\`, \`get_user_provided\`, \`get_registered\`\n
+- Use \`${platformCoreTools.uiSettings}\`:
+  - \`get\` - get a specific setting
+  - \`get_all\` - get all settings
+  - \`get_user_provided\` - get user-modified settings
+  - \`get_registered\` - get registered settings metadata
 
 ## Notes
-- Sensitive keys are redacted unless \`includeSensitive: true\` is explicitly requested.\n
+- This skill is read-only
+- Sensitive keys are redacted unless explicitly requested
 `,
   tools: [createToolProxy({ toolId: platformCoreTools.uiSettings })],
 };

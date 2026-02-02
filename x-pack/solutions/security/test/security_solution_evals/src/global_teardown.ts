@@ -24,6 +24,9 @@ function readScoutConfig(serversConfigDir: string, configName: string): any {
 export default async function globalTeardown(config: FullConfig) {
     const runId = getRunId();
     const workers = typeof config.workers === 'number' ? config.workers : 1;
+    const skipCleanup =
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === 'true' ||
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === '1';
 
     const firstProjectUse = config.projects[0]?.use as undefined | { serversConfigDir?: string; configName?: string };
     const serversConfigDir = firstProjectUse?.serversConfigDir;
@@ -51,7 +54,10 @@ export default async function globalTeardown(config: FullConfig) {
     };
 
     // Cleanup eval-created connectors (persisted for the whole run to avoid evaluator flakiness).
-    if (runId) {
+    if (skipCleanup) {
+        // eslint-disable-next-line no-console
+        console.log('[security_solution_evals] Skipping connector cleanup (SECURITY_SOLUTION_EVALS_SKIP_CLEANUP=true)');
+    } else if (runId) {
         const urlWithAuth = (() => {
             const u = new URL(scoutConfig.hosts.kibana);
             u.username = scoutConfig.auth.username;

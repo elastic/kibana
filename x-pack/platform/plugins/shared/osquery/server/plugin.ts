@@ -49,12 +49,10 @@ import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import {
-  getLiveQuerySkill,
   getOsquerySkill,
+  getLiveQuerySkill,
   getPacksSkill,
   getSavedQueriesSkill,
-  getResultsSkill,
-  getSchemaSkill,
   getStatusSkill,
 } from './onechat/skills';
 
@@ -122,18 +120,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
-    // Register OneChat skills if available
-    if (plugins.onechat) {
-
-
+    // Register AgentBuilder skills if available
+    if (plugins.agentBuilder) {
       const getOsqueryContext = () => this.osqueryAppContext;
 
       plugins.agentBuilder.skills.register(getOsquerySkill(getOsqueryContext));
       plugins.agentBuilder.skills.register(getLiveQuerySkill(getOsqueryContext));
       plugins.agentBuilder.skills.register(getPacksSkill(getOsqueryContext));
       plugins.agentBuilder.skills.register(getSavedQueriesSkill(getOsqueryContext));
-      plugins.agentBuilder.skills.register(getResultsSkill(getOsqueryContext));
-      plugins.agentBuilder.skills.register(getSchemaSkill(getOsqueryContext));
       plugins.agentBuilder.skills.register(getStatusSkill(getOsqueryContext));
     }
 

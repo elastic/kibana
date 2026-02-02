@@ -17,10 +17,13 @@ import type {
  * Minimal fallback renderer for unknown attachment types.
  * Displays the attachment version data as formatted JSON.
  */
-export const DefaultJsonRenderer: React.FC<AttachmentContentProps> = ({ version }) => {
+export const DefaultJsonRenderer: React.FC<AttachmentContentProps> = ({ attachment, version }) => {
+  // Use version data if available, fallback to attachment data
+  const data = version?.data ?? attachment?.data ?? {};
+
   return (
     <EuiCodeBlock language="json" paddingSize="m" fontSize="m" isCopyable>
-      {JSON.stringify(version.data, null, 2)}
+      {JSON.stringify(data, null, 2)}
     </EuiCodeBlock>
   );
 };

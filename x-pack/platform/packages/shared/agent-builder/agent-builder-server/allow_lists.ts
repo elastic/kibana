@@ -79,6 +79,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'platform.tags',
   'platform.ui_settings',
   'platform.privileges',
+  'platform.generate_esql',
   'security.cases',
   'security.detection_rules',
   'security.timelines',
@@ -90,6 +91,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'security.alert_suppression_readonly',
   'security.rule_exceptions_preview',
   'security.endpoint_response_actions_readonly',
+  'security.forensics_analytics',
   'observability.alerts',
   'observability.alerts_execution',
   'observability.apm',
@@ -108,8 +110,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'osquery.live_query',
   'osquery.packs',
   'osquery.saved_queries',
-  'osquery.results',
-  'osquery.schema',
   'osquery.status',
 ];
 

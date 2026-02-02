@@ -20,9 +20,9 @@ const EMAIL_PROMPT =
 
 const EMAIL_EVAL_CRITERIA = [
   `Uses the ${EXECUTE_CONNECTOR_FUNCTION_NAME} function to send the email before providing a final answer to the user.`,
-  'Clearly explains to the user that an email will be sent and summarizes the provided details (recipient, subject, body).',
-  'Confirms successful email delivery and includes the recipient, subject, and message in the summary.',
-  'Does not include irrelevant or unrelated information in the response.',
+  'The response should contain an explanation that an email will be sent with the provided details (recipient, subject, body).',
+  'The response should confirm successful email delivery and include the recipient, subject, and message.',
+  'The response should not include irrelevant or unrelated information.',
 ];
 
 evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
@@ -38,9 +38,9 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
-                  'Explains that no connectors are available to send the email.',
-                  'Does not attempt to send an email.',
-                  'Mentions that sending the email was unsuccessful.',
+                  'The response should explain that no connectors are available to send the email.',
+                  'No email sending should be attempted.',
+                  'The response should indicate that the email could not be sent.',
                 ],
               },
               metadata: {},

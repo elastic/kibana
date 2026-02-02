@@ -41,7 +41,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
             scrollContainerHeight={scrollContainerHeight}
             isCurrentRound={isCurrentRound}
             rawRound={round}
-            conversationAttachments={isCurrentRound ? conversationAttachments : undefined}
+            conversationAttachments={conversationAttachments}
           />
         );
       })}

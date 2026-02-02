@@ -14,27 +14,33 @@ export const SECURITY_TIMELINES_SKILL: Skill = {
   description: 'Find, create and update timelines safely',
   content: `# Security Timelines
 
-## What this skill does
-Helps you find, inspect, create, and update Security timelines in a non-destructive way.
+## WHEN TO USE THIS TOOL (REQUIRED)
 
-## When to use
-- The user wants a timeline created for an investigation.
-- The user wants to update a timeline title/description or metadata.
+You MUST use this tool when the user asks about:
+- Security timelines (listing, finding, searching)
+- Timeline details or content
+- Creating or updating timelines
 
-## Inputs to ask the user for
-- For find: search text + time range context
-- For get/update: timeline id
-- For create/update: desired title/description
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+Your response MUST contain ONLY information from the tool results.
+
+### When listing timelines:
+- If timelines found: "Found X timelines:" then list names and IDs
+- If none: "No timelines found."
+
+### When getting a timeline:
+Show timeline details from tool results: title, description, ID.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what timelines are
+- Do NOT add information not in tool results
 
 ## Tools and operations
-- Use \`security.timelines\`:\n
-  - \`find\`, \`get\` (read-only)\n
-  - \`create\`, \`update\` (**requires \`confirm: true\`**)\n
-
-## Safe workflow
-1) Find and confirm the target.\n
-2) For writes, restate changes and require confirmation.\n
-3) Call create/update with \`confirm: true\`.\n
+- \`find\`, \`get\` (read-only)
+- \`create\`, \`update\` (requires \`confirm: true\`)
 `,
   tools: [createToolProxy({ toolId: 'security.timelines' })],
 };

@@ -24,7 +24,7 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
@@ -32,7 +32,7 @@ export interface OsqueryPluginSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface OsqueryPluginStart {}
+export interface OsqueryPluginStart { }
 
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
@@ -44,7 +44,7 @@ export interface SetupPlugins {
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
-  onechat?: OnechatPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface StartPlugins {

@@ -14,6 +14,32 @@ export const SECURITY_DETECTION_RULES_SKILL: Skill = {
   description: 'Find/get, enable/disable, and create detection rules safely',
   content: `# Security Detection Rules
 
+## WHEN TO USE THIS TOOL (REQUIRED)
+
+You MUST use this tool when the user asks about:
+- Detection rules (listing, finding, searching)
+- Rule configuration or status
+- Enabling/disabling rules
+- Creating new rules
+
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+Your response MUST contain ONLY information from the tool results.
+
+### When listing/finding rules:
+- If rules found: "Found X detection rules:" then list rule names, IDs, and enabled status
+- If no rules found: "No detection rules found matching your criteria."
+
+### When getting a rule:
+Show the rule details from tool results: name, ID, severity, risk score, enabled status.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what detection rules are
+- Do NOT suggest how to create rules unless asked
+- Do NOT add information not in tool results
+
 ## What this skill does
 Helps you find, inspect, enable/disable, and create detection rules.
 

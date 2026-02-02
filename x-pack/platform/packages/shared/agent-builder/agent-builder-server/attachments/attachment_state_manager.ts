@@ -236,6 +236,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       active: true,
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
+      ...(input.created_in_round_id && { created_in_round_id: input.created_in_round_id }),
     };
 
     this.attachments.set(id, attachment);

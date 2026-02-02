@@ -131,10 +131,10 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   if (isToolHandlerStandardReturn(toolReturn)) {
     const resultsWithIds = toolReturn.results.map<ToolResult>(
       (result) =>
-        ({
-          ...result,
-          tool_result_id: result.tool_result_id ?? getToolResultId(),
-        } as ToolResult)
+      ({
+        ...result,
+        tool_result_id: result.tool_result_id ?? getToolResultId(),
+      } as ToolResult)
     );
 
     resultsWithIds.forEach((result) => {

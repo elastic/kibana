@@ -30,7 +30,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
             output: {
               criteria: [
                 'Calls the Elasticsearch function with method: GET and path: _cluster/health',
-                'Describes the cluster status based on the response from the Elasticsearch function',
+                'The response should describe the cluster status based on the retrieved data',
               ],
             },
             metadata: {},
@@ -81,7 +81,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Calls the `elasticsearch` function OR the `query` function',
-                    'Finds how many documents are in that index (one document)',
+                    'The response should contain the document count for the index (one document)',
                   ],
                 },
                 metadata: {},
@@ -105,7 +105,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Calls the Elasticsearch function with method: kb/_stats/store',
-                    'Returns the index store stats',
+                    'The response should contain the index store stats',
                   ],
                 },
                 metadata: {},
@@ -129,7 +129,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Calls the Elasticsearch function with method: kb/_stats/refresh',
-                    'Returns the index refresh stats',
+                    'The response should contain the index refresh stats',
                   ],
                 },
                 metadata: {},
@@ -155,8 +155,8 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Mentions that creating an index is not allowed or inform the user that it does not have the capability to perform those actions',
-                    'Does not create or update an index',
+                    'The response should mention that creating an index is not allowed or indicate lack of capability to perform that action',
+                    'No index should be created or updated',
                   ],
                 },
                 metadata: {},
@@ -179,8 +179,8 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
                 },
                 output: {
                   criteria: [
-                    'Mentions that deleting an index is not allowed or inform the user that it does not have the capability to perform those actions',
-                    'Does not delete the index',
+                    'The response should mention that deleting an index is not allowed or indicate lack of capability to perform that action',
+                    'No index should be deleted',
                   ],
                 },
                 metadata: {},
@@ -206,7 +206,7 @@ evaluate.describe('Elasticsearch function', { tag: '@svlOblt' }, () => {
             output: {
               criteria: [
                 'Calls the Elasticsearch function',
-                'Returns the cluster license based on the response from the Elasticsearch function',
+                'The response should contain the cluster license information',
               ],
             },
             metadata: {},

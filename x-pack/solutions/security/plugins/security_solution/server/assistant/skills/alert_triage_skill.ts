@@ -46,6 +46,63 @@ Collect additional context to make informed decisions:
 - **Asset Criticality**: Determine if affected assets are critical to the organization
 - **Business Context**: Consider current business operations or known maintenance windows
 
+### Step 2c: Cross-Host Investigation with Osquery (for domain/DNS alerts)
+
+When investigating alerts related to **malicious domains, DNS queries, or suspicious URLs**, you MUST use osquery to check if other hosts in the environment have also accessed the same domain. This helps identify:
+- Lateral spread of compromise
+- Multiple infected hosts
+- Scope of the incident
+
+**Use the osquery tool to query browser history across all hosts:**
+
+\`\`\`
+invoke_skill({
+  name: "osquery",
+  parameters: {
+    operation: "run_live_query",
+    params: {
+      query: "SELECT url, title, visit_count, last_visit_time, datetime(last_visit_time/1000000-11644473600, 'unixepoch') as last_visited FROM elastic_browser_history WHERE url LIKE '%<suspicious_domain>%'",
+      agent_all: true,
+      confirm: true
+    }
+  }
+})
+\`\`\`
+
+**Common osquery tables for domain/URL investigation:**
+- \`elastic_browser_history\` - Browser history (Chrome, Firefox, Edge)
+- \`dns_resolvers\` - Configured DNS resolvers
+- \`etc_hosts\` - Local hosts file entries
+
+**Example: Check for typosquat domain access across all hosts:**
+\`\`\`
+invoke_skill({
+  name: "osquery",
+  parameters: {
+    operation: "run_live_query",
+    params: {
+      query: "SELECT url, title, visit_count, datetime(last_visit_time/1000000-11644473600, 'unixepoch') as last_visited FROM elastic_browser_history WHERE url LIKE '%checkponit%' OR url LIKE '%fortinet%' OR url LIKE '%vmware%'",
+      agent_all: true,
+      timeout: 120,
+      confirm: true
+    }
+  }
+})
+\`\`\`
+
+**After running the query, fetch results using the action_id:**
+\`\`\`
+invoke_skill({
+  name: "osquery",
+  parameters: {
+    operation: "get_live_query_results",
+    params: { actionId: "<action_id_from_live_query>" }
+  }
+})
+\`\`\`
+
+**Important:** Live queries return an action_id immediately. You MUST call \`get_live_query_results\` with that action_id to get the actual query results from all agents.
+
 ### Step 2b: De-duplication, correlation, and case scoping (REQUIRED)
 If you find **duplicate** or **related** alerts (same entities, same rule, same technique, or same incident window), you must:
 

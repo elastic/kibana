@@ -169,6 +169,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
+        runId,
+        // Include conversation_id as thread_id for LangSmith thread tracking
+        ...(conversation?.id ? { thread_id: conversation.id, conversation_id: conversation.id } : {}),
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],

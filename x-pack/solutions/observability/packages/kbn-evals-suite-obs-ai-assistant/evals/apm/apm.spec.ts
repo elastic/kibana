@@ -54,10 +54,10 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
               criteria: [
                 'Uses the get_apm_dataset_info function to get information about the APM data streams',
                 'Uses the query function to generate an ES|QL query',
-                'Generates a valid ES|QL query that returns the throughput over the past 4 hours.',
+                'The generated ES|QL query should be valid and return throughput data for the past 4 hours',
                 'Uses the execute_query function to get the results for the generated query',
-                'Summarizes the results for the user',
-                'Calculates a throughput of 30 transactions per minute',
+                'The response should contain a summary of the throughput results',
+                'The response should contain a calculated throughput of 30 transactions per minute',
               ],
             },
             metadata: {},
@@ -81,7 +81,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
             output: {
               criteria: [
                 'Uses the get_apm_downstream_dependencies function with the `service.name` parameter being "ai-assistant-service-front"',
-                'Returns the results to the user ("ai-assistant-service-back" is the only dependency)',
+                'The response should contain the downstream dependencies list',
+                'The response should identify "ai-assistant-service-back" as the only dependency',
               ],
             },
             metadata: {},
@@ -103,9 +104,9 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: [
-                'Responds with the active services in the environment "test"',
-                'Successfully executes a query that filters on service.environment and return service.name',
-                'Mentions the two active services and their service names',
+                'The response should contain the active services in the environment "test"',
+                'Successfully executes a query that filters on service.environment and returns service.name',
+                'The response should mention the two active services and their service names',
               ],
             },
             metadata: {},
@@ -127,7 +128,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: [
-                'Succesfully executes a query that returns the error rate for the services in the last four hours',
+                'Successfully executes a query that returns the error rate for the services in the last four hours',
+                'The response should contain error rate information per service',
               ],
             },
             metadata: {},
@@ -151,7 +153,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: [
-                'Mentions the top 2 frequent errors of the services in the last hour, for the specified services in test environment',
+                'The response should contain the top 2 most frequent errors',
+                'The errors should be from services in the test environment within the last hour',
               ],
             },
             metadata: {},
@@ -171,7 +174,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
             input: { question: 'Are there any alert for those services?' },
             output: {
               criteria: [
-                'Returns the current alerts for the services, for the specified services in test environment',
+                'The response should contain current alerts for services in the test environment',
+                'The response should indicate whether alerts exist or none are found',
               ],
             },
             metadata: {},

@@ -11,13 +11,12 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, phoenixClient,  log }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
           phoenixClient,
-          traceEsClient,
           log,
         })
       );

@@ -1007,6 +1007,46 @@ export const PLATFORM_WORKFLOW_GENERATION_SKILL: Skill = {
   description: 'Generate and modify Kibana workflows using natural language',
   content: `# Workflow Generation Skill
 
+## WHEN TO USE THIS TOOL (REQUIRED)
+
+You MUST use this tool when the user asks for ANY of these:
+- Generate/create/build a workflow
+- Create automation that runs on schedule or triggers
+- Build a workflow with steps, triggers, or actions
+- Modify or update an existing workflow
+- Validate workflow YAML
+
+**ALWAYS call the tool - do NOT write workflow YAML from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+### When workflow generation succeeds:
+1. Show the generated workflow YAML in a code block
+2. Briefly explain what the workflow does (1-2 sentences)
+3. Mention any key triggers, steps, or conditions
+
+Example:
+\`\`\`yaml
+version: "1"
+name: My Workflow
+...
+\`\`\`
+This workflow runs every 5 minutes and sends a Slack notification when errors are detected.
+
+### When validation succeeds:
+State "The workflow YAML is valid."
+
+### When validation fails:
+List the specific validation errors from the tool result.
+
+### When clarification is needed:
+Ask about: trigger type, desired actions/steps, any conditions.
+
+## FORBIDDEN RESPONSES
+- Do NOT write workflow YAML without calling the tool
+- Do NOT explain workflow concepts without generating a specific workflow
+- Do NOT add suggestions or recommendations unless asked
+
 ## What this skill does
 Helps you create and modify Kibana workflow definitions using natural language descriptions instead of manually writing YAML. Supports workflow composition patterns for building complex automation pipelines.
 

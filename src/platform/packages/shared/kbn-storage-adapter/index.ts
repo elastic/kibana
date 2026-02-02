@@ -127,6 +127,8 @@ export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
 
+export type StorageClientEnsureIndex = () => Promise<void>;
+
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;
   bulk: StorageClientBulk<TDocumentType>;
@@ -135,6 +137,7 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
   clean: StorageClientClean;
   get: StorageClientGet<TDocumentType>;
   existsIndex: StorageClientExistsIndex;
+  ensureIndex: StorageClientEnsureIndex;
 }
 
 type UnionKeys<T> = T extends T ? keyof T : never;

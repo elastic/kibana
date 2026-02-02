@@ -70,3 +70,8 @@ export {
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
 } from './types';
+
+// Loop detection analyzer
+export { analyzeLoops, validateNoUnintentionalLoops, getLoopAnalysisSummary } from './analyzers';
+
+export type { DetectedLoop, LoopType, LoopDetectionResult } from './analyzers';

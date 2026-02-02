@@ -6,21 +6,10 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import {
-  platformCoreTools,
-  ToolResultType,
-  type ResolvedAgentCapabilities,
-} from '@kbn/agent-builder-common';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { ToolResultType, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { visualizationElement } from '@kbn/agent-builder-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from '../default/prompts/utils';
-
-const tools = {
-  indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
-  listIndices: sanitizeToolId(platformCoreTools.listIndices),
-  search: sanitizeToolId(platformCoreTools.search),
-};
 
 export const getSystemPrompt = ({
   customInstructions,
@@ -58,9 +47,6 @@ will have access to all information you gathered - you do not need to summarize 
 - Then follow the skill guidance:
   - Prefer \`invoke_skill\` for the tool ids/tool names explicitly referenced by that skill.
   - If multiple skills apply, read them before acting and then choose the safest minimal set of calls.
-
-## LAST RESORT (TOOLS)
-- Use \`${tools.search}\` only when no relevant skill exists, or when explicitly asked to run a raw search query.
 
 ## NON-NEGOTIABLE RULES
 1) Grounding: Every claim must come from tool output or user-provided content. If not present, omit it.

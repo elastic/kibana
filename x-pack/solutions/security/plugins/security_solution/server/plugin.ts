@@ -141,6 +141,7 @@ import {
   GET_ALERTS_SKILL,
   getAlertTriageSkill,
   getEntityAnalyticsSkill,
+  FORENSICS_ANALYTICS_SKILL,
 } from './assistant/skills';
 import { registerAgentBuilderSkills } from './agent_builder/skills/register_skills';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
@@ -685,6 +686,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.agentBuilder.skills.register(GET_ALERTS_SKILL);
       plugins.agentBuilder.skills.register(getAlertTriageSkill());
       plugins.agentBuilder.skills.register(getEntityAnalyticsSkill());
+      plugins.agentBuilder.skills.register(FORENSICS_ANALYTICS_SKILL);
       registerAgentBuilderSkills(plugins.agentBuilder);
     }
 

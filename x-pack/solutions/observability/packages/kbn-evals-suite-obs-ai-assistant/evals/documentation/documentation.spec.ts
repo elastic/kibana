@@ -71,9 +71,9 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
             output: {
               criteria: [
                 `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
-                'The assistant provides guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
+                'The response should contain guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
                 `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
-                'Mentions Elasticsearch and HTTPS configuration steps consistent with the documentation',
+                'The response should mention Elasticsearch and HTTPS configuration steps consistent with the documentation',
               ],
             },
             metadata: {},
@@ -97,7 +97,7 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
             output: {
               criteria: [
                 `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
-                'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
+                'The response should contain an accurate explanation of what Kibana Lens is and steps for creating a visualization',
                 `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
               ],
             },
@@ -122,8 +122,8 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
             output: {
               criteria: [
                 `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
-                'Provides instructions based on the Observability docs for setting up APM instrumentation',
-                'Mentions steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
+                'The response should contain instructions for setting up APM instrumentation based on the Observability docs',
+                'The response should mention steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
                 `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
               ],
             },

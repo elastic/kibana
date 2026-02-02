@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type { DefaultEvaluators, KibanaPhoenixClient, EvaluationDataset } from '@kbn/evals';
-import type { EvaluationResult } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type {
+  DefaultEvaluators,
+  EvalsExecutorClient,
+  EvaluationDataset,
+  Example,
+  EvaluationResult,
+} from '@kbn/evals';
 import type {
   SiemEntityAnalyticsEvaluationChatClient,
   ErrorResponse,
@@ -44,8 +48,8 @@ interface ChatTaskOutput {
   steps?: Step[];
 }
 
-function getPhoenixConcurrency(): number {
-  const raw = process.env.SECURITY_SOLUTION_EVALS_PHOENIX_CONCURRENCY;
+function getEvalsConcurrency(): number {
+  const raw = process.env.SECURITY_SOLUTION_EVALS_CONCURRENCY;
   const parsed = raw ? parseInt(raw, 10) : NaN;
 
   if (Number.isFinite(parsed) && parsed > 0) {
@@ -205,11 +209,11 @@ function combineEvaluationResults(results: EvaluationResult[]): EvaluationResult
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  executorClient: EvalsExecutorClient;
   chatClient: SiemEntityAnalyticsEvaluationChatClient;
 }): EvaluateDataset {
   return async function evaluateDataset({
@@ -222,7 +226,7 @@ export function createEvaluateDataset({
       agentId: string;
     };
   }) {
-    const concurrency = getPhoenixConcurrency();
+    const concurrency = getEvalsConcurrency();
 
     const dataset = {
       name,
@@ -230,7 +234,7 @@ export function createEvaluateDataset({
       examples,
     } satisfies EvaluationDataset;
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task: async ({ input }) => {
@@ -245,7 +249,7 @@ export function createEvaluateDataset({
             steps: response.steps,
           };
         },
-        // Phoenix local instances can be sensitive to bursty concurrency when suites get large.
+        // Local eval instances can be sensitive to bursty concurrency when suites get large.
         // Keep this modest to reduce transient socket resets.
         concurrency,
       },

@@ -95,19 +95,36 @@ export const OBSERVABILITY_LOGS_SKILL: Skill = {
     description: 'Explore logs, categories/patterns, and correlations',
     content: `# Observability Logs
 
-## What this skill does
-Helps you explore logs, find patterns/categories, do rate analysis, and correlate with services/alerts.
+## WHEN TO USE THIS TOOL (REQUIRED)
 
-## When to use
-- You need examples of errors/warnings for a time window.\n
-- You need to understand what changed (log rate spike / new patterns).\n
+You MUST use this tool when the user asks about:
+- Log data sources or log indices
+- Log patterns or categories
+- Log rate analysis or spikes
+- Correlated logs
 
-## Inputs to ask the user for
-- Time range\n
-- Service/host/environment filters\n
-- “What does ‘interesting’ mean?” (errors, specific message, etc.)\n
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+Your response MUST contain ONLY information from the tool results.
+
+### When listing data sources:
+- If sources found: "Found X log data sources:" then list names
+- If none: "No log data sources found."
+
+### When analyzing logs:
+Show analysis results from tool: patterns, categories, rates.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what logs are
+- Do NOT add information not in tool results
+
+## Operations
+- \`get_data_sources\`: Discover available log sources
+- \`run_log_rate_analysis\`: Analyze log rates
+- \`get_log_categories\`: Find log patterns
+- \`get_correlated_logs\`: Find related logs
 `,
     tools: [OBSERVABILITY_LOGS_TOOL],
 };
-
-

@@ -43,6 +43,7 @@ import {
   toCompactJson,
   truncateSchema,
   generateMinimalExample,
+  truncateToolResult,
 } from '../utils';
 
 /**
@@ -431,8 +432,15 @@ export const createSkillTools = (
         });
       }
 
+      // Truncate successful tool results to prevent context overflow
+      // The artifact is preserved unchanged for UI rendering, but content sent to LLM is truncated
+      const truncatedContent =
+        typeof toolMessage.content === 'string'
+          ? truncateToolResult(toolMessage.content, 15000) // ~15k chars max per tool result
+          : toolMessage.content;
+
       return new ToolMessage({
-        content: toolMessage.content,
+        content: truncatedContent,
         artifact: toolMessage.artifact,
         contentBlocks: toolMessage.contentBlocks,
         status: toolMessage.status,
@@ -444,13 +452,43 @@ export const createSkillTools = (
       description:
         'Invoke a skill tool (exposed by enabled skills) by name, with the provided parameters. ' +
         'Use discover_skills or read_skill_tools first to find available tools.',
-      schema: z.object({
-        name: z.string().describe('The skill tool name to invoke (e.g. "platform.core.search").'),
-        parameters: z
-          .object({})
-          .passthrough()
-          .describe('The parameters to pass to the skill tool.'),
-      }),
+      schema: z
+        .object({
+          // Common LLM variants:
+          // - { name, parameters }
+          // - { name, params }
+          // - { tool_name, parameters }
+          name: z
+            .string()
+            .optional()
+            .describe('The skill tool name to invoke (e.g. "platform.core.search").'),
+          tool_name: z.string().optional().describe('Alias for name. The skill tool name to invoke.'),
+          parameters: z
+            .object({})
+            .passthrough()
+            .optional()
+            .describe('The parameters to pass to the skill tool.'),
+          params: z
+            .object({})
+            .passthrough()
+            .optional()
+            .describe('Alias for parameters. The parameters to pass to the skill tool.'),
+        })
+        .superRefine((value, ctx) => {
+          if (!value.name && !value.tool_name) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Missing required field: name (or tool_name)',
+              path: ['name'],
+            });
+          }
+        })
+        .transform((value) => {
+          return {
+            name: value.name ?? value.tool_name ?? '',
+            parameters: value.parameters ?? value.params ?? {},
+          };
+        }),
     }
   );
 

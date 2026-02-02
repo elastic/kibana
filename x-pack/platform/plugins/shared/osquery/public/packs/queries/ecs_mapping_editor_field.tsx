@@ -48,7 +48,7 @@ import {
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
 import ECSSchema from '../../common/schemas/ecs/v9.2.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.19.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.20.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -118,8 +118,8 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
     (value: string) =>
       !value?.length && ecsCurrentMapping?.length
         ? i18n.translate('xpack.osquery.pack.queryFlyoutForm.ecsFieldRequiredErrorMessage', {
-            defaultMessage: 'ECS field is required.',
-          })
+          defaultMessage: 'ECS field is required.',
+        })
         : undefined,
     [ecsCurrentMapping?.length]
   );
@@ -228,13 +228,13 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       return selectedOption
         ? [selectedOption]
         : [
-            {
-              label: ECSField.value,
-              value: {
-                value: ECSField.value,
-              },
+          {
+            label: ECSField.value,
+            value: {
+              value: ECSField.value,
             },
-          ];
+          },
+        ];
     });
   }, [ECSField.value]);
 
@@ -358,14 +358,14 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
       return !osqueryColumnExists
         ? i18n.translate(
-            'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
-            {
-              defaultMessage: 'The current query does not return a {columnName} field',
-              values: {
-                columnName: isArray(value) ? value[0] : value,
-              },
-            }
-          )
+          'xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldValueMissingErrorMessage',
+          {
+            defaultMessage: 'The current query does not return a {columnName} field',
+            values: {
+              columnName: isArray(value) ? value[0] : value,
+            },
+          }
+        )
         : undefined;
     },
     [ecsMappingArray, euiFieldProps.options, index]
@@ -897,111 +897,111 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     const suggestions = isArray(ast?.result)
       ? ast?.result
-          ?.map((selectItem: { type: string; name: string; alias?: string }) => {
-            if (selectItem.type === 'identifier') {
-              /*
-                select * from routes, uptime;
-              */
-              if (ast?.result.length === 1 && selectItem.name === '*') {
-                return reduce(
-                  astOsqueryTables,
-                  (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
-                    acc.push(
-                      ...osqueryColumns.map((osqueryColumn) => ({
-                        label: osqueryColumn.name,
-                        value: {
-                          name: osqueryColumn.name,
-                          description: osqueryColumn.description,
-                          table,
-                          tableOrder,
-                          suggestion_label: osqueryColumn.name,
-                        },
-                      }))
-                    );
-
-                    return acc;
-                  },
-                  [] as OsquerySchemaOption[]
-                );
-              }
-
-              /*
-                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-              */
-
-              const [table, column] = selectItem.name.includes('.')
-                ? selectItem.name.split('.')
-                : [Object.keys(astOsqueryTables)[0], selectItem.name];
-
-              if (column === '*' && astOsqueryTables[table]) {
-                const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
-
-                return osqueryColumns.map((osqueryColumn) => ({
-                  label: osqueryColumn.name,
-                  value: {
-                    name: osqueryColumn.name,
-                    description: osqueryColumn.description,
-                    table,
-                    tableOrder,
-                    suggestion_label: `${osqueryColumn.name}`,
-                  },
-                }));
-              }
-
-              if (astOsqueryTables[table]) {
-                const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
-
-                if (osqueryColumn) {
-                  const label = selectItem.alias ?? column;
-
-                  return [
-                    {
-                      label,
+        ?.map((selectItem: { type: string; name: string; alias?: string }) => {
+          if (selectItem.type === 'identifier') {
+            /*
+              select * from routes, uptime;
+            */
+            if (ast?.result.length === 1 && selectItem.name === '*') {
+              return reduce(
+                astOsqueryTables,
+                (acc, { columns: osqueryColumns, order: tableOrder }, table) => {
+                  acc.push(
+                    ...osqueryColumns.map((osqueryColumn) => ({
+                      label: osqueryColumn.name,
                       value: {
                         name: osqueryColumn.name,
                         description: osqueryColumn.description,
                         table,
-                        tableOrder: astOsqueryTables[table].order,
-                        suggestion_label: `${label}`,
+                        tableOrder,
+                        suggestion_label: osqueryColumn.name,
                       },
-                    },
-                  ];
-                }
-              }
+                    }))
+                  );
+
+                  return acc;
+                },
+                [] as OsquerySchemaOption[]
+              );
             }
 
             /*
-              SELECT pid, uid, name, ROUND((
-                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-              ) * 100, 2) AS percentage
-              FROM processes, (
-              SELECT (
-                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                FROM cpu_time
-              ) AS cpu_time
-              ORDER BY user_time+system_time DESC
-              LIMIT 5;
+              select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
             */
 
-            if (selectItem.type === 'function' && selectItem.alias) {
-              return [
-                {
-                  label: selectItem.alias,
-                  value: {
-                    name: selectItem.alias,
-                    description: '',
-                    table: '',
-                    tableOrder: -1,
-                    suggestion_label: selectItem.alias,
-                  },
+            const [table, column] = selectItem.name.includes('.')
+              ? selectItem.name.split('.')
+              : [Object.keys(astOsqueryTables)[0], selectItem.name];
+
+            if (column === '*' && astOsqueryTables[table]) {
+              const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
+              return osqueryColumns.map((osqueryColumn) => ({
+                label: osqueryColumn.name,
+                value: {
+                  name: osqueryColumn.name,
+                  description: osqueryColumn.description,
+                  table,
+                  tableOrder,
+                  suggestion_label: `${osqueryColumn.name}`,
                 },
-              ];
+              }));
             }
 
-            return [];
-          })
-          .flat()
+            if (astOsqueryTables[table]) {
+              const osqueryColumn = find(astOsqueryTables[table].columns, ['name', column]);
+
+              if (osqueryColumn) {
+                const label = selectItem.alias ?? column;
+
+                return [
+                  {
+                    label,
+                    value: {
+                      name: osqueryColumn.name,
+                      description: osqueryColumn.description,
+                      table,
+                      tableOrder: astOsqueryTables[table].order,
+                      suggestion_label: `${label}`,
+                    },
+                  },
+                ];
+              }
+            }
+          }
+
+          /*
+            SELECT pid, uid, name, ROUND((
+              (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+            ) * 100, 2) AS percentage
+            FROM processes, (
+            SELECT (
+              SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+              SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+              FROM cpu_time
+            ) AS cpu_time
+            ORDER BY user_time+system_time DESC
+            LIMIT 5;
+          */
+
+          if (selectItem.type === 'function' && selectItem.alias) {
+            return [
+              {
+                label: selectItem.alias,
+                value: {
+                  name: selectItem.alias,
+                  description: '',
+                  table: '',
+                  tableOrder: -1,
+                  suggestion_label: selectItem.alias,
+                },
+              },
+            ];
+          }
+
+          return [];
+        })
+        .flat()
       : [];
 
     // Remove column duplicates by keeping the column from the table that appears last in the query

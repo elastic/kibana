@@ -74,16 +74,36 @@ export const OBSERVABILITY_SLO_READONLY_SKILL: Skill = {
     description: 'Read-only guidance for SLO discovery and interpretation',
     content: `# Observability SLOs (Read-only)
 
-## What this skill does
-Helps you **list** and **inspect** SLO summaries (status, error budget, burn rates) and interpret what they mean.\n
+## WHEN TO USE THIS TOOL (REQUIRED)
+
+You MUST use this tool when the user asks about:
+- SLOs (Service Level Objectives)
+- Error budgets
+- SLO status or health
+- Burn rate alerts
+
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+Your response MUST contain ONLY information from the tool results.
+
+### When listing SLOs:
+- If SLOs found: "Found X SLOs:" then list names, status, and error budget %
+- If no SLOs: "No SLOs configured."
+
+### When checking status:
+Show SLO status from tool results: name, current status, remaining error budget.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what SLOs are
+- Do NOT suggest how to create SLOs
+- Do NOT add information not in tool results
 
 ## Tools
-- Use \`observability.slo_readonly\` (single tool for this skill):\n
-  - \`operation: "get_slos"\` routes to \`observability.get_slos\`\n
-  - \`operation: "get_alerts"\` routes to \`observability.get_alerts\`\n
-\n
-## Optional pivots
-- If you need related alert context (e.g. burn rate alerts firing), use \`observability.get_alerts\`.\n
+- Use \`observability.slo_readonly\` (single tool for this skill):
+  - \`operation: "get_slos"\` routes to \`observability.get_slos\`
+  - \`operation: "get_alerts"\` routes to \`observability.get_alerts\`
 `,
     tools: [OBSERVABILITY_SLO_READONLY_TOOL],
 };

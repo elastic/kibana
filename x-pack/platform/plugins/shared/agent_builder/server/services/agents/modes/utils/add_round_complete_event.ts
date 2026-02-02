@@ -67,6 +67,7 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
+  roundId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -77,6 +78,8 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Pre-generated round ID (used to link attachments created during this round) */
+  roundId?: string;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -87,22 +90,23 @@ export const addRoundCompleteEvent = ({
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const round = pendingRound
             ? resumeRound({
-                pendingRound,
-                events,
-                input: userInput,
-                startTime,
-                endTime,
-                modelProvider,
-                configurationOverrides,
-              })
+              pendingRound,
+              events,
+              input: userInput,
+              startTime,
+              endTime,
+              modelProvider,
+              configurationOverrides,
+            })
             : createRound({
-                events,
-                input: userInput,
-                startTime,
-                endTime,
-                modelProvider,
-                configurationOverrides,
-              });
+              events,
+              input: userInput,
+              startTime,
+              endTime,
+              modelProvider,
+              configurationOverrides,
+              roundId,
+            });
 
           round.state = buildRoundState({ round, events, stateManager });
 
@@ -209,6 +213,7 @@ const createRound = ({
   endTime = new Date(),
   modelProvider,
   configurationOverrides,
+  roundId,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -216,6 +221,8 @@ const createRound = ({
   endTime?: Date;
   modelProvider: ModelProvider;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Pre-generated round ID (if not provided, a new one will be generated) */
+  roundId?: string;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -259,7 +266,7 @@ const createRound = ({
     : timeToLastToken;
 
   const round: ConversationRound = {
-    id: uuidv4(),
+    id: roundId ?? uuidv4(),
     status: promptRequest
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
@@ -274,9 +281,9 @@ const createRound = ({
     model_usage: getModelUsage(modelProvider.getUsageStats()),
     response: lastMessage
       ? {
-          message: lastMessage.message_content,
-          structured_output: lastMessage.structured_output,
-        }
+        message: lastMessage.message_content,
+        structured_output: lastMessage.structured_output,
+      }
       : { message: '' },
     configuration_overrides: configurationOverrides,
   };

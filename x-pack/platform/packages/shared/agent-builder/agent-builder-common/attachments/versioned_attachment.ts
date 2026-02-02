@@ -48,6 +48,10 @@ export interface VersionedAttachment<
   hidden?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
+  /** ID of the round that created this attachment (for agent-created attachments) */
+  created_in_round_id?: string;
+  /** Timestamp when attachment was deleted */
+  deleted_at?: string;
 }
 
 /**
@@ -90,6 +94,8 @@ export interface VersionedAttachmentInput<
   description?: string;
   /** Whether the attachment should be hidden */
   hidden?: boolean;
+  /** ID of the round that created this attachment (for agent-created attachments) */
+  created_in_round_id?: string;
 }
 
 // Zod schemas for validation
@@ -116,6 +122,8 @@ export const versionedAttachmentSchema = z.object({
   active: z.boolean().optional(),
   hidden: z.boolean().optional(),
   client_id: z.string().optional(),
+  created_in_round_id: z.string().optional(),
+  deleted_at: z.string().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({
@@ -124,6 +132,7 @@ export const versionedAttachmentInputSchema = z.object({
   data: z.unknown(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
+  created_in_round_id: z.string().optional(),
 });
 
 export const attachmentDiffSchema = z.object({

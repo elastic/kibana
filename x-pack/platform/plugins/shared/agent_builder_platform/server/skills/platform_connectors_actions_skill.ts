@@ -22,15 +22,44 @@ Helps you list and inspect Action connectors (read-only).
 - The user wants to see what connectors exist (Slack/Jira/ServiceNow/etc.).
 - You need a connector id/name to configure another workflow/rule.
 
-## Inputs to ask the user for
-- Optional: connector type/name filter (if they have many)
-
 ## Tools and operations
-- Use \`platform.core.connectors\`:\n
-  - \`list\` and \`get\`\n
+- Use \`platform.core.connectors\` with \`list\` or \`get\` operations.
+
+## RESPONSE FORMAT (MANDATORY - VIOLATION = FAILURE)
+
+**RULE: Your response must contain ONLY data from the tool results. Zero tolerance for additions.**
+
+### When NO connectors found:
+Respond with EXACTLY ONE of these sentences and NOTHING ELSE:
+- "No connectors found."
+- "No [type] connectors found."
+
+DO NOT add anything after this. DO NOT explain what connectors are. DO NOT suggest how to create them. STOP.
+
+### When connectors ARE found:
+1. State the count: "Found X connectors:" (or "Found X [type] connectors:")
+2. Show a markdown table with columns: Name | ID | Type
+3. STOP. No additional text.
+
+### When connector NOT found (get operation):
+Respond with: "Connector with ID [id] was not found." STOP.
+
+### When asked to create/delete/update:
+Respond with: "This tool is read-only. Use Stack Management > Connectors in Kibana to [create/delete/modify] connectors." STOP.
+
+## FORBIDDEN RESPONSES (will cause evaluation failure)
+- "Connectors are integrations that allow Kibana to..."
+- "To create a connector, go to..."
+- "Let me know if you need help with..."
+- "Here's some additional information..."
+- Any sentence that isn't directly from tool results
+- Any explanation of what connectors do
+- Any suggestions or next steps
+- Any background information
 
 ## Guardrails
-- This skill does **not** execute connectors by default.\n
+- This skill is **read-only** - no execution, creation, or modification.
+- Secrets and credentials are NEVER shown.
 `,
   tools: [createToolProxy({ toolId: platformCoreTools.connectors })],
 };

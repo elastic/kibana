@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { oneChatDefaultAgentId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { evaluate } from '../src/evaluate';
 import { cleanStandardListExceptAction } from '../src/helpers/saved_objects_cleanup';
 
-const AGENT_ID = oneChatDefaultAgentId;
+const AGENT_ID = agentBuilderDefaultAgentId;
 
 const ENTITY_STORE_EVAL_INDEX = '.entities.skills_evals_default';
 
@@ -66,7 +66,7 @@ evaluate.describe(
             await evaluateDataset({
                 dataset: {
                     name: 'entity-analytics-skills: entity store',
-                    description: 'Entity Store queries validated via OneAgent skills',
+                    description: 'Entity Store queries validated via Agent Builder skills',
                     agentId: AGENT_ID,
                     examples: [
                         {

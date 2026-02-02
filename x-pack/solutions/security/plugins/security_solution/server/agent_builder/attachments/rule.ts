@@ -91,16 +91,20 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
     },
     getTools: () => [platformCoreTools.generateEsql, platformCoreTools.productDocumentation],
     getAgentDescription: () => {
-      const description = `You have access to a security detection rule.
+      return `A security detection rule is attached to this conversation. The rule data is included in the <attachment> XML element within the user's message.
 
-{ruleData}
+**How to access the rule data:**
+The rule JSON is in the attachment content above. Parse it to extract:
+- Rule ID and name
+- Rule query (KQL/EQL)
+- Severity and risk score
+- MITRE ATT&CK mappings
 
-## Investigation Steps
-1. Review the rule query and logic
+**Investigation steps:**
+1. Review the rule query and detection logic
 2. Check if the rule is currently enabled
 3. Review any existing exceptions
 4. Analyze the rule's detection capabilities`;
-      return description;
     },
 
     // Skills to reference when this attachment is present

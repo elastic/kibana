@@ -29,7 +29,7 @@ interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
   rawRound: ConversationRound;
-  /** Conversation-level attachments (created by tools) - only passed for current round */
+  /** All conversation-level attachments */
   conversationAttachments?: VersionedAttachment[];
 }
 
@@ -156,10 +156,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* Conversation-level attachments (created by tools) */}
+      {/* Attachments created during this round */}
       {conversationAttachments && conversationAttachments.length > 0 && !isLoadingCurrentRound && (
         <EuiFlexItem grow={false}>
-          <ConversationAttachmentsList attachments={conversationAttachments} />
+          <ConversationAttachmentsList
+            attachments={conversationAttachments}
+            roundId={rawRound.id}
+          />
         </EuiFlexItem>
       )}
 
@@ -170,26 +173,29 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 };
 
 /**
- * Renderer for conversation-level attachments.
+ * Renderer for attachments created during a specific round.
  * Uses the registered renderContent function for each attachment type.
  */
-const ConversationAttachmentsList: React.FC<{ attachments: VersionedAttachment[] }> = ({
-  attachments,
-}) => {
+const ConversationAttachmentsList: React.FC<{
+  attachments: VersionedAttachment[];
+  roundId: string;
+}> = ({ attachments, roundId }) => {
   const { attachmentsService } = useAgentBuilderServices();
 
-  // Filter to only show active (non-deleted) attachments
-  const activeAttachments = useMemo(() => {
-    return attachments.filter((att) => !att.deleted_at);
-  }, [attachments]);
+  // Filter to only show active attachments created in this round
+  const roundAttachments = useMemo(() => {
+    return attachments.filter(
+      (att) => !att.deleted_at && att.created_in_round_id === roundId
+    );
+  }, [attachments, roundId]);
 
-  if (activeAttachments.length === 0) {
+  if (roundAttachments.length === 0) {
     return null;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {activeAttachments.map((versionedAttachment) => {
+      {roundAttachments.map((versionedAttachment) => {
         const latestVersion =
           versionedAttachment.versions?.[versionedAttachment.versions.length - 1];
         if (!latestVersion) {
@@ -203,8 +209,6 @@ const ConversationAttachmentsList: React.FC<{ attachments: VersionedAttachment[]
           data: latestVersion.data ?? {},
         };
 
-        // eslint-disable-next-line no-console
-        console.log('[ConversationAttachmentsList] Rendering attachment:', versionedAttachment.type, versionedAttachment);
         const RenderContent = attachmentsService.getRenderContent(versionedAttachment.type);
         return (
           <EuiFlexItem key={versionedAttachment.id} grow={false}>

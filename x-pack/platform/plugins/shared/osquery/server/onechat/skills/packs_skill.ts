@@ -22,51 +22,23 @@ const PACKS_SKILL: Omit<Skill, 'tools'> = {
   namespace: 'osquery.packs',
   name: 'Osquery Packs',
   description: 'List and retrieve osquery packs',
-  content: `# Osquery Packs Guide
+  content: `# Osquery Packs
 
-This skill provides knowledge about working with osquery packs.
+List and get details of osquery query packs.
 
-## Overview
-Packs are collections of osquery queries that can be scheduled to run on agents. They allow you to organize related queries and apply them to specific agent policies.
+## Response Format (MANDATORY)
 
-## Key Concepts
+### When listing packs:
+- If packs exist: "Found X packs:" then list names, IDs, and query counts
+- If no packs: "No packs found."
 
-### Pack Structure
-- **name**: Unique name for the pack
-- **description**: Human-readable description
-- **queries**: Collection of queries with scheduling information
-- **enabled**: Whether the pack is active
-- **policy_ids**: Agent policies this pack is assigned to
+### When getting a specific pack:
+Show pack details from tool results: name, ID, queries, enabled status.
 
-### Query Scheduling
-Each query in a pack can have:
-- **interval**: How often to run (e.g., "3600" for hourly)
-- **timeout**: Maximum execution time
-- **snapshot**: Whether to use snapshot mode
-- **removed**: Whether to track removed rows
-
-## Usage Examples
-
-### List all packs
-\`\`\`
-tool("list_packs", {
-  page: 1,
-  pageSize: 20
-})
-\`\`\`
-
-### Get a specific pack
-\`\`\`
-tool("get_pack", {
-  pack_id: "pack-uuid"
-})
-\`\`\`
-
-## Best Practices
-- Use packs to organize related queries
-- Assign packs to appropriate agent policies
-- Review pack queries before enabling
-- Monitor pack execution for performance issues
+## FORBIDDEN
+- Do NOT explain what packs are
+- Do NOT suggest how to create packs
+- Do NOT add any information not in tool results
 `,
 };
 

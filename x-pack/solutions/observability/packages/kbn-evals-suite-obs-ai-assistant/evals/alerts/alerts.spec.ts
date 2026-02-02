@@ -111,7 +111,7 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
               criteria: [
                 'Correctly uses the `alerts` function to fetch data for the current time range',
                 'Retrieves 2 alerts',
-                'Responds with a summary of the current active alerts',
+                'The response should contain a summary of the current active alerts',
               ],
             },
             metadata: {},
@@ -136,9 +136,9 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
               criteria: [
                 'Uses the get_alerts_dataset_info function',
                 'Correctly uses the alerts function',
-                'Returns two alerts related to threshold',
-                'After the second question, uses alerts function to filtering on service.name my-service to retrieve active alerts for that service. The filter should be `service.name:"my-service"` or `service.name:my-service`.',
-                'Summarizes the active alerts for the `my-service` service',
+                'The response should contain two alerts related to threshold',
+                'After filtering on service.name my-service, uses alerts function with filter `service.name:"my-service"` or `service.name:my-service`',
+                'The response should contain a summary of active alerts for the `my-service` service',
               ],
             },
             metadata: {},

@@ -110,6 +110,40 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('when calling ensureIndex on a clean Elasticsearch instance', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('creates the index template and backing index', async () => {
+      await verifyNoIndexTemplate();
+      await verifyNoIndex();
+
+      await client.ensureIndex();
+
+      await verifyIndex();
+    });
+
+    it('is idempotent - calling ensureIndex multiple times does not fail', async () => {
+      await client.ensureIndex();
+      await client.ensureIndex();
+      await client.ensureIndex();
+
+      await verifyIndex();
+    });
+
+    it('updates mappings when schema version changes', async () => {
+      await client.ensureIndex();
+      await verifyIndex();
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('updated_version');
+
+      await client.ensureIndex();
+
+      await verifyIndex({ version: 'updated_version' });
+    });
+  });
+
   describe('when indexing into a clean Elasticsearch instance', () => {
     afterAll(async () => {
       await client?.clean();

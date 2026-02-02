@@ -20,33 +20,22 @@ const STATUS_SKILL: Omit<Skill, 'tools'> = {
   description: 'Check osquery integration status and availability',
   content: `# Osquery Status Guide
 
-This skill provides knowledge about checking osquery integration status.
+Check osquery integration installation and availability status.
 
-## Overview
-Status checks help determine if osquery is properly installed, configured, and available for use.
+## Response Format (MANDATORY)
 
-## Key Concepts
+Report ONLY information from the tool results:
 
-### Installation Status
-- **installed**: Osquery package is installed
-- **not_installed**: Osquery package is not installed
+### If installed:
+"Osquery is installed. Version: [version]. Package policies: [count]."
 
-### Availability
-- Check if osquery integration is available
-- Verify package policies are configured
-- Confirm agents have osquery enabled
+### If not installed:
+"Osquery is not installed in this space. No package policies found."
 
-## Usage Examples
-
-### Check osquery status
-\`\`\`
-tool("get_status", {})
-\`\`\`
-
-## Best Practices
-- Check status before running queries
-- Verify installation if queries fail
-- Monitor status for configuration changes
+## FORBIDDEN
+- Do NOT explain what osquery is
+- Do NOT suggest how to install or configure osquery
+- Do NOT add any information not in tool results
 `,
 };
 
@@ -59,7 +48,7 @@ tool("get_status", {})
  */
 const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
   return tool(
-    async ({}, config) => {
+    async ({ }, config) => {
       const onechatContext = getOneChatContext(config);
       if (!onechatContext) {
         throw new Error('OneChat context not available');
@@ -101,10 +90,10 @@ const createGetStatusTool = (getOsqueryContext: GetOsqueryAppContextFn) => {
         install_status: packageInfo ? 'installed' : 'not_installed',
         package_info: packageInfo
           ? {
-              name: packageInfo.name,
-              version: packageInfo.version,
-              install_version: packageInfo.install_version,
-            }
+            name: packageInfo.name,
+            version: packageInfo.version,
+            install_version: packageInfo.install_version,
+          }
           : null,
         package_policies_count: osqueryPackagePolicyIdsWithinCurrentSpace.length,
       });

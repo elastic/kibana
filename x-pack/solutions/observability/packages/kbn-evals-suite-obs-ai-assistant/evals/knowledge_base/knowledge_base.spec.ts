@@ -41,8 +41,8 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the summarize function',
-                  'Effectively summarizes that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
-                  'The answer states that the information has been remembered',
+                  'The summary should capture that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
+                  'The response should confirm that the information has been remembered',
                 ],
               },
               metadata: {},
@@ -75,7 +75,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
               output: {
                 criteria: [
                   'Calls the "context" function to respond to What is this cluster used for?',
-                  'Effectively recalls that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
+                  'The response should contain information that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
                 ],
               },
               metadata: {},
@@ -138,9 +138,9 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Uses context function response to find information about ACME DevOps team structure',
-                    "Correctly identifies all three teams: Platform Infrastructure, Application Operations, and Security Operations and describes each team's responsibilities",
-                    'Mentions that on-call rotations are managed through PagerDuty and includes information about accessing the on-call schedule via Slack or Kibana',
-                    'Does not invent unrelated or hallucinated details not present in the KB',
+                    "The response should identify all three teams: Platform Infrastructure, Application Operations, and Security Operations with their responsibilities",
+                    'The response should mention that on-call rotations are managed through PagerDuty and include information about accessing the on-call schedule via Slack or Kibana',
+                    'The response should not contain invented or hallucinated details not present in the KB',
                   ],
                 },
                 metadata: {},
@@ -153,9 +153,9 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
                 output: {
                   criteria: [
                     'Uses context function response to find the correct documents about alert thresholds and database infrastructure',
-                    'Mentions the specific alert thresholds for API response time, error rate, CPU usage, and memory usage',
-                    'Identifies the primary database technologies: PostgreSQL, MongoDB, and Redis and mentions that database metrics are collected via Metricbeat',
-                    'Does not combine information incorrectly or hallucinate details not present in the KB',
+                    'The response should contain the specific alert thresholds for API response time, error rate, CPU usage, and memory usage',
+                    'The response should identify the primary database technologies: PostgreSQL, MongoDB, and Redis, and mention that database metrics are collected via Metricbeat',
+                    'The response should not combine information incorrectly or contain hallucinated details not present in the KB',
                   ],
                 },
                 metadata: {},

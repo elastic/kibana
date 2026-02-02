@@ -44,7 +44,6 @@ const PLATFORM_WORKFLOWS_TOOL = tool(
                 case 'get_execution_status':
                     return platformCoreTools.getWorkflowExecutionStatus;
                 default:
-                    // Exhaustive check
                     return platformCoreTools.listWorkflows;
             }
         })();
@@ -87,7 +86,9 @@ const PLATFORM_WORKFLOWS_TOOL = tool(
                 .object({
                     operation: z
                         .literal('run')
-                        .describe('Run a workflow (may be side-effecting; underlying tool requires confirm: true).'),
+                        .describe(
+                            'Run a workflow (may be side-effecting; underlying tool requires confirm: true).'
+                        ),
                     params: z.object({}).passthrough().optional(),
                 })
                 .passthrough(),
@@ -109,37 +110,46 @@ export const PLATFORM_WORKFLOWS_SKILL: Skill = {
     description: 'Discover, execute and monitor workflows safely',
     content: `# Platform Workflows
 
-## What this skill does
-Helps you discover workflows, inspect their definitions, run them with explicit confirmation, and monitor executions.
+## WHEN TO USE THIS TOOL (REQUIRED)
+
+You MUST use this tool when the user asks about:
+- Listing available workflows
+- Getting workflow details or definitions
+- Running/executing a workflow
+- Checking workflow execution status
+
+**ALWAYS call the tool - do NOT answer from memory.**
+
+## RESPONSE FORMAT (MANDATORY)
+
+### When listing workflows:
+- If workflows found: "Found X workflows:" then list names and IDs
+- If none: "No workflows found."
+
+### When getting workflow:
+Show the workflow name, description, triggers, and key steps from tool results.
+
+### When running workflow:
+Report the execution ID and status from tool results.
+
+### When checking status:
+Show execution status, any outputs or errors from tool results.
+
+## FORBIDDEN RESPONSES
+- Do NOT explain what workflows are without listing them
+- Do NOT describe workflow capabilities in general
+- Do NOT add suggestions unless asked
 
 ## Tools and operations
-- Use \`platform.workflows\` (single tool for this skill):\n
-  - \`operation: "list"\` routes to \`${platformCoreTools.listWorkflows}\` (read-only)\n
-  - \`operation: "get"\` routes to \`${platformCoreTools.getWorkflow}\` (read-only)\n
-  - \`operation: "run"\` routes to \`${platformCoreTools.runWorkflow}\` (**requires \`confirm: true\`**)\n
-  - \`operation: "get_execution_status"\` routes to \`${platformCoreTools.getWorkflowExecutionStatus}\`\n
-
-## Inputs to ask the user for
-- **workflowId** (required for run/get)\n
-- **inputs** (optional; keep minimal)\n
-- For execution: explicit user confirmation (and include \`confirmReason\` when available)\n
-
-## Safe workflow
-1) List or identify the workflow id.\n
-2) Inspect the workflow before running (use \`${platformCoreTools.getWorkflow}\`).\n
-3) Restate expected side effects and require explicit “yes”.\n
-4) Run with \`confirm: true\`.\n
-5) If not completed, return \`executionId\` and offer to check status later.\n
-
-## Example
-- **User**: “Run workflow X with inputs Y.”\n
-- **Assistant**: \`getWorkflow\` → summarize → ask for confirmation → \`runWorkflow\` with \`confirm: true\`.\n
+- Use \`platform.workflows\` with:
+  - \`operation: "list"\` - list all workflows (read-only)
+  - \`operation: "get"\` - get workflow details (read-only)
+  - \`operation: "run"\` - run a workflow (**requires confirm: true**)
+  - \`operation: "get_execution_status"\` - check execution status
 
 ## Guardrails
-- Do not delete workflows.\n
-- Treat workflow execution as potentially side-effecting.\n
+- Do not delete workflows.
+- Running workflows requires explicit confirmation.
 `,
     tools: [PLATFORM_WORKFLOWS_TOOL],
 };
-
-

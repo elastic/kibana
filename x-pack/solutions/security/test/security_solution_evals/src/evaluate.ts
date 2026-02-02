@@ -53,6 +53,9 @@ export const evaluate = base.extend<
   spaceId: [
     async ({ globalKbnClient, log }, use, workerInfo) => {
       const spaceId = `skills-evals-w${workerInfo.parallelIndex + 1}`;
+      const skipCleanup =
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === 'true' ||
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === '1';
 
       try {
         await globalKbnClient.spaces.create({
@@ -67,6 +70,11 @@ export const evaluate = base.extend<
       }
 
       await use(spaceId);
+
+      if (skipCleanup) {
+        log.info(`[SKIP_CLEANUP] Skipping space deletion for '${spaceId}' (debug mode)`);
+        return;
+      }
 
       try {
         await globalKbnClient.spaces.delete(spaceId);
@@ -242,12 +250,12 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
-          phoenixClient,
+          executorClient,
         })
       );
     },
@@ -255,6 +263,10 @@ export const evaluate = base.extend<
   ],
   esArchiverLoad: [
     async ({ log, esClient, kbnClient }, use) => {
+      const skipCleanup =
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === 'true' ||
+        process.env.SECURITY_SOLUTION_EVALS_SKIP_CLEANUP === '1';
+
       const esArchiver = new EsArchiver({
         log,
         client: esClient,
@@ -274,6 +286,13 @@ export const evaluate = base.extend<
       });
 
       // Teardown: unload all loaded archivers
+      if (skipCleanup) {
+        log.info(
+          `[SKIP_CLEANUP] Skipping esArchiver unload for ${loadedArchivers.size} archive(s) (debug mode)`
+        );
+        return;
+      }
+
       for (const archive of loadedArchivers) {
         await esArchiver.unload(archive);
       }
