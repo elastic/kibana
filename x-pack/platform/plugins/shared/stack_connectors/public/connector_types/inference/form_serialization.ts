@@ -18,6 +18,8 @@ export const formSerializer = (data: ConnectorFormSchema) => {
   if (data && providerConfig) {
     const {
       max_number_of_allocations: maxAllocations,
+      num_threads,
+      num_allocations,
       headers,
       ...restProviderConfig
     } = providerConfig || {};

@@ -65,6 +65,8 @@ export const formSerializer = (formData: InferenceEndpoint) => {
   if (formData && providerConfig) {
     const {
       max_number_of_allocations: maxAllocations,
+      num_threads,
+      num_allocations,
       headers,
       ...restProviderConfig
     } = providerConfig || {};

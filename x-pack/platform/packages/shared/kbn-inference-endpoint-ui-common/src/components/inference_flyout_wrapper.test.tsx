@@ -240,14 +240,13 @@ describe('InferenceFlyout', () => {
         expect.objectContaining({
           config: expect.objectContaining({
             provider: 'elasticsearch',
-            providerConfig: expect.objectContaining({
-              adaptive_allocations: expect.objectContaining({
+            providerConfig: {
+              adaptive_allocations: {
                 enabled: true,
                 min_number_of_allocations: 0,
                 max_number_of_allocations: 10,
-              }),
-              num_threads: 1,
-            }),
+              },
+            },
           }),
         }),
         false
