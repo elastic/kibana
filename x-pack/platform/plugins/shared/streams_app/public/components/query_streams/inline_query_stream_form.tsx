@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getEsqlViewName } from '@kbn/streams-schema';
-import { NestedView } from '../nested_view';
+import useMount from 'react-use/lib/useMount';
 import { QueryStreamForm } from './query_stream_form';
 
 /**
@@ -58,14 +58,6 @@ export interface InlineQueryStreamFormProps {
    * Whether the form fields should be read-only
    */
   readOnly?: boolean;
-  /**
-   * Whether this is the last item in a list (affects nested view styling)
-   */
-  isLast?: boolean;
-  /**
-   * Whether this is the first item in a list (affects nested view styling)
-   */
-  isFirst?: boolean;
 }
 
 /**
@@ -94,33 +86,38 @@ export function InlineQueryStreamForm({
   onQueryChange,
   isSaving = false,
   readOnly = false,
-  isLast = true,
-  isFirst = false,
 }: InlineQueryStreamFormProps) {
   const { euiTheme } = useEuiTheme();
-
+  const prefix = `${parentStreamName}.`;
   // Form state
   const [name, setName] = useState(initialName);
-  const [esqlQuery, setEsqlQuery] = useState(() => {
-    if (initialEsqlQuery) {
-      return initialEsqlQuery;
-    }
-    // Default: query from parent's ES|QL view
-    const parentViewName = getEsqlViewName(parentStreamName);
-    return `FROM ${parentViewName}`;
+  const [esqlQuery, setEsqlQuery] = useState(
+    () => initialEsqlQuery ?? `FROM ${getEsqlViewName(parentStreamName)}`
+  );
+
+  useMount(() => {
+    if (onQueryChange) onQueryChange(esqlQuery);
   });
 
-  // Notify parent of query changes for live preview
-  useEffect(() => {
-    onQueryChange?.(esqlQuery);
-  }, [esqlQuery, onQueryChange]);
+  const handleNameChange = useCallback(
+    (fullName: string) => {
+      // Extract suffix from full name (remove parent prefix)
+      const suffix = fullName.replace(prefix, '');
+      setName(suffix);
+    },
+    [prefix]
+  );
 
   // Handle query changes - allow full query editing
-  const handleQueryChange = useCallback((newQuery: AggregateQuery) => {
-    if ('esql' in newQuery) {
-      setEsqlQuery(newQuery.esql);
-    }
-  }, []);
+  const handleQueryChange = useCallback(
+    (newQuery: AggregateQuery) => {
+      if ('esql' in newQuery) {
+        setEsqlQuery(newQuery.esql);
+        if (onQueryChange) onQueryChange(newQuery.esql);
+      }
+    },
+    [onQueryChange]
+  );
 
   const handleQuerySubmit = useCallback(
     async (newQuery: AggregateQuery | undefined, _abortController?: AbortController) => {
@@ -131,71 +128,58 @@ export function InlineQueryStreamForm({
     [handleQueryChange]
   );
 
-  const handleNameChange = useCallback(
-    (fullName: string) => {
-      // Extract suffix from full name (remove parent prefix)
-      const suffix = fullName.replace(`${parentStreamName}.`, '');
-      setName(suffix);
-    },
-    [parentStreamName]
-  );
-
-  const handleSave = useCallback(() => {
-    onSave({ name, esqlQuery });
-  }, [name, esqlQuery, onSave]);
+  const handleSave = () => onSave({ name, esqlQuery });
 
   const canSave = name && name.trim() !== '';
 
   return (
-    <NestedView last={isLast} first={isFirst}>
-      <EuiPanel
-        color="plain"
-        hasShadow={false}
-        hasBorder
-        paddingSize="m"
-        className={css`
-          border-color: ${euiTheme.colors.primary};
-        `}
-      >
-        <QueryStreamForm>
-          <QueryStreamForm.StreamName
-            partitionName={name}
-            onChange={handleNameChange}
-            prefix={`${parentStreamName}.`}
-            readOnly={readOnly || isSaving}
-          />
-          <QueryStreamForm.ESQLEditor
+    <EuiPanel
+      color="plain"
+      hasShadow={false}
+      hasBorder
+      paddingSize="m"
+      className={css`
+        border-color: ${euiTheme.colors.primary};
+      `}
+    >
+      <QueryStreamForm>
+        <QueryStreamForm.StreamName
+          partitionName={name}
+          onChange={handleNameChange}
+          prefix={`${parentStreamName}.`}
+          readOnly={readOnly || isSaving}
+        />
+        <QueryStreamForm.ESQLEditor
+          isLoading={isSaving}
+          query={{ esql: esqlQuery }}
+          onTextLangQueryChange={handleQueryChange}
+          onTextLangQuerySubmit={handleQuerySubmit}
+        />
+      </QueryStreamForm>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
+            {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleSave}
             isLoading={isSaving}
-            query={{ esql: esqlQuery }}
-            onTextLangQueryChange={handleQueryChange}
-            onTextLangQuerySubmit={handleQuerySubmit}
-          />
-        </QueryStreamForm>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} disabled={isSaving || readOnly}>
-              {i18n.translate('xpack.streams.inlineQueryStreamForm.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              isLoading={isSaving}
-              disabled={!canSave || isSaving || readOnly}
-            >
-              {i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
-                defaultMessage: 'Create query stream',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </NestedView>
+            disabled={!canSave || isSaving || readOnly}
+          >
+            {i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
+              defaultMessage: 'Create query stream',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

@@ -203,8 +203,6 @@ export function StreamsTreeTable({
     [allRows, flattenTreeWithCollapse, sortField]
   );
 
-  console.log(items);
-
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
   };

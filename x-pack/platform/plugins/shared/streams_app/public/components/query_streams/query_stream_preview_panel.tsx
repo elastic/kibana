@@ -36,7 +36,6 @@ export function QueryStreamPreviewPanel({
     fieldName?: string;
     direction: 'asc' | 'desc';
   }>();
-
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
 
   let content: React.ReactNode | null = null;

@@ -40,8 +40,9 @@ export function useExecuteQueryStreamPreview() {
 
   const [{ value: documents, error, loading: isLoading }, executeQuery] = useAsyncFn(
     async (esqlQuery: string) => {
+      const limitedQuery = esqlQuery.concat(' | limit 100');
       const result = await executeEsqlQuery({
-        query: esqlQuery,
+        query: limitedQuery,
         search: data.search.search,
         start: timeState.start,
         end: timeState.end,

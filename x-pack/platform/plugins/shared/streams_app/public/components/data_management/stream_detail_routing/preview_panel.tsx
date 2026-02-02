@@ -35,12 +35,12 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
 import { RowSelectionContext } from '../shared/preview_table';
-import { useQueryStreamCreationOptional } from './query_stream_creation_context';
+import { useQueryStreamCreation } from './query_stream_creation_context';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
-  const queryStreamCreation = useQueryStreamCreationOptional();
+  const queryStreamCreation = useQueryStreamCreation();
   const { definition } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
@@ -48,24 +48,20 @@ export function PreviewPanel() {
   const documents = selectPreviewDocuments(samplesSnapshot.context);
   const hasDocuments = !isEmpty(documents);
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const isQueryModeCreating = routingSnapshot.matches({ ready: { queryMode: 'creating' } });
 
   let content;
 
-  if (routingSnapshot.matches({ ready: 'queryMode' })) {
-    // Query mode rendering branch
-    if (isQueryModeCreating && queryStreamCreation) {
-      content = (
-        <QueryStreamPreviewPanel
-          streamName={definition.stream.name}
-          documents={queryStreamCreation.documents ?? []}
-          documentsError={queryStreamCreation.error}
-          isLoading={queryStreamCreation.isLoading}
-        />
-      );
-    } else {
-      content = <QueryModeIdlePanel />;
-    }
+  if (routingSnapshot.matches({ ready: { queryMode: 'creating' } })) {
+    content = (
+      <QueryStreamPreviewPanel
+        streamName={definition.stream.name}
+        documents={queryStreamCreation.documents ?? []}
+        documentsError={queryStreamCreation.error}
+        isLoading={queryStreamCreation.isLoading}
+      />
+    );
+  } else if (routingSnapshot.matches({ ready: { queryMode: 'idle' } })) {
+    content = <QueryModeIdlePanel />;
   } else if (routingSnapshot.matches({ ready: { ingestMode: 'idle' } })) {
     content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (

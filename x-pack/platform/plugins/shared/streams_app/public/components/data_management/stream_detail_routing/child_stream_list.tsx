@@ -395,7 +395,9 @@ function QueryModeChildrenList() {
 
           {isCreating && (
             <EuiFlexItem grow={false}>
-              <CreatingQueryStreamEntry parentStreamName={definition.stream.name} />
+              <NestedView last first={isEmpty(childQueryStreamNames)}>
+                <CreatingQueryStreamEntry parentStreamName={definition.stream.name} />
+              </NestedView>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

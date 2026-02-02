@@ -47,11 +47,3 @@ export function useQueryStreamCreation(): QueryStreamCreationState {
   }
   return context;
 }
-
-/**
- * Hook to safely access query stream creation state.
- * Returns null if not within QueryStreamCreationProvider.
- */
-export function useQueryStreamCreationOptional(): QueryStreamCreationState | null {
-  return useContext(QueryStreamCreationContext);
-}

@@ -689,32 +689,39 @@ export const streamRoutingMachine = setup({
               },
             },
             creating: {
+              initial: 'changing',
               on: {
                 'queryStream.cancel': 'idle',
-                'queryStream.save': 'saving',
               },
-            },
-            saving: {
-              invoke: {
-                src: 'createQueryStream',
-                input: ({ event }) => {
-                  assertEvent(event, 'queryStream.save');
-                  return {
-                    name: event.name,
-                    esqlQuery: event.esqlQuery,
-                  };
+              states: {
+                changing: {
+                  on: {
+                    'queryStream.save': 'saving',
+                  },
                 },
-                onDone: {
-                  target: 'idle',
-                  actions: [
-                    { type: 'notifyQueryStreamSuccess' },
-                    { type: 'setRefreshing' },
-                    { type: 'refreshDefinition' },
-                  ],
-                },
-                onError: {
-                  target: 'creating',
-                  actions: [{ type: 'notifyStreamFailure' }],
+                saving: {
+                  invoke: {
+                    src: 'createQueryStream',
+                    input: ({ event }) => {
+                      assertEvent(event, 'queryStream.save');
+                      return {
+                        name: event.name,
+                        esqlQuery: event.esqlQuery,
+                      };
+                    },
+                    onDone: {
+                      target: '#queryMode.idle',
+                      actions: [
+                        { type: 'notifyQueryStreamSuccess' },
+                        { type: 'setRefreshing' },
+                        { type: 'refreshDefinition' },
+                      ],
+                    },
+                    onError: {
+                      target: 'changing',
+                      actions: [{ type: 'notifyStreamFailure' }],
+                    },
+                  },
                 },
               },
             },

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiButtonIcon,
-  EuiCode,
   EuiPanel,
   useEuiTheme,
   EuiLink,
@@ -160,11 +159,8 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const { executeQuery } = useQueryStreamCreation();
 
   const isSaving = useStreamsRoutingSelector((state) =>
-    state.matches({ ready: { queryMode: 'saving' } })
+    state.matches({ ready: { queryMode: { creating: 'saving' } } })
   );
-
-  // Track the current query to execute previews
-  const currentQueryRef = useRef<string>('');
 
   // Debounced query execution for preview
   const { run: debouncedExecuteQuery } = useDebounceFn((query: string) => {
@@ -172,22 +168,6 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
       executeQuery(query);
     }
   }, deboucingOptions);
-
-  // Execute initial query on mount
-  useEffect(() => {
-    const initialQuery = `FROM ${getEsqlViewName(parentStreamName)}`;
-    currentQueryRef.current = initialQuery;
-    executeQuery(initialQuery);
-  }, [parentStreamName, executeQuery]);
-
-  // Handle query changes - execute debounced preview
-  const handleQueryChange = useCallback(
-    (esqlQuery: string) => {
-      currentQueryRef.current = esqlQuery;
-      debouncedExecuteQuery(esqlQuery);
-    },
-    [debouncedExecuteQuery]
-  );
 
   // Validate and save the query stream
   const handleSave = useCallback(
@@ -201,7 +181,7 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
         return;
       }
       // Trigger save with the form data
-      saveQueryStream({ name, esqlQuery });
+      saveQueryStream({ name: fullName, esqlQuery });
     },
     [parentStreamName, saveQueryStream]
   );
@@ -209,14 +189,11 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   return (
     <InlineQueryStreamForm
       parentStreamName={parentStreamName}
-      initialName=""
       initialEsqlQuery={`FROM ${getEsqlViewName(parentStreamName)}`}
       onSave={handleSave}
       onCancel={cancelQueryStreamCreation}
-      onQueryChange={handleQueryChange}
+      onQueryChange={debouncedExecuteQuery}
       isSaving={isSaving}
-      isFirst={false}
-      isLast={true}
     />
   );
 }
