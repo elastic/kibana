@@ -4,39 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+
+import {
+  EuiFlexItem,
+  EuiLink,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import type { BuildThreatDescription } from './types';
-import type {
-  MitreSubTechnique,
-  MitreTactic,
-  MitreTechnique,
-} from '../../../../detections/mitre/types';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MitreSubTechnique, MitreTactic, MitreTechnique } from './mitre_types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
-  );
-};
-
-const ThreatEuiFlexGroupStyles = styled(EuiFlexGroup)`
+const threatEuiFlexGroupStyles = css`
   .euiFlexItem {
     margin-bottom: 0px;
   }
 `;
 
-const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const TechniqueLinkItem = styled(EuiButtonEmpty)`
+const techniqueLinkItemStyles = css`
   .euiIcon {
     width: 8px;
     height: 8px;
@@ -44,26 +32,43 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
   align-self: flex-start;
 `;
 
+export interface ThreatEuiFlexGroupProps {
+  threat: Threats;
+  'data-test-subj'?: string;
+}
+
+const lazyMitreConfiguration = () => {
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    './mitre_tactics_techniques'
+  );
+};
+
 export const ThreatEuiFlexGroup = ({
   threat,
   'data-test-subj': dataTestSubj = 'threat',
-}: BuildThreatDescription) => {
+}: ThreatEuiFlexGroupProps) => {
+  const { euiTheme } = useEuiTheme();
   const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
   const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
   const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 
+  const subtechniqueFlexItemStyles = css`
+    margin-left: ${euiTheme.size.m};
+  `;
+
   useEffect(() => {
     async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-      setTechniquesOptions(mitreConfig.techniques);
-      setTacticsOptions(mitreConfig.tactics);
+      const mitreModule = await lazyMitreConfiguration();
+      setSubtechniquesOptions(mitreModule.subtechniques);
+      setTechniquesOptions(mitreModule.techniques);
+      setTacticsOptions(mitreModule.tactics);
     }
     getMitre();
   }, []);
 
   return (
-    <ThreatEuiFlexGroupStyles direction="column" data-test-subj={dataTestSubj}>
+    <EuiFlexGroup css={threatEuiFlexGroupStyles} direction="column" data-test-subj={dataTestSubj}>
       {threat.map((singleThreat, index) => {
         const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
         return (
@@ -83,7 +88,8 @@ export const ThreatEuiFlexGroup = ({
                   const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                   return (
                     <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                      <TechniqueLinkItem
+                      <EuiButtonEmpty
+                        css={techniqueLinkItemStyles}
                         data-test-subj="threatTechniqueLink"
                         href={technique.reference}
                         target="_blank"
@@ -93,7 +99,7 @@ export const ThreatEuiFlexGroup = ({
                         {myTechnique != null
                           ? myTechnique.label
                           : `${technique.name} (${technique.id})`}
-                      </TechniqueLinkItem>
+                      </EuiButtonEmpty>
                       <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                         {technique.subtechnique != null &&
                           technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
@@ -101,8 +107,12 @@ export const ThreatEuiFlexGroup = ({
                               (t) => t.id === subtechnique.id
                             );
                             return (
-                              <SubtechniqueFlexItem key={mySubtechnique?.id ?? subtechniqueIndex}>
-                                <TechniqueLinkItem
+                              <EuiFlexItem
+                                key={mySubtechnique?.id ?? subtechniqueIndex}
+                                css={subtechniqueFlexItemStyles}
+                              >
+                                <EuiButtonEmpty
+                                  css={techniqueLinkItemStyles}
                                   data-test-subj="threatSubtechniqueLink"
                                   href={subtechnique.reference}
                                   target="_blank"
@@ -112,8 +122,8 @@ export const ThreatEuiFlexGroup = ({
                                   {mySubtechnique != null
                                     ? mySubtechnique.label
                                     : `${subtechnique.name} (${subtechnique.id})`}
-                                </TechniqueLinkItem>
-                              </SubtechniqueFlexItem>
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
                             );
                           })}
                       </EuiFlexGroup>
@@ -124,6 +134,6 @@ export const ThreatEuiFlexGroup = ({
           </EuiFlexItem>
         );
       })}
-    </ThreatEuiFlexGroupStyles>
+    </EuiFlexGroup>
   );
 };

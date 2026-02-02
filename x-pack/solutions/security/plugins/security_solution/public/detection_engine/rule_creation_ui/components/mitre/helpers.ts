@@ -14,7 +14,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '@kbn/security-solution-common'
   );
 };
 

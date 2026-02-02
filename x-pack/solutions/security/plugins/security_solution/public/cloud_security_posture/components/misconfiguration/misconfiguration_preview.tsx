@@ -19,7 +19,7 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { ExpandablePanel } from '@kbn/flyout-ui';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,

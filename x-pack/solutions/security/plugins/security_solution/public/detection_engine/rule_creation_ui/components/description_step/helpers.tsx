@@ -45,7 +45,6 @@ import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { THREAT_QUERY_LANGUAGE_LABEL } from '../../../rule_management/components/rule_details/translations';
 import { getQueryLanguageLabel } from '../../../rule_management/components/rule_details/helpers';
-import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionLabel } from './alert_suppression_label';
 import type { FieldValueThreshold } from '../threshold_input';
 
@@ -185,17 +184,8 @@ interface BuildThreatDescriptionProps {
 export const buildThreatDescription = ({
   threat,
   label,
-}: BuildThreatDescriptionProps): ListItems[] => {
-  if (threat.length > 0) {
-    return [
-      {
-        title: label,
-        description: <ThreatEuiFlexGroup threat={threat} />,
-      },
-    ];
-  }
-  return [];
-};
+}: BuildThreatDescriptionProps): ListItems[] =>
+  buildThreatDescriptionFromCommon({ label, threat });
 
 export const buildUnorderedListArrayDescription = (
   label: string,

@@ -25,6 +25,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
 import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
+import { buildThreatDescription } from '@kbn/security-solution-common';
 import type { ListItems } from './types';
 import {
   buildAlertSuppressionDescription,
@@ -41,7 +42,6 @@ import {
   buildSetupDescription,
   buildSeverityDescription,
   buildStringArrayDescription,
-  buildThreatDescription,
   buildThreatMappingDescription,
   buildThresholdDescription,
   buildUnorderedListArrayDescription,

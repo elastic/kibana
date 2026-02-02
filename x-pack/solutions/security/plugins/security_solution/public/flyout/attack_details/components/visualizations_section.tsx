@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { EuiSpacer } from '@elastic/eui';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
-import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ExpandableSection } from '@kbn/flyout-ui';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { AttackChain } from '../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { useAttackDetailsContext } from '../context';

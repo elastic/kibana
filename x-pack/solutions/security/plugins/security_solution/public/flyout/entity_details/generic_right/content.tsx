@@ -16,6 +16,7 @@ import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpandableSection } from '@kbn/flyout-ui';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
@@ -27,7 +28,6 @@ import { EntityInsight } from '../../../cloud_security_posture/components/entity
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { FieldsTable, usePinnedFields } from './components/fields_table';
-import { ExpandableSection } from '../../shared/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';

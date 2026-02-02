@@ -1,66 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getField } from '../../shared/utils';
-import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
-} from './test_ids';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+} from '../test_ids';
 
-export const ALERT_REASON_BANNER = {
-  title: i18n.translate(
-    'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
-    {
-      defaultMessage: 'Preview alert reason',
-    }
-  ),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-};
+export interface ReasonProps {
+  hit: DataTableRecord;
+  onOpenReason: () => void;
+}
+
+const ALERT_REASON_FIELD = 'kibana.alert.reason';
+const ALERT_RULE_UUID_FIELD = 'kibana.alert.rule.uuid';
 
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
-export const Reason: FC = () => {
-  const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
-    useDocumentDetailsContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const alertReason = getField(getFieldsData(ALERT_REASON));
-
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openRulePreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);
+export const Reason: FC<ReasonProps> = ({ hit, onOpenReason }) => {
+  const alertReason = useMemo(
+    () => (getFieldValue(hit, ALERT_REASON_FIELD) as string) ?? '',
+    [hit]
+  );
+  const isAlert = useMemo(() => {
+    const value = getFieldValue(hit, ALERT_RULE_UUID_FIELD);
+    return value != null && value !== '';
+  }, [hit]);
+  const hasAlertReason = Boolean(alertReason?.trim());
 
   const viewPreview = useMemo(
     () => (
@@ -68,7 +47,7 @@ export const Reason: FC = () => {
         <EuiButtonEmpty
           size="s"
           iconType="expand"
-          onClick={openRulePreview}
+          onClick={onOpenReason}
           iconSide="right"
           data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
           aria-label={i18n.translate(
@@ -77,7 +56,7 @@ export const Reason: FC = () => {
               defaultMessage: 'Show full reason',
             }
           )}
-          disabled={!alertReason}
+          disabled={!hasAlertReason}
         >
           <FormattedMessage
             id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
@@ -86,10 +65,10 @@ export const Reason: FC = () => {
         </EuiButtonEmpty>
       </EuiFlexItem>
     ),
-    [alertReason, openRulePreview]
+    [onOpenReason, hasAlertReason]
   );
 
-  const alertReasonText = alertReason ? (
+  const alertReasonText = hasAlertReason ? (
     alertReason
   ) : (
     <FormattedMessage
