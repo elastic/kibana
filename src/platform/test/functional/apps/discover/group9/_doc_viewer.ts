@@ -474,16 +474,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await restoreScreenWidth();
       });
 
-      describe('restorable state', function () {
-        beforeEach(async () => {
+      describe.only('restorable state', function () {
+        afterEach(async () => {
+          await browser.clearLocalStorage();
+        });
+
+        it('should restore search term when switching tabs and scope it to a tab', async () => {
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
           await retry.waitFor('rendered items', async () => {
             return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
           });
-        });
-
-        it('should restore search term when switching tabs and scope it to a tab', async () => {
           await discover.findFieldByNameOrValueInDocViewer('geo');
           await retry.waitFor('first tab filtered fields', async () => {
             return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
@@ -504,17 +505,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const searchInput = await testSubjects.find('unifiedDocViewerFieldsSearchInput');
           expect(await searchInput.getAttribute('value')).to.be('geo');
           expect((await find.allByCssSelector('.kbnDocViewer__fieldName')).length).to.be(4);
-
-          // clean up for next tests
-          const fieldSearchTab1 = await testSubjects.find('clearSearchButton');
-          await fieldSearchTab1.click();
-          await unifiedTabs.selectTab(1);
-          await discover.waitUntilTabIsLoaded();
-          const fieldSearchTab2 = await testSubjects.find('clearSearchButton');
-          await fieldSearchTab2.click();
         });
 
         it('should restore pinned fields when switching tabs and scope it to a tab', async () => {
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+          await retry.waitFor('rendered items', async () => {
+            return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+          });
           await dataGrid.togglePinActionInFlyout('agent');
           expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
 
@@ -522,13 +520,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await discover.waitUntilTabIsLoaded();
           await dataGrid.clickRowToggle();
           await discover.isShowingDocViewer();
+          await dataGrid.togglePinActionInFlyout('agent');
           await dataGrid.togglePinActionInFlyout('bytes');
+          expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(false);
           expect(await dataGrid.isFieldPinnedInFlyout('bytes')).to.be(true);
 
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
 
           expect(await dataGrid.isFieldPinnedInFlyout('agent')).to.be(true);
+        });
+
+        it('should restore hide null values option when switching tabs and scope it to a tab', async () => {
+          await discover.selectTextBaseLang();
+          await discover.waitUntilTabIsLoaded();
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          const hideNullValuesSwitchTab1 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1.getAttribute('aria-checked')).to.be('false');
+
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await dataGrid.clickRowToggle();
+          await discover.isShowingDocViewer();
+
+          const hideNullValuesSwitchTab2 = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('false');
+          await hideNullValuesSwitchTab2.click();
+          expect(await hideNullValuesSwitchTab2.getAttribute('aria-checked')).to.be('true');
+
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          const hideNullValuesSwitchTab1AfterSwitch = await testSubjects.find(
+            'unifiedDocViewerHideNullValuesSwitch'
+          );
+          expect(await hideNullValuesSwitchTab1AfterSwitch.getAttribute('aria-checked')).to.be(
+            'false'
+          );
         });
       });
 
