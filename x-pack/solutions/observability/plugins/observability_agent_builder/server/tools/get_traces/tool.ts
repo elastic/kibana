@@ -26,9 +26,32 @@ const getTracesSchema = z.object({
   index: z.string().describe(indexDescription).optional(),
   traceId: z
     .string()
+    .optional()
     .describe(
       'Trace ID to retrieve the full distributed trace (transactions, spans, errors, and logs). Example: "abc123".'
     ),
+  logId: z
+    .string()
+    .optional()
+    .describe(
+      'ID of a specific log entry to use as an anchor. When provided, other filter parameters are ignored.'
+    ),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'KQL filter to narrow down logs. Examples: \'service.name: "payment"\', \'host.name: "web-server-01"\'. Ignored if logId is provided.'
+    ),
+  errorLogsOnly: z
+    .boolean()
+    .default(true)
+    .describe(
+      'When true, only sequences containing error logs (ERROR, WARN, FATAL, HTTP 5xx) are returned. Set to false to return any sequence. You can use `kqlFilter` to apply another filter (e.g., slow requests).'
+    ),
+  maxSequences: z
+    .number()
+    .default(10)
+    .describe('Maximum number of unique log sequences to return.'),
 });
 
 export function createGetTracesTool({
@@ -43,17 +66,26 @@ export function createGetTracesTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTracesSchema> = {
     id: OBSERVABILITY_GET_TRACES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves a full distributed trace (transactions, spans, errors, and logs) for a specific \'trace.id\'.
+    description: `Retrieves trace data (APM transactions/spans/errors) plus logs for a single request/flow.
+
+You can look up a trace in two ways:
+- Direct: provide traceId to fetch for that trace within the provided time range
+- Anchor-based: provide a logId (or a KQL filter + time range) and the tool will find anchor logs, extract the best available correlation identifier (prefers trace.id), then fetch APM events and logs for that identifier
 
 When to use:
-- You already have a \'trace.id\' from tools like observability.get_trace_metrics, observability.get_correlated_logs, or an error/log record
-- You need to understand what happened during a single request end-to-end
-- You want a chronological view of trace events across services
+- You already have a trace.id and want a single place to fetch APM events + logs for that trace
+- You have an error log (logId) but not a trace.id yet, and you want to expand to the surrounding context
+- You have a log query (kqlFilter) and want to sample a few representative sequences, then expand each one
 
 How it works:
-1. Fetches APM events (transactions, spans, errors) with the same \'trace.id\'
-2. Fetches log events that share the same \'trace.id\'
-3. Sorts everything by \'@timestamp\'
+1. Determine correlation identifiers:
+   - If traceId is provided: use trace.id
+   - Else: find up to maxSequences anchor logs (errors by default), and derive correlation identifiers from their fields
+2. For each correlation identifier, query:
+   - APM events (transactions, spans, errors) using the same identifier field/value
+   - APM error documents (filtered to exclude debug/info/warning)
+   - Logs with the same identifier field/value from the selected indices
+3. Each result set is sorted by @timestamp (APM and logs are returned as separate arrays, not merged).
 
 Do NOT use for:
 - Finding traces by a broad query (use observability.get_trace_metrics or observability.get_trace_change_points to scope first)`,
@@ -65,7 +97,10 @@ Do NOT use for:
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, traceId, index }, { esClient, request }) => {
+    handler: async (
+      { start, end, traceId, index, logId, kqlFilter, errorLogsOnly, maxSequences },
+      { esClient, request }
+    ) => {
       try {
         const { sequences } = await getToolHandler({
           core,
@@ -77,6 +112,10 @@ Do NOT use for:
           end,
           traceId,
           index,
+          kqlFilter,
+          errorLogsOnly,
+          logId,
+          maxSequences,
         });
 
         return {

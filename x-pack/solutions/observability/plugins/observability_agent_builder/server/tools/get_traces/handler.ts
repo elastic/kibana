@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -25,20 +26,18 @@ import {
   DEFAULT_MAX_LOG_EVENTS,
   DEFAULT_LOG_SOURCE_FIELDS,
   DEFAULT_TRACE_FIELDS,
-  type TraceSequence,
 } from './constants';
+import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
+import type { Correlation, TraceSequence } from './types';
 
 export function getApmTraceError({
   apmEventClient,
-  traceId,
-  start,
-  end,
+  correlationIdentifier,
 }: {
   apmEventClient: APMEventClient;
-  traceId: string;
-  start: number;
-  end: number;
+  correlationIdentifier: Correlation;
 }) {
+  const { identifier, start, end } = correlationIdentifier;
   const excludedLogLevels = ['debug', 'info', 'warning'];
   const ERROR_LOG_LEVEL = 'error.log.level';
   return apmEventClient.search('get_errors_docs', {
@@ -56,7 +55,7 @@ export function getApmTraceError({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter('trace.id', traceId),
+          ...termFilter(identifier.field, identifier.value),
         ],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
@@ -68,15 +67,12 @@ export function getApmTraceError({
 
 export function getTraceDocs({
   apmEventClient,
-  traceId,
-  start,
-  end,
+  correlationIdentifier,
 }: {
   apmEventClient: APMEventClient;
-  traceId: string;
-  start: number;
-  end: number;
+  correlationIdentifier: Correlation;
 }) {
+  const { identifier, start, end } = correlationIdentifier;
   return apmEventClient.search('observability_agent_builder_get_trace_docs', {
     apm: {
       events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
@@ -90,7 +86,7 @@ export function getTraceDocs({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter('trace.id', traceId),
+          ...termFilter(identifier.field, identifier.value),
         ],
       },
     },
@@ -99,17 +95,14 @@ export function getTraceDocs({
 
 export function getCorrelatedLogs({
   esClient,
-  start,
-  end,
-  traceId,
+  correlationIdentifier,
   index,
 }: {
   esClient: IScopedClusterClient;
-  start: number;
-  end: number;
-  traceId: string;
+  correlationIdentifier: Correlation;
   index: string[];
 }) {
+  const { identifier, start, end } = correlationIdentifier;
   const search = getTypedSearch(esClient.asCurrentUser);
 
   return search({
@@ -123,7 +116,7 @@ export function getCorrelatedLogs({
       bool: {
         filter: [
           ...timeRangeFilter('@timestamp', { start, end }),
-          ...termFilter('trace.id', traceId),
+          ...termFilter(identifier.field, identifier.value),
         ],
       },
     },
@@ -140,6 +133,10 @@ export async function getToolHandler({
   end,
   traceId,
   index,
+  kqlFilter,
+  errorLogsOnly,
+  logId,
+  maxSequences,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -148,62 +145,96 @@ export async function getToolHandler({
   esClient: IScopedClusterClient;
   start: string;
   end: string;
-  traceId: string;
+  traceId?: string;
   index?: string;
+  kqlFilter?: string;
+  errorLogsOnly: boolean;
+  logId?: string;
+  maxSequences: number;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const startTime = parseDatemath(start);
   const endTime = parseDatemath(end, { roundUp: true });
-
+  let correlationIdentifiers: Correlation[] = [];
+  if (traceId) {
+    correlationIdentifiers = [
+      {
+        start: startTime,
+        end: endTime,
+        identifier: { field: 'trace.id', value: traceId },
+      },
+    ];
+  } else {
+    const anchorLogs = await getAnchorLogs({
+      esClient,
+      logsIndices,
+      startTime,
+      endTime,
+      kqlFilter,
+      errorLogsOnly,
+      logger,
+      logId,
+      maxSequences,
+    });
+    correlationIdentifiers = anchorLogs.map((anchorLog) => {
+      const { correlation, '@timestamp': timestamp } = anchorLog;
+      return {
+        identifier: {
+          field: correlation.field,
+          value: correlation.value,
+        },
+        start: moment(timestamp).subtract(1, 'hour').valueOf(),
+        end: moment(timestamp).add(1, 'hour').valueOf(),
+      };
+    });
+  }
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
-  const apmResponse = await getTraceDocs({
-    apmEventClient,
-    traceId,
-    start: startTime,
-    end: endTime,
-  });
-  const apmHits = apmResponse.hits.hits;
+  // For each correlation identifier, find the full distributed trace (transactions, spans, errors, and logs)
+  const sequences: TraceSequence[] = await Promise.all(
+    correlationIdentifiers.map(async (correlationIdentifier) => {
+      const apmResponse = await getTraceDocs({
+        apmEventClient,
+        correlationIdentifier,
+      });
+      const apmHits = apmResponse.hits.hits;
 
-  const errorResponse = await getApmTraceError({
-    apmEventClient,
-    traceId,
-    start: startTime,
-    end: endTime,
-  });
+      const errorResponse = await getApmTraceError({
+        apmEventClient,
+        correlationIdentifier,
+      });
 
-  const errorHits = errorResponse.hits.hits;
+      const errorHits = errorResponse.hits.hits;
 
-  const logsResponse = await getCorrelatedLogs({
-    esClient,
-    start: startTime,
-    end: endTime,
-    traceId,
-    index: logsIndices,
-  });
-  const logHits = logsResponse?.hits.hits ?? [];
+      const logsResponse = await getCorrelatedLogs({
+        esClient,
+        correlationIdentifier,
+        index: logsIndices,
+      });
+      const logHits = logsResponse?.hits.hits ?? [];
 
-  const sequences: TraceSequence[] = [
-    {
-      traceId,
-      traceItems: mapHitsToEntries(apmHits),
-      errorItems: mapHitsToEntries(errorHits),
-      logs: mapHitsToEntries(logHits),
-    },
-  ];
+      return {
+        correlation_identifier: correlationIdentifier,
+        traceItems: mapHitsToEntries(apmHits),
+        errorItems: mapHitsToEntries(errorHits),
+        logs: mapHitsToEntries(logHits),
+      };
+    })
+  );
 
   return { sequences };
 }
 
 function mapHitsToEntries(
-  apmHits: SearchHit<undefined, string[], undefined>[]
-): { [k: string]: unknown }[] {
-  return apmHits.map((hit) => {
-    return Object.fromEntries(
+  hits: SearchHit<undefined, string[], undefined>[]
+): Record<string, unknown>[] {
+  return hits.map((hit) => {
+    const entries = Object.fromEntries(
       Object.entries(hit.fields ?? {}).map(([key, value]) => [
         key,
         Array.isArray(value) && value.length === 1 ? value[0] : value,
       ])
     );
+    return { _id: hit._id, ...entries };
   });
 }

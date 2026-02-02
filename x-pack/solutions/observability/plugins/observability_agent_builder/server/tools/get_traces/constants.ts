@@ -57,19 +57,6 @@ export const DEFAULT_TRACE_FIELDS = [
   'url.path',
 ];
 
-export interface TraceSequence {
-  traceId: string;
-  traceItems: {
-    [k: string]: unknown;
-  }[];
-  logs: {
-    [k: string]: unknown;
-  }[];
-  errorItems: {
-    [k: string]: unknown;
-  }[];
-}
-
 export const DEFAULT_MAX_APM_EVENTS = 500;
 export const DEFAULT_MAX_LOG_EVENTS = 200;
 
