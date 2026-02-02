@@ -62,16 +62,14 @@ export const transformDashboardIn = (
       query
     );
 
-    const { controlsJSON, references: controlGroupReferences } =
-      transformControlGroupIn(pinned_panels);
+    const { controls, references: controlGroupReferences } = transformControlGroupIn(pinned_panels);
+    console.log({ controls });
 
     const attributes = {
       description: '',
       ...rest,
-      ...(controlsJSON && {
-        controlGroupInput: {
-          panelsJSON: controlsJSON,
-        },
+      ...(controls && {
+        pinned_panels: { panels: controls as Record<string, any> },
       }),
       optionsJSON: transformOptionsIn(options),
       panelsJSON,
@@ -83,6 +81,7 @@ export const transformDashboardIn = (
       kibanaSavedObjectMeta: { searchSourceJSON },
       ...(project_routing !== undefined && { projectRouting: project_routing }),
     };
+    console.log({ tesszt: attributes.pinned_panels });
     return {
       attributes,
       references: [

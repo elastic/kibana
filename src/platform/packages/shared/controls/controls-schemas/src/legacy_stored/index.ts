@@ -8,7 +8,6 @@
  */
 
 export type {
-  LegacyStoredDataControlState,
   LegacyStoredPinnedControls,
   LegacyStoredPinnedControlState,
   LegacyStoredRangeSliderExplicitInput,

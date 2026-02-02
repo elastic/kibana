@@ -11,39 +11,67 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { LegacyIgnoreParentSettings } from '@kbn/controls-schemas';
 
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import { transformControlsState } from './transform_controls_state';
+import { transformLegacyControlsState } from './transform_controls_state';
 import type { DashboardState } from '../../types';
+import { injectControlReferences } from './transform_controls_state';
 
 export function transformControlGroupOut(
-  controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
-  containerReferences: Reference[],
-  ignoreParentSettingsJSON?: string
+  controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'],
+  pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
+  containerReferences: Reference[]
 ): DashboardState['pinned_panels'] {
-  const controls = controlGroupInput.panelsJSON
-    ? transformControlsState(controlGroupInput.panelsJSON, containerReferences)
-    : [];
-  console.log({ controls: JSON.stringify(controls) });
-  /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
-  const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined = ignoreParentSettingsJSON
-    ? JSON.parse(ignoreParentSettingsJSON)
-    : undefined;
-  if (legacyControlGroupOptions) {
-    // Ignore filters if the legacy control group option is set to ignore filters, or if the legacy chaining system
-    // is set to NONE. Including the chaining system check inside this if block is okay to do, because we don't expect
-    // a legacy chaining system to be defined without legacyCon4trolGroupOptions also being defined
-    const ignoreFilters =
-      controlGroupInput.chainingSystem === 'NONE' ||
-      legacyControlGroupOptions.ignoreFilters ||
-      legacyControlGroupOptions.ignoreQuery;
-    controls.map(({ config, ...rest }) => ({
-      ...rest,
-      config: {
-        use_global_filters: !ignoreFilters,
-        ignore_validations: legacyControlGroupOptions.ignoreValidations,
-        ...config,
-      },
-    }));
+  if (pinnedPanels) {
+    console.log({ pinnedPanels });
+    /**
+     * >=9.4, pinned panels are stored under the key `pinned_panels` without any JSON bucketing
+     */
+    const panels = pinnedPanels.panels;
+    return injectControlReferences(
+      Object.entries(panels).map(([id, { explicitInput, order, ...rest }]) => {
+        console.log(rest);
+        return {
+          ...rest,
+          uid: id,
+          config: {
+            // use_global_filters: !ignoreFilters,
+            // ignore_validations: legacyControlGroupOptions.ignoreValidations,
+            ...explicitInput,
+          },
+        };
+      }),
+      containerReferences
+    );
+  } else if (controlGroupInput) {
+    /**
+     * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
+     */
+    const controls = controlGroupInput.panelsJSON
+      ? transformLegacyControlsState(controlGroupInput.panelsJSON, containerReferences)
+      : [];
+    console.log({ controls: JSON.stringify(controls) });
+    /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
+    const legacyControlGroupOptions: LegacyIgnoreParentSettings | undefined =
+      controlGroupInput.ignoreParentSettingsJSON
+        ? JSON.parse(controlGroupInput.ignoreParentSettingsJSON)
+        : undefined;
+    if (legacyControlGroupOptions) {
+      // Ignore filters if the legacy control group option is set to ignore filters, or if the legacy chaining system
+      // is set to NONE. Including the chaining system check inside this if block is okay to do, because we don't expect
+      // a legacy chaining system to be defined without legacyCon4trolGroupOptions also being defined
+      const ignoreFilters =
+        controlGroupInput.chainingSystem === 'NONE' ||
+        legacyControlGroupOptions.ignoreFilters ||
+        legacyControlGroupOptions.ignoreQuery;
+      controls.map(({ config, ...rest }) => ({
+        ...rest,
+        config: {
+          use_global_filters: !ignoreFilters,
+          ignore_validations: legacyControlGroupOptions.ignoreValidations,
+          ...config,
+        },
+      }));
+    }
+    return controls;
   }
-
-  return controls;
+  return;
 }

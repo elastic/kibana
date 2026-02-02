@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from 'utility-types';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState, StoredPinnedControlState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
 import { prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
@@ -26,7 +26,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
       const { uid = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
-      let transformedControlState = { ...controlState } as Partial<StoredPinnedControlState>;
+      let transformedControlState = { ...controlState } as Partial<LegacyStoredPinnedControlState>;
       try {
         if (transforms?.transformIn) {
           const transformed = transforms.transformIn(controlState.config);
@@ -36,12 +36,12 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
             ...prefixReferencesFromPanel(uid, transformed.references ?? []),
           ];
           // update the reference names in the SO so that we can inject the references later
-          const transformedState = transformed.state as Writable<StoredPinnedControlState>;
+          const transformedState = transformed.state as Writable<LegacyStoredPinnedControlState>;
           if ('dataViewRefName' in transformedState) {
             transformedControlState = {
               ...transformedControlState,
               explicitInput: {
-                ...(transformedState as StoredPinnedControlState['explicitInput']),
+                ...(transformedState as LegacyStoredPinnedControlState['explicitInput']),
                 dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
               },
             };
@@ -49,7 +49,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
         } else {
           transformedControlState = {
             ...transformedControlState,
-            explicitInput: controlState.config as StoredPinnedControlState['explicitInput'],
+            explicitInput: controlState.config as LegacyStoredPinnedControlState['explicitInput'],
           };
         }
       } catch (transformInError) {
@@ -76,7 +76,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
   );
 
   return {
-    controlsJSON: JSON.stringify(updatedControls),
+    controls: updatedControls,
     references,
   };
 }

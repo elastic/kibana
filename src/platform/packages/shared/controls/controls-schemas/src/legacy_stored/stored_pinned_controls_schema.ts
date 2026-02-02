@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  storedOptionsListDSLControlSchema,
+  legacyStoredOptionsListDSLControlSchema,
   storedOptionsListESQLControlSchema,
 } from './stored_options_list_schema';
 import { storedRangeSliderControlSchema } from './stored_range_slider_schema';

@@ -23,7 +23,7 @@ import { embeddableService, logger } from '../../../kibana_services';
 /**
  * Transform functions for serialized controls state.
  */
-export const transformControlsState: (
+export const transformLegacyControlsState: (
   serializedControlState: string,
   containerReferences: Reference[]
 ) => DashboardControlsState = (serializedControlState, containerReferences) => {
@@ -60,8 +60,9 @@ export function injectControlReferences(
   containerReferences: Reference[]
 ): DashboardControlsState {
   const transformedControls: DashboardControlsState = [];
-
+  console.log({ controls });
   controls.forEach((control) => {
+    console.log({ here: control });
     const transforms = embeddableService.getTransforms(control.type);
     const { config, ...rest } = control;
     if (transforms?.transformOut) {

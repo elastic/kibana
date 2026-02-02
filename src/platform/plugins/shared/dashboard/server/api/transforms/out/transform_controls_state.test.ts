@@ -17,7 +17,7 @@ import type { StoredPinnedControls } from '@kbn/controls-schemas';
 import {
   transformControlObjectToArray,
   transformControlProperties,
-  transformControlsState,
+  transformLegacyControlsState,
 } from './transform_controls_state';
 
 jest.mock('../../../kibana_services', () => ({
@@ -84,7 +84,7 @@ describe('control_state', () => {
   describe('transformControlsState', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = JSON.stringify(mockControls);
-      const result = transformControlsState(serializedControlState, []);
+      const result = transformLegacyControlsState(serializedControlState, []);
       expect(result).toEqual([
         {
           uid: 'control1',

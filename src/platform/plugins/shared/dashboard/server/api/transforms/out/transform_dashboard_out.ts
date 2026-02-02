@@ -21,6 +21,7 @@ export function transformDashboardOut(
   references?: SavedObjectReference[]
 ): DashboardState | Partial<DashboardState> {
   const {
+    pinned_panels,
     controlGroupInput,
     description,
     kibanaSavedObjectMeta,
@@ -40,14 +41,17 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  let pinnedControlsOut;
-  if (controlGroupInput) {
-    pinnedControlsOut = transformControlGroupOut(
-      controlGroupInput,
-      references ?? [],
-      controlGroupInput?.ignoreParentSettingsJSON // legacy for controls prior to v9.2.0
-    );
-  }
+  const pinnedControlsOut = transformControlGroupOut(
+    controlGroupInput,
+    pinned_panels,
+    references ?? []
+  );
+  console.log({ pinnedControlsOut });
+
+  pinnedControlsOut?.forEach((control) => {
+    console.log({ control });
+  });
+
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
@@ -56,7 +60,7 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const options = transformOptionsOut(optionsJSON ?? '{}', controlGroupInput?.showApplySelections);
+  const options = transformOptionsOut(optionsJSON ?? '{}', pinned_panels?.showApplySelections);
 
   // try to maintain a consistent (alphabetical) order of keys
   return {
