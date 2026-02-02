@@ -247,17 +247,26 @@ export const storedPackagePoliciesToAgentInputs = async (
         await getPackagePolicySavedObjectType(),
         packagePolicy.id
       );
-      const versionInputs = packagePolicySO?.attributes.inputs_for_versions?.[agentVersion];
-      if (!versionInputs) {
-        span?.end();
-        throw new Error(
-          `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}`
-        );
+      const inputsForVersions = packagePolicySO?.attributes.inputs_for_versions;
+      const hasVersionSpecificInputs =
+        inputsForVersions && Object.keys(inputsForVersions).length > 0;
+
+      if (hasVersionSpecificInputs) {
+        // Package has version conditions - we should have compiled inputs for this version
+        const versionInputs = inputsForVersions[agentVersion];
+        if (!versionInputs) {
+          span?.end();
+          throw new Error(
+            `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
+              `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
+          );
+        }
+        packagePolicyWithUpdatedInputs = {
+          ...packagePolicy,
+          inputs: versionInputs,
+        };
       }
-      packagePolicyWithUpdatedInputs = {
-        ...packagePolicy,
-        inputs: versionInputs,
-      };
+      // If no version-specific inputs exist, package doesn't have version conditions - use default inputs
       span?.end();
     }
 
