@@ -67,7 +67,7 @@ export interface EntityEngineInstallationDescriptor {
    * {
    *   set: {
    *     field: 'entity.type',
-   *     value: 'Identity',
+   *     value: 'user',
    *   },
    * },
    * ],
@@ -78,7 +78,7 @@ export interface EntityEngineInstallationDescriptor {
    *   {
    *     set: {
    *       field: 'entity.type',
-   *       value: 'Host',
+   *       value: 'host',
    *     },
    *   },
    * ],

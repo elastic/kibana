@@ -27,7 +27,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     esqlEvaluation: `CASE(${esqlIsNotNullOrEmpty('service.name')}, service.name, NULL)`,
   },
   indexPatterns: [],
-  entityTypeFallback: 'Service',
+  entityTypeFallback: 'service',
   fields: [
     collect({ source: 'service.name' }),
     collect({ source: 'service.address' }),

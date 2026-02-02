@@ -13,7 +13,21 @@ const DATA_VIEW_ID = 'entity-store-user-data-view';
 
 export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttributes => {
   const namespace = spaceId || 'default';
-  const entityStoreIndexPattern = `.entities.v1.latest.security_user_${namespace}`;
+  const entityStoreIndexPattern = `.entities.v2.latest.security_user_${namespace}`;
+
+  // Ad-hoc data view refs must be in state.internalReferences so Lens does not try to load them as saved objects (SavedObjectNotFound)
+  const internalReferences = [
+    {
+      id: DATA_VIEW_ID,
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern' as const,
+    },
+    {
+      id: DATA_VIEW_ID,
+      name: `indexpattern-datasource-layer-${LAYER_ID}`,
+      type: 'index-pattern' as const,
+    },
+  ];
 
   return {
     description: '',
@@ -25,6 +39,7 @@ export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttr
           timeFieldName: '@timestamp',
         },
       },
+      internalReferences,
       datasourceStates: {
         formBased: {
           layers: {
@@ -38,7 +53,7 @@ export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttr
                   label: ' ',
                   operationType: 'unique_count',
                   scale: 'ratio',
-                  sourceField: 'user.name',
+                  sourceField: 'entity.id',
                 },
               },
               incompleteColumns: {},
@@ -56,18 +71,7 @@ export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttr
     },
     title: '[User] Users - metric',
     visualizationType: 'lnsLegacyMetric',
-    references: [
-      {
-        id: DATA_VIEW_ID,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: DATA_VIEW_ID,
-        name: `indexpattern-datasource-layer-${LAYER_ID}`,
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
   } as LensAttributes;
 };
 

@@ -57,6 +57,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   const {
     additionalRequests,
     additionalResponses,
+    adHocDataViews,
     handleClick,
     handleCloseModal,
     isButtonDisabled,
@@ -103,6 +104,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
         <ModalInspectQuery
           additionalRequests={additionalRequests}
           additionalResponses={additionalResponses}
+          adHocDataViews={adHocDataViews}
           closeModal={handleCloseModal}
           data-test-subj="inspect-modal"
           inputId={inputId}

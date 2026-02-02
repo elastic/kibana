@@ -17,7 +17,21 @@ const DATA_VIEW_ID = 'entity-store-host-data-view';
 export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttributes => {
   return ({ extraOptions }) => {
     const namespace = spaceId || extraOptions?.spaceId || 'default';
-    const entityStoreIndexPattern = `.entities.v1.latest.security_host_${namespace}`;
+    const entityStoreIndexPattern = `.entities.v2.latest.security_host_${namespace}`;
+
+    // Ad-hoc data view refs must be in state.internalReferences so Lens does not try to load them as saved objects (SavedObjectNotFound)
+    const internalReferences = [
+      {
+        id: DATA_VIEW_ID,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern' as const,
+      },
+      {
+        id: DATA_VIEW_ID,
+        name: `indexpattern-datasource-layer-${layerHostName}`,
+        type: 'index-pattern' as const,
+      },
+    ];
 
     return {
       description: '',
@@ -29,6 +43,7 @@ export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttribute
             timeFieldName: '@timestamp',
           },
         },
+        internalReferences,
         datasourceStates: {
           formBased: {
             layers: {
@@ -48,10 +63,10 @@ export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttribute
                     customLabel: true,
                     dataType: 'number',
                     isBucketed: false,
-                    label: UNIQUE_COUNT('host.name'),
+                    label: UNIQUE_COUNT('entity.id'),
                     operationType: 'unique_count',
                     scale: 'ratio',
-                    sourceField: 'host.name',
+                    sourceField: 'entity.id',
                   },
                 },
                 incompleteColumns: {},
@@ -85,18 +100,7 @@ export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttribute
       },
       title: '[Host] Hosts - area',
       visualizationType: 'lnsXY',
-      references: [
-        {
-          id: DATA_VIEW_ID,
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: DATA_VIEW_ID,
-          name: `indexpattern-datasource-layer-${layerHostName}`,
-          type: 'index-pattern',
-        },
-      ],
+      references: [],
     } as LensAttributes;
   };
 };

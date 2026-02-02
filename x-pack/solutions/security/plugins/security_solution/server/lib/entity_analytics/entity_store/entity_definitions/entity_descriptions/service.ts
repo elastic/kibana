@@ -12,7 +12,7 @@ import { collectValues as collect, newestValue } from './field_utils';
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
 export const SERVICE_IDENTITY_FIELD = 'service.name';
 
-const SERVICE_ENTITY_TYPE = 'Service';
+const SERVICE_ENTITY_TYPE = 'service';
 export const serviceEntityEngineDescription: EntityDescription = {
   entityType: 'service',
   version: SERVICE_DEFINITION_VERSION,

@@ -71,12 +71,13 @@ export const listEntitiesRoute = (
 
           // just override the entity field with the normalized fields
           records.forEach((record) => {
-            const result = buildNormalizedFields(record.entity, [
+            const entity = record.entity ?? {};
+            const result = buildNormalizedFields(entity, [
               'behaviors',
               'lifecycle',
               'attributes',
             ]);
-            record.entity = { ...record.entity, ...result };
+            record.entity = { ...entity, ...result };
           });
 
           telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
@@ -107,7 +108,10 @@ export const listEntitiesRoute = (
     );
 };
 
-function buildNormalizedFields(obj: Record<string, unknown>, properties: string[]) {
+function buildNormalizedFields(obj: Record<string, unknown> | null | undefined, properties: string[]) {
+  if (obj == null) {
+    return {};
+  }
   // only use properties whose val is an object, skip them if undefined or some other type
   const hasObjVal = (p: string) =>
     obj[p] !== null && typeof obj[p] === 'object' && !Array.isArray(obj[p]);

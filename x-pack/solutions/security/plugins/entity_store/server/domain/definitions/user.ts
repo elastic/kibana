@@ -53,7 +53,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
                 NULL
               )`,
   },
-  entityTypeFallback: 'Identity',
+  entityTypeFallback: 'user',
   indexPatterns: [],
   fields: [
     collect({ source: 'user.domain' }),

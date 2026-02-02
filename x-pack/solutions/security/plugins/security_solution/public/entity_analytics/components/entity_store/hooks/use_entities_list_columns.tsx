@@ -138,7 +138,9 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       render: (record: Entity) => {
         const entityType = getEntityType(record);
 
-        const value = record.entity.name;
+        // Entity store v2 may use entity.display_name when entity.name is not set
+        const value =
+          record.entity?.name ?? (record.entity as { display_name?: string })?.display_name;
         const onClick = () => {
           const id = EntityPanelKeyByType[entityType];
 
@@ -198,10 +200,13 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       truncateText: { lines: 2 },
       render: (_: string, record: Entity) => {
         const entityType = getEntityType(record);
+        const entityWithDisplayName = record.entity as { name?: string; display_name?: string };
+        console.log('entityWithDisplayName', entityWithDisplayName);
+        const name = entityWithDisplayName?.name ?? entityWithDisplayName?.display_name ?? '';
         return (
           <span>
             <EuiIcon type={EntityIconByType[entityType]} />
-            <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
+            <span css={{ paddingLeft: euiTheme.size.s }}>{name}</span>
           </span>
         );
       },

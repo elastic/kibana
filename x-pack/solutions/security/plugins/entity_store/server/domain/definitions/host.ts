@@ -47,7 +47,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
                 NULL
               )`,
   },
-  entityTypeFallback: 'Host',
+  entityTypeFallback: 'host',
   indexPatterns: [],
   fields: [
     collect({ source: 'host.name' }),
