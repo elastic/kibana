@@ -76,7 +76,7 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
           },
           {
             id: '123',
-            attributes: { milestoneId: [1, 2, 3] },
+            attributes: { openTODOs: [1, 2, 3] },
             score: 0,
             references: [],
             type: NBA_SAVED_OBJECT_TYPE,
@@ -135,7 +135,7 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
   });
 
   describe('update', () => {
-    it('should update milestoneId', async () => {
+    it('should update openTODOs', async () => {
       const openTODOs = [Milestone.M2, Milestone.M4];
       const savedObjectId = 'abc';
       soClient.update.mockResolvedValue({

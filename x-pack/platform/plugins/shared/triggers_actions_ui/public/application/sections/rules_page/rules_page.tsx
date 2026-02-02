@@ -17,11 +17,16 @@ import {
   getEditRuleRoute,
   getRulesAppDetailsRoute,
   rulesAppDetailsRoute,
+  getCreateRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
+import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
 import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
+import { CreateRuleButton } from '../rules_list/components/create_rule_button';
 import { getCurrentDocTitle } from '../../lib/doc_title';
 import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
@@ -39,12 +44,11 @@ const RulesPage = () => {
     application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
     http,
     notifications: { toasts },
+    ruleTypeRegistry,
   } = useKibana().services;
   const currentAppId = useObservable(currentAppId$, undefined);
 
-  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
-
-  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+  const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes: [],
@@ -72,6 +76,19 @@ const RulesPage = () => {
       ),
     });
   }
+  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
+
+  const openRuleTypeModal = useCallback(() => {
+    setRuleTypeModalVisibility(true);
+  }, []);
+
+  const headerActions = [
+    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
+    <RulesSettingsLink
+      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+    />,
+    <RulesListDocLink />,
+  ];
 
   const onSectionChange = (newSection: Section) => {
     if (newSection === 'logs') {
@@ -126,7 +143,6 @@ const RulesPage = () => {
           consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
           showCreateRuleButtonInPrompt={true}
-          setHeaderActions={setHeaderActions}
           navigateToEditRuleForm={navigateToEditRuleForm}
           navigateToCreateRuleForm={navigateToCreateRuleForm}
           ruleDetailsRoute={rulesAppDetailsRoute}
@@ -142,7 +158,6 @@ const RulesPage = () => {
           LogsList,
           'xl'
         )({
-          setHeaderActions,
           getRuleDetailsRoute: getRulesAppDetailsRoute,
         })}
       </KibanaPageTemplate.Section>
@@ -165,40 +180,69 @@ const RulesPage = () => {
   }, [docTitle, setBreadcrumbs, currentSection, getUrlForApp, isAppRegistered]);
 
   return (
-    <RulesPageTemplate
-      pageHeader={{
-        paddingSize: 'xl',
-        bottomBorder: true,
-        pageTitle: (
-          <span data-test-subj="rulesPageTitle">
+    <>
+      <RulesPageTemplate
+        pageHeader={{
+          paddingSize: 'xl',
+          bottomBorder: true,
+          pageTitle: (
+            <span data-test-subj="rulesPageTitle">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesPage.pageTitle"
+                defaultMessage="Rules"
+              />
+            </span>
+          ),
+          rightSideItems: headerActions,
+          description: (
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesPage.pageTitle"
-              defaultMessage="Rules"
+              id="xpack.triggersActionsUI.rulesPage.pageDescription"
+              defaultMessage="Manage and monitor all of your rules in one place."
             />
-          </span>
-        ),
-        rightSideItems: headerActions,
-        description: (
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesPage.pageDescription"
-            defaultMessage="Manage and monitor all of your rules in one place."
-          />
-        ),
-        tabs: tabs.map((tab) => ({
-          label: tab.name,
-          onClick: () => onSectionChange(tab.id),
-          isSelected: tab.id === currentSection,
-          key: tab.id,
-          'data-test-subj': `${tab.id}Tab`,
-        })),
-      }}
-    >
-      <EuiSpacer size="l" />
-      <Routes>
-        <Route exact path="/logs" component={renderLogsList} />
-        <Route exact path="/" component={renderRulesList} />
-      </Routes>
-    </RulesPageTemplate>
+          ),
+          tabs: tabs.map((tab) => ({
+            label: tab.name,
+            onClick: () => onSectionChange(tab.id),
+            isSelected: tab.id === currentSection,
+            key: tab.id,
+            'data-test-subj': `${tab.id}Tab`,
+          })),
+        }}
+      >
+        <EuiSpacer size="l" />
+        <Routes>
+          <Route exact path="/logs" component={renderLogsList} />
+          <Route exact path="/" component={renderRulesList} />
+        </Routes>
+      </RulesPageTemplate>
+      {ruleTypeModalVisible && (
+        <RuleTypeModal
+          onClose={() => setRuleTypeModalVisibility(false)}
+          onSelectRuleType={(ruleTypeId) => {
+            if (navigateToCreateRuleForm) {
+              navigateToCreateRuleForm(ruleTypeId);
+            } else {
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
+            }
+          }}
+          onSelectTemplate={(templateId) => {
+            // For templates, we need to extract the ruleTypeId or handle it differently
+            // For now, fall back to default behavior
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                encodeURIComponent(templateId)
+              )}`,
+            });
+          }}
+          http={http}
+          toasts={toasts}
+          registeredRuleTypes={ruleTypeRegistry.list()}
+          filteredRuleTypes={[]}
+        />
+      )}
+    </>
   );
 };
 
