@@ -5,35 +5,52 @@
  * 2.0.
  */
 
-import { EuiCheckableCard, EuiTitle, EuiFormFieldset, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFormFieldset,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
+import { ProcessorFieldSelector } from '../processor_field_selector';
 
 const InternalNetworksContent = () => {
   return (
-    <EuiText>
-      <p>
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksContent',
-          { defaultMessage: 'Define them manually.' }
-        )}
-      </p>
-    </EuiText>
+    <EuiFormRow
+      label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksLabel',
+        { defaultMessage: 'Enter IPv4/IPv6 addresses, CIDR ranges, or named ranges.' }
+      )}
+    >
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiButtonIcon
+          iconType="plus"
+          display="base"
+          color="text"
+          onClick={() => {}}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksAddButton',
+            { defaultMessage: 'Add' }
+          )}
+        />
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };
 
-const InternalNetworksFieldContent = () => {
-  return (
-    <EuiText>
-      <p>
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksFieldContent',
-          { defaultMessage: 'Read them from a field.' }
-        )}
-      </p>
-    </EuiText>
-  );
-};
+const InternalNetworksFieldContent = () => (
+  <ProcessorFieldSelector
+    fieldKey="internal_networks_field"
+    label={i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksFieldLabel',
+      { defaultMessage: 'Field that contains the list of internal networks.' }
+    )}
+  />
+);
 
 interface InternalNetworksOptions {
   id: string;
@@ -70,7 +87,7 @@ export const InternalNetworksSelector = () => {
     <EuiFormFieldset
       legend={{
         children: (
-          <EuiTitle size="xs">
+          <EuiTitle size="xxs">
             <span>
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionInternalNetworksLabel',
