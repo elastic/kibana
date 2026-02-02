@@ -136,7 +136,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
-  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
+  esqlControls?: ControlPanelsState<ESQLControlState>;
   isAlertResults?: boolean;
 }
 
