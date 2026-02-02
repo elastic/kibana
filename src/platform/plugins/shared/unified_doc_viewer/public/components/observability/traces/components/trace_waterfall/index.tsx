@@ -10,15 +10,15 @@
 import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
-import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
+import { where } from '@kbn/esql-composer';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_ARIA_LABEL } from '../../common/constants';
+import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
 
 interface Props {
   traceId: string;
@@ -50,13 +50,17 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     'observability-focused-trace-waterfall'
   )?.render;
 
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.apm.traces,
+    whereClause: where(`${TRACE_ID_FIELD} == ?traceId`, { traceId }),
   });
 
-  const openInDiscoverLink = useMemo(() => {
-    return generateDiscoverLink({ [TRACE_ID_FIELD]: traceId });
-  }, [generateDiscoverLink, traceId]);
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: sectionTitle,
+    dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
+  });
 
   const actionId = 'traceWaterfallFullScreenAction';
 
@@ -89,17 +93,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
             id: actionId,
             dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
           },
-          ...(openInDiscoverLink
-            ? [
-                {
-                  icon: 'discoverApp',
-                  label: OPEN_IN_DISCOVER_LABEL,
-                  ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
-                  href: openInDiscoverLink,
-                  dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
-                },
-              ]
-            : []),
+          ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
         ]}
       >
         {docId ? (
