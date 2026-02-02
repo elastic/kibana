@@ -97,11 +97,7 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ count: number }> => {
+  handler: async ({ request, getScopedClients, server }): Promise<{ count: number }> => {
     const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -127,11 +123,7 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ promoted: number }> => {
+  handler: async ({ request, getScopedClients, server }): Promise<{ promoted: number }> => {
     const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });

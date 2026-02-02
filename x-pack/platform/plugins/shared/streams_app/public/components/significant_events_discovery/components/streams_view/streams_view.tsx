@@ -5,40 +5,25 @@
  * 2.0.
  */
 
-import { niceTimeFormatter } from '@elastic/charts';
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSearchBar,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { TaskStatus } from '@kbn/streams-schema';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { compact } from 'lodash';
+import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
-import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useInsightsApi } from '../../../../hooks/use_insights_api';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
-import { formatChangePoint } from '../../utils/change_point';
-import { SignificantEventsHistogramChart } from '../significant_events_histogram_chart/significant_events_histogram_chart';
+import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
+import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
-  OCCURRENCES_CHART_TITLE,
   RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
-import { useDiscoveryStreams } from './use_discovery_streams_fetch';
-import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -48,12 +33,14 @@ const datePickerStyle = css`
   }
 `;
 
-export function StreamsView() {
+interface StreamsViewProps {
+  refreshUnbackedQueriesCount: () => void;
+}
+
+export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
-  const { timeState } = useTimefilter();
   const streamsListFetch = useDiscoveryStreams();
   const [selectedStreams, setSelectedStreams] = useState<ListStreamDetail[]>([]);
-  const significantEventsFetchState = useFetchSignificantEvents();
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
   >({});
@@ -67,15 +54,15 @@ export function StreamsView() {
         ...currentMap,
         [streamName]: taskResult,
       }));
+
+      if (taskResult.status === TaskStatus.Completed) {
+        refreshUnbackedQueriesCount();
+      }
     },
-    []
+    [refreshUnbackedQueriesCount]
   );
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
-
-  const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
@@ -110,6 +97,8 @@ export function StreamsView() {
         return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(onboardingResult.status);
       })
       .map((item) => item.stream.name);
+
+    setSelectedStreams([]);
 
     await bulkScheduleOnboardingTask(streamList);
     streamList.forEach((streamName) => {
@@ -150,33 +139,6 @@ export function StreamsView() {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} hasBorder={false} color="subdued">
-          <EuiPanel hasBorder={true} color="plain">
-            <EuiText>
-              <h3>{OCCURRENCES_CHART_TITLE}</h3>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <SignificantEventsHistogramChart
-              id={'all-events'}
-              occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
-              changes={compact(
-                (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
-                  formatChangePoint({
-                    query: item.query,
-                    change_points: item.change_points,
-                    occurrences: item.occurrences,
-                  })
-                )
-              )}
-              xFormatter={xFormatter}
-              compressed={false}
-              height={180}
-            />
-          </EuiPanel>
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiText size="s">
             {i18n.translate(
@@ -204,7 +166,7 @@ export function StreamsView() {
           streamOnboardingResultMap={streamOnboardingResultMap}
           loading={streamsListFetch.loading}
           searchQuery={searchQuery}
-          onSelectionChange={setSelectedStreams}
+          selection={{ selected: selectedStreams, onSelectionChange: setSelectedStreams }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}
           onStopOnboardingActionClick={onStopOnboardingActionClick}
         />

@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,116 +20,97 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
-} from '../../../hooks/use_fetch_significant_events';
+} from '../../../../hooks/use_fetch_significant_events';
+import { useQueriesApi } from '../../../../hooks/use_queries_api';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
-} from '../../../hooks/use_unbacked_queries_count';
-import { SeverityBadge } from './severity_badge';
-import { LoadingPanel } from '../../loading_panel';
-import { SparkPlot } from '../../spark_plot';
-import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+} from '../../../../hooks/use_unbacked_queries_count';
+import { LoadingPanel } from '../../../loading_panel';
+import { SparkPlot } from '../../../spark_plot';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { SeverityBadge } from '../severity_badge/severity_badge';
+import {
+  CHART_SERIES_NAME,
+  CHART_TITLE,
+  IMPACT_COLUMN,
+  LAST_OCCURRED_COLUMN,
+  NO_ITEMS_MESSAGE,
+  OCCURRENCES_COLUMN,
+  OCCURRENCES_TOOLTIP_NAME,
+  PROMOTE_ALL_BUTTON,
+  PROMOTE_ALL_CALLOUT_DESCRIPTION,
+  PROMOTE_ALL_ERROR_TOAST_TITLE,
+  SEARCH_PLACEHOLDER,
+  STREAM_COLUMN,
+  SYSTEMS_COLUMN,
+  TABLE_CAPTION,
+  TITLE_COLUMN,
+  getEventsCount,
+  getPromoteAllCalloutTitle,
+  getPromoteAllSuccessToast,
+} from './translations';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-        unifiedSearch,
-      },
+      start: { unifiedSearch },
     },
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isPromoting, setIsPromoting] = useState(false);
-  const { data, isLoading: loading } = useFetchSignificantEvents({ query: searchQuery });
+  const { data, isLoading: queriesLoading } = useFetchSignificantEvents({ query: searchQuery });
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
-  const [selectedItems, setSelectedItems] = useState<SignificantEventItem[]>([]);
+  const { promoteAll } = useQueriesApi();
 
-  const onPromoteAll = async () => {
-    setIsPromoting(true);
+  const [{ loading: isPromoting }, onPromoteAll] = useAsyncFn(async () => {
     try {
-      const { promoted } = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/queries/_promote_all',
-        { signal: null }
-      );
-      toasts.addSuccess(
-        i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllSuccess', {
-          defaultMessage: 'Promoted {count} {count, plural, one {query} other {queries}}',
-          values: { count: promoted },
-        })
-      );
+      const { promoted } = await promoteAll();
+      toasts.addSuccess(getPromoteAllSuccessToast(promoted));
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['significantEvents'] }),
         queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
       ]);
     } catch (error) {
       toasts.addError(error, {
-        title: i18n.translate(
-          'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllErrorTitle',
-          { defaultMessage: 'Failed to promote queries' }
-        ),
+        title: PROMOTE_ALL_ERROR_TOAST_TITLE,
       });
-    } finally {
-      setIsPromoting(false);
     }
-  };
+  }, [promoteAll, queryClient, toasts]);
 
-  if (loading && !data) {
+  if (queriesLoading && !data) {
     return <LoadingPanel size="l" />;
   }
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
-      field: 'details',
-      name: '',
-      width: '40px',
-      render: () => (
-        <EuiButtonIcon
-          data-test-subj="queriesDetailsButton"
-          iconType="expand"
-          aria-label={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.queriesTable.detailsButtonAriaLabel',
-            { defaultMessage: 'View details' }
-          )}
-          onClick={() => {}}
-        />
-      ),
-    },
-    {
       field: 'query.title',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.titleColumn', {
-        defaultMessage: 'Title',
-      }),
+      name: TITLE_COLUMN,
       render: (_: unknown, item: SignificantEventItem) => (
         <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
       ),
     },
     {
       field: 'stream_name',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.streamColumn', {
-        defaultMessage: 'Stream',
-      }),
+      name: STREAM_COLUMN,
       render: (_: unknown, item: SignificantEventItem) => (
         <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
       ),
     },
     {
       field: 'query.feature',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.systemsColumn', {
-        defaultMessage: 'Systems',
-      }),
+      name: SYSTEMS_COLUMN,
       render: (_: unknown, item: SignificantEventItem) => {
         const systemName = item.query.feature?.name;
         return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
@@ -138,21 +118,14 @@ export function QueriesTable() {
     },
     {
       field: 'query.severity_score',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.impactColumn', {
-        defaultMessage: 'Impact',
-      }),
+      name: IMPACT_COLUMN,
       render: (_: unknown, item: SignificantEventItem) => {
         return <SeverityBadge score={item.query.severity_score} />;
       },
     },
     {
       field: 'occurrences',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.queriesTable.lastOccurredColumn',
-        {
-          defaultMessage: 'Last occurred',
-        }
-      ),
+      name: LAST_OCCURRED_COLUMN,
       render: (_: unknown, item: SignificantEventItem) => {
         const lastOccurrence = item.occurrences.findLast((occurrence) => occurrence.y !== 0);
         if (!lastOccurrence) {
@@ -175,20 +148,13 @@ export function QueriesTable() {
     },
     {
       field: 'occurrences',
-      name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesColumn',
-        {
-          defaultMessage: 'Occurrences',
-        }
-      ),
+      name: OCCURRENCES_COLUMN,
+      width: '160px',
       render: (_: unknown, item: SignificantEventItem) => {
         return (
           <SparkPlot
             id={`sparkplot-${item.query.id}`}
-            name={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.occurrencesTooltipName',
-              { defaultMessage: 'Occurrences' }
-            )}
+            name={OCCURRENCES_TOOLTIP_NAME}
             type="bar"
             timeseries={item.occurrences}
             annotations={[]}
@@ -207,36 +173,18 @@ export function QueriesTable() {
         <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
-            title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle',
-              {
-                defaultMessage:
-                  '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
-                values: { count: unbackedCount },
-              }
-            )}
-            iconType="iInCircle"
+            title={getPromoteAllCalloutTitle(unbackedCount)}
+            iconType="info"
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
-                {
-                  defaultMessage:
-                    'Create Kibana rules for these queries so they run on a schedule and generate alerts.',
-                }
-              )}
-            </p>
+            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
             <EuiButton
               fill
               onClick={onPromoteAll}
               isLoading={isPromoting}
               data-test-subj="queriesPromoteAllButton"
             >
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllButton',
-                { defaultMessage: 'Promote all' }
-              )}
+              {PROMOTE_ALL_BUTTON}
             </EuiButton>
           </EuiCallOut>
         </EuiFlexItem>
@@ -260,11 +208,8 @@ export function QueriesTable() {
                 query: searchQuery,
                 language: 'text',
               }}
-              isLoading={loading}
-              placeholder={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.queriesTable.searchPlaceholder',
-                { defaultMessage: 'Search' }
-              )}
+              isLoading={queriesLoading}
+              placeholder={SEARCH_PLACEHOLDER}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -277,25 +222,13 @@ export function QueriesTable() {
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.queriesTable.chart.title',
-                    {
-                      defaultMessage: 'Detected event occurrences',
-                    }
-                  )}
-                </h3>
+                <h3>{CHART_TITLE}</h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
               <SparkPlot
                 id="aggregated-occurrences"
-                name={i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.queriesTable.chart.seriesName',
-                  {
-                    defaultMessage: 'Occurrences',
-                  }
-                )}
+                name={CHART_SERIES_NAME}
                 type="bar"
                 timeseries={data?.aggregated_occurrences ?? []}
                 annotations={[]}
@@ -306,12 +239,7 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
-            defaultMessage: '{count} Queries',
-            values: { count: data?.significant_events.length ?? 0 },
-          })}
-        </EuiText>
+        <EuiText size="s">{getEventsCount(data?.significant_events.length ?? 0)}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -320,28 +248,12 @@ export function QueriesTable() {
               background-color: ${euiTheme.colors.backgroundBaseSubdued};
             }
           `}
-          tableCaption={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.queriesTable.tableCaption',
-            { defaultMessage: 'Queries table' }
-          )}
+          tableCaption={TABLE_CAPTION}
           columns={columns}
-          itemId="query.id"
+          itemId={(item) => item.query.id}
           items={data?.significant_events ?? []}
-          loading={loading}
-          noItemsMessage={
-            !loading
-              ? i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.queriesTable.noItemsMessage',
-                  {
-                    defaultMessage: 'No queries found',
-                  }
-                )
-              : ''
-          }
-          selection={{
-            onSelectionChange: setSelectedItems,
-            selected: selectedItems,
-          }}
+          loading={queriesLoading}
+          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

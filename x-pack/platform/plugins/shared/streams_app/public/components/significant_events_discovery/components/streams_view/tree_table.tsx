@@ -57,7 +57,7 @@ export function StreamsTreeTable({
   streams = [],
   streamOnboardingResultMap,
   searchQuery,
-  onSelectionChange,
+  selection,
   onOnboardStreamActionClick,
   onStopOnboardingActionClick,
 }: {
@@ -65,7 +65,7 @@ export function StreamsTreeTable({
   streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
   loading?: boolean;
   searchQuery?: Query;
-  onSelectionChange?: (selectedStreams: ListStreamDetail[]) => void;
+  selection: EuiTableSelectionType<ListStreamDetail>;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
@@ -239,11 +239,6 @@ export function StreamsTreeTable({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-
-  const selection: EuiTableSelectionType<TableRow> = {
-    initialSelected: [],
-    onSelectionChange,
-  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

@@ -45,15 +45,20 @@ export function cancellableTask(
       taskContext.logger.debug(
         `Running task ${runContext.taskInstance.id} with cancellation support (race)`
       );
-      // Moved the markCanceled logic into finally because with the onboarding task, run() exits
-      // early if it ends up in the BeingCanceled state in order to prevent scheduling next
-      // sub-tasks. In that case run() will "win" the race() and the task will still be in
-      // BeingCanceled state, so we must abort and mark canceled in finally.
+
       const result = await Promise.race([run(), cancellationPromise]).finally(async () => {
         clearInterval(intervalId);
 
         const task = await taskClient.get(runContext.taskInstance.id);
 
+        /**
+         * Here the task can be in BeingCanceled state in two scenarios:
+         * 1. cancellationPromise was resolved
+         * 2. run() exited early in response to cancellation. This might
+         * happen for multi-step tasks, like onboarding, in order to prevent
+         * scheduling the next sub-task while the parent task was already
+         * canceled.
+         */
         if (task.status === TaskStatus.BeingCanceled) {
           runContext.abortController.abort();
           await taskClient.markCanceled(task);
