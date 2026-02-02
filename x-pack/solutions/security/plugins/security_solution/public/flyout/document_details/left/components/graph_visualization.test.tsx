@@ -60,14 +60,8 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
 });
 
 jest.mock('../../../../common/lib/kibana', () => {
-  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
   return {
     useToasts: () => mockToasts,
-    useKibana: () => ({
-      services: {
-        notifications: notificationServiceMock.createStartContract(),
-      },
-    }),
     KibanaServices: {
       get: () => ({
         uiSettings: {

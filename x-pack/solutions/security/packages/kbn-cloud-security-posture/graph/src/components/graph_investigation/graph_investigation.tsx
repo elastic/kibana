@@ -183,11 +183,6 @@ export interface GraphInvestigationProps {
   };
 
   /**
-   * Whether to show the tour. Default value is true.
-   */
-  isTourEnabled?: boolean;
-
-  /**
    * Callback when "show entity/event preview" is clicked.
    */
   onOpenEventPreview?: (node: NodeViewModel) => void;
@@ -227,7 +222,6 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
     initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
-    isTourEnabled = true,
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
@@ -528,7 +522,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                   searchFilterCounter={searchFilterCounter}
                   searchToggled={searchToggled}
                   searchWarningMessage={searchWarningMessage}
-                  isTourEnabled={isTourEnabled}
                 />
               </Panel>
             </Graph>
