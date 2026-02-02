@@ -33,3 +33,13 @@ export type SnakeCasedKeys<StateType extends object = object> = {
       : SnakeCasedKeys<StateType[KeyType]> // recurse on nested object and snake case the keys
     : StateType[KeyType];
 };
+
+type TestType = {
+  fieldName: string;
+  optionalKey?: number;
+  anotherOptionalKey?: number;
+  arrayType?: string[];
+  nestedType?: {
+    thisIsNested?: string[];
+  };
+};

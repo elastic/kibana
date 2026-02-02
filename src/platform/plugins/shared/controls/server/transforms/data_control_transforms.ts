@@ -69,6 +69,7 @@ export function transformDataControlOut<
   /** Pick the state that we care about after ensu */
   const { title, use_global_filters, ignore_validations, field_name } =
     convertCamelCasedKeysToSnakeCase(state);
+
   return {
     title,
     data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
