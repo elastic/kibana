@@ -19,6 +19,9 @@ export const createCascadedDocumentsStateManager = ({
   internalState: InternalStateStore;
   tabId: string;
 }): CascadedDocumentsStateManager => ({
+  getIsActiveInstance() {
+    return internalState.getState().tabs.unsafeCurrentId === tabId;
+  },
   getCascadedDocuments(nodeId) {
     const currentTab = selectTab(internalState.getState(), tabId);
     return currentTab.cascadedDocumentsState.cascadedDocumentsMap[nodeId];
