@@ -19,7 +19,18 @@ import type {
 import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput, Attachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentInput,
+  Attachment,
+  VersionedAttachment,
+  AttachmentVersionRef,
+} from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  getLatestVersion,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
@@ -85,6 +96,68 @@ interface CreateConversationActionsParams extends UseConversationActionsParams {
   setAgentIdStorage: (value: string) => void;
 }
 
+const buildOptimisticAttachments = ({
+  attachments,
+  conversationAttachments,
+}: {
+  attachments?: AttachmentInput[];
+  conversationAttachments?: VersionedAttachment[];
+}): { fallbackAttachments: Attachment[]; attachmentRefs: AttachmentVersionRef[] } => {
+  if (!attachments?.length) {
+    return { fallbackAttachments: [], attachmentRefs: [] };
+  }
+
+  const existingById = new Map<string, VersionedAttachment>();
+  const existingByContentKey = new Map<string, string>();
+
+  for (const existing of conversationAttachments ?? []) {
+    const latest = getLatestVersion(existing);
+    if (!latest) continue;
+    existingById.set(existing.id, existing);
+    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
+  }
+
+  const fallbackAttachments: Attachment[] = [];
+  const attachmentRefs: AttachmentVersionRef[] = [];
+
+  attachments.forEach((input, index) => {
+    const inputId = input.id;
+    if (inputId && existingById.has(inputId)) {
+      const existing = existingById.get(inputId)!;
+      attachmentRefs.push({
+        attachment_id: inputId,
+        version: existing.current_version + 1,
+        operation: ATTACHMENT_REF_OPERATION.updated,
+        actor: ATTACHMENT_REF_ACTOR.user,
+      });
+      return;
+    }
+
+    const contentHash = hashContent(input.data);
+    const contentKey = `${input.type}:${contentHash}`;
+    if (existingByContentKey.has(contentKey)) {
+      return;
+    }
+
+    const createdId = inputId ?? `pending-attachment-${index}`;
+    fallbackAttachments.push({
+      id: createdId,
+      type: input.type,
+      data: input.data,
+      ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+    });
+    attachmentRefs.push({
+      attachment_id: createdId,
+      version: 1,
+      operation: ATTACHMENT_REF_OPERATION.created,
+      actor: ATTACHMENT_REF_ACTOR.user,
+    });
+    existingByContentKey.set(contentKey, createdId);
+  });
+
+  return { fallbackAttachments, attachmentRefs };
+};
+
 const createConversationActions = ({
   conversationId,
   queryClient,
@@ -125,13 +198,19 @@ const createConversationActions = ({
     }) => {
       setConversation(
         produce((draft) => {
-          const optimisticAttachments: Attachment[] =
-            attachments?.map((attachment, idx) => ({
-              id: `pending-attachment-${idx}`,
-              ...attachment,
-            })) ?? [];
+          const current = queryClient.getQueryData<Conversation>(queryKey);
+          const { fallbackAttachments, attachmentRefs } = buildOptimisticAttachments({
+            attachments,
+            conversationAttachments: current?.attachments,
+          });
 
-          const nextRound = createNewRound({ userMessage, attachments: optimisticAttachments });
+          const nextRound = createNewRound({
+            userMessage,
+            attachments: fallbackAttachments,
+          });
+          if (attachmentRefs.length) {
+            nextRound.input.attachment_refs = attachmentRefs;
+          }
 
           if (!draft) {
             const newConversation = createNewConversation();
