@@ -32,7 +32,11 @@ import { integrationSavedObjectType } from './saved_objects/integration';
 import { dataStreamSavedObjectType } from './saved_objects/data_stream';
 import type { DataStreamTaskParams } from './task_manager/task_manager_service';
 import { TaskManagerService } from './task_manager/task_manager_service';
-import type { CreateDataStreamParams, CreateUpdateIntegrationParams } from '../routes/types';
+import type {
+  ApproveIntegrationParams,
+  CreateDataStreamParams,
+  CreateUpdateIntegrationParams,
+} from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
@@ -189,6 +193,26 @@ export class AutomaticImportService {
       throw new Error('Saved Objects service not initialized.');
     }
     return this.savedObjectService.deleteIntegration(integrationId, options);
+  }
+
+  public async approveIntegration(params: ApproveIntegrationParams): Promise<void> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const { integrationId, authenticatedUser, version } = params;
+
+    const existing = await this.savedObjectService.getIntegration(integrationId);
+
+    const updateData: IntegrationAttributes = {
+      ...existing,
+      status: TASK_STATUSES.approved,
+      last_updated_by: authenticatedUser.username,
+      last_updated_at: new Date().toISOString(),
+      metadata: {
+        ...existing.metadata,
+      },
+    };
+
+    // Update integration status and bump semantic version (defaults to patch).
+    await this.savedObjectService.updateIntegration(updateData, version);
   }
 
   public async createDataStream(

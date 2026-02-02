@@ -28,21 +28,9 @@ export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest
 export const ApproveIntegrationRequest = z
   .object({
     /**
-     * The ID of the integration
-     */
-    integrationId: NonEmptyString,
-    /**
-     * The data streams of the integration
-     */
-    dataStreams: z.array(DataStream),
-    /**
      * The version of the integration
      */
     version: NonEmptyString,
-    /**
-     * Whether the integration is approved
-     */
-    isApproved: z.boolean(),
   })
   .strict();
 

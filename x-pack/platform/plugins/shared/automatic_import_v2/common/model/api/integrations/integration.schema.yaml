@@ -236,7 +236,7 @@ paths:
               $ref: "#/components/schemas/ApproveIntegrationRequest"
       responses:
         200:
-          description: Indicates integration has been approved correctly.
+          description: Indicates integration has been approved successfully.
         400:
           description: >-
             The request is invalid.
@@ -268,22 +268,8 @@ components:
       type: object
       additionalProperties: false
       required:
-        - integrationId
-        - dataStreams
         - version
-        - isApproved
       properties:
-        integrationId:
-          description: The ID of the integration
-          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
-        dataStreams:
-          description: The data streams of the integration
-          type: array
-          items:
-            $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/DataStream"
         version:
           description: The version of the integration
           $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
-        isApproved:
-          description: Whether the integration is approved
-          type: boolean

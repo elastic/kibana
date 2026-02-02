@@ -81,94 +81,12 @@ describe('integration schemas', () => {
 
   describe('ApproveAutoImportIntegrationRequestBody', () => {
     const validPayload = {
-      integrationId: 'integration-123',
       version: '1.0.0',
-      dataStreams: [createValidDataStream()],
-      isApproved: true,
     };
 
     it('accepts a valid payload', () => {
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(validPayload);
       expectParseSuccess(result);
-    });
-
-    it('accepts multiple data streams', () => {
-      const payload = {
-        ...validPayload,
-        dataStreams: [
-          createValidDataStream({ dataStreamId: 'ds-1', title: 'logs' }),
-          createValidDataStream({
-            dataStreamId: 'ds-2',
-            title: 'metrics',
-            inputTypes: [{ name: 'http_endpoint' as const }],
-          }),
-        ],
-      };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-    });
-
-    it('accepts an empty dataStreams array', () => {
-      const payload = { ...validPayload, dataStreams: [] };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-    });
-
-    it('requires integrationId', () => {
-      const payload = { ...validPayload };
-      delete (payload as any).integrationId;
-
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('integrationId: Required');
-    });
-
-    it('rejects empty integrationId', () => {
-      const payload = { ...validPayload, integrationId: '   ' };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('integrationId: No empty strings allowed');
-    });
-
-    it('requires dataStreams', () => {
-      const payload = { ...validPayload };
-      delete (payload as any).dataStreams;
-
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('dataStreams: Required');
-    });
-
-    it('rejects invalid dataStreams entries', () => {
-      const payload = {
-        ...validPayload,
-        dataStreams: [
-          {
-            // missing dataStreamId/title/description/inputTypes
-          },
-        ],
-      };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
-    });
-
-    it('strips unknown properties inside a data stream entry', () => {
-      const payload = {
-        ...validPayload,
-        dataStreams: [createValidDataStream({ unknown: 'property' })],
-      };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-      expect(result.data.dataStreams[0]).not.toHaveProperty('unknown');
-    });
-
-    it('rejects invalid input type in a data stream entry', () => {
-      const payload = {
-        ...validPayload,
-        dataStreams: [createValidDataStream({ inputTypes: [{ name: 'invalid-type' }] })],
-      };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
     });
 
     it('requires version', () => {
@@ -178,21 +96,6 @@ describe('integration schemas', () => {
       const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toContain('version: Required');
-    });
-
-    it('requires isApproved', () => {
-      const payload = { ...validPayload };
-      delete (payload as any).isApproved;
-
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('isApproved: Required');
-    });
-
-    it('accepts isApproved=false', () => {
-      const payload = { ...validPayload, isApproved: false };
-      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
     });
 
     it('rejects empty version', () => {
@@ -877,7 +780,14 @@ describe('integration schemas', () => {
     });
 
     it('accepts all valid task status values', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'approved',
+        'failed',
+        'cancelled',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = [

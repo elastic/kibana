@@ -229,15 +229,19 @@ const approveIntegrationRoute = (
           },
         },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
-          const { integration_id: integrationId } = request.params;
-          const { dataStreams, version } = request.body;
+          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const authenticatedUser = await getCurrentUser();
 
-          // Route stub: the actual "approve" side effects will be wired in service later.
-          logger.debug(
-            `approveIntegrationRoute: integrationId=${integrationId}, dataStreams=${dataStreams.length}, version=${version}`
-          );
+          const { integration_id: integrationId } = request.params;
+          const { version } = request.body;
+
+          await automaticImportService.approveIntegration({
+            integrationId,
+            authenticatedUser,
+            version,
+          });
 
           return response.ok({ body: { message: 'Integration approved successfully' } });
         } catch (err) {

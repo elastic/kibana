@@ -118,6 +118,80 @@ describe('AutomaticImportSetupService', () => {
         'Saved Objects service not initialized.'
       );
     });
+
+    it('should throw error when calling approveIntegration before initialize', async () => {
+      await expect(
+        service.approveIntegration({
+          integrationId: 'test-id',
+          dataStreams: [],
+          authenticatedUser: { username: 'test-user' } as any,
+          version: '1.0.0',
+        } as any)
+      ).rejects.toThrow('Saved Objects service not initialized.');
+    });
+  });
+
+  describe('approveIntegration', () => {
+    it('should update integration status to approved and bump version (expectedVersion from request)', async () => {
+      const mockGetIntegration = jest.fn().mockResolvedValue({
+        integration_id: 'integration-123',
+        created_by: 'creator',
+        status: 'pending',
+        metadata: { title: 't', description: 'd', version: '0.0.1' },
+      });
+      const mockUpdateIntegration = jest.fn().mockResolvedValue({});
+
+      (service as any).savedObjectService = {
+        getIntegration: mockGetIntegration,
+        updateIntegration: mockUpdateIntegration,
+      };
+
+      await service.approveIntegration({
+        integrationId: 'integration-123',
+        authenticatedUser: { username: 'approver-user' } as any,
+        version: '1.2.3',
+      });
+
+      expect(mockGetIntegration).toHaveBeenCalledWith('integration-123');
+      expect(mockUpdateIntegration).toHaveBeenCalledTimes(1);
+
+      const [updateData, expectedVersion] = mockUpdateIntegration.mock.calls[0];
+      expect(expectedVersion).toBe('1.2.3');
+      expect(updateData.integration_id).toBe('integration-123');
+      expect(updateData.status).toBe('approved');
+      expect(updateData.last_updated_by).toBe('approver-user');
+      expect(updateData.last_updated_at).toEqual(expect.any(String));
+      expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));
+
+      // Ensure we don't pass a versionUpdate argument explicitly.
+      expect(mockUpdateIntegration.mock.calls[0]).toHaveLength(2);
+    });
+
+    it('should propagate errors from saved object service', async () => {
+      const mockGetIntegration = jest.fn().mockResolvedValue({
+        integration_id: 'integration-123',
+        created_by: 'creator',
+        status: 'pending',
+        metadata: { title: 't', description: 'd', version: '0.0.1' },
+      });
+      const mockUpdateIntegration = jest
+        .fn()
+        .mockRejectedValue(new Error('Failed to update integration'));
+
+      (service as any).savedObjectService = {
+        getIntegration: mockGetIntegration,
+        updateIntegration: mockUpdateIntegration,
+      };
+
+      await expect(
+        service.approveIntegration({
+          integrationId: 'integration-123',
+          dataStreams: [],
+          authenticatedUser: { username: 'approver-user' } as any,
+          version: '1.2.3',
+        } as any)
+      ).rejects.toThrow('Failed to update integration');
+    });
   });
 
   describe('stop', () => {
