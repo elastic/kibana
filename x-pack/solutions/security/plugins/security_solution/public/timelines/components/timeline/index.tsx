@@ -41,6 +41,10 @@ const TimelineBody = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  @media (max-height: 400px) {
+    height: fit-content;
+    min-height: 400px;
+  }
 `;
 
 export interface Props {
