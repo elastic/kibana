@@ -24,7 +24,7 @@ export enum AppIds {
   DATA_VIEWS = 'dataViews',
   REPORTING = 'reporting',
   CONNECTORS = 'triggersActionsConnectors',
-  RULES = 'rules',
+  RULES = 'triggersActions',
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
   SERVERLESS_SETTINGS = 'settings',
   ROLES = 'roles',
