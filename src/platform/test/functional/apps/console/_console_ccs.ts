@@ -14,11 +14,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['common', 'console']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/240147
-  describe.skip('Console App CCS', function describeIndexTests() {
+  describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
@@ -46,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
         await PageObjects.console.clickPlay();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.waitForOutputPanelLoaded();
 
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();
