@@ -142,10 +142,6 @@ export async function prepareDataStreamTemplates(
 > {
   const ilmMigrationStatusMap = await getILMMigrationStatus();
 
-  // For OTel packages with dynamic_signal_types, index templates are generated for all
-  // signal type datastreams defined in the package manifest (logs, metrics, traces).
-  // At runtime, transforms will route data only to indices matching the actual pipeline
-  // signal types configured in the agent policy.
   const templates = dataStreams.map((dataStream) => {
     const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
       (datastreamFeature) =>

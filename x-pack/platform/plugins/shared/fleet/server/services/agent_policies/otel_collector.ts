@@ -157,9 +157,6 @@ function generateOTelAttributesTransform(
     // When dynamic_signal_types is true, extract signal types from pipeline IDs
     // and generate transforms for each. This allows the collector to route data
     // to the appropriate datastreams based on the pipelines configured in the policy.
-    // Index templates for all signal types (logs, metrics, traces) are created during
-    // package installation, and this transform ensures data is only routed to indices
-    // matching the actual pipeline signal types.
     const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
     // Generate transforms for each signal type found in pipelines
     signalTypes.forEach((signalType) => {
