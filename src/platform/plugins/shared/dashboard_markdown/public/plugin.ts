@@ -24,7 +24,7 @@ import {
   MARKDOWN_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
-import type { MarkdownEmbeddableState } from '../server';
+import type { MarkdownByReferenceState } from '../server';
 
 export interface MarkdownSetupDeps {
   embeddable: EmbeddableSetup;
@@ -58,13 +58,11 @@ export class DashboardMarkdownPlugin
 
       embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel<MarkdownEmbeddableState>(
+          container.addNewPanel<MarkdownByReferenceState>(
             {
               panelType: MARKDOWN_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                savedObjectId: savedObject.id,
               },
             },
             {

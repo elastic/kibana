@@ -50,7 +50,9 @@ const flexCss = css({
   flex: '1 1 100%',
 });
 
-const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
+const markdownComparators: StateComparators<MarkdownByValueState> = {
+  content: 'referenceEquality',
+};
 
 export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEmbeddableState,
@@ -217,7 +219,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 }
                 resetEditingState();
               }}
-              onSave={(value: string) => {
+              onSave={async (value: string) => {
                 resetEditingState();
                 markdownStateManager.api.setContent(value);
                 if (savedObjectId) {
