@@ -87,14 +87,14 @@ describe('TemplateSchema', () => {
     const result = TemplateSchema.safeParse(templateWithExtra);
 
     expect(result.success).toBe(true);
+    expect(result.data).toEqual(validTemplate);
+
     if (result.success) {
-      expect(result.data).toEqual(validTemplate);
       expect('extraField' in result.data).toBe(false);
     }
   });
 
-  it('accepts any string for deletedAt', () => {
-    // deletedAt is z.string().nullable() so any string is valid
+  it('does not accept random strings for deletedAt', () => {
     const templateWithStringDate = {
       ...validTemplate,
       deletedAt: 'not-an-iso-date-but-still-a-string',
@@ -102,10 +102,7 @@ describe('TemplateSchema', () => {
 
     const result = TemplateSchema.safeParse(templateWithStringDate);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.deletedAt).toBe('not-an-iso-date-but-still-a-string');
-    }
+    expect(result.success).not.toBe(true);
   });
 
   it('rejects template with number for deletedAt', () => {

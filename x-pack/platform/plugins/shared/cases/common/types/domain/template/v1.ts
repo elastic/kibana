@@ -37,9 +37,9 @@ export const TemplateSchema = z.object({
   templateVersion: z.number(),
 
   /**
-   * Deletion date, used to indicate soft-deletion. Elastic uses strings.
+   * Deletion date, used to indicate soft-deletion. Elastic uses strings, but will narrow it some more to actual dates here.
    */
-  deletedAt: z.string().nullable(),
+  deletedAt: z.string().datetime().nullable(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
