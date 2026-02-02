@@ -39,6 +39,8 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
   'Application/SaaS',
 ];
 
+const MAX_COLUMNS_PER_ROW = 3;
+
 // Helper function to convert category array to selection map
 const getMapFromCategories = (selected: CategoryOption[]): CategorySelectionMap => {
   const map: CategorySelectionMap = {} as CategorySelectionMap;
@@ -185,7 +187,7 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
                       />
                     </EuiFlexItem>
                   ))}
-                  {row.length < 3 && <EuiFlexItem grow={false} />}
+                  {row.length < MAX_COLUMNS_PER_ROW && <EuiFlexItem grow={false} />}
                 </EuiFlexGroup>
               </EuiFlexItem>
             ))}

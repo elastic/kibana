@@ -30,9 +30,7 @@ const SiemReadinessDashboard = () => {
   const { tab } = useParams<{ tab?: string }>();
 
   // State for category filtering (shared across all tabs)
-  const [selectedCategories, setSelectedCategories] = useState<CategoryOption[]>([
-    ...ALL_CATEGORIES,
-  ]);
+  const [selectedCategories, setSelectedCategories] = useState<CategoryOption[]>(ALL_CATEGORIES);
 
   // State for showing configuration modal
   const [isConfigModalVisible, setIsConfigModalVisible] = useState(false);
