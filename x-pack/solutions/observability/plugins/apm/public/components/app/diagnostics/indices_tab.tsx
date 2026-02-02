@@ -115,7 +115,7 @@ export function DiagnosticsIndices() {
         rowHeader="index"
         columns={columns}
         tableCaption={i18n.translate(
-          'xpack.observability.diagnostics.indicesTab.invalidIndicesCaption',
+          'xpack.apm.diagnostics.indicesTab.invalidIndicesCaption',
           {
             defaultMessage: 'Indices with problems',
           }
@@ -133,7 +133,7 @@ export function DiagnosticsIndices() {
         rowHeader="index"
         columns={columns}
         tableCaption={i18n.translate(
-          'xpack.observability.diagnostics.indicesTab.validIndicesCaption',
+          'xpack.apm.diagnostics.indicesTab.validIndicesCaption',
           {
             defaultMessage: 'Indices without problems',
           }
