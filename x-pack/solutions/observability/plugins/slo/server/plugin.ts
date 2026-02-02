@@ -55,7 +55,8 @@ import type {
 } from './types';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
-
+import { sloOverviewEmbeddableSchema } from './embeddable_schemas';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../public/embeddable/slo/overview/constants';
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 export class SLOPlugin
@@ -268,6 +269,10 @@ export class SLOPlugin
       core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
+    });
+
+    plugins.embeddable.registerTransforms(SLO_OVERVIEW_EMBEDDABLE_ID, {
+      getSchema: () => sloOverviewEmbeddableSchema,
     });
 
     return {};
