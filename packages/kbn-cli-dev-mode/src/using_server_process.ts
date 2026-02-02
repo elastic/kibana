@@ -23,6 +23,7 @@ interface Options {
   script: string;
   argv: string[];
   forceColor: boolean;
+  env?: Record<string, string>;
 }
 
 export function usingServerProcess<T>(
@@ -43,6 +44,7 @@ export function usingServerProcess<T>(
           isDevCliChild: 'true',
           ELASTIC_APM_SERVICE_NAME: 'kibana',
           ...(options.forceColor ? { FORCE_COLOR: 'true' } : {}),
+          ...options.env,
         },
       });
 

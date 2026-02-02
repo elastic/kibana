@@ -29,6 +29,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { Log } from './log';
 import { CliLog } from './log';
 import { Optimizer } from './optimizer';
+import { ViteServer } from './vite_server';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
@@ -59,7 +60,12 @@ export type SomeCliArgs = Pick<
   | 'cache'
   | 'dist'
   | 'basePath'
->;
+> & {
+  /**
+   * Use Vite dev server instead of webpack optimizer
+   */
+  useVite?: boolean;
+};
 
 export interface CliDevModeOptions {
   basePathProxy?: BasePathProxyServer;
@@ -104,12 +110,15 @@ export class CliDevMode {
   private readonly basePathProxy?: BasePathProxyServer;
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
-  private readonly optimizer: Optimizer;
+  private readonly optimizer?: Optimizer;
+  private readonly viteServer?: ViteServer;
+  private readonly useVite: boolean;
   private startTime?: number;
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
     this.log = log || new CliLog(!!cliArgs.silent);
+    this.useVite = !!cliArgs.useVite;
 
     if (cliArgs.basePath) {
       this.basePathProxy = getBasePathProxyServer({
@@ -125,22 +134,42 @@ export class CliDevMode {
       repoRoot: REPO_ROOT,
     });
 
+    // Build argv for the dev server, adding Vite config if enabled
+    const devServerArgv = [
+      ...process.argv.slice(2).filter((v) => v !== '--no-watch' && v !== '--use-vite'),
+      ...(this.basePathProxy
+        ? [
+            `--server.port=${this.basePathProxy.targetPort}`,
+            `--server.basePath=${this.basePathProxy.basePath}`,
+            '--server.rewriteBasePath=true',
+          ]
+        : []),
+    ];
+
+    // Pass Vite configuration to Kibana server via env var
+    // This will be picked up by the bundle routes registration
+    if (this.useVite) {
+      devServerArgv.push('--use-vite');
+    }
+
+    // Environment variables to pass to child process
+    // When Vite is enabled, pass the Vite server URL (it uses fixed ports)
+    // Plugin IDs will be passed after Vite server starts
+    const devServerEnv: Record<string, string> = {};
+    if (this.useVite) {
+      // Vite runs on fixed ports: 5173 for HTTP, 5174 for HMR
+      devServerEnv.KBN_VITE_SERVER_URL = 'http://localhost:5173';
+      // Note: KBN_VITE_PLUGIN_IDS will be set dynamically when Vite starts
+    }
+
     this.devServer = new DevServer({
       log: this.log,
       watcher: this.watcher,
       gracefulTimeout: GRACEFUL_TIMEOUT,
 
       script: Path.resolve(REPO_ROOT, 'scripts/kibana'),
-      argv: [
-        ...process.argv.slice(2).filter((v) => v !== '--no-watch'),
-        ...(this.basePathProxy
-          ? [
-              `--server.port=${this.basePathProxy.targetPort}`,
-              `--server.basePath=${this.basePathProxy.basePath}`,
-              '--server.rewriteBasePath=true',
-            ]
-          : []),
-      ],
+      argv: devServerArgv,
+      env: devServerEnv,
       mapLogLine: (line) => {
         if (!this.basePathProxy) {
           return line;
@@ -152,19 +181,51 @@ export class CliDevMode {
       },
     });
 
-    this.optimizer = new Optimizer({
-      enabled: !cliArgs.disableOptimizer,
-      repoRoot: REPO_ROOT,
-      runExamples: cliArgs.runExamples,
-      cache: cliArgs.cache,
-      dist: cliArgs.dist,
-      quiet: false,
-      silent: !!cliArgs.silent,
-      verbose: !!cliArgs.verbose,
-      watch: cliArgs.watch,
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
-    });
+    // Use either Vite or webpack optimizer based on flag
+    if (this.useVite) {
+      this.log.write(
+        Rx.of({
+          type: 'info' as const,
+          indent: false,
+          args: ['Using Vite dev server instead of webpack optimizer'],
+        })
+      );
+
+      this.viteServer = new ViteServer({
+        enabled: !cliArgs.disableOptimizer,
+        repoRoot: REPO_ROOT,
+        runExamples: cliArgs.runExamples,
+        verbose: !!cliArgs.verbose,
+        silent: !!cliArgs.silent,
+      });
+    } else {
+      this.optimizer = new Optimizer({
+        enabled: !cliArgs.disableOptimizer,
+        repoRoot: REPO_ROOT,
+        runExamples: cliArgs.runExamples,
+        cache: cliArgs.cache,
+        dist: cliArgs.dist,
+        quiet: false,
+        silent: !!cliArgs.silent,
+        verbose: !!cliArgs.verbose,
+        watch: cliArgs.watch,
+        pluginPaths: config.plugins.additionalPluginPaths,
+        pluginScanDirs: config.plugins.pluginSearchPaths,
+      });
+    }
+  }
+
+  /**
+   * Get Vite server information for the Kibana server
+   */
+  getViteConfig(): { serverUrl: string; pluginIds: string[] } | undefined {
+    if (!this.viteServer || !this.viteServer.serverUrl) {
+      return undefined;
+    }
+    return {
+      serverUrl: this.viteServer.serverUrl,
+      pluginIds: this.viteServer.pluginIds,
+    };
   }
 
   public start() {
@@ -182,6 +243,14 @@ export class CliDevMode {
       this.subscription.add(this.reportTimings(reporter));
     }
 
+    // Get the bundler ready observable (either optimizer or vite)
+    const bundlerReady$ =
+      this.useVite && this.viteServer
+        ? this.viteServer.isReady$()
+        : this.optimizer?.isReady$() ?? Rx.of(true);
+
+    const bundlerName = this.useVite ? '@kbn/vite' : '@kbn/optimizer';
+
     if (basePathProxy) {
       const serverReady$ = new Rx.BehaviorSubject(false);
       const optimizerReady$ = new Rx.BehaviorSubject(false);
@@ -190,7 +259,7 @@ export class CliDevMode {
       this.subscription.add(
         Rx.merge(
           this.devServer.isReady$().pipe(tap(serverReady$)),
-          this.optimizer.isReady$().pipe(tap(optimizerReady$)),
+          bundlerReady$.pipe(tap(optimizerReady$)),
           userWaiting$.pipe(
             distinctUntilChanged(),
             switchMap((waiting) =>
@@ -201,7 +270,9 @@ export class CliDevMode {
                       if (!optimizerReady$.getValue()) {
                         this.log.warn(
                           'please hold',
-                          'optimizer is still bundling so requests have been paused'
+                          this.useVite
+                            ? 'Vite dev server is starting so requests have been paused'
+                            : 'optimizer is still bundling so requests have been paused'
                         );
                         return;
                       }
@@ -244,14 +315,41 @@ export class CliDevMode {
       this.log.warn('no-base-path', '='.repeat(100));
     }
 
-    this.subscription.add(
-      this.optimizer.run$
-        .pipe(
-          // stop the optimizer as soon as we get an exit signal
-          takeUntil(exitSignal$)
-        )
-        .subscribe(this.observer('@kbn/optimizer'))
-    );
+    // Start either Vite or webpack optimizer
+    if (this.useVite && this.viteServer) {
+      this.subscription.add(
+        this.viteServer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
+      );
+
+      // When Vite is ready, send plugin config to Kibana server via IPC
+      this.subscription.add(
+        Rx.combineLatest([this.viteServer.isReady$(), this.devServer.isReady$()])
+          .pipe(
+            filter(([viteReady, serverReady]) => viteReady && serverReady),
+            take(1),
+            takeUntil(exitSignal$)
+          )
+          .subscribe(() => {
+            const viteConfig = this.getViteConfig();
+            if (viteConfig) {
+              this.log.write(
+                Rx.of({
+                  type: 'info' as const,
+                  indent: false,
+                  args: [
+                    `[vite] Sending plugin config to Kibana server (${viteConfig.pluginIds.length} plugins)`,
+                  ],
+                })
+              );
+              this.devServer.sendMessage('VITE_PLUGINS', viteConfig);
+            }
+          })
+      );
+    } else if (this.optimizer) {
+      this.subscription.add(
+        this.optimizer.run$.pipe(takeUntil(exitSignal$)).subscribe(this.observer(bundlerName))
+      );
+    }
 
     this.subscription.add(
       this.watcher.run$
@@ -339,6 +437,34 @@ export class CliDevMode {
    * true if they both started successfully, otherwise false
    */
   private getStarted$() {
+    // Get the bundler phase observable (either optimizer or vite)
+    const bundlerPhase$ =
+      this.useVite && this.viteServer
+        ? this.viteServer.getPhase$().pipe(
+            map((phase) => {
+              if (phase === 'error') {
+                return false;
+              }
+              if (phase === 'ready') {
+                return true;
+              }
+              return undefined;
+            })
+          )
+        : this.optimizer
+        ? this.optimizer.getPhase$().pipe(
+            map((phase) => {
+              if (phase === 'issue') {
+                return false;
+              }
+              if (phase === 'success') {
+                return true;
+              }
+              return undefined;
+            })
+          )
+        : Rx.of(true);
+
     return Rx.combineLatest([
       // convert the dev server and optimizer phase to:
       //  - true if they are started successfully
@@ -352,18 +478,10 @@ export class CliDevMode {
           if (phase === 'fatal exit') {
             return false;
           }
+          return undefined;
         })
       ),
-      this.optimizer.getPhase$().pipe(
-        map((phase) => {
-          if (phase === 'issue') {
-            return false;
-          }
-          if (phase === 'success') {
-            return true;
-          }
-        })
-      ),
+      bundlerPhase$,
     ]).pipe(
       // ignore states where either start state is undefined
       filter((states) => states.every((s) => typeof s === 'boolean')),

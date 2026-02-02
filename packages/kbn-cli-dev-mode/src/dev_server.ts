@@ -26,6 +26,7 @@ export interface Options {
   sigterm$?: Rx.Observable<void>;
   mapLogLine?: DevServer['mapLogLine'];
   forceColor?: boolean;
+  env?: Record<string, string>;
 }
 
 export class DevServer {
@@ -43,6 +44,12 @@ export class DevServer {
   private readonly gracefulTimeout: number;
   private readonly mapLogLine?: (line: string) => string | null;
   private readonly forceColor: boolean;
+  private readonly env?: Record<string, string>;
+
+  /**
+   * Reference to the current child process for IPC messaging
+   */
+  private currentProc?: import('execa').ExecaChildProcess;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -56,6 +63,7 @@ export class DevServer {
     this.sigterm$ = options.sigterm$ ?? Rx.fromEvent<void>(process, 'SIGTERM');
     this.mapLogLine = options.mapLogLine;
     this.forceColor = options.forceColor ?? !!process.stdout.isTTY;
+    this.env = options.env;
   }
 
   isReady$() {
@@ -64,6 +72,17 @@ export class DevServer {
 
   getPhase$() {
     return this.phase$.asObservable();
+  }
+
+  /**
+   * Send an IPC message to the child process
+   * @param type Message type identifier
+   * @param data Optional data payload
+   */
+  sendMessage(type: string, data?: unknown): void {
+    if (this.currentProc && this.currentProc.send) {
+      this.currentProc.send([type, data]);
+    }
   }
 
   /**
@@ -139,9 +158,13 @@ export class DevServer {
       script: this.script,
       argv: this.argv,
       forceColor: this.forceColor,
+      env: this.env,
     };
     const runServer = () =>
       usingServerProcess(serverOptions, (proc) => {
+        // Store reference for IPC messaging
+        this.currentProc = proc;
+
         this.phase$.next('starting');
         this.ready$.next(false);
 
@@ -161,6 +184,7 @@ export class DevServer {
         const exit$ = Rx.fromEvent<[number]>(proc, 'exit').pipe(
           tap(([code]) => {
             this.ready$.next(false);
+            this.currentProc = undefined; // Clear process reference
 
             if (code != null && code !== 0) {
               this.phase$.next('fatal exit');

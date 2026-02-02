@@ -37,6 +37,8 @@ export interface CliArgs {
   dist: boolean;
   serverless?: boolean;
   retrictInternalApis?: boolean;
+  /** Use Vite dev server instead of webpack optimizer (experimental) */
+  useVite?: boolean;
 }
 
 /** @internal */

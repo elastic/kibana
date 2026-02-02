@@ -267,6 +267,7 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
+      .option('--use-vite', 'Use Vite dev server instead of webpack optimizer (experimental)')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
       .option(
         '--no-dev-credentials',
@@ -322,6 +323,7 @@ export default function (program) {
       dist: !!opts.dist,
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && !!opts.uiam,
+      useVite: !!opts.useVite,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
