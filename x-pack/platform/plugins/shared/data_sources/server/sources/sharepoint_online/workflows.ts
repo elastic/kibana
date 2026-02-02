@@ -7,7 +7,7 @@
 export function generateSharepointSearchWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.search'
-description: 'Use this tool to run a Search query against SharePoint Online.'
+description: 'Use this tool to run a Search query against SharePoint Online. Inputs: - query (string, can accept Keyword Query Language queries) - entityType (Any combination of site, list, listItem, drive or driveItem) - region (Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa), defaults to NAM). Outputs: - search response payload from Microsoft Graph.'
 enabled: true
 tags:
   - workflow
@@ -43,7 +43,7 @@ steps:
 export function generateSharepointGetAllSitesWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_all_sites'
-description: 'List all SharePoint sites'
+description: 'List all SharePoint sites. Inputs: none. Outputs: - value (array of sites with id, displayName, webUrl, siteCollection) - @odata.nextLink (optional pagination URL).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -58,7 +58,7 @@ steps:
 export function generateSharepointGetSiteWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site'
-description: 'Get metadata for a SharePoint site by site ID'
+description: 'Get metadata for a SharePoint site by site ID. Inputs: - site_id (string). Outputs: - site details (id, displayName, webUrl, siteCollection, createdDateTime, lastModifiedDateTime).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -77,7 +77,7 @@ steps:
 export function generateSharepointGetSitePagesWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_pages'
-description: 'Use this tool to get all of the pages of a _specific_ SharePoint Online site'
+description: 'Use this tool to get all of the pages of a specific SharePoint Online site. Inputs: - site_id (string). Outputs: - value (array of pages with id, title, description, webUrl, createdDateTime, lastModifiedDateTime) - @odata.nextLink (optional pagination URL).'
 
 enabled: true
 tags:
@@ -102,7 +102,7 @@ steps:
 export function generateSharepointGetSitePageContentsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_page_contents'
-description: "Use this tool to get the contents of a particular Site page."
+description: 'Use this tool to get the contents of a particular site page. Inputs: - site_id (string) - page_id (string). Outputs: - page details including canvasLayout.'
 enabled: true
 triggers:
   - type: 'manual'
@@ -124,7 +124,7 @@ steps:
 export function generateSharepointGetSiteDrivesWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_drives'
-description: 'List drives for a SharePoint site'
+description: 'List drives for a SharePoint site. Inputs: - site_id (string). Outputs: - value (array of drives with id, name, driveType, webUrl, createdDateTime, lastModifiedDateTime, description, owner) - @odata.nextLink (optional pagination URL).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -143,7 +143,7 @@ steps:
 export function generateSharepointGetSiteListsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_lists'
-description: 'List lists for a SharePoint site'
+description: 'List lists for a SharePoint site. Inputs: - site_id (string). Outputs: - value (array of lists with id, displayName, name, webUrl, description, createdDateTime, lastModifiedDateTime) - @odata.nextLink (optional pagination URL).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -162,7 +162,7 @@ steps:
 export function generateSharepointGetSiteListItemsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_site_list_items'
-description: 'List items for a SharePoint list'
+description: 'List items for a SharePoint list. Inputs: - site_id (string) - list_id (string). Outputs: - value (array of list items with id, webUrl, createdDateTime, lastModifiedDateTime, createdBy, lastModifiedBy) - @odata.nextLink (optional pagination URL).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -184,7 +184,7 @@ steps:
 export function generateSharepointGetDriveItemsWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.get_drive_items'
-description: 'List items in a SharePoint drive (optionally by path)'
+description: 'List items in a SharePoint drive (optionally by path). Inputs: - drive_id (string) - path (string, optional). Outputs: - value (array of drive items with id, name, webUrl, createdDateTime, lastModifiedDateTime, size, downloadUrl) - @odata.nextLink (optional pagination URL).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -207,7 +207,7 @@ steps:
 export function generateSharepointDownloadDriveItemWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.download_drive_item'
-description: 'Download drive item content as text'
+description: 'Download drive item content as text. Inputs: - drive_id (string) - item_id (string). Outputs: - contentType - contentLength - text (UTF-8 file content).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -229,7 +229,7 @@ steps:
 export function generateSharepointDownloadItemFromUrlWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.download_item_from_url'
-description: 'Download item content from a SharePoint download URL'
+description: 'Download item content from a SharePoint download URL. Inputs: - download_url (string). Outputs: - contentType - contentLength - text (UTF-8 file content).'
 enabled: true
 triggers:
   - type: 'manual'
@@ -248,7 +248,7 @@ steps:
 export function generateSharepointCallGraphApiWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.sharepoint.call_graph_api'
-description: 'Call a Microsoft Graph v1.0 endpoint by path'
+description: 'Call a Microsoft Graph v1.0 endpoint by path. Inputs: - method (GET or POST) - path (string starting with /v1.0/) - body (optional). Outputs: - status - statusText - headers - data.'
 enabled: true
 triggers:
   - type: 'manual'

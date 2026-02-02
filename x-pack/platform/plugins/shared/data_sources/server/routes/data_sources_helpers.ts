@@ -13,7 +13,10 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
+import {
+  parseYamlToJSONWithoutValidation,
+  updateYamlField,
+} from '@kbn/workflows-management-plugin/common/lib/yaml';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -42,6 +45,23 @@ function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, '') // remove accents
     .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
     .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
+function getWorkflowDescription(yamlString: string): string | undefined {
+  const parseResult = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parseResult.success) {
+    return undefined;
+  }
+
+  const { json } = parseResult;
+  if (json && typeof json === 'object' && 'description' in json) {
+    const description = (json as Record<string, unknown>).description;
+    if (typeof description === 'string' && description.trim().length > 0) {
+      return description;
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -121,12 +141,13 @@ export async function createDataSourceAndRelatedResources(
     if (workflowInfo.shouldGenerateABTool) {
       // e.g., "sources.github.search_issues" -> "search_issues"
       const workflowBaseName = originalName.split('.').pop() || originalName;
+      const workflowDescription = getWorkflowDescription(prefixedContent);
 
       // Tool ID structure: type.data_source_name.workflow_base_name
       const tool = await toolRegistry.create({
         id: `${type}.${slugify(name)}.${workflowBaseName}`,
         type: ToolType.workflow,
-        description: `Workflow tool for ${type} data source`,
+        description: workflowDescription ?? `Workflow tool for ${type} data source`,
         tags: ['data-source', type],
         configuration: {
           workflow_id: workflow.id,

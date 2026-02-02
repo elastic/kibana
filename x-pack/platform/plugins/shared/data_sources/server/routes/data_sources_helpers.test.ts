@@ -163,7 +163,13 @@ describe('createConnectorAndRelatedResources', () => {
       stackConnector: { type: actionTypeId, config: {} },
       generateWorkflows: jest.fn().mockReturnValue([
         {
-          content: 'workflow yaml content',
+          content: `version: '1'
+name: workflow
+description: Tool description from workflow
+enabled: true
+triggers:
+  - type: manual
+steps: []`,
           shouldGenerateABTool: true,
         },
       ]),
@@ -198,16 +204,15 @@ describe('createConnectorAndRelatedResources', () => {
         }),
       }),
     });
-    expect(mockWorkflowManagement.management.createWorkflow).toHaveBeenCalledWith(
-      { yaml: 'workflow yaml content' },
-      'default',
-      mockRequest
-    );
+    const createdWorkflowYaml =
+      mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdWorkflowYaml).toContain('name: my-test-connector.workflow');
+    expect(createdWorkflowYaml).toContain('description: Tool description from workflow');
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'test_type.my-test-connector.workflow',
         type: 'workflow',
-        description: 'Workflow tool for test_type data source',
+        description: 'Tool description from workflow',
         tags: ['data-source', 'test_type'],
         configuration: {
           workflow_id: 'workflow-1',
