@@ -12,14 +12,25 @@ import { schema } from '@kbn/config-schema';
 export const sloOverviewEmbeddableSchema = schema.allOf(
   [
     schema.object({
-      slo_id: schema.string(),
-      slo_instance_id: schema.string(),
-      show_all_group_by_instances: schema.boolean(),
+      slo_id: schema.maybe(schema.string()),
+      slo_instance_id: schema.maybe(schema.string()),
+      show_all_group_by_instances: schema.maybe(schema.boolean()),
       remote_name: schema.maybe(schema.string()),
       overview_mode: schema.maybe(
         schema.oneOf([schema.literal('single'), schema.literal('groups')])
       ),
-      group_filters: schema.maybe(schema.arrayOf(schema.string())),
+      group_filters: schema.maybe(
+        schema.object({
+          group_by: schema.oneOf([
+            schema.literal('slo.tags'),
+            schema.literal('status'),
+            schema.literal('slo.indicator.type'),
+          ]),
+          groups: schema.maybe(schema.arrayOf(schema.string())),
+          filters: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          kql_query: schema.maybe(schema.string()),
+        })
+      ),
     }),
     serializedTitlesSchema,
   ],
@@ -29,7 +40,5 @@ export const sloOverviewEmbeddableSchema = schema.allOf(
     },
   }
 );
-
-// TODO - snake_caseify all of these schemas
 
 export type SloOverviewConfig = TypeOf<typeof sloOverviewEmbeddableSchema>;
