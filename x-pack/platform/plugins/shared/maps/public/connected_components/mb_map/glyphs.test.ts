@@ -26,6 +26,8 @@ jest.mock('../../kibana_services', () => ({
   },
 }));
 
+const mockedFetch = jest.spyOn(global, 'fetch');
+
 describe('EMS enabled', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -44,10 +46,9 @@ describe('EMS enabled', () => {
 
   describe('offline', () => {
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('node-fetch').default = () => {
+      mockedFetch.mockImplementation(() => {
         throw new Error('Simulated offline environment with no EMS access');
-      };
+      });
     });
 
     test('should return EMS fonts template URL before canAccessEmsFontsPromise resolves', () => {
@@ -68,10 +69,9 @@ describe('EMS enabled', () => {
 
   describe('online', () => {
     beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('node-fetch').default = () => {
-        return Promise.resolve({ status: 200 });
-      };
+      mockedFetch.mockImplementation(() => {
+        return Promise.resolve(new Response(null, { status: 200 }));
+      });
     });
 
     test('should return EMS fonts template URL before canAccessEmsFontsPromise resolves', () => {

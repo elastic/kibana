@@ -180,7 +180,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  enableAlertsAndAttacksAlignment: false,
   /**
    *  Enables the QRadar rules import feature
    */
