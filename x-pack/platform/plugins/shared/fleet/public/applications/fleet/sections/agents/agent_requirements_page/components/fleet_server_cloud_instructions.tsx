@@ -90,7 +90,7 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner data-test-subj="fleetServerConnectingSpinner" size="m" />
+            <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
