@@ -15,6 +15,8 @@ import { thresholdExecutor } from './threshold';
 import type { ThresholdAlertState } from './types';
 import type { SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
+import { getFilter } from '../utils/get_filter';
+import { esqlExecutor } from '../esql/esql';
 
 export const createThresholdAlertType = (): SecurityAlertType<
   ThresholdRuleParams,
@@ -61,6 +63,70 @@ export const createThresholdAlertType = (): SecurityAlertType<
     solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, startedAt, state } = execOptions;
+
+      const ruleParams = sharedParams.completeRule.ruleParams;
+      const { threshold } = ruleParams;
+      const byFields = threshold?.field?.join(',') ?? '';
+
+      const nullFilters = threshold.field.map((field) => `${field} IS NOT NULL`).join(' AND ');
+      const nullFiltersCommand = threshold.field.length > 0 ? ` | WHERE ${nullFilters}` : '';
+
+      const { field, value } = threshold.cardinality?.[0] ?? {};
+
+      const cardinalityAggrCommand = threshold.cardinality?.length
+        ? `, threshold.cardinality = COUNT_DISTINCT(${field})`
+        : '';
+
+      const cardinalityCommand = threshold.cardinality?.length
+        ? ` | WHERE threshold.cardinality >= ${value}`
+        : '';
+
+      const countCommand = `| WHERE threshold.count >= ${threshold.value}`;
+      const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}`;
+      const aggrByCommand = byFields ? `${aggrCommand} BY ${byFields}` : aggrCommand;
+
+      const esqlQuery = [
+        `FROM ${ruleParams.index}`,
+        nullFiltersCommand,
+        aggrByCommand,
+        countCommand,
+        cardinalityCommand,
+      ]
+        .filter(Boolean)
+        .join(' ');
+
+      const esFilter = await getFilter({
+        type: ruleParams.type,
+        filters: ruleParams.filters || [],
+        language: ruleParams.language,
+        query: ruleParams.query,
+        savedId: ruleParams.savedId,
+        services,
+        index: ruleParams.index,
+        exceptionFilter: undefined,
+        loadFields: true,
+      });
+
+      const resultEsql = await esqlExecutor({
+        ...execOptions,
+        sharedParams: {
+          ...sharedParams,
+          completeRule: {
+            ...sharedParams.completeRule,
+            ruleParams: {
+              ...ruleParams,
+              query: esqlQuery,
+            },
+          },
+        },
+        licensing: sharedParams.licensing,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
+        filters: esFilter,
+      });
+      return resultEsql;
+      // return { resultEsql, state: buildThresholdAlertStateHistory(state, []) };
+
       const result = await thresholdExecutor({
         sharedParams,
         services,

@@ -36,6 +36,7 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import type { ExcludedDocument, EsqlState } from './types';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 import {
   addToSearchAfterReturn,
@@ -63,6 +64,7 @@ export const esqlExecutor = async ({
   licensing,
   scheduleNotificationResponseActionsService,
   ruleExecutionTimeout,
+  filters,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
@@ -70,6 +72,7 @@ export const esqlExecutor = async ({
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   ruleExecutionTimeout?: string;
+  filters?: ESBoolQuery | undefined;
 }) => {
   const {
     completeRule,
@@ -130,7 +133,7 @@ export const esqlExecutor = async ({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
-          filters: dataTiersFilters,
+          filters: filters ? [filters, ...dataTiersFilters] : dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
