@@ -20,7 +20,8 @@ export {
   type AttachmentPresentationConfig,
 } from './attachment_presentation';
 export {
-  cleanToolCallHistory,
-  isCleanedResult,
-  estimateCleaningSavings,
-} from './clean_tool_history';
+  createResultTransformer,
+  type ToolCallResultTransformer,
+  type CreateResultTransformerOptions,
+  FILE_REFERENCE_TOKEN_THRESHOLD,
+} from './create_result_transformer';

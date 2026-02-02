@@ -24,12 +24,10 @@ import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/agent-builder-server/attachments';
-import type { ToolRegistry } from '../../../tools';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
-import { cleanToolCallHistory } from './clean_tool_history';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -130,12 +128,10 @@ export const prepareConversation = async ({
   previousRounds,
   nextInput,
   context,
-  toolRegistry,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
-  toolRegistry?: ToolRegistry;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
@@ -159,12 +155,8 @@ export const prepareConversation = async ({
     formatContext,
   });
 
-  const cleanedRounds = toolRegistry
-    ? await cleanToolCallHistory(previousRounds, toolRegistry)
-    : previousRounds;
-
   const processedRounds = await Promise.all(
-    cleanedRounds.map((round) => {
+    previousRounds.map((round) => {
       const strippedRound: ConversationRound = {
         ...round,
         input: { ...round.input, attachments: [] },

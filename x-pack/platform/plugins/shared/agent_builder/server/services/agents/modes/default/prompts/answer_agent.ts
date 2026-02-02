@@ -7,11 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import {
-  conversationToLangchainMessages,
-  createFilestoreResultTransformer,
-} from '../../utils/to_langchain_messages';
-import { FILESTORE_ENABLED } from '../../../../runner/store';
+import { conversationToLangchainMessages } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
@@ -24,12 +20,12 @@ type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimePar
 export const getAnswerAgentPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, answerActions, processedConversation, filestore } = params;
+  const { actions, answerActions, processedConversation, resultTransformer } = params;
 
-  // Generate initial messages from conversation, with file reference substitution when filestore is enabled
+  // Generate initial messages from conversation with result transformation
   const initialMessages = await conversationToLangchainMessages({
     conversation: processedConversation,
-    resultTransformer: FILESTORE_ENABLED ? createFilestoreResultTransformer(filestore) : undefined,
+    resultTransformer,
   });
 
   return [
@@ -106,15 +102,15 @@ export const getStructuredAnswerPrompt = async (
     answerActions,
     capabilities,
     processedConversation,
-    filestore,
+    resultTransformer,
   } = params;
   const { attachmentTypes } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
-  // Generate initial messages from conversation, with file reference substitution when filestore is enabled
+  // Generate initial messages from conversation with result transformation
   const initialMessages = await conversationToLangchainMessages({
     conversation: processedConversation,
-    resultTransformer: FILESTORE_ENABLED ? createFilestoreResultTransformer(filestore) : undefined,
+    resultTransformer,
   });
 
   return [

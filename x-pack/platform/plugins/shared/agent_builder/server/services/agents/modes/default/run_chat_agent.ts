@@ -20,6 +20,8 @@ import type { StructuredTool } from '@langchain/core/tools';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import { createResultTransformer } from '../utils/create_result_transformer';
+import { FILESTORE_ENABLED } from '../../../runner/store';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -76,6 +78,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     modelProvider,
     toolProvider,
+    toolRegistry,
     attachments,
     request,
     stateManager,
@@ -147,11 +150,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
+  // Create unified result transformer for tool result optimization
+  const resultTransformer = createResultTransformer({
+    toolRegistry,
+    filestore,
+    filestoreEnabled: FILESTORE_ENABLED,
+  });
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     filestore,
     processedConversation,
+    resultTransformer,
     outputSchema,
     conversationTimestamp,
   });

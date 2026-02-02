@@ -10,15 +10,10 @@ import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type { ToolCallStep, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import {
-  conversationToLangchainMessages,
-  createFilestoreResultTransformer,
-  FILE_REFERENCE_TOKEN_THRESHOLD,
-} from './to_langchain_messages';
+import { conversationToLangchainMessages } from './to_langchain_messages';
+import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type {
   ProcessedAttachment,
@@ -488,263 +483,8 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
     };
   };
 
-  const createMockFileStore = (entries: Map<string, FileEntry>): IFileStore => ({
-    read: jest.fn(async (path: string) => entries.get(path)),
-    ls: jest.fn(),
-    glob: jest.fn(),
-    grep: jest.fn(),
-  });
-
-  const createFileEntry = (
-    path: string,
-    tokenCount: number,
-    data: Record<string, unknown> = {}
-  ): FileEntry => ({
-    path,
-    type: 'file',
-    metadata: {
-      type: 'tool_result' as any,
-      id: 'result-id',
-      token_count: tokenCount,
-      readonly: true,
-    },
-    content: {
-      raw: data,
-      plain_text: JSON.stringify(data),
-    },
-  });
-
-  describe('createFilestoreResultTransformer', () => {
-    it('keeps tool results below threshold as-is', async () => {
-      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-        {
-          tool_result_id: 'result-1',
-          type: ToolResultType.other,
-          data: { some: 'result1' },
-        },
-      ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
-      const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
-
-      // Create file entry with token count below threshold
-      const entries = new Map<string, FileEntry>();
-      entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry('/tool_calls/search/call-1/result-1.json', 100, { some: 'result1' })
-      );
-      const filestore = createMockFileStore(entries);
-
-      const result = await conversationToLangchainMessages({
-        conversation,
-        resultTransformer: createFilestoreResultTransformer(filestore),
-      });
-
-      // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
-      expect(result).toHaveLength(5);
-      const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
-
-      // Result should be kept as-is (not replaced with file reference)
-      expect(content.results[0].type).toBe(ToolResultType.other);
-      expect(content.results[0].data).toEqual({ some: 'result1' });
-    });
-
-    it('substitutes tool results above threshold with file references', async () => {
-      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-        {
-          tool_result_id: 'result-1',
-          type: ToolResultType.other,
-          data: { some: 'large-result' },
-        },
-      ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
-      const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
-
-      // Create file entry with token count above threshold
-      const entries = new Map<string, FileEntry>();
-      entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry(
-          '/tool_calls/search/call-1/result-1.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
-          { some: 'large-result' }
-        )
-      );
-      const filestore = createMockFileStore(entries);
-
-      const result = await conversationToLangchainMessages({
-        conversation,
-        resultTransformer: createFilestoreResultTransformer(filestore),
-      });
-
-      // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
-      expect(result).toHaveLength(5);
-      const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
-
-      // Result should be replaced with file reference
-      expect(content.results[0].type).toBe(ToolResultType.fileReference);
-      expect(content.results[0].data.filepath).toBe('/tool_calls/search/call-1/result-1.json');
-      expect(content.results[0].data.comment).toContain('filestore_read');
-    });
-
-    it('handles mixed results (some above, some below threshold)', async () => {
-      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-        {
-          tool_result_id: 'result-1',
-          type: ToolResultType.other,
-          data: { small: 'result' },
-        },
-        {
-          tool_result_id: 'result-2',
-          type: ToolResultType.other,
-          data: { large: 'result' },
-        },
-      ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
-      const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
-
-      const entries = new Map<string, FileEntry>();
-      // First result below threshold
-      entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry('/tool_calls/search/call-1/result-1.json', 100, { small: 'result' })
-      );
-      // Second result above threshold
-      entries.set(
-        '/tool_calls/search/call-1/result-2.json',
-        createFileEntry(
-          '/tool_calls/search/call-1/result-2.json',
-          FILE_REFERENCE_TOKEN_THRESHOLD + 100,
-          { large: 'result' }
-        )
-      );
-      const filestore = createMockFileStore(entries);
-
-      const result = await conversationToLangchainMessages({
-        conversation,
-        resultTransformer: createFilestoreResultTransformer(filestore),
-      });
-
-      const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
-
-      // First result should be kept as-is
-      expect(content.results[0].type).toBe(ToolResultType.other);
-      expect(content.results[0].data).toEqual({ small: 'result' });
-
-      // Second result should be replaced with file reference
-      expect(content.results[1].type).toBe(ToolResultType.fileReference);
-      expect(content.results[1].data.filepath).toBe('/tool_calls/search/call-1/result-2.json');
-    });
-
-    it('keeps result if not found in filestore', async () => {
-      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-        {
-          tool_result_id: 'result-1',
-          type: ToolResultType.other,
-          data: { some: 'result' },
-        },
-      ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
-      const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
-
-      // Empty filestore - no entries
-      const filestore = createMockFileStore(new Map());
-
-      const result = await conversationToLangchainMessages({
-        conversation,
-        resultTransformer: createFilestoreResultTransformer(filestore),
-      });
-
-      const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
-
-      // Result should be kept as-is since entry not found
-      expect(content.results[0].type).toBe(ToolResultType.other);
-      expect(content.results[0].data).toEqual({ some: 'result' });
-    });
-
-    it('respects custom threshold parameter', async () => {
-      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
-        {
-          tool_result_id: 'result-1',
-          type: ToolResultType.other,
-          data: { some: 'result' },
-        },
-      ]);
-      const previousRounds = [
-        createRound({
-          id: 'round-1',
-          input: makeRoundInput('find foo'),
-          steps: [makeToolCallStep(toolCall)],
-          response: makeAssistantResponse('done!'),
-          started_at: now,
-        }),
-      ];
-      const nextInput = makeRoundInput('next');
-      const conversation = createConversation({ previousRounds, nextInput });
-
-      const entries = new Map<string, FileEntry>();
-      // Token count of 500 - below default threshold but above custom threshold of 100
-      entries.set(
-        '/tool_calls/search/call-1/result-1.json',
-        createFileEntry('/tool_calls/search/call-1/result-1.json', 500, { some: 'result' })
-      );
-      const filestore = createMockFileStore(entries);
-
-      // Use custom threshold of 100
-      const result = await conversationToLangchainMessages({
-        conversation,
-        resultTransformer: createFilestoreResultTransformer(filestore, 100),
-      });
-
-      const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
-
-      // Result should be replaced with file reference due to custom threshold
-      expect(content.results[0].type).toBe(ToolResultType.fileReference);
-    });
-  });
-
   describe('custom resultTransformer', () => {
-    it('applies custom transformer to tool results', async () => {
+    it('applies custom transformer to tool call results', async () => {
       const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
         {
           tool_result_id: 'result-1',
@@ -764,15 +504,17 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
       const nextInput = makeRoundInput('next');
       const conversation = createConversation({ previousRounds, nextInput });
 
-      // Custom transformer that adds metadata
-      const customTransformer = jest.fn(async (result, context) => ({
-        ...result,
-        data: {
-          ...result.data,
-          transformedBy: 'custom',
-          toolId: context.toolId,
-        },
-      }));
+      // Custom transformer that modifies all results from a tool call
+      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+        return toolCallArg.results.map((result) => ({
+          ...result,
+          data: {
+            ...(result.data as Record<string, unknown>),
+            transformedBy: 'custom',
+            toolId: toolCallArg.tool_id,
+          },
+        }));
+      });
 
       const result = await conversationToLangchainMessages({
         conversation,
@@ -783,12 +525,73 @@ describe('conversationToLangchainMessages with resultTransformer', () => {
       const content = JSON.parse(toolResultMessage.content as string);
 
       expect(customTransformer).toHaveBeenCalledWith(
-        expect.objectContaining({ tool_result_id: 'result-1' }),
-        { toolId: 'search', toolCallId: 'call-1' }
+        expect.objectContaining({
+          tool_call_id: 'call-1',
+          tool_id: 'search',
+          results: expect.arrayContaining([
+            expect.objectContaining({ tool_result_id: 'result-1' }),
+          ]),
+        })
       );
       expect(content.results[0].data).toEqual({
         original: 'data',
         transformedBy: 'custom',
+        toolId: 'search',
+      });
+    });
+
+    it('transformer receives all results from a tool call', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        {
+          tool_result_id: 'result-1',
+          type: ToolResultType.other,
+          data: { first: 'result' },
+        },
+        {
+          tool_result_id: 'result-2',
+          type: ToolResultType.other,
+          data: { second: 'result' },
+        },
+      ]);
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [makeToolCallStep(toolCall)],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const conversation = createConversation({ previousRounds, nextInput });
+
+      // Transformer that aggregates results
+      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+        // Aggregate all results into one
+        return [
+          {
+            tool_result_id: 'aggregated',
+            type: ToolResultType.other,
+            data: {
+              count: toolCallArg.results.length,
+              toolId: toolCallArg.tool_id,
+            },
+          },
+        ];
+      });
+
+      const result = await conversationToLangchainMessages({
+        conversation,
+        resultTransformer: customTransformer,
+      });
+
+      const toolResultMessage = result[2] as ToolMessage;
+      const content = JSON.parse(toolResultMessage.content as string);
+
+      // Should have one aggregated result
+      expect(content.results).toHaveLength(1);
+      expect(content.results[0].data).toEqual({
+        count: 2,
         toolId: 'search',
       });
     });

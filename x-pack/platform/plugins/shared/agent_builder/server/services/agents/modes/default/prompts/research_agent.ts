@@ -10,10 +10,7 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
-import {
-  conversationToLangchainMessages,
-  createFilestoreResultTransformer,
-} from '../../utils/to_langchain_messages';
+import { conversationToLangchainMessages } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
@@ -32,13 +29,13 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, processedConversation, filestore } = params;
+  const { actions, processedConversation, resultTransformer } = params;
   const clearSystemMessage = params.configuration.research.replace_default_instructions;
 
-  // Generate initial messages from conversation, with file reference substitution when filestore is enabled
+  // Generate initial messages from conversation with result transformation
   const initialMessages = await conversationToLangchainMessages({
     conversation: processedConversation,
-    resultTransformer: FILESTORE_ENABLED ? createFilestoreResultTransformer(filestore) : undefined,
+    resultTransformer,
   });
 
   return [
