@@ -844,7 +844,7 @@ Object {
         },
         "replyTo": Object {
           "items": Object {
-            "maxLength": 512, 
+            "maxLength": 512,
             "type": "string",
           },
           "maxItems": 10,
