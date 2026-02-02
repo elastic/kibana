@@ -181,10 +181,20 @@ export const skillTypeDefinitionSchema = z.object({
  * @returns The validated definition
  * @throws {z.ZodError} If validation fails
  */
-export function validateSkillTypeDefinition<TName extends string, TPath extends DirectoryPath>(
-  definition: SkillTypeDefinition<TName, TPath>
-): SkillTypeDefinition<TName, TPath> {
+export async function validateSkillTypeDefinition<
+  TName extends string,
+  TPath extends DirectoryPath
+>(definition: SkillTypeDefinition<TName, TPath>): Promise<SkillTypeDefinition<TName, TPath>> {
   skillTypeDefinitionSchema.parse(definition);
+  const allowedTools = definition.getAllowedTools?.();
+  const inlineTools = await definition.getInlineTools?.();
+  const totalToolCount = (allowedTools?.length ?? 0) + (inlineTools?.length ?? 0);
+  if (totalToolCount > 7) {
+    throw new Error(
+      'Max tool limit exceeded: a skill may define up to 7 tools. ' +
+        'Split the skill into smaller ones or combine related operations into a single tool.'
+    );
+  }
   return definition;
 }
 

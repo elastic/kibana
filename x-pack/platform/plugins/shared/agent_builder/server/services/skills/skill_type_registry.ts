@@ -10,7 +10,7 @@ import { validateSkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 
 export interface SkillTypeRegistry {
-  register(skill: SkillTypeDefinition): void;
+  register(skill: SkillTypeDefinition): Promise<void>;
   has(skillId: string): boolean;
   get(skillId: string): SkillTypeDefinition | undefined;
   list(): SkillTypeDefinition[];
@@ -24,8 +24,8 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
   private skills: Map<string, SkillTypeDefinition> = new Map();
   private skillFullPaths: Set<string> = new Set();
 
-  register(skill: SkillTypeDefinition) {
-    validateSkillTypeDefinition(skill);
+  async register(skill: SkillTypeDefinition) {
+    await validateSkillTypeDefinition(skill);
 
     if (this.skills.has(skill.id)) {
       throw new Error(`Skill type with id ${skill.id} already registered`);

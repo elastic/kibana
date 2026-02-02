@@ -11,7 +11,7 @@ export interface SkillServiceSetup {
   /**
    * @deprecated This API is still in development and not ready to be used yet.
    */
-  registerSkill(skill: SkillTypeDefinition): void;
+  registerSkill(skill: SkillTypeDefinition): Promise<void>;
 }
 
 export interface SkillServiceStart {

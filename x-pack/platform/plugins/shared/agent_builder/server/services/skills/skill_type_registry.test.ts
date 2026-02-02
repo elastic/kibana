@@ -14,7 +14,7 @@ jest.mock('@kbn/agent-builder-server/skills', () => {
   const actual = jest.requireActual('@kbn/agent-builder-server/skills');
   return {
     ...actual,
-    validateSkillTypeDefinition: jest.fn((skill) => skill),
+    validateSkillTypeDefinition: jest.fn(async (skill) => skill),
   };
 });
 
@@ -40,23 +40,23 @@ describe('SkillTypeRegistry', () => {
   });
 
   describe('register', () => {
-    it('registers a skill successfully', () => {
+    it('registers a skill successfully', async () => {
       const skill = createMockSkill();
-      expect(() => registry.register(skill)).not.toThrow();
+      await expect(registry.register(skill)).resolves.not.toThrow();
       expect(registry.has('test-skill-1')).toBe(true);
     });
 
-    it('throws error when registering duplicate skill id', () => {
+    it('throws error when registering duplicate skill id', async () => {
       const skill1 = createMockSkill({ id: 'duplicate-id' });
       const skill2 = createMockSkill({ id: 'duplicate-id', name: 'different-name' });
 
-      registry.register(skill1);
-      expect(() => registry.register(skill2)).toThrow(
+      await registry.register(skill1);
+      await expect(registry.register(skill2)).rejects.toThrow(
         'Skill type with id duplicate-id already registered'
       );
     });
 
-    it('throws error when registering skill with duplicate path and name', () => {
+    it('throws error when registering skill with duplicate path and name', async () => {
       const skill1 = createMockSkill({
         id: 'skill-1',
         name: 'same-name',
@@ -68,13 +68,13 @@ describe('SkillTypeRegistry', () => {
         basePath: 'skills/platform',
       });
 
-      registry.register(skill1);
-      expect(() => registry.register(skill2)).toThrow(
+      await registry.register(skill1);
+      await expect(registry.register(skill2)).rejects.toThrow(
         'Skill with path skills/platform and name same-name already registered'
       );
     });
 
-    it('allows different skills with same name but different base paths', () => {
+    it('allows different skills with same name but different base paths', async () => {
       const skill1 = createMockSkill({
         id: 'skill-1',
         name: 'same-name',
@@ -86,15 +86,13 @@ describe('SkillTypeRegistry', () => {
         basePath: 'skills/security/alerts',
       });
 
-      expect(() => {
-        registry.register(skill1);
-        registry.register(skill2);
-      }).not.toThrow();
+      await expect(registry.register(skill1)).resolves.not.toThrow();
+      await expect(registry.register(skill2)).resolves.not.toThrow();
       expect(registry.has('skill-1')).toBe(true);
       expect(registry.has('skill-2')).toBe(true);
     });
 
-    it('allows different skills with same base path but different names', () => {
+    it('allows different skills with same base path but different names', async () => {
       const skill1 = createMockSkill({
         id: 'skill-1',
         name: 'skill-a',
@@ -106,18 +104,16 @@ describe('SkillTypeRegistry', () => {
         basePath: 'skills/platform',
       });
 
-      expect(() => {
-        registry.register(skill1);
-        registry.register(skill2);
-      }).not.toThrow();
+      await expect(registry.register(skill1)).resolves.not.toThrow();
+      await expect(registry.register(skill2)).resolves.not.toThrow();
       expect(registry.has('skill-1')).toBe(true);
       expect(registry.has('skill-2')).toBe(true);
     });
 
-    it('validates skill definition before registering', () => {
+    it('validates skill definition before registering', async () => {
       const skill = createMockSkill();
 
-      registry.register(skill);
+      await registry.register(skill);
 
       expect(validateSkillTypeDefinition).toHaveBeenCalledWith(skill);
     });
@@ -128,15 +124,15 @@ describe('SkillTypeRegistry', () => {
       expect(registry.has('non-existent')).toBe(false);
     });
 
-    it('returns true for registered skill', () => {
+    it('returns true for registered skill', async () => {
       const skill = createMockSkill({ id: 'registered-skill' });
-      registry.register(skill);
+      await registry.register(skill);
       expect(registry.has('registered-skill')).toBe(true);
     });
 
-    it('returns false after skill is not registered', () => {
+    it('returns false after skill is not registered', async () => {
       const skill = createMockSkill({ id: 'temp-skill' });
-      registry.register(skill);
+      await registry.register(skill);
       expect(registry.has('temp-skill')).toBe(true);
       // Note: There's no delete method, so this test just verifies has works
     });
@@ -147,20 +143,20 @@ describe('SkillTypeRegistry', () => {
       expect(registry.get('non-existent')).toBeUndefined();
     });
 
-    it('returns the registered skill', () => {
+    it('returns the registered skill', async () => {
       const skill = createMockSkill({ id: 'get-skill', description: 'Get test skill' });
-      registry.register(skill);
+      await registry.register(skill);
 
       const retrieved = registry.get('get-skill');
       expect(retrieved).toEqual(skill);
     });
 
-    it('returns correct skill when multiple skills are registered', () => {
+    it('returns correct skill when multiple skills are registered', async () => {
       const skill1 = createMockSkill({ id: 'skill-1', name: 'skill-one' });
       const skill2 = createMockSkill({ id: 'skill-2', name: 'skill-two' });
 
-      registry.register(skill1);
-      registry.register(skill2);
+      await registry.register(skill1);
+      await registry.register(skill2);
 
       expect(registry.get('skill-1')).toEqual(skill1);
       expect(registry.get('skill-2')).toEqual(skill2);
@@ -172,28 +168,28 @@ describe('SkillTypeRegistry', () => {
       expect(registry.list()).toEqual([]);
     });
 
-    it('returns all registered skills', () => {
+    it('returns all registered skills', async () => {
       const skill1 = createMockSkill({ id: 'skill-1', name: 'skill-1' });
       const skill2 = createMockSkill({ id: 'skill-2', name: 'skill-2' });
       const skill3 = createMockSkill({ id: 'skill-3', name: 'skill-3' });
 
-      registry.register(skill1);
-      registry.register(skill2);
-      registry.register(skill3);
+      await registry.register(skill1);
+      await registry.register(skill2);
+      await registry.register(skill3);
 
       const list = registry.list();
       expect(list).toHaveLength(3);
       expect(list).toEqual(expect.arrayContaining([skill1, skill2, skill3]));
     });
 
-    it('returns skills in registration order', () => {
+    it('returns skills in registration order', async () => {
       const skill1 = createMockSkill({ id: 'skill-1', name: 'skill-1' });
       const skill2 = createMockSkill({ id: 'skill-2', name: 'skill-2' });
       const skill3 = createMockSkill({ id: 'skill-3', name: 'skill-3' });
 
-      registry.register(skill1);
-      registry.register(skill2);
-      registry.register(skill3);
+      await registry.register(skill1);
+      await registry.register(skill2);
+      await registry.register(skill3);
 
       const list = registry.list();
       expect(list[0]).toEqual(skill1);
@@ -201,9 +197,9 @@ describe('SkillTypeRegistry', () => {
       expect(list[2]).toEqual(skill3);
     });
 
-    it('returns a new array each time', () => {
+    it('returns a new array each time', async () => {
       const skill = createMockSkill({ id: 'skill-1' });
-      registry.register(skill);
+      await registry.register(skill);
 
       const list1 = registry.list();
       const list2 = registry.list();
@@ -228,33 +224,35 @@ describe('SkillTypeRegistry', () => {
   });
 
   describe('edge cases', () => {
-    it('handles skills with empty body', () => {
+    it('handles skills with empty body', async () => {
       const skill = createMockSkill({ body: '' });
-      expect(() => registry.register(skill)).not.toThrow();
+      await expect(registry.register(skill)).resolves.not.toThrow();
       expect(registry.get('test-skill-1')).toEqual(skill);
     });
 
-    it('handles skills with long descriptions', () => {
+    it('handles skills with long descriptions', async () => {
       const skill = createMockSkill({ description: 'a'.repeat(1000) });
-      expect(() => registry.register(skill)).not.toThrow();
+      await expect(registry.register(skill)).resolves.not.toThrow();
     });
 
-    it('handles skills with special characters in body', () => {
+    it('handles skills with special characters in body', async () => {
       const skill = createMockSkill({
         body: 'Body with "quotes" and \'apostrophes\' and\nnewlines',
       });
-      expect(() => registry.register(skill)).not.toThrow();
+      await expect(registry.register(skill)).resolves.not.toThrow();
       expect(registry.get('test-skill-1')?.body).toBe(
         'Body with "quotes" and \'apostrophes\' and\nnewlines'
       );
     });
 
-    it('handles multiple registrations and retrievals', () => {
+    it('handles multiple registrations and retrievals', async () => {
       const skills = Array.from({ length: 10 }, (_, i) =>
         createMockSkill({ id: `skill-${i}`, name: `skill-${i}` })
       );
 
-      skills.forEach((skill) => registry.register(skill));
+      for (const skill of skills) {
+        await registry.register(skill);
+      }
 
       expect(registry.list()).toHaveLength(10);
       skills.forEach((skill) => {

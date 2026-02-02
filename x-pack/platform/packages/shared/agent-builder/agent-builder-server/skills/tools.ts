@@ -25,9 +25,7 @@ export type IndexSearchSkillBoundedTool = SkillBoundToolMixin<IndexSearchToolDef
 export type WorkflowSkillBoundedTool = SkillBoundToolMixin<WorkflowToolDefinition>;
 
 /**
- * Definition of a tool which is bounded to an attachment instance.
- *
- * Refer to {@link AttachmentTypeDefinition}.
+ * Definition of a tool which is bounded to a skill instance.
  */
 export type SkillBoundedTool<RunInput extends ZodObject<any> = ZodObject<any>> =
   | BuiltinSkillBoundedTool<RunInput>
