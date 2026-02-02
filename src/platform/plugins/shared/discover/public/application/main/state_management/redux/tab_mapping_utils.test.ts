@@ -91,6 +91,10 @@ describe('tab mapping utils', () => {
               "bar": "foo",
             },
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
@@ -173,6 +177,10 @@ describe('tab mapping utils', () => {
             "visContext": Object {
               "bar": "foo",
             },
+          },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
           },
           "controlGroupState": undefined,
           "dataRequestParams": Object {
