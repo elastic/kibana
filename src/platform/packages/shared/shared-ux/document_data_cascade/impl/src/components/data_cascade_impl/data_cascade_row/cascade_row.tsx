@@ -14,7 +14,7 @@ import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
-import { StickyHeaderPortalProvider } from '../../../lib/core/sticky_header_portal';
+import { StickyHeaderPortalProvider } from '../../helpers/sticky_header_portal';
 import { isCascadeGroupRowNode } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,

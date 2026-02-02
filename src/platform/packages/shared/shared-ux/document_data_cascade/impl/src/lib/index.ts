@@ -17,4 +17,4 @@ export {
 export {
   useStickyHeaderPortal,
   type StickyHeaderPortalContextValue,
-} from './core/sticky_header_portal';
+} from '../components/helpers/sticky_header_portal';

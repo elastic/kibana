@@ -22,7 +22,7 @@ import {
   useDataCascadeActions,
 } from '../../../store_provider';
 import { useVirtualizedRowScrollState } from '../../../lib/core/virtualizer';
-import { useStickyHeaderPortal } from '../../../lib/core/sticky_header_portal';
+import { useStickyHeaderPortal } from '../../helpers/sticky_header_portal';
 import { cascadeRowCellStyles } from './cascade_row_cell.styles';
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
