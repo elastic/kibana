@@ -42,7 +42,7 @@ export const useQueryRuleFlyoutState = ({
   onSave,
 }: UseQueryRuleFlyoutStateProps) => {
   const usageTracker = useUsageTracker();
-  const { control, getValues, reset, setValue, formState, trigger } =
+  const { control, getValues, reset, setValue, formState, trigger, setFocus } =
     useFormContext<QueryRuleEditorForm>();
   const {
     fields: criteria,
@@ -320,5 +320,6 @@ export const useQueryRuleFlyoutState = ({
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
     update,
+    setFocus,
   };
 };

@@ -32,6 +32,7 @@ interface QueryRuleMetadataEditorProps {
     values?: FieldError;
     metadata?: FieldError;
   };
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = ({
@@ -39,6 +40,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   criteria,
   onChange,
   error,
+  inputRef,
 }) => {
   const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
 
