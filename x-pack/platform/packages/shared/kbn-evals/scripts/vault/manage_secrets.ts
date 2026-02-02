@@ -48,39 +48,68 @@ const KBN_EVALS_CONFIG_EXAMPLE_FILE = Path.join(
   'config.example.json'
 );
 
-const configSchema = schema.object({
-  description: schema.maybe(schema.string()),
-  contact: schema.maybe(schema.string()),
-  owner: schema.maybe(schema.string()),
-  environment: schema.maybe(schema.string()),
-  creation_date: schema.maybe(schema.string()),
-  refresh_interval: schema.maybe(schema.string()),
+const configSchema = schema.object(
+  {
+    description: schema.maybe(schema.string()),
+    contact: schema.maybe(schema.string()),
+    owner: schema.maybe(schema.string()),
+    environment: schema.maybe(schema.string()),
+    creation_date: schema.maybe(schema.string()),
+    refresh_interval: schema.maybe(schema.string()),
 
-  litellm: schema.object({
-    baseUrl: schema.string(),
-    apiKey: schema.string(),
-  }),
+    litellm: schema.object(
+      {
+        baseUrl: schema.string({ minLength: 1 }),
+        /**
+         * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
+         * This should not be the proxy master key.
+         */
+        virtualKey: schema.string({ minLength: 1 }),
+        /**
+         * Optional team id used by CI to discover models for connector generation.
+         * If omitted, CI may use a baked-in default.
+         */
+        teamId: schema.maybe(schema.string({ minLength: 1 })),
+        /**
+         * Optional, human-readable team name (not used for auth).
+         */
+        teamName: schema.maybe(schema.string({ minLength: 1 })),
+      },
+      { unknowns: 'allow' }
+    ),
 
-  /**
-   * Connector used for LLM-as-a-judge evaluators. Must match a connector ID present
-   * in the generated `KIBANA_TESTING_AI_CONNECTORS` payload.
-   */
-  evaluationConnectorId: schema.string(),
+    /**
+     * Connector used for LLM-as-a-judge evaluators. Must match a connector ID present
+     * in the generated `KIBANA_TESTING_AI_CONNECTORS` payload.
+     */
+    evaluationConnectorId: schema.string({ minLength: 1 }),
 
-  evaluationsEs: schema.object({
-    url: schema.string(),
-    apiKey: schema.string(),
-  }),
+    evaluationsEs: schema.object(
+      {
+        url: schema.string({ minLength: 1 }),
+        apiKey: schema.string({ minLength: 1 }),
+      },
+      { unknowns: 'allow' }
+    ),
 
-  tracingEs: schema.maybe(
-    schema.object({
-      url: schema.string(),
-      apiKey: schema.string(),
-    })
-  ),
-});
+    tracingEs: schema.maybe(
+      schema.object(
+        {
+          url: schema.string({ minLength: 1 }),
+          apiKey: schema.string({ minLength: 1 }),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+  },
+  { unknowns: 'allow' }
+);
 
 export type KbnEvalsCiConfig = ReturnType<typeof configSchema.validate>;
+
+export const validateKbnEvalsCiConfig = (config: unknown): KbnEvalsCiConfig => {
+  return configSchema.validate(config);
+};
 
 const ensureLocalConfigFileExists = (filePath: string) => {
   if (Fs.existsSync(filePath)) return;
@@ -102,7 +131,7 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string, fie
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
-  const validated = configSchema.validate(parsed);
+  const validated = validateKbnEvalsCiConfig(parsed);
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
@@ -115,7 +144,7 @@ export const retrieveConfigFromVault = async (vault: VaultType = 'ci-prod') => {
 export const uploadToVault = async (vaultPath: string, filePath: string, field: string) => {
   ensureLocalConfigFileExists(filePath);
   const config = await readFile(filePath, 'utf-8');
-  const validated = configSchema.validate(JSON.parse(config));
+  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   await execa('vault', ['write', vaultPath, `${field}=${asB64}`], {
@@ -134,7 +163,7 @@ export const getCommand = async (
 ) => {
   ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
   const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');
-  const validated = configSchema.validate(JSON.parse(config));
+  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   if (format === 'vault-write') {
@@ -161,5 +190,5 @@ export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsCiConfig => {
     );
   }
 
-  return configSchema.validate(config);
+  return validateKbnEvalsCiConfig(config);
 };

@@ -6,8 +6,8 @@
  */
 
 require('@kbn/babel-register').install();
-const minimist = require('minimist');
 const { getCommand } = require('./manage_secrets');
+const minimist = require('minimist');
 
 async function run() {
   const argv = minimist(process.argv.slice(2));
@@ -15,11 +15,13 @@ async function run() {
   const vault = argv.vault || 'ci-prod';
 
   if (vault !== 'ci-prod') {
+    // eslint-disable-next-line no-console
     console.error('Error: vault parameter must be "ci-prod"');
     process.exit(1);
   }
 
   if (format !== 'vault-write' && format !== 'env-var') {
+    // eslint-disable-next-line no-console
     console.error('Error: format must be "vault-write" or "env-var"');
     process.exit(1);
   }

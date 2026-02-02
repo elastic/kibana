@@ -568,7 +568,7 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
 
     // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
     const evalSuites = readEvalsSuiteMetadata();
-    const runAllEvals = GITHUB_PR_LABELS.includes('ci:kbn-evals-all');
+    const runAllEvals = GITHUB_PR_LABELS.includes('evals:all');
     const selectedEvalSuites = runAllEvals
       ? evalSuites
       : evalSuites.filter((suite) => {

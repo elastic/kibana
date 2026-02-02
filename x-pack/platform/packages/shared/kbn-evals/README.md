@@ -133,6 +133,52 @@ To see all supported environment variables:
 node scripts/evals env
 ```
 
+### CI labels
+
+Eval suites can be triggered in PR CI by adding GitHub labels:
+
+- `evals:<suite-id>` (or the explicit `ciLabels` value from `evals.suites.json`)
+- `evals:all` to run **all** eval suites
+
+### CI ops: sharing a Vault update command
+
+If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
+edit your local config and generate a Vault write command:
+
+```bash
+# 1) Copy the example (first time only)
+cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json \
+  x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
+# 2) Edit config.json with the desired values (includes secrets)
+
+# 3) Print a vault write command (contains base64-encoded config)
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
+```
+
+Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
+
+### Local dev: LiteLLM (SSO)
+
+If you have access to the internal LiteLLM gateway, you can generate a short-lived virtual key via SSO and export the connector payload needed by `@kbn/evals`:
+
+```bash
+bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
+```
+
+This script:
+
+- logs you in with `litellm-proxy login` (SSO)
+- if required by the deployment, expects `LITELLM_PROXY_API_KEY` (an `sk-...` key) to be set for `/key/*` management routes
+- generates (or reuses) a LiteLLM virtual key (`sk-...`)
+- exports `KIBANA_TESTING_AI_CONNECTORS` by discovering all models available to your team
+
+After running it, pick an `EVALUATION_CONNECTOR_ID` from the generated connector ids and run a suite:
+
+```bash
+EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite agent-builder
+```
+
 #### Local flow (trace capture)
 
 If you want local traces available for trace-based evaluators, run EDOT locally and start Scout using the built-in tracing config:

@@ -154,30 +154,44 @@ EOF
     echo "KBN_EVALS was set - exposing evals connectors and ES export credentials"
 
     KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    # Validate config shape (safe; does not print secrets)
+    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
 
     # EVAL connectors
     # NOTE: `@kbn/evals` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
     LITELLM_BASE_URL="$(jq -r '.litellm.baseUrl // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    LITELLM_API_KEY="$(jq -r '.litellm.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_VIRTUAL_KEY="$(jq -r '.litellm.virtualKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_TEAM_ID="$(jq -r '.litellm.teamId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    LITELLM_TEAM_NAME="$(jq -r '.litellm.teamName // "kibana-ci-evals"' <<<"$KBN_EVALS_CONFIG_JSON")"
 
     # Eval suites require this for the LLM-as-a-judge connector selection
     export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # Build connector configs for CI from a checked-in template and inject LiteLLM secrets at runtime.
-    # This keeps Vault scoped to a single key+URL while allowing the model list to evolve in git.
-    LITELLM_CHAT_URL="${LITELLM_BASE_URL%/}/v1/chat/completions"
     export KIBANA_TESTING_AI_CONNECTORS="$(
-      jq -c \
-        --arg apiUrl "$LITELLM_CHAT_URL" \
-        --arg apiKey "$LITELLM_API_KEY" \
-        'with_entries(
-          .value.actionTypeId = ".gen-ai"
-          | .value.config.apiProvider = "Other"
-          | .value.config.apiUrl = $apiUrl
-          | .value.secrets.apiKey = $apiKey
-        ) | @base64' \
-        x-pack/platform/packages/shared/kbn-evals/scripts/ci/litellm_connectors.template.json
+      if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+          --base-url "$LITELLM_BASE_URL" \
+          --team-id "$LITELLM_TEAM_ID" \
+          --api-key "$LITELLM_VIRTUAL_KEY" \
+          --model-prefix "llm-gateway/"
+      else
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+          --base-url "$LITELLM_BASE_URL" \
+          --team-name "$LITELLM_TEAM_NAME" \
+          --api-key "$LITELLM_VIRTUAL_KEY" \
+          --model-prefix "llm-gateway/"
+      fi
     )"
+
+    # Sanity-check: EVALUATION_CONNECTOR_ID must match a generated connector id
+    if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+      if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
+        echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated LiteLLM connectors."
+        echo "Sample generated connector ids:"
+        node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
+        exit 1
+      fi
+    fi
 
     # Elasticsearch cluster for evaluation results export
     export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"

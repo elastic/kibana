@@ -150,6 +150,11 @@ function runFastCiMap(repoRoot, args) {
   }
 
   var entries = [];
+  entries.push({
+    label: 'evals:all',
+    suiteId: '*',
+    command: 'Run all eval suites in PR CI',
+  });
   for (var i = 0; i < metadata.length; i++) {
     var suite = metadata[i];
     var labels = suite.ciLabels && suite.ciLabels.length ? suite.ciLabels : ['evals:' + suite.id];
