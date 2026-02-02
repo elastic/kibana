@@ -199,7 +199,7 @@ export function EditLifecycleModal({
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
-                    setIsSaveButtonDisabled(false);
+                    setIsSaveButtonDisabled(isCurrentLifecycleInherit);
                   } else {
                     setIsInheritToggleOn(false);
                     // When disabling inheritance with 'indefinite' selected and lifecycle is disabled,
@@ -352,12 +352,12 @@ function buildUpdatedLifecycle(
   lifecycle: IngestStreamLifecycleAll,
   { isInheritToggleOn }: { isInheritToggleOn: boolean }
 ): IngestStreamLifecycle | undefined {
-  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
-    return;
-  }
-
   if (isInheritToggleOn) {
     return { inherit: {} };
+  }
+
+  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+    return;
   }
 
   return lifecycle;
