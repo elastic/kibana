@@ -189,6 +189,8 @@ interface FetchHistogramsForFieldsParams {
     samplerShardSize: number;
     /** Optional runtime mappings for the query. */
     runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional project routing for the query. */
+    projectRouting?: string;
     /** Optional probability for random sampling. */
     randomSamplerProbability?: number;
     /** Optional seed for random sampling. */
@@ -212,6 +214,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
     runtimeMappings,
     randomSamplerProbability,
     randomSamplerSeed,
+    projectRouting,
   } = args;
 
   if (
@@ -234,6 +237,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
         runtimeMappings,
         randomSamplerProbability,
         randomSamplerSeed,
+        projectRouting,
       },
     })),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {

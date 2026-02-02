@@ -650,6 +650,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             splitFieldValue,
             runtimeMappings,
             indicesOptions,
+            projectRouting,
           } = request.body;
 
           const { newJobLineChart } = jobServiceProvider(client, mlClient);
@@ -664,7 +665,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             splitFieldName,
             splitFieldValue,
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            projectRouting
           );
 
           return response.ok({
@@ -710,6 +712,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             splitFieldName,
             runtimeMappings,
             indicesOptions,
+            projectRouting,
           } = request.body;
 
           const { newJobPopulationChart } = jobServiceProvider(client, mlClient);
@@ -723,7 +726,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             aggFieldNamePairs,
             splitFieldName,
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            projectRouting
           );
 
           return response.ok({
@@ -837,6 +841,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             analyzer,
             runtimeMappings,
             indicesOptions,
+            projectRouting,
           } = request.body;
 
           const resp = await validateCategoryExamples(
@@ -849,7 +854,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             end,
             analyzer,
             runtimeMappings,
-            indicesOptions
+            indicesOptions,
+            projectRouting
           );
 
           return response.ok({

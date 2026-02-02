@@ -120,6 +120,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
+  projectRouting?: string;
   dataView?: DataView;
   query?: Query;
 }
@@ -132,6 +133,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   legendType,
   searchQuery,
   runtimeMappings,
+  projectRouting,
   dataView,
   query,
 }) => {
@@ -328,6 +330,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           ...(isRuntimeMappings(combinedRuntimeMappings)
             ? { runtime_mappings: combinedRuntimeMappings }
             : {}),
+          ...(projectRouting ? { project_routing: projectRouting } : {}),
         };
 
         const promises = [

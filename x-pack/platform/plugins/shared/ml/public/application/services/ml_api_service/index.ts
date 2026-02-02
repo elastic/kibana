@@ -523,6 +523,7 @@ export function mlApiProvider(httpService: HttpService) {
       end,
       jobOverrides,
       estimateModelMemory,
+      projectRouting,
     }: {
       moduleId: string;
       prefix?: string;
@@ -535,6 +536,7 @@ export function mlApiProvider(httpService: HttpService) {
       end?: number;
       jobOverrides?: Array<Partial<Job>>;
       estimateModelMemory?: boolean;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         prefix,
@@ -547,6 +549,7 @@ export function mlApiProvider(httpService: HttpService) {
         end,
         jobOverrides,
         estimateModelMemory,
+        projectRouting,
       });
 
       return httpService.http<DataRecognizerConfigResponse>({
@@ -563,18 +566,21 @@ export function mlApiProvider(httpService: HttpService) {
       fields,
       samplerShardSize,
       runtimeMappings,
+      projectRouting,
     }: {
       indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
       runtimeMappings?: RuntimeMappings;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         query,
         fields,
         samplerShardSize,
         runtimeMappings,
+        projectRouting,
       });
 
       return httpService.http<any>({
@@ -724,6 +730,7 @@ export function mlApiProvider(httpService: HttpService) {
       runtimeMappings,
       indicesOptions,
       allowFutureTime,
+      projectRouting,
     }: {
       index: string;
       timeFieldName?: string;
@@ -731,6 +738,7 @@ export function mlApiProvider(httpService: HttpService) {
       runtimeMappings?: RuntimeMappings;
       indicesOptions?: IndicesOptions;
       allowFutureTime?: boolean;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         index,
@@ -739,6 +747,7 @@ export function mlApiProvider(httpService: HttpService) {
         runtimeMappings,
         indicesOptions,
         allowFutureTime,
+        projectRouting,
       });
 
       return httpService.http<GetTimeFieldRangeResponse>({

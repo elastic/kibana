@@ -69,6 +69,7 @@ export const categorizationFieldValidationSchema = schema.object({
   analyzer: schema.maybe(schema.any()),
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
+  projectRouting: schema.maybe(schema.string()),
   includeExamples: schema.boolean(),
 });
 export type CategorizationFieldValidationSchema = TypeOf<

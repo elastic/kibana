@@ -13,6 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import { PageTitle } from '../../../../components/page_title';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { Wizard } from './wizard';
@@ -55,7 +57,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin, uiSettings },
+    services: { maps: mapsPlugin, uiSettings, cps },
   } = useMlKibana();
   const mlApi = useMlApi();
   const newJobCapsService = useNewJobCapsService();
@@ -73,6 +75,15 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
+  );
+
+  if (cps?.cpsManager) {
+    jobCreator.projectRouting = cps.cpsManager.getProjectRouting() ?? null;
+  }
+
+  const projectRouting = useObservable(
+    cps?.cpsManager?.getProjectRouting$() ?? EMPTY,
+    cps?.cpsManager?.getProjectRouting()
   );
 
   const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
@@ -240,6 +251,17 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           )}
+          {cps?.cpsManager ? (
+            <span>
+              {
+                <FormattedMessage
+                  id="xpack.ml.newJob.page.createJob.projectRouting"
+                  defaultMessage=", with project routing {projectRouting}"
+                  values={{ projectRouting }}
+                />
+              }
+            </span>
+          ) : null}
         </EuiText>
 
         <Wizard

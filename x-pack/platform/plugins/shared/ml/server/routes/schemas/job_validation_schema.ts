@@ -34,6 +34,7 @@ export const estimateBucketSpanSchema = schema.object({
   timeField: schema.maybe(schema.string()),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
   indicesOptions: schema.maybe(indicesOptionsSchema),
+  projectRouting: schema.maybe(schema.string()),
 });
 
 export const modelMemoryLimitSchema = schema.object({

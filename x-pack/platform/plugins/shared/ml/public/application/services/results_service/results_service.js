@@ -585,7 +585,8 @@ export function resultsServiceProvider(mlApi) {
       latestMs,
       intervalMs,
       runtimeMappings,
-      indicesOptions
+      indicesOptions,
+      projectRouting
     ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
@@ -641,6 +642,7 @@ export function resultsServiceProvider(mlApi) {
               ...(isPopulatedObject(runtimeMappings) && query
                 ? { runtime_mappings: runtimeMappings }
                 : {}),
+              ...(projectRouting ? { project_routing: projectRouting } : {}),
             },
             ...(indicesOptions ?? {}),
           })

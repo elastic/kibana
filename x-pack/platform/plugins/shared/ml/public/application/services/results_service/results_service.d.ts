@@ -55,7 +55,8 @@ export function resultsServiceProvider(mlApi: MlApi): {
     latestMs: number,
     intervalMs: number,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    projectRouting?: string
   ): Promise<any>;
   getEventDistributionData(
     index: string,

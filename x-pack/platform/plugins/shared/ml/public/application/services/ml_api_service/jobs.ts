@@ -254,7 +254,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     splitFieldName: string | null,
     splitFieldValue: string | null,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    projectRouting?: string
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -268,6 +269,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldValue,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
     });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
@@ -287,7 +289,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    projectRouting?: string
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -300,6 +303,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldName,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
     });
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
@@ -342,6 +346,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     analyzer: CategorizationAnalyzer,
     runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions,
+    projectRouting?: string,
     includeExamples?: boolean
   ) {
     const body = JSON.stringify({
@@ -355,6 +360,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       analyzer,
       runtimeMappings,
       indicesOptions,
+      projectRouting,
       includeExamples,
     });
     return httpService.http<FieldValidationResults>({
