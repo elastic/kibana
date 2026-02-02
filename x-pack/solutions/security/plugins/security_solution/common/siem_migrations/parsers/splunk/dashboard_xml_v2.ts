@@ -6,6 +6,10 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
+import type { PanelSection, ParsedPanel, VizType } from '../types';
+import type { BaseXmlElement } from '../xml/xml';
+import { XmlParser } from '../xml/xml';
+import type { SplunkDashboardParser } from './types';
 
 const DEFAULT_PANEL_WIDTH = 20;
 const DEFAULT_PANEL_HEIGHT = 16;
@@ -85,17 +89,18 @@ interface DashboardDefinition {
   title: '';
 }
 
-import type { PanelSection, ParsedPanel, VizType } from '../types';
-import { XmlParser } from '../xml/xml';
-import type { SplunkDashboardParser } from './types';
-
 export class SplunkXmlDashboardV2Parser extends XmlParser implements SplunkDashboardParser {
   public async extractPanels(): Promise<ParsedPanel[]> {
     const root = await this.parse();
 
-    const metaStr = (this.findDeep(root, 'meta') ?? '{}') as string | Array<string>;
+    const metaEl = (this.findDeep(root, 'meta') ?? '{}') as
+      | string
+      | Array<string>
+      | BaseXmlElement[];
 
-    const meta = JSON.parse(this.getStrValue(metaStr)) as unknown as {
+    const meta = JSON.parse(
+      this.getStrValue(Array.isArray(metaEl) ? metaEl[0] : metaEl)
+    ) as unknown as {
       isTabbedDashboard?: boolean;
     };
 
