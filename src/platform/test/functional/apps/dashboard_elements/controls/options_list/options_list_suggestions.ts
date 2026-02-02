@@ -8,7 +8,7 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
@@ -202,7 +202,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('returning to default search technique should remove unsaved changes', async () => {
         await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
         await dashboard.ensureMissingUnsavedChangesNotification();
       });
