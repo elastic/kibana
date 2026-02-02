@@ -672,7 +672,7 @@ const ESQLEditorInternal = function ESQLEditor({
             getESQLAdHocDataview({
               dataViewsService: data.dataViews,
               query: queryToExecute,
-              http: core.http, // Use http so time field detection can populate the DataView cache correctly.
+              http: core.http,
             }).catch(() => undefined),
           ]);
 
