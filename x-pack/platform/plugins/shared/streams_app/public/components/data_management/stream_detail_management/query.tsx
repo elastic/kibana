@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -19,6 +19,7 @@ import { StreamDetailAttachments } from '../../stream_detail_attachments';
 import { RedirectTo } from '../../redirect_to';
 import { QueryStreamSchemaEditor } from '../../query_streams/query_stream_schema_editor';
 import { QueryStreamsAdvancedView } from '../../query_streams/query_streams_advanced_view';
+import { FeedbackButton } from '../../feedback_button';
 
 const queryStreamManagementSubTabs = [
   'overview',
@@ -125,7 +126,9 @@ export function QueryStreamDetailManagement({
             {key}
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <QueryStreamBadge />
-              <DiscoverBadgeButton definition={definition} hasDataStream />
+              <EuiFlexItem grow />
+              <DiscoverBadgeButton stream={definition.stream} hasDataStream spellOut />
+              <FeedbackButton />
             </EuiFlexGroup>
           </EuiFlexGroup>
         }

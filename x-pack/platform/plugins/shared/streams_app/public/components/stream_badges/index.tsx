@@ -21,6 +21,7 @@ import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
+import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 
 import { truncateText } from '../../util/truncate_text';
@@ -176,13 +177,15 @@ export function LifecycleBadge({
 }
 
 export function DiscoverBadgeButton({
-  definition,
+  stream,
   hasDataStream = false,
   spellOut = false,
+  indexMode,
 }: {
-  definition: Streams.all.GetResponse;
+  stream: Streams.all.Definition;
   hasDataStream?: boolean;
   spellOut?: boolean;
+  indexMode?: IndicesIndexMode;
 }) {
   const {
     dependencies: {
@@ -190,9 +193,9 @@ export function DiscoverBadgeButton({
     },
   } = useKibana();
   const esqlQuery = getDiscoverEsqlQuery({
-    definition: definition.stream,
-    indexMode: Streams.ingest.all.GetResponse.is(definition) ? definition.index_mode : undefined,
-    includeMetadata: Streams.WiredStream.GetResponse.is(definition),
+    definition: stream,
+    indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
+    includeMetadata: Streams.WiredStream.Definition.is(stream),
   });
   const useUrl = share.url.locators.useUrl;
 
@@ -217,7 +220,7 @@ export function DiscoverBadgeButton({
 
   return spellOut ? (
     <EuiButton
-      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
       size="s"
       aria-label={ariaLabel}
@@ -228,7 +231,7 @@ export function DiscoverBadgeButton({
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"

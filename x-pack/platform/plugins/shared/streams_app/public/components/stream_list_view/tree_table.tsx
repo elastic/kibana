@@ -203,6 +203,8 @@ export function StreamsTreeTable({
     [allRows, flattenTreeWithCollapse, sortField]
   );
 
+  console.log(items);
+
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
   };
@@ -513,22 +515,9 @@ export function StreamsTreeTable({
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
             <DiscoverBadgeButton
-              hasDataStream={
-                console.log(
-                  item.stream,
-                  Streams.QueryStream.GetResponse.is({ stream: item.stream })
-                ) ||
-                !!item.data_stream ||
-                Streams.QueryStream.GetResponse.is({
-                  stream: item.stream,
-                } as Streams.all.GetResponse)
-              }
-              definition={
-                {
-                  stream: item.stream,
-                  index_mode: item.data_stream?.index_mode,
-                } as Streams.all.GetResponse
-              }
+              hasDataStream={!!item.data_stream || Streams.QueryStream.Definition.is(item.stream)}
+              indexMode={item.data_stream?.index_mode}
+              stream={item.stream}
             />
           ),
         },

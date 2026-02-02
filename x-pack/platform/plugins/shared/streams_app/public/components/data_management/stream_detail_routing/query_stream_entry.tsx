@@ -148,7 +148,7 @@ interface CreatingQueryStreamEntryProps {
   parentStreamName: string;
 }
 
-const DEBOUNCE_DELAY_MS = 500;
+const deboucingOptions = { wait: 500 };
 
 /**
  * Inline form for creating a new query stream within the routing page.
@@ -167,14 +167,11 @@ export function CreatingQueryStreamEntry({ parentStreamName }: CreatingQueryStre
   const currentQueryRef = useRef<string>('');
 
   // Debounced query execution for preview
-  const { run: debouncedExecuteQuery } = useDebounceFn(
-    (query: string) => {
-      if (query && query.trim() !== '') {
-        executeQuery(query);
-      }
-    },
-    { wait: DEBOUNCE_DELAY_MS }
-  );
+  const { run: debouncedExecuteQuery } = useDebounceFn((query: string) => {
+    if (query && query.trim() !== '') {
+      executeQuery(query);
+    }
+  }, deboucingOptions);
 
   // Execute initial query on mount
   useEffect(() => {

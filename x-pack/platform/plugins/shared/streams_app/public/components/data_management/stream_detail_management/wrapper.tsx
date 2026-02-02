@@ -165,9 +165,9 @@ export function Wrapper({
                 <EuiFlexItem grow={false}>
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <DiscoverBadgeButton
-                      definition={definition}
+                      stream={definition.stream}
                       hasDataStream={
-                        Streams.ClassicStream.GetResponse.is(definition) &&
+                        Streams.WiredStream.GetResponse.is(definition) ||
                         definition.data_stream_exists
                       }
                       spellOut
