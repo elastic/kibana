@@ -22,7 +22,7 @@ import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_log
 
 export interface GetLogGroupsToolResult {
   type: ToolResultType.other;
-  data: Awaited<ReturnType<typeof getToolHandler>>;
+  data: { groups: Awaited<ReturnType<typeof getToolHandler>> };
 }
 
 const DEFAULT_TIME_RANGE = {
@@ -49,7 +49,7 @@ const getLogsSchema = z.object({
     .array(z.string())
     .default([])
     .describe(
-      'Additional fields to return for each log group sample. "@timestamp", "message", and "log.level" fields are always included. Examples: ["service.name", "host.name", "trace.id"].'
+      'Additional fields to return for each log group sample. Common fields like @timestamp, message, service.name, trace.id, and error fields are included by default.'
     ),
   includeStackTrace: z
     .boolean()
@@ -83,10 +83,10 @@ export function createGetLogGroupsTool({
     description: dedent`
       Returns categorized log messages and exceptions from logs and spans within a specified time range.
       
-      Returns three categories:
-      - **spanExceptionGroups**: Span exceptions (errors) collected in an application
-      - **logExceptionGroups**: Logs with exception attributes
-      - **nonExceptionLogGroups**: Regular log messages without exception attributes
+      Returns a flat array of log groups, each with a \`type\` field:
+      - \`spanException\`: Span exceptions (errors) from APM, grouped by error.grouping_key
+      - \`logException\`: Log exceptions with exception attributes, grouped by message pattern
+      - \`log\`: Regular log messages, grouped by message pattern
 
       When to use:
       - Getting a quick summary of log activity and exceptions in a service or time range
@@ -135,7 +135,7 @@ export function createGetLogGroupsTool({
           results: [
             {
               type: ToolResultType.other,
-              data: result,
+              data: { groups: result },
             },
           ],
         };

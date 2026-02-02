@@ -2,26 +2,13 @@
 
 Returns a comprehensive view of application health by grouping and categorizing logs and exceptions. This tool answers: **"What's happening in my application?"**
 
-## Data Sources
+## Output
 
-This tool returns three arrays:
+Returns a flat array of log groups sorted by count (descending). Each group has a `type` field:
 
-### `spanExceptionGroups`
-
-- Span exceptions grouped by `error.grouping_key` (pre-computed hash based on exception type, stack trace fingerprint, and code location)
-- Includes errors from both Elastic APM agents and [OpenTelemetry span exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/)
-- Contains structured exception data with type, message, and optional stack trace
-
-### `logExceptionGroups`
-
-- [OpenTelemetry log exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/) from log indices that don't have a pre-computed grouping key
-- Grouped by message pattern using `categorize_text` aggregation
-- Contains exceptions logged directly without span context
-
-### `nonExceptionLogGroups`
-
-- Regular log messages that are not exceptions
-- Grouped by message pattern using `categorize_text` aggregation
+- `spanException` - APM errors and [OTel span exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/), grouped by `error.grouping_key`
+- `logException` - [OTel log exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/), grouped by message pattern
+- `log` - Regular log messages, grouped by message pattern
 
 ## Examples
 
