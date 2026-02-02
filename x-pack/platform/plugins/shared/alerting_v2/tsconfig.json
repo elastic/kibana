@@ -22,7 +22,6 @@
     "@kbn/logging",
     "@kbn/es-types",
     "@kbn/spaces-utils",
-    "@kbn/search-types",
     "@kbn/core-di",
     "@kbn/core-di-browser",
     "@kbn/core-di-server",
