@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DrilldownsManager, DrilldownsState, DrilldownState, DrilldownStateInternal } from "./types";
 import { StateComparators } from "@kbn/presentation-publishing";
 import { createAction } from "./create_action";
+import { deleteAction } from "./delete_action";
 
 export function initializeDrilldownsManager(
   embeddableUuid: string,
@@ -19,11 +20,9 @@ export function initializeDrilldownsManager(
 ): DrilldownsManager {
   const drilldowns$ = new BehaviorSubject<DrilldownStateInternal[]>([]);
   const api: DrilldownsManager['api'] = {
-    drilldowns$: drilldowns$.pipe(map((drilldowns) => drilldowns.map((drilldown) => {
-      const { actionId, ...rest } = drilldown;
-      return rest;
-    }))),
+    drilldowns$,
     setDrilldowns: (drilldowns: DrilldownState[]) => {
+      deleteActions();
       const drilldownsInternal = drilldowns.map((drilldown) => {
         return {
           ...drilldown,
@@ -36,18 +35,9 @@ export function initializeDrilldownsManager(
   };
   api.setDrilldowns(state.drilldowns ?? []);
   
-  function getLatestState() {
-    return { drilldowns: drilldowns$.value };
+  function deleteActions() {
+    drilldowns$.value.forEach(deleteAction);
   }
-
-  /*protected killAction({ eventId, triggers }: SerializedEvent) {
-    const { uiActions } = this.params;
-    const actionId = this.generateActionId(eventId);
-    if (!uiActions.hasAction(actionId)) return;
-
-    for (const trigger of triggers) uiActions.detachAction(trigger, actionId);
-    uiActions.unregisterAction(actionId);
-  }*/
 
   return {
     api: { ...api },
@@ -56,7 +46,12 @@ export function initializeDrilldownsManager(
       drilldowns: 'deepEquality',
     } as StateComparators<DrilldownsState>,
     anyStateChange$: drilldowns$.pipe(map(() => undefined)),
-    getLatestState,
+    getLatestState: () => ({
+      drilldowns: drilldowns$.value.map((drilldown) => {
+        const { actionId, ...rest } = drilldown;
+        return rest;
+      })
+    }),
     reinitializeState: (lastState: DrilldownsState) => {
       api.setDrilldowns(lastState.drilldowns ?? []);
     },
