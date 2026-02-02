@@ -272,6 +272,42 @@ export class StreamsApp {
     }
   }
 
+  async verifyVirtualStreamsAreInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      // Virtual streams use streamsNameText instead of streamsNameLink
+      await expect(
+        this.page.getByTestId(`streamsNameText-${name}`),
+        `Virtual stream ${name} should be present in the table`
+      ).toBeVisible();
+    }
+  }
+
+  async verifyVirtualStreamsAreNotInTable(streamNames: string[]) {
+    for (const name of streamNames) {
+      // Virtual streams use streamsNameText instead of streamsNameLink
+      await expect(
+        this.page.getByTestId(`streamsNameText-${name}`),
+        `Virtual stream ${name} should not be present in the table`
+      ).toBeHidden();
+    }
+  }
+
+  async collapseExpandVirtualStream(streamName: string, collapse: boolean) {
+    // Same as collapseExpandStream but for virtual streams
+    // The collapse/expand buttons have the same test-subj format
+    if (collapse) {
+      const collapseButton = this.page.locator(`[data-test-subj="collapseButton-${streamName}"]`);
+      if (await collapseButton.isVisible()) {
+        await collapseButton.click();
+      }
+    } else {
+      const expandButton = this.page.locator(`[data-test-subj="expandButton-${streamName}"]`);
+      if (await expandButton.isVisible()) {
+        await expandButton.click();
+      }
+    }
+  }
+
   async expandAllStreams() {
     const expandAllButton = this.page.getByTestId('streamsExpandAllButton');
     await expect(expandAllButton, 'Expand all button should be visible').toBeVisible();

@@ -29,6 +29,7 @@ import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
   asTrees,
+  asDsnsTrees,
   enrichStream,
   shouldComposeTree,
   filterStreamsByQuery,
@@ -178,8 +179,24 @@ export function StreamsTreeTable({
   }, [streams, searchQuery]);
 
   const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField) ? asTrees(filteredStreams) : filteredStreams;
-    return streamList.map(enrichStream);
+    if (!shouldComposeTree(sortField)) {
+      return filteredStreams.map(enrichStream);
+    }
+
+    // Separate wired and classic streams for different hierarchy handling
+    const wiredStreams = filteredStreams.filter(
+      (s) => !Streams.ClassicStream.Definition.is(s.stream)
+    );
+    const classicStreams = filteredStreams.filter((s) =>
+      Streams.ClassicStream.Definition.is(s.stream)
+    );
+
+    // Apply wired tree hierarchy (dot-separated names)
+    const wiredTrees = asTrees(wiredStreams).map(enrichStream);
+    // Apply DSNS tree hierarchy for classic streams
+    const classicTrees = asDsnsTrees(classicStreams).map(enrichStream);
+
+    return [...wiredTrees, ...classicTrees];
   }, [sortField, filteredStreams]);
 
   const flattenTreeWithCollapse = React.useCallback(
@@ -396,22 +413,32 @@ export function StreamsTreeTable({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', {
-                      path: { key: item.stream.name },
-                      query: { rangeFrom, rangeTo },
-                    })}
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
-                      router.push('/{key}', {
+                  {item.isVirtual ? (
+                    <span data-test-subj={`streamsNameText-${item.stream.name}`}>
+                      <EuiHighlight search={searchQuery?.text ?? ''}>
+                        {item.stream.name}
+                      </EuiHighlight>
+                    </span>
+                  ) : (
+                    <EuiLink
+                      data-test-subj={`streamsNameLink-${item.stream.name}`}
+                      href={router.link('/{key}', {
                         path: { key: item.stream.name },
                         query: { rangeFrom, rangeTo },
-                      });
-                    }}
-                  >
-                    <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
-                  </EuiLink>
+                      })}
+                      onClick={(e: React.MouseEvent) => {
+                        e.preventDefault();
+                        router.push('/{key}', {
+                          path: { key: item.stream.name },
+                          query: { rangeFrom, rangeTo },
+                        });
+                      }}
+                    >
+                      <EuiHighlight search={searchQuery?.text ?? ''}>
+                        {item.stream.name}
+                      </EuiHighlight>
+                    </EuiLink>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             );
@@ -437,7 +464,7 @@ export function StreamsTreeTable({
           align: 'right',
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
+            item.isVirtual ? null : item.data_stream ? (
               <DocumentsColumn
                 indexPattern={item.stream.name}
                 histogramQueryFetch={getStreamHistogram(item.stream.name)}
@@ -467,7 +494,7 @@ export function StreamsTreeTable({
             : false,
           dataType: 'string',
           render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
+            item.isVirtual ? null : item.data_stream ? (
               <DataQualityColumn
                 streamName={item.stream.name}
                 quality={item.dataQuality as QualityIndicators}
@@ -486,16 +513,20 @@ export function StreamsTreeTable({
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
           width: '220px',
-          render: (_: unknown, item: TableRow) => (
-            <RetentionColumn
-              lifecycle={item.effective_lifecycle!}
-              aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
-                defaultMessage: 'Retention policy for {name}',
-                values: { name: item.stream.name },
-              })}
-              dataTestSubj={`retentionColumn-${item.stream.name}`}
-            />
-          ),
+          render: (_: unknown, item: TableRow) =>
+            item.isVirtual ? null : (
+              <RetentionColumn
+                lifecycle={item.effective_lifecycle!}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
+                  {
+                    defaultMessage: 'Retention policy for {name}',
+                    values: { name: item.stream.name },
+                  }
+                )}
+                dataTestSubj={`retentionColumn-${item.stream.name}`}
+              />
+            ),
         },
         {
           field: 'definition',
@@ -504,18 +535,19 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton
-              definition={
-                {
-                  stream: item.stream,
-                  data_stream_exists: !!item.data_stream,
-                  index_mode: item.data_stream?.index_mode,
-                } as Streams.ingest.all.GetResponse
-              }
-              isWiredStream={item.type === 'wired'}
-            />
-          ),
+          render: (_: unknown, item: TableRow) =>
+            item.isVirtual ? null : (
+              <DiscoverBadgeButton
+                definition={
+                  {
+                    stream: item.stream,
+                    data_stream_exists: !!item.data_stream,
+                    index_mode: item.data_stream?.index_mode,
+                  } as Streams.ingest.all.GetResponse
+                }
+                isWiredStream={item.type === 'wired'}
+              />
+            ),
         },
       ]}
       itemId="name"
