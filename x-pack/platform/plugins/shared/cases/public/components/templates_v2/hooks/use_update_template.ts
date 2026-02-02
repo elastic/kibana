@@ -18,7 +18,15 @@ interface MutationArgs {
   template: TemplateUpdateRequest;
 }
 
-export const useUpdateTemplate = () => {
+interface UseUpdateTemplateProps {
+  onSuccess?: (data: Template) => void;
+  disableDefaultSuccessToast?: boolean;
+}
+
+export const useUpdateTemplate = ({
+  onSuccess,
+  disableDefaultSuccessToast,
+}: UseUpdateTemplateProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
@@ -26,9 +34,12 @@ export const useUpdateTemplate = () => {
     ({ templateId, template }) => patchTemplate({ templateId, template }),
     {
       mutationKey: casesMutationsKeys.updateTemplate,
-      onSuccess: () => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries(casesQueriesKeys.templates);
-        showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
+        if (!disableDefaultSuccessToast) {
+          showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
+        }
+        onSuccess?.(data);
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_UPDATING_TEMPLATE });

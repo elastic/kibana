@@ -194,6 +194,12 @@ export const SUCCESS_UPDATING_TEMPLATE = i18n.translate(
   }
 );
 
+export const SUCCESS_SET_AS_DEFAULT_TEMPLATE = (templateName: string) =>
+  i18n.translate('xpack.cases.templates.successSetAsDefaultTemplate', {
+    defaultMessage: 'Template {templateName} was set as default',
+    values: { templateName },
+  });
+
 export const ERROR_DELETING_TEMPLATE = i18n.translate(
   'xpack.cases.templates.errorDeletingTemplate',
   {

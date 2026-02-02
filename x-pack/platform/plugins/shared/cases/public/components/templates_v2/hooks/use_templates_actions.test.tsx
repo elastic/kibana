@@ -13,6 +13,8 @@ import { useTemplatesActions } from './use_templates_actions';
 import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
+import { useUpdateTemplate } from './use_update_template';
+import { useCasesToast } from '../../../common/use_cases_toast';
 
 jest.mock('../../../common/navigation/hooks', () => ({
   ...jest.requireActual('../../../common/navigation/hooks'),
@@ -20,9 +22,13 @@ jest.mock('../../../common/navigation/hooks', () => ({
 }));
 
 jest.mock('./use_delete_template');
+jest.mock('./use_update_template');
+jest.mock('../../../common/use_cases_toast');
 
 const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
 const useDeleteTemplateMock = useDeleteTemplate as jest.Mock;
+const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
+const useCasesToastMock = useCasesToast as jest.Mock;
 
 describe('useTemplatesActions', () => {
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
@@ -45,6 +51,8 @@ describe('useTemplatesActions', () => {
   let consoleSpy: jest.SpyInstance;
   const navigateToCasesEditTemplateMock = jest.fn();
   const deleteTemplateMock = jest.fn();
+  const setDefaultTemplateMock = jest.fn();
+  const showSuccessToastMock = jest.fn();
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -55,6 +63,14 @@ describe('useTemplatesActions', () => {
     useDeleteTemplateMock.mockReturnValue({
       mutate: deleteTemplateMock,
       isLoading: false,
+    });
+    useUpdateTemplateMock.mockReturnValue({
+      mutate: setDefaultTemplateMock,
+      isLoading: false,
+    });
+    useCasesToastMock.mockReturnValue({
+      showSuccessToast: showSuccessToastMock,
+      showErrorToast: jest.fn(),
     });
   });
 
@@ -75,6 +91,7 @@ describe('useTemplatesActions', () => {
     expect(result.current).toHaveProperty('cancelDelete');
     expect(result.current).toHaveProperty('templateToDelete');
     expect(result.current).toHaveProperty('isDeleting');
+    expect(result.current).toHaveProperty('isSettingDefault');
   });
 
   it('handleEdit navigates to edit template page', () => {
@@ -103,7 +120,7 @@ describe('useTemplatesActions', () => {
     expect(consoleSpy).toHaveBeenCalledWith('Clone template:', mockTemplate);
   });
 
-  it('handleSetAsDefault is a function', () => {
+  it('handleSetAsDefault calls setDefaultTemplate mutation with isDefault: true', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     expect(typeof result.current.handleSetAsDefault).toBe('function');
@@ -112,7 +129,33 @@ describe('useTemplatesActions', () => {
       result.current.handleSetAsDefault(mockTemplate);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Set as default template:', mockTemplate);
+    expect(setDefaultTemplateMock).toHaveBeenCalledWith({
+      templateId: mockTemplate.key,
+      template: { isDefault: true },
+    });
+  });
+
+  it('configures useUpdateTemplate with custom success toast for set as default', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(useUpdateTemplateMock).toHaveBeenCalledWith({
+      disableDefaultSuccessToast: true,
+      onSuccess: expect.any(Function),
+    });
+  });
+
+  it('shows custom success toast when template is set as default', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    // Get the onSuccess callback passed to useUpdateTemplate
+    const { onSuccess } = useUpdateTemplateMock.mock.calls[0][0];
+
+    // Simulate successful update with template data
+    act(() => {
+      onSuccess({ ...mockTemplate, isDefault: true });
+    });
+
+    expect(showSuccessToastMock).toHaveBeenCalledWith('Template Template 1 was set as default');
   });
 
   it('handleExport is a function', () => {

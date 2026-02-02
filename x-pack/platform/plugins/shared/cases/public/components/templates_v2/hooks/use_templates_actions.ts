@@ -9,6 +9,9 @@ import { useCallback, useState } from 'react';
 import type { Template } from '../types';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useDeleteTemplate } from './use_delete_template';
+import { useUpdateTemplate } from './use_update_template';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import * as i18n from '../../templates/translations';
 
 interface UseTemplatesActionsProps {
   onDeleteSuccess?: () => void;
@@ -16,9 +19,18 @@ interface UseTemplatesActionsProps {
 
 export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
+  const { showSuccessToast } = useCasesToast();
   const { mutate: deleteTemplate, isLoading: isDeleting } = useDeleteTemplate({
     onSuccess: onDeleteSuccess,
   });
+
+  const { mutate: setDefaultTemplate, isLoading: isSettingDefault } = useUpdateTemplate({
+    disableDefaultSuccessToast: true,
+    onSuccess: (data) => {
+      showSuccessToast(i18n.SUCCESS_SET_AS_DEFAULT_TEMPLATE(data.name));
+    },
+  });
+
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
   const handleEdit = useCallback(
@@ -34,11 +46,15 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     console.log('Clone template:', template);
   }, []);
 
-  const handleSetAsDefault = useCallback((template: Template) => {
-    // TODO: Implement set as default functionality
-    // eslint-disable-next-line no-console
-    console.log('Set as default template:', template);
-  }, []);
+  const handleSetAsDefault = useCallback(
+    (template: Template) => {
+      setDefaultTemplate({
+        templateId: template.key,
+        template: { isDefault: true },
+      });
+    },
+    [setDefaultTemplate]
+  );
 
   const handleExport = useCallback((template: Template) => {
     // TODO: Implement export functionality
@@ -71,5 +87,6 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     cancelDelete,
     templateToDelete,
     isDeleting,
+    isSettingDefault,
   };
 };

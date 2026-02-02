@@ -106,4 +106,50 @@ describe('useUpdateTemplate', () => {
 
     expect(result.current.error).toEqual(error);
   });
+
+  it('calls onSuccess callback with template data on successful update', async () => {
+    const onSuccessMock = jest.fn();
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(() => useUpdateTemplate({ onSuccess: onSuccessMock }), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders queryClient={queryClient}>{children}</TestProviders>
+      ),
+    });
+
+    await act(async () => {
+      result.current.mutate({ templateId: 'template-1', template: mockUpdateRequest });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(onSuccessMock).toHaveBeenCalledWith(mockTemplateResponse);
+  });
+
+  it('does not show default success toast when disableDefaultSuccessToast is true', async () => {
+    const onSuccessMock = jest.fn();
+    const queryClient = createTestQueryClient();
+
+    const { result } = renderHook(
+      () => useUpdateTemplate({ onSuccess: onSuccessMock, disableDefaultSuccessToast: true }),
+      {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders queryClient={queryClient}>{children}</TestProviders>
+        ),
+      }
+    );
+
+    await act(async () => {
+      result.current.mutate({ templateId: 'template-1', template: mockUpdateRequest });
+    });
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    // onSuccess callback should still be called
+    expect(onSuccessMock).toHaveBeenCalledWith(mockTemplateResponse);
+  });
 });
