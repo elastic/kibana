@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
-import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks';
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/use_doc_viewer_extension_actions';
 export { useSpanFlyoutData } from './use_span_flyout_data';
 export type { UseSpanFlyoutDataParams, SpanFlyoutData } from './use_span_flyout_data';
 

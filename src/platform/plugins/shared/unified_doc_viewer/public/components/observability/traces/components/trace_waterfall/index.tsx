@@ -18,7 +18,8 @@ import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { FullScreenWaterfall } from '../full_screen_waterfall';
 import { TraceWaterfallTourStep } from './full_screen_waterfall_tour_step';
-import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 
 interface Props {
   traceId: string;

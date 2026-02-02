@@ -15,7 +15,8 @@ import { ContentFrameworkSection } from '../../../../content_framework/lazy_cont
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { useLatencyChart } from '../../hooks/use_latency_chart';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
-import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../../hooks';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import { getEsqlQuery } from './get_esql_query';
 
 const sectionTitle = i18n.translate('unifiedDocViewer.observability.traces.similarSpans', {

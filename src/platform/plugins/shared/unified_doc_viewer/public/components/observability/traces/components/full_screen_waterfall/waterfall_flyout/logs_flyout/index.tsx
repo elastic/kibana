@@ -12,7 +12,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
 import LogsOverview from '../../../../../../doc_viewer_logs_overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
-import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks';
+import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/use_doc_viewer_extension_actions';
 export { useLogFlyoutData } from './use_log_flyout_data';
 export type { UseLogFlyoutDataParams, LogFlyoutData } from './use_log_flyout_data';
 

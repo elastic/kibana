@@ -21,7 +21,8 @@ import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getEsqlQuery } from './get_esql_query';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 import { buildSectionDescription, type FieldInfo } from './build_section_description';
-import { useDiscoverLinkAndEsqlQuery, useOpenInDiscoverSectionAction } from '../../../../hooks';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../hooks/use_open_in_discover_section_action';
 
 const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo | undefined => {
   return value && field ? { value, field } : undefined;
