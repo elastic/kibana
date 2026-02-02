@@ -32,7 +32,8 @@ export const LegacyEngineDescriptorV1 = z.object({
   maxPageSearchSize: z.literal(10000),
 });
 
-type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> & LegacyEngineDescriptorV1;
+type StatusEngine = Omit<GetStatusResult['engines'][number], 'versionState'> &
+  LegacyEngineDescriptorV1;
 
 interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
@@ -45,7 +46,8 @@ const querySchema = z.object({
 
 function toPublicEngine(engine: GetStatusResult['engines'][number]): StatusEngine {
   const { versionState, ...rest } = engine;
-  const {delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter} = rest.logExtractionState;
+  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
+    rest.logExtractionState;
   return {
     ...rest,
     // TODO: Remove the legacy fields once we stop supporting V1.
