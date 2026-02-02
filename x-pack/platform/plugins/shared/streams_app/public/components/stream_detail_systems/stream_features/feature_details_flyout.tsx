@@ -69,14 +69,7 @@ export function FeatureDetailsFlyout({
       title: ID_LABEL,
       description: (
         <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
-          <code
-            css={css`
-              font-family: ${euiTheme.font.familyCode};
-              font-size: ${euiTheme.font.scale.s};
-            `}
-          >
-            {feature.id}
-          </code>
+          {feature.id}
         </EuiText>
       ),
     },
@@ -202,20 +195,13 @@ export function FeatureDetailsFlyout({
             <InfoPanel title={GENERAL_INFORMATION_LABEL}>
               {generalInfoItems.map((item, index) => (
                 <React.Fragment key={index}>
-                  <div
-                    css={{
-                      '& .euiDescriptionList__title': {
-                        alignSelf: 'center',
-                      },
-                    }}
-                  >
-                    <EuiDescriptionList
-                      type="column"
-                      columnWidths={[1, 2]}
-                      compressed
-                      listItems={[item]}
-                    />
-                  </div>
+                  <EuiDescriptionList
+                    titleProps={{ css: { alignSelf: 'center' } }}
+                    type="column"
+                    columnWidths={[1, 2]}
+                    compressed
+                    listItems={[item]}
+                  />
                   {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
                 </React.Fragment>
               ))}
