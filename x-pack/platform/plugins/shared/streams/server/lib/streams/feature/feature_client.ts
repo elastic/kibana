@@ -20,6 +20,7 @@ import {
   FEATURE_DESCRIPTION,
   FEATURE_TYPE,
   FEATURE_NAME,
+  FEATURE_TITLE,
   FEATURE_VALUE,
   FEATURE_TAGS,
   FEATURE_META,
@@ -52,8 +53,30 @@ export class FeatureClient {
   }
 
   async bulk(stream: string, operations: FeatureBulkOperation[]) {
+    const deleteIds = operations.flatMap((op) => ('delete' in op ? op.delete.id : []));
+    const validDeleteIds =
+      deleteIds.length > 0
+        ? new Set(
+            (
+              await this.clients.storageClient.search({
+                size: deleteIds.length,
+                track_total_hits: false,
+                query: {
+                  bool: {
+                    filter: [{ terms: { _id: deleteIds } }, ...termQuery(STREAM_NAME, stream)],
+                  },
+                },
+              })
+            ).hits.hits.flatMap((hit) => hit._id ?? [])
+          )
+        : new Set<string>();
+
+    const filteredOperations = operations.filter(
+      (operation) => 'index' in operation || validDeleteIds.has(operation.delete.id)
+    );
+
     return await this.clients.storageClient.bulk({
-      operations: operations.map((operation) => {
+      operations: filteredOperations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(stream, operation.index.feature);
           return {
@@ -157,6 +180,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
+    [FEATURE_TITLE]: feature.title,
   };
 }
 
@@ -174,6 +198,7 @@ function fromStorage(feature: StoredFeature): Feature {
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
+    title: feature[FEATURE_TITLE],
   };
 }
 

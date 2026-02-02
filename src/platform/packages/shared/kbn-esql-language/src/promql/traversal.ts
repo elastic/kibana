@@ -8,7 +8,7 @@
  */
 
 import { isPromqlNode } from './is';
-import type { PromQLAstNode } from './types';
+import type { PromQLAstNode, PromQLAstQueryExpression, PromQLPositionResult } from './types';
 
 export function* childrenOfPromqlNode(node: PromQLAstNode): Iterable<PromQLAstNode> {
   if (!isPromqlNode(node)) {
@@ -44,5 +44,44 @@ export function* childrenOfPromqlNode(node: PromQLAstNode): Iterable<PromQLAstNo
   if ('args' in node && Array.isArray(node.args)) {
     yield* node.args;
     return;
+  }
+}
+
+/** Finds the deepest node at a given offset within a PromQL AST.*/
+export function findPromqlAstPosition(
+  root: PromQLAstQueryExpression,
+  offset: number
+): PromQLPositionResult {
+  const result: PromQLPositionResult = {
+    node: undefined,
+    parent: undefined,
+  };
+
+  if (!root.expression) {
+    return result;
+  }
+
+  traverseForPosition(root.expression, root, offset, result);
+
+  return result;
+}
+
+function traverseForPosition(
+  node: PromQLAstNode,
+  parent: PromQLAstNode,
+  offset: number,
+  result: PromQLPositionResult
+): void {
+  if (!isPromqlNode(node)) {
+    return;
+  }
+
+  if (node.location.min <= offset && node.location.max >= offset) {
+    result.node = node;
+    result.parent = parent;
+
+    for (const child of childrenOfPromqlNode(node)) {
+      traverseForPosition(child, node, offset, result);
+    }
   }
 }

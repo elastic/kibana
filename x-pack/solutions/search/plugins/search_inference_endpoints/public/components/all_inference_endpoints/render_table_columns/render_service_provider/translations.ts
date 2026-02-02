@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MIT_LICENSE = i18n.translate(
-  'xpack.searchInferenceEndpoints.elasticsearch.mitLicense',
-  {
-    defaultMessage: 'License: MIT',
-  }
-);
-
 export const TOKEN_BASED_BILLING_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.elastic.description',
   {

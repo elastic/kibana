@@ -13,6 +13,12 @@ import {
   DATE_WITH_HOSTS_DATA,
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
+  HOST1_NAME,
+  HOST2_NAME,
+  HOST3_NAME,
+  HOST4_NAME,
+  HOST5_NAME,
+  HOST6_NAME,
   HOSTS,
   POD_COUNT,
   POD_NAMES,
@@ -55,6 +61,16 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.nodesOverviewTable).toBeVisible();
     });
+  });
+
+  test('Filter nodes by query bar', async ({ pageObjects: { inventoryPage } }) => {
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
+    await inventoryPage.filterByQueryBar(`host.name: "${HOST1_NAME}"`);
+
+    await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(1);
+
+    const host1Node = await inventoryPage.getWaffleNode(HOST1_NAME);
+    await expect(host1Node.container).toBeVisible();
   });
 
   test('Render empty data prompt for dates with no data', async ({
@@ -142,6 +158,46 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       const url = new URL(page.url());
 
       expect(url.pathname).toBe(`/app/metrics/detail/pod/${encodeURIComponent(POD_NAME)}`);
+    });
+  });
+
+  test('Change waffle map color palette', async ({ pageObjects: { inventoryPage } }) => {
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
+
+    await test.step('select "positive" palette and verify colors', async () => {
+      await inventoryPage.selectPalette('positive');
+
+      const nodesWithValues = [
+        { name: HOST6_NAME, color: '#b1e4d1' },
+        { name: HOST5_NAME, color: '#e5f4f1' },
+        { name: HOST4_NAME, color: '#c3eadb' },
+        { name: HOST3_NAME, color: '#24c292' },
+        { name: HOST2_NAME, color: '#62cea6' },
+        { name: HOST1_NAME, color: '#8cd9bb' },
+      ];
+
+      for (const node of nodesWithValues) {
+        const waffleNode = await inventoryPage.getWaffleNode(node.name);
+        await expect(waffleNode.name).toHaveAttribute('color', node.color);
+      }
+    });
+
+    await test.step('change palette to "temperature" and verify colors', async () => {
+      await inventoryPage.selectPalette('temperature');
+
+      const nodesWithValues = [
+        { name: HOST6_NAME, color: '#dbe9ff' },
+        { name: HOST5_NAME, color: '#61a2ff' },
+        { name: HOST4_NAME, color: '#b5d2ff' },
+        { name: HOST3_NAME, color: '#f6726a' },
+        { name: HOST2_NAME, color: '#ffbab3' },
+        { name: HOST1_NAME, color: '#fbefee' },
+      ];
+
+      for (const node of nodesWithValues) {
+        const waffleNode = await inventoryPage.getWaffleNode(node.name);
+        await expect(waffleNode.name).toHaveAttribute('color', node.color);
+      }
     });
   });
 

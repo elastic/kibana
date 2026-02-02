@@ -8,7 +8,13 @@
  */
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
@@ -27,10 +33,16 @@ export interface QuickSearchVisorProps {
   isVisible: boolean;
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
+  // Callback to toggle the visor visibility
+  onToggleVisor: () => void;
 }
 
 const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
   defaultMessage: 'Search...',
+});
+
+const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
+  defaultMessage: 'Close quick search visor',
 });
 
 export function QuickSearchVisor({
@@ -38,6 +50,7 @@ export function QuickSearchVisor({
   isSpaceReduced,
   isVisible,
   onUpdateAndSubmitQuery,
+  onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql } = kibana.services;
@@ -119,28 +132,36 @@ export function QuickSearchVisor({
   }
 
   return (
-    <div css={styles.visorContainer} data-test-subj="ESQLEditor-quick-search-visor">
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="flexStart"
-        responsive={false}
-        css={styles.visorWrapper}
-      >
-        <EuiFlexItem css={styles.comboBoxWrapper}>
-          <SourcesDropdown
-            currentSources={selectedSources.map((source) => source.label)}
-            onChangeSources={(newSources) => {
-              setSelectedSources(newSources.map((source) => ({ label: source })));
-              userSelectedSourceRef.current = true;
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={styles.separator} />
-        <EuiFlexItem css={styles.searchWrapper}>
-          <div ref={kqlInputRef}>
-            {isVisible && (
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      justifyContent="center"
+      responsive={false}
+      css={styles.visorContainer}
+      data-test-subj="ESQLEditor-quick-search-visor"
+    >
+      <EuiFlexItem grow={false} css={styles.visorWrapper}>
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          justifyContent="flexStart"
+          responsive={false}
+          css={styles.visorGradientBox}
+        >
+          <EuiFlexItem css={styles.comboBoxWrapper}>
+            <SourcesDropdown
+              currentSources={selectedSources.map((source) => source.label)}
+              onChangeSources={(newSources) => {
+                setSelectedSources(newSources.map((source) => ({ label: source })));
+                userSelectedSourceRef.current = true;
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.separator} />
+          <EuiFlexItem css={styles.searchWrapper}>
+            <div ref={kqlInputRef}>
               <KQLComponent
+                isDisabled={!isVisible}
                 iconType="search"
                 disableLanguageSwitcher={true}
                 indexPatterns={selectedSources.map((source) => source.label)}
@@ -159,11 +180,24 @@ export function QuickSearchVisor({
                 }}
                 appName="esqlEditorVisor"
                 dataTestSubj="esqlVisorKQLQueryInput"
+                size="s"
               />
-            )}
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
+        <EuiButtonIcon
+          color="text"
+          display="base"
+          size="s"
+          iconSize="m"
+          onClick={onToggleVisor}
+          iconType="cross"
+          aria-label={closeButtonAriaLabel}
+          css={styles.closeButton}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -31,16 +31,11 @@ import { i18nMessages } from '../../i18n';
 import { EsqlParamSource, type EsqlToolFormData } from '../../types/tool_form_types';
 
 const FIELD_TYPE_TOKEN_MAP: Record<EsqlToolFieldType, string> = {
-  [EsqlToolFieldType.TEXT]: 'tokenString',
-  [EsqlToolFieldType.KEYWORD]: 'tokenKeyword',
-  [EsqlToolFieldType.LONG]: 'tokenNumber',
+  [EsqlToolFieldType.STRING]: 'tokenString',
   [EsqlToolFieldType.INTEGER]: 'tokenNumber',
-  [EsqlToolFieldType.DOUBLE]: 'tokenNumber',
   [EsqlToolFieldType.FLOAT]: 'tokenNumber',
   [EsqlToolFieldType.BOOLEAN]: 'tokenBoolean',
   [EsqlToolFieldType.DATE]: 'tokenDate',
-  [EsqlToolFieldType.OBJECT]: 'tokenObject',
-  [EsqlToolFieldType.NESTED]: 'tokenNested',
 };
 
 interface EsqlParamRowProps {

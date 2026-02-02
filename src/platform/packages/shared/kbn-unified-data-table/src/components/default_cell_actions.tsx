@@ -16,6 +16,7 @@ import type { ToastsStart } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { REVERSE_CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
+import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
@@ -195,8 +196,11 @@ export function buildCellActions(
   hideFilteringOnComputedColumns?: boolean,
   uiActions?: UiActionsStart
 ) {
-  const shouldShowFilters =
-    onFilter && field.filterable && (!hideFilteringOnComputedColumns || !field.isComputedColumn);
+  const shouldShowFilters = shouldShowFieldFilterInOutActions({
+    dataViewField: field,
+    hideFilteringOnComputedColumns,
+    onFilter,
+  });
 
   return [
     ...(shouldShowFilters

@@ -11,11 +11,14 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../types';
+import { settings } from '../../definitions/generated/settings';
 
 const setCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
 };
+
+const isHidden = settings.every((setting) => setting.snapshotOnly || setting.ignoreAsSuggestion);
 
 export const setCommand = {
   name: 'set',
@@ -27,7 +30,7 @@ export const setCommand = {
     }),
     declaration: `SET <setting> = <value>`,
     examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias:*";'],
-    hidden: process.env.NODE_ENV === 'test' ? false : true, // Temporary until making it GA
+    hidden: isHidden,
     preview: true,
     name: 'set',
   },
