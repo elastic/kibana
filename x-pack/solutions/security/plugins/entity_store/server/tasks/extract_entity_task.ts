@@ -12,6 +12,7 @@ import type {
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import moment from 'moment';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
@@ -62,12 +63,20 @@ async function runTask({
       namespace,
     });
 
-    const extractionResult = await logsExtractionClient.extractLogs(entityType);
+    const extractionStart = Date.now();
+    const extractionResult = await logsExtractionClient.extractLogs(entityType, {
+      abortController,
+    });
+    const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     if (!extractionResult.success) {
-      logger.error(`Logs extraction failed for ${entityType}: ${extractionResult.error?.message}`);
+      logger.error(
+        `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
+      );
     } else {
-      logger.info(`Successfully extracted ${extractionResult.count} entities for ${entityType}`);
+      logger.info(
+        `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
+      );
     }
 
     const updatedState = {
@@ -75,7 +84,6 @@ async function runTask({
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
-      lastExtractionCount: extractionResult.count,
       lastExtractionSuccess: extractionResult.success,
     };
 
