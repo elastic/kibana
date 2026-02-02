@@ -6,13 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
-interface LogDocumentForSeverityCheck {
-  'log.level'?: string;
-  'http.response.status_code'?: number | string;
-  'error.exception.message'?: string;
-  message?: string;
-}
+import type { LogDocument } from '../routes/ai_insights/get_log_document_by_id';
 
 const ERROR_PATTERNS = [/\berror\b/i, /\bexception\b/i, /\bfail(?:ed|ure|ing)?\b/i, /\btimeout\b/i];
 
@@ -57,7 +51,7 @@ export function warningAndAboveLogFilter(): QueryDslQueryContainer {
  * Analyzes a log entry to determine if it is warning level or above
  * (warn, error, critical, fatal)
  */
-export function isWarningOrAbove(logDocument: LogDocumentForSeverityCheck): boolean {
+export function isWarningOrAbove(logDocument: LogDocument): boolean {
   const logLevel = logDocument['log.level'];
   if (logLevel && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
     return true;

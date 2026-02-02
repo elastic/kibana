@@ -111,6 +111,8 @@ async function fetchLogContext({
       logger,
       esClient,
       index,
+      start: windowStart,
+      end: windowEnd,
       logId: id,
     });
     correlatedLogsResult = sequences[0];

@@ -20,9 +20,12 @@ const LOG_DOCUMENT_FIELDS = [
 
 type FieldKeys = (typeof LOG_DOCUMENT_FIELDS)[number];
 
-type LogDocument = {
+export type LogDocument = {
   'log.level'?: string;
   '@timestamp'?: string;
+  message?: string;
+  'http.response.status_code'?: number;
+  'error.exception.message'?: string;
 } & {
   [K in FieldKeys]?: unknown;
 };
@@ -40,7 +43,7 @@ export const getLogDocumentById = async ({
     index,
     size: 1,
     _source: false,
-    fields: LOG_DOCUMENT_FIELDS,
+    fields: [...LOG_DOCUMENT_FIELDS],
     query: {
       ids: { values: [id] },
     },
