@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -64,14 +64,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   const isSyncing = isWaitingForSync || isSyncingProp;
 
   const { http } = useValues(HttpLogic);
-  const { application, share } = useValues(KibanaLogic);
-  const onStartPlaygroundClick = useCallback(() => {
-    if (!share) return;
-    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
-    if (playgroundLocator) {
-      playgroundLocator.navigate({ 'default-index': connector?.index_name });
-    }
-  }, [connector, share]);
+  const { application } = useValues(KibanaLogic);
   useEffect(() => {
     setTimeout(() => {
       window.scrollTo({
@@ -132,21 +125,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       }
                     )}
                     footer={
-                      showNext ? (
-                        <EuiButton
-                          data-test-subj="enterpriseSearchFinishUpStepStartSearchPlaygroundButton"
-                          aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
-                            { defaultMessage: 'Start Search Playground' }
-                          )}
-                          onClick={onStartPlaygroundClick}
-                        >
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.startSearchPlaygroundButtonLabel',
-                            { defaultMessage: 'Start Search Playground' }
-                          )}
-                        </EuiButton>
-                      ) : (
+                      !showNext && (
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepButton"
                           color="warning"
