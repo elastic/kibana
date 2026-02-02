@@ -31,21 +31,22 @@ export function getConnectorIdSuggestions({
     return [];
   }
 
-  // Extract position from range if position is not provided
-  const insertPosition: MonacoInsertPosition = position
-    ? { lineNumber: position.lineNumber, column: position.column }
-    : {
-        lineNumber: range.startLineNumber,
-        column:
-          lineParseResult.fullKey !== '' ? lineParseResult.valueStartIndex + 1 : range.startColumn,
-      };
+  // Use position line number if available, otherwise fall back to range line number
+  const lineNumber = position?.lineNumber ?? range.startLineNumber;
 
   // If the user has typed part of the connector-id, we replace from the start of the value to the end of the line
   if (lineParseResult.fullKey !== '') {
+    const valueStartColumn = lineParseResult.valueStartIndex + 1;
     const replaceRange = {
-      ...range,
-      startColumn: lineParseResult.valueStartIndex + 1,
+      startLineNumber: lineNumber,
+      endLineNumber: lineNumber,
+      startColumn: valueStartColumn,
       endColumn: line.length + 1,
+    };
+    // Pass the insert position for the "Create connector" command
+    const insertPosition: MonacoInsertPosition = {
+      lineNumber,
+      column: valueStartColumn,
     };
     return getConnectorIdSuggestionsItems(
       stepConnectorType,
@@ -55,6 +56,11 @@ export function getConnectorIdSuggestions({
     );
   }
 
+  // No existing value - use the range as-is
+  const insertPosition: MonacoInsertPosition = {
+    lineNumber,
+    column: range.startColumn,
+  };
   return getConnectorIdSuggestionsItems(
     stepConnectorType,
     range,

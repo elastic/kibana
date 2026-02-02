@@ -69,9 +69,14 @@ export function validateConnectorIds(
     const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
     const actionType = getActionTypeFromStepType(connectorIdItem.connectorType);
+    // Create insert position at the start of the connector-id value
+    const insertPosition = {
+      lineNumber: connectorIdItem.startLineNumber,
+      column: connectorIdItem.startColumn,
+    };
     const createConnectorLink = createHoverClickActionLink({
-      action: WorkflowAction.OpenConnectorFlyout,
-      params: { connectorType: actionType },
+      action: WorkflowAction.OpenConnectorCreationFlyout,
+      params: { connectorType: actionType, insertPosition },
       text: TRANSLATIONS.createConnector,
     });
 

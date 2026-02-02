@@ -57,20 +57,36 @@ export function getConnectorIdSuggestionsItems(
     });
   });
 
+  // Use provided insertPosition or calculate from range
+  const finalInsertPosition: MonacoInsertPosition =
+    insertPosition ??
+    ('startLineNumber' in range
+      ? { lineNumber: range.startLineNumber, column: range.startColumn }
+      : { lineNumber: range.replace.startLineNumber, column: range.replace.startColumn });
+
+  // Create a zero-width range at the insert position to prevent Monaco from replacing any text
+  // when the empty insertText is applied. The command will handle the insertion after connector creation.
+  const zeroWidthRange: monaco.IRange = {
+    startLineNumber: finalInsertPosition.lineNumber,
+    endLineNumber: finalInsertPosition.lineNumber,
+    startColumn: finalInsertPosition.column,
+    endColumn: finalInsertPosition.column,
+  };
+
   suggestions.push({
     label: i18n.translate('workflows.editor.autocomplete.createConnectorLabel', {
       defaultMessage: 'Create a new connector',
     }),
     kind: monaco.languages.CompletionItemKind.Text,
     insertText: '',
-    range,
+    range: zeroWidthRange,
     detail: connectorType,
     documentation: `Create a new connector of type ${connectorType}`,
     sortText: 'z_create',
     command: {
       id: 'workflows.editor.action.createConnector',
       title: 'Create connector',
-      arguments: [getConnectorActionType(connectorType), insertPosition],
+      arguments: [getConnectorActionType(connectorType), finalInsertPosition],
     },
   });
 

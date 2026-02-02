@@ -17,14 +17,14 @@ import {
 } from '../../../../entities/workflows/store';
 
 export enum WorkflowAction {
-  OpenConnectorFlyout = 'open-connector-flyout',
+  OpenConnectorCreationFlyout = 'open-connector-creation-flyout',
   OpenConnectorEditFlyout = 'open-connector-edit-flyout',
 }
 
 type WorkflowHoverClickAction =
   | {
-      action: WorkflowAction.OpenConnectorFlyout;
-      params: { connectorType: string };
+      action: WorkflowAction.OpenConnectorCreationFlyout;
+      params: { connectorType: string; insertPosition: MonacoInsertPosition };
     }
   | {
       action: WorkflowAction.OpenConnectorEditFlyout;
@@ -76,14 +76,18 @@ export function useMonacoHoverClickInterceptor(
       event.stopPropagation();
 
       // Handle the open-connector-flyout action
-      if (action === WorkflowAction.OpenConnectorFlyout) {
+      if (action === WorkflowAction.OpenConnectorCreationFlyout) {
         const connectorType = actionElement.getAttribute('data-connector-type');
         if (connectorType) {
-          // Get the current editor position to insert the connector ID later
-          const position = editor.getPosition();
-          const insertPosition: MonacoInsertPosition | undefined = position
-            ? { lineNumber: position.lineNumber, column: position.column }
-            : undefined;
+          let insertPosition: MonacoInsertPosition | undefined;
+          const lineNumberAttr = actionElement.getAttribute('data-line-number');
+          const columnAttr = actionElement.getAttribute('data-column');
+          if (lineNumberAttr && columnAttr) {
+            insertPosition = {
+              lineNumber: parseInt(lineNumberAttr, 10),
+              column: parseInt(columnAttr, 10),
+            };
+          }
           dispatch(
             openCreateConnectorFlyout({
               connectorType: decodeURIComponent(connectorType),
@@ -131,8 +135,10 @@ export const createHoverClickActionLink = ({
   link.setAttribute('data-workflow-action', action);
   link.setAttribute('style', 'color: #006BB4; text-decoration: underline; cursor: pointer;');
 
-  if (action === WorkflowAction.OpenConnectorFlyout) {
+  if (action === WorkflowAction.OpenConnectorCreationFlyout) {
     link.setAttribute('data-connector-type', encodeURIComponent(params.connectorType));
+    link.setAttribute('data-line-number', params.insertPosition.lineNumber.toString());
+    link.setAttribute('data-column', params.insertPosition.column.toString());
   }
   if (action === WorkflowAction.OpenConnectorEditFlyout) {
     link.setAttribute('data-connector-type', encodeURIComponent(params.connectorType));

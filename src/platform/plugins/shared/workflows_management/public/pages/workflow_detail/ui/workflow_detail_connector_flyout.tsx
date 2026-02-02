@@ -94,29 +94,14 @@ function insertConnectorId(id: string, insertPosition: MonacoInsertPosition) {
 
   if (yamlModel) {
     try {
-      const position = new monaco.Position(insertPosition.lineNumber, insertPosition.column);
+      const { lineNumber, column } = insertPosition;
 
-      // Try to get the word/value at this position to replace it entirely
-      const wordAtPosition = yamlModel.getWordAtPosition(position);
-
-      let replaceRange: monaco.Range;
-      if (wordAtPosition) {
-        // Replace the entire word/value
-        replaceRange = new monaco.Range(
-          insertPosition.lineNumber,
-          wordAtPosition.startColumn,
-          insertPosition.lineNumber,
-          wordAtPosition.endColumn
-        );
-      } else {
-        // If no word found, just insert at the position
-        replaceRange = new monaco.Range(
-          insertPosition.lineNumber,
-          insertPosition.column,
-          insertPosition.lineNumber,
-          insertPosition.column
-        );
-      }
+      const replaceRange = new monaco.Range(
+        lineNumber,
+        column,
+        lineNumber,
+        yamlModel.getLineMaxColumn(lineNumber) // make sure to replace the entire line
+      );
 
       yamlModel.pushEditOperations(null, [{ range: replaceRange, text: id }], () => null);
     } catch (error) {
