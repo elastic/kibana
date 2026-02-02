@@ -16,9 +16,9 @@ const LOG_DOCUMENT_FIELDS = [
   'span.id',
   'http.response.status_code',
   'error.exception.message',
-] as const; 
+] as const;
 
-type FieldKeys = typeof LOG_DOCUMENT_FIELDS[number];
+type FieldKeys = (typeof LOG_DOCUMENT_FIELDS)[number];
 
 type LogDocument = {
   'log.level'?: string;
@@ -26,16 +26,6 @@ type LogDocument = {
 } & {
   [K in FieldKeys]?: unknown;
 };
-  '@timestamp'?: string;
-  message?: string;
-  'log.level'?: string;
-  'service.name'?: string;
-  'trace.id'?: string;
-  'span.id'?: string;
-  'http.response.status_code'?: number;
-  'error.exception.message'?: string;
-  [key: string]: unknown;
-}
 
 export const getLogDocumentById = async ({
   esClient,
