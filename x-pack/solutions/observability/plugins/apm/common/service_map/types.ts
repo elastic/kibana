@@ -12,6 +12,8 @@ import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from 
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
+import type { ServiceHealthStatus } from '../service_health_status';
+import type { ServiceAlertsSeverity, SloStatus } from '../service_inventory';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
@@ -56,6 +58,16 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  alertCounts: Array<{
+    serviceName: string;
+    alertsCount: number;
+    severity: ServiceAlertsSeverity;
+  }>;
+  sloStats: Array<{
+    serviceName: string;
+    sloStatus: SloStatus;
+    sloCount: number;
+  }>;
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
@@ -64,6 +76,12 @@ export interface ServicesResponse {
   [SERVICE_NAME]: string;
   [AGENT_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
+  anomalyHealthStatus?: ServiceHealthStatus;
+  combinedHealthStatus?: ServiceHealthStatus;
+  alertsCount?: number;
+  alertsSeverity?: ServiceAlertsSeverity;
+  sloStatus?: SloStatus;
+  sloCount?: number;
 }
 
 export type ServiceConnectionNode = cytoscape.NodeDataDefinition &

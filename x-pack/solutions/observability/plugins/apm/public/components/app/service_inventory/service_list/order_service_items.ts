@@ -20,13 +20,9 @@ const SERVICE_HEALTH_STATUS_ORDER = [
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
   [ServiceInventoryFieldName.AnomalyHealthStatus]: (item) =>
-    item.anomalyHealthStatus
-      ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.anomalyHealthStatus)
-      : -1,
+    item.anomalyHealthStatus ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.anomalyHealthStatus) : -1,
   [ServiceInventoryFieldName.CombinedHealthStatus]: (item) =>
-    item.combinedHealthStatus
-      ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.combinedHealthStatus)
-      : -1,
+    item.combinedHealthStatus ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.combinedHealthStatus) : -1,
   [ServiceInventoryFieldName.ServiceName]: (item) => item.serviceName.toLowerCase(),
   [ServiceInventoryFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',

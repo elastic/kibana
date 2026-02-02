@@ -11,16 +11,23 @@ import { type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
+import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import type { ApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
+import { getServicesAlerts } from '../services/get_services/get_service_alerts';
+import { getServicesSloStats } from '../services/get_services/get_services_slo_stats';
+import { mergeServiceMapData } from './merge_service_map_data';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
   config: APMConfig;
   apmEventClient: APMEventClient;
+  apmAlertsClient: ApmAlertsClient;
+  sloClient?: ApmSloClient;
   serviceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
@@ -81,7 +88,8 @@ export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
 ): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
-    const { logger } = options;
+    const { logger, apmAlertsClient, sloClient, maxNumberOfServices, start, end, environment } =
+      options;
     const anomaliesPromise = getServiceAnomalies(
       options
 
@@ -91,19 +99,54 @@ export function getServiceMap(
       return DEFAULT_ANOMALIES;
     });
 
-    const [connectionData, servicesData, anomalies] = await Promise.all([
+    const [connectionData, servicesData, anomalies, alertCounts] = await Promise.all([
       getConnectionData(options),
       getServiceStats(options),
       anomaliesPromise,
+      getServicesAlerts({
+        apmAlertsClient,
+        maxNumServices: maxNumberOfServices,
+        start,
+        end,
+        environment,
+        kuery: options.kuery,
+        serviceGroup: undefined, // Service map doesn't use service groups for filtering
+        serviceName: options.serviceName,
+      }).catch((error) => {
+        logger.debug(`Unable to retrieve alerts for service maps.`, { error });
+        return [];
+      }),
     ]);
 
+    // Fetch SLO stats after we have service names
+    const serviceNames = servicesData.map((service) => service['service.name']);
+    const sloStats = await getServicesSloStats({
+      sloClient,
+      environment,
+      maxNumServices: maxNumberOfServices,
+      serviceNames,
+    }).catch((error) => {
+      logger.debug(`Unable to retrieve SLO stats for service maps.`, { error });
+      return [];
+    });
+
     logger.debug('Received and parsed all responses');
+
+    // Merge all data sources into enriched services data for node coloring
+    const enrichedServicesData = mergeServiceMapData({
+      servicesData,
+      anomalies,
+      alertCounts,
+      sloStats,
+    });
 
     return {
       spans: connectionData.spans,
       tracesCount: connectionData.tracesCount,
-      servicesData,
+      servicesData: enrichedServicesData,
       anomalies,
+      alertCounts,
+      sloStats,
     };
   });
 }

@@ -23,7 +23,7 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  anomalyHealthStatus?: ServiceHealthStatus; // ML anomaly detection health status
+  anomalyHealthStatus?: ServiceHealthStatus;
   combinedHealthStatus?: ServiceHealthStatus; // Combined health from alerts, SLOs, and anomalies
   alertsCount?: number;
   alertsSeverity?: ServiceAlertsSeverity;
@@ -84,7 +84,6 @@ export function mergeServiceStats({
     }
   );
 
-  // Calculate combined health status for each service
   return mergedStats.map((service): MergedServiceStat => {
     const mergedService = service as MergedServiceStat;
     return {

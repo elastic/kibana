@@ -127,6 +127,8 @@ export const useServiceMap = ({
     }
   }, [data, status, error]);
 
+  console.log('serviceMapNodes', data);
+
   return serviceMapNodes;
 };
 

@@ -24,6 +24,8 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -64,9 +66,18 @@ const serviceMapRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
+    const [
+      mlClient,
+      apmEventClient,
+      apmAlertsClient,
+      sloClient,
+      serviceGroup,
+      maxNumberOfServices,
+    ] = await Promise.all([
       getMlClient(resources),
       getApmEventClient(resources),
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
       serviceGroupId
         ? getServiceGroup({
             savedObjectsClient,
@@ -88,6 +99,8 @@ const serviceMapRoute = createApmServerRoute({
       mlClient,
       config,
       apmEventClient,
+      apmAlertsClient,
+      sloClient,
       serviceName,
       environment,
       searchAggregatedTransactions,
