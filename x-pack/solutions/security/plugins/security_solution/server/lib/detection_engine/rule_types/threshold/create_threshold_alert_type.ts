@@ -22,6 +22,11 @@ import { buildThresholdSignalHistory } from './build_signal_history';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
 import { getSignalHistory } from './utils';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
+import type {
+  DetectionAlertLatest,
+  WrappedAlert,
+} from '../../../../../common/api/detection_engine/model/alerts';
+import type { EsqlRuleParams } from '../../rule_schema';
 
 export const createThresholdAlertType = (): SecurityAlertType<
   ThresholdRuleParams,
@@ -114,13 +119,14 @@ export const createThresholdAlertType = (): SecurityAlertType<
         : '';
 
       const timestampCommand = `, ${TIMESTAMP} = MAX(${aggregatableTimestampField})`;
+      const minTimestampCommand = `, from = MIN(${aggregatableTimestampField})`;
 
       const timestampOverrideCommand =
         aggregatableTimestampField === 'kibana.combined_timestamp'
           ? `| eval ${aggregatableTimestampField}=CASE(${primaryTimestamp} IS NOT NULL, ${primaryTimestamp}, ${secondaryTimestamp})`
           : '';
       const countCommand = `| WHERE threshold.count >= ${threshold.value}`;
-      const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}${timestampCommand}`;
+      const aggrCommand = `| STATS threshold.count = count(*)${cardinalityAggrCommand}${timestampCommand}${minTimestampCommand}`;
       const aggrByCommand = byFields ? `${aggrCommand} BY ${byFields}` : aggrCommand;
 
       const esqlQuery = [
@@ -146,6 +152,59 @@ export const createThresholdAlertType = (): SecurityAlertType<
         loadFields: true,
       });
 
+      // TODO: probably neeeds to be merged before we wrap alerts
+      const mergeRuleTypeFields = (
+        alerts: Array<WrappedAlert<DetectionAlertLatest>>
+      ): Array<WrappedAlert<DetectionAlertLatest>> => {
+        return alerts.map((alert) => {
+          const source = alert._source;
+          const thresholdCount = source['threshold.count'];
+          const thresholdCardinalityValue = source['threshold.cardinality'];
+
+          // Extract terms from threshold fields
+          const terms = threshold?.field.map((thresholdField) => ({
+            field,
+            value: String(source[thresholdField] ?? ''),
+          }));
+
+          // Build threshold_result object
+          const thresholdResult: {
+            count: number;
+            from: Date;
+            terms: Array<{ field: string; value: string }>;
+            cardinality?: Array<{ field: string; value: number }>;
+          } = {
+            count: typeof thresholdCount === 'number' ? thresholdCount : 0,
+            from: source.from,
+            terms,
+          };
+
+          // Add cardinality if present
+          if (threshold?.cardinality?.length && thresholdCardinalityValue != null) {
+            const cardinalityNumValue =
+              typeof thresholdCardinalityValue === 'number'
+                ? thresholdCardinalityValue
+                : Number(thresholdCardinalityValue);
+            if (!isNaN(cardinalityNumValue)) {
+              thresholdResult.cardinality = [
+                {
+                  field: threshold?.cardinality?.[0]?.field,
+                  value: cardinalityNumValue,
+                },
+              ];
+            }
+          }
+
+          return {
+            ...alert,
+            _source: {
+              ...source,
+              'kibana.alert.threshold_result': thresholdResult,
+            },
+          };
+        });
+      };
+
       const resultEsql = await esqlExecutor({
         ...execOptions,
         sharedParams: {
@@ -155,22 +214,29 @@ export const createThresholdAlertType = (): SecurityAlertType<
             ruleParams: {
               ...ruleParams,
               query: esqlQuery,
-              alertSuppression: {
-                ...ruleParams.alertSuppression,
-                groupBy: threshold.field,
-              },
-            },
+              alertSuppression: ruleParams.alertSuppression
+                ? {
+                    ...ruleParams.alertSuppression,
+                    groupBy: threshold?.field,
+                  }
+                : undefined,
+            } as EsqlRuleParams,
           },
         },
         licensing: sharedParams.licensing,
         scheduleNotificationResponseActionsService:
           sharedParams.scheduleNotificationResponseActionsService,
         filters: esFilter,
+        mergeRuleTypeFields,
       });
 
       // console.log('Esql Result:', JSON.stringify(resultEsql, null, 2));
 
-      const alerts = resultEsql.createdSignals ?? [];
+      const alerts = (resultEsql.createdSignals ?? []) as Array<{
+        _id: string;
+        _index: string;
+        _source: Record<string, unknown>;
+      }>;
       const newSignalHistory = buildThresholdSignalHistory({
         alerts: alerts.map(({ _id, _index, ...rest }) => ({ _id, _index, _source: rest })),
       });

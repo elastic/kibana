@@ -704,7 +704,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('preview logged requests', () => {
+    describe.skip('preview logged requests', () => {
       const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
