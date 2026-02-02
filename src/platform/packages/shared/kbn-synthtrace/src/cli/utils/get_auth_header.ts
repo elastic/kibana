@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
-import type { BehaviorSubject } from 'rxjs';
+export const getApiKeyHeader = (apiKey?: string) => {
+  return apiKey ? { Authorization: `ApiKey ${apiKey}` } : undefined;
+};
 
-export interface PublishesControlsLayout {
-  layout$: BehaviorSubject<{
-    controls: {
-      [id: string]: PinnedControlLayoutState;
-    };
-  }>;
-}
-export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
-  Boolean((api as PublishesControlsLayout).layout$);
+export const getBasicAuthHeader = (username?: string, password?: string) => {
+  return username || password
+    ? {
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      }
+    : {};
+};
