@@ -33,6 +33,7 @@ import { StepContextMenu } from '../context_menu';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
+import { DragHandle } from '../../draggable_step_wrapper';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
@@ -74,6 +75,11 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {!readOnly && (
+              <EuiFlexItem grow={false}>
+                <DragHandle />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}

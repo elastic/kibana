@@ -43,8 +43,8 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   ECH_AGENTLESS_OUTPUT_ID,
   ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
 import { appContextService } from '../app_context';
@@ -89,12 +89,12 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
     const outputId = isServerless
-      ? SERVERLESS_DEFAULT_OUTPUT_ID
+      ? SERVERLESS_AGENTLESS_OUTPUT_ID
       : isCloud
       ? ECH_AGENTLESS_OUTPUT_ID
       : undefined;
     const fleetServerId = isServerless
-      ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+      ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
       ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PROMPT_LAYOUT_VARIANTS } from '../application/components/common/prompt/layout';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../application/hooks/use_ui_privileges';
 import { UpgradeLicensePrompt } from '../application/components/access/prompts/upgrade_license_prompt';
@@ -133,7 +134,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasRequiredLicense) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <UpgradeLicensePrompt variant="embeddable" />
+        <UpgradeLicensePrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }
@@ -141,7 +142,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!hasShowPrivilege) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <NoPrivilegePrompt variant="embeddable" />
+        <NoPrivilegePrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }
@@ -149,7 +150,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasLlmConnector) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <AddLlmConnectionPrompt variant="embeddable" />
+        <AddLlmConnectionPrompt variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />
       </AccessDeniedWrapper>
     );
   }

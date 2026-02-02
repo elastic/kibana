@@ -285,10 +285,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization();
       expect(await testSubjects.exists('lnsDataTable')).to.be(true);
 
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
+      // Removing all except one columns one
+      let count = 9;
+      while (count-- > 0) {
+        await lens.removeDimension('lnsDatatable_metrics');
+      }
 
       await lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',

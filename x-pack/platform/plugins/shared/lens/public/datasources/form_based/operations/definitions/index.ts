@@ -72,6 +72,16 @@ import type { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../.
 import type { OriginalColumn } from '../../to_expression';
 import type { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
+/**
+ * Represents an ES|QL expression with parameterized values.
+ * Use ??paramName for field/column identifiers (esql-composer will escape properly)
+ * Use ?paramName for literal values (strings, numbers)
+ */
+export interface ESQLExpressionWithParams {
+  template: string;
+  params?: Record<string, string | number>;
+}
+
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
 // the column type to the `GenericIndexPatternColumn` union type below.
@@ -421,7 +431,7 @@ interface BaseOperationDefinitionProps<
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient,
     dateRange: DateRange
-  ) => string | undefined;
+  ) => ESQLExpressionWithParams | undefined;
 }
 
 interface BaseBuildColumnArgs {

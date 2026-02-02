@@ -44,13 +44,14 @@ function getColor(
   metricColumn: Column,
   metric: Metric,
   seriesColor: string,
-  splitAccessor?: string
+  splitAccessors: string[]
 ) {
-  if (isPercentileColumnWithMeta(metricColumn) && !splitAccessor) {
+  const hasSplitAccessors = splitAccessors.length > 0;
+  if (isPercentileColumnWithMeta(metricColumn) && !hasSplitAccessors) {
     const [_, percentileIndex] = metricColumn.meta.reference.split('.');
     return metric.percentiles?.[parseInt(percentileIndex, 10)]?.color;
   }
-  if (isPercentileRanksColumnWithMeta(metricColumn) && !splitAccessor) {
+  if (isPercentileRanksColumnWithMeta(metricColumn) && !hasSplitAccessors) {
     const [_, percentileRankIndex] = metricColumn.meta.reference.split('.');
     return metric.colors?.[parseInt(percentileRankIndex, 10)];
   }
@@ -83,9 +84,9 @@ export const getLayers = async (
     );
     const isReferenceLine =
       metricColumns.length === 1 && metricColumns[0].operationType === 'static_value';
-    const splitAccessor = dataSourceLayer.columns.find(
-      (column) => column.isBucketed && column.isSplit
-    )?.columnId;
+    const splitAccessors = dataSourceLayer.columns
+      .filter((column) => column.isBucketed && column.isSplit)
+      .map((c) => c.columnId);
     const chartType = getChartType(series, model.type);
     const commonProps = {
       layerId: dataSourceLayer.layerId,
@@ -98,7 +99,7 @@ export const getLayers = async (
         );
         return {
           forAccessor: metricColumn.columnId,
-          color: getColor(metricColumn, metric!, series.color, splitAccessor),
+          color: getColor(metricColumn, metric!, series.color, splitAccessors),
           axisMode: isReferenceLine // reference line should be assigned to axis with real data
             ? model.series.some((s) => s.id !== series.id && getAxisMode(s, model) === 'right')
               ? 'right'
@@ -125,7 +126,7 @@ export const getLayers = async (
         ...commonProps,
         xAccessor: dataSourceLayer.columns.find((column) => column.isBucketed && !column.isSplit)
           ?.columnId,
-        splitAccessor,
+        splitAccessors: splitAccessors.length > 0 ? splitAccessors : undefined,
         collapseFn: seriesAgg,
         palette: getPalette(series.palette as PaletteOutput),
       };

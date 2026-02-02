@@ -4967,10 +4967,6 @@
                 "path": "src/platform/plugins/private/interactive_setup/server/routes/status.ts"
               },
               {
-                "plugin": "cps",
-                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
-              },
-              {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
               },
@@ -7933,6 +7929,10 @@
               {
                 "plugin": "contentManagement",
                 "path": "src/platform/plugins/shared/content_management/server/plugin.test.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/get_projects_tags.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -16557,6 +16557,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/routes/nba_routes.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_all_integrations/route.ts"
               },
               {
@@ -18372,6 +18376,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/routes/nba_routes.ts"
               },
               {
                 "plugin": "securitySolution",

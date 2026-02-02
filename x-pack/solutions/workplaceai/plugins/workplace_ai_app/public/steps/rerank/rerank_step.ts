@@ -13,7 +13,7 @@ import {
   rerankStepCommonDefinition,
   RerankStepTypeId,
 } from '../../../common/steps/rerank/rerank_step';
-import { createInferenceIdCompletion, createInferenceIdValidator } from './inference_id_validation';
+import { createInferenceIdSelectionHandler } from './inference_id_selection';
 
 export const createRerankStepDefinition = (core: CoreSetup) => {
   let httpPromise: Promise<HttpStart> | null = null;
@@ -126,18 +126,7 @@ This encapsulates the Elasticsearch rerank API call for easy use in workflows.`,
     editorHandlers: {
       config: {
         inference_id: {
-          completion: {
-            getOptions: async (value) => {
-              const http = await getHttp();
-              return createInferenceIdCompletion(http)(value);
-            },
-          },
-          validation: {
-            validate: async (value, _context) => {
-              const http = await getHttp();
-              return createInferenceIdValidator(http)(value);
-            },
-          },
+          selection: createInferenceIdSelectionHandler(getHttp),
         },
       },
     },

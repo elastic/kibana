@@ -290,7 +290,14 @@ export async function createAgentPolicy(
   const agentPolicyType = await getAgentPolicySavedObjectType();
   await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
     try {
-      return await soClient.create<unknown>(agentPolicyType, {}, { id });
+      return await soClient.create<unknown>(
+        agentPolicyType,
+        {
+          name: 'Elastic Cloud agent policy',
+          namespace: 'default',
+        },
+        { id }
+      );
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
       throw Error(`>> Error searching for agent: ${e}`);

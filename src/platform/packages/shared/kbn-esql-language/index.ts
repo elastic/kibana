@@ -31,6 +31,7 @@ export type {
   ESQLAstChangePointCommand,
   ESQLAstForkCommand,
   ESQLForkParens,
+  ESQLAstPromqlCommand,
 } from './src/types';
 
 export * from './src/constants';

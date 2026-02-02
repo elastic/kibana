@@ -54,7 +54,6 @@ export class OrphanSummaryCleanupTask {
             run: async () => {
               return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {},
           };
         },
       },

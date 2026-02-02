@@ -34,6 +34,14 @@ export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.o
       headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     }),
   }),
+
+  // Protobuf OTLP Exporter
+  schema.object({
+    proto: metricsCommonExporterConfigSchema.extends({
+      url: schema.string(),
+      headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    }),
+  }),
 ]);
 
 /**
