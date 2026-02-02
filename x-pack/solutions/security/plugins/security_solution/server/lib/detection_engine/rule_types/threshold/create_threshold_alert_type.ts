@@ -155,6 +155,10 @@ export const createThresholdAlertType = (): SecurityAlertType<
             ruleParams: {
               ...ruleParams,
               query: esqlQuery,
+              alertSuppression: {
+                ...ruleParams.alertSuppression,
+                groupBy: threshold.field,
+              },
             },
           },
         },
