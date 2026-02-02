@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alerts-actions';
+export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alerts-actions-*';
 export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alerts-actions-ilm-policy';
 
 export const ALERT_ACTIONS_ILM_POLICY: IlmPolicy = {
