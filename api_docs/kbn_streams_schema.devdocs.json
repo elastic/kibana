@@ -705,6 +705,51 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getDiscoverEsqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiscoverEsqlQuery",
+        "description": [
+          "\nGenerates a base ES|QL query for Discover from a stream definition.\n\nUses 'TS' source command for TSDB mode streams, 'FROM' otherwise.\nOptionally includes METADATA _source for wired streams.\n"
+        ],
+        "signature": [
+          "(options: ",
+          "GetDiscoverEsqlQueryOptions",
+          ") => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_discover_esql_query.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getDiscoverEsqlQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Configuration options for query generation"
+            ],
+            "signature": [
+              "GetDiscoverEsqlQueryOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_discover_esql_query.ts",
+            "lineNumber": 51,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The ES|QL query string, or undefined if index patterns cannot be determined"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getIndexPatternsForStream",
         "type": "Function",
         "tags": [],
@@ -1444,7 +1489,7 @@
           "(feature: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 53,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1460,7 +1505,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -1941,13 +1986,29 @@
           },
           {
             "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.BaseFeature.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.BaseFeature.description",
             "type": "string",
             "tags": [],
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1963,7 +2024,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1976,7 +2037,7 @@
             "label": "confidence",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1992,7 +2053,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2008,7 +2069,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2024,7 +2085,7 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2231,7 +2292,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2244,7 +2305,7 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2260,7 +2321,7 @@
               "\"active\" | \"expired\" | \"stale\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2273,7 +2334,7 @@
             "label": "last_seen",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2289,7 +2350,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3148,42 +3209,148 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.InsightsResult",
+        "id": "def-common.Insight",
         "type": "Interface",
         "tags": [],
-        "label": "InsightsResult",
+        "label": "Insight",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-        "lineNumber": 8,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.InsightsResult.summary",
+            "id": "def-common.Insight.title",
             "type": "string",
             "tags": [],
-            "label": "summary",
+            "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-            "lineNumber": 9,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.InsightsResult.tokenUsage",
-            "type": "Object",
+            "id": "def-common.Insight.description",
+            "type": "string",
             "tags": [],
-            "label": "tokenUsage",
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.impact",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "impact",
             "description": [],
             "signature": [
-              "{ prompt: number; completion: number; cached: number; }"
+              "\"medium\" | \"critical\" | \"high\" | \"low\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
-            "lineNumber": 10,
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.evidence",
+            "type": "Array",
+            "tags": [],
+            "label": "evidence",
+            "description": [],
+            "signature": [
+              "InsightEvidence[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Insight.recommendations",
+            "type": "Array",
+            "tags": [],
+            "label": "recommendations",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InsightsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InsightsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.insights",
+            "type": "Array",
+            "tags": [],
+            "label": "insights",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Insight",
+                "text": "Insight"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.tokensUsed",
+            "type": "Object",
+            "tags": [],
+            "label": "tokensUsed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompletionTokenCount",
+                "text": "ChatCompletionTokenCount"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4358,6 +4525,23 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamIndexMode",
+        "type": "Type",
+        "tags": [],
+        "label": "IngestStreamIndexMode",
+        "description": [],
+        "signature": [
+          "\"standard\" | \"time_series\" | \"logsdb\" | \"lookup\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.IngestStreamLifecycle",
         "type": "Type",
         "tags": [],
@@ -4456,6 +4640,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/fields/index.ts",
         "lineNumber": 90,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InsightImpactLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "InsightImpactLevel",
+        "description": [],
+        "signature": [
+          "\"medium\" | \"critical\" | \"high\" | \"low\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4904,7 +5105,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5016,7 +5217,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 44,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

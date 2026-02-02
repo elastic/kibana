@@ -1640,6 +1640,23 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ALERT_STATUS_DELAYED",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_STATUS_DELAYED",
+        "description": [],
+        "signature": [
+          "\"delayed\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ALERT_STATUS_RECOVERED",
         "type": "string",
         "tags": [],
@@ -2207,10 +2224,10 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"recovered\" | \"untracked\""
+          "\"active\" | \"recovered\" | \"untracked\" | \"delayed\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2630,6 +2647,23 @@
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "lineNumber": 10,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.PublicAlertStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicAlertStatus",
+        "description": [],
+        "signature": [
+          "\"active\" | \"recovered\" | \"untracked\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -10,7 +10,7 @@
         "label": "CoreAppsService",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-        "lineNumber": 52,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26,7 +26,7 @@
               "any"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 55,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -42,7 +42,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-                "lineNumber": 55,
+                "lineNumber": 47,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -64,7 +64,7 @@
               ") => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 57,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -80,7 +80,7 @@
                   "CoreAppsServiceSetupDeps"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-                "lineNumber": 57,
+                "lineNumber": 49,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -102,7 +102,7 @@
               ") => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 85,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -118,7 +118,7 @@
                   "CoreAppsServiceStartDeps"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-                "lineNumber": 85,
+                "lineNumber": 77,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,7 +138,7 @@
               "() => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 107,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -159,7 +159,7 @@
         "label": "CoreAppsServiceSetupDeps",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-        "lineNumber": 33,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -175,7 +175,7 @@
               "InternalApplicationSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 34,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -195,7 +195,7 @@
               "; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 35,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -211,7 +211,7 @@
               "InternalInjectedMetadataSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 36,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -227,7 +227,7 @@
               "NotificationsSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 37,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -243,7 +243,7 @@
         "label": "CoreAppsServiceStartDeps",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-        "lineNumber": 40,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -259,7 +259,7 @@
               "InternalApplicationStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 41,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -275,7 +275,7 @@
               "DocLinksStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 42,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -295,7 +295,7 @@
               "; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 43,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -311,7 +311,7 @@
               "NotificationsStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 44,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -327,7 +327,7 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 45,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -349,7 +349,7 @@
               ">; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 46,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -365,7 +365,7 @@
               "I18nStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 47,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -381,7 +381,7 @@
               "ThemeServiceSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 48,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -397,7 +397,7 @@
               "UserProfileService"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
-            "lineNumber": 49,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -407,27 +407,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-public.URL_MAX_LENGTH",
-        "type": "CompoundType",
-        "tags": [],
-        "label": "URL_MAX_LENGTH",
-        "description": [
-          "\nThe max URL length allowed by the current browser. Should be used to display warnings to users when query parameters\ncause URL to exceed this limit."
-        ],
-        "signature": [
-          "2000 | 25000"
-        ],
-        "path": "src/core/packages/apps/browser-internal/src/errors/url_overflow.tsx",
-        "lineNumber": 28,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "server": {
