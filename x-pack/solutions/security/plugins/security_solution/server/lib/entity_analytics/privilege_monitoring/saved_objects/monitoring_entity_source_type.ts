@@ -9,6 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { maxSize } from '@kbn/files-plugin/common/default_image_file_kind';
 
 export const monitoringEntitySourceTypeName = 'entity-analytics-monitoring-entity-source';
 
@@ -46,14 +47,15 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
 
 const matcherSchema = schema.object(
   {
-    fields: schema.arrayOf(schema.string()),
+    fields: schema.arrayOf(schema.string(), { maxSize: 20 }), // do not expect many fields
     // Keep permissive at the SO layer; enforce strict (string[] | boolean[]) via Zod in service code.
-    values: schema.arrayOf(schema.any()),
+    values: schema.arrayOf(schema.any(), { maxSize: 50 }), // values will be groups and roles, should not be huge.
   },
   { unknowns: 'ignore' }
 );
 
-const matchersSchema = schema.arrayOf(matcherSchema);
+// matchers size 50 is generous, should never really be this large.
+const matchersSchema = schema.arrayOf(matcherSchema, { maxSize: 50 });
 
 const baseEntitySourceSchema = {
   type: schema.maybe(schema.string()),
