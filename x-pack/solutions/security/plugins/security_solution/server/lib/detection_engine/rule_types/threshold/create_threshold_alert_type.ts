@@ -171,16 +171,16 @@ export const createThresholdAlertType = (): SecurityAlertType<
         },
       };
 
-      const result = await thresholdExecutor({
-        sharedParams,
-        services,
-        startedAt,
-        state,
-        licensing: sharedParams.licensing,
-        scheduleNotificationResponseActionsService:
-          sharedParams.scheduleNotificationResponseActionsService,
-      });
-      return result;
+      // const result = await thresholdExecutor({
+      //   sharedParams,
+      //   services,
+      //   startedAt,
+      //   state,
+      //   licensing: sharedParams.licensing,
+      //   scheduleNotificationResponseActionsService:
+      //     sharedParams.scheduleNotificationResponseActionsService,
+      // });
+      // return result;
     },
   };
 };
