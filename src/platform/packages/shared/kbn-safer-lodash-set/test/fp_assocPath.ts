@@ -4,7 +4,7 @@
  */
 
 import { expectType } from 'tsd';
-import assocPath from '../fp/assocPath';
+import { assocPath } from '../fp';
 
 const someObj: object = {};
 const anyValue: any = 'any value';
