@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
   - '@kbn/data-views-plugin'
+  - '@kbn/index-management-shared-types'
 tags:
   - plugin
   - prod
