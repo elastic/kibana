@@ -46,7 +46,7 @@ export const AllTemplatesPage: React.FC = () => {
     totalItemCount: data?.total ?? 0,
   });
 
-  const { handleEdit, handleClone, handleSetAsDefault, handleExport, handlePreview, handleDelete } =
+  const { handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete } =
     useTemplatesActions();
 
   const { columns } = useTemplatesColumns({
@@ -54,7 +54,6 @@ export const AllTemplatesPage: React.FC = () => {
     onClone: handleClone,
     onSetAsDefault: handleSetAsDefault,
     onExport: handleExport,
-    onPreview: handlePreview,
     onDelete: handleDelete,
     disableActions: selectedTemplates.length > 0,
   });

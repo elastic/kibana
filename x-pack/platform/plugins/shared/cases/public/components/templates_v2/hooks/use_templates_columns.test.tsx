@@ -21,7 +21,6 @@ describe('useTemplatesColumns', () => {
     onClone: jest.fn(),
     onSetAsDefault: jest.fn(),
     onExport: jest.fn(),
-    onPreview: jest.fn(),
     onDelete: jest.fn(),
   };
 

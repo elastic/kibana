@@ -52,7 +52,6 @@ interface ActionColumnProps {
   onClone: (template: Template) => void;
   onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
-  onPreview: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
 }
@@ -63,7 +62,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
   onClone,
   onSetAsDefault,
   onExport,
-  onPreview,
   onDelete,
   disableActions = false,
 }) => {
@@ -89,11 +87,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
     closePopover();
     onExport(template);
   }, [closePopover, onExport, template]);
-
-  const handlePreview = useCallback(() => {
-    closePopover();
-    onPreview(template);
-  }, [closePopover, onPreview, template]);
 
   const handleDelete = useCallback(() => {
     closePopover();
@@ -134,12 +127,6 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
             isSeparator: true,
           },
           {
-            name: i18n.PREVIEW_TEMPLATE,
-            icon: 'eye',
-            onClick: handlePreview,
-            'data-test-subj': `template-action-preview-${template.key}`,
-          },
-          {
             name: i18n.DELETE_TEMPLATE,
             icon: 'trash',
             onClick: handleDelete,
@@ -148,15 +135,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
         ],
       },
     ],
-    [
-      handleEdit,
-      handleClone,
-      handleSetAsDefault,
-      handleExport,
-      handlePreview,
-      handleDelete,
-      template.key,
-    ]
+    [handleEdit, handleClone, handleSetAsDefault, handleExport, handleDelete, template.key]
   );
 
   return (
@@ -195,7 +174,6 @@ export interface UseTemplatesColumnsProps {
   onClone: (template: Template) => void;
   onSetAsDefault: (template: Template) => void;
   onExport: (template: Template) => void;
-  onPreview: (template: Template) => void;
   onDelete: (template: Template) => void;
   disableActions?: boolean;
 }
@@ -205,7 +183,6 @@ export const useTemplatesColumns = ({
   onClone,
   onSetAsDefault,
   onExport,
-  onPreview,
   onDelete,
   disableActions = false,
 }: UseTemplatesColumnsProps) => {
@@ -389,7 +366,6 @@ export const useTemplatesColumns = ({
             onClone={onClone}
             onSetAsDefault={onSetAsDefault}
             onExport={onExport}
-            onPreview={onPreview}
             onDelete={onDelete}
             disableActions={disableActions}
           />
@@ -397,16 +373,7 @@ export const useTemplatesColumns = ({
         width: '80px',
       },
     ],
-    [
-      onEdit,
-      euiTheme.size.xs,
-      onClone,
-      onSetAsDefault,
-      onExport,
-      onPreview,
-      onDelete,
-      disableActions,
-    ]
+    [onEdit, euiTheme.size.xs, onClone, onSetAsDefault, onExport, onDelete, disableActions]
   );
 
   return { columns };

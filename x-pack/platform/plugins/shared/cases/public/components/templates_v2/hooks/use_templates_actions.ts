@@ -37,12 +37,6 @@ export const useTemplatesActions = () => {
     console.log('Export template:', template);
   }, []);
 
-  const handlePreview = useCallback((template: Template) => {
-    // TODO: Implement preview functionality
-    // eslint-disable-next-line no-console
-    console.log('Preview template:', template);
-  }, []);
-
   const handleDelete = useCallback((template: Template) => {
     // TODO: Implement delete functionality
     // eslint-disable-next-line no-console
@@ -54,7 +48,6 @@ export const useTemplatesActions = () => {
     handleClone,
     handleSetAsDefault,
     handleExport,
-    handlePreview,
     handleDelete,
   };
 };

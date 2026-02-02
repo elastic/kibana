@@ -61,7 +61,6 @@ describe('useTemplatesActions', () => {
     expect(result.current).toHaveProperty('handleClone');
     expect(result.current).toHaveProperty('handleSetAsDefault');
     expect(result.current).toHaveProperty('handleExport');
-    expect(result.current).toHaveProperty('handlePreview');
     expect(result.current).toHaveProperty('handleDelete');
   });
 
@@ -115,18 +114,6 @@ describe('useTemplatesActions', () => {
     expect(consoleSpy).toHaveBeenCalledWith('Export template:', mockTemplate);
   });
 
-  it('handlePreview is a function', () => {
-    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
-
-    expect(typeof result.current.handlePreview).toBe('function');
-
-    act(() => {
-      result.current.handlePreview(mockTemplate);
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith('Preview template:', mockTemplate);
-  });
-
   it('handleDelete is a function', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
@@ -150,7 +137,6 @@ describe('useTemplatesActions', () => {
     expect(result.current.handleClone).toBe(firstRenderHandlers.handleClone);
     expect(result.current.handleSetAsDefault).toBe(firstRenderHandlers.handleSetAsDefault);
     expect(result.current.handleExport).toBe(firstRenderHandlers.handleExport);
-    expect(result.current.handlePreview).toBe(firstRenderHandlers.handlePreview);
     expect(result.current.handleDelete).toBe(firstRenderHandlers.handleDelete);
   });
 });
