@@ -13,8 +13,6 @@ import type {
   ToolUpdateParams,
 } from '@kbn/agent-builder-server/tools';
 
-export type { ToolCreateParams, ToolUpdateParams };
-
 export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
