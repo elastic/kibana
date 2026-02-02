@@ -85,7 +85,7 @@ async function fetchLogContext({
   id: string;
   logEntry: LogDocument;
 }): Promise<string> {
-  const logTimestamp = logEntry['@timestamp'] as string;
+  const logTimestamp = logEntry['@timestamp'];
   const logTime = moment(logTimestamp);
   const windowStart = logTime.clone().subtract(60, 'minutes').toISOString();
   const windowEnd = logTime.clone().add(60, 'minutes').toISOString();
