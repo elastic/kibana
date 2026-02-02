@@ -54,7 +54,14 @@ var BASE_QUERY = {
  * Uses config file (default config/kibana.dev.yml or --config), then env overrides.
  */
 function readKibanaConfig(configPath, log) {
-  var configPathToUse = path.resolve(process.cwd(), configPath || 'config/kibana.dev.yml');
+  var configPathToUse = path.resolve(process.cwd(), '../config/kibana.dev.yml');
+
+  if (configPath) {
+    configPathToUse = path.resolve(process.cwd(), configPath);
+  }
+  if (!fs.existsSync(configPathToUse)) {
+    configPathToUse = path.resolve(process.cwd(), 'config/kibana.dev.yml');
+  }
   var esConfigValues = {};
 
   if (fs.existsSync(configPathToUse)) {
@@ -102,6 +109,10 @@ function readKibanaConfig(configPath, log) {
   Object.keys(envOverrides).forEach(function (key) {
     baseConfig[key] = envOverrides[key];
   });
+
+  if (baseConfig.username === 'kibana_system_user') {
+    baseConfig.username = 'elastic';
+  }
 
   return baseConfig;
 }
