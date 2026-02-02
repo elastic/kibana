@@ -113,7 +113,8 @@ export const createCustomThresholdExecutor = ({
     };
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
+    const alertOnGroupDisappear =
+      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
     const compositeSize = config.customThresholdRule.groupByPageSize;
     const queryIsSame = isEqual(
       state.searchConfiguration?.query.query,
@@ -194,20 +195,32 @@ export const createCustomThresholdExecutor = ({
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+      if (isNoDataFound && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
-      const nextState = isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : AlertStates.OK;
+      const isIndeterminateState =
+        isNoDataFound &&
+        params.noDataBehavior === 'remainActive' &&
+        alertsClient.isTrackedAlert(group);
+
+      const isAlertOnNoDataEnabled = params.noDataBehavior
+        ? params.noDataBehavior === 'alertOnNoData'
+        : alertOnNoData || alertOnGroupDisappear;
+
+      const nextState =
+        isNoDataFound && isAlertOnNoDataEnabled
+          ? AlertStates.NO_DATA
+          : isIndeterminateState
+          ? AlertStates.ALERT
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT) {
+      if (nextState === AlertStates.ALERT && !isIndeterminateState) {
         reason = buildFiredAlertReason(alertResults, group, dataViewName);
       }
 
