@@ -10,12 +10,12 @@ import type {
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ERROR_EXC_TYPE } from '@kbn/apm-types/es_fields';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { warningAndAboveLogFilter } from '../../utils/warning_and_above_log_filter';
 import { getCategorizedLogs, getSamplingProbability } from './get_categorized_logs';
-import { EXCEPTION_TYPE } from './get_log_exception_groups';
 
 export async function getNonExceptionLogGroups({
   core,
@@ -43,7 +43,7 @@ export async function getNonExceptionLogGroups({
     ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
     ...kqlFilter(kuery),
     { exists: { field: 'message' } },
-    { bool: { must_not: { exists: { field: EXCEPTION_TYPE } } } },
+    { bool: { must_not: { exists: { field: ERROR_EXC_TYPE } } } },
   ] as QueryDslQueryContainer[];
 
   const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
@@ -107,7 +107,7 @@ export async function getNonExceptionLogGroupsWithQuery({
     samplingProbability,
     size,
     messageField: 'message',
-    fields: ['message', '@timestamp', 'log.level', ...fields],
+    fields,
     type: 'log',
   });
 }

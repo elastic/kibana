@@ -7,26 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import {
-  ERROR_CULPRIT,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_MESSAGE,
-  ERROR_EXC_TYPE,
-  ERROR_GROUP_ID,
-  ERROR_LOG_MESSAGE,
-  HTTP_REQUEST_METHOD,
-  HTTP_RESPONSE_STATUS_CODE,
-  SERVICE_ENVIRONMENT,
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_NAME,
-  SPAN_ID,
-  TRACE_ID,
-  TRANSACTION_ID,
-  TRANSACTION_NAME,
-  TRANSACTION_PAGE_URL,
-  URL_FULL,
-} from '@kbn/observability-shared-plugin/common';
-import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
+import type { SERVICE_NAME, TRACE_ID } from '@kbn/apm-types/es_fields';
+import { ERROR_GROUP_ID } from '@kbn/apm-types/es_fields';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
@@ -42,7 +24,6 @@ export async function getSpanExceptionGroups({
   startMs,
   endMs,
   kqlFilter,
-  includeStackTrace,
   includeFirstSeen,
   size,
   logger,
@@ -52,7 +33,6 @@ export async function getSpanExceptionGroups({
   startMs: number;
   endMs: number;
   kqlFilter: string | undefined;
-  includeStackTrace: boolean;
   includeFirstSeen: boolean;
   size: number;
   logger: Logger;
@@ -63,7 +43,6 @@ export async function getSpanExceptionGroups({
     startMs,
     endMs,
     kqlFilter,
-    includeStackTrace,
     size,
     logger,
     fields,
@@ -101,7 +80,6 @@ async function getSpanExceptionSamples({
   startMs,
   endMs,
   kqlFilter,
-  includeStackTrace,
   size,
   logger,
   fields,
@@ -110,7 +88,6 @@ async function getSpanExceptionSamples({
   startMs: number;
   endMs: number;
   kqlFilter: string | undefined;
-  includeStackTrace: boolean;
   size: number;
   logger: Logger;
   fields: string[];
@@ -149,38 +126,7 @@ async function getSpanExceptionSamples({
             top_hits: {
               size: 1,
               _source: false,
-              fields: [
-                '@timestamp',
-                '_index',
-                // Error fields
-                ERROR_CULPRIT,
-                ERROR_EXC_HANDLED,
-                ERROR_EXC_MESSAGE,
-                ERROR_EXC_TYPE,
-                ERROR_GROUP_ID,
-                ERROR_LOG_MESSAGE,
-
-                // Service fields
-                SERVICE_ENVIRONMENT,
-                SERVICE_LANGUAGE_NAME,
-                SERVICE_NAME,
-
-                // Trace fields
-                SPAN_ID,
-                TRACE_ID,
-                TRANSACTION_ID,
-                TRANSACTION_NAME,
-
-                // HTTP fields
-                HTTP_REQUEST_METHOD,
-                HTTP_RESPONSE_STATUS_CODE,
-                TRANSACTION_PAGE_URL,
-                URL_FULL,
-
-                // Stack trace if requested
-                ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
-                ...fields,
-              ],
+              fields,
               sort: [{ '@timestamp': 'desc' as const }],
             },
           },

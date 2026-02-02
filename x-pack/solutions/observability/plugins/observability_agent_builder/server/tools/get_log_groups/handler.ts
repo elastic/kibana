@@ -7,6 +7,26 @@
 
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { orderBy } from 'lodash';
+import {
+  ERROR_CULPRIT,
+  HTTP_RESPONSE_STATUS_CODE,
+  TRANSACTION_NAME,
+  TRANSACTION_ID,
+  ERROR_LOG_MESSAGE,
+  ERROR_GROUP_ID,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+  SPAN_ID,
+  TRACE_ID,
+  HTTP_REQUEST_METHOD,
+  TRANSACTION_PAGE_URL,
+  URL_FULL,
+  ERROR_STACK_TRACE,
+} from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -50,6 +70,42 @@ export async function getToolHandler({
   const endMs = parseDatemath(end, { roundUp: true });
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
+  const logGroupFields = [
+    '_index',
+    '@timestamp',
+    'message',
+    'log.level',
+
+    // Error fields
+    ERROR_CULPRIT,
+    ERROR_EXC_HANDLED,
+    ERROR_EXC_MESSAGE,
+    ERROR_EXC_TYPE,
+    ERROR_GROUP_ID,
+    ERROR_LOG_MESSAGE,
+
+    // Service fields
+    SERVICE_ENVIRONMENT,
+    SERVICE_LANGUAGE_NAME,
+    SERVICE_NAME,
+
+    // Trace fields
+    SPAN_ID,
+    TRACE_ID,
+    TRANSACTION_ID,
+    TRANSACTION_NAME,
+
+    // HTTP fields
+    HTTP_REQUEST_METHOD,
+    HTTP_RESPONSE_STATUS_CODE,
+    TRANSACTION_PAGE_URL,
+    URL_FULL,
+
+    // Stack trace if requested
+    ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
+    ...fields,
+  ];
+
   const [spanExceptionGroups, logExceptionGroups, nonExceptionLogGroups] = await Promise.all([
     getSpanExceptionGroups({
       apmEventClient,
@@ -57,10 +113,9 @@ export async function getToolHandler({
       startMs,
       endMs,
       kqlFilter,
-      includeStackTrace,
       includeFirstSeen,
       size,
-      fields,
+      fields: logGroupFields,
     }),
     getLogExceptionGroups({
       core,
@@ -70,9 +125,8 @@ export async function getToolHandler({
       startMs,
       endMs,
       kqlFilter,
-      includeStackTrace,
       size,
-      fields,
+      fields: logGroupFields,
     }),
     getNonExceptionLogGroups({
       core,
@@ -82,7 +136,7 @@ export async function getToolHandler({
       startMs,
       endMs,
       kqlFilter,
-      fields,
+      fields: logGroupFields,
       size,
     }),
   ]);

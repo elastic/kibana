@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   TRACE_ID,
-} from '@kbn/observability-shared-plugin/common';
+} from '@kbn/apm-types/es_fields';
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';

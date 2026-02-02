@@ -9,7 +9,7 @@ import { compact } from 'lodash';
 import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
-import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
+import { ERROR_GROUP_ID } from '@kbn/apm-types/es_fields';
 import type { ApmEventClient } from './types';
 import type { SpanExceptionSample } from './get_span_exception_groups';
 import { getTotalHits } from '../../utils/get_total_hits';
