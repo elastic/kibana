@@ -35,13 +35,13 @@ import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 export function getInitialAppState({
   initialUrlState,
-  hasGlobalState,
+  hasGlobalState = false,
   persistedTab,
   dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
-  hasGlobalState: boolean;
+  hasGlobalState?: boolean;
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
