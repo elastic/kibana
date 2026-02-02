@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getEntityDefinitionId } from '../../../common/domain/definitions/registry';
 import { getEntityIndexPattern, ENTITY_SCHEMA_VERSION_V2, ENTITY_UPDATES } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
-import { getEntityDefinitionId } from './latest_index';
 
 export const getUpdatesEntitiesDataStreamName = (entityType: EntityType, namespace: string) =>
   getEntityIndexPattern({
