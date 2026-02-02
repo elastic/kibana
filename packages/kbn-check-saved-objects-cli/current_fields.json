@@ -1,9 +1,4 @@
 {
-  "DASHBOARD_MARKDOWN": [
-    "description",
-    "links",
-    "title"
-  ],
   "action": [
     "actionTypeId",
     "name"
@@ -926,6 +921,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
