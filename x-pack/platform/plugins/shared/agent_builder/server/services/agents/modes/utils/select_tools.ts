@@ -101,15 +101,21 @@ export const selectTools = async ({
     request,
   });
 
-  const dynamicInlineTools = (await Promise.all(skills.list()
-    .filter(skill => skill.getInlineTools != undefined)
-    .map(skill => skill.getInlineTools!()))).flat()
-    .filter(tool => previousDynamicToolIds.includes(tool.id))
-    .map(tool => skills.convertSkillTool(tool));
+  const dynamicInlineTools = (
+    await Promise.all(
+      skills
+        .list()
+        .filter((skill) => skill.getInlineTools != undefined)
+        .map((skill) => skill.getInlineTools!())
+    )
+  )
+    .flat()
+    .filter((tool) => previousDynamicToolIds.includes(tool.id))
+    .map((tool) => skills.convertSkillTool(tool));
 
   return {
     staticTools: [...dedupedStaticTools.values()],
-    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools]
+    dynamicTools: [...dynamicRegistryTools, ...dynamicInlineTools],
   };
 };
 

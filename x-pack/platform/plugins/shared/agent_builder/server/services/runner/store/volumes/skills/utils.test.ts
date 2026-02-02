@@ -12,7 +12,7 @@ import {
   createSkillEntries,
   isSkillFileEntry,
 } from './utils';
-import { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
@@ -177,15 +177,15 @@ This is the skill body.`);
       });
       const entries = createSkillEntries(skill);
       expect(entries).toHaveLength(3); // 1 skill entry + 2 referenced content entries
-      
+
       const skillEntry = entries[0];
       expect(skillEntry.metadata.type).toBe(FileEntryType.skill);
-      
+
       const refContent1 = entries[1];
       expect(refContent1.metadata.type).toBe(FileEntryType.skillReferenceContent);
       expect(refContent1.path).toBe('skills/platform/test-skill/./content-1.md');
       expect(refContent1.content.plain_text).toBe('Content 1 body');
-      
+
       const refContent2 = entries[2];
       expect(refContent2.metadata.type).toBe(FileEntryType.skillReferenceContent);
       expect(refContent2.path).toBe('skills/platform/test-skill/./queries/content-2.md');

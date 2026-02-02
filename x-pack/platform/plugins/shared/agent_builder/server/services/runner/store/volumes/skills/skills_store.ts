@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type {
-  SkillsStore,
-  WritableSkillsStore,
-} from '@kbn/agent-builder-server/runner';
+import type { SkillsStore, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
+import type { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
 import { MemoryVolume } from '../../filesystem';
 import { createSkillEntries, getSkillEntryPath } from './utils';
-import { SkillTypeDefinition } from '@kbn/agent-builder-server/skills';
-import { SKILLS_ENABLED } from '@kbn/agent-builder-plugin/server/services/skills/constants';
+import { SKILLS_ENABLED } from '../../../../skills/constants';
 
 export const createSkillsStore = ({ skills }: { skills: SkillTypeDefinition[] }) => {
   return new SkillsStoreImpl({ skills });
@@ -24,7 +21,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
 
   constructor({ skills = [] }: { skills?: SkillTypeDefinition[] }) {
     this.volume = new MemoryVolume('skills');
-    if(SKILLS_ENABLED){
+    if (SKILLS_ENABLED) {
       skills.forEach((skill) => this.add(skill));
     }
   }
@@ -43,7 +40,7 @@ export class SkillsStoreImpl implements WritableSkillsStore {
   /**
    * Delete a skill from the store and the volume. Currently unused.
    * @param skillId - The id of the skill to delete
-   * @returns 
+   * @returns
    */
   delete(skillId: string): boolean {
     const skill = this.skills.get(skillId);

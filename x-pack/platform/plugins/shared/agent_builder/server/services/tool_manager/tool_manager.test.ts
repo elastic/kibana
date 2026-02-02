@@ -6,7 +6,7 @@
  */
 
 import { ToolManager, createToolManager } from './tool_manager';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -40,11 +40,14 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
 
 jest.mock('../tools/browser_tool_adapter', () => ({
   browserToolsToLangchain: jest.fn(({ browserApiTools }) => {
-    const tools = browserApiTools.map((tool: any) => ({
-      name: `browser_${tool.id}`,
-      description: tool.description,
-      invoke: jest.fn(),
-    } as unknown as StructuredTool));
+    const tools = browserApiTools.map(
+      (tool: any) =>
+        ({
+          name: `browser_${tool.id}`,
+          description: tool.description,
+          invoke: jest.fn(),
+        } as unknown as StructuredTool)
+    );
 
     const idMappings = new Map();
     browserApiTools.forEach((tool: any) => {
@@ -63,7 +66,10 @@ describe('ToolManager', () => {
     toolManager = new ToolManager({ dynamicToolCapacity: 5 });
   });
 
-  const createMockExecutableTool = (id: string, description: string = 'Test tool'): ExecutableTool => ({
+  const createMockExecutableTool = (
+    id: string,
+    description: string = 'Test tool'
+  ): ExecutableTool => ({
     id,
     type: 'builtin' as any,
     description,
@@ -74,7 +80,10 @@ describe('ToolManager', () => {
     execute: jest.fn(),
   });
 
-  const createMockBrowserTool = (id: string, description: string = 'Browser tool'): BrowserApiToolMetadata => ({
+  const createMockBrowserTool = (
+    id: string,
+    description: string = 'Browser tool'
+  ): BrowserApiToolMetadata => ({
     id,
     description,
     schema: {
@@ -109,7 +118,7 @@ describe('ToolManager', () => {
   describe('addTool - executable tools', () => {
     it('adds a single executable tool as static tool', async () => {
       const tool = createMockExecutableTool('tool-1');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
@@ -124,7 +133,7 @@ describe('ToolManager', () => {
     it('adds multiple executable tools as static tools', async () => {
       const tool1 = createMockExecutableTool('tool-1');
       const tool2 = createMockExecutableTool('tool-2');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: [tool1, tool2],
@@ -137,7 +146,7 @@ describe('ToolManager', () => {
 
     it('adds executable tool as dynamic tool when dynamic option is true', async () => {
       const tool = createMockExecutableTool('dynamic-tool');
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -156,7 +165,7 @@ describe('ToolManager', () => {
     it('merges tool id mappings when adding multiple tools', async () => {
       const tool1 = createMockExecutableTool('tool-1');
       const tool2 = createMockExecutableTool('tool-2');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: [tool1, tool2],
@@ -170,7 +179,7 @@ describe('ToolManager', () => {
     it('handles event emitter when provided', async () => {
       const tool = createMockExecutableTool('tool-1');
       const eventEmitter = jest.fn();
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
@@ -185,7 +194,7 @@ describe('ToolManager', () => {
   describe('addTool - browser tools', () => {
     it('adds a single browser tool as static tool', async () => {
       const tool = createMockBrowserTool('browser-tool-1');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.browser,
         tools: tool,
@@ -199,7 +208,7 @@ describe('ToolManager', () => {
     it('adds multiple browser tools as static tools', async () => {
       const tool1 = createMockBrowserTool('browser-tool-1');
       const tool2 = createMockBrowserTool('browser-tool-2');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.browser,
         tools: [tool1, tool2],
@@ -211,7 +220,7 @@ describe('ToolManager', () => {
 
     it('adds browser tool as dynamic tool when dynamic option is true', async () => {
       const tool = createMockBrowserTool('dynamic-browser-tool');
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.browser,
@@ -234,13 +243,13 @@ describe('ToolManager', () => {
     it('returns all static and dynamic tools', async () => {
       const staticTool = createMockExecutableTool('static-tool');
       const dynamicTool = createMockExecutableTool('dynamic-tool');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: staticTool,
         logger: mockLogger,
       });
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -258,13 +267,13 @@ describe('ToolManager', () => {
       const staticTool1 = createMockExecutableTool('static-1');
       const staticTool2 = createMockExecutableTool('static-2');
       const dynamicTool = createMockExecutableTool('dynamic-1');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: [staticTool1, staticTool2],
         logger: mockLogger,
       });
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -282,7 +291,7 @@ describe('ToolManager', () => {
   describe('recordToolUse', () => {
     it('marks dynamic tool as recently used', async () => {
       const tool = createMockExecutableTool('dynamic-tool');
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -306,7 +315,7 @@ describe('ToolManager', () => {
 
       // Record use of the first tool
       toolManager.recordToolUse('langchain_dynamic-tool');
-      
+
       // The tool should still be in the list (not evicted)
       const dynamicIds = toolManager.getDynamicToolIds();
       expect(dynamicIds.length).toBeGreaterThan(0);
@@ -314,7 +323,7 @@ describe('ToolManager', () => {
 
     it('does nothing for static tools', async () => {
       const tool = createMockExecutableTool('static-tool');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
@@ -337,7 +346,7 @@ describe('ToolManager', () => {
 
     it('returns mappings for executable tools', async () => {
       const tool = createMockExecutableTool('tool-1');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
@@ -350,7 +359,7 @@ describe('ToolManager', () => {
 
     it('returns mappings for browser tools', async () => {
       const tool = createMockBrowserTool('browser-tool-1');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.browser,
         tools: tool,
@@ -363,13 +372,13 @@ describe('ToolManager', () => {
     it('merges mappings from multiple addTool calls', async () => {
       const executableTool = createMockExecutableTool('exec-tool');
       const browserTool = createMockBrowserTool('browser-tool');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: executableTool,
         logger: mockLogger,
       });
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.browser,
         tools: browserTool,
@@ -387,7 +396,7 @@ describe('ToolManager', () => {
 
     it('returns internal tool IDs for dynamic tools', async () => {
       const tool = createMockExecutableTool('dynamic-tool');
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -404,13 +413,13 @@ describe('ToolManager', () => {
     it('does not include static tools', async () => {
       const staticTool = createMockExecutableTool('static-tool');
       const dynamicTool = createMockExecutableTool('dynamic-tool');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: staticTool,
         logger: mockLogger,
       });
-      
+
       await toolManager.addTool(
         {
           type: ToolManagerToolType.executable,
@@ -428,7 +437,7 @@ describe('ToolManager', () => {
     it('returns correct IDs when capacity is exceeded', async () => {
       const capacity = 3;
       const manager = new ToolManager({ dynamicToolCapacity: capacity });
-      
+
       // Add more tools than capacity
       for (let i = 0; i < capacity + 2; i++) {
         await manager.addTool(
@@ -451,7 +460,7 @@ describe('ToolManager', () => {
     it('evicts least recently used tool when capacity is exceeded', async () => {
       const capacity = 3;
       const manager = new ToolManager({ dynamicToolCapacity: capacity });
-      
+
       // Add tools up to capacity
       for (let i = 0; i < capacity; i++) {
         await manager.addTool(
@@ -481,7 +490,7 @@ describe('ToolManager', () => {
     it('keeps recently used tools when evicting', async () => {
       const capacity = 3;
       const manager = new ToolManager({ dynamicToolCapacity: capacity });
-      
+
       const tool0 = createMockExecutableTool('tool-0');
       await manager.addTool(
         {
@@ -525,13 +534,13 @@ describe('ToolManager', () => {
   describe('edge cases', () => {
     it('handles adding same tool multiple times', async () => {
       const tool = createMockExecutableTool('duplicate-tool');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
         logger: mockLogger,
       });
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,
@@ -555,7 +564,7 @@ describe('ToolManager', () => {
 
     it('handles tools with special characters in IDs', async () => {
       const tool = createMockExecutableTool('tool_with_underscores');
-      
+
       await toolManager.addTool({
         type: ToolManagerToolType.executable,
         tools: tool,

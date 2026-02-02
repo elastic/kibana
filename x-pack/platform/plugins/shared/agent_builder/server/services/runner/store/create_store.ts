@@ -10,9 +10,15 @@ import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
-import { CreateRunnerDeps } from '../runner';
+import type { CreateRunnerDeps } from '../runner';
 
-export const createStore = ({ conversation, runnerDeps }: { conversation?: Conversation, runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'> }) => {
+export const createStore = ({
+  conversation,
+  runnerDeps,
+}: {
+  conversation?: Conversation;
+  runnerDeps: Omit<CreateRunnerDeps, 'modelProviderFactory'>;
+}) => {
   const { skillServiceStart } = runnerDeps;
   const filesystem = new VirtualFileSystem();
 
@@ -27,6 +33,6 @@ export const createStore = ({ conversation, runnerDeps }: { conversation?: Conve
     filesystem,
     filestore,
     resultStore,
-    skillsStore
+    skillsStore,
   };
 };

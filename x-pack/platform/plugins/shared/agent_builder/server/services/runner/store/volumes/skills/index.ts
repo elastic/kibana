@@ -6,4 +6,7 @@
  */
 
 export { createSkillsStore as createResultStore } from './skills_store';
-export type { SkillFileEntry as ToolCallFileEntry, SkillEntryMeta as ToolCallEntryMeta } from './types';
+export type {
+  SkillFileEntry as ToolCallFileEntry,
+  SkillEntryMeta as ToolCallEntryMeta,
+} from './types';

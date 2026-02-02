@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SkillTypeDefinition } from "../skills";
+import type { SkillTypeDefinition } from '../skills';
 
 /**
  * Store to access tool results during execution

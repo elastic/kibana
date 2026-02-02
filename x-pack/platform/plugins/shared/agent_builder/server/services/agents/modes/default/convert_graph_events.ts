@@ -37,6 +37,7 @@ import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
@@ -49,7 +50,6 @@ import {
 } from './actions';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
-import { ToolManager } from '@kbn/agent-builder-server/runner';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 

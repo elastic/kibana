@@ -88,19 +88,19 @@ export interface SkillTypeDefinition<
    */
   referencedContent?: {
     /**
-     * Name of the content. Also used as the file name. 
+     * Name of the content. Also used as the file name.
      * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
      * <basePath>/<name>/<relativePath>/<reference-name> must be unique.
      */
     name: string;
     /**
      * Relative path of the referenced content. Must start with a dot `.`
-     * 
+     *
      * Valid relative paths are:
      * - "." - stores reference content in the same directory as the skill
      * - "./<directory>" - stores reference content in the "<directory>" directory
      * - Avoid multiple levels of directories (such as "./<directory>/<subdirectory>") to keep the structure flat.
-     * 
+     *
      * Examples:
      * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/<name>.md" file
      * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/<name>.md" file
