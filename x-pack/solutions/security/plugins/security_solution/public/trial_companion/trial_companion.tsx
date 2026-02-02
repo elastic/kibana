@@ -16,21 +16,22 @@ import { NBA_TODO_LIST } from './nba_translations';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import type { Milestone } from '../../common/trial_companion/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props {}
+export interface TrialCompanionProps {
+  bottom: number;
+}
 
-export const TrialCompanion: React.FC<Props> = () => {
+export const TrialCompanion: React.FC<TrialCompanionProps> = ({ bottom }) => {
   const { cloud } = useKibana().services;
   const trialCompanionEnabled = useIsExperimentalFeatureEnabled('trialCompanionEnabled');
   if (!cloud?.isInTrial() || !trialCompanionEnabled) {
     return null;
   }
-  return <TrialCompanionImpl />;
+  return <TrialCompanionImpl bottom={bottom} />;
 };
 
 const defaultTimeout = 10000;
 
-const TrialCompanionImpl: React.FC<Props> = () => {
+const TrialCompanionImpl: React.FC<TrialCompanionProps> = ({ bottom }) => {
   const [count, setCount] = useState(0);
   const [previouslyLoaded, setPreviouslyLoaded] = useState<Milestone[] | undefined>(undefined);
   const response = useGetNBA([count]);
@@ -59,5 +60,5 @@ const TrialCompanionImpl: React.FC<Props> = () => {
 
   if (!result || dismiss) return null;
 
-  return <YourTrialCompanion open={result} todoItems={NBA_TODO_LIST} />;
+  return <YourTrialCompanion open={result} todoItems={NBA_TODO_LIST} bottom={bottom} />;
 };

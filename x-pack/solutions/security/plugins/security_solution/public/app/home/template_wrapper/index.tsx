@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo } from 'react';
+import React, { type ReactNode, useMemo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { EuiResizeObserver } from '@elastic/eui';
+import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
@@ -24,6 +26,7 @@ import { Timeline } from './timeline';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
 import { SecurityPageName } from '../../types';
+import { TrialCompanion } from '../../../trial_companion/trial_companion';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -72,6 +75,13 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
     // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
     const renderChildren = !rest.isEmptyState && solutionNavProps !== undefined;
+    const [bottomPos, setBottomPos] = useState(0);
+    const onResize = useCallback<EuiResizeObserverProps['onResize']>(
+      ({ height }) => {
+        setBottomPos(height);
+      },
+      [setBottomPos]
+    );
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -103,17 +113,24 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                   {children}
                   <SecuritySolutionFlyout />
+                  <TrialCompanion bottom={bottomPos} />
                 </ExpandableFlyoutProvider>
               </AlertsContextProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
               <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
-                <EuiThemeProvider colorMode={globalColorMode}>
-                  <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
-                    <Timeline />
-                    <TimelineFlyout />
-                  </ExpandableFlyoutProvider>
-                </EuiThemeProvider>
+                <EuiResizeObserver onResize={onResize}>
+                  {(resizeRef) => (
+                    <div ref={resizeRef}>
+                      <EuiThemeProvider colorMode={globalColorMode}>
+                        <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
+                          <Timeline />
+                          <TimelineFlyout />
+                        </ExpandableFlyoutProvider>
+                      </EuiThemeProvider>
+                    </div>
+                  )}
+                </EuiResizeObserver>
               </KibanaPageTemplate.BottomBar>
             )}
           </>

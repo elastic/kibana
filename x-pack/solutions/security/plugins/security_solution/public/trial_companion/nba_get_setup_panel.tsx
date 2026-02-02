@@ -40,6 +40,7 @@ export const GET_SET_UP_DISMISS_BUTTON_TEST_ID = `${TEST_SUBJ_PREFIX}-get-set-up
 export interface YourTrialCompanionProps {
   open: Milestone[];
   todoItems: NBATODOItem[];
+  bottom?: number;
 }
 
 export interface YourTrialCompanionTODOItemProps {
@@ -213,6 +214,7 @@ function completedTODOs(todoList: NBATODOItem[], open: Milestone[]): Milestone[]
 export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   open,
   todoItems,
+  bottom,
 }: YourTrialCompanionProps) => {
   const { analytics } = useKibana().services;
   const accordionId = useGeneratedHtmlId({ prefix: 'yourTrialCompanionAccordion' });
@@ -220,18 +222,20 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   const completed = completedTODOs(todoItems, open);
   const showDismiss = difference(open, completed).length === 0;
   const [expandedItemId, setExpandedItemId] = useState<Milestone | null>(null);
+  const bottomPos = bottom ? `${Math.round(bottom)}px` : '0px';
   const styles = css({
     zIndex: euiTheme.levels.header,
     position: 'fixed',
-    bottom: '5%',
+    bottom: `calc(var(--kbn-layout--application-margin-bottom) + ${bottomPos} + ${euiTheme.size.m})`,
     maxWidth: '400px',
-    left: `calc(var(--kbn-layout--navigation-width) + ${euiTheme.size.base})`,
+    left: `calc(var(--kbn-layout--navigation-width) + ${euiTheme.size.m})`,
     '.euiAccordion__buttonContent': {
       width: '100%;',
     },
     paddingTop: euiTheme.size.base,
     paddingBottom: euiTheme.size.l,
   });
+
   const firstLineSelected = expandedItemId === todoItems[0].milestoneId;
   const lastLineSelected = expandedItemId === todoItems[todoItems.length - 1].milestoneId;
 
