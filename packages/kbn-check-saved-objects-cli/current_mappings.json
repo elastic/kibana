@@ -298,6 +298,26 @@
       }
     }
   },
+  "alerting_notification_policy": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule": {
     "dynamic": false,
     "properties": {
