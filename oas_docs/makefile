@@ -40,8 +40,8 @@ merge-api-docs-serverless: ## Merge only kibana.serverless.yaml
 .PHONY: componentize-schemas
 componentize-schemas: ## convert inline object schemas to component references in both kibana.yaml and kibana.serverless.yaml
 	@echo "Converting inline schemas to component references...this might take a while"
-	@node scripts/componentize.js oas_docs/output/kibana.yaml
-	@node scripts/componentize.js oas_docs/output/kibana.serverless.yaml
+	@node scripts/extract_components.js oas_docs/output/kibana.yaml
+	@node scripts/extract_components.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter

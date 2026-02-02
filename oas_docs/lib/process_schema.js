@@ -136,7 +136,7 @@ function extractAndReplaceNestedSchema(
   const name = nameGenerator(context, type);
 
   if (components[name]) {
-    log.warn(`Component name already exists: ${name} - appending counter`);
+    log.warning(`Component name already exists: ${name} - appending counter`);
   }
 
   const schemaToStore = { ...schemaToExtract };
@@ -211,7 +211,7 @@ const createProcessSchema = (
     stats.maxDepth = Math.max(stats.maxDepth, depth);
 
     if (depth > MAX_RECURSION_DEPTH) {
-      log.warn(`Max depth reached at ${context.path || 'unknown path'}`);
+      log.warning(`Max depth reached at ${context.path || 'unknown path'}`);
       return;
     }
 
@@ -229,7 +229,7 @@ const createProcessSchema = (
           const name = nameGenerator(context, compType, idx);
 
           if (components[name]) {
-            log.warn(`Component name collision: ${name} - appending counter`);
+            log.warning(`Component name collision: ${name} - appending counter`);
           }
 
           const itemToStore = item;

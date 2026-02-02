@@ -68,7 +68,7 @@ function extractAndReplaceTopLevelSchema(
   const name = nameGenerator(context);
 
   if (components[name]) {
-    log.warn(`Component name collision: ${name} - appending counter`);
+    log.warning(`Component name collision: ${name} - appending counter`);
   }
 
   const schemaToStore = cloneDeep(schema);
