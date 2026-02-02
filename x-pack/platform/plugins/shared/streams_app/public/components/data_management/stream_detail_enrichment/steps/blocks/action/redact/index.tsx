@@ -22,13 +22,11 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
-import type { RedactProcessor } from '@kbn/streamlang';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
-
-export type RedactFormState = RedactProcessor;
+import type { RedactFormState } from '../../../../types';
 
 // Common Grok patterns useful for redaction with human-readable labels
 // These are official ES Grok patterns from @kbn/grok-ui
@@ -44,9 +42,9 @@ const COMMON_REDACT_PATTERNS = [
 
 export const RedactProcessorForm = () => {
   const { control } = useFormContext<RedactFormState>();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray<RedactFormState, 'patterns'>({
     control,
-    name: 'patterns' as never,
+    name: 'patterns',
     rules: {
       minLength: {
         value: 1,
@@ -69,7 +67,7 @@ export const RedactProcessorForm = () => {
   // Ensure there's always at least one pattern field
   useEffect(() => {
     if (fields.length === 0) {
-      append('');
+      append({ value: '' });
     }
   }, [fields.length, append]);
 
@@ -109,7 +107,7 @@ export const RedactProcessorForm = () => {
           ))}
           <EuiButtonEmpty
             iconType="plusInCircle"
-            onClick={() => append('')}
+            onClick={() => append({ value: '' })}
             size="xs"
             data-test-subj="streamsAppRedactAddPatternButton"
           >
@@ -183,8 +181,8 @@ interface PatternFieldProps {
 }
 
 const PatternField = ({ index, onRemove, canRemove }: PatternFieldProps) => {
-  const { field, fieldState } = useController<RedactFormState, `patterns.${number}`>({
-    name: `patterns.${index}`,
+  const { field, fieldState } = useController<RedactFormState, `patterns.${number}.value`>({
+    name: `patterns.${index}.value`,
     rules: {
       required: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactPatternRequiredError',

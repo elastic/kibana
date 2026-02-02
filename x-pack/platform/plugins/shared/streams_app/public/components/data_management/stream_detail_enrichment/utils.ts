@@ -235,7 +235,7 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
 const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
   action: 'redact' as const,
   from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-  patterns: [''], // Start with one empty pattern field (required validation will catch if not filled)
+  patterns: [{ value: '' }], // Start with one empty pattern field (required validation will catch if not filled)
   ignore_missing: true,
   ignore_failure: true,
   where: ALWAYS_CONDITION,
@@ -350,6 +350,15 @@ export const getFormStateFromActionStep = (
     return clone;
   }
 
+  if (step.action === 'redact') {
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    // Convert string[] patterns to RedactPatternWrapper[] for useFieldArray compatibility
+    return {
+      ...structuredClone(restStep),
+      patterns: patterns.map((pattern) => ({ value: pattern })),
+    };
+  }
+
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
@@ -358,7 +367,6 @@ export const getFormStateFromActionStep = (
     step.action === 'set' ||
     step.action === 'convert' ||
     step.action === 'replace' ||
-    step.action === 'redact' ||
     step.action === 'math' ||
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
@@ -567,14 +575,16 @@ export const convertFormStateToProcessor = (
         ignore_missing,
       } = formState;
 
-      // Ensure patterns is always an array
-      const patternsArray = Array.isArray(patterns) ? patterns : [];
+      // Convert RedactPatternWrapper[] back to string[] and filter empty values
+      const patternsArray = Array.isArray(patterns)
+        ? patterns.map((p) => p.value).filter((p) => !isEmpty(p))
+        : [];
 
       return {
         processorDefinition: {
           action: 'redact',
           from,
-          patterns: patternsArray.filter((p) => !isEmpty(p)),
+          patterns: patternsArray,
           pattern_definitions: isEmpty(pattern_definitions) ? undefined : pattern_definitions,
           prefix: isEmpty(prefix) ? undefined : prefix,
           suffix: isEmpty(suffix) ? undefined : suffix,
