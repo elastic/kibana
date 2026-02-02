@@ -94,6 +94,19 @@ export const CREATE_TEMPLATE = i18n.translate('xpack.cases.templates.createTempl
   defaultMessage: 'Create template',
 });
 
+export const CREATE_NEW_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.createNewTemplateDescription',
+  {
+    defaultMessage: 'Create a new template',
+  }
+);
+
+export const EDITING_TEMPLATE = (templateId: string) =>
+  i18n.translate('xpack.cases.templates.editingTemplate', {
+    values: { templateId },
+    defaultMessage: 'Editing template: {templateId}',
+  });
+
 export const REQUIRED = i18n.translate('xpack.cases.templates.required', {
   defaultMessage: 'Required',
 });

@@ -11,6 +11,14 @@ import { renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesActions } from './use_templates_actions';
 import type { Template } from '../types';
+import { useCasesEditTemplateNavigation } from '../../../common/navigation';
+
+jest.mock('../../../common/navigation/hooks', () => ({
+  ...jest.requireActual('../../../common/navigation/hooks'),
+  useCasesEditTemplateNavigation: jest.fn(),
+}));
+
+const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
 
 describe('useTemplatesActions', () => {
   const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
@@ -31,13 +39,19 @@ describe('useTemplatesActions', () => {
   };
 
   let consoleSpy: jest.SpyInstance;
+  const navigateToCasesEditTemplateMock = jest.fn();
 
   beforeEach(() => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    useCasesEditTemplateNavigationMock.mockReturnValue({
+      navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
+      getCasesEditTemplateUrl: jest.fn(),
+    });
   });
 
   afterEach(() => {
     consoleSpy.mockRestore();
+    jest.clearAllMocks();
   });
 
   it('returns all action handlers', () => {
@@ -51,7 +65,7 @@ describe('useTemplatesActions', () => {
     expect(result.current).toHaveProperty('handleDelete');
   });
 
-  it('handleEdit is a function', () => {
+  it('handleEdit navigates to edit template page', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     expect(typeof result.current.handleEdit).toBe('function');
@@ -60,7 +74,9 @@ describe('useTemplatesActions', () => {
       result.current.handleEdit(mockTemplate);
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith('Edit template:', mockTemplate);
+    expect(navigateToCasesEditTemplateMock).toHaveBeenCalledWith({
+      templateId: mockTemplate.key,
+    });
   });
 
   it('handleClone is a function', () => {

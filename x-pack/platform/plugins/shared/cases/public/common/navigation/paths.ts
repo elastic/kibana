@@ -16,6 +16,7 @@ import {
   CASE_VIEW_TAB_PATH,
   CASES_TEMPLATES_PATH,
   CASES_CREATE_TEMPLATE_PATH,
+  CASES_EDIT_TEMPLATE_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -44,6 +45,21 @@ export const getCasesTemplatesPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_TEMPLATES_PATH}`);
 export const getCasesCreateTemplatePath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_CREATE_TEMPLATE_PATH}`);
+export const getCasesEditTemplatePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_EDIT_TEMPLATE_PATH}`);
+
+export interface TemplateViewPathParams {
+  templateId: string;
+}
+
+export const generateTemplateEditPath = (params: TemplateViewPathParams): string => {
+  return normalizePath(
+    generatePath(
+      CASES_EDIT_TEMPLATE_PATH,
+      params as ExtractRouteParams<typeof CASES_EDIT_TEMPLATE_PATH>
+    )
+  );
+};
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { commentId, tabId } = params;
   // paths with commentId have their own specific path.

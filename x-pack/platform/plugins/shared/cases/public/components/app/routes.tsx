@@ -25,6 +25,7 @@ import {
   useCaseViewNavigation,
   getCasesTemplatesPath,
   getCasesCreateTemplatePath,
+  getCasesEditTemplatePath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -33,7 +34,7 @@ import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
 import { AllTemplatesPage } from '../templates_v2/pages/all_templates_page';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { CreateTemplatePage } from '../templates_v2/pages/create_template_page';
+import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 
@@ -95,7 +96,12 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         )}
         {isTemplatesEnabled && (
           <Route exact path={getCasesCreateTemplatePath(basePath)}>
-            <CreateTemplatePage label="Create Template Page" />
+            <TemplateFormPage />
+          </Route>
+        )}
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesEditTemplatePath(basePath)}>
+            <TemplateFormPage />
           </Route>
         )}
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}

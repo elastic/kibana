@@ -7,13 +7,17 @@
 
 import { useCallback } from 'react';
 import type { Template } from '../types';
+import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 
 export const useTemplatesActions = () => {
-  const handleEdit = useCallback((template: Template) => {
-    // TODO: Implement edit functionality
-    // eslint-disable-next-line no-console
-    console.log('Edit template:', template);
-  }, []);
+  const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
+
+  const handleEdit = useCallback(
+    (template: Template) => {
+      navigateToCasesEditTemplate({ templateId: template.key });
+    },
+    [navigateToCasesEditTemplate]
+  );
 
   const handleClone = useCallback((template: Template) => {
     // TODO: Implement clone functionality
