@@ -204,6 +204,16 @@ const getStyle = (
       },
     },
     {
+      selector: 'edge.hover',
+      style: {
+        width: 4,
+        'z-index': zIndexEdgeHover,
+        'line-color': euiTheme.colors.darkShade,
+        'source-arrow-color': euiTheme.colors.darkShade,
+        'target-arrow-color': euiTheme.colors.darkShade,
+      },
+    },
+    {
       selector: 'edge.highlight',
       style: {
         width: 4,

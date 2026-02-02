@@ -23,6 +23,14 @@ export function getConnectorIdAsUuid(connectorId: string) {
   return v5(runSeed, v5.DNS);
 }
 
+/**
+ * When running locally, only UUIDs are allowed for non-preconfigured connectors.
+ * We generate a deterministic UUID from the logical connector id so runs are stable/idempotent.
+ */
+export function getConnectorIdAsUuid(connectorId: string) {
+  return v5(connectorId, v5.DNS);
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,

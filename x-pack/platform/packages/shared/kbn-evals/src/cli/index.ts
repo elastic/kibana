@@ -17,3 +17,18 @@ export {
   type EvalsCliArgs,
   type OutputFormat,
 } from './flags';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { listSuitesCmd } from './commands/list';
+import { runSuiteCmd } from './commands/run';
+import { doctorCmd } from './commands/doctor';
+import { envCmd } from './commands/env';
+import { ciMapCmd } from './commands/ci_map';
+
+export async function run() {
+  await new RunWithCommands(
+    {
+      description: 'Evals CLI',
+    },
+    [listSuitesCmd, runSuiteCmd, doctorCmd, envCmd, ciMapCmd]
+  ).execute();
+}

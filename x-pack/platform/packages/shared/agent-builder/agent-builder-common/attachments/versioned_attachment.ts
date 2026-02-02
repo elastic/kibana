@@ -46,6 +46,8 @@ export interface VersionedAttachment<
   active?: boolean;
   /** Whether the attachment should be hidden from the user */
   hidden?: boolean;
+  /** Whether the attachment is read-only in this conversation */
+  readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
   /** ID of the round that created this attachment (for agent-created attachments) */
@@ -53,6 +55,28 @@ export interface VersionedAttachment<
   /** Timestamp when attachment was deleted */
   deleted_at?: string;
 }
+
+/**
+ * Operation performed on an attachment during a round.
+ */
+export const ATTACHMENT_REF_OPERATION = {
+  read: 'read',
+  created: 'created',
+  updated: 'updated',
+  deleted: 'deleted',
+  restored: 'restored',
+} as const;
+
+export type AttachmentRefOperation =
+  (typeof ATTACHMENT_REF_OPERATION)[keyof typeof ATTACHMENT_REF_OPERATION];
+
+export const ATTACHMENT_REF_ACTOR = {
+  user: 'user',
+  agent: 'agent',
+  system: 'system',
+} as const;
+
+export type AttachmentRefActor = (typeof ATTACHMENT_REF_ACTOR)[keyof typeof ATTACHMENT_REF_ACTOR];
 
 /**
  * Reference to a specific version of an attachment.
@@ -63,6 +87,10 @@ export interface AttachmentVersionRef {
   attachment_id: string;
   /** Version number being referenced */
   version: number;
+  /** Operation performed on this attachment during the round */
+  operation?: AttachmentRefOperation;
+  /** Actor responsible for the operation during the round */
+  actor?: AttachmentRefActor;
 }
 
 /**
@@ -96,13 +124,31 @@ export interface VersionedAttachmentInput<
   hidden?: boolean;
   /** ID of the round that created this attachment (for agent-created attachments) */
   created_in_round_id?: string;
+  /** Whether the attachment should be read-only */
+  readonly?: boolean;
 }
 
 // Zod schemas for validation
 
+export const attachmentRefOperationSchema = z.enum([
+  ATTACHMENT_REF_OPERATION.read,
+  ATTACHMENT_REF_OPERATION.created,
+  ATTACHMENT_REF_OPERATION.updated,
+  ATTACHMENT_REF_OPERATION.deleted,
+  ATTACHMENT_REF_OPERATION.restored,
+]);
+
+export const attachmentRefActorSchema = z.enum([
+  ATTACHMENT_REF_ACTOR.user,
+  ATTACHMENT_REF_ACTOR.agent,
+  ATTACHMENT_REF_ACTOR.system,
+]);
+
 export const attachmentVersionRefSchema = z.object({
   attachment_id: z.string(),
   version: z.number().int().positive(),
+  operation: attachmentRefOperationSchema.optional(),
+  actor: attachmentRefActorSchema.optional(),
 });
 
 export const attachmentVersionSchema = z.object({
@@ -121,6 +167,7 @@ export const versionedAttachmentSchema = z.object({
   description: z.string().optional(),
   active: z.boolean().optional(),
   hidden: z.boolean().optional(),
+  readonly: z.boolean().optional(),
   client_id: z.string().optional(),
   created_in_round_id: z.string().optional(),
   deleted_at: z.string().optional(),
@@ -133,6 +180,7 @@ export const versionedAttachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   created_in_round_id: z.string().optional(),
+  readonly: z.boolean().optional(),
 });
 
 export const attachmentDiffSchema = z.object({

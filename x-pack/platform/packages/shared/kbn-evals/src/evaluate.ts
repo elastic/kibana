@@ -184,25 +184,25 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const phoenixClient = usePhoenixExecutor
         ? new KibanaPhoenixClient({
-            config: getPhoenixConfig(),
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          })
+          config: getPhoenixConfig(),
+          log,
+          model,
+          runId: process.env.TEST_RUN_ID!,
+          repetitions,
+        })
         : new KibanaEvalsClient({
-            log,
-            model,
-            runId: process.env.TEST_RUN_ID!,
-            repetitions,
-          });
+          log,
+          model,
+          runId: process.env.TEST_RUN_ID!,
+          repetitions,
+        });
 
       await use(phoenixClient);
 
       const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
         ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
+          esUrl: process.env.EVALUATIONS_ES_URL,
+        })
         : esClient;
 
       const report = await buildEvaluationReport({
@@ -399,15 +399,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async ({ esClient }, use) => {
       const traceEsClient = process.env.TRACING_ES_URL
         ? createEsClientForTesting({
-            esUrl: process.env.TRACING_ES_URL,
-          })
+          esUrl: process.env.TRACING_ES_URL,
+        })
         : esClient;
       await use(traceEsClient);
     },
     { scope: 'worker' },
   ],
   repetitions: [
-    async ({}, use, testInfo) => {
+    async ({ }, use, testInfo) => {
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
@@ -418,8 +418,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async ({ esClient, log }, use) => {
       const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
         ? createEsClientForTesting({
-            esUrl: process.env.EVALUATIONS_ES_URL,
-          })
+          esUrl: process.env.EVALUATIONS_ES_URL,
+        })
         : esClient;
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
       const helper = new EvaluationAnalysisService(scoreRepository, log);

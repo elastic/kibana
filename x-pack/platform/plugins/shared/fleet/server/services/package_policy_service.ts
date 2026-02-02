@@ -19,8 +19,6 @@ import type {
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -84,7 +82,6 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
@@ -109,9 +106,9 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;

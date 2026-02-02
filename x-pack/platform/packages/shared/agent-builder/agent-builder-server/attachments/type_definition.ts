@@ -152,6 +152,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * in user messages and create attachments for them.
    */
   entityRecognition?: EntityRecognitionConfig;
+  /**
+   * Whether attachments of this type are read-only. Defaults to true.
+   */
+  isReadonly?: boolean;
 }
 
 /**
@@ -198,7 +202,12 @@ export interface AgentFormattedAttachment {
   /**
    * Should return the representation of the attachment, which will be presented to the agent.
    */
-  getRepresentation: () => MaybePromise<AttachmentRepresentation>;
+  /**
+   * @deprecated Representation can be inferred from attachment data; prefer returning
+   * the raw data and let the formatter decide. If omitted, we will fall back to
+   * stringifying the attachment data.
+   */
+  getRepresentation?: () => MaybePromise<AttachmentRepresentation>;
   /**
    * Can be used to expose tools which are specific to the attachment instance.
    *

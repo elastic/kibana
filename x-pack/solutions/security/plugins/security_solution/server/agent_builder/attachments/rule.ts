@@ -91,7 +91,9 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
     },
     getTools: () => [platformCoreTools.generateEsql, platformCoreTools.productDocumentation],
     getAgentDescription: () => {
-      return `A security detection rule is attached to this conversation. The rule data is included in the <attachment> XML element within the user's message.
+      const description = `You have access to a rule, query, or migration rule.
+
+      If this is a migration rule, it includes both the old rule and the new rule.
 
 **How to access the rule data:**
 The rule JSON is in the attachment content above. Parse it to extract:

@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import type {
@@ -24,6 +26,7 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { RoundAttachmentReferences } from './round_attachment_references';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -114,7 +117,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} attachments={input.attachments} />
+        <RoundInput
+          input={input.message}
+          attachmentRefs={input.attachment_refs}
+          conversationAttachments={conversationAttachments}
+          fallbackAttachments={input.attachments}
+        />
       </EuiFlexItem>
 
       {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
@@ -153,6 +161,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               isLoading={isLoadingCurrentRound}
             />
           </EuiFlexItem>
+          <EuiSpacer />
+          <RoundAttachmentReferences
+            attachmentRefs={input.attachment_refs}
+            conversationAttachments={conversationAttachments}
+            actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+          />
         </EuiFlexItem>
       )}
 

@@ -17,7 +17,11 @@ import {
   type ExperimentTask,
   type TaskOutput,
   type GroundTruth,
+  type RetrievedDoc,
+  type ExperimentTask,
+  type TaskOutput,
 } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getStringMeta } from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient, ConverseResult } from './chat_client';

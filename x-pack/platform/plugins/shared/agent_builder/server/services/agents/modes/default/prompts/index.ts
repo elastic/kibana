@@ -13,3 +13,5 @@ export {
   getSkillToolSelectionGuidance,
   getSkillDiscoveryPrompt,
 } from './skill_aware';
+export type { PromptFactoryParams, PromptFactory } from './types';
+export { createPromptFactory } from './prompt_factory';

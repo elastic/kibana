@@ -50,6 +50,13 @@ export const platformCoreTools = {
   readSkillTools: platformCoreTool('read_skill_tools'),
 } as const;
 
+export const filestoreTools = {
+  read: `${internalNamespaces.filestore}.read`,
+  ls: `${internalNamespaces.filestore}.ls`,
+  grep: `${internalNamespaces.filestore}.grep`,
+  glob: `${internalNamespaces.filestore}.glob`,
+};
+
 /**
  * List of tool types which can be created / edited by a user.
  */

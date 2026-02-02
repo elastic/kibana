@@ -16,6 +16,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsSection } from '../../../common/constants';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
+import { formatBytes } from '../../../public';
 
 import { DetailsPage } from '../../../public/application/sections/home/index_list/details_page/details_page';
 import { TYPE_DEFINITION } from '../../../public/application/components/mappings_editor/constants';
@@ -373,7 +374,9 @@ describe('<IndexDetailsPage />', () => {
       await renderPage();
       const storageDetails = screen.getByTestId('indexDetailsStorage').textContent;
       expect(storageDetails).toBe(
-        `Storage${testIndexMock.primary_size}Primary${testIndexMock.size}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
+        `Storage${formatBytes(testIndexMock.primary_size)}Primary${formatBytes(
+          testIndexMock.size
+        )}TotalShards${testIndexMock.primary} Primary / ${testIndexMock.replica} Replicas `
       );
     });
 
