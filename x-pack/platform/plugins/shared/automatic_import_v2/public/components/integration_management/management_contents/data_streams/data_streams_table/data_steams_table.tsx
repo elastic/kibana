@@ -5,35 +5,20 @@
  * 2.0.
  */
 import React, { useMemo, useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import type { DataStreamResponse } from '../../../../../../common';
 import * as i18n from '../translations';
 import { useDeleteDataStream } from '../../../../../common';
-
-const LINE_CLAMP = 1;
-const getLineClampedCss = css`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: normal;
-`;
+import { InputTypesBadges } from './input_types_badges';
+import { Status } from './status';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -47,6 +32,34 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     null
   );
   const deleteModalTitleId = useGeneratedHtmlId();
+  const [sortField, setSortField] = useState<keyof DataStreamResponse>('title');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const sorting: EuiTableSortingType<DataStreamResponse> = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+  };
+
+  const onTableChange = ({ sort }: Criteria<DataStreamResponse>) => {
+    if (sort) {
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    }
+  };
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [items, sortField, sortDirection]);
 
   const deletingDataStreamId = deleteDataStreamMutation.isLoading
     ? deleteDataStreamMutation.variables?.dataStreamId
@@ -86,7 +99,8 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             onClick: () => {
               // TODO: Implement expand action
             },
-            enabled: () => true,
+            enabled: (item: DataStreamResponse) =>
+              item.status === 'completed' && item.dataStreamId !== deletingDataStreamId,
           },
         ],
         width: '48px',
@@ -95,7 +109,6 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         field: 'title',
         name: 'Title',
         sortable: true,
-        width: '200px',
         render: (title: DataStreamResponse['title']) => (
           <EuiToolTip
             content={title}
@@ -110,113 +123,21 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       {
         field: 'inputTypes',
         name: 'Data Collection Methods',
-        render: (inputTypes: DataStreamResponse['inputTypes']) => {
-          if (inputTypes != null && inputTypes.length > 0) {
-            const clampedBadges = (
-              <EuiBadgeGroup
-                data-test-subj="input-types-table-column-tags"
-                gutterSize="none"
-                css={getLineClampedCss}
-              >
-                {inputTypes.map((inputType, index) => (
-                  <EuiBadge
-                    key={`${inputType.name}`}
-                    color="hollow"
-                    css={{
-                      borderRadius: '4px',
-                      marginRight: index < inputTypes.length - 1 ? '4px' : 0,
-                    }}
-                    data-test-subj={`input-type-table-column-${inputType.name}`}
-                  >
-                    {inputType.name}
-                  </EuiBadge>
-                ))}
-              </EuiBadgeGroup>
-            );
-
-            const unclampedBadges = (
-              <EuiBadgeGroup data-test-subj="input-types-table-column-types" gutterSize="xs">
-                {inputTypes.map((inputType) => (
-                  <EuiBadge
-                    color="hollow"
-                    css={{ borderRadius: '4px' }}
-                    key={`${inputType.name}`}
-                    data-test-subj={`input-type-table-column-${inputType.name}`}
-                  >
-                    {inputType.name}
-                  </EuiBadge>
-                ))}
-              </EuiBadgeGroup>
-            );
-            return (
-              <EuiToolTip
-                data-test-subj="case-table-column-tags-tooltip"
-                css={tooltipStyles}
-                content={unclampedBadges}
-              >
-                {clampedBadges}
-              </EuiToolTip>
-            );
-          }
-          return null;
-        },
+        sortable: true,
+        render: (inputTypes: DataStreamResponse['inputTypes']) => (
+          <InputTypesBadges inputTypes={inputTypes} />
+        ),
+        css: css`
+          max-width: 200px;
+        `,
       },
       {
         field: 'status',
         name: 'Status',
         sortable: true,
-        render: (status: DataStreamResponse['status'], item: DataStreamResponse) => {
-          const isDeleting = item.dataStreamId === deletingDataStreamId;
-
-          if (isDeleting) {
-            return (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">Deleting...</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            );
-          }
-
-          const statusColorMap: Record<DataStreamResponse['status'], string> = {
-            pending: 'default',
-            processing: 'primary',
-            completed: 'success',
-            failed: 'danger',
-            cancelled: 'warning',
-          };
-          const statusIconMap: Record<DataStreamResponse['status'], string> = {
-            pending: '',
-            processing: '',
-            completed: 'dot',
-            failed: 'cross',
-            cancelled: 'minusInCircle',
-          };
-          const statusTextMap: Record<DataStreamResponse['status'], string> = {
-            pending: 'Analyzing',
-            processing: 'Analyzing',
-            completed: 'Success',
-            failed: 'Failed',
-            cancelled: 'Cancelled',
-          };
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {status === 'pending' || status === 'processing' ? (
-                  <EuiLoadingSpinner size="s" />
-                ) : (
-                  <EuiIcon type={statusIconMap[status]} color={statusColorMap[status]} />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{statusTextMap[status]}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
+        render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
+          <Status status={status} isDeleting={item.dataStreamId === deletingDataStreamId} />
+        ),
         width: '120px',
       },
       {
@@ -257,10 +178,12 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   return (
     <>
       <EuiBasicTable<DataStreamResponse>
-        items={items}
+        items={sortedItems}
         columns={dataStreamColumns}
-        tableLayout="fixed"
+        tableLayout="auto"
         tableCaption={i18n.DATA_STREAMS_TITLE}
+        sorting={sorting}
+        onChange={onTableChange}
       />
       {dataStreamDeleteTarget && (
         <EuiConfirmModal
