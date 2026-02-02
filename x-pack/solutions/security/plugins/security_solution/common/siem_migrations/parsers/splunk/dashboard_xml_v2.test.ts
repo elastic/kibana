@@ -80,7 +80,7 @@ describe('SplunkXmlDashboardV2Parser', () => {
         title: 'Test Table',
         query: 'index=main | stats count by host',
         viz_type: 'table',
-        position: { x: 0, y: 0, w: 720, h: 250 },
+        position: { x: 0, y: 0, w: 20, h: 16 },
       });
     });
 
@@ -455,7 +455,7 @@ describe('SplunkXmlDashboardV2Parser', () => {
 
     it('should default unknown types to table', async () => {
       expect(await testVizTypeMapping('splunk.unknown', 'table')).toBe('table');
-      expect(await testVizTypeMapping('splunk.markdown', 'table')).toBe('table');
+      expect(await testVizTypeMapping('splunk.markdown', 'table')).toBe('markdown');
       expect(await testVizTypeMapping('splunk.rectangle', 'table')).toBe('table');
     });
   });
@@ -551,7 +551,7 @@ describe('SplunkXmlDashboardV2Parser', () => {
 
       expect(panels).toHaveLength(1);
       expect(panels[0].title).toBe('Tabbed Table');
-      expect(panels[0].section).toEqual({ title: 'Overview Tab' });
+      expect(panels[0].section).toEqual({ title: 'Overview Tab', id: expect.any(String) });
     });
 
     it('should handle multiple tabbed definitions', async () => {
@@ -626,7 +626,7 @@ describe('SplunkXmlDashboardV2Parser', () => {
         title: 'Tab 1 Panel',
         viz_type: 'bar_vertical',
         query: 'index=tab1',
-        position: { x: 0, y: 0, w: 720, h: 250 },
+        position: { x: 0, y: 0, w: 20, h: 16 },
         section: {
           title: 'First Tab',
         },
@@ -637,7 +637,7 @@ describe('SplunkXmlDashboardV2Parser', () => {
         viz_type: 'pie',
         query: 'index=tab2',
         section: { title: 'Second Tab' },
-        position: { x: 0, y: 0, w: 720, h: 250 },
+        position: { x: 0, y: 0, w: 20, h: 16 },
       });
     });
   });
