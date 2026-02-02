@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
+import { getFormattedError } from '../util/errors';
 
 export function useFetchErrorToast() {
   const {
@@ -16,20 +17,6 @@ export function useFetchErrorToast() {
 
   return useCallback(
     (error: Error) => {
-      if (
-        'body' in error &&
-        typeof error.body === 'object' &&
-        !!error.body &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-      ) {
-        error.message = error.body.message;
-      }
-
-      if (error instanceof AggregateError) {
-        error.message = error.errors.map((err) => err.message).join(', ');
-      }
-
       let requestUrl: string | undefined;
       if (
         'request' in error &&
@@ -41,7 +28,7 @@ export function useFetchErrorToast() {
         requestUrl = error.request.url;
       }
 
-      return notifications.toasts.addError(error, {
+      return notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.failedToFetchError', {
           defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
           values: {
