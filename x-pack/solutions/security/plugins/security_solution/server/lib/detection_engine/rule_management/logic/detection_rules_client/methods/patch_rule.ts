@@ -10,6 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
   RulePatchProps,
   RuleResponse,
@@ -38,6 +39,7 @@ interface PatchRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
 }
 
 export const patchRule = async ({
@@ -46,6 +48,7 @@ export const patchRule = async ({
   prebuiltRuleAssetClient,
   rulePatch,
   mlAuthz,
+  rulesAuthz,
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch;
 
@@ -98,6 +101,7 @@ export const patchRule = async ({
         >[0]['rulePatch'],
         existingRule,
         prebuiltRuleAssetClient,
+        rulesAuthz,
       }
     );
 

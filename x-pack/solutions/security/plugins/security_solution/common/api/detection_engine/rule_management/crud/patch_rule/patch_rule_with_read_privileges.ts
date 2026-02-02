@@ -7,6 +7,9 @@
 
 import type { RulePatchProps, RuleSource } from '../../../model';
 
-export type ReadAuthRulePatchProps = Pick<RulePatchProps, 'exceptions_list'>;
+export type ReadAuthRulePatchProps = Pick<
+  RulePatchProps,
+  'exceptions_list' | 'note' | 'investigation_fields'
+>;
 
 export type ReadAuthRulePatchWithRuleSource = ReadAuthRulePatchProps & { rule_source: RuleSource };
