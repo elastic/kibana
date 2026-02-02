@@ -75,6 +75,65 @@ const MITRE_TACTICS_LIST = [
   'Reconnaissance',
 ];
 
+const MITRE_TACTIC_TRANSLATIONS: Record<string, string> = {
+  'Initial Access': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.initialAccess',
+    { defaultMessage: 'Initial Access' }
+  ),
+  'Defense Evasion': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.defenseEvasion',
+    { defaultMessage: 'Defense Evasion' }
+  ),
+  'Privilege Escalation': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.privilegeEscalation',
+    { defaultMessage: 'Privilege Escalation' }
+  ),
+  Persistence: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.persistence',
+    { defaultMessage: 'Persistence' }
+  ),
+  'Lateral Movement': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.lateralMovement',
+    { defaultMessage: 'Lateral Movement' }
+  ),
+  Execution: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.execution',
+    { defaultMessage: 'Execution' }
+  ),
+  Discovery: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.discovery',
+    { defaultMessage: 'Discovery' }
+  ),
+  Collection: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.collection',
+    { defaultMessage: 'Collection' }
+  ),
+  Exfiltration: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.exfiltration',
+    { defaultMessage: 'Exfiltration' }
+  ),
+  Impact: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.impact',
+    { defaultMessage: 'Impact' }
+  ),
+  'Resource Development': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.resourceDevelopment',
+    { defaultMessage: 'Resource Development' }
+  ),
+  'Credential Access': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.credentialAccess',
+    { defaultMessage: 'Credential Access' }
+  ),
+  'Command and Control': i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.commandAndControl',
+    { defaultMessage: 'Command and Control' }
+  ),
+  Reconnaissance: i18n.translate(
+    'xpack.securitySolution.siemReadiness.coverage.mitreAttack.tactic.reconnaissance',
+    { defaultMessage: 'Reconnaissance' }
+  ),
+};
+
 export const MitreAttackRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const [activeTacticPopover, setActiveTacticPopover] = useState<string | null>(null);
@@ -259,7 +318,9 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   }}
                 >
                   <EuiText size="xs">
-                    <strong>{tactic.tacticName}</strong>
+                    <strong>
+                      {MITRE_TACTIC_TRANSLATIONS[tactic.tacticName] || tactic.tacticName}
+                    </strong>
                   </EuiText>
                   <div style={{ fontSize: euiTheme.size.m }}>
                     {tactic.missingPackages.length > 0 && (
