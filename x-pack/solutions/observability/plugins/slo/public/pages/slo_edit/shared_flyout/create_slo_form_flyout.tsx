@@ -92,8 +92,8 @@ export default function CreateSLOFormFlyout({
       if (stepIndex === currentStep) {
         return 'current';
       }
-      // Only show complete if the step was actually completed (user moved past it)
-      if (completedSteps.has(stepIndex)) {
+      // Only show complete if the step is before current step and was completed
+      if (stepIndex < currentStep && completedSteps.has(stepIndex)) {
         return 'complete';
       }
       return 'incomplete';
