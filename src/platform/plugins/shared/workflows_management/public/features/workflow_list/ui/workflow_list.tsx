@@ -175,6 +175,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                       display: block;
                       max-width: 100%;
                     `}
+                    title={name}
+                    data-test-subj="workflowNameLink"
                   >
                     {name}
                   </Link>
@@ -436,6 +438,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         showEnd={showEnd}
       />
       <EuiBasicTable
+        data-test-subj="workflowListTable"
         css={css`
           .euiBasicTableAction-showOnHover {
             opacity: 1 !important;

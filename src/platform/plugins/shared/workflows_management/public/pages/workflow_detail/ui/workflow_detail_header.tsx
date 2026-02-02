@@ -303,6 +303,7 @@ export const WorkflowDetailHeader = React.memo(
                     onClick={handleSaveWorkflow}
                     disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
                     isLoading={isSaving}
+                    data-test-subj="saveWorkflowHeaderButton"
                   >
                     <FormattedMessage
                       id="keepWorkflows.buttonText"
