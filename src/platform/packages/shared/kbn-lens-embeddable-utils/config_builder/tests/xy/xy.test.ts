@@ -12,6 +12,8 @@ import { xyStateSchema } from '../../schema/charts/xy';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
+  apiXYWithNoTitleAndCustomOutsideLegend,
+  apiXYWithNoYTitleAndInsideLegend,
   barWithTwoLayersAttributes,
   breakdownXY,
   fullBasicXY,
@@ -303,5 +305,13 @@ describe('XY', () => {
         );
       }
     );
+
+    it('should correctly transform no title and inside legend - bug 248611', () => {
+      validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
+    });
+
+    it('should correctly transform with custom position legend - bug 248611', () => {
+      validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
   });
 });
