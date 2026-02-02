@@ -13,6 +13,7 @@ import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams, TaskResult } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
 import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
+import { TaskNotFoundError } from '../streams/errors/task_not_found_error';
 import { isStale } from './is_stale';
 
 interface TaskRequest<TaskType, TParams extends {}> {
@@ -244,5 +245,41 @@ export class TaskClient<TaskType extends string> {
       status: TaskStatus.Canceled,
       last_canceled_at: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Lists all tasks from the task index.
+   * Returns up to 10,000 tasks with only id and created_at fields.
+   */
+  public async list(): Promise<Array<{ id: string; created_at: string }>> {
+    this.logger.debug('Listing all tasks');
+
+    const response = await this.storageClient.search({
+      query: { match_all: {} },
+      size: 10000,
+      track_total_hits: false,
+      _source: ['created_at'],
+    });
+
+    return response.hits.hits.map((hit) => ({
+      id: hit._id!,
+      created_at: hit._source.created_at,
+    }));
+  }
+
+  /**
+   * Deletes a single task by ID.
+   * @throws TaskNotFoundError if the task does not exist
+   */
+  public async deleteTask(id: string): Promise<void> {
+    this.logger.debug(`Deleting task ${id}`);
+    const { result } = await this.storageClient.delete({
+      id,
+      refresh: true,
+    });
+    if (result === 'not_found') {
+      throw new TaskNotFoundError(`Task ${id} not found`);
+    }
+    this.logger.debug(`Successfully deleted task ${id}`);
   }
 }
