@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
@@ -19,10 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import type { AggregateQuery } from '@kbn/es-query';
-import { ESQLLangEditor } from '@kbn/esql/public';
 import { getEsqlViewName } from '@kbn/streams-schema';
-import { StreamNameFormRow } from '../stream_name_form_row';
 import { NestedView } from '../nested_view';
+import { QueryStreamForm } from './query_stream_form';
 
 /**
  * Props for the InlineQueryStreamForm component
@@ -159,37 +157,20 @@ export function InlineQueryStreamForm({
           border-color: ${euiTheme.colors.primary};
         `}
       >
-        <StreamNameFormRow
-          prefix={`${parentStreamName}.`}
-          partitionName={name}
-          onChange={handleNameChange}
-          readOnly={readOnly || isSaving}
-        />
-
-        <EuiSpacer size="m" />
-
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.inlineQueryStreamForm.esqlQueryLabel', {
-            defaultMessage: 'ES|QL Query',
-          })}
-          helpText={i18n.translate('xpack.streams.inlineQueryStreamForm.esqlQueryHelpText', {
-            defaultMessage:
-              'The FROM clause defaults to the parent stream view, but you can modify the query.',
-          })}
-          fullWidth
-        >
-          <ESQLLangEditor
-            disableAutoFocus
-            editorIsInline
-            expandToFitQueryOnMount
-            hasOutline
-            hideRunQueryButton
+        <QueryStreamForm>
+          <QueryStreamForm.StreamName
+            partitionName={name}
+            onChange={handleNameChange}
+            prefix={`${parentStreamName}.`}
+            readOnly={readOnly || isSaving}
+          />
+          <QueryStreamForm.ESQLEditor
             isLoading={isSaving}
+            query={{ esql: esqlQuery }}
             onTextLangQueryChange={handleQueryChange}
             onTextLangQuerySubmit={handleQuerySubmit}
-            query={{ esql: esqlQuery }}
           />
-        </EuiFormRow>
+        </QueryStreamForm>
 
         <EuiSpacer size="m" />
 
