@@ -149,10 +149,11 @@ EOF
 }
 
 # Set up EIS Cloud Connected Mode (CCM) API key
+# Note: This secret is in the legacy vault, not the new CI vault.
 {
   if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
-    export KIBANA_EIS_CCM_API_KEY="$(vault_get inference/kibana-eis-ccm key)"
+    export KIBANA_EIS_CCM_API_KEY="$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
   fi
 }
 
