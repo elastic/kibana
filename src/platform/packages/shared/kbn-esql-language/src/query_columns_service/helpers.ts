@@ -21,12 +21,13 @@ import {
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstJoinCommand } from '../types';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
+import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -83,8 +84,31 @@ function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWi
   };
 }
 
-function createGetPromQLFields(resourceRetriever?: ESQLCallbacks) {
-  return () => resourceRetriever?.getTimeseriesIndices?.() ?? Promise.resolve({ indices: [] });
+function createGetPromqlFields(
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  resourceRetriever?: ESQLCallbacks
+) {
+  return async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    if (command.name !== 'promql') {
+      return [];
+    }
+
+    const indexName = getIndexFromPromQLParams(command as ESQLAstPromqlCommand);
+
+    if (!indexName) {
+      const indices = (await resourceRetriever?.getTimeseriesIndices?.())?.indices ?? [];
+      const indexNames = indices.map(({ name }) => name);
+
+      if (indexNames.length > 0) {
+        return fetchFields(synth.cmd`FROM ${indexNames.join(',')}`.toString());
+      }
+
+      return [];
+    }
+
+    // TODO: Replace fetchFields with PromQL AST-based column extraction
+    return fetchFields(synth.cmd`FROM ${indexName}`.toString());
+  };
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
@@ -165,13 +189,13 @@ export async function getCurrentQueryAvailableColumns(
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
   const getFromFields = createGetFromFields(fetchFields);
-  const getPromQLFields = createGetPromQLFields(resourceRetriever);
+  const getPromqlFields = createGetPromqlFields(fetchFields, resourceRetriever);
 
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
-    fromProql: getPromQLFields,
+    fromPromql: getPromqlFields,
   };
 
   const previousCommands = commands.slice(0, -1);

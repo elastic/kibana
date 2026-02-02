@@ -22,9 +22,10 @@ describe('PROMQL columnsAfter', () => {
       [],
       '',
       {
-        fromFrom: () => Promise.resolve(sourceFields),
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
       }
     );
 
@@ -42,9 +43,10 @@ describe('PROMQL columnsAfter', () => {
       [],
       '',
       {
-        fromFrom: () => Promise.resolve(sourceFields),
+        fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
       }
     );
 
@@ -56,51 +58,10 @@ describe('PROMQL columnsAfter', () => {
       fromFrom: () => Promise.resolve([]),
       fromJoin: () => Promise.resolve([]),
       fromEnrich: () => Promise.resolve([]),
+      fromPromql: () => Promise.resolve([]),
     });
 
     expect(result).toEqual([]);
-  });
-
-  it('uses default timeseries indices when no explicit index param', async () => {
-    const fromFrom = jest.fn().mockResolvedValue([]);
-
-    await columnsAfter(synth.cmd`PROMQL rate(http_requests_total[5m])`, [], '', {
-      fromFrom,
-      fromJoin: () => Promise.resolve([]),
-      fromEnrich: () => Promise.resolve([]),
-      fromProql: () =>
-        Promise.resolve({
-          indices: [
-            { name: 'metrics-tsdb', mode: 'time_series' as const, aliases: [] },
-            { name: 'logs-tsdb', mode: 'time_series' as const, aliases: [] },
-          ],
-        }),
-    });
-
-    const cmd = String(fromFrom.mock.calls[0][0]);
-    expect(cmd).toContain('metrics-tsdb');
-    expect(cmd).toContain('logs-tsdb');
-  });
-
-  it('passes multiple indices to fromFrom', async () => {
-    const fromFrom = jest.fn().mockResolvedValue([]);
-
-    await columnsAfter(
-      synth.cmd`PROMQL index=metrics,logs-tsdb rate(http_requests_total[5m])`,
-      [],
-      '',
-      {
-        fromFrom,
-        fromJoin: () => Promise.resolve([]),
-        fromEnrich: () => Promise.resolve([]),
-      }
-    );
-
-    expect(fromFrom).toHaveBeenCalledTimes(1);
-
-    const [cmd] = fromFrom.mock.calls[0];
-    expect(String(cmd)).toContain('metrics');
-    expect(String(cmd)).toContain('logs-tsdb');
   });
 
   it('returns step column of type date when step param is present', async () => {
@@ -112,6 +73,7 @@ describe('PROMQL columnsAfter', () => {
         fromFrom: () => Promise.resolve([]),
         fromJoin: () => Promise.resolve([]),
         fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve([]),
       }
     );
 

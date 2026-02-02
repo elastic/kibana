@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
 import type {
   ISuggestionItem,
@@ -155,7 +155,7 @@ export interface IAdditionalFields {
   fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
-  fromProql?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**
