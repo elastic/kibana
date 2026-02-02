@@ -44,7 +44,7 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   const data = res.data;
 
   // If status is 204 and there is no data, we just return
-  if (res.status === 204 && isEmpty(data)) {
+  if (res.status === 204 && isEmpty(data) && requiredAttributesToBeInTheResponse.length === 0) {
     return;
   }
 
