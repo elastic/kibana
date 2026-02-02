@@ -10,10 +10,7 @@ import { table } from 'table';
 import chalk from 'chalk';
 import type { EvaluatorStats, DatasetScoreWithStats } from '../evaluation_stats';
 import { getUniqueEvaluatorNames, calculateOverallStats } from '../evaluation_stats';
-import {
-  expandPatternsToEvaluators,
-  matchesEvaluatorPattern,
-} from '../../evaluators/patterns';
+import { expandPatternsToEvaluators, matchesEvaluatorPattern } from '../../evaluators/patterns';
 
 export interface EvaluatorDisplayOptions {
   decimalPlaces?: number;
