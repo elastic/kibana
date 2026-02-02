@@ -23,7 +23,7 @@ interface TopNavMenuItemsProps {
 }
 
 /**
- * @deprecated Use `AppMenu` instead.
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
  */
 export const TopNavMenuItems = ({
   config,

@@ -146,7 +146,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         ? {
             name: storageFields[QUERY_FEATURE_NAME],
             filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
-            type: storageFields[QUERY_FEATURE_TYPE],
+            type: 'system',
           }
         : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],

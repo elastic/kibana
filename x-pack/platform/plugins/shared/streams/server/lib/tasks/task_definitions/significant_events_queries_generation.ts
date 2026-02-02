@@ -26,6 +26,7 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   systems?: System[];
   sampleDocsSize?: number;
+  streamName: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -42,17 +43,24 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, systems, sampleDocsSize, _task } = runContext
-                .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
-              const { stream: name } = _task;
+              const { connectorId, start, end, systems, sampleDocsSize, streamName, _task } =
+                runContext.taskInstance
+                  .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
-              const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                scopedClusterClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+                featureClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
-                const stream = await streamsClient.getStream(name);
+                const stream = await streamsClient.getStream(streamName);
+                const { hits: features } = await featureClient.getFeatures(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -83,6 +91,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           end,
                           system,
                           sampleDocsSize,
+                          features,
                           systemPrompt: significantEventsPromptOverride,
                         },
                         {
@@ -120,7 +129,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { connectorId, start, end, systems, sampleDocsSize }, combinedResults);
+                >(
+                  _task,
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
+                  combinedResults
+                );
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -142,7 +155,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { connectorId, start, end, systems, sampleDocsSize },
+                  { connectorId, start, end, systems, sampleDocsSize, streamName },
                   errorMessage
                 );
               }

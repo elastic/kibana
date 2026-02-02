@@ -13,7 +13,6 @@ import {
   APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
   APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
 } from './alerting/constants';
-import { APM_TRACE_WATERFALL_EMBEDDABLE } from './trace_waterfall/constant';
 
 export async function registerEmbeddables(
   deps: Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>
@@ -49,13 +48,5 @@ export async function registerEmbeddables(
       coreStart,
       pluginsStart,
     });
-  });
-
-  registerReactEmbeddableFactory(APM_TRACE_WATERFALL_EMBEDDABLE, async () => {
-    const { getApmTraceWaterfallEmbeddableFactory } = await import(
-      './trace_waterfall/react_embeddable_factory'
-    );
-
-    return getApmTraceWaterfallEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
 }

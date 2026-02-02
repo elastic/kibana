@@ -47,46 +47,53 @@ export const DataLifecycleSummary = ({ phases, loading = false }: DataLifecycleS
   const showSkeleton = loading && phases.length === 0;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-        <EuiText>
-          <h5 data-test-subj="dataLifecycleSummary-title">
-            {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
-              defaultMessage: 'Data lifecycle',
-            })}
-          </h5>
-        </EuiText>
-      </EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder grow>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        css={{ height: '100%' }}
+      >
+        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+          <EuiText>
+            <h5 data-test-subj="dataLifecycleSummary-title">
+              {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
+                defaultMessage: 'Data lifecycle',
+              })}
+            </h5>
+          </EuiText>
+        </EuiPanel>
 
-      <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
-        {showSkeleton ? (
-          <EuiSkeletonRectangle
-            width="100%"
-            height={50}
-            borderRadius="s"
-            css={{ marginBottom: 35 }}
-            data-test-subj="dataLifecycleSummary-skeleton"
-          />
-        ) : (
-          <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
-            {phasesWithPosition.map((phase, index) => (
-              <EuiFlexItem key={index} grow={phase.grow}>
-                <LifecyclePhaseBar
-                  color={phase.color}
-                  label={phase.label}
-                  size={phase.size}
-                  isDelete={phase.isDelete}
-                  isFirst={phase.isFirst}
-                  isLast={phase.isLast}
-                  timelineValue={phase.timelineValue}
-                  hasNextPhase={phase.hasNextPhase}
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </EuiFlexGroup>
+        <EuiPanel grow hasShadow={false} hasBorder={false} paddingSize="s">
+          {showSkeleton ? (
+            <EuiSkeletonRectangle
+              width="100%"
+              height={50}
+              borderRadius="s"
+              css={{ marginBottom: 35 }}
+              data-test-subj="dataLifecycleSummary-skeleton"
+            />
+          ) : (
+            <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+              {phasesWithPosition.map((phase, index) => (
+                <EuiFlexItem key={index} grow={phase.grow}>
+                  <LifecyclePhaseBar
+                    color={phase.color}
+                    label={phase.label}
+                    size={phase.size}
+                    isDelete={phase.isDelete}
+                    isFirst={phase.isFirst}
+                    isLast={phase.isLast}
+                    timelineValue={phase.timelineValue}
+                    hasNextPhase={phase.hasNextPhase}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
+        </EuiPanel>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 

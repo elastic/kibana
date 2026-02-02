@@ -120,7 +120,7 @@ describe('Fleet preconfigured outputs', () => {
 
       it('Should create a default output and the default preconfigured output', async () => {
         const outputs = await kbnServer.coreStart.savedObjects
-          .createInternalRepository()
+          .getUnsafeInternalClient()
           .find<OutputSOAttributes>({
             type: 'ingest-outputs',
             perPage: 10000,

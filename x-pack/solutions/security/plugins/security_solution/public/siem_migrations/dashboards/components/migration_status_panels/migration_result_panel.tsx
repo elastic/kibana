@@ -306,6 +306,7 @@ const TranslationResultsTable = React.memo<{
       items={items}
       columns={columns}
       compressed
+      tableCaption={i18n.DASHBOARD_MIGRATION_SUMMARY_TITLE}
     />
   );
 });

@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '@kbn/lens-common';
-import { convertToLegendStats } from './legend_stats';
-import { convertToRawColorMappingsFn } from './raw_color_mappings';
+import type { GeneralDatasourceStates, XYState } from '@kbn/lens-common';
+
+import { convertXYToRawColorMappings } from '../../../../../common/content_management/v1/transforms/raw_color_mappings/xy';
+import { convertXYToLegendStats } from '../../../../../common/content_management/v1/transforms/legend_stats/xy';
+import { convertToSplitAccessorsFn } from '../../../../../common/content_management/v2/transforms/split_accessors/xy';
 
 export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
-  convertToLegendStats,
-  convertToRawColorMappingsFn(datasourceStates),
+  // v1
+  convertXYToLegendStats,
+  (state: XYState) => convertXYToRawColorMappings(state, datasourceStates),
+  // v2
+  convertToSplitAccessorsFn,
 ];

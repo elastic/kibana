@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiCodeBlock,
+  EuiDatePicker,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -29,6 +30,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import moment from 'moment';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
 import type { ExecuteToolResponse } from '../../../../../common/http_api/tools';
@@ -89,6 +91,7 @@ interface ToolParameter {
   value: string;
   type: string;
   optional: boolean;
+  format?: string;
 }
 
 enum ToolParameterType {
@@ -135,6 +138,7 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
       value: '',
       description: paramSchema?.description || '',
       type,
+      format: (paramSchema && 'format' in paramSchema && paramSchema.format) || undefined,
       optional: !requiredParams.has(paramName),
     };
   });
@@ -229,6 +233,25 @@ const renderFormField = ({
       );
 
     case ToolParameterType.TEXT:
+      if (parameter.format === 'date-time') {
+        return (
+          <Controller
+            {...commonProps}
+            defaultValue={new Date().toISOString()}
+            render={({ field: { onChange, value, ref, ...field } }) => (
+              <EuiDatePicker
+                {...field}
+                data-test-subj={`agentBuilderToolTestInput-${name}`}
+                showTimeSelect
+                showIcon={false}
+                inputRef={ref}
+                selected={value ? moment(value) : undefined}
+                onChange={(date) => onChange(date ? date.toISOString() : undefined)}
+              />
+            )}
+          />
+        );
+      }
     default:
       return (
         <Controller

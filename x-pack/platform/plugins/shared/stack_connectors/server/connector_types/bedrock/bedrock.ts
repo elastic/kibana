@@ -34,6 +34,7 @@ import {
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
   DashboardActionParamsSchema,
+  ConverseResponseSchema,
 } from '@kbn/connector-schemas/bedrock';
 import type {
   Config,
@@ -51,6 +52,7 @@ import type {
   ConverseStreamParams,
   DashboardActionParams,
   DashboardActionResponse,
+  ConverseResponse,
   StreamingResponse,
 } from '@kbn/connector-schemas/bedrock';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -529,7 +531,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       timeout = DEFAULT_TIMEOUT_MS,
     }: ConverseParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<RunActionResponse> {
+  ): Promise<ConverseResponse> {
     const modelId = reqModel ?? this.model;
     if (!modelId) {
       throw new Error('No model specified. Please configure a default model.');
@@ -546,7 +548,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       toolConfig: {
         tools,
-        toolChoice: { auto: toolChoice },
+        toolChoice,
       },
       system,
       modelId,
@@ -561,11 +563,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: requestBody,
       signal,
       timeout,
-      responseSchema: RunApiLatestResponseSchema,
+      responseSchema: ConverseResponseSchema,
     };
-    const response = await this.runApiLatest(requestArgs, connectorUsageCollector);
+    const response = await this.request(requestArgs, connectorUsageCollector);
 
-    return response;
+    return response.data;
   }
   private async _converseStream({
     messages,

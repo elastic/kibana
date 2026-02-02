@@ -17,6 +17,7 @@ import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { Streams } from '@kbn/streams-schema';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { NoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 /**
  * Extracts the tool call arguments type from a Prompt.
@@ -71,7 +72,7 @@ export async function callInferenceWithPrompt<
   });
 
   if (!('toolCalls' in response) || response.toolCalls.length === 0) {
-    throw new Error('The LLM response did not contain any tool calls');
+    throw new NoLLMSuggestionsError();
   }
 
   const toolCall = response.toolCalls[0] as {

@@ -26,10 +26,10 @@ describe('set instructions helpers', () => {
     });
 
     describe('when project_routing is set', () => {
-      it('should return the correct project routing for "_alias: *"', () => {
-        const queryString = 'SET project_routing = "_alias: *"; FROM my_index';
+      it('should return the correct project routing for "_alias:*"', () => {
+        const queryString = 'SET project_routing = "_alias:*"; FROM my_index';
         const result = getProjectRoutingFromEsqlQuery(queryString);
-        expect(result).toBe('_alias: *');
+        expect(result).toBe('_alias:*');
       });
 
       it('should return the correct project routing for "_alias:_origin"', () => {

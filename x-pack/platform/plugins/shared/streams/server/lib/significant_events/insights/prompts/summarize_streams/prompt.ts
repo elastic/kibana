@@ -9,11 +9,12 @@ import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
+import { insightsSchema, SUBMIT_INSIGHTS_TOOL_NAME } from '../../schema';
 
 export const SummarizeStreamsPrompt = createPrompt({
   name: 'summarize_streams',
   input: z.object({
-    summaries: z.string(),
+    streamInsights: z.string(),
   }),
 })
   .version({
@@ -27,5 +28,12 @@ export const SummarizeStreamsPrompt = createPrompt({
         template: userPromptTemplate,
       },
     },
+    tools: {
+      [SUBMIT_INSIGHTS_TOOL_NAME]: {
+        description: 'Submit system-level insights correlating across streams',
+        schema: insightsSchema,
+      },
+    },
+    toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
   })
   .get();

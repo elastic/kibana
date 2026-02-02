@@ -48,6 +48,7 @@ steps:
         page: "\${{inputs.page}}"
         perPage: "\${{inputs.per_page}}"
         sort: "\${{inputs.sort}}"
+        type: "issue"
 `;
 }
 export function generateGithubSearchCodeWorkflow(stackConnectorId: string): string {

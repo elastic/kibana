@@ -23,7 +23,6 @@ export const StateAnnotation = Annotation.Root({
   }),
   // internals
   resumeToStep: Annotation<string>(),
-
   currentCycle: Annotation<number>({
     reducer: (a, b) => b,
     default: () => 0,

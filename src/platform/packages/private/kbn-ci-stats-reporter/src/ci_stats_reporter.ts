@@ -133,6 +133,11 @@ export class CiStatsReporter {
    * for builds use #hasBuildConfig().
    */
   isEnabled() {
+    if (process.env.CODEX_SANDBOX) {
+      // Codex sandbox blocks outbound network access, so disable ci-stats there.
+      return false;
+    }
+
     return process.env.CI_STATS_DISABLED !== 'true';
   }
 

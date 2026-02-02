@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const fields = [
+const fields: FieldSpec[] = [
   {
     count: 0,
     name: '_id',
@@ -411,10 +412,10 @@ const fields = [
     aggregatable: true,
     readFromDocValues: false,
   },
-] as DataView['fields'];
+];
 
 export const dataViewComplexMock = buildDataViewMock({
   name: 'data-view-with-various-field-types',
-  fields,
+  fields: fieldList(fields),
   timeFieldName: 'data',
 });

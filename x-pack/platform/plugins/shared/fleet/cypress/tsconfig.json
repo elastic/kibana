@@ -2,8 +2,6 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "include": [
     "**/*",
-    "../cypress.config.ts",
-    "../cypress.config.space_awareness.ts",
     "../../../../../../typings/**/*"
   ],
   "exclude": [

@@ -54,6 +54,7 @@ export { MessageText } from './components/message_panel/message_text';
 
 export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
 export { AIAgentTourCallout } from './components/tour_callout/ai_agent_tour_callout';
+export { EisKnowledgeBaseCallout } from './components/tour_callout/eis_knowledge_base_callout';
 
 export {
   type ChatActionClickHandler,
@@ -138,6 +139,11 @@ export {
   useElasticLlmCalloutDismissed,
   ElasticLlmCalloutKey,
 } from './hooks/use_elastic_llm_callout_dismissed';
+
+export {
+  useEisKnowledgeBaseCalloutDismissed,
+  EIS_KNOWLEDGE_BASE_CALLOUT_KEY,
+} from './hooks/use_eis_knowledge_base_callout_dismissed';
 
 export {
   ObservabilityAIAssistantFlyoutStateProvider,

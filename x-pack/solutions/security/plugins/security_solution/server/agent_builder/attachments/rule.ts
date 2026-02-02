@@ -51,7 +51,9 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
     },
     getTools: () => [platformCoreTools.generateEsql, platformCoreTools.productDocumentation],
     getAgentDescription: () => {
-      const description = `You have access to a rule or query.
+      const description = `You have access to a rule, query, or migration rule.
+
+      If this is a migration rule, it includes both the old rule and the new rule.
 
 {ruleData}
 

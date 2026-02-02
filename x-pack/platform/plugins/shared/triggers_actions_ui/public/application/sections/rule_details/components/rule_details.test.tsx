@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -522,12 +523,25 @@ describe('rule_details', () => {
     });
 
     describe('links', () => {
-      it('links to the app that created the rule', () => {
+      it('renders view in app button in management context', () => {
         const rule = mockRule();
+        const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+        useKibanaMock().services.application.currentAppId$ = currentAppId$.asObservable();
         expect(
           shallowWithIntl(
             <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
           ).find('ViewInApp')
+        ).toBeTruthy();
+      });
+
+      it('renders view linked object button in rules app context', () => {
+        const rule = mockRule();
+        const currentAppId$ = new BehaviorSubject<string | undefined>('rules');
+        useKibanaMock().services.application.currentAppId$ = currentAppId$.asObservable();
+        expect(
+          shallowWithIntl(
+            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+          ).find('ViewLinkedObject')
         ).toBeTruthy();
       });
 

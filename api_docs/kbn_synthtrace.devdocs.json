@@ -523,7 +523,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 244,
+        "lineNumber": 264,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -536,7 +536,7 @@
             "label": "{\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 286,
+            "lineNumber": 306,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -551,7 +551,7 @@
                   "Service name (maps to service.name)"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 287,
+                "lineNumber": 307,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -569,7 +569,7 @@
                   "{ [x: string]: string; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 289,
+                "lineNumber": 309,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -594,7 +594,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 291,
+                "lineNumber": 311,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -612,7 +612,7 @@
                   "Record<string, unknown> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 293,
+                "lineNumber": 313,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1938,6 +1938,122 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateLogChangePointsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateLogChangePointsData",
+        "description": [],
+        "signature": [
+          "({\n  logsEsClient,\n  range,\n}: { logsEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.LogsSynthtraceEsClient",
+            "text": "LogsSynthtraceEsClient"
+          },
+          "; range?: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          " | undefined; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.LogDocument",
+            "text": "LogDocument"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateLogChangePointsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logsEsClient,\n  range,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+            "lineNumber": 63,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogChangePointsData.$1.logsEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "logsEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.LogsSynthtraceEsClient",
+                    "text": "LogsSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+                "lineNumber": 64,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateLogChangePointsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+                "lineNumber": 65,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.generateLogRateAnalysisSpikeData",
         "type": "Function",
         "tags": [],
@@ -2220,6 +2336,122 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateMetricChangePointsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateMetricChangePointsData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n}: { range?: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          " | undefined; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateMetricChangePointsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+            "lineNumber": 56,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateMetricChangePointsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+                "lineNumber": 57,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateMetricChangePointsData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+                "lineNumber": 58,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.generateSyntheticAlerts",
         "type": "Function",
         "tags": [],
@@ -2346,6 +2578,122 @@
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_alerts/alerts.ts",
                 "lineNumber": 52,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.generateTraceChangePointsData",
+        "type": "Function",
+        "tags": [],
+        "label": "generateTraceChangePointsData",
+        "description": [],
+        "signature": [
+          "({\n  range,\n  apmEsClient,\n}: { range?: ",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.Timerange",
+            "text": "Timerange"
+          },
+          " | undefined; apmEsClient: ",
+          {
+            "pluginId": "@kbn/synthtrace",
+            "scope": "server",
+            "docId": "kibKbnSynthtracePluginApi",
+            "section": "def-server.ApmSynthtraceEsClient",
+            "text": "ApmSynthtraceEsClient"
+          },
+          "; }) => { client: ",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; generator: ",
+          "SynthGenerator",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.generateTraceChangePointsData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  range,\n  apmEsClient,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+            "lineNumber": 55,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTraceChangePointsData.$1.range",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.Timerange",
+                    "text": "Timerange"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+                "lineNumber": 56,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.generateTraceChangePointsData.$1.apmEsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "apmEsClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace",
+                    "scope": "server",
+                    "docId": "kibKbnSynthtracePluginApi",
+                    "section": "def-server.ApmSynthtraceEsClient",
+                    "text": "ApmSynthtraceEsClient"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4016,6 +4364,20 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LOG_CHANGE_POINTS_DATA_STREAM",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_CHANGE_POINTS_DATA_STREAM",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM",
         "type": "string",
         "tags": [],
@@ -4050,6 +4412,20 @@
         "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/utils/create_logger.ts",
         "lineNumber": 46,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.METRIC_CHANGE_POINTS_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "METRIC_CHANGE_POINTS_INDEX",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4096,9 +4472,110 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.TRACE_CHANGE_POINTS_SERVICE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "TRACE_CHANGE_POINTS_SERVICE_NAME",
+        "description": [],
+        "signature": [
+          "\"test-service\""
+        ],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.LOG_CHANGE_POINTS_ANALYSIS_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_log_change_points/log_change_points.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW",
@@ -4135,6 +4612,174 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "METRIC_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.METRIC_CHANGE_POINTS_ANALYSIS_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_metric_change_points/metric_change_points.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "type": "Object",
+        "tags": [],
+        "label": "TRACE_CHANGE_POINTS_ANALYSIS_WINDOW",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_trace_change_points/trace_change_points.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

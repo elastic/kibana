@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-chrome-layout-utils'
-  - '@kbn/core-chrome-browser'
 tags:
   - shared-browser
   - package
