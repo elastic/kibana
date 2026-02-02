@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, fromEvent, map, merge, shareReplay, startWith } from 'rxjs';
-
-/**
- * Emits true during printing (window.beforeprint), false otherwise.
- */
-export const isPrinting$ = merge(
-  fromEvent(window, 'beforeprint').pipe(map(() => true)),
-  fromEvent(window, 'afterprint').pipe(map(() => false))
-).pipe(startWith(false), distinctUntilChanged(), shareReplay(1));
+export { createChromeApi } from './chrome_api';
+export {
+  createBreadcrumbsApi,
+  type BreadcrumbsApi,
+  type BreadcrumbsApiDeps,
+} from './breadcrumbs_api';
+export { createHelpApi, type HelpApi, type HelpApiDeps } from './help_api';
+export { createProjectApi, type ProjectApi, type ProjectApiDeps } from './project_api';
