@@ -67,7 +67,18 @@ export function FeatureDetailsFlyout({
   const generalInfoItems = [
     {
       title: ID_LABEL,
-      description: <EuiText size="s">{feature.id}</EuiText>,
+      description: (
+        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          <code
+            css={css`
+              font-family: ${euiTheme.font.familyCode};
+              font-size: ${euiTheme.font.scale.s};
+            `}
+          >
+            {feature.id}
+          </code>
+        </EuiText>
+      ),
     },
     {
       title: TYPE_LABEL,

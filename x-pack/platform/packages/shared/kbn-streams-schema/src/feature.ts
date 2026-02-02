@@ -18,7 +18,7 @@ export interface BaseFeature {
   subtype?: string;
   title?: string;
   description: string;
-  properties: Record<string, any>;
+  properties: Record<string, string>;
   confidence: number;
   evidence: string[];
   tags: string[];
@@ -38,7 +38,7 @@ export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   subtype: z.string().optional(),
   title: z.string().optional(),
   description: z.string(),
-  properties: z.record(z.string(), z.any()),
+  properties: z.record(z.string(), z.string()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()),
   tags: z.array(z.string()),
