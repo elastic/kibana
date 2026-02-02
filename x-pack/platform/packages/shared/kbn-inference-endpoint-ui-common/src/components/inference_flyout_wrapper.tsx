@@ -65,8 +65,6 @@ export const formSerializer = (formData: InferenceEndpoint) => {
   if (formData && providerConfig) {
     const {
       max_number_of_allocations: maxAllocations,
-      num_threads,
-      num_allocations,
       headers,
       ...restProviderConfig
     } = providerConfig || {};
@@ -86,6 +84,8 @@ export const formSerializer = (formData: InferenceEndpoint) => {
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
+                // Remove num_allocations as it cannot be set when adaptive allocations is set.
+                num_allocations: undefined,
               }
             : {}),
         },
