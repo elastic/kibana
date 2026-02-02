@@ -16,9 +16,16 @@ const LOG_DOCUMENT_FIELDS = [
   'span.id',
   'http.response.status_code',
   'error.exception.message',
-];
+] as const; 
 
-export interface LogDocument {
+type FieldKeys = typeof LOG_DOCUMENT_FIELDS[number];
+
+type LogDocument = {
+  'log.level'?: string;
+  '@timestamp'?: string;
+} & {
+  [K in FieldKeys]?: unknown;
+};
   '@timestamp'?: string;
   message?: string;
   'log.level'?: string;
