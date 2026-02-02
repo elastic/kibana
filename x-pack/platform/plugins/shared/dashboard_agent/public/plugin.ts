@@ -38,6 +38,7 @@ export class DashboardAgentPlugin
   ): DashboardAgentPluginPublicStart {
     registerDashboardAttachmentUiDefinition({
       attachments: plugins.agentBuilder.attachments,
+      share: plugins.share,
     });
 
     return {};

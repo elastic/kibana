@@ -349,7 +349,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             title: updatedTitle,
             description: updatedDescription,
             viewMode: 'edit',
-            time_range: { from: 'now-15m', to: 'now' },
+            time_range: { from: 'now-24h', to: 'now' },
             dashboardAttachmentId: currentAttachmentId,
           },
           { spaceId }

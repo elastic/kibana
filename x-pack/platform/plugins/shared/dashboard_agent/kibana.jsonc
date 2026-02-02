@@ -21,6 +21,8 @@
       "share",
       "spaces"
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "data"
+    ]
   }
 }
