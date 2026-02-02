@@ -37,6 +37,10 @@
 ### Scout (UI/API with Playwright)
 `node scripts/scout.js run-tests --stateful --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
 
+### Component tests
+- Enzyme is deprecated, and tests using it should be replaced with React Testing Library.
+- Avoid writing unit tests that match against snapshots of rendered components.
+
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
 
