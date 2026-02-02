@@ -112,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have quick stats', async () => {
           await pageObjects.searchIndexDetailsPage.expectQuickStats();
           await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
-          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227.00 B');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
         });
 
