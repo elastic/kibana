@@ -26,6 +26,7 @@ describe('NotificationPolicyClient', () => {
     createNotificationPolicySavedObjectService();
 
   const baseCreateData = {
+    name: 'policy-1',
     workflow_id: 'workflow-1',
   };
 
@@ -76,13 +77,14 @@ describe('NotificationPolicyClient', () => {
       });
 
       const res = await client.createNotificationPolicy({
-        data: { workflow_id: 'my-workflow' },
+        data: { name: 'my-policy', workflow_id: 'my-workflow' },
         options: { id: 'policy-id-1' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         expect.objectContaining({
+          name: 'my-policy',
           workflow_id: 'my-workflow',
           createdBy: 'elastic',
           updatedBy: 'elastic',
@@ -95,6 +97,7 @@ describe('NotificationPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-1',
+          name: 'my-policy',
           workflow_id: 'my-workflow',
           createdBy: 'elastic',
           updatedBy: 'elastic',
@@ -114,17 +117,19 @@ describe('NotificationPolicyClient', () => {
       });
 
       const res = await client.createNotificationPolicy({
-        data: { workflow_id: 'my-workflow' },
+        data: { name: 'my-policy', workflow_id: 'my-workflow' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         expect.objectContaining({
+          name: 'my-policy',
           workflow_id: 'my-workflow',
         }),
         expect.objectContaining({ overwrite: false })
       );
 
+      expect(res.name).toBe('my-policy');
       expect(res.workflow_id).toBe('my-workflow');
     });
 
@@ -139,7 +144,7 @@ describe('NotificationPolicyClient', () => {
 
       await expect(
         client.createNotificationPolicy({
-          data: { workflow_id: 'my-workflow' },
+          data: { name: 'my-policy', workflow_id: 'my-workflow' },
           options: { id: 'policy-id-conflict' },
         })
       ).rejects.toMatchObject({
@@ -153,6 +158,7 @@ describe('NotificationPolicyClient', () => {
       const client = createClient();
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'test-policy',
         workflow_id: 'test-workflow',
         createdBy: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',
@@ -202,6 +208,7 @@ describe('NotificationPolicyClient', () => {
       const client = createClient();
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
         workflow_id: 'original-workflow',
         createdBy: 'elastic',
         createdAt: '2024-12-01T00:00:00.000Z',
@@ -218,13 +225,14 @@ describe('NotificationPolicyClient', () => {
 
       const res = await client.updateNotificationPolicy({
         id: 'policy-id-update-1',
-        data: { workflow_id: 'updated-workflow' },
+        data: { name: 'updated-policy', workflow_id: 'updated-workflow' },
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-update-1',
         expect.objectContaining({
+          name: 'updated-policy',
           workflow_id: 'updated-workflow',
           updatedBy: 'elastic',
           updatedAt: '2025-01-01T00:00:00.000Z',
@@ -238,6 +246,7 @@ describe('NotificationPolicyClient', () => {
       expect(res).toEqual(
         expect.objectContaining({
           id: 'policy-id-update-1',
+          name: 'updated-policy',
           workflow_id: 'updated-workflow',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -267,6 +276,7 @@ describe('NotificationPolicyClient', () => {
       const client = createClient();
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
         workflow_id: 'original-workflow',
         createdBy: 'elastic',
         createdAt: '2024-12-01T00:00:00.000Z',
@@ -304,6 +314,7 @@ describe('NotificationPolicyClient', () => {
       const client = createClient();
 
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'policy-to-delete',
         workflow_id: 'workflow-to-delete',
         createdBy: 'elastic',
         createdAt: '2025-01-01T00:00:00.000Z',

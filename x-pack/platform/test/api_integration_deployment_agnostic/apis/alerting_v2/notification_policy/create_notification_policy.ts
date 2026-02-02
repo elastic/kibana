@@ -35,10 +35,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'my-workflow-id' });
+        .send({ name: 'my-policy', workflow_id: 'my-workflow-id' });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be.a('string');
+      expect(response.body.name).to.be('my-policy');
       expect(response.body.workflow_id).to.be('my-workflow-id');
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
@@ -51,10 +52,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${customId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'another-workflow-id' });
+        .send({ name: 'another-policy', workflow_id: 'another-workflow-id' });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(customId);
+      expect(response.body.name).to.be('another-policy');
       expect(response.body.workflow_id).to.be('another-workflow-id');
     });
 
@@ -66,7 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'workflow-1' });
+        .send({ name: 'policy-1', workflow_id: 'workflow-1' });
 
       expect(firstResponse.status).to.be(200);
 
@@ -75,9 +77,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'workflow-2' });
+        .send({ name: 'policy-2', workflow_id: 'workflow-2' });
 
       expect(secondResponse.status).to.be(409);
+    });
+
+    it('should return 400 when name is missing', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ workflow_id: 'my-workflow-id' });
+
+      expect(response.status).to.be(400);
     });
 
     it('should return 400 when workflow_id is missing', async () => {
@@ -85,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({});
+        .send({ name: 'my-policy' });
 
       expect(response.status).to.be(400);
     });

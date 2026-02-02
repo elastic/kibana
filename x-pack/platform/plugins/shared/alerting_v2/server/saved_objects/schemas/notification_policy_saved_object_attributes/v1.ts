@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
  * Attributes for the notification policy saved object.
  */
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
+  name: schema.string(),
   workflow_id: schema.string(),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),

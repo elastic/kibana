@@ -25,6 +25,7 @@ const createNotificationPolicyParamsSchema = schema.object({
 });
 
 const createNotificationPolicyBodySchema = schema.object({
+  name: schema.string(),
   workflow_id: schema.string(),
 });
 

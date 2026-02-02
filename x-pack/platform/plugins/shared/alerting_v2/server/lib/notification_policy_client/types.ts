@@ -6,11 +6,13 @@
  */
 
 export interface CreateNotificationPolicyData {
+  name: string;
   workflow_id: string;
 }
 
 export interface UpdateNotificationPolicyData {
-  workflow_id: string;
+  name?: string;
+  workflow_id?: string;
 }
 
 export interface CreateNotificationPolicyParams {
@@ -20,6 +22,7 @@ export interface CreateNotificationPolicyParams {
 
 export interface NotificationPolicyResponse {
   id: string;
+  name: string;
   workflow_id: string;
   createdBy: string | null;
   createdAt: string;

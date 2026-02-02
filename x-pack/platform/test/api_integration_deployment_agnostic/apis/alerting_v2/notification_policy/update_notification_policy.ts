@@ -30,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'original-workflow-id' });
+        .send({ name: 'original-policy', workflow_id: 'original-workflow-id' });
 
       createdPolicyId = createResponse.body.id;
     });
@@ -40,17 +40,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    it('should update a notification policy', async () => {
+    it('should update a notification policy name and workflow_id', async () => {
       const response = await supertestWithoutAuth
         .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'updated-workflow-id' });
+        .send({ name: 'updated-policy', workflow_id: 'updated-workflow-id' });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(createdPolicyId);
+      expect(response.body.name).to.be('updated-policy');
       expect(response.body.workflow_id).to.be('updated-workflow-id');
       expect(response.body.updatedAt).to.be.a('string');
+    });
+
+    it('should update only name when workflow_id is not provided', async () => {
+      const response = await supertestWithoutAuth
+        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ name: 'only-name-updated' });
+
+      expect(response.status).to.be(200);
+      expect(response.body.name).to.be('only-name-updated');
+      expect(response.body.workflow_id).to.be('updated-workflow-id');
     });
 
     it('should return 404 when updating a non-existent notification policy', async () => {
@@ -58,19 +71,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'some-workflow-id' });
+        .send({ name: 'some-name' });
 
       expect(response.status).to.be(404);
-    });
-
-    it('should return 400 when workflow_id is missing', async () => {
-      const response = await supertestWithoutAuth
-        .put(`${NOTIFICATION_POLICY_API_PATH}/${createdPolicyId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({});
-
-      expect(response.status).to.be(400);
     });
   });
 }

@@ -23,7 +23,8 @@ const updateNotificationPolicyParamsSchema = schema.object({
 });
 
 const updateNotificationPolicyBodySchema = schema.object({
-  workflow_id: schema.string(),
+  name: schema.maybe(schema.string()),
+  workflow_id: schema.maybe(schema.string()),
 });
 
 @injectable()

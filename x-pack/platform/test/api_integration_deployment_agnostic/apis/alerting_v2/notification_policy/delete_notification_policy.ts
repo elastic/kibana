@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'workflow-to-delete' });
+        .send({ name: 'policy-to-delete', workflow_id: 'workflow-to-delete' });
 
       const policyId = createResponse.body.id;
 

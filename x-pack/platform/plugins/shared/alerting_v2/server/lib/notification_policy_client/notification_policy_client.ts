@@ -41,6 +41,7 @@ export class NotificationPolicyClient {
     const now = new Date().toISOString();
 
     const notificationPolicyAttributes: NotificationPolicySavedObjectAttributes = {
+      name: params.data.name,
       workflow_id: params.data.workflow_id,
       createdBy: username,
       createdAt: now,
@@ -103,7 +104,8 @@ export class NotificationPolicyClient {
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
       ...existingAttrs,
-      workflow_id: data.workflow_id,
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.workflow_id !== undefined && { workflow_id: data.workflow_id }),
       updatedBy: username,
       updatedAt: now,
     };

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-
-import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
-import { ruleMappings } from './rule_mappings';
-import { ruleModelVersions, notificationPolicyModelVersions } from './model_versions';
+import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { notificationPolicyModelVersions, ruleModelVersions } from './model_versions';
 import { notificationPolicyMappings } from './notification_policy_mappings';
+import { ruleMappings } from './rule_mappings';
+import type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
+import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
@@ -46,10 +46,13 @@ export function registerSavedObjects({
     mappings: notificationPolicyMappings,
     management: {
       importableAndExportable: false,
+      getTitle(so: SavedObject<NotificationPolicySavedObjectAttributes>) {
+        return `Notification Policy: [${so.attributes.name}]`;
+      },
     },
     modelVersions: notificationPolicyModelVersions,
   });
 }
 
-export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 export type { NotificationPolicySavedObjectAttributes } from './schemas/notification_policy_saved_object_attributes';
+export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';

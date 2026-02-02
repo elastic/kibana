@@ -30,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ workflow_id: 'test-workflow-for-get' });
+        .send({ name: 'test-policy-for-get', workflow_id: 'test-workflow-for-get' });
 
       createdPolicyId = createResponse.body.id;
     });
@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(createdPolicyId);
+      expect(response.body.name).to.be('test-policy-for-get');
       expect(response.body.workflow_id).to.be('test-workflow-for-get');
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
