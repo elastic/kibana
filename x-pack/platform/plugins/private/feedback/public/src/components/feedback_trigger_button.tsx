@@ -19,7 +19,6 @@ interface Props {
 
 export const FeedbackTriggerButton = ({ core, cloud, organizationId }: Props) => {
   const handleShowFeedbackContainer = () => {
-    // Only load the feedback container if we know the user can send telemetry
     Promise.all([import('./feedback_container'), import('@kbn/react-kibana-mount')]).then(
       ([{ FeedbackContainer }, { toMountPoint }]) => {
         const feedbackContainer = core.overlays.openModal(

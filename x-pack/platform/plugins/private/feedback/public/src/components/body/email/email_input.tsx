@@ -9,7 +9,6 @@ import React, { useEffect, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import type { SecurityServiceStart } from '@kbn/core/public';
-import { getUserEmail } from '../../../utils';
 
 interface Props {
   email: string;
@@ -30,11 +29,15 @@ export const EmailInput = ({ email, security, handleChangeEmail }: Props) => {
         return;
       }
 
-      const userEmail = await getUserEmail(security);
-
-      hasFetchedEmailRef.current = true;
-      if (userEmail) {
-        handleChangeEmail(userEmail);
+      try {
+        const user = await security.authc.getCurrentUser();
+        if (user?.email) {
+          handleChangeEmail(user.email);
+        }
+      } catch {
+        handleChangeEmail('');
+      } finally {
+        hasFetchedEmailRef.current = true;
       }
     };
 

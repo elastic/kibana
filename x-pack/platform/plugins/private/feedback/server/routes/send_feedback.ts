@@ -18,7 +18,7 @@ const feedbackQuestionSchema = schema.object({
 const feedbackBodySchema = schema.object({
   app_id: schema.string(),
   user_email: schema.maybe(schema.string()),
-  solution: schema.maybe(schema.string()),
+  solution: schema.string(),
   csat_score: schema.maybe(schema.number()),
   questions: schema.maybe(schema.arrayOf(feedbackQuestionSchema)),
   organization_id: schema.maybe(schema.string()),

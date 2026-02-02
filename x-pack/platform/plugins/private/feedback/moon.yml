@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-internal'
   - '@kbn/cloud-plugin'
   - '@kbn/telemetry-plugin'
+  - '@kbn/config-schema'
   - '@kbn/feedback-registry'
 tags:
   - plugin

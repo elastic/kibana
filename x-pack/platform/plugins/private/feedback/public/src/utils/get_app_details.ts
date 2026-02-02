@@ -7,6 +7,9 @@
 
 import type { CoreStart } from '@kbn/core/public';
 
+/**
+ * Get current app details from execution context and nav links
+ */
 export const getAppDetails = (core: CoreStart) => {
   /**
    * Clear previous context to get the latest app info

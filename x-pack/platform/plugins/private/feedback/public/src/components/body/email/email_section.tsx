@@ -27,7 +27,7 @@ export const EmailSection = ({
   handleChangeEmail,
 }: Props) => {
   return (
-    <EuiFormRow fullWidth>
+    <EuiFormRow display="center">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EmailConsentCheck

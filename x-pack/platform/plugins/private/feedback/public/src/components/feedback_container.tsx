@@ -109,13 +109,13 @@ export const FeedbackContainer = ({
 
   const containerCss = css`
     padding: ${euiTheme.size.l};
-    width: calc(600px + ${euiTheme.size.l} * 2);
+    width: 576px;
   `;
 
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       data-test-subj="feedbackContainer"
       css={containerCss}
     >

@@ -31,7 +31,7 @@ export const FeedbackTextArea = ({
   };
 
   return (
-    <EuiFormRow fullWidth label={label}>
+    <EuiFormRow label={label}>
       <EuiTextArea
         fullWidth
         rows={4}

@@ -23,5 +23,4 @@ export { FeedbackFooter } from './components';
 
 export { FeedbackContainer } from './components';
 
-export { getUserEmail } from './utils';
 export { getAppDetails } from './utils';

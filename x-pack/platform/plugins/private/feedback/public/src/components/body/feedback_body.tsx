@@ -7,9 +7,9 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+
 import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import { FeedbackTextArea } from './feedback_text_area';
 import { EmailSection } from './email';
@@ -42,23 +42,15 @@ export const FeedbackBody = ({
   handleChangeAllowEmailContact,
   handleChangeEmail,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
-  const bodyCss = css`
-    padding-top: ${euiTheme.size.m};
-    width: 600px;
-  `;
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem css={bodyCss} data-test-subj="feedbackBody">
-        <EuiForm component="form">
+      <EuiFlexItem data-test-subj="feedbackBody">
+        <EuiForm fullWidth component="form">
           <CsatButtons
             appTitle={appTitle}
             selectedCsatOptionId={selectedCsatOptionId}
             handleChangeCsatOptionId={handleChangeCsatOptionId}
           />
-          <EuiSpacer size="m" />
           {questions.length > 0 &&
             questions.map((question) => (
               <FeedbackTextArea
@@ -98,7 +90,6 @@ export const FeedbackBody = ({
           />
         </EuiForm>
       </EuiFlexItem>
-      <EuiSpacer size="m" />
       <EuiFlexItem>
         <SessionInfoDisclaimer />
       </EuiFlexItem>

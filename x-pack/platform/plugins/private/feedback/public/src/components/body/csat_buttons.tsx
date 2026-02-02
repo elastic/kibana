@@ -64,7 +64,6 @@ export const CsatButtons = ({
 
   return (
     <EuiFormRow
-      fullWidth
       label={i18n.translate('feedback.body.csatButtons.titleText', {
         defaultMessage: 'How would you rate your experience with {appTitle}?',
         values: {
