@@ -14,8 +14,7 @@ import type { QueryClient } from '../assets/query/query_client';
 import type { AttachmentClient } from '../attachments/attachment_client';
 import type { SystemClient } from '../system/system_client';
 import type { FeatureClient } from '../feature/feature_client';
-import type { AttachmentLink, AttachmentBulkOperation } from '../attachments/types';
-import type { FeatureBulkOperation } from '../feature/feature_client';
+import type { AttachmentLink } from '../attachments/types';
 
 interface StreamUpsertChange {
   type: 'upsert';
@@ -40,12 +39,6 @@ interface UnlinkAttachmentChange {
   attachment: AttachmentLink;
 }
 
-interface BulkAttachmentChange {
-  type: 'bulk_attachments';
-  name: string;
-  operations: AttachmentBulkOperation[];
-}
-
 // Query changes
 interface UpsertQueryChange {
   type: 'upsert_query';
@@ -57,12 +50,6 @@ interface DeleteQueryChange {
   type: 'delete_query';
   name: string;
   queryId: string;
-}
-
-interface BulkQueriesChange {
-  type: 'bulk_queries';
-  name: string;
-  operations: Array<{ index?: StreamQuery; delete?: { id: string } }>;
 }
 
 // Feature changes
@@ -78,24 +65,15 @@ interface DeleteFeatureChange {
   featureId: string;
 }
 
-interface BulkFeaturesChange {
-  type: 'bulk_features';
-  name: string;
-  operations: FeatureBulkOperation[];
-}
-
 export type StreamChange =
   | StreamUpsertChange
   | StreamDeleteChange
   | LinkAttachmentChange
   | UnlinkAttachmentChange
-  | BulkAttachmentChange
   | UpsertQueryChange
   | DeleteQueryChange
-  | BulkQueriesChange
   | UpsertFeatureChange
-  | DeleteFeatureChange
-  | BulkFeaturesChange;
+  | DeleteFeatureChange;
 
 export interface StateDependencies {
   logger: Logger;

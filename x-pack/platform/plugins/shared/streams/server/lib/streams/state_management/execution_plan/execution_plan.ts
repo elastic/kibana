@@ -58,13 +58,10 @@ import type {
   UnlinkFeaturesAction,
   LinkAttachmentAction,
   UnlinkAttachmentAction,
-  BulkAttachmentsAction,
   UpsertQueryAction,
   DeleteQueryAction,
-  BulkQueriesAction,
   UpsertFeatureAction,
   DeleteFeatureAction,
-  BulkFeaturesAction,
 } from './types';
 
 /**
@@ -105,13 +102,10 @@ export class ExecutionPlan {
       update_ingest_settings: [],
       link_attachment: [],
       unlink_attachment: [],
-      bulk_attachments: [],
       upsert_query: [],
       delete_query: [],
-      bulk_queries: [],
       upsert_feature: [],
       delete_feature: [],
-      bulk_features: [],
     };
   }
 
@@ -206,13 +200,10 @@ export class ExecutionPlan {
         update_ingest_settings,
         link_attachment,
         unlink_attachment,
-        bulk_attachments,
         upsert_query,
         delete_query,
-        bulk_queries,
         upsert_feature,
         delete_feature,
-        bulk_features,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -262,13 +253,10 @@ export class ExecutionPlan {
       await Promise.all([
         this.linkAttachments(link_attachment),
         this.unlinkAttachments(unlink_attachment),
-        this.bulkAttachments(bulk_attachments),
         this.upsertQueries(upsert_query),
         this.deleteQueriesSingle(delete_query),
-        this.bulkQueries(bulk_queries),
         this.upsertFeatures(upsert_feature),
         this.deleteFeaturesSingle(delete_feature),
-        this.bulkFeatures(bulk_features),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -554,18 +542,6 @@ export class ExecutionPlan {
     );
   }
 
-  private async bulkAttachments(actions: BulkAttachmentsAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.attachmentClient.bulk(action.request.name, action.request.operations)
-      )
-    );
-  }
-
   // Query action handlers
   private async upsertQueries(actions: UpsertQueryAction[]) {
     if (actions.length === 0) {
@@ -587,18 +563,6 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         this.dependencies.queryClient.delete(action.request.name, action.request.queryId)
-      )
-    );
-  }
-
-  private async bulkQueries(actions: BulkQueriesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.queryClient.bulk(action.request.name, action.request.operations)
       )
     );
   }
@@ -626,18 +590,6 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         this.dependencies.featureClient.deleteFeature(action.request.name, action.request.featureId)
-      )
-    );
-  }
-
-  private async bulkFeatures(actions: BulkFeaturesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.featureClient.bulk(action.request.name, action.request.operations)
       )
     );
   }

@@ -862,19 +862,24 @@ export class StreamsClient {
     streamName: string,
     operations: AttachmentBulkOperation[]
   ): Promise<{ acknowledged: boolean }> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'bulk_attachments',
+    const changes = operations.map((op) => {
+      if ('index' in op) {
+        return {
+          type: 'link_attachment' as const,
           name: streamName,
-          operations,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+          attachment: op.index.attachment,
+        };
       }
-    );
+      return {
+        type: 'unlink_attachment' as const,
+        name: streamName,
+        attachment: op.delete.attachment,
+      };
+    });
+    await State.attemptChanges(changes, {
+      ...this.dependencies,
+      streamsClient: this,
+    });
     return { acknowledged: true };
   }
 
@@ -927,19 +932,24 @@ export class StreamsClient {
     streamName: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ): Promise<{ acknowledged: boolean }> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'bulk_queries',
+    const changes = operations.map((op) => {
+      if (op.index) {
+        return {
+          type: 'upsert_query' as const,
           name: streamName,
-          operations,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+          query: op.index,
+        };
       }
-    );
+      return {
+        type: 'delete_query' as const,
+        name: streamName,
+        queryId: op.delete!.id,
+      };
+    });
+    await State.attemptChanges(changes, {
+      ...this.dependencies,
+      streamsClient: this,
+    });
     return { acknowledged: true };
   }
 
@@ -992,19 +1002,24 @@ export class StreamsClient {
     streamName: string,
     operations: FeatureBulkOperation[]
   ): Promise<{ acknowledged: boolean }> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'bulk_features',
+    const changes = operations.map((op) => {
+      if ('index' in op) {
+        return {
+          type: 'upsert_feature' as const,
           name: streamName,
-          operations,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+          feature: op.index.feature,
+        };
       }
-    );
+      return {
+        type: 'delete_feature' as const,
+        name: streamName,
+        featureId: op.delete.id,
+      };
+    });
+    await State.attemptChanges(changes, {
+      ...this.dependencies,
+      streamsClient: this,
+    });
     return { acknowledged: true };
   }
 }

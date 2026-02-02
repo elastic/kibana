@@ -95,13 +95,10 @@ export abstract class StreamActiveRecord<
         return this.upsert(change.definition, desiredState, startingState);
       case 'link_attachment':
       case 'unlink_attachment':
-      case 'bulk_attachments':
       case 'upsert_query':
       case 'delete_query':
-      case 'bulk_queries':
       case 'upsert_feature':
       case 'delete_feature':
-      case 'bulk_features':
         return this.handleResourceChange(change, desiredState, startingState);
       default:
         // Exhaustive check - TypeScript will error if we miss a case
@@ -220,11 +217,6 @@ export abstract class StreamActiveRecord<
             type: 'unlink_attachment',
             request: { name: change.name, attachment: change.attachment },
           };
-        case 'bulk_attachments':
-          return {
-            type: 'bulk_attachments',
-            request: { name: change.name, operations: change.operations },
-          };
         case 'upsert_query':
           return {
             type: 'upsert_query',
@@ -235,11 +227,6 @@ export abstract class StreamActiveRecord<
             type: 'delete_query',
             request: { name: change.name, queryId: change.queryId },
           };
-        case 'bulk_queries':
-          return {
-            type: 'bulk_queries',
-            request: { name: change.name, operations: change.operations },
-          };
         case 'upsert_feature':
           return {
             type: 'upsert_feature',
@@ -249,11 +236,6 @@ export abstract class StreamActiveRecord<
           return {
             type: 'delete_feature',
             request: { name: change.name, featureId: change.featureId },
-          };
-        case 'bulk_features':
-          return {
-            type: 'bulk_features',
-            request: { name: change.name, operations: change.operations },
           };
         default:
           const _exhaustiveCheck: never = change;

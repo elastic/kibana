@@ -14,8 +14,7 @@ import type {
 import type { Feature, IngestStreamLifecycle, StreamQuery, Streams } from '@kbn/streams-schema';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import type { AttachmentLink, AttachmentBulkOperation } from '../../attachments/types';
-import type { FeatureBulkOperation } from '../../feature/feature_client';
+import type { AttachmentLink } from '../../attachments/types';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -194,14 +193,6 @@ export interface UnlinkAttachmentAction {
   };
 }
 
-export interface BulkAttachmentsAction {
-  type: 'bulk_attachments';
-  request: {
-    name: string;
-    operations: AttachmentBulkOperation[];
-  };
-}
-
 // Query actions
 export interface UpsertQueryAction {
   type: 'upsert_query';
@@ -219,14 +210,6 @@ export interface DeleteQueryAction {
   };
 }
 
-export interface BulkQueriesAction {
-  type: 'bulk_queries';
-  request: {
-    name: string;
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>;
-  };
-}
-
 // Feature actions
 export interface UpsertFeatureAction {
   type: 'upsert_feature';
@@ -241,14 +224,6 @@ export interface DeleteFeatureAction {
   request: {
     name: string;
     featureId: string;
-  };
-}
-
-export interface BulkFeaturesAction {
-  type: 'bulk_features';
-  request: {
-    name: string;
-    operations: FeatureBulkOperation[];
   };
 }
 
@@ -277,13 +252,10 @@ export type ElasticsearchAction =
   | UpdateIngestSettingsAction
   | LinkAttachmentAction
   | UnlinkAttachmentAction
-  | BulkAttachmentsAction
   | UpsertQueryAction
   | DeleteQueryAction
-  | BulkQueriesAction
   | UpsertFeatureAction
-  | DeleteFeatureAction
-  | BulkFeaturesAction;
+  | DeleteFeatureAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -310,11 +282,8 @@ export interface ActionsByType {
   update_ingest_settings: UpdateIngestSettingsAction[];
   link_attachment: LinkAttachmentAction[];
   unlink_attachment: UnlinkAttachmentAction[];
-  bulk_attachments: BulkAttachmentsAction[];
   upsert_query: UpsertQueryAction[];
   delete_query: DeleteQueryAction[];
-  bulk_queries: BulkQueriesAction[];
   upsert_feature: UpsertFeatureAction[];
   delete_feature: DeleteFeatureAction[];
-  bulk_features: BulkFeaturesAction[];
 }
