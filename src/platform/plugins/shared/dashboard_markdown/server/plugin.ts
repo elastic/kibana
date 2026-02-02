@@ -16,11 +16,13 @@ import type { MarkdownState } from '.';
 import { markdownSavedObjectType } from './markdown_saved_object';
 import { MarkdownStorage } from './content_management/markdown_storage';
 import type { SetupDeps, StartDeps } from './types';
+import { getTransforms } from './embeddable/transforms/get_transforms';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
       getSchema: () => markdownEmbeddableSchema,
+      ...getTransforms(),
     });
 
     plugins.contentManagement.register({
