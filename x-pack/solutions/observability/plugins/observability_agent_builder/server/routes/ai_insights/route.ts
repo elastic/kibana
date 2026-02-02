@@ -142,6 +142,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
       const result = await getLogAiInsights({
+        core,
         index,
         id,
         inferenceClient,

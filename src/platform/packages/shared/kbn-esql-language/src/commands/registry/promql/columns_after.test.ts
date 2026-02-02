@@ -60,4 +60,25 @@ describe('PROMQL columnsAfter', () => {
 
     expect(result).toEqual([]);
   });
+
+  it('passes multiple indices to fromFrom', async () => {
+    const fromFrom = jest.fn().mockResolvedValue([]);
+
+    await columnsAfter(
+      synth.cmd`PROMQL index=metrics,logs-tsdb rate(http_requests_total[5m])`,
+      [],
+      '',
+      {
+        fromFrom,
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+      }
+    );
+
+    expect(fromFrom).toHaveBeenCalledTimes(1);
+
+    const [cmd] = fromFrom.mock.calls[0];
+    expect(String(cmd)).toContain('metrics');
+    expect(String(cmd)).toContain('logs-tsdb');
+  });
 });
