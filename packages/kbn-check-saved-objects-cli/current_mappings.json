@@ -1,19 +1,4 @@
 {
-  "DASHBOARD_MARKDOWN": {
-    "dynamic": false,
-    "properties": {
-      "description": {
-        "type": "text"
-      },
-      "links": {
-        "dynamic": false,
-        "properties": {}
-      },
-      "title": {
-        "type": "text"
-      }
-    }
-  },
   "action": {
     "dynamic": false,
     "properties": {
@@ -3006,6 +2991,20 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
