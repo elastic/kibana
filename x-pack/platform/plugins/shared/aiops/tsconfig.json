@@ -83,6 +83,9 @@
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/esql-utils",
+    "@kbn/discover-utils",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",
