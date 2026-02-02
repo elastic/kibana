@@ -107,12 +107,18 @@ export const DimensionsSelector = ({
         key: dimension.name,
       };
     });
-    // Sort so that selected options appear first
-    return sortBy(mappedOptions, (option) => (option.checked === 'on' ? 0 : 1));
+    
+    return sortBy(mappedOptions, (option) => {
+      if (option.checked === 'on') {
+        const selectionIndex = localSelection.findIndex((dim) => dim.name === option.value);
+        return selectionIndex !== -1 ? selectionIndex : Infinity;
+      }
+      return Infinity;
+    });
   }, [
     dimensions,
     selectedNamesSet,
-    localSelection.length,
+    localSelection,
     intersectingDimensions,
     singleSelection,
   ]);
@@ -121,12 +127,14 @@ export const DimensionsSelector = ({
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      const selectedValues = new Set(opts.map((p) => p.value));
-      const newSelection = dimensions.filter((d) => selectedValues.has(d.name));
-      // Enforce the maximum limit
-      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
+      const dimensionMap = new Map(dimensions.map((d) => [d.name, d]));
+      
+      const newSelection = opts
+        .map((opt) => dimensionMap.get(opt.value))
+        .filter((d): d is Dimension => d !== undefined)
+        .slice(0, MAX_DIMENSIONS_SELECTIONS);
 
-      handleInputChange(limitedSelection);
+      handleInputChange(newSelection);
     },
     [dimensions, handleInputChange]
   );
