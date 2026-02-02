@@ -8,13 +8,10 @@ import { dateRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { transformHealthSchema } from '../../schema/health';
 
-const postHealthScanParamsSchema = t.type({
-  body: t.union([
-    t.undefined,
-    t.partial({
-      force: toBooleanRt,
-    }),
-  ]),
+const postHealthScanParamsSchema = t.partial({
+  body: t.partial({
+    force: toBooleanRt,
+  }),
 });
 
 interface PostHealthScanResponse {
@@ -26,20 +23,21 @@ interface PostHealthScanResponse {
   error?: string;
 }
 
-const getHealthScanParamsSchema = t.type({
-  path: t.type({
-    scanId: t.string,
+const getHealthScanParamsSchema = t.intersection([
+  t.type({
+    path: t.type({
+      scanId: t.string,
+    }),
   }),
-  query: t.union([
-    t.undefined,
-    t.partial({
+  t.partial({
+    query: t.partial({
       size: toNumberRt,
       searchAfter: t.string,
       problematic: toBooleanRt,
       allSpaces: toBooleanRt,
     }),
-  ]),
-});
+  }),
+]);
 
 const listHealthScanParamsSchema = t.partial({
   query: t.partial({

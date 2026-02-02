@@ -34,7 +34,7 @@ export const postHealthScanRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 
-    return scheduleHealthScan({ force: params.body?.force }, { taskManager, request });
+    return scheduleHealthScan({ force: params?.body?.force }, { taskManager, request });
   },
 });
 
