@@ -14,19 +14,25 @@ import {
   EuiModalHeaderTitle,
   EuiText,
   EuiTextColor,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { RequestCodeBlock } from '../components';
-import { SHOW_REQUEST_MODAL_SUBTITLE, SHOW_REQUEST_MODAL_TITLE } from '../translations';
+import {
+  SHOW_REQUEST_MODAL_SUBTITLE,
+  SHOW_REQUEST_MODAL_TITLE,
+  SHOW_REQUEST_MODAL_CREATE_TAB,
+  SHOW_REQUEST_MODAL_UPDATE_TAB,
+} from '../translations';
 import { useRuleFormScreenContext } from '../hooks';
+import type { ShowRequestActivePage } from '../types';
+import { useRuleFormState } from '../hooks';
 
-export interface RulePageShowRequestModalProps {
-  isEdit?: boolean;
-}
-
-export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) => {
-  const { isEdit = false } = props;
+export const RulePageShowRequestModal = () => {
   const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
+  const [activeTab, setActiveTab] = useState<ShowRequestActivePage>('create');
+  const { id } = useRuleFormState();
 
   const onClose = useCallback(() => {
     setIsShowRequestScreenVisible(false);
@@ -42,20 +48,43 @@ export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) =
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle id="showRequestModal" data-test-subj="modalHeaderTitle">
-              {SHOW_REQUEST_MODAL_TITLE(isEdit)}
+              {SHOW_REQUEST_MODAL_TITLE(activeTab)}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText data-test-subj="modalSubtitle">
               <p>
-                <EuiTextColor color="subdued">{SHOW_REQUEST_MODAL_SUBTITLE(isEdit)}</EuiTextColor>
+                <EuiTextColor color="subdued">
+                  {SHOW_REQUEST_MODAL_SUBTITLE(activeTab)}
+                </EuiTextColor>
               </p>
             </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiTabs>
+              <EuiTab
+                isSelected={activeTab === 'create'}
+                onClick={() => setActiveTab('create')}
+                data-test-subj="showRequestCreateTab"
+              >
+                {SHOW_REQUEST_MODAL_CREATE_TAB}
+              </EuiTab>
+              {id && (
+                <EuiTab
+                  isSelected={activeTab === 'update'}
+                  onClick={() => setActiveTab('update')}
+                  data-test-subj="showRequestUpdateTab"
+                >
+                  {SHOW_REQUEST_MODAL_UPDATE_TAB}
+                </EuiTab>
+              )}
+            </EuiTabs>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        <RequestCodeBlock isEdit={isEdit} data-test-subj="modalRequestCodeBlock" />
+        <RequestCodeBlock data-test-subj="modalRequestCodeBlock" activeTab={activeTab} />
       </EuiModalBody>
     </EuiModal>
   );
