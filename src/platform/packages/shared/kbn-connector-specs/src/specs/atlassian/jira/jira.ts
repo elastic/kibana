@@ -16,7 +16,24 @@ export const JiraConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
   auth: {
-    types: ['basic'],
+    types: [
+      {
+        type: 'basic',
+        defaults: {},
+        overrides: {
+          meta: {
+            password: {
+              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
+                defaultMessage: 'API key',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
+                defaultMessage: 'Your Jira API token',
+              }),
+            },
+          },
+        },
+      },
+    ],
   },
   schema: z.object({
     subdomain: z
