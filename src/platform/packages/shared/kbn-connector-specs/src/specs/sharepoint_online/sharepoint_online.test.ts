@@ -644,9 +644,6 @@ describe('SharepointOnline', () => {
             select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
-          headers: {
-            Prefer: 'odata.include-annotations="*"',
-          },
         }
       );
       expect(result).toEqual(mockResponse.data);
@@ -669,9 +666,6 @@ describe('SharepointOnline', () => {
           params: {
             select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
-          },
-          headers: {
-            Prefer: 'odata.include-annotations="*"',
           },
         }
       );
