@@ -18,9 +18,10 @@ import {
   useGeneratedHtmlId,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { MetricField } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
@@ -43,6 +44,10 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
   const flyoutWidthRef = useRef(flyoutWidth ?? defaultWidth);
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
   const { fieldsMetadata = {} } = useFieldsMetadataContext();
+
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
 
   const metricFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'metricFlyoutTitle',

@@ -187,83 +187,77 @@ interface ChartItemProps
 }
 
 const ChartItem = React.memo(
-  React.forwardRef<HTMLDivElement, ChartItemProps>(
-    (
-      {
-        id,
-        metric,
-        index,
-        size,
-        dimensions,
-        services,
-        onBrushEnd,
-        onFilter,
-        actions,
-        fetchParams,
-        discoverFetch$,
-        rowIndex,
-        colIndex,
-        isFocused,
-        searchTerm,
-        whereStatements,
-        onFocusCell,
-        onViewDetails,
-      }: ChartItemProps,
-      ref
-    ) => {
-      const { euiTheme } = useEuiTheme();
-      const colorPalette = useMemo(
-        () => Object.values(euiTheme.colors.vis).slice(0, 10),
-        [euiTheme.colors.vis]
-      );
+  ({
+    id,
+    metric,
+    index,
+    size,
+    dimensions,
+    services,
+    onBrushEnd,
+    onFilter,
+    actions,
+    fetchParams,
+    discoverFetch$,
+    rowIndex,
+    colIndex,
+    isFocused,
+    searchTerm,
+    whereStatements,
+    onFocusCell,
+    onViewDetails,
+  }: ChartItemProps) => {
+    const { euiTheme } = useEuiTheme();
+    const colorPalette = useMemo(
+      () => Object.values(euiTheme.colors.vis).slice(0, 10),
+      [euiTheme.colors.vis]
+    );
 
-      const esqlQuery = useMemo(() => {
-        const isSupported = metric.type !== 'unsigned_long';
-        return isSupported
-          ? createESQLQuery({
-              metric,
-              splitAccessors: dimensions.map((dim) => dim.name),
-              whereStatements,
-            })
-          : '';
-      }, [metric, dimensions, whereStatements]);
+    const esqlQuery = useMemo(() => {
+      const isSupported = metric.type !== 'unsigned_long';
+      return isSupported
+        ? createESQLQuery({
+            metric,
+            splitAccessors: dimensions.map((dim) => dim.name),
+            whereStatements,
+          })
+        : '';
+    }, [metric, dimensions, whereStatements]);
 
-      const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-      const chartLayers = useChartLayers({ dimensions, metric, color });
-      const handleViewDetailsCallback = useCallback(
-        () => onViewDetails(index, esqlQuery, metric),
-        [index, esqlQuery, metric, onViewDetails]
-      );
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
+    const chartLayers = useChartLayers({ dimensions, metric, color });
+    const handleViewDetailsCallback = useCallback(
+      () => onViewDetails(index, esqlQuery, metric),
+      [index, esqlQuery, metric, onViewDetails]
+    );
 
-      return (
-        <A11yGridCell
-          id={id}
-          ref={ref}
-          rowIndex={rowIndex}
-          colIndex={colIndex}
-          index={index}
-          isFocused={isFocused}
-          onFocus={onFocusCell}
-        >
-          <Chart
-            esqlQuery={esqlQuery}
-            size={size}
-            discoverFetch$={discoverFetch$}
-            fetchParams={fetchParams}
-            services={services}
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-            onExploreInDiscoverTab={actions.openInNewTab}
-            onViewDetails={handleViewDetailsCallback}
-            title={metric.name}
-            chartLayers={chartLayers}
-            titleHighlight={searchTerm}
-            extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
-          />
-        </A11yGridCell>
-      );
-    }
-  )
+    return (
+      <A11yGridCell
+        id={id}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
+        index={index}
+        isFocused={isFocused}
+        onFocus={onFocusCell}
+      >
+        <Chart
+          esqlQuery={esqlQuery}
+          size={size}
+          discoverFetch$={discoverFetch$}
+          fetchParams={fetchParams}
+          services={services}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          onExploreInDiscoverTab={actions.openInNewTab}
+          onViewDetails={handleViewDetailsCallback}
+          title={metric.name}
+          chartLayers={chartLayers}
+          titleHighlight={searchTerm}
+          extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+        />
+      </A11yGridCell>
+    );
+  }
 );
 
 ChartItem.displayName = 'ChartItem';
