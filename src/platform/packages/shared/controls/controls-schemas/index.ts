@@ -10,7 +10,6 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
-  ControlsGroupState,
   ControlState,
   ControlWidth,
   DataControlState,
@@ -22,8 +21,7 @@ export type {
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,
-  PinnedControlLayoutState,
-  PinnedControlState,
+  ControlsGroupState,
   RangeSliderControlState,
   RangeSliderValue,
   TimeSlice,

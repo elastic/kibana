@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState, PinnedControlState } from '@kbn/controls-schemas';
-import { transformControlGroupIn } from './transform_control_group_in';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../../kibana_services', () => ({
   },
 }));
 
-describe('transformControlGroupIn', () => {
+describe(' transformPinnedPanelsIn', () => {
   const mockControlsGroupState: ControlsGroupState = [
     {
       uid: 'control1',
@@ -29,53 +29,44 @@ describe('transformControlGroupIn', () => {
       width: CONTROL_WIDTH_SMALL,
       config: { bizz: 'buzz' },
       grow: false,
-    } as unknown as PinnedControlState,
+    } as unknown as ControlsGroupState[number],
     {
       type: 'type2',
       grow: true,
       width: CONTROL_WIDTH_SMALL,
       config: { boo: 'bear' },
-    } as unknown as PinnedControlState,
+    } as unknown as ControlsGroupState[number],
   ];
 
   it('should return empty references if controlsGroupState is undefined', () => {
-    const result = transformControlGroupIn(undefined);
+    const result = transformPinnedPanelsIn(undefined);
     expect(result.references).toEqual([]);
   });
 
   it('should transform controlsGroupState correctly', () => {
-    const result = transformControlGroupIn(mockControlsGroupState);
+    const result = transformPinnedPanelsIn(mockControlsGroupState);
 
-    expect(result.controlsJSON).toEqual(
-      JSON.stringify({
-        control1: {
-          order: 0,
-          type: 'type1',
-          width: 'small',
-          grow: false,
-          explicitInput: { bizz: 'buzz' },
-        },
-        'mock-uuid': {
-          order: 1,
-          type: 'type2',
-          width: 'small',
-          grow: true,
-          explicitInput: { boo: 'bear' },
-        },
-      })
-    );
+    expect(result.pinnedPanels).toEqual({
+      control1: {
+        order: 0,
+        type: 'type1',
+        width: 'small',
+        grow: false,
+        explicitInput: { bizz: 'buzz' },
+      },
+      'mock-uuid': {
+        order: 1,
+        type: 'type2',
+        width: 'small',
+        grow: true,
+        explicitInput: { boo: 'bear' },
+      },
+    });
   });
 
   it('should handle empty controls array', () => {
     const controlsGroupState: ControlsGroupState = [];
-
-    const result = transformControlGroupIn(controlsGroupState);
-
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "controlsJSON": "{}",
-        "references": Array [],
-      }
-    `);
+    const result = transformPinnedPanelsIn(controlsGroupState);
+    expect(result).toEqual({ pinnedPanels: {}, references: [] });
   });
 });

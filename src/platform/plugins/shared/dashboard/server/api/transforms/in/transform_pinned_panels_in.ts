@@ -17,12 +17,12 @@ import type { ControlsGroupState, LegacyStoredPinnedControlState } from '@kbn/co
 import { prefixReferencesFromPanel } from '../../../../common';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformControlGroupIn(controls?: ControlsGroupState) {
-  if (!controls) return { references: [] };
+export function transformPinnedPanelsIn(pinnedPanels?: ControlsGroupState) {
+  if (!pinnedPanels) return { references: [] };
 
   let references: Reference[] = [];
-  const updatedControls = Object.fromEntries(
-    controls.map((controlState, index) => {
+  const updatedPinnedPanels = Object.fromEntries(
+    pinnedPanels.map((controlState, index) => {
       const { uid = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
@@ -77,7 +77,7 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
   );
 
   return {
-    controls: updatedControls,
+    pinnedPanels: updatedPinnedPanels,
     references,
   };
 }

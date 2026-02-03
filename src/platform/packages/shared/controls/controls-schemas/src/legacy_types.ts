@@ -10,7 +10,9 @@
 import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 /**
- * These values only exist for control saved objects prior to version 9.4
+ * These values only exist for control saved objects prior to version 9.4.
+ * They should remain isolated and not rely on other imported types, since
+ * they should never change.
  */
 
 export interface LegacyStoredPinnedControlState {

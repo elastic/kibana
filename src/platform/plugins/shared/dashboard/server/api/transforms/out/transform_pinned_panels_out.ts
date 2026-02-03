@@ -25,7 +25,7 @@ import { embeddableService, logger } from '../../../kibana_services';
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformPinnedPanelsOut(
-  controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'],
+  controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
   containerReferences: Reference[]
 ): DashboardState['pinned_panels'] {
@@ -85,16 +85,16 @@ export function transformPinnedPanelsOut(
 /**
  * The SO stores pinned panel as an object with `order` while the Dashboard API expects an array
  */
-function transformPinnedPanelsObjectToArray(
+export function transformPinnedPanelsObjectToArray(
   controls: StoredPinnedPanels
 ): Array<StoredPinnedPanels[string] & { id: string }> {
   return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
 }
 
 /**
- * The SO stores the panel config under `explicitInput`
+ * <9.4 The SO stores the panel config under `explicitInput`
  */
-function transformLegacyPinnedPanelProperties(
+export function transformLegacyPinnedPanelProperties(
   controls: Array<StoredPinnedPanels[string] & { id: string }>
 ): PinnedPanelsState {
   return controls

@@ -13,12 +13,13 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import type { StoredPinnedControls } from '@kbn/controls-schemas';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import {
-  transformControlObjectToArray,
-  transformControlProperties,
-  transformLegacyControlsState,
-} from './transform_controls_state';
+  transformLegacyPinnedPanelProperties,
+  transformPinnedPanelsObjectToArray,
+  transformPinnedPanelsOut,
+} from './transform_pinned_panels_out';
+import type { DashboardState } from '../../types';
 
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
@@ -27,8 +28,8 @@ jest.mock('../../../kibana_services', () => ({
   },
 }));
 
-describe('control_state', () => {
-  const mockControls = {
+describe('pinned panels', () => {
+  const mockPinnedPanels = {
     control1: {
       id: 'control1',
       type: 'optionsListControl',
@@ -51,22 +52,52 @@ describe('control_state', () => {
       unsupportedProperty: 'unsupported',
       order: 2,
     },
-  } as StoredPinnedControls;
+  } as Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
-  describe('transformControlObjectToArray', () => {
-    it('should transform control object to array', () => {
-      const result = transformControlObjectToArray(mockControls);
-      expect(result).toHaveLength(3);
-      expect(result).toHaveProperty('0.id', 'control1');
-      expect(result).toHaveProperty('1.id', 'control2');
-      expect(result).toHaveProperty('2.id', 'control3');
-    });
+  const transformedPinnedPanels = [
+    {
+      uid: 'control1',
+      type: OPTIONS_LIST_CONTROL,
+      width: DEFAULT_CONTROL_WIDTH,
+      config: {
+        foo: 'bar',
+      },
+    },
+    {
+      uid: 'control2',
+      type: RANGE_SLIDER_CONTROL,
+      width: 'small',
+      config: {
+        bizz: 'buzz',
+      },
+    },
+    {
+      uid: 'control3',
+      type: ESQL_CONTROL,
+      grow: true,
+      config: {
+        boo: 'bear',
+      },
+    },
+  ] as unknown as DashboardState['pinned_panels'];
+
+  it('should transform pinned panels object to array with all transformations applied', () => {
+    const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
+    expect(result).toEqual(transformedPinnedPanels);
   });
 
-  describe('transformControlExplicitInput', () => {
+  it('should transform pinned panels object to array', () => {
+    const result = transformPinnedPanelsObjectToArray(mockPinnedPanels);
+    expect(result).toHaveLength(3);
+    expect(result).toHaveProperty('0.id', 'control1');
+    expect(result).toHaveProperty('1.id', 'control2');
+    expect(result).toHaveProperty('2.id', 'control3');
+  });
+
+  describe('transform <9.4 legacy controls', () => {
     it('should transform controls explicit input', () => {
-      const controlsArray = transformControlObjectToArray(mockControls);
-      const result = transformControlProperties(controlsArray);
+      const controlsArray = transformPinnedPanelsObjectToArray(mockPinnedPanels);
+      const result = transformLegacyPinnedPanelProperties(controlsArray);
 
       expect(result).toHaveProperty('0.config.foo', 'bar');
       expect(result).not.toHaveProperty('0.explicitInput');
@@ -79,38 +110,11 @@ describe('control_state', () => {
       expect(result).not.toHaveProperty('2.unsupportedProperty');
       expect(result).not.toHaveProperty('2.config.unsupportedProperty');
     });
-  });
 
-  describe('transformControlsState', () => {
     it('should transform serialized control state to array with all transformations applied', () => {
-      const serializedControlState = JSON.stringify(mockControls);
-      const result = transformLegacyControlsState(serializedControlState, []);
-      expect(result).toEqual([
-        {
-          uid: 'control1',
-          type: OPTIONS_LIST_CONTROL,
-          width: DEFAULT_CONTROL_WIDTH,
-          config: {
-            foo: 'bar',
-          },
-        },
-        {
-          uid: 'control2',
-          type: RANGE_SLIDER_CONTROL,
-          width: 'small',
-          config: {
-            bizz: 'buzz',
-          },
-        },
-        {
-          uid: 'control3',
-          type: ESQL_CONTROL,
-          grow: true,
-          config: {
-            boo: 'bear',
-          },
-        },
-      ]);
+      const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
+      const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
+      expect(result).toEqual(transformedPinnedPanels);
     });
   });
 });
