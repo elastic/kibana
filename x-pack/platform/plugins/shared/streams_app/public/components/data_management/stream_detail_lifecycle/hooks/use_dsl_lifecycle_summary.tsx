@@ -35,11 +35,11 @@ export const useDslLifecycleSummary = ({
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 
-  const isDsl = isDslLifecycle(definition.effective_lifecycle);
+  const effectiveLifecycle = definition.effective_lifecycle;
+  const isDsl = isDslLifecycle(effectiveLifecycle);
 
   const getPhases = (): LifecyclePhase[] => {
-    const effectiveLifecycle = definition.effective_lifecycle;
-    if (!isDslLifecycle(effectiveLifecycle)) {
+    if (!isDsl) {
       return [];
     }
 
@@ -65,9 +65,7 @@ export const useDslLifecycleSummary = ({
     });
   };
 
-  const downsampleSteps = isDslLifecycle(definition.effective_lifecycle)
-    ? definition.effective_lifecycle.dsl.downsample
-    : undefined;
+  const downsampleSteps = isDsl ? effectiveLifecycle.dsl.downsample : undefined;
 
   return {
     phases: getPhases(),
