@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
+
 /**
  * Expected Kibana access configuration for Elasticsearch built-in roles.
  *
@@ -55,7 +57,7 @@
  */
 export const EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS: Record<
   string,
-  { applications: Array<{ application: string; privileges: string[]; resources: string[] }> }
+  { applications: ElasticsearchRoleDescriptor['applications'] }
 > = {
   // ==========================================================================
   // Core Kibana Roles

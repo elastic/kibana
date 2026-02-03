@@ -12,6 +12,7 @@ import type {
   SecurityGetRoleRole,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
 import { apiTest, expect } from '@kbn/scout';
 
 import { EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS } from '../fixtures/expected_builtin_roles_kibana_access';
@@ -44,8 +45,8 @@ function extractKibanaApplications(
  */
 function buildBuiltinRolesKibanaAccessMap(
   rolesResponse: SecurityGetRoleResponse
-): Record<string, Pick<SecurityGetRoleRole, 'applications'>> {
-  const result: Record<string, Pick<SecurityGetRoleRole, 'applications'>> = {};
+): Record<string, { applications: ElasticsearchRoleDescriptor['applications'] }> {
+  const result: Record<string, { applications: ElasticsearchRoleDescriptor['applications'] }> = {};
 
   for (const [roleName, role] of Object.entries(rolesResponse)) {
     // Only include built-in (reserved) roles
@@ -70,15 +71,15 @@ function buildBuiltinRolesKibanaAccessMap(
  * Compares two role access maps and returns detailed differences.
  */
 function compareRoleAccessMaps(
-  actual: Record<string, SecurityGetRoleRole['applications']>,
-  expected: Record<string, SecurityGetRoleRole['applications']>
+  actual: Record<string, { applications: ElasticsearchRoleDescriptor['applications'] }>,
+  expected: Record<string, { applications: ElasticsearchRoleDescriptor['applications'] }>
 ): {
   addedRoles: string[];
   removedRoles: string[];
   changedRoles: Array<{
     roleName: string;
-    actual: SecurityGetRoleRole['applications'];
-    expected: SecurityGetRoleRole['applications'];
+    actual: { applications: ElasticsearchRoleDescriptor['applications'] };
+    expected: { applications: ElasticsearchRoleDescriptor['applications'] };
   }>;
 } {
   const actualRoleNames = new Set(Object.keys(actual));
@@ -89,8 +90,8 @@ function compareRoleAccessMaps(
 
   const changedRoles: Array<{
     roleName: string;
-    actual: SecurityGetRoleRole['applications'];
-    expected: SecurityGetRoleRole['applications'];
+    actual: { applications: ElasticsearchRoleDescriptor['applications'] };
+    expected: { applications: ElasticsearchRoleDescriptor['applications'] };
   }> = [];
 
   // Check for roles that exist in both but have different access
@@ -118,48 +119,6 @@ function compareRoleAccessMaps(
   return { addedRoles, removedRoles, changedRoles };
 }
 
-/**
- * Formats the differences for error messages.
- */
-function formatDifferences(differences: {
-  addedRoles: string[];
-  removedRoles: string[];
-  changedRoles: Array<{
-    roleName: string;
-    actual: SecurityGetRoleRole['applications'];
-    expected: SecurityGetRoleRole['applications'];
-  }>;
-}): string {
-  const lines: string[] = [];
-
-  if (differences.addedRoles.length > 0) {
-    lines.push('NEW ROLES WITH KIBANA ACCESS (not in expected list):');
-    for (const roleName of differences.addedRoles) {
-      lines.push(`  - ${roleName}`);
-    }
-    lines.push('');
-  }
-
-  if (differences.removedRoles.length > 0) {
-    lines.push('REMOVED ROLES (expected but not found):');
-    for (const roleName of differences.removedRoles) {
-      lines.push(`  - ${roleName}`);
-    }
-    lines.push('');
-  }
-
-  if (differences.changedRoles.length > 0) {
-    lines.push('CHANGED ROLES (different Kibana access than expected):');
-    for (const { roleName, actual, expected } of differences.changedRoles) {
-      lines.push(`  - ${roleName}:`);
-      lines.push(`    Expected: ${JSON.stringify(expected, null, 2).split('\n').join('\n    ')}`);
-      lines.push(`    Actual:   ${JSON.stringify(actual, null, 2).split('\n').join('\n    ')}`);
-    }
-  }
-
-  return lines.join('\n');
-}
-
 apiTest.describe('Built-in roles Kibana access validation', { tag: ['@ess'] }, () => {
   apiTest(
     'should have expected Kibana access for all built-in roles',
@@ -179,43 +138,15 @@ apiTest.describe('Built-in roles Kibana access validation', { tag: ['@ess'] }, (
 
       // Compare with expected roles
       const differences = compareRoleAccessMaps(
-        Object.fromEntries(
-          Object.entries(actualBuiltinRolesWithKibanaAccess).map(([key, value]) => [
-            key,
-            value.applications,
-          ])
-        ),
-        Object.fromEntries(
-          Object.entries(EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS).map(([key, value]) => [
-            key,
-            value.applications,
-          ])
-        )
+        actualBuiltinRolesWithKibanaAccess,
+        EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS
       );
 
-      const hasDifferences =
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        differences.addedRoles.length > 0 ||
-        differences.removedRoles.length > 0 ||
-        differences.changedRoles.length > 0;
-
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      const errorMessage = hasDifferences ? formatDifferences(differences) : '';
-
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (hasDifferences) {
-        log.error('Built-in roles Kibana access has changed:\n' + errorMessage);
-
-        // Provide guidance on how to update
-        log.info(
-          '\nIf these changes are expected, update the EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS ' +
-            'in expected_builtin_roles_kibana_access.ts with the new values.\n' +
-            '\nTo get the current state, you can log actualBuiltinRolesWithKibanaAccess:\n' +
-            JSON.stringify(actualBuiltinRolesWithKibanaAccess, null, 2)
-        );
-      }
-
-      expect(hasDifferences, errorMessage).toBe(false);
+      expect(differences).toStrictEqual({
+        addedRoles: [],
+        removedRoles: [],
+        changedRoles: [],
+      });
     }
   );
 
