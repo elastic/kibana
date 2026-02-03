@@ -111,44 +111,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="machineLearningApp" />}
-                    titleSize="s"
-                    title={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.chatWithYourDataLabel',
-                      { defaultMessage: 'Chat with your data' }
-                    )}
-                    description={i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.chatWithYourDataDescriptionl',
-                      {
-                        defaultMessage:
-                          'Combine your data with the power of LLMs for retrieval augmented generation (RAG)',
-                      }
-                    )}
-                    footer={
-                      !showNext && (
-                        <EuiButton
-                          data-test-subj="enterpriseSearchFinishUpStepButton"
-                          color="warning"
-                          iconSide="left"
-                          iconType="refresh"
-                          isLoading={isSyncing}
-                          aria-label={i18n.translate(
-                            'xpack.enterpriseSearch.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
-                            { defaultMessage: 'First sync data' }
-                          )}
-                          onClick={() => {
-                            startSync(connector);
-                            setShowNext(true);
-                          }}
-                        >
-                          {isSyncing ? 'Syncing data' : 'First sync data'}
-                        </EuiButton>
-                      )
-                    }
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
                     titleSize="s"
                     title={i18n.translate(
