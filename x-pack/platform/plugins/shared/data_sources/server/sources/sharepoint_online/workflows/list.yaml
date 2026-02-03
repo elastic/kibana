@@ -1,0 +1,83 @@
+version: '1'
+name: 'sources.sharepoint.list'
+description: 'List/fetch SharePoint resources. Actions: getAllSites, getSite, getSitePages, getSiteDrives, getSiteLists, getSiteListItems, getDriveItems.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "getAllSites"
+      - "getSite"
+      - "getSitePages"
+      - "getSiteDrives"
+      - "getSiteLists"
+      - "getSiteListItems"
+      - "getDriveItems"
+  - name: site_id
+    type: string
+    required: false
+  - name: relative_url
+    type: string
+    required: false
+  - name: list_id
+    type: string
+    required: false
+  - name: drive_id
+    type: string
+    required: false
+  - name: path
+    type: string
+    required: false
+steps:
+  - name: get-all-sites
+    type: sharepoint-online.getAllSites
+    if: "${{ inputs.list_action == 'getAllSites' }}"
+    connector-id: <%= stackConnectorId %>
+    with: {}
+  - name: get-site-by-id
+    type: sharepoint-online.getSite
+    if: "${{ inputs.list_action == 'getSite' and inputs.site_id }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+  - name: get-site-by-relative-url
+    type: sharepoint-online.getSite
+    if: "${{ inputs.list_action == 'getSite' and inputs.relative_url }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      relativeUrl: "${{ inputs.relative_url }}"
+  - name: get-site-pages
+    type: sharepoint-online.getSitePages
+    if: "${{ inputs.list_action == 'getSitePages' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+  - name: get-site-drives
+    type: sharepoint-online.getSiteDrives
+    if: "${{ inputs.list_action == 'getSiteDrives' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+  - name: get-site-lists
+    type: sharepoint-online.getSiteLists
+    if: "${{ inputs.list_action == 'getSiteLists' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+  - name: get-site-list-items
+    type: sharepoint-online.getSiteListItems
+    if: "${{ inputs.list_action == 'getSiteListItems' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+      listId: "${{ inputs.list_id }}"
+  - name: get-drive-items
+    type: sharepoint-online.getDriveItems
+    if: "${{ inputs.list_action == 'getDriveItems' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      driveId: "${{ inputs.drive_id }}"
+      path: "${{ inputs.path }}"

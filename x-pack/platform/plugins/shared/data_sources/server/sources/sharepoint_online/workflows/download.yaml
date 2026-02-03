@@ -1,0 +1,50 @@
+version: '1'
+name: 'sources.sharepoint.download'
+description: 'Download SharePoint content. Actions: downloadDriveItem, downloadItemFromURL, getSitePageContents.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: download_action
+    type: choice
+    options:
+      - "downloadDriveItem"
+      - "downloadItemFromURL"
+      - "getSitePageContents"
+  - name: site_id
+    type: string
+    required: false
+  - name: page_id
+    type: string
+    required: false
+  - name: drive_id
+    type: string
+    required: false
+  - name: item_id
+    type: string
+    required: false
+  - name: download_url
+    type: string
+    required: false
+steps:
+  - name: download-drive-item
+    type: sharepoint-online.downloadDriveItem
+    if: "${{ inputs.download_action == 'downloadDriveItem' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      driveId: "${{ inputs.drive_id }}"
+      itemId: "${{ inputs.item_id }}"
+  - name: download-item-from-url
+    type: sharepoint-online.downloadItemFromURL
+    if: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      downloadUrl: "${{ inputs.download_url }}"
+  - name: get-site-page-contents
+    type: sharepoint-online.getSitePageContents
+    if: "${{ inputs.download_action == 'getSitePageContents' }}"
+    connector-id: <%= stackConnectorId %>
+    with:
+      siteId: "${{ inputs.site_id }}"
+      pageId: "${{ inputs.page_id }}"

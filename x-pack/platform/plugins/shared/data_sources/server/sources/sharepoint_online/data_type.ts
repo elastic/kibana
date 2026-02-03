@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import {
-  generateSharepointDownloadWorkflow,
-  generateSharepointListWorkflow,
-  generateSharepointSearchWorkflow,
-} from './workflows';
-
 export const sharepointOnlineDataSource: DataSource = {
   id: 'sharepoint-online',
   name: 'SharePoint Online',
@@ -27,11 +21,7 @@ export const sharepointOnlineDataSource: DataSource = {
     config: {},
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      { content: generateSharepointListWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateSharepointDownloadWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      { content: generateSharepointSearchWorkflow(stackConnectorId), shouldGenerateABTool: true },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };
