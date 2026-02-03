@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/common/ai_assistant_type';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
