@@ -6,6 +6,7 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
@@ -29,6 +30,10 @@ interface BulkActionsValidationArgs {
   mlAuthz: MlAuthz;
 }
 
+interface BulkEnableDisableActionValidationArgs extends BulkActionsValidationArgs {
+  rulesAuthz: DetectionRulesAuthz;
+}
+
 /**
  * throws ML authorization error wrapped with MACHINE_LEARNING_AUTH error code
  * @param mlAuthz - {@link MlAuthz}
@@ -40,20 +45,61 @@ const throwMlAuthError = (mlAuthz: MlAuthz, ruleType: RuleType) =>
     BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH
   );
 
+const throwRulesAuthError = (
+  rulesAuthz: DetectionRulesAuthz,
+  editActions: BulkActionEditPayload[]
+) => {
+  if (
+    editActions.some(
+      (action) =>
+        action.type === 'add_investigation_fields' ||
+        action.type === 'set_investigation_fields' ||
+        action.type === 'delete_investigation_fields'
+    )
+  ) {
+    throwDryRunError(
+      () =>
+        invariant(
+          rulesAuthz.canEditCustomHighlightedFields,
+          'User does not have permission to edit custom highlighted fields'
+        ),
+      BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
+    );
+  }
+};
+
 /**
  * runs validation for bulk enable for a single rule
  * @param params - {@link BulkActionsValidationArgs}
  */
-export const validateBulkEnableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
+export const validateBulkEnableRule = async ({
+  rule,
+  mlAuthz,
+  rulesAuthz,
+}: BulkEnableDisableActionValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
+  throwDryRunError(
+    () =>
+      invariant(rulesAuthz.canEnableDisableRules, 'User does not have permission to enable rules'),
+    BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
+  );
 };
 
 /**
  * runs validation for bulk disable for a single rule
  * @param params - {@link BulkActionsValidationArgs}
  */
-export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
+export const validateBulkDisableRule = async ({
+  rule,
+  mlAuthz,
+  rulesAuthz,
+}: BulkEnableDisableActionValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
+  throwDryRunError(
+    () =>
+      invariant(rulesAuthz.canEnableDisableRules, 'User does not have permission to disable rules'),
+    BulkActionsDryRunErrCodeEnum.USER_INSUFFICIENT_RULE_PRIVILEGES
+  );
 };
 
 /**
@@ -89,6 +135,7 @@ export const validateBulkRuleGapFilling = async ({ rule }: BulkActionsValidation
 interface BulkEditBulkActionsValidationArgs {
   ruleType: RuleType;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
   edit: BulkActionEditPayload[];
   immutable: boolean;
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
@@ -100,11 +147,13 @@ interface BulkEditBulkActionsValidationArgs {
 export const validateBulkEditRule = async ({
   ruleType,
   mlAuthz,
+  rulesAuthz,
   edit,
   immutable,
   ruleCustomizationStatus,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
+  throwRulesAuthError(rulesAuthz, edit);
 
   // Prebuilt rule customization checks
   if (immutable) {
@@ -138,6 +187,7 @@ const isEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean
 interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
   edit: BulkActionEditPayload[];
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
@@ -149,11 +199,13 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  rulesAuthz,
   ruleCustomizationStatus,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
     mlAuthz,
+    rulesAuthz,
     edit,
     immutable: rule.params.immutable,
     ruleCustomizationStatus,

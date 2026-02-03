@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -18,6 +19,7 @@ interface BulkEnableDisableRulesArgs {
   isDryRun?: boolean;
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
 }
 
 interface BulkEnableDisableRulesOutcome {
@@ -31,6 +33,7 @@ export const bulkEnableDisableRules = async ({
   rulesClient,
   action: operation,
   mlAuthz,
+  rulesAuthz,
 }: BulkEnableDisableRulesArgs): Promise<BulkEnableDisableRulesOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error>> = [];
 
@@ -39,7 +42,7 @@ export const bulkEnableDisableRules = async ({
   await Promise.all(
     rules.map(async (rule) => {
       try {
-        await validateBulkEnableRule({ mlAuthz, rule });
+        await validateBulkEnableRule({ mlAuthz, rule, rulesAuthz });
         validatedRules.push(rule);
       } catch (error) {
         errors.push({ item: rule, error });

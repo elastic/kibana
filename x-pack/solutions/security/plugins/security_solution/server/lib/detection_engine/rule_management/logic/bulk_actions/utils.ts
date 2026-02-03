@@ -12,6 +12,8 @@ import type {
   NormalizedRuleAction,
   ThrottleForBulkActions,
   BulkActionEditPayload,
+  BulkActionEditForRuleParams,
+  BulkActionEditWithReadPrivileges,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
@@ -79,4 +81,26 @@ export const parseAndTransformRuleActions = (
       transformNormalizedRuleToAlertAction
     ),
   ];
+};
+
+/**
+ * Returns a type-safe boolean for bulk edit actions that asserts if all elements are able to be edited with read auth
+ * @param actions
+ * @returns {boolean}
+ */
+export const isOnlyActionsWithReadAuth = (
+  actions: BulkActionEditForRuleParams[]
+): actions is BulkActionEditWithReadPrivileges[] => {
+  for (const action of actions) {
+    if (
+      !(
+        action.type === 'set_investigation_fields' ||
+        action.type === 'delete_investigation_fields' ||
+        action.type === 'add_investigation_fields'
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
 };

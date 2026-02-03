@@ -23,9 +23,7 @@ export const bulkEditParamsOperationSchema = schema.object({
   value: schema.any(),
 });
 
-export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOperationSchema, {
-  minSize: 1,
-});
+export const bulkEditParamsOperationsSchema = schema.arrayOf(bulkEditParamsOperationSchema);
 
 export const bulkEditRuleParamsOptionsSchema = schema.object({
   filter: schema.maybe(schema.string()),
