@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import { v4 as uuid } from 'uuid';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 import {
   type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
@@ -59,7 +59,7 @@ export const upsertFeatureRoute = createServerRoute({
             ...params.body,
             status: 'active' as const,
             last_seen: new Date().toISOString(),
-            id: getFeatureId(params.path.name, params.body),
+            uuid: uuid(),
           },
         },
       },
@@ -70,7 +70,7 @@ export const upsertFeatureRoute = createServerRoute({
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -82,7 +82,7 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), id: z.string() }),
+    path: z.object({ name: z.string(), uuid: z.string() }),
   }),
   handler: async ({
     params,
@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.id);
+    await featureClient.deleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },

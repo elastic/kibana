@@ -13,8 +13,7 @@ import {
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
-import { type AggregateQuery, FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabActionPayload, InternalStateThunkActionCreator } from '../internal_state';
 import { selectTab, selectTabAppState } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -138,27 +137,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
               dataSource: currentDataView?.id
                 ? createDataViewDataSource({ dataViewId: currentDataView.id })
                 : undefined,
-            },
-          })
-        );
-      }
-
-      if (
-        isOfAggregateQueryType(appState.query) &&
-        services.discoverFeatureFlags.getCascadeLayoutEnabled()
-      ) {
-        // on first load if the data cascade layout feature flag is enabled,
-        // we need to set the available cascade groups from the user's query and selected cascade groups
-        const availableCascadeGroups = getESQLStatsQueryMeta(
-          (appState.query as AggregateQuery).esql
-        ).groupByFields.map((group) => group.field);
-
-        dispatch(
-          internalStateActions.setCascadeUiState({
-            tabId,
-            cascadeUiState: {
-              availableCascadeGroups,
-              selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
             },
           })
         );
