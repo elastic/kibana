@@ -10,6 +10,7 @@ import type { FormBasedLayer, GenericIndexPatternColumn, IndexPattern } from '@k
 
 import { generateEsqlQuery } from './generate_esql_query';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
+import { mockDateRange } from './__mocks__/esql_query_mocks';
 
 const mockAggEntries: Array<readonly [string, GenericIndexPatternColumn]> = [
   [
@@ -67,14 +68,7 @@ const mockLayer: FormBasedLayer = {
   indexPatternId: mockIndexPattern.id,
 };
 
-const mockDateRange = {
-  fromDate: '2021-01-01T00:00:00.000Z',
-  toDate: '2021-01-01T23:59:59.999Z',
-};
-
-const mockNowInstant = new Date();
-
-describe('to_esql top N', () => {
+describe('generateEsqlQuery top N', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
@@ -82,14 +76,14 @@ describe('to_esql top N', () => {
 
   // Note: operationDefinitionMap for "terms" does not support toESQL
   // should generate a valid ESQL query for top N terms and average aggregation
-  it('should return failure with function_not_supported reason for top N terms and average aggregation', () => {
+  it('should return failure with terms_not_supported reason for top N terms and average aggregation', () => {
     const result = generateEsqlQuery(
       mockAggEntries,
       mockLayer,
       mockIndexPattern,
       uiSettings,
       mockDateRange,
-      mockNowInstant
+      new Date()
     );
 
     expect(result).toEqual({

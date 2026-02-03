@@ -5,41 +5,21 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
+import {
+  mockLayer,
+  mockIndexPattern,
+  mockIndexPatternWithoutTimeField,
+  mockDateRange,
+} from './__mocks__/esql_query_mocks';
 
 describe('generateEsqlQuery metric max (static_value)', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });
-
-  const layer = {
-    indexPatternId: 'myIndexPattern',
-    columns: {},
-    columnOrder: [],
-  };
-
-  const indexPattern = {
-    title: 'myIndexPattern',
-    timeFieldName: 'order_date',
-    getFieldByName: (field: string) => {
-      if (field === 'records') return undefined;
-      return { name: field };
-    },
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
-  } as unknown as IndexPattern;
-
-  const indexPatternWithoutTimeField = {
-    title: 'myIndexPattern',
-    getFieldByName: (field: string) => {
-      if (field === 'records') return undefined;
-      return { name: field };
-    },
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
-  } as unknown as IndexPattern;
 
   it('should convert static_value columns to EVAL statements', () => {
     const result = generateEsqlQuery(
@@ -79,13 +59,10 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           },
         ],
       ],
-      layer,
-      indexPattern,
+      mockLayer,
+      mockIndexPattern,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -123,13 +100,10 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           },
         ],
       ],
-      layer,
-      indexPatternWithoutTimeField,
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
@@ -171,13 +145,10 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           },
         ],
       ],
-      layer,
-      indexPatternWithoutTimeField,
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date(),
       { 'max-col-id': 'max_value' }
     );
@@ -223,13 +194,10 @@ describe('generateEsqlQuery metric max (static_value)', () => {
           },
         ],
       ],
-      layer,
-      indexPatternWithoutTimeField,
+      mockLayer,
+      mockIndexPatternWithoutTimeField,
       uiSettings,
-      {
-        fromDate: '2021-01-01T00:00:00.000Z',
-        toDate: '2021-01-01T23:59:59.999Z',
-      },
+      mockDateRange,
       new Date()
     );
 
