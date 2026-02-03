@@ -59,6 +59,7 @@ import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
+import { useEsqlEditorActions } from './use_esql_editor_actions';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -259,11 +260,6 @@ const ESQLEditorInternal = function ESQLEditor({
     openVisorOnSourceCommands,
     setIsVisorOpen,
   ]);
-
-  const onToggleVisor = useCallback(() => {
-    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const trimmedQuery = useMemo(() => getTrimmedQuery(code ?? ''), [code]);
 
@@ -696,66 +692,28 @@ const ESQLEditorInternal = function ESQLEditor({
     [onSuggestionsReady, telemetryService]
   );
 
-  const onClickQueryHistory = useCallback(
-    (isOpen: boolean) => {
-      telemetryService.trackQueryHistoryOpened(isOpen);
-      setIsHistoryOpen(isOpen);
-    },
-    [telemetryService, setIsHistoryOpen]
-  );
-
-  const onToggleHistory = useCallback(() => {
-    onClickQueryHistory(!isHistoryOpen);
-  }, [isHistoryOpen, onClickQueryHistory]);
-
-  const onToggleStarredQuery = useCallback(async () => {
-    if (!starredQueriesService || !trimmedQuery) {
-      return;
-    }
-
-    if (starredQueriesService.checkIfQueryIsStarred(trimmedQuery)) {
-      setIsCurrentQueryStarred(false);
-      await starredQueriesService.removeStarredQuery(trimmedQuery);
-      return;
-    }
-
-    setIsCurrentQueryStarred(true);
-    await starredQueriesService.addStarredQuery({
-      queryString: trimmedQuery,
-      status: 'success',
-    });
-  }, [starredQueriesService, trimmedQuery]);
-
-  const onSubmitEsqlQuery = useCallback(
-    (queryString: string) => {
-      onUpdateAndSubmitQuery(queryString, QuerySource.HELP);
-    },
-    [onUpdateAndSubmitQuery]
-  );
-
-  const editorActions = useMemo(
-    () => ({
-      toggleVisor: onToggleVisor,
-      toggleHistory: onToggleHistory,
-      toggleStarredQuery: onToggleStarredQuery,
-      submitEsqlQuery: onSubmitEsqlQuery,
-      isHistoryOpen,
-      isCurrentQueryStarred,
-      canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
-      currentQuery: code,
-    }),
-    [
-      code,
-      isCurrentQueryStarred,
-      isHistoryOpen,
-      onToggleHistory,
-      onSubmitEsqlQuery,
-      onToggleStarredQuery,
-      onToggleVisor,
-      starredQueriesService,
-      trimmedQuery,
-    ]
-  );
+  const {
+    editorActions,
+    onClickQueryHistory,
+    onSubmitEsqlQuery,
+    onToggleHistory,
+    onToggleStarredQuery,
+    onToggleVisor,
+  } = useEsqlEditorActions({
+    code,
+    isHistoryOpen,
+    isCurrentQueryStarred,
+    onUpdateAndSubmitQuery,
+    starredQueriesService,
+    trimmedQuery,
+    hasUserDismissedVisorAutoOpen: Boolean(hasUserDismissedVisorAutoOpen),
+    isVisorOpenRef,
+    setHasUserDismissedVisorAutoOpen,
+    setIsHistoryOpen,
+    setIsCurrentQueryStarred,
+    setIsVisorOpen,
+    trackQueryHistoryOpened: telemetryService.trackQueryHistoryOpened,
+  });
   useEsqlEditorActionsRegistration(editorActions);
 
   const esqlCallbacks = useEsqlCallbacks({
