@@ -5,18 +5,46 @@
  * 2.0.
  */
 
-// @ts-expect-error we don't use @types/mocha so it doesn't conflict with @types/jest
-import Test from 'mocha/lib/test';
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { runConverseTests } from './converse';
-import {
-  EIS_CCM_API_KEY_ENV,
-  enableCcm,
-  discoverEisModels,
-  createEisConnectors,
-  cleanupEisConnectors,
-} from './eis_helpers';
+import { createEisConnectors, cleanupEisConnectors, enableCcm } from './eis_helpers';
+
+/**
+ * Path to pre-discovered EIS models JSON file.
+ * This file is created by running: node scripts/discover_eis_models.js
+ * Stored in repo root target/ directory (standard CI artifact location)
+ */
+const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
+
+/**
+ * Environment variable for EIS CCM API key (set by CI from Vault)
+ */
+const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
+
+interface DiscoveredModel {
+  inferenceId: string;
+  modelId: string;
+}
+
+/**
+ * Reads pre-discovered EIS models from JSON file.
+ * Returns empty array if file doesn't exist (models not discovered yet).
+ */
+const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
+  if (!existsSync(EIS_MODELS_PATH)) {
+    return [];
+  }
+  try {
+    const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8'));
+    return data.models || [];
+  } catch {
+    return [];
+  }
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -25,8 +53,15 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  // Read EIS models SYNCHRONOUSLY at file load time - no async needed!
+  // This allows proper describe/it block creation without dynamic addTest() hacks.
+  const eisModels = getPreDiscoveredEisModels();
+
   describe('Agent Builder - LLM Smoke tests', function () {
-    // Preconfigured connectors from Vault (static - registered synchronously)
+    // =========================================================================
+    // PRECONFIGURED CONNECTOR SMOKE TESTS
+    // Tests connectors configured via Vault (KIBANA_TESTING_AI_CONNECTORS)
+    // =========================================================================
     describe('Preconfigured Connector Smoke Tests', function () {
       this.timeout(300000);
 
@@ -50,74 +85,83 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // =========================================================================
-    // EIS DYNAMIC SMOKE TESTS
-    // Tests are added programmatically using Mocha's addTest() API.
-    // This allows async discovery in before() hook while still getting
-    // individual test entries in the test results.
+    // EIS SMOKE TESTS
+    // Tests all EIS models discovered by the pre-discovery script.
+    // Models are read from target/eis_models.json (created by discover_eis_models.js)
     // =========================================================================
-    describe('EIS Dynamic Smoke Tests', function () {
+    describe('EIS Smoke Tests', function () {
       this.timeout(600000); // 10 min for all EIS model tests
 
-      before(async function () {
-        const apiKey = process.env[EIS_CCM_API_KEY_ENV];
-
-        // Store for cleanup
-        (this as any).createdConnectorIds = [] as string[];
-
-        if (!apiKey) {
+      if (eisModels.length === 0) {
+        it('should skip - no EIS models discovered', function () {
+          log.warning('[EIS] No models in target/eis_models.json');
           log.warning(
-            `[EIS] ${EIS_CCM_API_KEY_ENV} not set - skipping EIS tests.\n` +
-              `For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`
+            '[EIS] Run: node x-pack/platform/test/agent_builder/scripts/discover_eis_models.js'
           );
-          return;
-        }
-
-        // Step 1: Enable CCM
-        await enableCcm(es, apiKey, log);
-
-        // Step 2: Discover EIS models
-        const discovered = await discoverEisModels(es, log);
-        if (discovered.length === 0) return;
-
-        // Step 3: Create connectors
-        const { connectors, connectorIds } = await createEisConnectors(discovered, supertest, log);
-        (this as any).createdConnectorIds = connectorIds;
-
-        // Step 4: Dynamically add tests for each model
-        const suite = this.test!.parent!;
-        for (const model of connectors) {
-          suite.addTest(
-            new Test(`${model.modelId} - should respond to simple message`, async () => {
-              await runConverseTests(model.connectorId, supertest, 'simple');
-            })
-          );
-          suite.addTest(
-            new Test(`${model.modelId} - should execute tools`, async () => {
-              await runConverseTests(model.connectorId, supertest, 'tool');
-            })
-          );
-          suite.addTest(
-            new Test(`${model.modelId} - should continue conversation`, async () => {
-              await runConverseTests(model.connectorId, supertest, 'conversation');
-            })
-          );
-        }
-
-        log.info(`[EIS] Added ${connectors.length * 3} dynamic tests`);
-      });
-
-      after(async function () {
-        const connectorIds = (this as any).createdConnectorIds as string[];
-        await cleanupEisConnectors(connectorIds, supertest, log);
-      });
-
-      // Placeholder test - ensures the suite isn't empty during dry run
-      it('should have EIS tests or skip', function () {
-        if ((this.test!.parent!.tests?.length ?? 0) > 1) {
           this.skip();
+        });
+      } else {
+        // Store connector mappings: modelId -> connectorId
+        const connectorMap = new Map<string, string>();
+        const createdConnectorIds: string[] = [];
+
+        before(async function () {
+          // Enable CCM on FTR's ES instance (discovery used a separate ES)
+          const apiKey = process.env[EIS_CCM_API_KEY_ENV];
+          if (!apiKey) {
+            throw new Error(
+              `${EIS_CCM_API_KEY_ENV} not set. ` +
+                `For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`
+            );
+          }
+          await enableCcm(es, apiKey, log);
+
+          // Create connectors for pre-discovered models
+          log.info(`[EIS] Creating connectors for ${eisModels.length} pre-discovered models...`);
+          const { connectors, connectorIds } = await createEisConnectors(eisModels, supertest, log);
+
+          // Populate connector map for tests to use
+          for (const connector of connectors) {
+            connectorMap.set(connector.modelId, connector.connectorId);
+          }
+          createdConnectorIds.push(...connectorIds);
+
+          log.info(`[EIS] ✅ Created ${connectors.length} connectors`);
+        });
+
+        after(async function () {
+          await cleanupEisConnectors(createdConnectorIds, supertest, log);
+        });
+
+        // Create proper describe/it blocks for each model - no dynamic addTest() needed!
+        for (const model of eisModels) {
+          describe(`Model: ${model.modelId}`, function () {
+            it('should respond to simple message', async () => {
+              const connectorId = connectorMap.get(model.modelId);
+              if (!connectorId) {
+                throw new Error(`Connector not created for model ${model.modelId}`);
+              }
+              await runConverseTests(connectorId, supertest, 'simple');
+            });
+
+            it('should execute tools', async () => {
+              const connectorId = connectorMap.get(model.modelId);
+              if (!connectorId) {
+                throw new Error(`Connector not created for model ${model.modelId}`);
+              }
+              await runConverseTests(connectorId, supertest, 'tool');
+            });
+
+            it('should continue conversation', async () => {
+              const connectorId = connectorMap.get(model.modelId);
+              if (!connectorId) {
+                throw new Error(`Connector not created for model ${model.modelId}`);
+              }
+              await runConverseTests(connectorId, supertest, 'conversation');
+            });
+          });
         }
-        log.warning('[EIS] No EIS models available - suite skipped');
-      });
+      }
     });
   });
 }

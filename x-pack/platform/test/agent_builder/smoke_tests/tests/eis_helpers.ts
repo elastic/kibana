@@ -9,32 +9,17 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-/**
- * Environment variable for EIS CCM API key (set by CI from Vault)
- * Vault path: secret/kibana-issues/dev/inference/kibana-eis-ccm
- *
- * For local dev: export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
- */
-export const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
-
-interface EisInferenceEndpoint {
-  inference_id: string;
-  task_type: string;
-  service: string;
-  service_settings?: {
-    model_id?: string;
-    [key: string]: unknown;
-  };
-}
-
 export interface EisModel {
   inferenceId: string;
   modelId: string;
   connectorId: string;
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * Enables Cloud Connected Mode (CCM) for EIS
+ * Enables Cloud Connected Mode (CCM) for EIS and waits for endpoints to be available.
+ * This makes EIS inference endpoints available in Elasticsearch.
  */
 export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Promise<void> => {
   log.info('[EIS] Enabling Cloud Connected Mode...');
@@ -44,43 +29,31 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
     body: { api_key: apiKey },
   });
   log.info('[EIS] ✅ CCM enabled');
-};
 
-/**
- * Discovers EIS chat completion models with retry logic
- * (endpoints may take time to appear after CCM is enabled)
- */
-export const discoverEisModels = async (
-  es: Client,
-  log: ToolingLog,
-  { maxRetries = 5, retryDelayMs = 3000 } = {}
-): Promise<Array<{ inferenceId: string; modelId: string }>> => {
-  log.info('[EIS] Discovering inference endpoints...');
+  // Wait for EIS to provision endpoints (similar to discovery script)
+  log.info('[EIS] Waiting for EIS endpoints to be provisioned...');
+  const maxRetries = 10;
+  const retryDelayMs = 3000;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const response = await es.inference.get({ inference_id: '_all' });
-    const endpoints = response.endpoints as EisInferenceEndpoint[];
+    const endpoints = response.endpoints as Array<{ task_type: string; service: string }>;
+    const eisEndpoints = endpoints.filter(
+      (ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic'
+    );
 
-    const discovered = endpoints
-      .filter((ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic')
-      .map((ep) => ({
-        inferenceId: ep.inference_id,
-        modelId: ep.service_settings?.model_id || 'unknown',
-      }));
-
-    if (discovered.length > 0) {
-      log.info(`[EIS] Found ${discovered.length} models on attempt ${attempt}`);
-      return discovered;
+    if (eisEndpoints.length > 0) {
+      log.info(`[EIS] ✅ Found ${eisEndpoints.length} EIS endpoints on attempt ${attempt}`);
+      return;
     }
 
     if (attempt < maxRetries) {
-      log.info(`[EIS] No models found (attempt ${attempt}/${maxRetries}), waiting...`);
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      log.info(`[EIS] No endpoints yet (attempt ${attempt}/${maxRetries}), waiting...`);
+      await sleep(retryDelayMs);
     }
   }
 
-  log.warning('[EIS] No EIS models discovered');
-  return [];
+  log.warning('[EIS] ⚠️ No EIS endpoints found after waiting - connector creation may fail');
 };
 
 /**
@@ -124,7 +97,7 @@ export const createEisConnectors = async (
     }
   }
 
-  log.info(`[EIS] ✅ Created ${connectors.length} connectors`);
+  log.info(`[EIS] ✅ Created ${connectors.length}/${models.length} connectors`);
   return { connectors, connectorIds };
 };
 
