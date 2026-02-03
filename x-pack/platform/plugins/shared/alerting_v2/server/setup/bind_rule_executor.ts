@@ -20,7 +20,7 @@ import {
 } from '../lib/rule_executor/steps';
 import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
-import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events.ts';
+import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
 
 export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
   /**

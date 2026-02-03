@@ -15,7 +15,7 @@ import { DirectorService } from '../../director/director';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
-  public readonly name = 'director_step';
+  public readonly name = 'director';
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,

@@ -20,7 +20,7 @@ describe('BasicTransitionStrategy', () => {
   });
 
   describe('no event status', () => {
-    it('returns pending when theres in no current alerte episode status', () => {
+    it('returns pending when there is no current alert episode status', () => {
       const result = strategy.getNextState({
         currentAlertEpisodeStatus: null,
         alertEventStatus: alertEventStatus.breached,
@@ -86,7 +86,7 @@ describe('BasicTransitionStrategy', () => {
       expect(result).toBe(alertEpisodeStatus.inactive);
     });
 
-    it('transitions to inactive on no_data event', () => {
+    it('transitions to pending on no_data event', () => {
       const result = strategy.getNextState({
         currentAlertEpisodeStatus: currentState,
         alertEventStatus: alertEventStatus.no_data,
