@@ -26,8 +26,8 @@ import type {
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
-  PackagePolicyAssetsMap,
 } from '../../common';
+import type { PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
