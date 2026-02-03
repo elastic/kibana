@@ -7,7 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
-import { hasTransformationalCommand, getQuerySummary, isComputedColumn } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { isEsqlSourceCommandQuery } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 import { EsqlSourceCommand } from '@kbn/esql-utils/src/utils/esql_source_commands';
 import type {
@@ -55,8 +55,7 @@ const createSuggestionWithAttributes = (
 //
 // - For PromQL queries, a line chart is always considered suitable.
 // - For other ESQL queries, a line chart is suitable when:
-//   - A date/time column is available (used as the x-axis), and
-//   - A computed numeric column is available (used as the y-axis).
+//   - A date/time column is available
 //
 // Returns `undefined` if the context is not applicable
 // (e.g., non-ESQL queries or when `textBasedColumns` is unavailable).
@@ -73,26 +72,16 @@ const shouldShowLineChart = (
 
   if (!esqlQuery) return undefined;
 
-  // Check if there's at least one date column (for x-axis)
-  const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
-
   const isPromQLQuery = isEsqlSourceCommandQuery(esqlQuery, EsqlSourceCommand.Promql);
 
   if (isPromQLQuery) {
     return true;
   }
 
-  // For regular ES|QL queries, require a computed numeric column (for y-axis).
-  // This avoids preferring line charts for raw (non-derived) numeric fields.
-  try {
-    const summary = getQuerySummary(esqlQuery);
-    const hasComputedNumericColumn = columns.some(
-      (col) => col.meta?.type === 'number' && isComputedColumn(col.name, summary)
-    );
-    return hasDateColumn && hasComputedNumericColumn;
-  } catch {
-    return undefined;
-  }
+  // Check if there's at least one date column (for x-axis)
+  const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
+
+  return hasDateColumn;
 };
 
 export const suggestionsApi = ({
@@ -188,7 +177,7 @@ export const suggestionsApi = ({
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
     visualizationMap,
-    suggestions: newSuggestions,
+    suggestions: [primarySuggestion, ...newSuggestions],
     targetTypeId: chartType,
     familyType: 'lnsXY',
     forceSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
