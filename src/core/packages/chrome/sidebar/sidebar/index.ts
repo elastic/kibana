@@ -53,7 +53,7 @@ export interface SidebarAppDefinition<TParams = {}> {
   available?: boolean;
   /**
    * Whether to restore on page reload. Defaults to true.
-   * @deprecated Use as last resort. Apps should use `params` for state restoration.
+   * Use as last resort. Apps should use `params` for state restoration.
    */
   restoreOnReload?: boolean;
   /** Async component loader */
