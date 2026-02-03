@@ -92,3 +92,17 @@ export const OCCURRENCES_CHART_TITLE = i18n.translate(
     defaultMessage: 'Detected event occurrences',
   }
 );
+
+export const ONBOARDING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.onboardingErrorTitle',
+  {
+    defaultMessage: 'Could not onboard stream',
+  }
+);
+
+export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
+  {
+    defaultMessage: 'Could not schedule a task to onboard stream',
+  }
+);

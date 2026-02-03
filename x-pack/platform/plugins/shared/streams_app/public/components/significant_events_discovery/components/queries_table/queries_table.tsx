@@ -20,7 +20,6 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -47,6 +46,7 @@ import {
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
   PROMOTE_ALL_BUTTON,
+  PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
@@ -54,6 +54,7 @@ import {
   TABLE_CAPTION,
   TITLE_COLUMN,
   getEventsCount,
+  getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
 
@@ -172,26 +173,11 @@ export function QueriesTable() {
         <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
-            title={i18n.translate(
-              'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle',
-              {
-                defaultMessage:
-                  '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
-                values: { count: unbackedCount },
-              }
-            )}
+            title={getPromoteAllCalloutTitle(unbackedCount)}
             iconType="info"
             data-test-subj="queriesPromoteAllCallout"
           >
-            <p>
-              {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
-                {
-                  defaultMessage:
-                    'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
-                }
-              )}
-            </p>
+            <p>{PROMOTE_ALL_CALLOUT_DESCRIPTION}</p>
             <EuiButton
               fill
               onClick={onPromoteAll}

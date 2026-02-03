@@ -15,11 +15,15 @@ import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
+import { getFormattedError } from '../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
+  ONBOARDING_FAILURE_TITLE,
+  ONBOARDING_SCHEDULING_FAILURE_TITLE,
   RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
@@ -38,6 +42,11 @@ interface StreamsViewProps {
 }
 
 export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const streamsListFetch = useDiscoveryStreams();
   const [selectedStreams, setSelectedStreams] = useState<ListStreamDetail[]>([]);
@@ -55,11 +64,17 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
         [streamName]: taskResult,
       }));
 
+      if (taskResult.status === TaskStatus.Failed) {
+        toasts.addDanger(taskResult.error, {
+          title: ONBOARDING_FAILURE_TITLE,
+        });
+      }
+
       if (taskResult.status === TaskStatus.Completed) {
         refreshUnbackedQueriesCount();
       }
     },
-    [refreshUnbackedQueriesCount]
+    [refreshUnbackedQueriesCount, toasts]
   );
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
@@ -80,13 +95,19 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {
-    await pMap(
-      streamList,
-      async (streamName) => {
-        await scheduleOnboardingTask(streamName);
-      },
-      { concurrency: 10 }
-    );
+    try {
+      await pMap(
+        streamList,
+        async (streamName) => {
+          await scheduleOnboardingTask(streamName);
+        },
+        { concurrency: 10 }
+      );
+    } catch (error) {
+      toasts.addError(getFormattedError(error), {
+        title: ONBOARDING_SCHEDULING_FAILURE_TITLE,
+      });
+    }
   };
 
   const onBulkOnboardStreamsClick = async () => {

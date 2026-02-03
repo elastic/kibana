@@ -76,7 +76,7 @@ export const PROMOTE_ALL_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
   {
     defaultMessage:
-      'Create Kibana rules for these queries so they run on a schedule and generate alerts.',
+      'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
   }
 );
 
