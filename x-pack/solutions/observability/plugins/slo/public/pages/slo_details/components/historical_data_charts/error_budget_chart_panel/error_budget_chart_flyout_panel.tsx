@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import numeral from '@elastic/numeral';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
 import { useErrorBudgetChart } from './hooks/use_error_budget_chart';
-import { SloFlyoutCard } from '../../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../../shared_flyout/flyout_panel';
 import { WideChart } from '../../wide_chart';
 import { getSloChartState } from '../../../utils/is_slo_failed';
 import { ErrorBudgetActions } from './error_budget_actions';
@@ -62,7 +62,7 @@ export function ErrorBudgetChartFlyoutPanel({
           }
         }}
       >
-        <SloFlyoutCard
+        <SloFlyoutPanel
           title={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.title', {
             defaultMessage: 'Error budget burn down',
           })}
@@ -151,7 +151,7 @@ export function ErrorBudgetChartFlyoutPanel({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </SloFlyoutCard>
+        </SloFlyoutPanel>
       </EuiFlexItem>
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard

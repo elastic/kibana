@@ -8,12 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
-import { SloFlyoutCard } from '../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import type { ErrorRatePanelProps } from './types';
 
 export function ErrorRateFlyoutPanel({ slo, dataTimeRange, onBrushed }: ErrorRatePanelProps) {
   return (
-    <SloFlyoutCard
+    <SloFlyoutPanel
       title={i18n.translate('xpack.slo.sloDetailsHistory.h2.errorRatePanelTitle', {
         defaultMessage: 'Error rate',
       })}
@@ -25,6 +25,6 @@ export function ErrorRateFlyoutPanel({ slo, dataTimeRange, onBrushed }: ErrorRat
         onBrushed={onBrushed}
         variant={['VIOLATED', 'DEGRADING'].includes(slo.summary.status) ? 'danger' : 'success'}
       />
-    </SloFlyoutCard>
+    </SloFlyoutPanel>
   );
 }

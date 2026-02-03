@@ -11,7 +11,7 @@ import React from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { BurnRateStatus } from './burn_rate_status';
 import { burnRateWindowLabel } from './utils';
-import { SloFlyoutCard } from '../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import { useBurnRatePanel } from './hooks/use_burn_rate_panel';
 import type { BurnRatePanelProps } from './types';
 
@@ -29,7 +29,7 @@ export function BurnRateFlyoutPanel({ slo, isAutoRefreshing }: BurnRatePanelProp
   } = useBurnRatePanel({ slo, isAutoRefreshing });
 
   return (
-    <SloFlyoutCard
+    <SloFlyoutPanel
       title={i18n.translate('xpack.slo.burnRates.burnRatePanelTitle', {
         defaultMessage: 'Burn rate',
       })}
@@ -73,6 +73,6 @@ export function BurnRateFlyoutPanel({ slo, isAutoRefreshing }: BurnRatePanelProp
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-    </SloFlyoutCard>
+    </SloFlyoutPanel>
   );
 }

@@ -14,7 +14,7 @@ import { getSloChartState } from '../../../utils/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
 import { WideChart } from '../../wide_chart';
 import { useSliChartPanel } from './hooks/use_sli_chart_panel';
-import { SloFlyoutCard } from '../../../shared_flyout/flyout_card';
+import { SloFlyoutPanel } from '../../../shared_flyout/flyout_panel';
 import type { SliChartPanelProps } from './types';
 
 export function SliChartFlyoutPanel({
@@ -27,7 +27,7 @@ export function SliChartFlyoutPanel({
   const { isSloFailed, hasNoData, observedValue, percentFormat } = useSliChartPanel({ data, slo });
 
   return (
-    <SloFlyoutCard
+    <SloFlyoutPanel
       title={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.title', {
         defaultMessage: 'Historical SLI',
       })}
@@ -92,6 +92,6 @@ export function SliChartFlyoutPanel({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </SloFlyoutCard>
+    </SloFlyoutPanel>
   );
 }

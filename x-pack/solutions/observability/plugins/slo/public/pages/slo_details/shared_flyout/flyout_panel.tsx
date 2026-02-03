@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiSplitPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 interface Props {
@@ -17,7 +25,7 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export function SloFlyoutCard({
+export function SloFlyoutPanel({
   title,
   renderTooltip,
   tooltipContent,
@@ -25,19 +33,27 @@ export function SloFlyoutCard({
   children,
   'data-test-subj': dataTestSubj,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj={dataTestSubj}>
-      <EuiSplitPanel.Inner color="subdued" paddingSize="s">
+      <EuiSplitPanel.Inner
+        color="subdued"
+        paddingSize="s"
+        css={css`
+          border-bottom: ${euiTheme.border.thin};
+        `}
+      >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4>{title}</h4>
-              </EuiTitle>
+              <EuiText size="xs" css={{ fontWeight: 500 }}>
+                {title}
+              </EuiText>
             </EuiFlexItem>
             {renderTooltip && (
               <EuiFlexItem grow={false}>
-                <EuiIconTip type="question" content={tooltipContent} />
+                <EuiIconTip content={tooltipContent} size="s" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
