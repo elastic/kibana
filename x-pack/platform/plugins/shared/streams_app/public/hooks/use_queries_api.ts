@@ -11,6 +11,7 @@ import { useKibana } from './use_kibana';
 
 interface QueriesApi {
   promoteAll: () => Promise<{ promoted: number }>;
+  getUnbackedQueriesCount: (signal?: AbortSignal | null) => Promise<{ count: number }>;
   abort: () => void;
 }
 
@@ -29,6 +30,11 @@ export function useQueriesApi(): QueriesApi {
       promoteAll: async () => {
         return streamsRepositoryClient.fetch('POST /internal/streams/queries/_promote_all', {
           signal,
+        });
+      },
+      getUnbackedQueriesCount: async (requestSignal?: AbortSignal | null) => {
+        return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
+          signal: requestSignal ?? signal,
         });
       },
       abort: () => {

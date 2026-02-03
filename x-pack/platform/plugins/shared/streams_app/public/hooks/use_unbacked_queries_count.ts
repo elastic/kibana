@@ -6,27 +6,19 @@
  */
 
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
+import { useQueriesApi } from './use_queries_api';
 
 export const UNBACKED_QUERIES_COUNT_QUERY_KEY = ['unbackedQueriesCount'] as const;
 
 export function useUnbackedQueriesCount() {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
   const showFetchErrorToast = useFetchErrorToast();
+  const { getUnbackedQueriesCount } = useQueriesApi();
 
   const query = useQuery({
     queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY,
     queryFn: async ({ signal }: QueryFunctionContext) => {
-      return streamsRepositoryClient.fetch('GET /internal/streams/queries/_unbacked_count', {
-        signal: signal ?? null,
-      });
+      return getUnbackedQueriesCount(signal ?? null);
     },
     onError: showFetchErrorToast,
   });
