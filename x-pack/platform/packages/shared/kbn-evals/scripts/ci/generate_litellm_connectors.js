@@ -257,19 +257,39 @@ async function main() {
 
   const chatUrl = `${baseUrl}/v1/chat/completions`;
   const connectors = {};
+  const modelSet = new Set(modelNames.map((m) => String(m)));
 
   for (const rawModelName of modelNames) {
     const modelName = String(rawModelName);
     const fullModel = modelName.startsWith(modelPrefix) ? modelName : `${modelPrefix}${modelName}`;
     const connectorId = `litellm-${sanitizeId(fullModel)}`;
+    // Temporary normalization: LiteLLM can expose a *public model name* (aka a "model group")
+    // like `llm-gateway/gpt-5.2-chat`, while internally routing that group to a provider-specific
+    // model name (e.g. `gpt-5.2-chat-latest` as shown in the LiteLLM UI).
+    //
+    // The team/model listing APIs we query typically return only the public model names, not the
+    // internal provider mapping. In our CI runs we observed requests for `*-chat` groups being
+    // routed to `*-chat-latest` and then failing with "Unknown model: *-chat-latest".
+    //
+    // Workaround: if a non-`-chat` sibling model exists, prefer it for the actual request model
+    // while keeping the connector id stable (so CI-configured EVALUATION_CONNECTOR_ID stays valid).
+    const fullModelSibling = fullModel.endsWith('-chat') ? fullModel.replace(/-chat$/, '') : null;
+    const requestModel =
+      fullModelSibling &&
+      (modelSet.has(fullModelSibling) || modelSet.has(fullModelSibling.replace(modelPrefix, '')))
+        ? fullModelSibling
+        : fullModel;
 
     connectors[connectorId] = {
-      name: `LiteLLM ${fullModel}`,
+      name:
+        requestModel === fullModel
+          ? `LiteLLM ${fullModel}`
+          : `LiteLLM ${fullModel} (via ${requestModel})`,
       actionTypeId: '.gen-ai',
       config: {
         apiProvider: 'Other',
         apiUrl: chatUrl,
-        defaultModel: fullModel,
+        defaultModel: requestModel,
       },
       secrets: {
         apiKey,
