@@ -7,7 +7,6 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { of } from 'rxjs';
 import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
@@ -21,7 +20,7 @@ import {
 describe('AlertActionsClient', () => {
   jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
   const request = httpServerMock.createKibanaRequest();
-  const { queryService, mockSearchClient: queryServiceSearchClient } = createQueryService();
+  const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
   const security = securityMock.createStart();
   let client: AlertActionsClient;
@@ -43,9 +42,7 @@ describe('AlertActionsClient', () => {
     };
 
     it('should successfully create an action', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse() })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
       await client.createAction({
         groupHash: 'test-group-hash',
@@ -71,9 +68,7 @@ describe('AlertActionsClient', () => {
     });
 
     it('should throw when alert event is not found', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getEmptyESQLResponse() })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
 
       await expect(
         client.createAction({
@@ -93,8 +88,8 @@ describe('AlertActionsClient', () => {
         episode_id: 'episode-2',
       };
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse({ episode_id: 'episode-2' }) })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse({ episode_id: 'episode-2' })
       );
 
       await client.createAction({
@@ -110,9 +105,7 @@ describe('AlertActionsClient', () => {
     });
 
     it('should handle null username when security is not available', async () => {
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getAlertEventESQLResponse() })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
 
       const clientWithoutSecurity = new AlertActionsClient(
         request,
@@ -141,13 +134,11 @@ describe('AlertActionsClient', () => {
         { group_hash: 'group-hash-2', action_type: 'snooze' as const },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({
-          rawResponse: getBulkAlertEventsESQLResponse([
-            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
-            { group_hash: 'group-hash-2', episode_id: 'episode-2' },
-          ]),
-        })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkAlertEventsESQLResponse([
+          { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+          { group_hash: 'group-hash-2', episode_id: 'episode-2' },
+        ])
       );
 
       const result = await client.createBulkActions(actions);
@@ -166,12 +157,8 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-group-hash', action_type: 'ack' as const, episode_id: 'episode-1' },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({
-          rawResponse: getBulkAlertEventsESQLResponse([
-            { group_hash: 'group-hash-1', episode_id: 'episode-1' },
-          ]),
-        })
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkAlertEventsESQLResponse([{ group_hash: 'group-hash-1', episode_id: 'episode-1' }])
       );
 
       const result = await client.createBulkActions(actions);
@@ -190,9 +177,7 @@ describe('AlertActionsClient', () => {
         { group_hash: 'unknown-2', action_type: 'snooze' as const },
       ];
 
-      queryServiceSearchClient.search.mockReturnValueOnce(
-        of({ rawResponse: getBulkAlertEventsESQLResponse([]) })
-      );
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getBulkAlertEventsESQLResponse([]));
 
       const result = await client.createBulkActions(actions);
 

@@ -6,9 +6,10 @@
  */
 
 import { createHash } from 'crypto';
-import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLRow } from '@kbn/es-types';
 import stringify from 'json-stable-stringify';
 
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { AlertEvent } from '../../resources/alert_events';
 
@@ -48,7 +49,7 @@ export interface BuildAlertEventsOpts {
   ruleVersion: number;
   spaceId: string;
   ruleAttributes: RuleSavedObjectAttributes;
-  esqlResponse: ESQLSearchResponse;
+  esqlResponse: EsqlQueryResponse;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
@@ -62,7 +63,7 @@ export function buildAlertEventsFromEsqlResponse({
   ruleAttributes,
   esqlResponse,
   scheduledTimestamp,
-}: BuildAlertEventsOpts): Array<{ id: string; doc: AlertEvent }> {
+}: BuildAlertEventsOpts): AlertEvent[] {
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -78,18 +79,15 @@ export function buildAlertEventsFromEsqlResponse({
   const wroteAt = new Date().toISOString();
   const source = 'internal';
 
-  return values.map((row, i) => {
+  return values.map((row, index) => {
     const rowDoc = rowToDocument(columns, row);
     const groupHash = buildGroupHash({
       rowDoc,
       groupKeyFields: ruleAttributes.groupingKey ?? [],
       get fallbackSeed(): string {
-        return `${executionUuid}|row:${i}|${stringify(rowDoc)}`;
+        return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
       },
     });
-
-    // Deterministic document id: hash(@timestamp + rule_id + space_id + group_hash)
-    const alertUuid = sha256(`${wroteAt}|${ruleId}|${spaceId}|${groupHash}`);
 
     const doc: AlertEvent = {
       '@timestamp': wroteAt,
@@ -102,10 +100,9 @@ export function buildAlertEventsFromEsqlResponse({
       data: rowDoc,
       status: 'breached',
       source,
-      type: 'signal', // Initial events are signals; they become alerts after episode processing
-      // TODO: episode_id, episode_status, episode_status_count are populated during episode processing
+      type: 'signal',
     };
 
-    return { id: alertUuid, doc };
+    return doc;
   });
 }
