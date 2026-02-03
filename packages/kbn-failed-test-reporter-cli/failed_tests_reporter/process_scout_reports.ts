@@ -7,11 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import { escape } from 'he';
+import Path from 'path';
 import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
-import { reportFailuresToFile } from './report_failures_to_file';
+
+const updateScoutHtmlReport = ({
+  log,
+  reportDir,
+  failure,
+  reportUpdate,
+}: {
+  log: ProcessReportsParams['log'];
+  reportDir: string;
+  failure: ScoutTestFailureExtended;
+  reportUpdate: boolean;
+}) => {
+  const htmlReportPath = Path.join(reportDir, `${failure.id}.html`);
+  if (!fs.existsSync(htmlReportPath)) {
+    log.warning(`Scout HTML report not found: ${htmlReportPath}`);
+    return;
+  }
+
+  const fileContent = fs.readFileSync(htmlReportPath, 'utf-8');
+  const failureCount = failure.failureCount ?? 0;
+  const githubIssue = failure.githubIssue ? escape(failure.githubIssue) : undefined;
+
+  let updatedContent = fileContent.replace(
+    /id="failure-count">\d+</,
+    `id="failure-count">${failureCount}<`
+  );
+
+  if (githubIssue) {
+    updatedContent = updatedContent
+      .replace(/<div id="github-issue-section"[^>]*>/, '<div id="github-issue-section">')
+      .replace(
+        /<a id="github-issue-link"[^>]*>.*?<\/a>/,
+        `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`
+      );
+  }
+
+  if (updatedContent === fileContent) {
+    return;
+  }
+
+  if (!reportUpdate) {
+    log.info(`Report update disabled, skipping HTML update for ${htmlReportPath}`);
+    return;
+  }
+
+  fs.writeFileSync(htmlReportPath, updatedContent, 'utf-8');
+};
 
 export async function processScoutReports(
   reportPaths: string[],
@@ -27,7 +76,7 @@ export async function processScoutReports(
     prependTitle,
     updateGithub,
     indexInEs,
-    bkMeta,
+    reportUpdate,
   } = params;
 
   for (const reportPath of reportPaths) {
@@ -46,6 +95,8 @@ export async function processScoutReports(
     if (indexInEs) {
       await reportFailuresToEs(log, failures);
     }
+
+    const reportDir = Path.dirname(reportPath);
 
     for (const failure of failures) {
       if (failure.likelyIrrelevant) {
@@ -68,6 +119,7 @@ export async function processScoutReports(
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
 
@@ -85,9 +137,7 @@ export async function processScoutReports(
         failure.githubIssue = newIssue.html_url;
       }
       failure.failureCount = updateGithub ? 1 : 0;
+      updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
     }
-
-    // Generate Scout failure artifacts (similar to JUnit report processing)
-    await reportFailuresToFile(log, failures, bkMeta, {});
   }
 }
