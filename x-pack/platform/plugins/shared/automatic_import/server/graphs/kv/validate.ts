@@ -68,7 +68,10 @@ export async function handleHeaderValidate({
 }: HandleKVNodeParams): Promise<Partial<KVState>> {
   const grokPattern = state.grokPattern;
   const grokProcessor = createGrokProcessor([grokPattern]);
-  const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
+  const pipeline = {
+    processors: [grokProcessor],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
 
   const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
     pipelineResults: GrokResult[];
@@ -81,7 +84,7 @@ export async function handleHeaderValidate({
 
   const kvLogMessages: string[] = pipelineResults.map((entry) => entry.message);
   const additionalProcessors = state.additionalProcessors;
-  additionalProcessors.push(grokProcessor[0]);
+  additionalProcessors.push(grokProcessor);
 
   return {
     kvLogMessages,
