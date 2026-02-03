@@ -40,12 +40,6 @@ export interface GetAnomalyDetectionJobsToolResult {
 }
 
 const getAnomalyDetectionJobsSchema = z.object({
-  jobIds: z
-    .array(z.string().min(1))
-    .min(1)
-    .max(20)
-    .optional()
-    .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
   jobsLimit: z
     .number()
     .int()
@@ -124,7 +118,6 @@ When to use:
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
       const {
-        jobIds,
         jobsLimit,
         anomalyRecordsLimit,
         minAnomalyScore,
@@ -144,7 +137,6 @@ When to use:
           mlClient,
           request,
           logger,
-          jobIds,
           jobsLimit,
           anomalyRecordsLimit,
           minAnomalyScore,

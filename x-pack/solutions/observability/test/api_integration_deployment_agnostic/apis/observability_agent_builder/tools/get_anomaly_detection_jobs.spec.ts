@@ -180,34 +180,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    it('filters by specific job ID', async () => {
-      const anomalyDetetionJobs = await ml.api.getAllAnomalyDetectionJobs();
-      const jobId = anomalyDetetionJobs.body.jobs[0].job_id;
-      const toolResults =
-        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
-          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { jobIds: [jobId], start: START_ISO, end: END_ISO },
-        });
-
-      expect(toolResults[0].data.jobs).to.have.length(1);
-      expect(toolResults[0].data.jobs[0].jobId).to.be(jobId);
-    });
-
-    it('returns empty response for non-existent job ID', async () => {
-      const toolResults =
-        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
-          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: {
-            jobIds: ['non-existent-job-id'],
-            start: START_ISO,
-            end: END_ISO,
-          },
-        });
-
-      expect(toolResults[0].data.jobs).to.be.empty();
-      expect(toolResults[0].data.total).to.be(0);
-    });
-
     it('returns job without anomalies when time range excludes them', async () => {
       // Start check 4 hours before spike to avoid start of dataset initialization noise
       const EARLY_START_ISO = new Date(
