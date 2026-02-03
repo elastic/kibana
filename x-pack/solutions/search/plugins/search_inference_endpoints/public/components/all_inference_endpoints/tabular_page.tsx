@@ -130,13 +130,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           endpointInfo: InferenceInferenceEndpointInfo
         ) => {
           if (inferenceId) {
-            return (
-              <EndpointInfo
-                inferenceId={inferenceId}
-                endpointInfo={endpointInfo}
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
-              />
-            );
+            return <EndpointInfo inferenceId={inferenceId} endpointInfo={endpointInfo} />;
           }
 
           return null;
@@ -214,7 +208,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout, cloud?.isCloudEnabled]
+    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
   );
 
   const handleTableChange = useCallback(
