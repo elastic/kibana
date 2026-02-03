@@ -8,6 +8,8 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ChartType, mapVisToChartType } from '@kbn/visualization-utils';
 import { hasTransformationalCommand, getQuerySummary, isComputedColumn } from '@kbn/esql-utils';
+import { isEsqlSourceCommandQuery } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import { EsqlSourceCommand } from '@kbn/esql-utils/src/utils/esql_source_commands';
 import type {
   DatasourceMap,
   VisualizationMap,
@@ -49,9 +51,15 @@ const createSuggestionWithAttributes = (
       })
     : suggestion;
 
-// Determine line charts is suitable for the context.
-// Line charts are suitable when there's a date column (x-axis) and a computed numeric column (y-axis).
-// Returns `undefined` when not applicable (non-ESQL / no textBasedColumns), so callers can skip filtering.
+// Determines whether a line chart is appropriate for the given context.
+//
+// - For PromQL queries, a line chart is always considered suitable.
+// - For other ESQL queries, a line chart is suitable when:
+//   - A date/time column is available (used as the x-axis), and
+//   - A computed numeric column is available (used as the y-axis).
+//
+// Returns `undefined` if the context is not applicable
+// (e.g., non-ESQL queries or when `textBasedColumns` is unavailable).
 const shouldShowLineChart = (
   context: VisualizeFieldContext | VisualizeEditorContext
 ): boolean | undefined => {
@@ -65,18 +73,26 @@ const shouldShowLineChart = (
 
   if (!esqlQuery) return undefined;
 
-  // Get query summary to identify computed columns
-  const summary = getQuerySummary(esqlQuery);
-
   // Check if there's at least one date column (for x-axis)
   const hasDateColumn = columns.some((col) => col.meta?.type === 'date');
 
-  // Check if there's at least one computed numeric column (for y-axis)
-  const hasComputedNumericColumn = columns.some(
-    (col) => col.meta?.type === 'number' && isComputedColumn(col.name, summary)
-  );
+  const isPromQLQuery = isEsqlSourceCommandQuery(esqlQuery, EsqlSourceCommand.Promql);
 
-  return hasDateColumn && hasComputedNumericColumn;
+  if (isPromQLQuery) {
+    return true;
+  }
+
+  // For regular ES|QL queries, require a computed numeric column (for y-axis).
+  // This avoids preferring line charts for raw (non-derived) numeric fields.
+  try {
+    const summary = getQuerySummary(esqlQuery);
+    const hasComputedNumericColumn = columns.some(
+      (col) => col.meta?.type === 'number' && isComputedColumn(col.name, summary)
+    );
+    return hasDateColumn && hasComputedNumericColumn;
+  } catch {
+    return undefined;
+  }
 };
 
 export const suggestionsApi = ({
