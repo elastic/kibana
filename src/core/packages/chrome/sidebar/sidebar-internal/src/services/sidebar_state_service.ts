@@ -62,10 +62,10 @@ export class SidebarStateService {
       this.registry.hasApp(currentAppId) &&
       this.registry.isRestorable(currentAppId)
     ) {
-      if (this.registry.isAvailable(currentAppId)) {
+      if (this.registry.isAccessible(currentAppId)) {
         this.open(currentAppId);
       } else {
-        this.waitForAvailabilityAndRestore(currentAppId);
+        this.waitForAccessibilityAndRestore(currentAppId);
       }
     }
 
@@ -81,14 +81,14 @@ export class SidebarStateService {
     this.setWidth(this.getWidth());
   };
 
-  /** Wait for app to become available, then restore it */
-  private waitForAvailabilityAndRestore(appId: SidebarAppId): void {
+  /** Wait for app to become accessible, then restore it */
+  private waitForAccessibilityAndRestore(appId: SidebarAppId): void {
     this.pendingRestoreSubscription?.unsubscribe();
 
     this.pendingRestoreSubscription = this.registry
-      .getAvailable$(appId)
+      .getStatus$(appId)
       .pipe(
-        filter((available) => available),
+        filter((status) => status === 'accessible'),
         take(1)
       )
       .subscribe(() => {
@@ -104,8 +104,8 @@ export class SidebarStateService {
       throw new Error(`[Sidebar State] Cannot open sidebar. App not registered: ${appId}`);
     }
 
-    if (!this.registry.isAvailable(appId)) {
-      throw new Error(`[Sidebar State] Cannot open sidebar. App not available: ${appId}`);
+    if (!this.registry.isAccessible(appId)) {
+      throw new Error(`[Sidebar State] Cannot open sidebar. App not accessible: ${appId}`);
     }
 
     this.pendingRestoreSubscription?.unsubscribe();

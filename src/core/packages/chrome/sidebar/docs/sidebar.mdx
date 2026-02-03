@@ -31,7 +31,7 @@ core.chrome.sidebar.registerApp({
       count: z.number().default(0),
     }),
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
-  available: true,
+  status: 'accessible',
 });
 ```
 
@@ -41,7 +41,7 @@ Required fields:
 
 Optional fields:
 - `getParamsSchema`: Zod schema for params (persisted state). If omitted, `params` is `{}` and `setParams()` throws.
-- `available`: Whether the app is available (defaults to `true`).
+- `status`: Accessibility status (defaults to `accessible`).
 - `restoreOnReload`: Whether the app auto-reopens on page reload (defaults to `true`).
 
 ## Build a sidebar app component
@@ -134,19 +134,19 @@ function MyToolbarButton() {
 }
 ```
 
-## Manage availability
+## Manage accessibility
 
-Use `available: false` when the app depends on async checks (license, permissions).
+Use `status: 'inaccessible'` when the app depends on async checks (license, permissions).
 
 ```tsx
-core.chrome.sidebar.registerApp({
+const updateMySidebarApp = core.chrome.sidebar.registerApp({
   appId: 'mySidebarApp',
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
-  available: false,
+  status: 'inaccessible',
 });
 
 // Later in start
-core.chrome.sidebar.getApp('mySidebarApp').setAvailable(true);
+updateMySidebarApp({ status: 'accessible' });
 ```
 
 ## Control sidebar width

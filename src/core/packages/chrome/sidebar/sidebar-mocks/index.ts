@@ -8,13 +8,22 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { SidebarStart, SidebarSetup, SidebarApp } from '@kbn/core-chrome-sidebar';
+import type {
+  SidebarApp,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
+} from '@kbn/core-chrome-sidebar';
 
 const DEFAULT_WIDTH = 400;
 
 const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
+  const registerApp = jest.fn(<TParams = {}>(_app: SidebarAppDefinition<TParams>) =>
+    jest.fn()
+  ) as jest.MockedFunction<SidebarSetup['registerApp']>;
+
   return {
-    registerApp: jest.fn(),
+    registerApp,
   };
 };
 
@@ -25,7 +34,6 @@ const createAppMock = <TParams = {}>(): jest.Mocked<SidebarApp<TParams>> => {
     setParams: jest.fn(),
     getParams: jest.fn().mockReturnValue({} as TParams),
     getParams$: jest.fn().mockReturnValue(new BehaviorSubject<TParams>({} as TParams)),
-    setAvailable: jest.fn(),
   };
 };
 

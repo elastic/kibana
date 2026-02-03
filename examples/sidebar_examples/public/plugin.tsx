@@ -10,6 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { counterAppId } from './counter_app';
 import { tabSelectionAppId, getTabSelectionParamsSchema } from './tab_selection_app';
@@ -20,6 +21,8 @@ interface SetupDeps {
 }
 
 export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
+  private updateTabSelectionApp?: SidebarAppUpdater;
+
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
@@ -33,10 +36,10 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
-    // Register tab selection app as initially unavailable (simulating permission check)
-    core.chrome.sidebar.registerApp({
+    // Register tab selection app as initially inaccessible (simulating permission check)
+    this.updateTabSelectionApp = core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
-      available: false, // Initially unavailable
+      status: 'inaccessible', // Initially inaccessible
       getParamsSchema: getTabSelectionParamsSchema,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
@@ -61,11 +64,11 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   }
 
   public start(core: CoreStart) {
-    // Simulate async permission check - make tab selection app available after 2 seconds
+    // Simulate async permission check - make tab selection app accessible after 2 seconds
     setTimeout(() => {
-      core.chrome.sidebar.getApp(tabSelectionAppId).setAvailable(true);
+      this.updateTabSelectionApp?.({ status: 'accessible' });
       // eslint-disable-next-line no-console
-      console.log('[Sidebar Example] Tab Selection app is now available after permission check');
+      console.log('[Sidebar Example] Tab Selection app is now accessible after permission check');
     }, 2000);
 
     return {};

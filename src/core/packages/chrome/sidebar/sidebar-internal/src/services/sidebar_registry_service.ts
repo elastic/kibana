@@ -9,7 +9,13 @@
 
 import type { Observable } from 'rxjs';
 import { map, startWith, Subject, distinctUntilChanged } from 'rxjs';
-import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
+import type {
+  SidebarAppDefinition,
+  SidebarAppId,
+  SidebarAppUpdate,
+  SidebarAppUpdater,
+  SidebarAppStatus,
+} from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 import { bind, memoize } from './utils';
 
@@ -18,7 +24,7 @@ export class SidebarRegistryService {
   private readonly changed$ = new Subject<void>();
 
   @bind
-  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): void {
+  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): SidebarAppUpdater {
     if (!isValidSidebarAppId(app.appId)) {
       throw new Error(
         `[Sidebar Registry] Invalid app ID: ${app.appId}. App ID must be either explicitly listed`
@@ -31,10 +37,16 @@ export class SidebarRegistryService {
 
     this.registeredApps.set(app.appId, {
       ...app,
-      available: app.available !== false,
+      status: app.status ?? 'accessible',
       restoreOnReload: app.restoreOnReload !== false,
     } as SidebarAppDefinition);
     this.changed$.next();
+
+    return (update: SidebarAppUpdate) => {
+      if (update.status !== undefined) {
+        this.setStatus(app.appId, update.status);
+      }
+    };
   }
 
   @bind
@@ -51,32 +63,32 @@ export class SidebarRegistryService {
     return this.registeredApps.has(appId);
   }
 
-  setAvailable(appId: SidebarAppId, available: boolean): void {
+  private setStatus(appId: SidebarAppId, status: SidebarAppStatus): void {
     const app = this.registeredApps.get(appId);
     if (!app) {
-      throw new Error(`[Sidebar Registry] Cannot set availability. App not registered: ${appId}`);
+      throw new Error(`[Sidebar Registry] Cannot set status. App not registered: ${appId}`);
     }
 
-    this.registeredApps.set(appId, { ...app, available });
+    this.registeredApps.set(appId, { ...app, status });
     this.changed$.next();
   }
 
   @memoize
-  getAvailable$(appId: SidebarAppId): Observable<boolean> {
+  getStatus$(appId: SidebarAppId): Observable<SidebarAppStatus> {
     if (!this.registeredApps.has(appId)) {
-      throw new Error(`[Sidebar Registry] Cannot get availability. App not registered: ${appId}`);
+      throw new Error(`[Sidebar Registry] Cannot get status. App not registered: ${appId}`);
     }
 
     return this.changed$.pipe(
       startWith(undefined),
-      map(() => Boolean(this.registeredApps.get(appId)?.available)),
+      map(() => this.registeredApps.get(appId)?.status ?? 'accessible'),
       distinctUntilChanged()
     );
   }
 
-  isAvailable(appId: SidebarAppId): boolean {
+  isAccessible(appId: SidebarAppId): boolean {
     const app = this.registeredApps.get(appId);
-    return app ? app.available !== false : false;
+    return app ? app.status !== 'inaccessible' : false;
   }
 
   isRestorable(appId: SidebarAppId): boolean {

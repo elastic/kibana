@@ -33,8 +33,8 @@ export function Sidebar(props: SidebarProps) {
 
   const currentApp = sidebarService.getAppDefinition(currentAppId);
 
-  if (!currentApp.available) {
-    // most likely we're trying to render an app that hasn't become available yet after initial restoration
+  if (currentApp.status === 'inaccessible') {
+    // most likely we're trying to render an app that hasn't become accessible yet after initial restoration
     return null;
   }
 

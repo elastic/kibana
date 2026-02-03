@@ -34,8 +34,8 @@ const registerApp = (
   service: SidebarService,
   app: Partial<SidebarAppDefinition> & Pick<SidebarAppDefinition, 'appId'>
 ) => {
-  service.setup().registerApp({
-    available: true,
+  return service.setup().registerApp({
+    status: 'accessible',
     restoreOnReload: true,
     getParamsSchema,
     loadComponent: async () => () => null,
@@ -50,17 +50,16 @@ describe('SidebarService (integration)', () => {
   });
 
   describe('state restoration', () => {
-    it('restores open app after availability becomes true', () => {
+    it('restores open app after accessibility becomes true', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A, available: false });
+      const updateApp = registerApp(service, { appId: APP_ID_A, status: 'inaccessible' });
 
       sessionStorage.setItem(`${STATE_STORAGE_PREFIX}:currentAppId`, JSON.stringify(APP_ID_A));
 
       const start = service.start();
-      const app = start.getApp(APP_ID_A);
 
       expect(start.isOpen()).toBe(false);
-      app.setAvailable(true);
+      updateApp({ status: 'accessible' });
       expect(start.isOpen()).toBe(true);
       expect(start.getCurrentAppId()).toBe(APP_ID_A);
       expect(sessionStorage.getItem(`${STATE_STORAGE_PREFIX}:currentAppId`)).toBe(
@@ -213,15 +212,15 @@ describe('SidebarService (integration)', () => {
       expect(start.getApp(APP_ID_A)).not.toBe(start.getApp(APP_ID_B));
     });
 
-    it('throws when opening an unavailable app', () => {
+    it('throws when opening an inaccessible app', () => {
       const service = createService();
-      registerApp(service, { appId: APP_ID_A, available: false });
+      registerApp(service, { appId: APP_ID_A, status: 'inaccessible' });
 
       const start = service.start();
       const app = start.getApp(APP_ID_A);
 
       expect(() => app.open()).toThrow(
-        '[Sidebar State] Cannot open sidebar. App not available: sidebarExampleAppA'
+        '[Sidebar State] Cannot open sidebar. App not accessible: sidebarExampleAppA'
       );
       expect(start.isOpen()).toBe(false);
       expect(start.getCurrentAppId()).toBe(null);

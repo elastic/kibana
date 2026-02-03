@@ -72,7 +72,6 @@ export class SidebarService {
       setParams: (params: Partial<TParams>) => this.appState.setParams(appId, params),
       getParams: () => this.appState.getParams(appId),
       getParams$: () => this.appState.getParams$(appId),
-      setAvailable: (available: boolean) => this.registry.setAvailable(appId, available),
     };
   }
 }

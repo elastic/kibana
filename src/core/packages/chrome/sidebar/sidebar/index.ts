@@ -45,12 +45,15 @@ export interface SidebarComponentProps<TParams = {}> {
 
 export type SidebarComponentType<TParams = {}> = ComponentType<SidebarComponentProps<TParams>>;
 
+/** Accessibility status of a sidebar app. */
+export type SidebarAppStatus = 'accessible' | 'inaccessible';
+
 /** App definition for sidebar registration */
 export interface SidebarAppDefinition<TParams = {}> {
   /** Unique identifier */
   appId: SidebarAppId;
-  /** Whether available. Defaults to true. Use `setAvailable()` for async checks. */
-  available?: boolean;
+  /** Accessibility status. Defaults to `accessible`. Use the returned updater for async checks. */
+  status?: SidebarAppStatus;
   /**
    * Whether to restore on page reload. Defaults to true.
    * Use as last resort. Apps should use `params` for state restoration.
@@ -84,10 +87,19 @@ export interface SidebarAppDefinition<TParams = {}> {
   getParamsSchema?: () => z.ZodType<TParams>;
 }
 
+/** Sidebar app update payload */
+export interface SidebarAppUpdate {
+  /** Accessibility status. Defaults to `accessible` when omitted. */
+  status?: SidebarAppStatus;
+}
+
+/** Sidebar app updater returned from registration */
+export type SidebarAppUpdater = (update: SidebarAppUpdate) => void;
+
 /** Sidebar setup contract */
 export interface SidebarSetup {
   /** Register a sidebar app */
-  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): void;
+  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): SidebarAppUpdater;
 }
 
 /** App-bound API obtained via `sidebar.getApp(appId)` */
@@ -102,8 +114,6 @@ export interface SidebarApp<TParams = {}> {
   getParams: () => TParams;
   /** Observable of params */
   getParams$: () => Observable<TParams>;
-  /** Set availability */
-  setAvailable: (available: boolean) => void;
 }
 
 /** Sidebar start contract */
