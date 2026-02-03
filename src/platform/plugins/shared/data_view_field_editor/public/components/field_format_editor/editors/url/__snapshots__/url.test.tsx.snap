@@ -168,7 +168,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           URL template help
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1j75qc1"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -228,7 +228,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           Label template help
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1j75qc1"
             data-euiicon-type="popout"
             role="presentation"
           />

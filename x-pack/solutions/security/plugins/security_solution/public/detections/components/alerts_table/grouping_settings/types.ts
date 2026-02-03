@@ -36,4 +36,10 @@ export interface AlertsGroupingAggregation {
   relatedIntegrationSubAggregation?: {
     buckets?: GenericBuckets[];
   };
+  attacks?: {
+    doc_count?: number;
+  };
+  attackRelatedAlerts?: {
+    doc_count?: number;
+  };
 }
