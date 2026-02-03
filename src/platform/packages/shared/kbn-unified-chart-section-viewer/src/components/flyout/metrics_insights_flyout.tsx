@@ -57,15 +57,21 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
     defaultMessage: 'Metric',
   });
 
+  // Only handle ESC in push mode (xl screen). In overlay mode, EUI handles ESC automatically.
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
-      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+      if (
+        isXlScreen &&
+        isDOMNode(ev.target) &&
+        ev.currentTarget.contains(ev.target) &&
+        ev.key === keys.ESCAPE
+      ) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
       }
     },
-    [onClose]
+    [onClose, isXlScreen]
   );
 
   const minWidth = euiTheme.base * 24;
