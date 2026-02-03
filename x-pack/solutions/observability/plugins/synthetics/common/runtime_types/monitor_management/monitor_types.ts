@@ -44,6 +44,7 @@ export const TLSFieldsCodec = t.partial({
   [ConfigKey.TLS_CERTIFICATE]: t.string,
   [ConfigKey.TLS_VERIFICATION_MODE]: VerificationModeCodec,
   [ConfigKey.TLS_VERSION]: t.array(TLSVersionCodec),
+  [ConfigKey.TLS_CIPHER_SUITES]: t.array(t.string),
 });
 
 export const TLSSensitiveFieldsCodec = t.partial({

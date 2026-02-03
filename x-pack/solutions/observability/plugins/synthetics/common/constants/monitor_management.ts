@@ -70,6 +70,7 @@ export enum ConfigKey {
   TLS_KEY_PASSPHRASE = 'ssl.key_passphrase',
   TLS_VERIFICATION_MODE = 'ssl.verification_mode',
   TLS_VERSION = 'ssl.supported_protocols',
+  TLS_CIPHER_SUITES = 'ssl.cipher_suites',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   THROTTLING_CONFIG = 'throttling',
