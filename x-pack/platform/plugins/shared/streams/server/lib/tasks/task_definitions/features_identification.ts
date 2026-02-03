@@ -9,12 +9,13 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
+import { v4 as uuid } from 'uuid';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { getFeatureId, MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
@@ -70,7 +71,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
 
-                const { features: baseFeatures } = await identifyFeatures({
+                const { features: identifiedFeatures } = await identifyFeatures({
                   start,
                   end,
                   esClient,
@@ -81,14 +82,30 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   systemPrompt: featurePromptOverride,
                 });
 
+                const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
+                  id: identifiedFeatures.map(({ id }) => id),
+                });
+
                 const now = Date.now();
-                const features = baseFeatures.map((feature) => ({
-                  ...feature,
-                  status: 'active' as const,
-                  last_seen: new Date(now).toISOString(),
-                  id: getFeatureId(stream.name, feature),
-                  expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-                }));
+                const features = identifiedFeatures.map((feature) => {
+                  const existing = existingFeatures.find(({ id }) => id === feature.id);
+                  if (existing) {
+                    taskContext.logger.debug(
+                      `Overwriting feature with id [${
+                        feature.id
+                      }] since it already exists.\nExisting feature: ${JSON.stringify(
+                        existing
+                      )}\nNew feature: ${JSON.stringify(feature)}`
+                    );
+                  }
+                  return {
+                    ...feature,
+                    status: 'active' as const,
+                    last_seen: new Date(now).toISOString(),
+                    expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
+                    uuid: existing?.uuid ?? uuid(),
+                  };
+                });
 
                 await featureClient.bulk(
                   stream.name,

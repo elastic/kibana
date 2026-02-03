@@ -34,7 +34,6 @@ import type {
   DiscoverInternalState,
   TabState,
   UpdateESQLQueryActionPayload,
-  UpdateCascadeGroupingActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
@@ -287,32 +286,6 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
       addLog('onQuerySubmit triggers data fetching');
       stateContainer$.getValue()?.dataState.fetch();
     }
-  };
-
-/**
- * Triggered when the user changes the grouping of the cascade layout
- */
-export const updateCascadeGrouping: InternalStateThunkActionCreator<
-  [UpdateCascadeGroupingActionPayload]
-> = ({ tabId, groupingOrUpdater: groupingUpdater }) =>
-  async function updateCascadeGroupingThunkFn(dispatch, getState) {
-    addLog('updateCascadeGrouping');
-    const currentState = getState();
-    const { uiState } = selectTab(currentState, tabId);
-
-    const cascadeGrouping = isFunction(groupingUpdater)
-      ? groupingUpdater(uiState.cascadedDocuments!.selectedCascadeGroups)
-      : groupingUpdater;
-
-    dispatch(
-      internalStateSlice.actions.setCascadeUiState({
-        tabId,
-        cascadeUiState: {
-          availableCascadeGroups: uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
-          selectedCascadeGroups: cascadeGrouping,
-        },
-      })
-    );
   };
 
 /**
