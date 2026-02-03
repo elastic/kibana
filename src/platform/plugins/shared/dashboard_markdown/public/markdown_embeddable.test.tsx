@@ -182,7 +182,7 @@ describe('MarkdownEmbeddable', () => {
     expect(embeddable.api.overrideHoverActions$.getValue()).toBe(false);
   });
 
-  it('loads content from library', async () => {
+  it('loads content from library when by reference', async () => {
     const { embeddable } = await renderEmbeddable({
       initialState: { savedObjectId: '123' },
     });
