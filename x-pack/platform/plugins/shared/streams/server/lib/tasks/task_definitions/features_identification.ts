@@ -87,6 +87,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     esClient,
+                    logger: taskContext.logger.get('computed_features'),
                   }),
                 ]);
 
