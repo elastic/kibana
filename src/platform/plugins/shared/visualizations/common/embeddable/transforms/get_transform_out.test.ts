@@ -65,9 +65,7 @@ describe('getTransformOut', () => {
             Object {
               "dashboard_id": "someRef",
               "label": "Go to dashboard",
-              "triggers": Array [
-                "some_trigger",
-              ],
+              "trigger": "some_trigger",
               "type": "dashboard_drilldown",
             },
           ],
@@ -114,9 +112,7 @@ describe('getTransformOut', () => {
             Object {
               "dashboard_id": "someRef",
               "label": "Go to dashboard",
-              "triggers": Array [
-                "some_trigger",
-              ],
+              "trigger": "some_trigger",
               "type": "dashboard_drilldown",
             },
           ],

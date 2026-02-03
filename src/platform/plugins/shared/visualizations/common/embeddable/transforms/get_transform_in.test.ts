@@ -72,9 +72,7 @@ describe('getTransformIn', () => {
               Object {
                 "dashboardRefName": "someRef",
                 "label": "Go to dashboard",
-                "triggers": Array [
-                  "some_action",
-                ],
+                "trigger": "some_action",
                 "type": "dashboard_drilldown",
               },
             ],
@@ -125,9 +123,7 @@ describe('getTransformIn', () => {
               Object {
                 "dashboardRefName": "someRef",
                 "label": "Go to dashboard",
-                "triggers": Array [
-                  "some_action",
-                ],
+                "trigger": "some_action",
                 "type": "dashboard_drilldown",
               },
             ],

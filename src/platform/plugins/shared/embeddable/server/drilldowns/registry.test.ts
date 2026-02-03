@@ -30,8 +30,8 @@ describe('drilldown registry', () => {
       return drilldownJoiSchema.schema.keys.type.allow[0];
     }
 
-    function getTriggers(drilldownJoiSchema: any) {
-      return drilldownJoiSchema.schema.keys.triggers.items[0].matches.map(
+    function getTriggerLiterals(drilldownJoiSchema: any) {
+      return drilldownJoiSchema.schema.keys.trigger.matches.map(
         (match: any) => match.schema.allow[0]
       );
     }
@@ -58,8 +58,8 @@ describe('drilldown registry', () => {
       const drilldownsJoiSchema = drilldownsSchema.getPropSchemas().drilldowns?.getSchema();
       const matches = drilldownsJoiSchema.describe().items[0].matches;
       // foo drilldown schema should not show 'ON_HOVER' because that trigger does not intersect supported triggers
-      expect(getTriggers(matches[0])).toEqual(['ON_CLICK', 'ON_ROW_CLICK']);
-      expect(getTriggers(matches[1])).toEqual(['ON_CLICK']);
+      expect(getTriggerLiterals(matches[0])).toEqual(['ON_CLICK', 'ON_ROW_CLICK']);
+      expect(getTriggerLiterals(matches[1])).toEqual(['ON_CLICK']);
     });
   });
 });
