@@ -12,7 +12,10 @@ import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
-import { filterModulesByScoutCiConfig } from '../tests_discovery/search_configs';
+import {
+  filterModulesByScoutCiConfig,
+  getScoutCiExcludedConfigs,
+} from '../tests_discovery/search_configs';
 import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
@@ -99,6 +102,24 @@ const filterModulesByCustomServerPaths = (
         const isCustomServerConfig = CUSTOM_SERVERS_PATH_PATTERN.test(config.path);
         return !isCustomServerConfig;
       }),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const filterModulesByExcludedConfigPaths = (
+  modules: ModuleDiscoveryInfo[],
+  excludedConfigPaths: string[]
+): ModuleDiscoveryInfo[] => {
+  if (excludedConfigPaths.length === 0) {
+    return modules;
+  }
+
+  const excludedSet = new Set(excludedConfigPaths);
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => !excludedSet.has(config.path)),
     }))
     .filter((module) => module.configs.length > 0);
 };
@@ -234,11 +255,14 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     filteredModulesByTags,
     includeCustomServers
   );
+  const filteredModulesWithExcludedConfigs = process.env.CI
+    ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
+    : filteredModules;
   // Handle output based on flatten flag
   if (flatten) {
-    handleFlattenedOutput(filteredModules, flagsReader, log);
+    handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   } else {
-    handleNonFlattenedOutput(filteredModules, flagsReader, log);
+    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
   }
 };
 
