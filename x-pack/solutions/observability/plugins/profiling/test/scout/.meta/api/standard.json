@@ -1,0 +1,110 @@
+{
+  "lastModified": "2026-01-30T09:08:40.048Z",
+  "sha1": "84af36db19fd0a9023c112feeaefbf67229cf311",
+  "tests": [
+    {
+      "id": "405beff6794306f-a54347ac1e57e7e",
+      "title": "Profiling is not setup and no data is loaded Admin users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "405beff6794306f-429a339166c2e77",
+      "title": "Profiling is not setup and no data is loaded Viewer users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "f24ba03baeb5e26-0723e6c11fe5d87",
+      "title": "APM integration not installed but setup completed Admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "f24ba03baeb5e26-76b2ff68d4e7a1b",
+      "title": "APM integration not installed but setup completed Viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "da6d82a4243ce6c-271837831195e95",
+      "title": "Profiling is setup and data is loaded Admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
+        "line": 22,
+        "column": 10
+      }
+    },
+    {
+      "id": "da6d82a4243ce6c-7018203930dfa66",
+      "title": "Profiling is setup and data is loaded Viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
+        "line": 36,
+        "column": 10
+      }
+    },
+    {
+      "id": "8b3eca81b16d245-3ee5b04db1c974d",
+      "title": "Collector integration is not installed collector integration missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
+        "line": 23,
+        "column": 10
+      }
+    },
+    {
+      "id": "8b3eca81b16d245-7029a2aca281cbb",
+      "title": "Collector integration is not installed Symbolizer integration is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
+        "line": 51,
+        "column": 10
+      }
+    }
+  ]
+}

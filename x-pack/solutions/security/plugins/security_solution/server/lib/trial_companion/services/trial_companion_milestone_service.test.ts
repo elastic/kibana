@@ -11,18 +11,28 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import { Milestone } from '../../../../common/trial_companion/types';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import {
+  TRIAL_COMPANION_DEPLOYMENT_STATE,
+  TRIAL_COMPANION_MILESTONE_REFRESH_ERROR,
+} from '../telemetry/trial_companion_ebt_events';
 
 describe('TrialCompanionMilestoneServiceImpl', () => {
   let sut: TrialCompanionMilestoneServiceImpl;
   const taskManagerSetup = taskManagerMock.createSetup();
   const taskManagerStart = taskManagerMock.createStart();
   let abortController: AbortController;
+  let mockCore: ReturnType<typeof coreMock.createSetup>;
+  let mockTelemetry: jest.Mocked<AnalyticsServiceSetup>;
   const repo: jest.Mocked<TrialCompanionMilestoneRepository> = lazyObject({
     getCurrent: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
   });
   beforeEach(() => {
+    mockCore = coreMock.createSetup();
+    mockTelemetry = mockCore.analytics;
     sut = new TrialCompanionMilestoneServiceImpl(loggingSystemMock.createLogger());
     abortController = new AbortController();
     jest.clearAllMocks();
@@ -32,6 +42,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       sut.setup({
         enabled,
         taskManager: taskManagerSetup,
+        telemetry: mockTelemetry,
       });
       expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
         'security:trial-companion-milestone': {
@@ -48,6 +59,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       sut.setup({
         enabled,
         taskManager: taskManagerSetup,
+        telemetry: mockTelemetry,
       });
       await sut.start({
         taskManager: taskManagerStart,
@@ -74,6 +86,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       sut.setup({
         enabled: true,
         taskManager: taskManagerSetup,
+        telemetry: mockTelemetry,
       });
     });
 
@@ -93,6 +106,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       expect(repo.update).not.toHaveBeenCalled();
       expect(repo.create).toHaveBeenCalledTimes(1);
       expect(mockDetectorUndefined).toHaveBeenCalledTimes(4);
+      expect(mockTelemetry.reportEvent).toHaveBeenCalled();
     });
 
     it('does not run detectors if abort signal', async () => {
@@ -107,6 +121,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       expect(repo.update).not.toHaveBeenCalled();
       expect(repo.create).not.toHaveBeenCalled();
       expect(mockDetectorUndefined).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
     });
 
     it('no detectors - all done', async () => {
@@ -118,6 +133,7 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       await sut.refreshMilestones(abortController.signal);
       expect(repo.update).not.toHaveBeenCalled();
       expect(repo.create).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportEvent).toHaveBeenCalled();
     });
 
     it('runs detectors - runs all detectors', async () => {
@@ -136,6 +152,12 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       expect(mockDetectorM2).toHaveBeenCalledTimes(1);
       expect(repo.create).toHaveBeenCalledWith([Milestone.M1, Milestone.M2]);
       expect(repo.update).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+        TRIAL_COMPANION_DEPLOYMENT_STATE.eventType,
+        {
+          openTODOs: [Milestone.M1, Milestone.M2],
+        }
+      );
     });
 
     it('runs detectors - update existing milestone', async () => {
@@ -157,6 +179,12 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       expect(mockDetectorM2).toHaveBeenCalled();
       expect(repo.create).not.toHaveBeenCalled();
       expect(repo.update).toHaveBeenCalledWith({ openTODOs: [Milestone.M2], savedObjectId: 'abc' });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+        TRIAL_COMPANION_DEPLOYMENT_STATE.eventType,
+        {
+          openTODOs: [Milestone.M2],
+        }
+      );
     });
 
     it('runs detectors - does not update the same TODO list', async () => {
@@ -196,6 +224,12 @@ describe('TrialCompanionMilestoneServiceImpl', () => {
       });
       await expect(sut.refreshMilestones(abortController.signal)).resolves.not.toThrowError();
       expect(repo.getCurrent).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+        TRIAL_COMPANION_MILESTONE_REFRESH_ERROR.eventType,
+        {
+          message: 'test error',
+        }
+      );
     });
 
     it('does not propagate an error from repo.update', async () => {

@@ -25,7 +25,7 @@ type ProductInterceptPrompterStartDeps = Omit<
   InterceptServiceStartDeps,
   'persistInterceptRunId' | 'staticAssetsHelper' | 'resetInterceptTimingRecord'
 > &
-  Pick<CoreStart, 'http'>;
+  Pick<CoreStart, 'http'> & { userAllowsFeedback: boolean };
 
 export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
@@ -33,6 +33,7 @@ export class InterceptPrompter {
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
   // observer for page visibility changes, shared across all intercepts
   private pageHidden$?: Rx.Observable<boolean>;
+  private userAllowsFeedback?: boolean;
 
   // Registry for intercept timers, used to track activation of a particular intercept for each user
   private interceptTimerRegistry = new Proxy<Record<Intercept['id'], { timerStart: Date }>>(
@@ -72,7 +73,9 @@ export class InterceptPrompter {
     return {};
   }
 
-  start({ http, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+  start({ http, userAllowsFeedback, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+    this.userAllowsFeedback = userAllowsFeedback;
+
     const { getUserTriggerData$, updateUserTriggerData } =
       this.userInterceptRunPersistenceService.start(http);
 
@@ -108,6 +111,8 @@ export class InterceptPrompter {
       config: () => Promise<Omit<Intercept, 'id'>>;
     }
   ) {
+    if (!this.userAllowsFeedback) return Rx.EMPTY;
+
     return Rx.from(
       http.post<NonNullable<TriggerInfo>>(TRIGGER_INFO_API_ROUTE, {
         body: JSON.stringify({
