@@ -327,7 +327,7 @@ export function useOnSubmit({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
-  defaultPolicyData?: Partial<PackagePolicy>;
+  defaultPolicyData?: Partial<NewPackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();

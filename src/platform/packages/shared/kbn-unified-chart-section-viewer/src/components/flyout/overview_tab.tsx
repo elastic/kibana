@@ -204,7 +204,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             `}
           />
           <EuiSpacer size="s" />
-          {dimensionListItems.length >= DEFAULT_PAGINATION_SIZE && (
+          {sortedDimensions.length >= DEFAULT_PAGINATION_SIZE && (
             <EuiTablePagination
               data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"
               aria-label={i18n.translate(
