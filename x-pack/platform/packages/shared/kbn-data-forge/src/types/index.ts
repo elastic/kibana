@@ -117,6 +117,7 @@ export const DestinationRT = rt.union([
 export type Destination = rt.TypeOf<typeof DestinationRT>;
 
 export const ConfigRT = rt.type({
+  destination: DestinationRT,
   elasticsearch: rt.type({
     host: rt.string,
     username: rt.string,
