@@ -18,6 +18,8 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiTourStep,
+  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -396,23 +398,58 @@ export function StreamsTreeTable({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiLink
-                    data-test-subj={`streamsNameLink-${item.stream.name}`}
-                    href={router.link('/{key}', {
-                      path: { key: item.stream.name },
-                      query: { rangeFrom, rangeTo },
-                    })}
-                    onClick={(e: React.MouseEvent) => {
-                      e.preventDefault();
-                      router.push('/{key}', {
-                        path: { key: item.stream.name },
-                        query: { rangeFrom, rangeTo },
-                      });
-                    }}
-                  >
-                    <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
-                  </EuiLink>
+                  <EuiFlexGroup direction="column" gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      <EuiLink
+                        data-test-subj={`streamsNameLink-${item.stream.name}`}
+                        href={router.link('/{key}', {
+                          path: { key: item.stream.name },
+                          query: { rangeFrom, rangeTo },
+                        })}
+                        onClick={(e: React.MouseEvent) => {
+                          e.preventDefault();
+                          router.push('/{key}', {
+                            path: { key: item.stream.name },
+                            query: { rangeFrom, rangeTo },
+                          });
+                        }}
+                      >
+                        <EuiHighlight search={searchQuery?.text ?? ''}>
+                          {Streams.ingest.all.Definition.is(item.stream) && item.stream.title
+                            ? item.stream.title
+                            : item.stream.name}
+                        </EuiHighlight>
+                      </EuiLink>
+                    </EuiFlexItem>
+                    {Streams.ingest.all.Definition.is(item.stream) && item.stream.title && (
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued" data-test-subj="streamNameSubtitle">
+                          <EuiHighlight search={searchQuery?.text ?? ''}>
+                            {item.stream.name}
+                          </EuiHighlight>
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
+                {Streams.ingest.all.Definition.is(item.stream) &&
+                  item.stream.tags &&
+                  item.stream.tags.length > 0 && (
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+                        {item.stream.tags.map((tag) => (
+                          <EuiFlexItem key={tag} grow={false}>
+                            <EuiBadge
+                              data-test-subj={`streamTag-${item.stream.name}-${tag}`}
+                              color="hollow"
+                            >
+                              {tag}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
               </EuiFlexGroup>
             );
           },
