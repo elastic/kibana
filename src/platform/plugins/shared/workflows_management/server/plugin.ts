@@ -194,7 +194,11 @@ export class WorkflowsPlugin
     stepSchemas.initialize(plugins.workflowsExtensions);
 
     // Initialize workflow task scheduler with the start contract
-    this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
+    this.workflowTaskScheduler = new WorkflowTaskScheduler(
+      this.logger,
+      plugins.taskManager,
+      plugins.workflowsExtensions
+    );
 
     // Set task scheduler and security service in workflows service
     if (this.workflowsService) {

@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
+import { StepCost } from '../../step_registry/types';
 
 export const DataMapStepTypeId = 'data.map';
 
@@ -38,4 +39,5 @@ export const dataMapStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
+  cost: StepCost.Light,
 };

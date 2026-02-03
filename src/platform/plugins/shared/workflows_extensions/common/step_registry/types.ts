@@ -10,6 +10,33 @@
 import type { z } from '@kbn/zod/v4';
 
 /**
+ * Resource cost tier for workflow steps.
+ * Determines how much Task Manager capacity a workflow containing this step consumes.
+ *
+ * The workflow execution engine uses the highest cost step in a workflow to determine
+ * the overall workflow cost, which affects Task Manager slot allocation.
+ */
+export enum StepCost {
+  /**
+   * Low-cost steps: simple data transforms, quick IO operations.
+   * Examples: data.map, data.dedupe, elasticsearch.search
+   */
+  Light = 'light',
+
+  /**
+   * Default cost: typical API calls, moderate processing.
+   * Examples: HTTP calls to external APIs, webhook notifications
+   */
+  Normal = 'normal',
+
+  /**
+   * High-cost steps: LLM calls, large data processing, memory-intensive operations.
+   * Examples: ai.prompt, ai.summarize, agent.call
+   */
+  Heavy = 'heavy',
+}
+
+/**
  * Common step definition fields shared between server and public.
  * Input and output types are automatically inferred from the schemas.
  */
@@ -44,4 +71,17 @@ export interface CommonStepDefinition<
    * Example: `agent-id` for agent.call step.
    */
   configSchema?: ConfigSchema;
+
+  /**
+   * Resource cost tier for this step type.
+   * Used by the workflow execution engine to determine Task Manager slot allocation
+   * for workflows containing this step.
+   *
+   * - 'light': IO-bound operations, minimal memory (e.g., HTTP GET, ES queries)
+   * - 'normal': Standard operations (default if not specified)
+   * - 'heavy': Memory-intensive or long-running (e.g., LLM calls, large data processing)
+   *
+   * @default StepCost.Normal
+   */
+  cost?: StepCost;
 }

@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
+import { StepCost } from '../../step_registry/types';
 
 export const DataRegexReplaceStepTypeId = 'data.regex_replace' as const;
 
@@ -46,4 +47,5 @@ export const dataRegexReplaceStepCommonDefinition: CommonStepDefinition<
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema,
+  cost: StepCost.Light,
 };

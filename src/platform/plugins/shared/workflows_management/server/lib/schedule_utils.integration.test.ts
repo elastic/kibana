@@ -316,9 +316,10 @@ describe('RRule Scheduling Integration', () => {
       const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
 
       // This is the format that would be passed to TaskManager.schedule()
+      // Note: taskType is now cost-tiered (e.g., workflow:scheduled:normal)
       const taskInstance = {
         id: 'workflow:test-workflow:scheduled',
-        taskType: 'workflow:scheduled',
+        taskType: 'workflow:scheduled:normal',
         schedule,
         params: {
           workflow: {

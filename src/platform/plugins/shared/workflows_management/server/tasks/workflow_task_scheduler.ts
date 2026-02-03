@@ -10,6 +10,11 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import {
+  getTaskTypeForCost,
+  inferWorkflowCost,
+} from '@kbn/workflows-execution-engine/server/lib/infer_workflow_cost';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
@@ -23,7 +28,8 @@ export interface WorkflowTaskSchedulerParams {
 export class WorkflowTaskScheduler {
   constructor(
     private readonly logger: Logger,
-    private readonly taskManager: TaskManagerStartContract
+    private readonly taskManager: TaskManagerStartContract,
+    private readonly workflowsExtensions?: WorkflowsExtensionsServerPluginStart
   ) {}
 
   /**
@@ -39,7 +45,7 @@ export class WorkflowTaskScheduler {
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
+        const taskId = await this.scheduleWorkflowTask(workflow, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
         this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -59,7 +65,7 @@ export class WorkflowTaskScheduler {
    * Schedules a single workflow task for a specific trigger
    */
   async scheduleWorkflowTask(
-    workflowId: string,
+    workflow: EsWorkflow,
     spaceId: string,
     trigger: WorkflowTrigger,
     request?: KibanaRequest
@@ -72,16 +78,26 @@ export class WorkflowTaskScheduler {
       const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
 
       this.logger.debug(
-        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+        `RRule schedule created for workflow ${workflow.id}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
       );
     }
 
+    // Infer cost from workflow definition to route to the appropriate task type
+    const costTier = workflow.definition
+      ? inferWorkflowCost(workflow.definition, this.workflowsExtensions)
+      : 'normal';
+    const taskType = getTaskTypeForCost('workflow:scheduled', costTier);
+
+    this.logger.debug(
+      `Inferred cost tier '${costTier}' for scheduled workflow ${workflow.id}, using task type '${taskType}'`
+    );
+
     const taskInstance = {
-      id: `workflow:${workflowId}:${trigger.type}`,
-      taskType: 'workflow:scheduled',
+      id: `workflow:${workflow.id}:${trigger.type}`,
+      taskType,
       schedule,
       params: {
-        workflowId,
+        workflowId: workflow.id,
         spaceId,
         triggerType: trigger.type,
       },
@@ -109,12 +125,22 @@ export class WorkflowTaskScheduler {
 
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
     try {
-      // Find all tasks for this workflow
+      // Find all tasks for this workflow across all cost tiers
+      // Task types are: workflow:scheduled:light, workflow:scheduled:normal, workflow:scheduled:heavy
       const tasks = await this.taskManager.fetch({
         query: {
           bool: {
             must: [
-              { term: { 'task.taskType': 'workflow:scheduled' } },
+              {
+                bool: {
+                  should: [
+                    { term: { 'task.taskType': 'workflow:scheduled:light' } },
+                    { term: { 'task.taskType': 'workflow:scheduled:normal' } },
+                    { term: { 'task.taskType': 'workflow:scheduled:heavy' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
               { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
             ],
           },

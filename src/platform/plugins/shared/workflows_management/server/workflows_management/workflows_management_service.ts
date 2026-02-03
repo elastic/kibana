@@ -248,9 +248,28 @@ export class WorkflowsService {
 
     // Schedule the workflow if it has triggers
     if (this.taskScheduler && workflowToCreate.definition?.triggers) {
+      const workflowForScheduling: EsWorkflow = {
+        id,
+        name: workflowData.name,
+        enabled: workflowData.enabled,
+        tags: workflowData.tags,
+        definition: workflowData.definition ?? undefined,
+        yaml: workflowData.yaml,
+        createdBy: workflowData.createdBy,
+        lastUpdatedBy: workflowData.lastUpdatedBy,
+        valid: workflowData.valid,
+        deleted_at: workflowData.deleted_at,
+        createdAt: new Date(workflowData.created_at),
+        lastUpdatedAt: new Date(workflowData.updated_at),
+      };
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled') {
-          await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
+          await this.taskScheduler.scheduleWorkflowTask(
+            workflowForScheduling,
+            spaceId,
+            trigger,
+            request
+          );
         }
       }
     }
