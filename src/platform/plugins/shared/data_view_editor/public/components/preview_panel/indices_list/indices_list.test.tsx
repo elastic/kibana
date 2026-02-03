@@ -13,7 +13,7 @@ import type { IndicesListProps } from './indices_list';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IndicesList, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import userEvent from '@testing-library/user-event';
 
