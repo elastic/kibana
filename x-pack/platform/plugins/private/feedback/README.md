@@ -8,7 +8,7 @@ Feedback plugin registers a button in the Chrome global header area which is sho
 
 - feedback is globaly enabled (`core.notifications.feedback.isEnabled()`)
 - telemetry is enabled (`telemetry.telemetryService.canSendTelemetry()`)
-- telemetry is opted in (`telemetry.telemetryService.canSendTelemetry()`)
+- telemetry is opted in (`telemetry.telemetryService.getIsOptedIn()`)
 
 Once clicked, a modal containing feedback questions and CSAT score buttons are displayed to the user. The questions are context-aware and are defined per application in `@kbn/feedback-registry` package. In case when an application has no defined questions a default set of questions is displayed.
 
