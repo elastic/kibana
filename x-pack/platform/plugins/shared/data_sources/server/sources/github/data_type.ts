@@ -7,26 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
-import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
+import { DataSourceBase, EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin/common';
 
-export const githubDataSource: DataSource = {
-  id: 'github',
-  name: 'Github',
-  description: i18n.translate('xpack.dataSources.github.description', {
+class GithubDataSource extends DataSourceBase {
+  id = 'github';
+  name = 'Github';
+  description = i18n.translate('xpack.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
-  }),
+  });
 
-  iconType: '.github',
+  iconType = '.github';
 
-  oauthConfiguration: {
+  oauthConfiguration = {
     provider: EARSSupportedOAuthProvider.GITHUB,
     initiatePath: '/oauth/start/github',
     fetchSecretsPath: '/oauth/fetch_request_secrets',
     oauthBaseUrl: 'https://localhost:8052', // update once EARS deploys to QA
-  },
+  };
 
-  stackConnector: {
+  stackConnector = {
     type: '.mcp',
     config: {
       serverUrl: 'https://api.githubcopilot.com/mcp/',
@@ -51,9 +50,11 @@ export const githubDataSource: DataSource = {
       'list_tags',
       'pull_request_read',
     ],
-  },
+  };
 
-  workflows: {
+  workflows = {
     directory: __dirname + '/workflows',
-  },
-};
+  };
+}
+
+export const githubDataSource = new GithubDataSource();

@@ -16,6 +16,7 @@ export type {
   CustomOAuthConfiguration,
   WorkflowInfo,
 } from './data_source_spec';
+export { DataSourceBase } from './data_source_base';
 export { loadWorkflows } from './workflow_loader';
 
 export { EARSSupportedOAuthProvider } from './data_source_spec';
