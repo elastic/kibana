@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint.search'
-description: 'Search SharePoint content with Microsoft Graph search. Actions: search. The query input accepts Keyword Query Language (KQL).'
+description: 'Search SharePoint content with Microsoft Graph search. Actions and inputs: search (query, optional entity_types, optional region, optional from, optional size). The query input accepts Keyword Query Language (KQL).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

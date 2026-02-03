@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint.list'
-description: 'List/fetch SharePoint resources. Actions: getAllSites, getSite, getSitePages, getSiteDrives, getSiteLists, getSiteListItems, getDriveItems.'
+description: 'List/fetch SharePoint resources. Actions and inputs: getAllSites (no inputs); getSite (site_id OR relative_url); getSitePages (site_id); getSiteDrives (site_id); getSiteLists (site_id); getSiteListItems (site_id, list_id); getDriveItems (drive_id, optional path).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
