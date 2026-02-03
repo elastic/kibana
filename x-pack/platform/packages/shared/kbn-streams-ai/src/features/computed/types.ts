@@ -25,7 +25,6 @@ export interface ComputedFeatureGeneratorOptions {
 export interface ComputedFeatureGenerator {
   /**
    * Unique type identifier for this computed feature.
-   * This is also used as the feature's name to ensure consistent ID generation.
    */
   type: string;
 
@@ -42,7 +41,6 @@ export interface ComputedFeatureGenerator {
 
   /**
    * Generates the computed value for this feature.
-   * @returns The computed value/data (analysis results, samples, etc.)
    */
   generate: (options: ComputedFeatureGeneratorOptions) => Promise<Record<string, unknown>>;
 }

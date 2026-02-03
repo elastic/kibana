@@ -146,6 +146,7 @@ export {
   type FeatureStatus,
   DATASET_ANALYSIS_FEATURE_TYPE,
   isFeature,
+  isComputedFeature,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,

@@ -88,11 +88,13 @@ export function FeatureDetailsFlyout({
       title: PROPERTIES_LABEL,
       description: (
         <EuiText size="s">
-          {Object.entries(feature.properties).map(([key, value]) => (
-            <div key={key}>
-              <b>{key}</b> {value}
-            </div>
-          ))}
+          {Object.entries(feature.properties)
+            .filter(([, value]) => typeof value === 'string')
+            .map(([key, value]) => (
+              <EuiText size="s" key={key}>
+                <strong>{key}</strong> {value as string}
+              </EuiText>
+            ))}
         </EuiText>
       ),
     },

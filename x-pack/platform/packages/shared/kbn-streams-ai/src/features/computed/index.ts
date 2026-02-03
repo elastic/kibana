@@ -50,19 +50,18 @@ export function getComputedFeatureInstructions(): string {
 }
 
 /**
- * Converts a generator and its computed value into a full BaseFeature.
- * Enforces that name = type.
+ * Converts a generator and its computed value into a BaseFeature.
  */
 function toComputedFeature(
   generator: ComputedFeatureGenerator,
   value: Record<string, unknown>
 ): BaseFeature {
   return {
-    type: generator.type,
+    id: generator.type,
     description: generator.description,
+    type: generator.type,
     properties: value,
     confidence: 100,
-    id: generator.type,
   };
 }
 

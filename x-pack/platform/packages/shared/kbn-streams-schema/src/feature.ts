@@ -19,7 +19,7 @@ export const baseFeatureSchema = z.object({
   subtype: z.string().optional(),
   title: z.string().optional(),
   description: z.string(),
-  properties: z.record(z.string(), z.any()),
+  properties: z.record(z.string(), z.unknown()),
   confidence: z.number().min(0).max(100),
   evidence: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
@@ -41,4 +41,8 @@ export type Feature = z.infer<typeof featureSchema>;
 
 export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
+}
+
+export function isComputedFeature(feature: BaseFeature) {
+  return feature.type === DATASET_ANALYSIS_FEATURE_TYPE;
 }

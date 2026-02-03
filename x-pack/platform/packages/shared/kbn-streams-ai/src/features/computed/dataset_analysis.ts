@@ -14,8 +14,8 @@ export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
 
   description: 'Dataset schema and field analysis including value distributions and coverage',
 
-  llmInstructions: `Contains the full schema, field distributions, and sample values from the log dataset.
-Use the \`value.analysis\` field to understand available fields and their value distributions.
+  llmInstructions: `Contains the schema (excluding empty fields), field distributions, and sample values from the log dataset.
+Use the \`properties.analysis\` field to understand available fields and their value distributions.
 This is useful for understanding what fields are available for querying and what values they typically contain.`,
 
   generate: async ({ stream, start, end, esClient }) => {

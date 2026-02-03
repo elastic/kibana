@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { DATASET_ANALYSIS_FEATURE_TYPE, type Feature, type Streams } from '@kbn/streams-schema';
+import { isComputedFeature, type Feature, type Streams } from '@kbn/streams-schema';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from './use_fetch_error_toast';
@@ -36,8 +36,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
   });
 
   const features: Feature[] = useMemo(
-    () =>
-      (data?.features ?? []).filter((feature) => feature.type !== DATASET_ANALYSIS_FEATURE_TYPE),
+    () => (data?.features ?? []).filter((feature) => !isComputedFeature(feature)),
     [data?.features]
   );
 
