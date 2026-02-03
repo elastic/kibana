@@ -19,6 +19,7 @@ export function useStateSyncingActions({
   indices,
   filters,
   shouldUpdate,
+  entityIndex,
 }: {
   /**
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
@@ -28,6 +29,7 @@ export function useStateSyncingActions({
   indices: string[];
   shouldUpdate: boolean;
   filters: object;
+  entityIndex: string;
 }) {
   const dispatch = useDispatch();
   const locationSearch = useLocation().search;
@@ -41,6 +43,7 @@ export function useStateSyncingActions({
         indices,
         shouldUpdate,
         filters,
+        entityIndex,
       })
     );
   }, [
@@ -51,5 +54,6 @@ export function useStateSyncingActions({
     indices,
     shouldUpdate,
     filters,
+    entityIndex,
   ]);
 }
