@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useCallback, useState } from 'react';
@@ -134,6 +135,19 @@ export const FullScreenWaterfall = ({
       resizable={true}
       minWidth={minWidth}
     >
+      {/**
+       * This global style ensures popovers (field action menus, data grid cell popovers, etc.)
+       * appear above the flyout layer. Popovers use portals and render in document.body,
+       * so they need a z-index higher than the flyout to be visible.
+       */}
+      <Global
+        styles={css`
+          .euiDataGridRowCell__popover,
+          .euiPopover__panel[data-popover-open='true'] {
+            z-index: ${euiTheme.levels.menu} !important;
+          }
+        `}
+      />
       <EuiFlyoutHeader>
         <EuiTitle size="l">
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
