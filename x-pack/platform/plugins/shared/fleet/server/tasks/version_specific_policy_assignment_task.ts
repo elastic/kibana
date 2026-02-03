@@ -203,7 +203,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions:true`,
       perPage: AGENT_POLICIES_BATCHSIZE,
-      fields: ['id', 'revision'],
+      fields: ['id'],
       spaceId: '*',
     });
 
@@ -247,7 +247,6 @@ export class VersionSpecificPolicyAssignmentTask {
       esClient,
       soClient,
       agentPolicy.id,
-      agentPolicy.revision,
       abortController
     );
 
@@ -273,15 +272,16 @@ export class VersionSpecificPolicyAssignmentTask {
    *
    * Criteria:
    * 1. Agents on parent policy (newly enrolled) that need versioned policy
-   * 2. Agents on versioned policy but upgraded to a different version
-   * 3. Agents on versioned policy but not using latest policy revision
-   * 4. Recently upgraded agents (upgraded_at > now - 30m)
+   * 2. Agents on versioned policy but upgraded to a different version (recently upgraded)
+   *
+   * Note: Agents already on the correct versioned policy but with outdated revisions
+   * do NOT need reassignment - they will receive policy updates automatically through
+   * fleet-server after deployPolicies updates .fleet-policies.
    */
   private async findAgentsNeedingVersionSpecificPolicies(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    currentRevision: number,
     abortController: AbortController
   ): Promise<AgentVersionGroup[]> {
     const agentsByMinorVersion = new Map<string, string[]>();
@@ -302,11 +302,11 @@ export class VersionSpecificPolicyAssignmentTask {
     //   - May need to move to a different versioned policy
     const versionedPolicyKuery = `policy_id:${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}* AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
-    // Query 3: Agents on versioned policy with outdated policy revision
-    // Note: policy_revision_idx tracks which revision the agent is using
-    const outdatedRevisionKuery = `policy_id:${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}* AND policy_revision_idx < ${currentRevision}`;
+    // Note: We intentionally do NOT query for agents with outdated policy revisions.
+    // Agents already on the correct versioned policy will receive updated revisions
+    // automatically through fleet-server after deployPolicies updates .fleet-policies.
 
-    const combinedKuery = `(${parentPolicyKuery}) OR (${versionedPolicyKuery}) OR (${outdatedRevisionKuery})`;
+    const combinedKuery = `(${parentPolicyKuery}) OR (${versionedPolicyKuery})`;
 
     this.logger.debug(
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
@@ -353,12 +353,10 @@ export class VersionSpecificPolicyAssignmentTask {
           const { baseId, version: policyVersion } =
             splitVersionSuffixFromPolicyId(currentPolicyId);
 
-          // If agent is on a versioned policy with matching version and up-to-date revision, skip
-          if (
-            policyVersion === minorVersion &&
-            baseId === agentPolicyId &&
-            agent.policy_revision === currentRevision
-          ) {
+          // If agent is on a versioned policy with matching version, skip.
+          // We don't check policy_revision here - agents with outdated revisions
+          // will receive updates automatically through fleet-server after deployPolicies.
+          if (policyVersion === minorVersion && baseId === agentPolicyId) {
             continue;
           }
         }

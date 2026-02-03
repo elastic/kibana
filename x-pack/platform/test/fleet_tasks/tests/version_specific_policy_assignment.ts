@@ -15,6 +15,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const retry = getService('retry');
   const TASK_INTERVAL = 30000; // as set in the config
 
   let policyId: string;
@@ -23,34 +24,6 @@ export default function (providerContext: FtrProviderContextWithServices) {
   async function waitForTask() {
     // Sleep for the duration of the task interval plus buffer for processing
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL + 5000));
-  }
-
-  async function waitForResult(
-    verifySuccess: () => Promise<boolean>,
-    maxAttempts: number = 10,
-    intervalMs: number = 3000
-  ) {
-    await new Promise((resolve, reject) => {
-      let attempts = 0;
-      const intervalId = setInterval(async () => {
-        if (attempts > maxAttempts) {
-          clearInterval(intervalId);
-          reject(new Error('wait timed out'));
-        }
-        ++attempts;
-
-        try {
-          if (await verifySuccess()) {
-            clearInterval(intervalId);
-            resolve({});
-          }
-        } catch (e) {
-          // continue waiting
-        }
-      }, intervalMs);
-    }).catch((e) => {
-      throw e;
-    });
   }
 
   async function getAgent(agentId: string) {
@@ -142,10 +115,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await waitForTask();
 
       // Agent should be reassigned to versioned policy
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
         const expectedVersionedPolicyId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
-        return agent.policy_id === expectedVersionedPolicyId;
+        expect(agent.policy_id).to.be(expectedVersionedPolicyId);
       });
 
       const agent = await getAgent('agent1');
@@ -161,16 +134,14 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await waitForTask();
 
       // Agents should be grouped by minor version
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent1 = await getAgent('agent1');
         const agent2 = await getAgent('agent2');
         const agent3 = await getAgent('agent3');
 
-        return (
-          agent1.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18` &&
-          agent2.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18` &&
-          agent3.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}9.3`
-        );
+        expect(agent1.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+        expect(agent2.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+        expect(agent3.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}9.3`);
       });
 
       const agent1 = await getAgent('agent1');
@@ -191,9 +162,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await waitForTask();
 
       // Wait for the agent to be reassigned
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
-        return agent.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
       });
 
       // Check that versioned policy was created in .fleet-policies
@@ -213,9 +184,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0');
       await waitForTask();
 
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
-        return agent.policy_id === versionedPolicyId;
+        expect(agent.policy_id).to.be(versionedPolicyId);
       });
 
       // Get the current policy revision
@@ -242,9 +213,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await waitForTask();
 
       // Wait for active agent to be reassigned
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
-        return agent.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`;
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
       });
 
       // Active agent should be reassigned
@@ -292,9 +263,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await waitForTask();
 
       // Agent should be reassigned to the 8.18 versioned policy
-      await waitForResult(async () => {
+      await retry.tryForTime(30000, async () => {
         const agent = await getAgent('agent1');
-        return agent.policy_id === newVersionedPolicyId;
+        expect(agent.policy_id).to.be(newVersionedPolicyId);
       });
 
       const agent = await getAgent('agent1');
@@ -322,13 +293,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
         await waitForTask();
 
         // Both agents should be reassigned to their respective versioned policies
-        await waitForResult(async () => {
+        await retry.tryForTime(30000, async () => {
           const agent1 = await getAgent('agent1');
           const agent2 = await getAgent('agent2');
-          return (
-            agent1.policy_id === `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18` &&
-            agent2.policy_id === `${secondPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}9.0`
-          );
+          expect(agent1.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+          expect(agent2.policy_id).to.be(`${secondPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}9.0`);
         });
 
         const agent1 = await getAgent('agent1');

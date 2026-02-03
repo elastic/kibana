@@ -314,7 +314,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
     });
 
-    it('Should skip agents already on correct versioned policy with current revision', async () => {
+    it('Should skip agents already on correct versioned policy regardless of revision', async () => {
       const agentPolicies = [
         {
           id: 'policy-1',
@@ -323,7 +323,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         },
       ] as AgentPolicy[];
 
-      // Agent already on correct versioned policy with current revision
+      // Agent already on correct versioned policy (revision doesn't matter)
       const agents = [
         {
           id: 'agent-1',
@@ -351,7 +351,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
     });
 
-    it('Should reassign agents on versioned policy with outdated revision', async () => {
+    it('Should NOT reassign agents on versioned policy with outdated revision - fleet-server handles updates', async () => {
       const agentPolicies = [
         {
           id: 'policy-1',
@@ -360,12 +360,13 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         },
       ] as AgentPolicy[];
 
-      // Agent on versioned policy but with old revision
+      // Agent on correct versioned policy but with old revision - should be skipped
+      // Fleet-server will push the updated policy revision automatically after deployPolicies
       const agents = [
         {
           id: 'agent-1',
           policy_id: 'policy-1#8.18',
-          policy_revision: 3, // outdated
+          policy_revision: 3, // outdated, but on correct policy
           agent: { version: '8.18.0' },
         },
       ] as Agent[];
@@ -384,12 +385,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       await runTask();
 
-      expect(mockAgentPolicyService.deployPolicies).toHaveBeenCalledWith(
-        expect.anything(),
-        ['policy-1'],
-        undefined,
-        { agentVersions: ['8.18'] }
-      );
+      // Should NOT deploy policies - agent is on correct versioned policy, just has old revision
+      // Fleet-server will handle pushing the new revision after the normal policy update flow
+      expect(mockAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
     });
 
     it('Should handle agents without version gracefully', async () => {

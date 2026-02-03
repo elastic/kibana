@@ -32,6 +32,7 @@ import {
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
+import { FleetError } from '../../errors';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -256,7 +257,7 @@ export const storedPackagePoliciesToAgentInputs = async (
         const versionInputs = inputsForVersions[agentVersion];
         if (!versionInputs) {
           span?.end();
-          throw new Error(
+          throw new FleetError(
             `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
               `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
           );
