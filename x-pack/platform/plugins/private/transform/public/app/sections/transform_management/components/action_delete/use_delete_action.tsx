@@ -21,6 +21,7 @@ import {
   deleteActionNameText,
   isDeleteActionDisabled,
   DeleteActionName,
+  getDeleteActionDisabledMessage,
 } from './delete_action_name';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
@@ -97,7 +98,9 @@ export const useDeleteAction = (forceDisable: boolean) => {
         isTransformListRowWithStats(item) &&
         !isDeleteActionDisabled([item], forceDisable) &&
         canDeleteTransform,
-      description: deleteActionNameText,
+      description: (item: TransformListRow) =>
+        getDeleteActionDisabledMessage({ items: [item], canDeleteTransform }) ??
+        deleteActionNameText,
       icon: 'trash',
       type: 'icon',
       onClick: (item: TransformListRow) => openModal([item]),

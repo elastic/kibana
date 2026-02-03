@@ -18,9 +18,6 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
     const props: DeleteActionNameProps = {
       items: [],
       canDeleteTransform: true,
-      disabled: false,
-      isBulkAction: false,
-      forceDisable: false,
     };
 
     const { container } = render(<DeleteActionName {...props} />);
