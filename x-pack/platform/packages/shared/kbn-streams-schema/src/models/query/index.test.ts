@@ -61,9 +61,9 @@ describe('QueryStream', () => {
             view: 'stream.query-stream',
             esql: 'FROM logs | WHERE service.name == "query-child"',
           },
+          query_streams: [],
         },
         inherited_fields: {},
-        sub_query_streams: [],
         ...emptyAssets,
       },
     ])('is valid', (val) => {
