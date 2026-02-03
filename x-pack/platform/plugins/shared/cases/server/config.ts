@@ -22,6 +22,9 @@ export const ConfigSchema = schema.object({
       }),
     }),
   }),
+  attachments: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   files: schema.object({
     allowedMimeTypes: schema.arrayOf(schema.string({ minLength: 1 }), {
       defaultValue: ALLOWED_MIME_TYPES,
