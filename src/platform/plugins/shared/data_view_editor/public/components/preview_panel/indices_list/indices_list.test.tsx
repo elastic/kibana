@@ -54,8 +54,8 @@ describe('IndicesList', () => {
     };
 
     renderWithI18n(<IndicesList {...propsWithMoreIndices} query="" />);
-    const paginationContainer = screen.getByTestId('indicesListPagination');
-    const paginationButton = within(paginationContainer).getByText('2');
+    const paginationButton = screen.getByTestId('pagination-button-1');
+
     await user.click(paginationButton);
 
     expect(screen.getByText('second-page')).toBeVisible();
@@ -72,8 +72,7 @@ describe('IndicesList', () => {
     expect(rows).toHaveLength(10);
     await user.click(rowsPerPageButton);
 
-    const listMenu = screen.getByTestId('perPageIndicesListMenu');
-    const option1 = within(listMenu).getByText('5');
+    const option1 = screen.getByTestId('tablePagination-5-rows');
     await user.click(option1);
 
     rows = screen.getAllByTestId('indicesListTableRow');

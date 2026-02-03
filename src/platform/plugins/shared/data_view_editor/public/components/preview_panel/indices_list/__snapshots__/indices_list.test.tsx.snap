@@ -109,7 +109,6 @@ exports[`IndicesList should render normally 1`] = `
       <nav
         aria-label="Indices list pagination"
         class="euiPagination emotion-euiPagination"
-        id="customizablePagination"
       >
         <span
           aria-atomic="true"
