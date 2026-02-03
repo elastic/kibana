@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { markdownByValueEmbeddableSchema } from './schemas';
 import { APP_ICON, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
 
 export const markdownSavedObjectType: SavedObjectsType = {
   name: MARKDOWN_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'multiple',
   management: {
     icon: APP_ICON,
     defaultSearchField: 'title',
