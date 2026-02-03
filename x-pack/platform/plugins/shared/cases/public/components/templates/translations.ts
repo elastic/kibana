@@ -240,6 +240,32 @@ export const SUCCESS_EXPORTING_TEMPLATE = i18n.translate(
   }
 );
 
+export const ERROR_BULK_DELETING_TEMPLATES = i18n.translate(
+  'xpack.cases.templates.errorBulkDeletingTemplates',
+  {
+    defaultMessage: 'Error deleting templates',
+  }
+);
+
+export const SUCCESS_BULK_DELETING_TEMPLATES = (count: number) =>
+  i18n.translate('xpack.cases.templates.successBulkDeletingTemplates', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# template} other {# templates}} deleted successfully',
+  });
+
+export const ERROR_BULK_EXPORTING_TEMPLATES = i18n.translate(
+  'xpack.cases.templates.errorBulkExportingTemplates',
+  {
+    defaultMessage: 'Error exporting templates',
+  }
+);
+
+export const SUCCESS_BULK_EXPORTING_TEMPLATES = (count: number) =>
+  i18n.translate('xpack.cases.templates.successBulkExportingTemplates', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# template} other {# templates}} exported successfully',
+  });
+
 // Table column names
 export const COLUMN_NAME = i18n.translate('xpack.cases.templates.column.name', {
   defaultMessage: 'Name',
@@ -332,6 +358,19 @@ export const BULK_EXPORT_TEMPLATES = i18n.translate('xpack.cases.templates.bulkE
 export const BULK_DELETE_TEMPLATES = i18n.translate('xpack.cases.templates.bulkDeleteTemplates', {
   defaultMessage: 'Delete',
 });
+
+export const BULK_DELETE_TITLE = (count: number) =>
+  i18n.translate('xpack.cases.templates.bulkDeleteTitle', {
+    values: { count },
+    defaultMessage: 'Delete {count, plural, one {# template} other {# templates}}?',
+  });
+
+export const BULK_DELETE_MESSAGE = (count: number) =>
+  i18n.translate('xpack.cases.templates.bulkDeleteMessage', {
+    values: { count },
+    defaultMessage:
+      'This action will permanently delete {count, plural, one {this template} other {these {count} templates}}.',
+  });
 
 export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
   defaultMessage: 'Showing',

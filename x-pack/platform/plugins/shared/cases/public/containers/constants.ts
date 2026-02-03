@@ -78,6 +78,8 @@ export const casesMutationsKeys = {
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,
   exportTemplate: ['export-template'] as const,
+  bulkDeleteTemplates: ['bulk-delete-templates'] as const,
+  bulkExportTemplates: ['bulk-export-templates'] as const,
 };
 
 export const inferenceKeys = {

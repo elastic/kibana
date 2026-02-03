@@ -33,7 +33,18 @@ export interface DeleteTemplateResponse {
   success: boolean;
 }
 
+export interface BulkDeleteTemplatesResponse {
+  success: boolean;
+  deleted: string[];
+  errors: Array<{ id: string; error: string }>;
+}
+
 export interface ExportTemplateResponse {
+  filename: string;
+  content: string;
+}
+
+export interface BulkExportTemplatesResponse {
   filename: string;
   content: string;
 }

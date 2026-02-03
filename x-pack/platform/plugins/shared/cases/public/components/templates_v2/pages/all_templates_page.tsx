@@ -36,7 +36,7 @@ export const AllTemplatesPage: React.FC = () => {
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
 
-  const { queryParams, setQueryParams, sorting, selectedTemplates, selection } =
+  const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
 
   const { data, isLoading, refetch } = useGetTemplates({ queryParams });
@@ -50,6 +50,10 @@ export const AllTemplatesPage: React.FC = () => {
   const handleDeleteSuccess = useCallback(() => {
     setQueryParams({ page: 1 });
   }, [setQueryParams]);
+
+  const handleBulkActionSuccess = useCallback(() => {
+    deselectTemplates();
+  }, [deselectTemplates]);
 
   const {
     handleEdit,
@@ -133,7 +137,10 @@ export const AllTemplatesPage: React.FC = () => {
                 {i18n.SHOWING_TEMPLATES(totalTemplates)}
               </EuiText>
             </EuiFlexItem>
-            <TemplatesBulkActions selectedTemplates={selectedTemplates} />
+            <TemplatesBulkActions
+              selectedTemplates={selectedTemplates}
+              onActionSuccess={handleBulkActionSuccess}
+            />
             {hasFilters && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

@@ -135,16 +135,21 @@ describe('useTemplatesActions', () => {
       result.current.handleClone(mockTemplate);
     });
 
-    expect(cloneTemplateMock).toHaveBeenCalledWith({
-      template: {
-        name: expect.stringContaining(mockTemplate.name),
-        description: mockTemplate.description,
-        solution: mockTemplate.solution,
-        fields: mockTemplate.fields,
-        tags: mockTemplate.tags,
-        isDefault: false,
+    expect(cloneTemplateMock).toHaveBeenCalledWith(
+      {
+        template: {
+          name: expect.stringContaining(mockTemplate.name),
+          description: mockTemplate.description,
+          solution: mockTemplate.solution,
+          fields: mockTemplate.fields,
+          tags: mockTemplate.tags,
+          isDefault: false,
+        },
       },
-    });
+      {
+        onSuccess: expect.any(Function),
+      }
+    );
   });
 
   it('configures useCreateTemplate with disabled default toast for clone', () => {

@@ -7,13 +7,22 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import { TemplatesBulkActions } from './templates_bulk_actions';
 import { renderWithTestingProviders } from '../../../common/mock';
 import type { Template } from '../types';
+import * as api from '../api/api';
+
+jest.mock('../api/api');
+
+const apiMock = api as jest.Mocked<typeof api>;
 
 describe('TemplatesBulkActions', () => {
+  // EUI components use CSS animations that set pointer-events: none during transitions
+  // Using pointerEventsCheck: 0 skips this check which is standard for testing EUI components
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+
   const mockTemplates: Template[] = [
     {
       key: 'template-1',
@@ -43,6 +52,15 @@ describe('TemplatesBulkActions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    apiMock.bulkDeleteTemplates.mockResolvedValue({
+      success: true,
+      deleted: ['template-1', 'template-2'],
+      errors: [],
+    });
+    apiMock.bulkExportTemplates.mockResolvedValue({
+      filename: 'templates-bulk-export.yaml',
+      content: 'mock content',
+    });
   });
 
   it('renders nothing when no templates are selected', () => {
@@ -76,7 +94,7 @@ describe('TemplatesBulkActions', () => {
   it('opens popover when bulk actions button is clicked', async () => {
     renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
 
-    await userEvent.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('templates-bulk-actions-context-menu')).toBeInTheDocument();
     expect(screen.getByTestId('templates-bulk-action-export')).toBeInTheDocument();
@@ -86,7 +104,7 @@ describe('TemplatesBulkActions', () => {
   it('renders export action in popover', async () => {
     renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
 
-    await userEvent.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('templates-bulk-action-export')).toBeInTheDocument();
     expect(screen.getByText('Export')).toBeInTheDocument();
@@ -95,9 +113,100 @@ describe('TemplatesBulkActions', () => {
   it('renders delete action in popover', async () => {
     renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
 
-    await userEvent.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('templates-bulk-action-delete')).toBeInTheDocument();
     expect(screen.getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('calls bulkExportTemplates when export action is clicked', async () => {
+    renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-export'));
+
+    await waitFor(() => {
+      expect(apiMock.bulkExportTemplates).toHaveBeenCalledWith({
+        templateIds: ['template-1', 'template-2'],
+      });
+    });
+  });
+
+  it('shows confirmation modal when delete action is clicked', async () => {
+    renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+    expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
+    expect(
+      screen.getByText('This action will permanently delete these 2 templates.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows singular text in confirmation modal when one template is selected', async () => {
+    renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={[mockTemplates[0]]} />);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+    expect(await screen.findByText('Delete 1 template?')).toBeInTheDocument();
+    expect(
+      screen.getByText('This action will permanently delete this template.')
+    ).toBeInTheDocument();
+  });
+
+  it('calls bulkDeleteTemplates when deletion is confirmed', async () => {
+    renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+    expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(apiMock.bulkDeleteTemplates).toHaveBeenCalledWith({
+        templateIds: ['template-1', 'template-2'],
+      });
+    });
+  });
+
+  it('closes confirmation modal when cancel is clicked', async () => {
+    renderWithTestingProviders(<TemplatesBulkActions selectedTemplates={mockTemplates} />);
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+    expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('confirmModalCancelButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Delete 2 templates?')).not.toBeInTheDocument();
+    });
+
+    expect(apiMock.bulkDeleteTemplates).not.toHaveBeenCalled();
+  });
+
+  it('calls onActionSuccess callback after successful bulk delete', async () => {
+    const onActionSuccess = jest.fn();
+    renderWithTestingProviders(
+      <TemplatesBulkActions selectedTemplates={mockTemplates} onActionSuccess={onActionSuccess} />
+    );
+
+    await user.click(await screen.findByTestId('templates-bulk-actions-link-icon'));
+    await user.click(await screen.findByTestId('templates-bulk-action-delete'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Delete 2 templates?')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(onActionSuccess).toHaveBeenCalled();
+    });
   });
 });

@@ -12,7 +12,9 @@ import type {
   TemplateRequest,
   TemplateUpdateRequest,
   DeleteTemplateResponse,
+  BulkDeleteTemplatesResponse,
   ExportTemplateResponse,
+  BulkExportTemplatesResponse,
 } from '../types';
 
 // TODO: Uncomment when API is available
@@ -225,6 +227,129 @@ export const exportTemplate = async ({
   ];
   const yamlContent = yamlLines.join('\n');
   const filename = `${existingTemplate.name.toLowerCase().replace(/\s+/g, '-')}-template.yaml`;
+
+  // Mock: Trigger download (will be handled differently with real API response)
+  const blob = new Blob([yamlContent], { type: 'application/x-yaml' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  // ---- END MOCK IMPLEMENTATION ----
+
+  return {
+    filename,
+    content: yamlContent,
+  };
+};
+
+export const bulkDeleteTemplates = async ({
+  templateIds,
+}: {
+  templateIds: string[];
+  signal?: AbortSignal;
+}): Promise<BulkDeleteTemplatesResponse> => {
+  // TODO: Replace with actual API call when available
+  // const response = await KibanaServices.get().http.fetch<BulkDeleteTemplatesResponse>(
+  //   `${TEMPLATES_URL}/_bulk_delete`,
+  //   {
+  //     method: 'POST',
+  //     body: JSON.stringify({ ids: templateIds }),
+  //     signal,
+  //   }
+  // );
+  // return response;
+
+  // ---- MOCK IMPLEMENTATION - Remove when API is available ----
+  const deleted: string[] = [];
+  const errors: Array<{ id: string; error: string }> = [];
+
+  for (const templateId of templateIds) {
+    const existingTemplate = MOCK_TEMPLATES.find((t) => t.key === templateId);
+
+    if (!existingTemplate) {
+      errors.push({ id: templateId, error: `Template with id ${templateId} not found` });
+    } else {
+      deleted.push(templateId);
+    }
+  }
+  // ---- END MOCK IMPLEMENTATION ----
+
+  return {
+    success: errors.length === 0,
+    deleted,
+    errors,
+  };
+};
+
+export const bulkExportTemplates = async ({
+  templateIds,
+}: {
+  templateIds: string[];
+  signal?: AbortSignal;
+}): Promise<BulkExportTemplatesResponse> => {
+  // TODO: Replace with actual API call when available.
+  // The server will generate a single YAML file containing all templates and return it as a blob.
+  // The client will then trigger a download from the server response.
+  //
+  // const response = await KibanaServices.get().http.fetch<Blob>(
+  //   `${TEMPLATES_URL}/_bulk_export`,
+  //   {
+  //     method: 'GET',
+  //     query: { ids: templateIds.join(',') },
+  //     signal,
+  //   }
+  // );
+  //
+  // const filename = response.headers.get('content-disposition')?.split('filename=')[1] || 'templates.yaml';
+  // const url = URL.createObjectURL(response);
+  // const link = document.createElement('a');
+  // link.href = url;
+  // link.download = filename;
+  // document.body.appendChild(link);
+  // link.click();
+  // document.body.removeChild(link);
+  // URL.revokeObjectURL(url);
+  //
+  // return { filename, content: '' };
+
+  // ---- MOCK IMPLEMENTATION - Remove when API is available ----
+  const templatesToExport = MOCK_TEMPLATES.filter((t) => templateIds.includes(t.key));
+
+  if (templatesToExport.length === 0) {
+    throw new Error('No templates found for the provided IDs');
+  }
+
+  // Mock: Convert templates to YAML (server will handle this in real implementation)
+  const yamlSections: string[] = [
+    `# Bulk Export: ${templatesToExport.length} templates`,
+    `# Exported: ${new Date().toISOString()}`,
+    '',
+  ];
+
+  for (const template of templatesToExport) {
+    yamlSections.push(
+      '---',
+      `key: ${template.key}`,
+      `name: ${template.name}`,
+      `description: ${template.description}`,
+      `solution: ${template.solution}`,
+      `fields: ${template.fields}`,
+      `tags:`,
+      ...template.tags.map((tag) => `  - ${tag}`),
+      `lastUpdate: ${template.lastUpdate}`,
+      `lastTimeUsed: ${template.lastTimeUsed}`,
+      `usage: ${template.usage}`,
+      `isDefault: ${template.isDefault}`,
+      ''
+    );
+  }
+
+  const yamlContent = yamlSections.join('\n');
+  const filename = `templates-bulk-export-${Date.now()}.yaml`;
 
   // Mock: Trigger download (will be handled differently with real API response)
   const blob = new Blob([yamlContent], { type: 'application/x-yaml' });

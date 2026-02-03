@@ -10,27 +10,54 @@ import { EuiFlexItem, EuiText, EuiButtonEmpty, EuiPopover, EuiContextMenu } from
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import * as i18n from '../../templates/translations';
 import type { Template } from '../types';
+import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
+import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
+import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export interface TemplatesBulkActionsProps {
   selectedTemplates: Template[];
+  onActionSuccess?: () => void;
 }
 
 const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
   selectedTemplates,
+  onActionSuccess,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const { mutate: bulkDeleteTemplates, isLoading: isBulkDeleting } = useBulkDeleteTemplates({
+    onSuccess: onActionSuccess,
+  });
+  const { mutate: bulkExportTemplates, isLoading: isBulkExporting } = useBulkExportTemplates();
+
+  const selectedTemplateIds = useMemo(
+    () => selectedTemplates.map((template) => template.key),
+    [selectedTemplates]
+  );
+
   const handleBulkExport = useCallback(() => {
     closePopover();
-    // TODO: Implement bulk export
+    bulkExportTemplates({ templateIds: selectedTemplateIds });
+  }, [closePopover, bulkExportTemplates, selectedTemplateIds]);
+
+  const handleBulkDeleteClick = useCallback(() => {
+    closePopover();
+    setIsDeleteModalVisible(true);
   }, [closePopover]);
 
-  const handleBulkDelete = useCallback(() => {
-    closePopover();
-    // TODO: Implement bulk delete
-  }, [closePopover]);
+  const handleConfirmBulkDelete = useCallback(() => {
+    bulkDeleteTemplates({ templateIds: selectedTemplateIds });
+    setIsDeleteModalVisible(false);
+  }, [bulkDeleteTemplates, selectedTemplateIds]);
+
+  const handleCancelBulkDelete = useCallback(() => {
+    setIsDeleteModalVisible(false);
+  }, []);
+
+  const isLoading = isBulkDeleting || isBulkExporting;
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
@@ -41,18 +68,20 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
             name: i18n.BULK_EXPORT_TEMPLATES,
             icon: 'exportAction',
             onClick: handleBulkExport,
+            disabled: isLoading,
             'data-test-subj': 'templates-bulk-action-export',
           },
           {
             name: i18n.BULK_DELETE_TEMPLATES,
             icon: 'trash',
-            onClick: handleBulkDelete,
+            onClick: handleBulkDeleteClick,
+            disabled: isLoading,
             'data-test-subj': 'templates-bulk-action-delete',
           },
         ],
       },
     ],
-    [handleBulkExport, handleBulkDelete]
+    [handleBulkExport, handleBulkDeleteClick, isLoading]
   );
 
   if (selectedTemplates.length === 0) {
@@ -92,6 +121,14 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
           />
         </EuiPopover>
       </EuiFlexItem>
+      {isDeleteModalVisible && (
+        <DeleteConfirmationModal
+          title={i18n.BULK_DELETE_TITLE(selectedTemplates.length)}
+          message={i18n.BULK_DELETE_MESSAGE(selectedTemplates.length)}
+          onCancel={handleCancelBulkDelete}
+          onConfirm={handleConfirmBulkDelete}
+        />
+      )}
     </>
   );
 };
