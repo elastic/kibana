@@ -94,14 +94,19 @@ async function fetchLinkedChildrenOfSpan({
     const source = 'span' in hit._source ? hit._source : undefined;
     const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields).build();
 
+    const spanLinksArray = source?.span?.links
+      ? Array.isArray(source?.span?.links)
+        ? source.span.links
+        : [source.span.links]
+      : [];
     return {
       ...event,
-      [SPAN_LINKS]: Array.isArray(source?.span?.links)
-        ? source.span.links
-        : mapOtelToSpanLink({
-            trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
-            span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
-          }),
+      [SPAN_LINKS]:
+        spanLinksArray ??
+        mapOtelToSpanLink({
+          trace_id: event[OTEL_SPAN_LINKS_TRACE_ID],
+          span_id: event[OTEL_SPAN_LINKS_SPAN_ID],
+        }),
     };
   });
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId

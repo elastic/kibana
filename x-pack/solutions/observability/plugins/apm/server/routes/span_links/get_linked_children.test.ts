@@ -28,11 +28,6 @@ describe('get_linked_children', () => {
     fields,
   });
 
-  const createOtelHit = (fields: Record<string, string[]>) => ({
-    _source: {},
-    fields,
-  });
-
   const mockSearchWith = (hits: any[]) => {
     (mockApmEventClient.search as jest.Mock).mockResolvedValue({ hits: { hits } });
   };
@@ -56,27 +51,8 @@ describe('get_linked_children', () => {
       expect(result).toEqual({ 'span-1': 2, 'span-2': 1 });
     });
 
-    it.each([
-      ['object', { trace: { id: 'test-trace-id' }, span: { id: 'span-1' } }],
-      ['null', null],
-      ['string', 'not-an-array'],
-    ])('should handle malformed span.links data (%s)', async (_, malformedData) => {
-      mockSearchWith([createHit(malformedData)]);
-
-      const result = await getSpanLinksCountById(defaultParams);
-
-      expect(result).toEqual({});
-    });
-
-    it('should use mapOtelToSpanLink for OTel data', async () => {
-      mockSearchWith([
-        createOtelHit({
-          'trace.id': ['test-trace-id'],
-          'span.id': ['otel-span-1'],
-          'links.trace_id': ['test-trace-id'],
-          'links.span_id': ['span-1'],
-        }),
-      ]);
+    it('should wrap single span link object in array', async () => {
+      mockSearchWith([createHit({ trace: { id: 'test-trace-id' }, span: { id: 'span-1' } })]);
 
       const result = await getSpanLinksCountById(defaultParams);
 
@@ -119,12 +95,17 @@ describe('get_linked_children', () => {
       expect(result).toEqual([{ trace: { id: 'test-trace-id' }, span: { id: 'child-span-1' } }]);
     });
 
-    it('should handle malformed span.links data', async () => {
-      mockSearchWith([createHit('not-an-array')]);
+    it('should wrap single span link object in array', async () => {
+      mockSearchWith([
+        createHit(
+          { trace: { id: 'test-trace-id' }, span: { id: 'target-span-id' } },
+          { 'trace.id': ['test-trace-id'], 'span.id': ['child-span-1'] }
+        ),
+      ]);
 
       const result = await getLinkedChildrenOfSpan({ ...defaultParams, spanId: 'target-span-id' });
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([{ trace: { id: 'test-trace-id' }, span: { id: 'child-span-1' } }]);
     });
 
     it('should use transaction.id when span.id is not available', async () => {
@@ -142,10 +123,13 @@ describe('get_linked_children', () => {
 
     it('should filter out links that do not match the target spanId', async () => {
       mockSearchWith([
-        createHit([
-          { trace: { id: 'test-trace-id' }, span: { id: 'target-span-id' } },
-          { trace: { id: 'test-trace-id' }, span: { id: 'different-span-id' } },
-        ]),
+        createHit(
+          [
+            { trace: { id: 'test-trace-id' }, span: { id: 'target-span-id' } },
+            { trace: { id: 'test-trace-id' }, span: { id: 'different-span-id' } },
+          ],
+          { 'trace.id': ['test-trace-id'], 'span.id': ['child-span-1'] }
+        ),
       ]);
 
       const result = await getLinkedChildrenOfSpan({ ...defaultParams, spanId: 'target-span-id' });
