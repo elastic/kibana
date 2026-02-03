@@ -8,6 +8,7 @@
  */
 
 import type { inlineCastsMapping } from './commands/definitions/generated/inline_casts_mapping';
+import type { PromQLAstQueryExpression } from './promql/types';
 
 /**
  * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
@@ -48,7 +49,8 @@ export type ESQLSingleAstItem =
   | ESQLOrderExpression
   | ESQLUnknownItem
   | ESQLMap
-  | ESQLMapEntry;
+  | ESQLMapEntry
+  | PromQLAstQueryExpression;
 
 /**
  * A field is either an index field `this.is.field`, or it is a field assignment
@@ -196,7 +198,7 @@ export type ESQLAstPromqlCommandQuery =
  * This will be replaced in the future with a proper PROMQL query AST.
  * For now, we just represent the query as an "unknown" node.
  */
-export type ESQLAstPromqlQuery = ESQLUnknownItem;
+export type ESQLAstPromqlQuery = PromQLAstQueryExpression;
 
 /**
  * Represents a header pseudo-command, such as SET.
