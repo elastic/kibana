@@ -71,7 +71,15 @@ export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
  * Main purpose is to add `self` value to some directives when the configuration specifies other values
  */
 export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'connect-src': [`'self'`],
+  'connect-src': [
+    `'self'`,
+    // External Elastic services needed for telemetry, newsfeed, and maps
+    'telemetry.elastic.co',
+    'telemetry-staging.elastic.co',
+    'feeds.elastic.co',
+    'tiles.maps.elastic.co',
+    'vector.maps.elastic.co',
+  ],
   'default-src': [`'self'`],
   'font-src': [`'self'`],
   'img-src': [`'self'`],
