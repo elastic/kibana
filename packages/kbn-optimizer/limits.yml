@@ -26,7 +26,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
+  core: 556318
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -82,7 +82,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13091
   imageEmbeddable: 6000
   indexLifecycleManagement: 29818
   indexManagement: 35522
@@ -207,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 90040
+  workflowsExtensions: 83402
   workflowsManagement: 8497
   workplaceAIApp: 65731
