@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   streamsGetStreamStepCommonDefinition,
   StreamsGetStreamStepTypeId,
-} from '../../../common/steps/streams';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+} from '../../common/workflow_steps';
 
 export const streamsGetStreamStepDefinition: PublicStepDefinition = {
   ...streamsGetStreamStepCommonDefinition,
@@ -22,15 +20,15 @@ export const streamsGetStreamStepDefinition: PublicStepDefinition = {
       default: icon,
     }))
   ),
-  label: i18n.translate('workflowsExtensions.streamsGetStreamStep.label', {
+  label: i18n.translate('xpack.streams.streamsGetStreamStep.label', {
     defaultMessage: 'Get Stream',
   }),
-  description: i18n.translate('workflowsExtensions.streamsGetStreamStep.description', {
+  description: i18n.translate('xpack.streams.streamsGetStreamStep.description', {
     defaultMessage: 'Retrieve details of a specific stream by name',
   }),
   actionsMenuGroup: ActionsMenuGroup.kibana,
   documentation: {
-    details: i18n.translate('workflowsExtensions.streamsGetStreamStep.documentation.details', {
+    details: i18n.translate('xpack.streams.streamsGetStreamStep.documentation.details', {
       defaultMessage: `The ${StreamsGetStreamStepTypeId} step retrieves a specific stream definition including its features and associated dashboards. Use {nameSyntax} to specify the stream name. The stream data is accessible via {outputSyntax}.`,
       values: {
         nameSyntax: '`name`',

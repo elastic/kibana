@@ -29,7 +29,7 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
+    "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement", "workflowsExtensions"],
     "requiredBundles": [
       "discover",
       "kibanaReact",

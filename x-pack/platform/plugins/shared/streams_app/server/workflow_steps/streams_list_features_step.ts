@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { makeKibanaRequest } from './utils/make_kibana_request';
-import { streamsListFeaturesStepCommonDefinition } from '../../../common/steps/streams';
-import { createServerStepDefinition } from '../../step_registry/types';
+import { streamsListFeaturesStepCommonDefinition } from '../../common/workflow_steps';
 
 interface ListFeaturesResponse {
   features: Array<Record<string, unknown>>;

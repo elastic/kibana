@@ -14,6 +14,7 @@ import type {
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies,
 } from './types';
+import { registerServerWorkflowSteps } from './workflow_steps';
 
 export class StreamsAppPlugin
   implements
@@ -33,6 +34,11 @@ export class StreamsAppPlugin
     coreSetup: CoreSetup<StreamsAppStartDependencies, StreamsAppServerStart>,
     pluginsSetup: StreamsAppSetupDependencies
   ): StreamsAppServerSetup {
+    // Register workflow steps if the workflowsExtensions plugin is available
+    if (pluginsSetup.workflowsExtensions) {
+      registerServerWorkflowSteps(pluginsSetup.workflowsExtensions);
+    }
+
     return {};
   }
 

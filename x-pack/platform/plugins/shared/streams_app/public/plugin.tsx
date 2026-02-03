@@ -36,6 +36,7 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
+import { registerPublicWorkflowSteps } from './workflow_steps';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -96,9 +97,17 @@ export class StreamsAppPlugin
     this.logger = context.logger.get();
     this.version = context.env.packageInfo.version;
   }
-  setup(coreSetup: CoreSetup<StreamsAppStartDependencies>): StreamsAppPublicSetup {
+  setup(
+    coreSetup: CoreSetup<StreamsAppStartDependencies>,
+    plugins: StreamsAppSetupDependencies
+  ): StreamsAppPublicSetup {
     this.telemetry.setup(coreSetup.analytics);
     const startServicesPromise = coreSetup.getStartServices();
+
+    // Register workflow steps if workflowsExtensions plugin is available
+    if (plugins.workflowsExtensions) {
+      registerPublicWorkflowSteps(plugins.workflowsExtensions);
+    }
 
     coreSetup.application.register({
       id: 'streams',

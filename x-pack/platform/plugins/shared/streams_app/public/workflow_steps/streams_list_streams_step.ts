@@ -1,19 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   streamsListStreamsStepCommonDefinition,
   StreamsListStreamsStepTypeId,
-} from '../../../common/steps/streams';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+} from '../../common/workflow_steps';
 
 export const streamsListStreamsStepDefinition: PublicStepDefinition = {
   ...streamsListStreamsStepCommonDefinition,
@@ -22,15 +20,15 @@ export const streamsListStreamsStepDefinition: PublicStepDefinition = {
       default: icon,
     }))
   ),
-  label: i18n.translate('workflowsExtensions.streamsListStreamsStep.label', {
+  label: i18n.translate('xpack.streams.streamsListStreamsStep.label', {
     defaultMessage: 'List Streams',
   }),
-  description: i18n.translate('workflowsExtensions.streamsListStreamsStep.description', {
+  description: i18n.translate('xpack.streams.streamsListStreamsStep.description', {
     defaultMessage: 'Retrieve a list of all available stream definitions',
   }),
   actionsMenuGroup: ActionsMenuGroup.kibana,
   documentation: {
-    details: i18n.translate('workflowsExtensions.streamsListStreamsStep.documentation.details', {
+    details: i18n.translate('xpack.streams.streamsListStreamsStep.documentation.details', {
       defaultMessage: `The ${StreamsListStreamsStepTypeId} step retrieves all stream definitions from the Streams API. The output contains an array of stream definitions accessible via {outputSyntax}.`,
       values: {
         outputSyntax: '`{{ steps.stepName.output.streams }}`',
