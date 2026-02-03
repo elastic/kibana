@@ -11,8 +11,8 @@ import { useCallback, useRef, type MutableRefObject } from 'react';
 import type { TelemetryLatencyProps } from '@kbn/esql-types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 
-const DEFAULT_SAMPLE_RATE = 25;
-const INPUT_SAMPLE_RATE = 10;
+const DEFAULT_SAMPLE_RATE = process.env.NODE_ENV === 'test' ? 100 : 25;
+const INPUT_SAMPLE_RATE = process.env.NODE_ENV === 'test' ? 100 : 10;
 
 interface InitLatencyTrackingDeps {
   telemetryService: ESQLEditorTelemetryService;
