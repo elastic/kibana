@@ -294,6 +294,11 @@ describe('FeatureFlagsService Browser', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      await startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a string flag', async () => {
@@ -315,6 +320,11 @@ describe('FeatureFlagsService Browser', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      await startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a number flag', async () => {
@@ -336,6 +346,11 @@ describe('FeatureFlagsService Browser', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      await startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('with overrides', async () => {
