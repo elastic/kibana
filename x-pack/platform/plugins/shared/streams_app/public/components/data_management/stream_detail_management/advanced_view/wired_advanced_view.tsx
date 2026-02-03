@@ -54,7 +54,7 @@ export function WiredAdvancedView({
           <EuiSpacer />
         </>
       )}
-      {significantEvents?.enabled && (
+      {significantEvents?.enabled && significantEvents?.available && (
         <>
           <StreamDescription
             definition={definition}

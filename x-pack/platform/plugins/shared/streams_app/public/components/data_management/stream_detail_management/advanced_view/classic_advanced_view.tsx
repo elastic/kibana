@@ -29,7 +29,7 @@ export function ClassicAdvancedView({
 
   return (
     <>
-      {significantEvents?.enabled ? (
+      {significantEvents?.enabled && significantEvents?.available ? (
         <>
           <StreamDescription
             definition={definition}
