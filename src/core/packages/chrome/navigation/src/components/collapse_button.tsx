@@ -23,6 +23,7 @@ import {
   EuiIcon,
   EuiCheckbox,
   EuiSpacer,
+  EuiTitle,
   useEuiTheme,
   euiDragDropReorder,
 } from '@elastic/eui';
@@ -188,22 +189,23 @@ export const SideNavCollapseButton: FC<Props> = ({
     ({ source, destination }: DropResult) => {
       if (!destination) return;
 
+      // Get only unlocked items for reordering
+      const unlockedItems = navItemsConfig.filter((item) => !item.isLocked);
       const sourceIndex = source.index;
       const destIndex = destination.index;
-      const sourceItem = navItemsConfig[sourceIndex];
-      const destItem = navItemsConfig[destIndex];
 
-      // Don't allow moving locked items
-      if (sourceItem.isLocked) return;
-      // Don't allow moving items into locked positions (positions 0 and 1)
-      if (destIndex < 2 && !destItem.isLocked) return;
-
-      const newItems = euiDragDropReorder(navItemsConfig, sourceIndex, destIndex);
+      // Reorder only within unlocked items
+      const reorderedUnlocked = euiDragDropReorder(unlockedItems, sourceIndex, destIndex);
+      
+      // Rebuild the full array with locked items first, then reordered unlocked items
+      const lockedItems = navItemsConfig.filter((item) => item.isLocked);
+      const newItems = [...lockedItems, ...reorderedUnlocked];
+      
       setNavItemsConfig(newItems);
 
       // Immediately call the callback to update parent state (only unlocked items)
       if (onSetNavItemsOrder) {
-        const unlockedOrder = newItems.filter((item) => !item.isLocked).map((item) => item.id);
+        const unlockedOrder = reorderedUnlocked.map((item) => item.id);
         onSetNavItemsOrder(unlockedOrder);
       }
     },
@@ -246,6 +248,7 @@ export const SideNavCollapseButton: FC<Props> = ({
           aria-labelledby="navigation-modal-title"
           maxWidth={800}
           style={{ width: '600px' }}
+          outsideClickCloses={true}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="navigation-modal-title">
@@ -276,45 +279,69 @@ export const SideNavCollapseButton: FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            <div>
+            <EuiTitle size="xs">
               <h3>
                 {i18n.translate('core.ui.chrome.sideNavigation.tabsTitle', {
                   defaultMessage: 'Tabs',
                 })}
               </h3>
-              <EuiSpacer size="m" />
-              <EuiDragDropContext onDragEnd={handleDragEnd}>
-                <EuiDroppable droppableId="navItems" spacing="s" withPanel>
-                  {navItemsConfig.map((item, index) => (
-                    <EuiDraggable
-                      key={item.id}
-                      index={index}
-                      draggableId={item.id}
-                      isDragDisabled={item.isLocked}
-                      customDragHandle={true}
-                      hasInteractiveChildren={true}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          css={css`
-                            display: flex;
-                            align-items: center;
-                            padding: ${euiTheme.size.s};
-                            background-color: ${snapshot.isDragging
-                              ? euiTheme.colors.primary
-                              : euiTheme.colors.emptyShade};
-                            border-radius: ${euiTheme.border.radius.medium};
-                          `}
-                        >
-                          {item.isLocked ? (
-                            <EuiIcon
-                              type="lock"
-                              color="subdued"
-                              css={css`
-                                margin-right: ${euiTheme.size.s};
-                              `}
-                            />
-                          ) : (
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            
+            {/* Locked items section (non-draggable) */}
+            {navItemsConfig
+              .filter((item) => item.isLocked)
+              .map((item) => (
+                <div
+                  key={item.id}
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    padding: ${euiTheme.size.s} 4px;
+                  `}
+                >
+                  <EuiIcon
+                    type="lock"
+                    color="subdued"
+                    css={css`
+                      margin-right: ${euiTheme.size.s};
+                    `}
+                  />
+                  <EuiCheckbox
+                    id={`nav-item-${item.id}`}
+                    checked={item.visible}
+                    onChange={(e) => handleToggleVisibility(item.id, e.target.checked)}
+                    disabled={item.isLocked}
+                    label={item.label}
+                    css={css`
+                      flex: 1;
+                    `}
+                  />
+                </div>
+              ))}
+            
+            {/* Draggable items section */}
+            <EuiDragDropContext onDragEnd={handleDragEnd}>
+              <EuiDroppable droppableId="navItems" spacing="s">
+                {navItemsConfig
+                  .filter((item) => !item.isLocked)
+                  .map((item, index) => (
+                      <EuiDraggable
+                        key={item.id}
+                        index={index}
+                        draggableId={item.id}
+                        customDragHandle={true}
+                        hasInteractiveChildren={true}
+                        usePortal={true}
+                      >
+                        {(provided) => (
+                          <div
+                            css={css`
+                              display: flex;
+                              align-items: center;
+                              padding: ${euiTheme.size.s} 0;
+                            `}
+                          >
                             <div
                               {...provided.dragHandleProps}
                               css={css`
@@ -333,24 +360,21 @@ export const SideNavCollapseButton: FC<Props> = ({
                             >
                               <EuiIcon type="grab" color="subdued" />
                             </div>
-                          )}
-                          <EuiCheckbox
-                            id={`nav-item-${item.id}`}
-                            checked={item.visible}
-                            onChange={(e) => handleToggleVisibility(item.id, e.target.checked)}
-                            disabled={item.isLocked}
-                            label={item.label}
-                            css={css`
-                              flex: 1;
-                            `}
-                          />
-                        </div>
-                      )}
-                    </EuiDraggable>
-                  ))}
-                </EuiDroppable>
-              </EuiDragDropContext>
-            </div>
+                            <EuiCheckbox
+                              id={`nav-item-${item.id}`}
+                              checked={item.visible}
+                              onChange={(e) => handleToggleVisibility(item.id, e.target.checked)}
+                              label={item.label}
+                              css={css`
+                                flex: 1;
+                              `}
+                            />
+                          </div>
+                        )}
+                      </EuiDraggable>
+                    ))}
+              </EuiDroppable>
+            </EuiDragDropContext>
           </EuiModalBody>
         </EuiModal>
       )}
