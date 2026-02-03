@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import type { CliSupportedServerModes } from '../../../types';
+import type { ScoutTestTarget } from '@kbn/scout-info';
 import type { Config } from '../config';
 import { readConfigFile } from '../loader';
 import { getConfigFilePath } from './get_config_file';
@@ -19,17 +19,24 @@ import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
  * Loads server configuration based on the mode, creates "kbn-test" compatible Config
  * instance, that can be used to start local servers and saves its "Scout"-format copy
  * to the disk.
- * @param mode server local run mode
+ * @param testTarget The test target definition (based on location, architecture and domain)
  * @param log Logger instance to report errors or debug information.
- * @param configRootDir The root directory where the config file is located (e.g., 'servers/configs/default/serverless' or 'servers/configs/custom/uiam_local/serverless')
+ * @param configRootDir The root directory where the config file is located
+ *
+ * @example
+ * Config root dirs
+ * ```
+ * servers/configs/config_sets/default/serverless
+ * servers/configs/config_sets/uiam_local/serverless
+ * ```
  * @returns "kbn-test" compatible Config instance
  */
 export async function loadServersConfig(
-  mode: CliSupportedServerModes,
+  testTarget: ScoutTestTarget,
   log: ToolingLog,
   configRootDir: string
 ): Promise<Config> {
-  const configPath = getConfigFilePath(configRootDir, mode);
+  const configPath = getConfigFilePath(configRootDir, testTarget);
 
   // Validate that the config file exists
   if (!fs.existsSync(configPath)) {
