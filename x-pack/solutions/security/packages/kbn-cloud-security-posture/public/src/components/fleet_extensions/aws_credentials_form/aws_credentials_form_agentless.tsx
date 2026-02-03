@@ -354,6 +354,11 @@ export const AwsCredentialsFormAgentless = ({
             cloud={cloud}
             cloudProvider={AWS_PROVIDER}
             accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+            )}
           />
         </Suspense>
       )}

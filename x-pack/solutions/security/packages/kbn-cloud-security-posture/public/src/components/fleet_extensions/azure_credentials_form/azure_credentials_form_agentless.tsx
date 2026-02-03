@@ -24,8 +24,13 @@ import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
   AZURE_PROVIDER,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../constants';
-import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
+import {
+  getCloudCredentialVarsConfig,
+  getTemplateUrlFromPackageInfo,
+  updatePolicyWithInputs,
+} from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
   getAgentlessCredentialsType,
@@ -159,6 +164,11 @@ export const AzureCredentialsFormAgentless = ({
             templateName={templateName}
             isEditPage={isEditPage}
             accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.ARM_TEMPLATE_CLOUD_CONNECTORS
+            )}
           />
         </Suspense>
       ) : (

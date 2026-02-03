@@ -24,11 +24,7 @@ import {
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
-import {
-  AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
-  AZURE_PROVIDER,
-  ORGANIZATION_ACCOUNT,
-} from '../constants';
+import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -58,21 +54,18 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   packageInfo,
   cloud,
   hasInvalidRequiredVars = false,
-  templateName = 'azure-cloud-connector-template',
   credentials,
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
+  iacTemplateUrl,
 }) => {
-  const armTemplateUrl =
-    cloud && templateName
-      ? getCloudConnectorRemoteRoleTemplate({
-          cloud,
-          packageInfo,
-          templateName,
-          provider: AZURE_PROVIDER,
-          accountType,
-        })
-      : undefined;
+  const armTemplateUrl = cloud
+    ? getCloudConnectorRemoteRoleTemplate({
+        cloud,
+        accountType,
+        iacTemplateUrl,
+      })
+    : undefined;
 
   const elasticStackId = getElasticStackId(cloud);
 

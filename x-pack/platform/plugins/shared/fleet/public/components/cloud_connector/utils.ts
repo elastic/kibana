@@ -19,14 +19,11 @@ import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
   CloudConnectorCredentials,
-  CloudProviders,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
   CLOUD_CONNECTOR_AWS_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AWS_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_AZURE_CSPM_REUSABLE_MIN_VERSION,
@@ -148,28 +145,14 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-const getTemplateFieldNameByProvider = (provider: CloudProviders): string | undefined => {
-  switch (provider) {
-    case AWS_PROVIDER:
-      return CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS;
-    case AZURE_PROVIDER:
-      return ARM_TEMPLATE_URL_CLOUD_CONNECTORS;
-    default:
-      return undefined;
-  }
-};
-
 export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
-  packageInfo,
-  templateName,
-  provider,
   accountType,
+  iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-  const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
 
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
     elasticResourceId = cloud.serverless.projectId;
@@ -179,11 +162,11 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !templateUrlFieldName || !accountType) return undefined;
+  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
 
-  return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+  return iacTemplateUrl
+    .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    .replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 /**

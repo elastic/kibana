@@ -18,7 +18,7 @@ import {
   updateInputVarsWithCredentials,
   isAwsCredentials,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -31,21 +31,18 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   packageInfo,
   cloud,
   hasInvalidRequiredVars = false,
-  templateName,
   credentials,
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
+  iacTemplateUrl,
 }) => {
-  const cloudConnectorRemoteRoleTemplate =
-    cloud && templateName
-      ? getCloudConnectorRemoteRoleTemplate({
-          cloud,
-          packageInfo,
-          templateName,
-          provider: AWS_PROVIDER,
-          accountType,
-        })
-      : undefined;
+  const cloudConnectorRemoteRoleTemplate = cloud
+    ? getCloudConnectorRemoteRoleTemplate({
+        cloud,
+        accountType,
+        iacTemplateUrl,
+      })
+    : undefined;
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);

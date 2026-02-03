@@ -34,6 +34,8 @@ export interface CloudConnectorSetupProps {
   templateName: string;
   /** Optional account type. When provided, selector is hidden. When undefined, shows selector defaulting to 'organization-account'. */
   accountType?: AccountType;
+  /** Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates. */
+  iacTemplateUrl?: string;
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
@@ -46,6 +48,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   cloudProvider,
   templateName,
   accountType,
+  iacTemplateUrl,
 }) => {
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
@@ -135,7 +138,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           </div>
           <EuiSpacer size="l" />
           <NewCloudConnectorForm
-            templateName={templateName}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
@@ -146,6 +148,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             credentials={newConnectionCredentials}
             setCredentials={updatePolicyWithNewCredentials}
             accountType={effectiveAccountType}
+            iacTemplateUrl={iacTemplateUrl}
           />
         </>
       ),
@@ -206,7 +209,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 
       {!reusableFeatureEnabled && (
         <NewCloudConnectorForm
-          templateName={templateName}
           newPolicy={newPolicy}
           packageInfo={packageInfo}
           updatePolicy={updatePolicy}
@@ -217,6 +219,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           credentials={newConnectionCredentials}
           setCredentials={updatePolicyWithNewCredentials}
           accountType={effectiveAccountType}
+          iacTemplateUrl={iacTemplateUrl}
         />
       )}
       {reusableFeatureEnabled && (

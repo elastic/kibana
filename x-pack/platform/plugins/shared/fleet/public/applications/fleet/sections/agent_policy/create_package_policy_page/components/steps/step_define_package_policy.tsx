@@ -40,6 +40,7 @@ import {
   shouldShowVar,
   isVarRequiredByVarGroup,
   getCloudConnectorOption,
+  getIacTemplateUrlFromVarGroupSelection,
 } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
@@ -94,6 +95,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Check if a cloud connector option is selected
     const cloudConnectorOption = useMemo(
       () => getCloudConnectorOption(packageInfo.var_groups, varGroupSelections),
+      [packageInfo.var_groups, varGroupSelections]
+    );
+
+    // Get IaC template URL from var_group selection (for non-CSPM integrations)
+    const iacTemplateUrl = useMemo(
+      () => getIacTemplateUrlFromVarGroupSelection(packageInfo.var_groups, varGroupSelections),
       [packageInfo.var_groups, varGroupSelections]
     );
 
@@ -305,6 +312,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   cloud={cloud}
                   cloudProvider={cloudConnectorOption.provider as CloudProvider}
                   templateName={packageInfo.name}
+                  iacTemplateUrl={iacTemplateUrl}
                 />
               </EuiFlexItem>
             )}

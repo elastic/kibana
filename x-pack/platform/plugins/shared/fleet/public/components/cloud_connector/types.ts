@@ -55,11 +55,12 @@ export interface NewCloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   /** Account type to determine organization vs single account behavior */
   accountType?: AccountType;
+  /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
+  iacTemplateUrl?: string;
 }
 
 // Define the interface for connector options
@@ -88,11 +89,12 @@ export interface CloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   /** Account type for cloud connector template URL generation */
   accountType?: AccountType;
+  /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
+  iacTemplateUrl?: string;
 }
 
 export type CloudSetupForCloudConnector = Pick<
@@ -107,10 +109,9 @@ export type CloudSetupForCloudConnector = Pick<
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   cloud: CloudSetupForCloudConnector;
-  packageInfo: PackageInfo;
-  templateName: string;
-  provider: CloudProviders;
   accountType: AccountType;
+  /** IaC template URL to use for generating the cloud connector remote role template. */
+  iacTemplateUrl?: string;
 }
 
 export interface CloudConnectorField {

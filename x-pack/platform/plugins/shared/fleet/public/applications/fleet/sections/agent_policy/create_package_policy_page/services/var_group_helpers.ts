@@ -206,3 +206,30 @@ export function getCloudConnectorOption(
   }
   return { isCloudConnector: false };
 }
+
+/**
+ * Gets the iac_template_url from the currently selected var_group option.
+ * This is used for Fleet integrations that store IaC template URLs (CloudFormation, ARM)
+ * as properties on the var_group option rather than in input.vars.
+ */
+export function getIacTemplateUrlFromVarGroupSelection(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection
+): string | undefined {
+  if (!varGroups || varGroups.length === 0) {
+    return undefined;
+  }
+
+  for (const varGroup of varGroups) {
+    const selectedName = varGroupSelections[varGroup.name];
+    if (!selectedName) {
+      continue;
+    }
+
+    const selectedOption = getSelectedOption(varGroup, selectedName);
+    if (selectedOption?.iac_template_url) {
+      return selectedOption.iac_template_url as string;
+    }
+  }
+  return undefined;
+}
