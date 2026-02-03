@@ -14,7 +14,10 @@ import {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars } from '../../../../common';
+import {
+  extractRawCredentialVars,
+  getCredentialKeyFromVarName,
+} from '../../../../common/services/cloud_connectors';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
 import {
@@ -24,7 +27,7 @@ import {
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
-import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, ORGANIZATION_ACCOUNT } from '../constants';
+import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -129,17 +132,8 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           onChange={(key, value) => {
             if (!credentials || !isAzureCredentials(credentials) || !setCredentials) return;
 
-            // Map field keys to credential properties (handles both package-level and input-level var names)
-            const fieldToCredentialKey: Record<string, keyof typeof credentials> = {
-              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]: 'tenantId',
-              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]: 'tenantId',
-              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]: 'clientId',
-              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]: 'clientId',
-              [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]:
-                'azure_credentials_cloud_connector_id',
-            };
-
-            const credentialKey = fieldToCredentialKey[key];
+            // Use schema-based lookup to map var names to credential properties
+            const credentialKey = getCredentialKeyFromVarName('azure', key);
             if (credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });
             }

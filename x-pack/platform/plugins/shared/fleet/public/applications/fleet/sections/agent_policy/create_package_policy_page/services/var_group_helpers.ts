@@ -7,9 +7,16 @@
 
 import type { RegistryVarGroup, RegistryVarGroupOption } from '../../../../types';
 
-export interface VarGroupSelection {
-  [groupName: string]: string; // groupName -> selected option name
-}
+// Re-export cloud connector specific functions and types from common
+// These are maintained in common/services/cloud_connectors for shared use
+export {
+  type VarGroupSelection,
+  type CloudConnectorOptionResult,
+  getSelectedOption,
+  getCloudConnectorOption,
+  getCloudConnectorVars,
+  getIacTemplateUrlFromVarGroupSelection,
+} from '../../../../../../../common/services/cloud_connectors';
 
 /**
  * Get visible options for a var group, filtering out options that should be hidden
@@ -73,8 +80,8 @@ export function computeDefaultVarGroupSelections(
   varGroups: RegistryVarGroup[] | undefined,
   isAgentlessEnabled: boolean,
   hideInVarGroupOptions?: Record<string, string[]>
-): VarGroupSelection {
-  const defaults: VarGroupSelection = {};
+): Record<string, string> {
+  const defaults: Record<string, string> = {};
   if (varGroups) {
     for (const varGroup of varGroups) {
       const visibleOptions = getVisibleOptions(varGroup, isAgentlessEnabled, hideInVarGroupOptions);
@@ -92,7 +99,7 @@ export function computeDefaultVarGroupSelections(
 export function shouldShowVar(
   varName: string,
   varGroups: RegistryVarGroup[],
-  varGroupSelections: VarGroupSelection
+  varGroupSelections: Record<string, string>
 ): boolean {
   // Get all vars controlled by var_groups
   const controlledVars = getVarsControlledByVarGroups(varGroups);
@@ -120,7 +127,7 @@ export function shouldShowVar(
 export function isVarRequiredByVarGroup(
   varName: string,
   varGroups: RegistryVarGroup[] | undefined,
-  varGroupSelections: VarGroupSelection | undefined
+  varGroupSelections: Record<string, string> | undefined
 ): boolean {
   if (!varGroups || varGroups.length === 0 || !varGroupSelections) {
     return false;
@@ -147,7 +154,7 @@ export function isVarRequiredByVarGroup(
 export function isVarInSelectedVarGroupOption(
   varName: string,
   varGroups: RegistryVarGroup[],
-  varGroupSelections: VarGroupSelection
+  varGroupSelections: Record<string, string>
 ): boolean {
   const controlledVars = getVarsControlledByVarGroups(varGroups);
 
@@ -158,78 +165,4 @@ export function isVarInSelectedVarGroupOption(
 
   // If controlled and shouldShowVar returns true, it means it's in a selected option
   return shouldShowVar(varName, varGroups, varGroupSelections);
-}
-
-/**
- * Gets the full RegistryVarGroupOption object for the currently selected option in a var_group.
- */
-export function getSelectedOption(
-  varGroup: RegistryVarGroup,
-  selectedOptionName: string | undefined
-): RegistryVarGroupOption | undefined {
-  if (!selectedOptionName) {
-    return undefined;
-  }
-  return varGroup.options.find((opt) => opt.name === selectedOptionName);
-}
-
-export interface CloudConnectorOptionResult {
-  isCloudConnector: boolean;
-  provider?: string;
-}
-
-/**
- * Checks if any selected var_group option has a `provider` field, indicating Cloud Connector support.
- * Returns the provider value if found.
- */
-export function getCloudConnectorOption(
-  varGroups: RegistryVarGroup[] | undefined,
-  varGroupSelections: VarGroupSelection
-): CloudConnectorOptionResult {
-  if (!varGroups || varGroups.length === 0) {
-    return { isCloudConnector: false };
-  }
-
-  for (const varGroup of varGroups) {
-    const selectedName = varGroupSelections[varGroup.name];
-    if (!selectedName) {
-      continue;
-    }
-
-    const selectedOption = getSelectedOption(varGroup, selectedName);
-    if (selectedOption?.provider) {
-      return {
-        isCloudConnector: true,
-        provider: selectedOption.provider as string,
-      };
-    }
-  }
-  return { isCloudConnector: false };
-}
-
-/**
- * Gets the iac_template_url from the currently selected var_group option.
- * This is used for Fleet integrations that store IaC template URLs (CloudFormation, ARM)
- * as properties on the var_group option rather than in input.vars.
- */
-export function getIacTemplateUrlFromVarGroupSelection(
-  varGroups: RegistryVarGroup[] | undefined,
-  varGroupSelections: VarGroupSelection
-): string | undefined {
-  if (!varGroups || varGroups.length === 0) {
-    return undefined;
-  }
-
-  for (const varGroup of varGroups) {
-    const selectedName = varGroupSelections[varGroup.name];
-    if (!selectedName) {
-      continue;
-    }
-
-    const selectedOption = getSelectedOption(varGroup, selectedName);
-    if (selectedOption?.iac_template_url) {
-      return selectedOption.iac_template_url as string;
-    }
-  }
-  return undefined;
 }

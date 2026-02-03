@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,19 +29,15 @@ import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
-import type { UpdatePolicy } from '../../../../../../../components/cloud_connector/types';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
-import type { CloudProvider } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
-
 import {
-  isAdvancedVar,
-  shouldShowVar,
-  isVarRequiredByVarGroup,
-  getCloudConnectorOption,
-  getIacTemplateUrlFromVarGroupSelection,
-} from '../../services';
+  useGetEpmDatastreams,
+  useStartServices,
+  useVarGroupCloudConnector,
+} from '../../../../../hooks';
+
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
@@ -92,25 +88,18 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         onSelectionsChange: updatePackagePolicy,
       });
 
-    // Check if a cloud connector option is selected
-    const cloudConnectorOption = useMemo(
-      () => getCloudConnectorOption(packageInfo.var_groups, varGroupSelections),
-      [packageInfo.var_groups, varGroupSelections]
-    );
-
-    // Get IaC template URL from var_group selection (for non-CSPM integrations)
-    const iacTemplateUrl = useMemo(
-      () => getIacTemplateUrlFromVarGroupSelection(packageInfo.var_groups, varGroupSelections),
-      [packageInfo.var_groups, varGroupSelections]
-    );
-
-    // Create an UpdatePolicy callback compatible with CloudConnectorSetup
-    const handleCloudConnectorUpdate: UpdatePolicy = useCallback(
-      ({ updatedPolicy, isValid }) => {
-        updatePackagePolicy(updatedPolicy);
-      },
-      [updatePackagePolicy]
-    );
+    // Cloud connector state from var_group selections
+    const {
+      isCloudConnector,
+      cloudProvider,
+      iacTemplateUrl,
+      cloudConnectorVars,
+      handleCloudConnectorUpdate,
+    } = useVarGroupCloudConnector({
+      varGroups: packageInfo.var_groups,
+      varGroupSelections,
+      updatePackagePolicy,
+    });
 
     // Package-level vars, filtered by var_group visibility
     const { requiredVars, advancedVars } = useMemo(() => {
@@ -119,6 +108,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
+          // Skip vars handled by cloud connector (they render their own fields)
+          if (cloudConnectorVars.has(varDef.name)) {
+            return;
+          }
+
           // Check if var should be shown based on var_group selections
           if (
             packageInfo.var_groups &&
@@ -137,7 +131,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections]);
+    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, cloudConnectorVars]);
 
     // Outputs
     const {
@@ -301,7 +295,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             ))}
 
             {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
-            {cloudConnectorOption.isCloudConnector && (
+            {isCloudConnector && cloudProvider && (
               <EuiFlexItem>
                 <CloudConnectorSetup
                   newPolicy={packagePolicy}
@@ -310,7 +304,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   isEditPage={isEditPage}
                   hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
                   cloud={cloud}
-                  cloudProvider={cloudConnectorOption.provider as CloudProvider}
+                  cloudProvider={cloudProvider}
                   templateName={packageInfo.name}
                   iacTemplateUrl={iacTemplateUrl}
                 />

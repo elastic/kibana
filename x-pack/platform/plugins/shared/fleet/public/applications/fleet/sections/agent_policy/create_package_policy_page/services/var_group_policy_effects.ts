@@ -6,9 +6,11 @@
  */
 
 import type { NewPackagePolicy } from '../../../../../../../common';
+import {
+  getCloudConnectorOption,
+  type VarGroupSelection,
+} from '../../../../../../../common/services/cloud_connectors';
 import type { RegistryVarGroup } from '../../../../types';
-
-import { getCloudConnectorOption, type VarGroupSelection } from './var_group_helpers';
 
 /**
  * Handler function type for computing policy effects based on var_group selections.

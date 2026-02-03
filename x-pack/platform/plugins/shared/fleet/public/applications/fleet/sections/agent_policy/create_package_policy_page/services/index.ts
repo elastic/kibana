@@ -17,6 +17,7 @@ export {
   isVarInSelectedVarGroupOption,
   getSelectedOption,
   getCloudConnectorOption,
+  getCloudConnectorVars,
   getIacTemplateUrlFromVarGroupSelection,
 } from './var_group_helpers';
 export type { VarGroupSelection, CloudConnectorOptionResult } from './var_group_helpers';

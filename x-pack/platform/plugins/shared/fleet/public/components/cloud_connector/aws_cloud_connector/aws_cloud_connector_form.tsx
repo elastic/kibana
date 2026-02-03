@@ -10,7 +10,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
 
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars } from '../../../../common';
+import {
+  extractRawCredentialVars,
+  getCredentialKeyFromVarName,
+} from '../../../../common/services/cloud_connectors';
 import { type CloudConnectorFormProps } from '../types';
 
 import {
@@ -18,7 +21,7 @@ import {
   updateInputVarsWithCredentials,
   isAwsCredentials,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, ORGANIZATION_ACCOUNT } from '../constants';
+import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -99,15 +102,8 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           onChange={(key, value) => {
             if (!credentials || !isAwsCredentials(credentials) || !setCredentials) return;
 
-            // Map field keys to credential properties (handles both package-level and input-level var names)
-            const fieldToCredentialKey: Record<string, keyof typeof credentials> = {
-              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]: 'roleArn',
-              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]: 'roleArn',
-              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]: 'externalId',
-              [AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]: 'externalId',
-            };
-
-            const credentialKey = fieldToCredentialKey[key];
+            // Use schema-based lookup to map var names to credential properties
+            const credentialKey = getCredentialKeyFromVarName('aws', key);
             if (credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });
             }

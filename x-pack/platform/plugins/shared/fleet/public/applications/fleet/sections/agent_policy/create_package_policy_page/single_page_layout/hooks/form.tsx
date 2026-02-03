@@ -60,11 +60,8 @@ import {
 import { getMaxPackageName } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
-import {
-  validatePackagePolicy,
-  validationHasErrors,
-  getCloudConnectorOption,
-} from '../../services';
+import { getCloudConnectorOption } from '../../../../../../../../common/services/cloud_connectors';
+import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
 import type { RegistryVarGroup } from '../../../../../types';
