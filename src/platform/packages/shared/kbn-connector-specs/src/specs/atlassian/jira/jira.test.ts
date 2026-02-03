@@ -162,4 +162,70 @@ describe('JiraConnector', () => {
       );
     });
   });
+
+  describe('searchUsers action', () => {
+    it('should search users by query and return response data', async () => {
+      const mockResponse = {
+        data: [
+          {
+            accountId: '5b10a2844c20165700ede21g',
+            displayName: 'Mia Krystof',
+            emailAddress: 'mia@example.com',
+          },
+        ],
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.searchUsers.handler(mockContext, {
+        query: 'mia',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/user/search',
+        { params: { query: 'mia' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should build base URL from config subdomain', async () => {
+      const mockResponse = { data: [] };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const contextWithSubdomain = {
+        ...mockContext,
+        config: { subdomain: 'acme' },
+      } as unknown as ActionContext;
+
+      await JiraConnector.actions.searchUsers.handler(contextWithSubdomain, {
+        query: 'workplace-search',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://acme.atlassian.net/rest/api/3/user/search',
+        { params: { query: 'workplace-search' } }
+      );
+    });
+
+    it('should include optional startAt and maxResults in the request', async () => {
+      const mockResponse = { data: [] };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await JiraConnector.actions.searchUsers.handler(mockContext, {
+        query: 'alice',
+        startAt: 10,
+        maxResults: 25,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/user/search',
+        {
+          params: {
+            query: 'alice',
+            startAt: 10,
+            maxResults: 25,
+          },
+        }
+      );
+    });
+  });
 });

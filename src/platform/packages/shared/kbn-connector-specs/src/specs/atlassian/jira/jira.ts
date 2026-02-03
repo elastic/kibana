@@ -107,5 +107,31 @@ export const JiraConnector: ConnectorSpec = {
         return response.data;
       },
     },
+    searchUsers: {
+      isTool: false,
+      input: z.object({
+        query: z.string().optional(),
+        username: z.string().optional(),
+        accountId: z.string().optional(),
+        startAt: z.number().optional(),
+        maxResults: z.number().optional(),
+        property: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          query?: string;
+          username?: string;
+          accountId?: string;
+          startAt?: number;
+          maxResults?: number;
+          property?: string;
+        };
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/rest/api/3/user/search`, {
+          params: typedInput,
+        });
+        return response.data;
+      },
+    },
   },
 };
