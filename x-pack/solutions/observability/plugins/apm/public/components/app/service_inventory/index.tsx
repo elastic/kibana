@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import type { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -28,7 +28,7 @@ import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
-import { orderServiceItems } from './service_list/order_service_items';
+import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
 import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
@@ -177,22 +177,19 @@ export function ServiceInventory() {
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
-    query: { rangeFrom, rangeTo },
+    query: { rangeFrom, rangeTo, sortField },
   } = useApmParams('/services');
-
-  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
-  const displayAlerts = mainStatisticsData.items.some(
-    (item) => ServiceInventoryFieldName.AlertsCount in item
-  );
-
-  const tiebreakerField = ServiceInventoryFieldName.Throughput;
-
-  const initialSortField = displayHealthStatus
-    ? ServiceInventoryFieldName.HealthStatus
-    : tiebreakerField;
+  // Determine the default sort field based on available data in service items
+  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+  const {
+    sortField: initialSortField,
+    hasAlerts,
+    hasSlos,
+    hasHealthStatuses,
+  } = getAvailableFields(mainStatisticsData.items);
 
   const initialSortDirection = 'desc';
 
@@ -235,16 +232,20 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
+  // Track if user has explicitly selected a sort column via URL params
+  const isDefaultSort = !sortField;
+
   const sortFn: SortFunction<ServiceListItem> = useCallback(
-    (itemsToSort, sortField, sortDirection) => {
+    (itemsToSort, currentSortField, currentSortDirection) => {
       return orderServiceItems({
         items: itemsToSort,
-        primarySortField: sortField,
-        sortDirection,
-        tiebreakerField,
+        sortField: currentSortField as ServiceInventoryFieldName,
+        sortDirection: currentSortDirection,
+        // Use multi-level sort only when no explicit sort field is in URL
+        isDefaultSort,
       });
     },
-    [tiebreakerField]
+    [isDefaultSort]
   );
 
   // TODO verify this with AI team
@@ -299,8 +300,9 @@ export function ServiceInventory() {
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
-            displayHealthStatus={displayHealthStatus}
-            displayAlerts={displayAlerts}
+            displayHealthStatus={hasHealthStatuses}
+            displayAlerts={hasAlerts}
+            displaySlos={hasSlos}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
             sortFn={sortFn}

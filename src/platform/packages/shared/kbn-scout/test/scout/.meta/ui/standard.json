@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-03T19:04:20.842Z",
-  "sha1": "cf987cc228a08cc2083d5d705322a88092e4ba5a",
+  "lastModified": "2026-01-30T09:09:08.844Z",
+  "sha1": "5d4b92e47f9b4ddfce3618769852aefc5a296489",
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
@@ -33,42 +33,42 @@
     {
       "id": "cfef694ab86356f-79526e55b73e4e5",
       "title": "EUI testing wrapper: EuiCheckBox checkbox",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@svlSecurity",
         "@ess"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 7
       }
     },
     {
       "id": "017789e0b431bee-3428dc06d0d6721",
       "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@svlSecurity",
         "@ess"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 7
       }
     },
     {
       "id": "017789e0b431bee-5331af19c193bbb",
       "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@svlSecurity",
         "@ess"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 7
       }
     },
@@ -103,28 +103,28 @@
     {
       "id": "61a2eae02548a18-ecfb93690a45e0e",
       "title": "EUI testing wrapper: EuiSelectable selectable with search field",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@svlSecurity",
         "@ess"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/selectable.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 7
       }
     },
     {
       "id": "eb199ae3cbbe1c6-2dd52577680db76",
       "title": "EUI testing wrapper: EuiToast toast",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@svlSecurity",
         "@ess"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/toast.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 7
       }
     }

@@ -17,11 +17,11 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { ResponseSection } from './response_section';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../hooks/use_expand_section');
+jest.mock('../../../shared/hooks/use_expand_section');
 jest.mock('../../../../common/lib/kibana');
 
 const mockedUseKibana = mockUseKibana();

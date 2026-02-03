@@ -10,7 +10,13 @@ import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS } from './constants';
+import {
+  DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  DEFAULT_LOG_SOURCE_FIELDS,
+  DEFAULT_ERROR_LOGS_ONLY,
+  DEFAULT_MAX_SEQUENCES,
+  DEFAULT_MAX_LOGS_PER_SEQUENCE,
+} from './constants';
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
@@ -56,6 +62,39 @@ export function getNoResultsMessage({
     .join(', ')}.`;
 }
 
+export async function getCorrelatedLogsForLogEntry({
+  core,
+  logger,
+  esClient,
+  index,
+  start,
+  end,
+  logId,
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  index: string;
+  start: string;
+  end: string;
+  logId: string;
+}) {
+  return getToolHandler({
+    core,
+    logger,
+    esClient,
+    index,
+    start,
+    end,
+    logId,
+    errorLogsOnly: false,
+    correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+    logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
+    maxSequences: DEFAULT_MAX_SEQUENCES,
+    maxLogsPerSequence: DEFAULT_MAX_LOGS_PER_SEQUENCE,
+  });
+}
+
 export async function getToolHandler({
   core,
   logger,
@@ -63,13 +102,13 @@ export async function getToolHandler({
   start,
   end,
   kqlFilter,
-  errorLogsOnly,
+  errorLogsOnly = DEFAULT_ERROR_LOGS_ONLY,
   index,
-  correlationFields,
+  correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
   logId,
-  logSourceFields,
-  maxSequences,
-  maxLogsPerSequence,
+  logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
+  maxSequences = DEFAULT_MAX_SEQUENCES,
+  maxLogsPerSequence = DEFAULT_MAX_LOGS_PER_SEQUENCE,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;

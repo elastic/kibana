@@ -132,6 +132,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'description',
   'format_version',
   'discovery',
+  'var_groups',
   'deprecated',
 ] as const;
 
