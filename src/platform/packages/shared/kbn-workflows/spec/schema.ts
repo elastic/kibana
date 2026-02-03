@@ -11,8 +11,6 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers/trigger_schema';
-export type { JsonModelSchemaType } from './schema/common/json_model_schema';
-export { JsonModelSchema };
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
