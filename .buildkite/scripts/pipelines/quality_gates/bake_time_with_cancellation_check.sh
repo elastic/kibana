@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This scripts waits for BAKE_SECONDS (environment variable) seconds and
+# This script waits for BAKE_SECONDS (environment variable) seconds and
 # regularly checks for the existence of the early-bake-time-cancel BK meta-data
 # key to cancel the bake time earlier with exit code 42, which should be
 # handled by the calling pipeline to make it soft-fail, such that the cancelled
