@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
   - '@kbn/utility-types'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
