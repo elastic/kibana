@@ -19,11 +19,10 @@ target
 /build
 .jruby
 .idea
-.claude
+.claude/*.local.json
 .cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
-claude.md
 *.iml
 *.log
 types.eslint.config.js

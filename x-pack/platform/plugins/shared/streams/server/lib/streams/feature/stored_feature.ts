@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import type { FeatureStatus } from '@kbn/streams-schema/src/feature';
 import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
 import {
   STREAM_NAME,
@@ -26,25 +25,7 @@ import {
   FEATURE_SUBTYPE,
 } from './fields';
 
-export interface StoredFeature {
-  [FEATURE_UUID]: string;
-  [FEATURE_ID]: string;
-  [FEATURE_TYPE]: string;
-  [FEATURE_SUBTYPE]?: string;
-  [FEATURE_DESCRIPTION]: string;
-  [STREAM_NAME]: string;
-  [FEATURE_PROPERTIES]: Record<string, any>;
-  [FEATURE_CONFIDENCE]: number;
-  [FEATURE_EVIDENCE]: string[];
-  [FEATURE_STATUS]: FeatureStatus;
-  [FEATURE_LAST_SEEN]: string;
-  [FEATURE_TAGS]: string[];
-  [FEATURE_META]: Record<string, any>;
-  [FEATURE_EXPIRES_AT]?: string;
-  [FEATURE_TITLE]?: string;
-}
-
-export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
+export const storedFeatureSchema = z.object({
   [FEATURE_TYPE]: z.string(),
   [FEATURE_ID]: z.string(),
   [FEATURE_UUID]: z.string(),
@@ -53,11 +34,13 @@ export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
   [STREAM_NAME]: z.string(),
   [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
   [FEATURE_CONFIDENCE]: z.number(),
-  [FEATURE_EVIDENCE]: z.array(z.string()),
+  [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
   [FEATURE_STATUS]: featureStatusSchema,
   [FEATURE_LAST_SEEN]: z.string(),
-  [FEATURE_TAGS]: z.array(z.string()),
-  [FEATURE_META]: z.record(z.string(), z.any()),
+  [FEATURE_TAGS]: z.array(z.string()).optional(),
+  [FEATURE_META]: z.record(z.string(), z.any()).optional(),
   [FEATURE_EXPIRES_AT]: z.string().optional(),
   [FEATURE_TITLE]: z.string().optional(),
 });
+
+export type StoredFeature = z.infer<typeof storedFeatureSchema>;
