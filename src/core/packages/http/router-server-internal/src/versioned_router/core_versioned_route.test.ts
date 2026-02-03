@@ -22,6 +22,8 @@ import { isConfigSchema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
+import { kibanaResponseFactory } from '../response';
+import { Logger } from '@kbn/logging';
 
 const notDevOptions = getEnvOptions();
 notDevOptions.cliArgs.dev = false;
@@ -32,7 +34,7 @@ describe('Versioned route', () => {
   let router: Router;
   let versionedRouter: CoreVersionedRouter;
   let testValidation: ReturnType<typeof createFooValidation>;
-  const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
+  const handlerFn: RequestHandler = jest.fn(async (ctx, req, res) => res.ok({ body: { foo: 1 } }));
   beforeEach(() => {
     testValidation = createFooValidation();
     router = createRouter();
@@ -419,11 +421,13 @@ describe('Versioned route', () => {
   });
 
   describe('when in dev', () => {
+    let logger: Logger;
     beforeEach(() => {
+      logger = loggingSystemMock.createLogger();
       versionedRouter = CoreVersionedRouter.from({
         router,
         env: devEnv,
-        log: loggingSystemMock.createLogger(),
+        log: logger,
       });
     });
     // NOTE: Temporary test to ensure single public API version is enforced
@@ -443,44 +447,82 @@ describe('Versioned route', () => {
       ).toThrow(/Invalid public version/);
     });
 
-    it('runs response validations', async () => {
+    describe('runs response validations', () => {
       let handler: InternalRouteHandler;
-      const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
-        testValidation;
+      let validateBodyFn: jest.Mock;
+      let validateOutputFn: jest.Mock;
+      let validateParamsFn: jest.Mock;
+      let validateQueryFn: jest.Mock;
+      beforeEach(() => {
+        ({ validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } = testValidation);
 
-      (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
-      versionedRouter
-        .post({
-          path: '/test/{id}',
-          access: 'internal',
-          security: {
-            authz: {
-              requiredPrivileges: ['foo'],
+        const fooValidation = testValidation.fooValidation;
+
+        (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
+        versionedRouter
+          .post({
+            path: '/test/{id}',
+            access: 'internal',
+            security: {
+              authz: {
+                requiredPrivileges: ['foo'],
+              },
             },
-          },
-        })
-        .addVersion(
-          {
+          })
+          .addVersion(
+            {
+              version: '1',
+              validate: fooValidation,
+            },
+            handlerFn
+          );
+      });
+
+      it('on success', async () => {
+        const kibanaResponse = await handler!(
+          createRequest({
             version: '1',
-            validate: fooValidation,
-          },
-          handlerFn
+            body: { foo: 1 },
+            params: { foo: 1 },
+            query: { foo: 1 },
+          })
         );
 
-      const kibanaResponse = await handler!(
-        createRequest({
-          version: '1',
-          body: { foo: 1 },
-          params: { foo: 1 },
-          query: { foo: 1 },
-        })
-      );
+        expect(kibanaResponse.status).toBe(200);
+        expect(validateBodyFn).toHaveBeenCalledTimes(1);
+        expect(validateParamsFn).toHaveBeenCalledTimes(1);
+        expect(validateQueryFn).toHaveBeenCalledTimes(1);
+        expect(validateOutputFn).toHaveBeenCalledTimes(1);
+      });
 
-      expect(kibanaResponse.status).toBe(200);
-      expect(validateBodyFn).toHaveBeenCalledTimes(1);
-      expect(validateParamsFn).toHaveBeenCalledTimes(1);
-      expect(validateQueryFn).toHaveBeenCalledTimes(1);
-      expect(validateOutputFn).toHaveBeenCalledTimes(1);
+      it('on failure', async () => {
+        (handlerFn as jest.Mock).mockImplementationOnce(async () =>
+          kibanaResponseFactory.ok({ body: { notOk: true } })
+        );
+        const kibanaResponse = await handler!(
+          createRequest({
+            version: '1',
+            body: { foo: 1 },
+            params: { foo: 1 },
+            query: { foo: 1 },
+          })
+        );
+
+        expect(kibanaResponse.status).toBe(500);
+        const expectedMessage = `POST /test/{id} (version: 1) failed to validate response schema:
+
+\`\`\`
+Error: [response body.foo]: expected value of type [number] but got [undefined]
+\`\`\`
+
+Please check the code in your handler definition. This is an indication that your application code may contain errors
+because your routes are returning unexpected values.
+
+Note: response validation only runs in DEV mode.`;
+        expect(kibanaResponse.payload).toBe(expectedMessage);
+        expect(logger.get).toHaveBeenCalledWith('versioned-router-response-validation');
+        expect(logger.error).toHaveBeenCalledWith(expectedMessage);
+      });
     });
 
     it('handles "undefined" response schemas', async () => {
