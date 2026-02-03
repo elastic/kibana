@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.alerts-events';
+export const ALERT_EVENTS_BACKING_INDEX = '.ds-.alerts-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.alerts-events-ilm-policy';
 
 export const ALERT_EVENTS_ILM_POLICY: IlmPolicy = {
@@ -63,7 +64,7 @@ export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
-  scheduled_timestamp: z.string(),
+  scheduled_timestamp: z.string().optional(),
   rule: z.object({
     id: z.string(),
     version: z.number(),
