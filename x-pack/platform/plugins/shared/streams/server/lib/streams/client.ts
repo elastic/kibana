@@ -39,6 +39,7 @@ import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import type { SystemClient } from './system/system_client';
 import type { FeatureClient } from './feature';
+import { WorkflowTriggerService } from './workflow_triggers';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -81,6 +82,7 @@ export class StreamsClient {
       request: KibanaRequest;
       isServerless: boolean;
       isDev: boolean;
+      workflowTriggerService?: WorkflowTriggerService;
     }
   ) {}
 
@@ -246,11 +248,24 @@ export class StreamsClient {
   async upsertStream({
     name,
     request,
+    spaceId = 'default',
   }: {
     name: string;
     request: Streams.all.UpsertRequest;
+    spaceId?: string;
   }): Promise<UpsertStreamResponse> {
     const stream = convertUpsertRequestIntoDefinition(name, request);
+
+    // Get the old definition before changes (for change detection)
+    let oldDefinition: Streams.all.Definition | undefined;
+    try {
+      oldDefinition = await this.getStream(name);
+    } catch (error) {
+      if (!isDefinitionNotFoundError(error)) {
+        throw error;
+      }
+      // Stream doesn't exist yet, oldDefinition stays undefined
+    }
 
     const result = await State.attemptChanges(
       [
@@ -267,17 +282,82 @@ export class StreamsClient {
 
     await this.syncAssets(stream.name, request);
 
+    const isCreated = result.changes.created.includes(name);
+
+    // Fire workflow triggers for the stream change (async, don't await)
+    this.fireStreamUpsertTrigger(name, oldDefinition, stream, isCreated, spaceId);
+
     return {
       acknowledged: true,
-      result: result.changes.created.includes(name) ? 'created' : 'updated',
+      result: isCreated ? 'created' : 'updated',
     };
   }
 
-  async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
+  /**
+   * Fire workflow triggers for a stream upsert.
+   * This is done asynchronously to not block the main operation.
+   */
+  private fireStreamUpsertTrigger(
+    name: string,
+    oldDefinition: Streams.all.Definition | undefined,
+    newDefinition: Streams.all.Definition,
+    isCreated: boolean,
+    spaceId: string
+  ): void {
+    const { workflowTriggerService, request } = this.dependencies;
+
+    if (!workflowTriggerService) {
+      return;
+    }
+
+    const changeTypes = WorkflowTriggerService.detectChangeTypes(oldDefinition, newDefinition);
+
+    // Fire asynchronously - don't await
+    workflowTriggerService
+      .onStreamUpsert({
+        streamName: name,
+        changeTypes,
+        isCreated,
+        streamDefinition: newDefinition,
+        spaceId,
+        request,
+      })
+      .catch((error: Error) => {
+        this.dependencies.logger.error(
+          `Failed to fire workflow trigger for stream ${name}: ${error.message}`
+        );
+      });
+  }
+
+  async bulkUpsert(
+    streams: Array<{ name: string; request: Streams.all.UpsertRequest }>,
+    spaceId: string = 'default'
+  ) {
+    // Get old definitions for change detection
+    const oldDefinitions = new Map<string, Streams.all.Definition | undefined>();
+    await Promise.all(
+      streams.map(async ({ name }) => {
+        try {
+          const def = await this.getStream(name);
+          oldDefinitions.set(name, def);
+        } catch (error) {
+          if (!isDefinitionNotFoundError(error)) {
+            throw error;
+          }
+          oldDefinitions.set(name, undefined);
+        }
+      })
+    );
+
+    const streamDefinitions = streams.map(({ name, request }) => ({
+      name,
+      definition: convertUpsertRequestIntoDefinition(name, request),
+    }));
+
     const result = await State.attemptChanges(
-      streams.map(({ name, request }) => ({
+      streamDefinitions.map(({ definition }) => ({
         type: 'upsert',
-        definition: convertUpsertRequestIntoDefinition(name, request),
+        definition,
       })),
       {
         ...this.dependencies,
@@ -286,6 +366,13 @@ export class StreamsClient {
     );
 
     await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+
+    // Fire workflow triggers for each stream change
+    for (const { name, definition } of streamDefinitions) {
+      const oldDefinition = oldDefinitions.get(name);
+      const isCreated = result.changes.created.includes(name);
+      this.fireStreamUpsertTrigger(name, oldDefinition, definition, isCreated, spaceId);
+    }
 
     return {
       acknowledged: true,

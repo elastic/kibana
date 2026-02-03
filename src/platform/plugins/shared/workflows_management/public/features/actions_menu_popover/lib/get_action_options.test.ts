@@ -54,6 +54,9 @@ describe('getActionOptions', () => {
       getStepDefinition: jest.fn(),
       getAllStepDefinitions: jest.fn(),
       hasStepDefinition: jest.fn(),
+      getTriggerDefinition: jest.fn(),
+      getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      hasTriggerDefinition: jest.fn().mockReturnValue(false),
     };
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);

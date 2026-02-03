@@ -10,6 +10,7 @@
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   Logger,
   Plugin,
@@ -25,6 +26,8 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { TriggerService } from './trigger_service';
+import { createStorage } from './storage/workflow_storage';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsRequestHandlerContext,
@@ -52,11 +55,14 @@ export class WorkflowsPlugin
   private readonly logger: Logger;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
+  private triggerService: TriggerService;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private esClient: ElasticsearchClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.triggerService = new TriggerService(this.logger);
   }
 
   public setup(
@@ -204,12 +210,27 @@ export class WorkflowsPlugin
       }
     }
 
+    // Initialize trigger service
+    this.esClient = core.elasticsearch.client.asInternalUser;
+    const workflowStorage = createStorage({
+      logger: this.logger,
+      esClient: this.esClient,
+    });
+
+    this.triggerService.initialize({
+      workflowStorage,
+      workflowsExtensions: plugins.workflowsExtensions,
+      workflowsExecutionEngine: plugins.workflowsExecutionEngine,
+    });
+
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
     this.logger.debug('Workflows Management: Started');
 
-    return {};
+    return {
+      triggerService: this.triggerService,
+    };
   }
 
   public stop() {}

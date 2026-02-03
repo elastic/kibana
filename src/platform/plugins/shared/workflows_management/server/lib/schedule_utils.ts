@@ -10,10 +10,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, complexity */
 
 import { Frequency } from '@kbn/rrule';
+import type { TriggerType } from '@kbn/workflows';
 
-// Define the trigger type based on the schema
+/**
+ * Workflow trigger type - represents any trigger type with optional config.
+ * Uses TriggerType from @kbn/workflows for the type field to ensure
+ * consistency with all registered trigger types (alert, scheduled, manual,
+ * streams.upsertStream, etc.).
+ */
 export interface WorkflowTrigger {
-  type: 'alert' | 'scheduled' | 'manual';
+  type: TriggerType;
   with?: Record<string, any>;
 }
 

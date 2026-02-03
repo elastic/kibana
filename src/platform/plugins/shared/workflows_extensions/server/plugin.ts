@@ -10,7 +10,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { ServerStepRegistry } from './step_registry';
+import { ServerTriggerRegistry } from './trigger_registry';
 import { registerInternalStepDefinitions } from './steps';
+import { registerInternalTriggerDefinitions } from './triggers';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
@@ -28,9 +30,11 @@ export class WorkflowsExtensionsServerPlugin
     >
 {
   private readonly stepRegistry: ServerStepRegistry;
+  private readonly triggerRegistry: ServerTriggerRegistry;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new ServerStepRegistry();
+    this.triggerRegistry = new ServerTriggerRegistry();
   }
 
   public setup(
@@ -43,9 +47,15 @@ export class WorkflowsExtensionsServerPlugin
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
 
+    // Register internal trigger definitions (e.g., streams.upsertStream)
+    registerInternalTriggerDefinitions(this.triggerRegistry);
+
     return {
       registerStepDefinition: (definition) => {
         this.stepRegistry.register(definition);
+      },
+      registerTriggerDefinition: (definition) => {
+        this.triggerRegistry.register(definition);
       },
     };
   }
@@ -63,6 +73,15 @@ export class WorkflowsExtensionsServerPlugin
       },
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
+      },
+      getTriggerDefinition: (triggerTypeId: string) => {
+        return this.triggerRegistry.get(triggerTypeId);
+      },
+      hasTriggerDefinition: (triggerTypeId: string) => {
+        return this.triggerRegistry.has(triggerTypeId);
+      },
+      getAllTriggerDefinitions: () => {
+        return this.triggerRegistry.getAll();
       },
     };
   }

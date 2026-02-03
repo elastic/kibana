@@ -10,11 +10,12 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ServerStepDefinition } from './step_registry/types';
+import type { ServerTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /**
  * Server-side plugin setup contract.
- * Exposes methods for other plugins to register server-side custom workflow steps.
+ * Exposes methods for other plugins to register server-side custom workflow steps and triggers.
  */
 export interface WorkflowsExtensionsServerPluginSetup {
   /**
@@ -25,14 +26,25 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if definition for the same step type ID is already registered
    */
   registerStepDefinition(definition: ServerStepDefinition): void;
+
+  /**
+   * Register server-side definition for a workflow trigger.
+   * This should be called during the plugin's setup phase.
+   *
+   * @param definition - The trigger server-side definition
+   * @throws Error if definition for the same trigger type ID is already registered
+   */
+  registerTriggerDefinition(definition: ServerTriggerDefinition): void;
 }
 
 /**
  * Server-side plugin start contract.
- * Exposes methods for retrieving registered server-side step implementations.
+ * Exposes methods for retrieving registered server-side step and trigger implementations.
  */
-export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition>;
+export type WorkflowsExtensionsServerPluginStart = WorkflowsExtensionsStartContract<
+  ServerStepDefinition,
+  ServerTriggerDefinition
+>;
 
 /**
  * Dependencies for the server plugin setup phase.

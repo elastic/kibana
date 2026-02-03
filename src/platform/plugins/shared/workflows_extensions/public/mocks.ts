@@ -8,22 +8,27 @@
  */
 
 import type { PublicStepDefinition } from './step_registry/types';
+import type { PublicTriggerDefinition } from './trigger_registry/types';
 import type { WorkflowsExtensionsPublicPluginSetup } from './types';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsPublicPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
+    registerTriggerDefinition: jest.fn(),
   };
 };
 
 const createStartMock: () => jest.Mocked<
-  WorkflowsExtensionsStartContract<PublicStepDefinition>
+  WorkflowsExtensionsStartContract<PublicStepDefinition, PublicTriggerDefinition>
 > = () => {
   return {
     getStepDefinition: jest.fn(),
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(() => []),
+    getTriggerDefinition: jest.fn(),
+    hasTriggerDefinition: jest.fn(),
+    getAllTriggerDefinitions: jest.fn(() => []),
   };
 };
 

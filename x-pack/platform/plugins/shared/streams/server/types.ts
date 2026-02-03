@@ -30,6 +30,7 @@ import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/serv
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type { WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -70,4 +71,5 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   spaces?: SpacesPluginStart;
+  workflowsManagement?: WorkflowsServerPluginStart;
 }

@@ -14,13 +14,18 @@ import { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import type { SystemClient } from './system/system_client';
 import type { FeatureClient } from './feature';
+import { WorkflowTriggerService } from './workflow_triggers';
 
 export class StreamsService {
+  private readonly workflowTriggerService: WorkflowTriggerService;
+
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger,
     private readonly isDev: boolean
-  ) {}
+  ) {
+    this.workflowTriggerService = new WorkflowTriggerService(coreSetup, logger);
+  }
 
   async getClientWithRequest({
     request,
@@ -54,6 +59,7 @@ export class StreamsService {
       request,
       isServerless,
       isDev: this.isDev,
+      workflowTriggerService: this.workflowTriggerService,
     });
   }
 }
