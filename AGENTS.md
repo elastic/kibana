@@ -52,7 +52,6 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
-- `yarn llm` runs ESLint `--fix` on changed JS/TS files and may apply formatting-style fixes.
 - Prefer single quotes in TS/JS unless the file uses double quotes.
 
 ### Naming
