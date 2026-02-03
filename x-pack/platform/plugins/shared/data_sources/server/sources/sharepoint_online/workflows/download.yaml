@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint.download'
-description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id); downloadItemFromURL + ingest extract (download_url, extracted text available in simulate response under docs[0].doc._source.attachment.content); getSitePageContents (site_id, page_id).'
+description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id) for markdown/plain-text files; downloadItemFromURL + ingest extract (download_url) for PDFs, .docx, and other files that require preprocessing (extracted text available in simulate response under docs[0].doc._source.attachment.content); getSitePageContents (site_id, page_id) for SharePoint site page content.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
