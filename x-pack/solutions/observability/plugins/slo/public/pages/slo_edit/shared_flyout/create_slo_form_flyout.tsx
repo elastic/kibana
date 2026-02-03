@@ -43,15 +43,18 @@ const STEP_DEFINE_SLI = 0;
 const STEP_SET_OBJECTIVES = 1;
 const STEP_DESCRIBE_SLO = 2;
 
+// Keep the portal node export for backward compatibility with SloEditForm used in other contexts
+export const sloEditFormFooterPortal = createHtmlPortalNode();
+
 // eslint-disable-next-line import/no-default-export
 export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
-  formSettings,
+  formSettings = {},
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
-  formSettings?: FormSettings;
+  formSettings?: Omit<FormSettings, 'isFlyout'>;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
   const [currentStep, setCurrentStep] = useState(STEP_DEFINE_SLI);
@@ -223,7 +226,6 @@ export default function CreateSLOFormFlyout({
         maxWidth={620}
         ownFocus
         session="start"
-        flyoutMenuProps={{ title: 'Create SLO' }}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
@@ -240,7 +242,7 @@ export default function CreateSLOFormFlyout({
               <EuiStepsHorizontal steps={steps} size="xs" />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={true}>{renderStepContent()}</EuiFlexItem>
+            <EuiFlexItem>{renderStepContent()}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutBody>
 
@@ -318,6 +320,3 @@ export default function CreateSLOFormFlyout({
     </FormProvider>
   );
 }
-
-// Keep the portal node export for backward compatibility with SloEditForm used in other contexts
-export const sloEditFormFooterPortal = createHtmlPortalNode();
