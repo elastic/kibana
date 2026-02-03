@@ -362,6 +362,7 @@ enabled:
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql_long_running.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_long_running.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
+  - x-pack/performance/journeys_e2e/data_stress_test_lens_esql.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys_e2e/dashboard_listing_page.ts
