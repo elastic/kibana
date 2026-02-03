@@ -104,4 +104,26 @@ test.describe('Stream data retention - ILM policy', { tag: ['@ess'] }, () => {
     await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
     await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
   });
+
+  test('should open ILM lifecycle phase popup and display phase details', async ({ page }) => {
+    // First set an ILM policy
+    await openRetentionModal(page);
+    await toggleInheritSwitch(page, false);
+
+    // Click ILM policy button and select a policy
+    await page.getByRole('button', { name: 'ILM policy' }).click();
+    await page.getByRole('listbox', { name: 'Filter options' }).waitFor();
+    await page.getByRole('option', { name: /.alerts-ilm-policy/ }).click();
+    await saveRetentionChanges(page);
+
+    // Click on the hot phase button using test ID
+    await page.getByTestId('lifecyclePhase-hot-button').click();
+
+    // Verify the popover opens and shows the expected content
+    await expect(page.getByTestId('lifecyclePhase-hot-popoverTitle')).toBeVisible();
+    await expect(page.getByTestId('lifecyclePhase-hot-popoverContent')).toBeVisible();
+
+    // Close the popover by pressing Escape
+    await page.keyboard.press('Escape');
+  });
 });
