@@ -570,25 +570,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('size parameter', () => {
-      it('limits the number of groups returned', async () => {
+      it('limits the total number of groups returned', async () => {
         const results = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
           id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            size: 2,
+            size: 5,
           },
         });
 
-        const spanExceptionGroups = getSpanExceptionGroups(results[0].data.groups);
-        const logExceptionGroups = getLogExceptionGroups(results[0].data.groups);
-        const nonExceptionLogGroups = getNonExceptionLogGroups(results[0].data.groups);
+        const { groups } = results[0].data;
 
-        // Each category should have at most 2 groups
-        expect(spanExceptionGroups.length).to.be.lessThan(3);
-        expect(logExceptionGroups.length).to.be.lessThan(3);
-        // nonExceptionLogGroups may have up to 4 (2 high severity + 2 low severity)
-        expect(nonExceptionLogGroups.length).to.be.lessThan(5);
+        // Total groups should be limited to size
+        expect(groups.length).to.be(5);
+      });
+
+      it('prioritizes span exceptions over log exceptions over regular logs', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
+          id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            size: 4,
+          },
+        });
+
+        const { groups } = results[0].data;
+
+        expect(groups.every((group) => group.type === 'spanException')).to.be(true);
       });
 
       it('returns more groups when size is larger', async () => {
@@ -597,7 +607,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            size: 1,
+            size: 3,
           },
         });
 
@@ -606,15 +616,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            size: 10,
+            size: 15,
           },
         });
 
-        const smallSpanExceptionGroups = getSpanExceptionGroups(smallSizeResults[0].data.groups);
-        const largeSpanExceptionGroups = getSpanExceptionGroups(largeSizeResults[0].data.groups);
-
-        // Larger size should return at least as many (likely more) groups
-        expect(largeSpanExceptionGroups.length).to.be.greaterThan(smallSpanExceptionGroups.length);
+        expect(largeSizeResults[0].data.groups.length).to.be.greaterThan(
+          smallSizeResults[0].data.groups.length
+        );
       });
     });
   });

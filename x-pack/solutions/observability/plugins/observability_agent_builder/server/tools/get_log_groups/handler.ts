@@ -142,7 +142,7 @@ export async function getToolHandler({
   ]);
 
   return orderBy(
-    [...spanExceptionGroups, ...logExceptionGroups, ...nonExceptionLogGroups],
+    [...spanExceptionGroups, ...logExceptionGroups, ...nonExceptionLogGroups].slice(0, size),
     (group) => group.count,
     ['desc']
   );

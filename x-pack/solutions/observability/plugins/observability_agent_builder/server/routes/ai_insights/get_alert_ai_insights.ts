@@ -87,7 +87,6 @@ export async function getAlertAiInsight({
 const START_TIME_OFFSETS = {
   serviceSummary: 5,
   downstream: 24 * 60, // 24 hours
-  errors: 15,
   logs: 15,
   changePoints: 6 * 60, // 6 hours
 } as const;
@@ -131,11 +130,6 @@ async function fetchAlertContext({
       params: { serviceName, serviceEnvironment },
     },
     {
-      key: 'apmErrors' as const,
-      startOffset: START_TIME_OFFSETS.errors,
-      params: { serviceName, serviceEnvironment },
-    },
-    {
       key: 'apmServiceChangePoints' as const,
       startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
@@ -163,10 +157,10 @@ async function fetchAlertContext({
         start,
         end,
         kqlFilter: `service.name: "${serviceName}"`,
-        fields: ['service.name'],
+        fields: [],
         includeStackTrace: false,
         includeFirstSeen: false,
-        size: 50,
+        size: 10,
       });
 
       return result.length > 0 ? { key: 'logGroups' as const, start, end, data: result } : null;
