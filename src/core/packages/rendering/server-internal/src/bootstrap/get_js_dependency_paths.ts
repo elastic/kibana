@@ -31,9 +31,12 @@ export const getJsDependencyPaths = (
  *
  * Load order:
  * 1. Webpack shared deps (kbn-ui-shared-deps) - for npm externals
- * 2. Single unified Kibana bundle - contains core + all plugins
+ * 2. Single unified Kibana bundle - contains core + all plugins + runtime
  *
- * Async chunks (solution-specific code) are loaded on demand via import().
+ * The RSPack runtime is embedded in kibana.bundle.js (runtimeChunk: false).
+ * Async chunks do NOT contain runtime - they use JSONP format:
+ *   (self.webpackChunkkibana=self.webpackChunkkibana||[]).push([...])
+ * The runtime in kibana.bundle.js processes these pushed chunks.
  */
 export const getRspackDependencyPaths = (
   regularBundlePath: string,
@@ -44,7 +47,7 @@ export const getRspackDependencyPaths = (
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.dllFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
 
-    // 2. Single unified bundle containing core + all plugins
+    // 2. Single unified bundle containing core + all plugins + runtime
     `${regularBundlePath}/kibana.bundle.js`,
   ];
 };

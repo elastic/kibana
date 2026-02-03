@@ -262,8 +262,8 @@ export async function createSingleCompileConfig(
     output: {
       // Output to a central location
       path: Path.resolve(outputRoot, 'target/public/bundles'),
-      // Single unified bundle
-      filename: 'kibana.bundle.js',
+      // Single unified bundle (with [name] for runtimeChunk compatibility)
+      filename: '[name].bundle.js',
       // Async chunks: short hash names in production, descriptive names in development
       chunkFilename: dist
         ? 'chunks/[contenthash:8].js'
@@ -355,18 +355,29 @@ export async function createSingleCompileConfig(
           },
         },
       },
-      // Each entry contains its own runtime
+      // Runtime is embedded in the main entry bundle (kibana.bundle.js)
+      // Async chunks do NOT contain runtime - they use JSONP to register modules
       runtimeChunk: false,
+      // Production optimizations
       minimize: dist,
       minimizer: dist
         ? [
             new rspack.SwcJsMinimizerRspackPlugin({
+              // Match legacy webpack optimizer (TerserPlugin) config
+              extractComments: false, // Don't extract license comments to separate files
               minimizerOptions: {
+                // Target ES2020 - safe based on .browserslistrc (Firefox ESR 115+ supports it)
+                ecma: 2020,
                 compress: {
-                  drop_console: false,
-                  drop_debugger: true,
+                  passes: 2, // Multiple compression passes (same as legacy)
+                  ecma: 2020,
                 },
-                mangle: true,
+                mangle: {
+                  keep_classnames: true, // Same as legacy - required for Kibana
+                },
+                format: {
+                  ecma: 2020,
+                },
               },
             }),
             // Note: CSS is injected via style-loader, not extracted to files
@@ -419,9 +430,11 @@ export async function createSingleCompileConfig(
       // Node.js browser polyfills (same as kbn-optimizer)
       new NodeLibsBrowserPlugin() as any,
 
-      // Define NODE_ENV
+      // Define environment variables
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
+        // Match legacy webpack - used for conditional code in plugins
+        'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
       }),
 
       // Progress reporting - use log-based progress instead of dynamic terminal updates

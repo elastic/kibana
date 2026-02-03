@@ -136,16 +136,29 @@ export async function createExternalPluginConfig(
       splitChunks: {
         chunks: 'async',
       },
+      // Production optimizations (same as main build)
       minimize: dist,
+      usedExports: dist,
+      sideEffects: dist,
+      concatenateModules: dist,
       minimizer: dist
         ? [
             new rspack.SwcJsMinimizerRspackPlugin({
+              // Match legacy webpack optimizer (TerserPlugin) config
+              extractComments: false,
               minimizerOptions: {
+                // Target ES2020 - safe based on .browserslistrc (Firefox ESR 115+ supports it)
+                ecma: 2020,
                 compress: {
-                  drop_console: false,
-                  drop_debugger: true,
+                  passes: 2,
+                  ecma: 2020,
                 },
-                mangle: true,
+                mangle: {
+                  keep_classnames: true,
+                },
+                format: {
+                  ecma: 2020,
+                },
               },
             }),
             // Note: CSS is injected via style-loader, not extracted to files
@@ -185,6 +198,7 @@ export async function createExternalPluginConfig(
       new NodeLibsBrowserPlugin() as any,
       new rspack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(dist ? 'production' : 'development'),
+        'process.env.IS_KIBANA_DISTRIBUTABLE': JSON.stringify(dist ? 'true' : 'false'),
       }),
       new rspack.ProgressPlugin({
         prefix: `plugin:${pluginId}`,
