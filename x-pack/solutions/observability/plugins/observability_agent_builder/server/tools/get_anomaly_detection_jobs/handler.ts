@@ -175,9 +175,9 @@ async function getTopAnomalyRecords({
               path: 'influencers',
               query: {
                 bool: {
-                  must: [
-                    { match: { 'influencers.influencer_field_name': fieldName } },
-                    { match: { 'influencers.influencer_field_values': fieldValue } },
+                  filter: [
+                    { term: { 'influencers.influencer_field_name': fieldName } },
+                    { term: { 'influencers.influencer_field_values': fieldValue } },
                   ],
                 },
               },
