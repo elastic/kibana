@@ -322,35 +322,34 @@ export async function createSingleCompileConfig(
     optimization: {
       moduleIds: dist ? 'deterministic' : 'named',
       chunkIds: dist ? 'deterministic' : 'named',
-      // Let RSPack do NATURAL code splitting based on import dependencies
-      // NO forced groupings - this allows on-demand loading like legacy webpack
-      // Each plugin's code loads only when that plugin's route is accessed
+      // Match legacy webpack optimizer's more conservative chunk splitting
+      // Legacy uses maxAsyncRequests: 10 per plugin
+      // With unified compilation, we use slightly higher but still constrained
       splitChunks: {
         chunks: 'async',
-        minSize: 20000, // 20KB minimum chunk size
-        maxSize: 500000, // 500KB max - split larger chunks
-        maxAsyncRequests: 100, // Allow many parallel requests for HTTP/2
-        maxInitialRequests: 50,
+        minSize: 100000, // 100KB minimum - balanced for parse time vs requests
+        // No maxSize - don't force splitting
+        maxAsyncRequests: 30, // Balance between legacy (10) and HTTP/2 optimization
+        maxInitialRequests: 30,
         cacheGroups: {
-          // Heavy vendors NOT in ui-shared-deps
+          // Heavy vendors NOT in ui-shared-deps - keep separate for lazy loading
           vendorsHeavy: {
-            test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib)/,
+            test: /[\\/]node_modules[\\/](maplibre-gl|@xyflow|ace-builds|vega|pdf-lib|d3-|dagre|graphlib|ajv|handlebars)/,
             name: 'vendors-heavy',
             priority: 30,
             chunks: 'async',
             reuseExistingChunk: true,
           },
-          // Shared vendors - only extract if used by 3+ chunks
+          // Shared vendors - extract if used by 5+ chunks
           vendors: {
             test: /[\\/]node_modules[\\/]/,
             priority: 20,
-            minChunks: 3,
+            minChunks: 5,
             reuseExistingChunk: true,
-            // Don't force name - let RSPack create natural splits
           },
           // Default for shared async code
           default: {
-            minChunks: 2,
+            minChunks: 3,
             priority: -20,
             reuseExistingChunk: true,
           },
