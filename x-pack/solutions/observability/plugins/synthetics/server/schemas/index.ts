@@ -6,6 +6,13 @@
  */
 
 export {
+  monitorOptionSchema,
+  monitorFiltersSchema,
+  type MonitorOption,
+  type MonitorFilters,
+} from './common_schemas';
+
+export {
   syntheticsStatsOverviewEmbeddableSchema,
   type SyntheticsStatsOverviewEmbeddableState,
 } from './synthetics_stats_overview_embeddable_schema';
