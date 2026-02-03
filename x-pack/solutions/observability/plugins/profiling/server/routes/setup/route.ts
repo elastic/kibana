@@ -119,6 +119,11 @@ export function registerSetupRoute({
             isServerless: dependencies.esCapabilities.serverless,
           });
 
+        // For now, we don't support serverless setup
+        if (type === 'serverless') {
+          return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
+        }
+
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
         if (isCloudEnabled && type === 'cloud') {
           if (!dependencies.start.fleet) {
@@ -151,8 +156,6 @@ export function registerSetupRoute({
           });
 
           logger.debug('Setting up self-managed Universal Profiling');
-        } else {
-          logger.debug('Skipping setting up Universal Profiling on serverless ');
         }
 
         // Wait until Profiling ES plugin creates all resources
