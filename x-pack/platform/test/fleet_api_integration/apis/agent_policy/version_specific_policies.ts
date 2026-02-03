@@ -49,8 +49,7 @@ export default function (providerContext: FtrProviderContext) {
       previousMinorVersion = `${previousMinor}.0`;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/250457
-    describe.skip('package level agent version condition', () => {
+    describe('package level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
       const agentId = `agent-${Date.now()}`;
@@ -146,7 +145,7 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
           await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
 
@@ -169,7 +168,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/250460
-    describe.skip('template level agent version condition', () => {
+    describe('template level agent version condition', () => {
       let agentPolicyWithPPId: string;
       let packagePolicyId: string;
       const agentId = `agent-${Date.now()}`;
@@ -333,7 +332,7 @@ export default function (providerContext: FtrProviderContext) {
           }
         });
 
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(20000, async () => {
           // verify agent with parent policy is reassigned
           await verifyReassignAction(agentPolicyWithPPId, agentId, previousMinor);
 

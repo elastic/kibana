@@ -110,6 +110,7 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
     return;
   }
 
+  appContextService.getLogger().debug(`Reassign for versioned policy ${versionedAgentPolicyId}`);
   await AgentService.reassignAgents(
     soClient,
     esClient,
