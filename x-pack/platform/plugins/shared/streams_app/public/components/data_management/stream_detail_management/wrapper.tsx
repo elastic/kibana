@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiText,
+  EuiToolTip,
+  EuiTourStep,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
@@ -138,7 +146,33 @@ export function Wrapper({
             wrap
           >
             <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
-              {streamId}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    {Streams.ingest.all.GetResponse.is(definition) &&
+                    definition.stream.description ? (
+                      <EuiToolTip content={definition.stream.description}>
+                        {definition.stream.title ? (
+                          <span data-test-subj="streamTitle">{definition.stream.title}</span>
+                        ) : (
+                          <span data-test-subj="streamName">{streamId}</span>
+                        )}
+                      </EuiToolTip>
+                    ) : Streams.ingest.all.GetResponse.is(definition) && definition.stream.title ? (
+                      <span data-test-subj="streamTitle">{definition.stream.title}</span>
+                    ) : (
+                      <span data-test-subj="streamName">{streamId}</span>
+                    )}
+                  </EuiFlexItem>
+                  {Streams.ingest.all.GetResponse.is(definition) && definition.stream.title && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued" data-test-subj="streamNameSubtitle">
+                        {streamId}
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
