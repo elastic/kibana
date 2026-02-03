@@ -85,7 +85,7 @@ export function createPlaywrightEvalsConfig({
   });
 
   return defineConfig<{}, EvaluationTestOptions>({
-    ...config,     
+    ...config,
     // some reports write to disk, which we don't need
     reporter: Array.isArray(reporter)
       ? reporter.filter(([name]) => {
