@@ -22,11 +22,6 @@ import {
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
 
-const mockLoadWorkflows = jest.fn();
-jest.mock('@kbn/data-catalog-plugin/common/workflow_loader', () => ({
-  loadWorkflows: (...args: unknown[]) => mockLoadWorkflows(...args),
-}));
-
 const mockConnectorSpecs = {
   customConnectorWithBearerType: {
     metadata: {
@@ -137,7 +132,6 @@ describe('createConnectorAndRelatedResources', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSavedObjectsClient.getCurrentNamespace.mockReturnValue('default');
-    mockLoadWorkflows.mockReset();
   });
 
   it('should create connector and all related resources successfully', async () => {
@@ -165,17 +159,17 @@ describe('createConnectorAndRelatedResources', () => {
         kscIds: ['ksc-1'],
       },
     };
-    const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
-      workflows: { directory: '/path/to/workflows' },
-    } as Partial<DataSource>;
-
-    mockLoadWorkflows.mockResolvedValue([
+    const mockGenerateWorkflows = jest.fn().mockResolvedValue([
       {
-        content: 'workflow yaml content',
+        content: 'name: workflow\nother: stuff',
         shouldGenerateABTool: true,
       },
     ]);
+    const mockDataSource = {
+      stackConnector: { type: actionTypeId, config: {} },
+      workflows: { directory: '/path/to/workflows' },
+      generateWorkflows: mockGenerateWorkflows,
+    } as Partial<DataSource>;
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
@@ -206,8 +200,9 @@ describe('createConnectorAndRelatedResources', () => {
         }),
       }),
     });
+    expect(mockGenerateWorkflows).toHaveBeenCalledWith('ksc-1');
     expect(mockWorkflowManagement.management.createWorkflow).toHaveBeenCalledWith(
-      { yaml: 'workflow yaml content' },
+      { yaml: expect.stringContaining('name: my-test-connector.workflow') },
       'default',
       mockRequest
     );
@@ -242,17 +237,17 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'connector-1',
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
-    const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
-      workflows: { directory: '/path/to/workflows' },
-    } as Partial<DataSource>;
-
-    mockLoadWorkflows.mockResolvedValue([
+    const mockGenerateWorkflows = jest.fn().mockResolvedValue([
       {
-        content: 'workflow yaml content',
+        content: 'name: workflow\nother: stuff',
         shouldGenerateABTool: false,
       },
     ]);
+    const mockDataSource = {
+      stackConnector: { type: actionTypeId, config: {} },
+      workflows: { directory: '/path/to/workflows' },
+      generateWorkflows: mockGenerateWorkflows,
+    } as Partial<DataSource>;
 
     mockActionsClient.create.mockResolvedValue(mockStackConnector);
     mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
@@ -271,7 +266,51 @@ describe('createConnectorAndRelatedResources', () => {
       agentBuilder: mockAgentBuilder as any,
     });
 
+    expect(mockGenerateWorkflows).toHaveBeenCalledWith('ksc-1');
     expect(mockToolRegistry.create).not.toHaveBeenCalled();
+  });
+
+  it('should use provided stackConnectorId when reusing existing connector', async () => {
+    const actionTypeId = '.notion';
+    const existingStackConnectorId = 'existing-ksc-123';
+    const mockWorkflow = { id: 'workflow-1', name: 'Test Workflow' };
+    const mockSavedObject = {
+      id: 'connector-1',
+      attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: [existingStackConnectorId] },
+    };
+    const mockGenerateWorkflows = jest.fn().mockResolvedValue([
+      {
+        content: 'name: workflow\nother: stuff',
+        shouldGenerateABTool: false,
+      },
+    ]);
+    const mockDataSource = {
+      stackConnector: { type: actionTypeId, config: {} },
+      workflows: { directory: '/path/to/workflows' },
+      generateWorkflows: mockGenerateWorkflows,
+    } as Partial<DataSource>;
+
+    mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as any);
+
+    await createDataSourceAndRelatedResources({
+      name: 'Test',
+      type: 'test',
+      credentials: 'token',
+      stackConnectorId: existingStackConnectorId,
+      savedObjectsClient: mockSavedObjectsClient,
+      request: mockRequest,
+      logger: mockLogger,
+      workflowManagement: mockWorkflowManagement as any,
+      actions: mockActions as any,
+      dataSource: mockDataSource as any,
+      agentBuilder: mockAgentBuilder as any,
+    });
+
+    // Should NOT create a new stack connector
+    expect(mockActionsClient.create).not.toHaveBeenCalled();
+    // Should call generateWorkflows with the provided stackConnectorId
+    expect(mockGenerateWorkflows).toHaveBeenCalledWith(existingStackConnectorId);
   });
 });
 
