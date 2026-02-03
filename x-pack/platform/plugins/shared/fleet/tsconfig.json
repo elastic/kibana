@@ -127,6 +127,7 @@
     "@kbn/react-query",
     "@kbn/fs",
     "@kbn/kql",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/rule-data-utils"
   ]
 }
