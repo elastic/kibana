@@ -10,41 +10,31 @@ import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import { getIndexFromPromQLParams } from '../../definitions/utils/promql';
-import { synth } from '../../../..';
+import { PromqlParamName } from './utils';
 
 export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[],
   _query: string,
-  { fromFrom }: IAdditionalFields
+  { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const sourceColumns = await getSourceColumns(promqlCommand, fromFrom);
+  const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
+  const stepColumn = getStepColumn(promqlCommand);
 
-  return userDefinedColumn ? [...sourceColumns, userDefinedColumn] : sourceColumns;
-};
+  const columns: ESQLColumnData[] = [...sourceColumns];
 
-async function getSourceColumns(
-  command: ESQLAstPromqlCommand,
-  fromFrom: IAdditionalFields['fromFrom']
-): Promise<ESQLColumnData[]> {
-  const indexName = getIndexFromPromQLParams(command);
-
-  if (!indexName) {
-    return [];
+  if (stepColumn) {
+    columns.push(stepColumn);
   }
 
-  /*
-   * PROMQL stores the index in params, not as a source arg like FROM/TS:
-   *   FROM metrics  → args: [{ type: "source", name: "metrics" }]
-   *   PROMQL index=metrics → params.entries: [{ key: "index", value: "metrics" }]
-   *
-   * We create a synthetic FROM command to reuse the existing field fetching infrastructure.
-   */
-  return fromFrom(synth.cmd`FROM ${indexName}`);
-}
+  if (userDefinedColumn) {
+    columns.push(userDefinedColumn);
+  }
+
+  return columns;
+};
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
   const { query } = command;
@@ -64,5 +54,21 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
     type: 'unknown', // TODO: infer type once PROMQL query AST is available
     location: target.location,
     userDefined: true,
+  };
+}
+
+function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
+  const hasStep = command.params?.entries?.some(
+    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
+  );
+
+  if (!hasStep) {
+    return undefined;
+  }
+
+  return {
+    name: PromqlParamName.Step,
+    type: 'date',
+    userDefined: false,
   };
 }

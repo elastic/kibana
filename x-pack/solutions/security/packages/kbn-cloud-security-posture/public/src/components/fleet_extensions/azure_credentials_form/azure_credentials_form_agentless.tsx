@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +17,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
@@ -36,7 +37,6 @@ import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -146,17 +146,19 @@ export const AzureCredentialsFormAgentless = ({
         </>
       )}
       {azureCredentialsType === 'cloud_connectors' && isAzureCloudConnectorEnabled ? (
-        <CloudConnectorSetup
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          cloud={cloud}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloudProvider="azure"
-          templateName={templateName}
-          isEditPage={isEditPage}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCloudConnectorSetup
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            cloud={cloud}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            cloudProvider="azure"
+            templateName={templateName}
+            isEditPage={isEditPage}
+          />
+        </Suspense>
       ) : (
         <AzureInputVarFields
           packageInfo={packageInfo}
