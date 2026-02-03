@@ -424,6 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
+        expect(logoutCookie.httpOnly).to.be(true);
         expect(logoutCookie.maxAge).to.be(0);
         checkStandardSessionCookiePropsDefault(logoutCookie);
 
