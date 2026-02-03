@@ -47,6 +47,7 @@ import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { RegisteredAttachmentTypeRegistry } from './client/attachment_framework/attachment_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type {
   CasesByAlertIDRequest,
@@ -62,7 +63,8 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
-  EventAttachmentPayload,
+  // EventAttachmentPayload,
+  RegisteredAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -113,6 +115,7 @@ export interface RenderAppProps {
   pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
   kibanaVersion: string;
+  attachmentTypeRegistry: RegisteredAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
@@ -181,11 +184,12 @@ export interface CasesPublicStart {
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
-  | EventAttachmentPayload
+  // | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
+  | ExternalReferenceSOAttachmentPayload
+  | RegisteredAttachmentPayload;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

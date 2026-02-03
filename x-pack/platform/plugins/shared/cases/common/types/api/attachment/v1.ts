@@ -31,7 +31,7 @@ import {
   AttachmentType,
   AttachmentRt,
   AttachmentsRt,
-  EventAttachmentPayloadRt,
+  RegisteredAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -68,21 +68,21 @@ export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentReque
  */
 
 const BasicAttachmentRequestRt = rt.union([
+  RegisteredAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
 ]);
 
 export const AttachmentRequestRt = rt.union([
+  RegisteredAttachmentPayloadRt,
   rt.strict({
     comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
     type: rt.literal(AttachmentType.user),
     owner: rt.string,
   }),
-  EventAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),

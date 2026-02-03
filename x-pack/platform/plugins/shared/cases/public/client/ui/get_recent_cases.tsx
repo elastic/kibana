@@ -15,6 +15,7 @@ type GetRecentCasesPropsInternal = RecentCasesProps & CasesContextProps;
 export type GetRecentCasesProps = Omit<
   GetRecentCasesPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
+  | 'attachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
 >;
@@ -24,6 +25,7 @@ const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
 );
 export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  attachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   getFilesClient,
   owner,
@@ -33,6 +35,7 @@ export const getRecentCasesLazy = ({
   <CasesProvider
     value={{
       externalReferenceAttachmentTypeRegistry,
+      attachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
       getFilesClient,
       owner,

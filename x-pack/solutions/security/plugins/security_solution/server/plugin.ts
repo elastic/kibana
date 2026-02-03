@@ -411,6 +411,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     });
+    plugins.cases.attachmentFramework.registerAttachment({
+      id: 'event',
+    });
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;

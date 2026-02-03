@@ -10,19 +10,19 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { type CaseUI } from '../../../../common';
-import type { CaseViewProps } from '../types';
+// import type { CaseViewProps } from '../types';
 
 import { AttachmentType, type EventAttachment } from '../../../../common/types/domain';
 
 interface CaseViewEventsProps {
   caseData: CaseUI;
-  renderEventsTable: CaseViewProps['renderEventsTable'];
+  // renderEventsTable: CaseViewProps['renderEventsTable'];
 }
 
 export const CaseViewEvents = ({
   caseData,
-  renderEventsTable: EventsTable,
-}: CaseViewEventsProps) => {
+}: // renderEventsTable: EventsTable,
+CaseViewEventsProps) => {
   const events = useMemo(
     () =>
       caseData.comments
@@ -38,9 +38,9 @@ export const CaseViewEvents = ({
     [caseData.comments]
   );
 
-  if (!EventsTable) {
-    throw new Error('renderEventsTable has not been specified during case plugin init');
-  }
+  // if (!EventsTable) {
+  //   throw new Error('renderEventsTable has not been specified during case plugin init');
+  // }
 
   return (
     <EuiFlexItem
@@ -49,7 +49,7 @@ export const CaseViewEvents = ({
       `}
       data-test-subj="case-view-events"
     >
-      <EventsTable events={events} />
+      {/* <EventsTable events={events} /> */}
     </EuiFlexItem>
   );
 };

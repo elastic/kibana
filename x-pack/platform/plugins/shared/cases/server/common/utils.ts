@@ -18,11 +18,12 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,
+  AlertAttachmentAttributes,
   AlertAttachmentPayload,
   Attachment,
   AttachmentAttributes,
   Case,
-  EventAttachmentPayload,
+  RegisteredAttachmentAttributes,
   User,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
@@ -169,17 +170,10 @@ export const flattenCommentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment: AlertAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
-  if (comment.type === AttachmentType.alert) {
-    return {
-      ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
-      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
-    };
-  }
-
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
     indices: Array.isArray(comment.index) ? comment.index : [comment.index],
   };
 };
@@ -272,15 +266,6 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for event comments.
- */
-export const isCommentRequestTypeEvent = (
-  context: AttachmentRequest
-): context is EventAttachmentPayload => {
-  return context.type === AttachmentType.event;
-};
-
-/**
  * Returns true if a Comment Request is trying to create either a persistableState or an
  * externalReference attachment.
  */
@@ -322,8 +307,9 @@ export function createAlertUpdateStatusRequest({
 export const countAlerts = (comment: SavedObjectsFindResult<AttachmentAttributes>) => {
   let totalAlerts = 0;
   if (comment.attributes.type === AttachmentType.alert) {
-    if (Array.isArray(comment.attributes.alertId)) {
-      totalAlerts += comment.attributes.alertId.length;
+    const alertAttachment = comment.attributes as AlertAttachmentAttributes;
+    if (Array.isArray(alertAttachment.alertId)) {
+      totalAlerts += alertAttachment.alertId.length;
     } else {
       totalAlerts++;
     }
@@ -379,8 +365,11 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    // Events are now registered attachments (type: "event" with attachmentId)
+    if (current.attributes.type === 'event' && 'attachmentId' in current.attributes) {
+      const eventAttachment = current.attributes as RegisteredAttachmentAttributes;
+      const attachmentId = eventAttachment.attachmentId;
+      return sum + (Array.isArray(attachmentId) ? attachmentId.length : 1);
     }
 
     return sum;

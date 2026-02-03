@@ -50,6 +50,8 @@ export {
   UPDATE_CASES_CAPABILITY,
   INTERNAL_BULK_GET_CASES_URL,
   LENS_ATTACHMENT_TYPE,
+  DASHBOARD_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SAVED_OBJECT_TYPES,
   CASE_COMMENT_SAVED_OBJECT,
@@ -60,6 +62,8 @@ export {
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
 } from './constants';
+
+export { isRegisteredAttachmentType } from './utils/attachments';
 
 export type { AttachmentAttributes } from './types/domain';
 export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';

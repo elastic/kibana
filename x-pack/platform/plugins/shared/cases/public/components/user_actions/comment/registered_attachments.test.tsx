@@ -36,7 +36,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     'test-registry'
   );
 
-  const viewProps = { foo: 'bar' };
+  const viewProps = { attachmentId: 'dashboard-id-from-payload', foo: 'bar' };
   const viewObjectProps = {
     timelineAvatar: 'casesApp',
     children: getLazyComponent(),
@@ -97,7 +97,6 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     expect(getAttachmentViewProps).toHaveBeenCalled();
     expect(getAttachmentViewObject).toBeCalledWith({
       ...viewProps,
-      attachmentId: attachment.id,
       caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
     });
   });

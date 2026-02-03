@@ -8,7 +8,6 @@
 import { useCallback, useMemo } from 'react';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import { APP_ID } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CustomBulkAction } from '../../../../common/types';
@@ -16,15 +15,19 @@ import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
 /**
  * Utility function converting multiple timeline items into single attachment (when attaching multiple timeline items to a case)
+ * Uses registered attachment format (type: "event" with attachmentId and metaData)
  */
 const timelineItemsToCaseEventAttachment = (
   timelineItems: TimelineItem[]
 ): CaseAttachmentWithoutOwner => {
+  const eventIds = timelineItems.map((item) => item._id).filter(Boolean);
+  const indices = timelineItems.map((item) => item._index).filter(Boolean);
+
   return {
-    type: AttachmentType.event,
-    eventId: timelineItems.map((item) => item._id).filter(Boolean),
-    index: timelineItems.map((item) => item._index).filter(Boolean),
-  } as CaseAttachmentWithoutOwner;
+    type: 'event',
+    attachmentId: eventIds,
+    metaData: { index: indices },
+  } as unknown as CaseAttachmentWithoutOwner;
 };
 
 /**

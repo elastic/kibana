@@ -34,6 +34,7 @@ export async function update(
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
+    attachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -48,7 +49,11 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
+    decodeCommentRequest(
+      queryRestAttributes,
+      externalReferenceAttachmentTypeRegistry,
+      attachmentTypeRegistry
+    );
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,

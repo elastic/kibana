@@ -33,9 +33,9 @@ import type {
   Attachment,
   ExternalReferenceAttachment,
   PersistableStateAttachment,
+  RegisteredAttachment,
   Configuration,
   CustomFieldTypes,
-  EventAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -107,11 +107,12 @@ export type AttachmentUI = SnakeToCamelCase<Attachment>;
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
+export type RegisteredAttachmentUI = SnakeToCamelCase<RegisteredAttachment>;
 export type UserActionUI = SnakeToCamelCase<UserAction>;
 export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>, 'userActions'> & {
   userActions: UserActionUI[];
 };
-export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
+// EventAttachmentUI removed: events are now registered attachments (RegisteredAttachmentUI)
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
   latestAttachments: AttachmentUI[];

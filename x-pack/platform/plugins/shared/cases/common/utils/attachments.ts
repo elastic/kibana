@@ -8,6 +8,7 @@
 import type { AttachmentRequest } from '../types/api';
 import type {
   ExternalReferenceAttachmentPayload,
+  RegisteredAttachmentPayload,
   PersistableStateAttachmentPayload,
 } from '../types/domain';
 import { AttachmentType } from '../types/domain';
@@ -28,4 +29,21 @@ export const isCommentRequestTypePersistableState = (
   context: Partial<AttachmentRequest>
 ): context is PersistableStateAttachmentPayload => {
   return context.type === AttachmentType.persistableState;
+};
+
+/**
+ * Checks if a type is a registered attachment type (not in the enum).
+ * Registry-based attachments use their registry ID directly as the type field value.
+ */
+export const isRegisteredAttachmentType = (type: string): boolean => {
+  return !Object.values(AttachmentType).includes(type as AttachmentType);
+};
+
+/**
+ * A type narrowing function for registered attachment types.
+ */
+export const isCommentRequestTypeRegistered = (
+  context: AttachmentRequest
+): context is RegisteredAttachmentPayload => {
+  return isRegisteredAttachmentType(context.type);
 };

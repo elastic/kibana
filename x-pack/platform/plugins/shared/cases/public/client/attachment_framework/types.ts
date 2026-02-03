@@ -9,6 +9,7 @@ import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
+  RegisteredAttachmentPayload,
   PersistableStateAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
@@ -62,16 +63,44 @@ export interface PersistableStateAttachmentViewProps extends CommonAttachmentVie
   persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
+export interface RegisteredAttachmentViewProps extends CommonAttachmentViewProps {
+  // attachmentId: RegisteredAttachmentPayload['attachmentId'];
+  metaData: RegisteredAttachmentPayload['metaData'];
+}
+
+export interface AttachmentListRendererProps {
+  caseData: CaseUI;
+  searchTerm?: string;
+  isLoading?: boolean;
+}
+
+export interface AttachmentMetadataFetcher<TMetadata = unknown> {
+  /**
+   * A hook that fetches metadata for attachments of this type.
+   * Returns metadata map keyed by attachmentId.
+   */
+  useAttachmentMetadata?: (attachmentIds: string[]) => {
+    metadata: Record<string, TMetadata>;
+    isLoading: boolean;
+    error?: Error;
+  };
+}
+
 export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
+  getAttachmentListRenderer?: () => React.LazyExoticComponent<
+    React.FC<AttachmentListRendererProps>
+  >;
+  getAttachmentMetadataFetcher?: () => AttachmentMetadataFetcher;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
+export type RegisteredAttachmentType = AttachmentType<RegisteredAttachmentViewProps>;
 
 export interface AttachmentFramework {
   registerExternalReference: (
@@ -80,4 +109,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
+  registerAttachment: (attachmentType: RegisteredAttachmentType) => void;
 }

@@ -44,9 +44,11 @@ export const useAddToCaseActions = ({
       return ecsData?._id
         ? [
             {
-              eventId: ecsData?._id ?? '',
-              index: ecsData?._index ?? '',
-              type: AttachmentType.event,
+              attachmentId: ecsData?._id ?? '',
+              metaData: {
+                index: ecsData?._index ?? '',
+              },
+              type: 'event',
             },
           ]
         : [];

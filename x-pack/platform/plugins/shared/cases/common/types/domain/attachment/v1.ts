@@ -49,7 +49,7 @@ export const FileAttachmentMetadataPayloadRt = rt.strict({
 export enum AttachmentType {
   actions = 'actions',
   alert = 'alert',
-  event = 'event',
+  // event = 'event', // Removed: events are now registered attachments (type: "event")
   externalReference = 'externalReference',
   persistableState = 'persistableState',
   user = 'user',
@@ -82,13 +82,6 @@ export type UserCommentAttachment = rt.TypeOf<typeof UserCommentAttachmentRt>;
  * Generic event
  */
 
-export const EventAttachmentPayloadRt = rt.strict({
-  type: rt.literal(AttachmentType.event),
-  eventId: rt.union([rt.array(rt.string), rt.string]),
-  index: rt.union([rt.array(rt.string), rt.string]),
-  owner: rt.string,
-});
-
 /**
  * Alerts
  */
@@ -109,21 +102,8 @@ export const AlertAttachmentAttributesRt = rt.intersection([
   AttachmentAttributesBasicRt,
 ]);
 
-export const EventAttachmentAttributesRt = rt.intersection([
-  EventAttachmentPayloadRt,
-  AttachmentAttributesBasicRt,
-]);
-
 export const AlertAttachmentRt = rt.intersection([
   AlertAttachmentAttributesRt,
-  rt.strict({
-    id: rt.string,
-    version: rt.string,
-  }),
-]);
-
-export const EventAttachmentRt = rt.intersection([
-  EventAttachmentAttributesRt,
   rt.strict({
     id: rt.string,
     version: rt.string,
@@ -133,16 +113,6 @@ export const EventAttachmentRt = rt.intersection([
 export type AlertAttachmentPayload = rt.TypeOf<typeof AlertAttachmentPayloadRt>;
 export type AlertAttachmentAttributes = rt.TypeOf<typeof AlertAttachmentAttributesRt>;
 export type AlertAttachment = rt.TypeOf<typeof AlertAttachmentRt>;
-
-export type EventAttachmentPayload = rt.TypeOf<typeof EventAttachmentPayloadRt>;
-export type EventAttachmentAttributes = rt.TypeOf<typeof EventAttachmentAttributesRt>;
-export type EventAttachment = rt.TypeOf<typeof EventAttachmentRt>;
-
-export const DocumentAttachmentAttributesRt = rt.union([
-  AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
-]);
-export type DocumentAttachmentAttributes = rt.TypeOf<typeof DocumentAttachmentAttributesRt>;
 
 /**
  * Actions
@@ -327,13 +297,42 @@ export type PersistableStateAttachmentAttributes = rt.TypeOf<
 >;
 
 /**
+ * Registered attachment (registry-based types)
+ * These attachments use their registry ID directly as the type field value.
+ */
+
+export const RegisteredAttachmentPayloadRt = rt.strict({
+  type: rt.string, // Registry ID (e.g., "dashboard", "visualization", "event")
+  attachmentId: rt.union([rt.string, rt.array(rt.string)]), // Single ID or array (for events)
+  metaData: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  owner: rt.string,
+});
+
+const RegisteredAttachmentAttributesRt = rt.intersection([
+  RegisteredAttachmentPayloadRt,
+  AttachmentAttributesBasicRt,
+]);
+
+export const RegisteredAttachmentRt = rt.intersection([
+  RegisteredAttachmentAttributesRt,
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export type RegisteredAttachmentPayload = rt.TypeOf<typeof RegisteredAttachmentPayloadRt>;
+export type RegisteredAttachmentAttributes = rt.TypeOf<typeof RegisteredAttachmentAttributesRt>;
+export type RegisteredAttachment = rt.TypeOf<typeof RegisteredAttachmentRt>;
+
+/**
  * Common
  */
 
 export const AttachmentPayloadRt = rt.union([
+  RegisteredAttachmentPayloadRt,
   UserCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
-  EventAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -341,27 +340,29 @@ export const AttachmentPayloadRt = rt.union([
 ]);
 
 export const AttachmentAttributesRt = rt.union([
+  RegisteredAttachmentAttributesRt,
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
 ]);
 
 const AttachmentAttributesNoSORt = rt.union([
+  // Custom registered attachment types (NOT in enum, e.g., "dashboard", "event")
+  RegisteredAttachmentAttributesRt,
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceNoSOAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
 ]);
 
 const AttachmentAttributesWithoutRefsRt = rt.union([
+  // Custom registered attachment types (NOT in enum, e.g., "dashboard", "event")
+  RegisteredAttachmentAttributesRt,
   UserCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
-  EventAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceWithoutRefsAttachmentAttributesRt,
   PersistableStateAttachmentAttributesRt,
@@ -387,10 +388,10 @@ export const AttachmentPatchAttributesRt = rt.intersection([
   rt.union([
     rt.exact(rt.partial(UserCommentAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(AlertAttachmentPayloadRt.type.props)),
-    rt.exact(rt.partial(EventAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ActionsAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceNoSOAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceSOAttachmentPayloadRt.type.props)),
+    rt.exact(rt.partial(RegisteredAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(PersistableStateAttachmentPayloadRt.type.props)),
   ]),
   rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),

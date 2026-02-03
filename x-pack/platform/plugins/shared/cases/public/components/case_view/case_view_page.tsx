@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
@@ -23,7 +27,6 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
-import { CaseViewEvents } from './components/case_view_events';
 import { CaseViewAttachments } from './components/case_view_attachments';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
 
@@ -40,6 +43,7 @@ const ATTACHMENT_TABS = [
   CASE_VIEW_PAGE_TABS.EVENTS,
   CASE_VIEW_PAGE_TABS.FILES,
   CASE_VIEW_PAGE_TABS.OBSERVABLES,
+  CASE_VIEW_PAGE_TABS.DASHBOARDS,
 ];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
@@ -52,9 +56,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
     onAlertsTableLoaded,
     renderAlertsTable,
-    renderEventsTable,
+    // renderEventsTable,
   }) => {
-    const { features } = useCasesContext();
+    const { features, attachmentTypeRegistry } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -71,6 +75,20 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       () => filterCaseAttachmentsBySearchTerm(caseData, searchTerm),
       [caseData, searchTerm]
     );
+
+    const DashboardListRenderer = useMemo(() => {
+      const dashboardType = attachmentTypeRegistry.has(DASHBOARD_ATTACHMENT_TYPE)
+        ? attachmentTypeRegistry.get(DASHBOARD_ATTACHMENT_TYPE)
+        : undefined;
+      return dashboardType?.getAttachmentListRenderer?.();
+    }, [attachmentTypeRegistry]);
+
+    const EventsListRenderer = useMemo(() => {
+      const eventType = attachmentTypeRegistry.has(EVENT_ATTACHMENT_TYPE)
+        ? attachmentTypeRegistry.get(EVENT_ATTACHMENT_TYPE)
+        : undefined;
+      return eventType?.getAttachmentListRenderer?.();
+    }, [attachmentTypeRegistry]);
 
     useCasesTitleBreadcrumbs(caseData.title);
 
@@ -163,12 +181,17 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     onAlertsTableLoaded={onAlertsTableLoaded}
                   />
                 )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
-                  <CaseViewEvents
-                    caseData={caseWithFilteredAttachments}
-                    renderEventsTable={renderEventsTable}
-                  />
-                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS &&
+                  features.events.enabled &&
+                  EventsListRenderer && (
+                    <Suspense fallback={<EuiLoadingSpinner />}>
+                      <EventsListRenderer
+                        caseData={caseWithFilteredAttachments}
+                        searchTerm={searchTerm}
+                        isLoading={isLoading}
+                      />
+                    </Suspense>
+                  )}
                 {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
                   <CaseViewFiles caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
                 )}
@@ -179,6 +202,15 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                     searchTerm={searchTerm}
                     onUpdateField={onUpdateField}
                   />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.DASHBOARDS && DashboardListRenderer && (
+                  <Suspense fallback={<EuiLoadingSpinner />}>
+                    <DashboardListRenderer
+                      caseData={caseWithFilteredAttachments}
+                      searchTerm={searchTerm}
+                      isLoading={isLoading}
+                    />
+                  </Suspense>
                 )}
               </>
             </CaseViewAttachments>

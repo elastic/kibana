@@ -34,6 +34,7 @@ export const bulkCreate = async (
     authorization,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    attachmentTypeRegistry,
     services: { userActionService },
   } = clientArgs;
 
@@ -46,11 +47,16 @@ export const bulkCreate = async (
     });
 
     attachments.forEach((attachment) => {
-      decodeCommentRequest(attachment, externalReferenceAttachmentTypeRegistry);
+      decodeCommentRequest(
+        attachment,
+        externalReferenceAttachmentTypeRegistry,
+        attachmentTypeRegistry
+      );
       validateRegisteredAttachments({
         query: attachment,
         persistableStateAttachmentTypeRegistry,
         externalReferenceAttachmentTypeRegistry,
+        attachmentTypeRegistry,
       });
     });
 

@@ -13,9 +13,10 @@ import type { AttachmentRequestAttributes } from '../common/types/attachments';
  * A type narrowing function for external reference saved object attachments.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
-  context: Partial<AttachmentRequestAttributes>
+  context: Partial<AttachmentRequestAttributes> | undefined | null
 ): context is ExternalReferenceSOAttachmentPayload => {
   return (
+    context != null &&
     context.type === AttachmentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
   );

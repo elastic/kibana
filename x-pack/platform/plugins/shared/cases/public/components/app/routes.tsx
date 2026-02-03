@@ -93,7 +93,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
               renderAlertsTable={renderAlertsTable}
-              renderEventsTable={renderEventsTable}
+              // renderEventsTable={renderEventsTable}
             />
           </Suspense>
         </Route>

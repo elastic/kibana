@@ -45,7 +45,8 @@ type BuilderArgs<C, R> = Pick<
   registry: R;
   isLoading: boolean;
   getId: () => string;
-  getAttachmentViewProps: () => object;
+  getAttachmentViewProps: () => Pick<CommonAttachmentViewProps, 'attachmentId'> &
+    Record<string, unknown>;
 };
 
 /**
@@ -128,7 +129,6 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
-      attachmentId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 

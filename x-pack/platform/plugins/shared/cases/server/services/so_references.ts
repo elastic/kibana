@@ -33,11 +33,11 @@ import { SOReferenceExtractor } from './so_reference_extractor';
 import type { OptionalAttributes } from './types';
 
 export const getAttachmentSOExtractor = (
-  attachment: Partial<AttachmentRequestAttributes>
+  attachment: Partial<AttachmentRequestAttributes> | undefined | null
 ): SOReferenceExtractor => {
   const fieldsToExtract = [];
 
-  if (isCommentRequestTypeExternalReferenceSO(attachment)) {
+  if (attachment && isCommentRequestTypeExternalReferenceSO(attachment)) {
     fieldsToExtract.push({
       path: 'externalReferenceId',
       type: attachment.externalReferenceStorage.soType,
