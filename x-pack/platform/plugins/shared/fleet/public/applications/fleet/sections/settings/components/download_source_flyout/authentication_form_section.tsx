@@ -35,14 +35,14 @@ const AUTH_TYPE_OPTIONS = [
     id: 'username_password',
     label: i18n.translate(
       'xpack.fleet.settings.editDownloadSourcesFlyout.authTypeUsernamePassword',
-      { defaultMessage: 'Username & Password' }
+      { defaultMessage: 'Username & password' }
     ),
     iconType: 'user',
   },
   {
     id: 'api_key',
     label: i18n.translate('xpack.fleet.settings.editDownloadSourcesFlyout.authTypeApiKey', {
-      defaultMessage: 'API Key',
+      defaultMessage: 'API key',
     }),
     iconType: 'key',
   },
@@ -53,11 +53,11 @@ function getAuthTypeLabel(authType: AuthType): string {
     case 'username_password':
       return i18n.translate(
         'xpack.fleet.settings.editDownloadSourcesFlyout.authLabelUsernamePassword',
-        { defaultMessage: 'Username & Password' }
+        { defaultMessage: 'Username & password' }
       );
     case 'api_key':
       return i18n.translate('xpack.fleet.settings.editDownloadSourcesFlyout.authLabelApiKey', {
-        defaultMessage: 'API Key',
+        defaultMessage: 'API key',
       });
     default:
       return i18n.translate('xpack.fleet.settings.editDownloadSourcesFlyout.authLabelNone', {
@@ -209,7 +209,7 @@ export const AuthenticationFormSection: React.FunctionComponent<AuthenticationFo
                   label={
                     <FormattedMessage
                       id="xpack.fleet.settings.editDownloadSourcesFlyout.apiKeyLabel"
-                      defaultMessage="API Key"
+                      defaultMessage="API key"
                     />
                   }
                   {...inputs.apiKeyInput.formRowProps}
@@ -234,7 +234,7 @@ export const AuthenticationFormSection: React.FunctionComponent<AuthenticationFo
                   fullWidth
                   title={i18n.translate(
                     'xpack.fleet.settings.editDownloadSourcesFlyout.apiKeySecretTitle',
-                    { defaultMessage: 'API Key' }
+                    { defaultMessage: 'API key' }
                   )}
                   {...inputs.apiKeySecretInput.formRowProps}
                   useSecretsStorage={useSecretsStorage}
