@@ -17,13 +17,13 @@ export interface CreateOptions {
   throwIfExists?: boolean;
 }
 
-export const createIndex = (
+export const createIndex = async (
   esClient: EsClient,
   index: IndexName,
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    esClient.indices.create({ index });
+    await esClient.indices.create({ index });
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -35,36 +35,39 @@ export const createIndex = (
   }
 };
 
-export const deleteIndex = (esClient: EsClient, index: IndexName) => {
-  esClient.indices.delete({ index }, { ignore: [404] });
+export const deleteIndex = async (esClient: EsClient, index: IndexName) => {
+  await esClient.indices.delete({ index }, { ignore: [404] });
 };
 
-export const putComponentTemplate = (
+export const putComponentTemplate = async (
   esClient: EsClient,
   request: ClusterPutComponentTemplateRequest
 ) => {
-  esClient.cluster.putComponentTemplate(request);
+  await esClient.cluster.putComponentTemplate(request);
 };
 
-export const deleteComponentTemplate = (esClient: EsClient, name: Names) => {
-  esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+export const deleteComponentTemplate = async (esClient: EsClient, name: Names) => {
+  await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
 };
 
-export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) => {
-  esClient.indices.putIndexTemplate(template);
+export const putIndexTemplate = async (
+  esClient: EsClient,
+  template: IndicesPutIndexTemplateRequest
+) => {
+  await esClient.indices.putIndexTemplate(template);
 };
 
-export const deleteIndexTemplate = (esClient: EsClient, name: Names) => {
-  esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+export const deleteIndexTemplate = async (esClient: EsClient, name: Names) => {
+  await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
 };
 
-export const createDataStream = (
+export const createDataStream = async (
   esClient: EsClient,
   name: IndexName,
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    esClient.indices.createDataStream({ name });
+    await esClient.indices.createDataStream({ name });
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -76,6 +79,6 @@ export const createDataStream = (
   }
 };
 
-export const deleteDataStream = (esClient: EsClient, name: IndexName) => {
-  esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+export const deleteDataStream = async (esClient: EsClient, name: IndexName) => {
+  await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
 };
