@@ -12,7 +12,6 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
   SearchEmbeddableState,
   StoredSearchEmbeddableState,
 } from './types';
@@ -29,10 +28,11 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
-    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
+    const { state: storedState, references: drilldownReferences } =
+      transformDrilldownsIn<SearchEmbeddableState>(state);
 
-    if (isByRefState(storedState as SearchEmbeddableByReferenceState)) {
-      const { savedObjectId, ...rest } = storedState as SearchEmbeddableByReferenceState;
+    if (isByRefState(storedState)) {
+      const { savedObjectId, ...rest } = storedState;
       return {
         state: rest,
         references: [
@@ -49,14 +49,14 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
     // by value
     const { state: extractedState, references } = extract({
       type: SavedSearchType,
-      attributes: (state as SearchEmbeddableByValueState).attributes,
+      attributes: storedState.attributes,
     });
 
     return {
       state: {
-        ...state,
+        ...storedState,
         attributes: {
-          ...(state as SearchEmbeddableByValueState).attributes,
+          ...storedState.attributes,
           ...extractedState.attributes,
           // discover session stores references as part of attributes
           references,

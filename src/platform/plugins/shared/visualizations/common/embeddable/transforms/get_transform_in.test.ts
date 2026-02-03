@@ -15,7 +15,7 @@ describe('getTransformIn', () => {
     dashboard_id: '5678',
     type: 'dashboard_drilldown',
     label: 'Go to dashboard',
-    triggers: ['some_action'],
+    trigger: 'some_action',
   };
   const transformDrilldownsIn = jest.fn((state) => {
     const { dashboard_id, ...restOfDrilldown } = drilldown;

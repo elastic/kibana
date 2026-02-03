@@ -15,7 +15,7 @@ describe('getTransformOut', () => {
     dashboardRefName: 'someRef',
     type: 'dashboard_drilldown',
     label: 'Go to dashboard',
-    triggers: ['some_trigger'],
+    trigger: 'some_trigger',
   };
   const drilldownReference = {
     id: '5678',

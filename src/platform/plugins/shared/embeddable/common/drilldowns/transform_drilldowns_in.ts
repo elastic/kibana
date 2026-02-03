@@ -18,11 +18,11 @@ export function getTransformDrilldownsIn(
       })
     | undefined
 ) {
-  function transformDrilldownsIn(state: DrilldownsState) {
+  function transformDrilldownsIn<State extends DrilldownsState>(state: State) {
     const { drilldowns, ...restOfState } = state;
     if (!drilldowns) {
       return {
-        state,
+        state: state as State,
         references: [],
       };
     }
@@ -30,7 +30,7 @@ export function getTransformDrilldownsIn(
     const references: Reference[] = [];
     return {
       state: {
-        ...restOfState,
+        ...(restOfState as State),
         drilldowns: drilldowns.map((drilldownState) => {
           const transformIn = getTranformIn(drilldownState.type);
           if (!transformIn) {
