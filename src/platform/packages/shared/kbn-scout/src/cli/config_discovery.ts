@@ -292,15 +292,15 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   validate against CI configuration, or save filtered results to a file.
 
   Options:
-    --target <target>  Filter configs by deployment target:
-                       - 'all': deployment-agnostic tags (default)
-                       - 'mki': serverless-only tags
-                       - 'ech': stateful-only tags
-    --include-custom-servers   Include configs under 'test/scout_*' (local only)
-    --validate         Validate that all discovered modules are registered in Scout CI config
-    --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
-    --flatten          Output configs in flattened format grouped by mode, group, and scout command
-                       (useful for Cloud test execution)
+    --target <target>         Filter configs by deployment target:
+                              - 'all': deployment-agnostic tags (default)
+                              - 'mki': serverless-only tags
+                              - 'ech': stateful-only tags
+    --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
+    --validate                Validate that all discovered modules are registered in Scout CI config
+    --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+    --flatten                 Output configs in flattened format grouped by mode, group, and scout command
+                              (useful for Cloud test execution)
 
   Examples:
     # Discover all deployment-agnostic configs
