@@ -29,6 +29,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
     await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.alertsTable.scrollIntoViewIfNeeded();
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
