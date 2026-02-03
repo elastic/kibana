@@ -11,12 +11,17 @@ import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { useRuleExecutionSettings } from '../../../rule_monitoring';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../rule_monitoring');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseRuleExecutionSettings = useRuleExecutionSettings as jest.Mock;
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 const mockRule: Rule = {
   id: 'myfakeruleid',
@@ -65,6 +70,7 @@ describe('useRuleDetailsTabs', () => {
       },
     });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
+    mockUseUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
   });
 
   beforeEach(() => {
@@ -90,7 +96,26 @@ describe('useRuleDetailsTabs', () => {
     expect(tabsNames).not.toContain(RuleDetailTabs.alerts);
   });
 
-  it('always returns ths rule exception tab ', async () => {
+  it('does not render the rule exception tab if the user does not have read permissions', async () => {
+    const tabs = render({
+      rule: mockRule,
+      ruleId: mockRule.rule_id,
+      isExistingRule: true,
+      hasIndexRead: true,
+    });
+    const tabsNames = Object.keys(tabs.result.current);
+
+    expect(tabsNames).not.toContain(RuleDetailTabs.exceptions);
+  });
+
+  it('renders the rule exception tab if the user has read permissions', async () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        exceptions: { read: true, crud: false },
+      },
+    });
     const tabs = render({
       rule: mockRule,
       ruleId: mockRule.rule_id,

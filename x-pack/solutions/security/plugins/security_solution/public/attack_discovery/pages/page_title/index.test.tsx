@@ -15,16 +15,16 @@ import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 
 describe('PageTitle', () => {
-  const mockGetBooleanValue = jest.fn();
+  const mockGetSetting = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        featureFlags: { getBooleanValue: mockGetBooleanValue },
+        uiSettings: { get: mockGetSetting },
       },
     });
-    mockGetBooleanValue.mockReturnValue(false);
+    mockGetSetting.mockReturnValue(false);
   });
 
   it('renders the expected title', () => {
@@ -36,16 +36,16 @@ describe('PageTitle', () => {
   });
 
   describe('Attacks page announcement', () => {
-    it('renders the Attacks page announcement when `attacksAlertsAlignmentEnabled` feature flag is enabled', () => {
-      mockGetBooleanValue.mockReturnValue(true);
+    it('renders the Attacks page announcement when `enableAlertsAndAttacksAlignment` setting is enabled', () => {
+      mockGetSetting.mockReturnValue(true);
 
       render(<PageTitle />);
 
       expect(screen.getByTestId('attackDiscoveryAnnouncementBadge')).toBeInTheDocument();
     });
 
-    it('does not render the Attacks page announcement when `attacksAlertsAlignmentEnabled` feature flag is disabled', () => {
-      mockGetBooleanValue.mockReturnValue(false);
+    it('does not render the Attacks page announcement when `enableAlertsAndAttacksAlignment` setting is disabled', () => {
+      mockGetSetting.mockReturnValue(false);
 
       render(<PageTitle />);
 

@@ -30,6 +30,8 @@
           "({ client, children }: React.PropsWithChildren<ContextProps>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "React.PropsWithChildren<ContextProps>"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+            "lineNumber": 37,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,6 +74,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -86,6 +92,8 @@
         "label": "FilesContextValue",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +117,8 @@
               "<any>"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

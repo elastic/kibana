@@ -21,6 +21,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -45,6 +46,7 @@ export interface WorkflowsServerPluginSetupDeps {
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
   spaces?: SpacesPluginStart;
+  serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 

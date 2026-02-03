@@ -33,6 +33,8 @@ export enum ROLES {
   no_risk_engine_privileges = 'no_risk_engine_privileges',
   timeline_none = 'timeline_none',
   notes_none = 'notes_none',
+  rules_read_exceptions_all = 'rules_read_exceptions_all',
+  rules_read_exceptions_read = 'rules_read_exceptions_read',
 }
 
 /**

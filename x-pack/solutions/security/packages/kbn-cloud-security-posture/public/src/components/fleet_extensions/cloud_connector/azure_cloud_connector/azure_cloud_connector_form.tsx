@@ -14,6 +14,8 @@ import {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
+import { extractRawCredentialVars } from '@kbn/fleet-plugin/common';
+
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 import {
@@ -71,7 +73,8 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 
   const elasticStackId = getElasticStackId(cloud);
 
-  const inputVars = input.streams.find((i) => i.enabled)?.vars;
+  // Use accessor to get vars from the correct location (package-level or input-level)
+  const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
 
   const updatedInputVars = credentials
     ? updateInputVarsWithCredentials(inputVars, credentials)

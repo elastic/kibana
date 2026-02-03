@@ -30,6 +30,8 @@
         "label": "EMPTY_LABEL",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -45,6 +47,8 @@
           "\"__missing__\""
         ],
         "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -60,6 +64,8 @@
           "\"NaN\""
         ],
         "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -72,6 +78,8 @@
         "label": "NULL_LABEL",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-formats-common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

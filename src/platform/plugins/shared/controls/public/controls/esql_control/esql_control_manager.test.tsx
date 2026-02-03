@@ -260,5 +260,42 @@ describe('initializeESQLControlManager', () => {
 
       expect(setDataLoadingMock).not.toHaveBeenCalled();
     });
+
+    test('should refetch values when the timeRange changes', async () => {
+      const initialState = {
+        selectedOptions: [],
+        variableName: 'variable1',
+        variableType: ESQLVariableType.VALUES,
+        esqlQuery: 'FROM foo | WHERE @timestamp >= ?start AND @timestamp <= ?end | STATS BY column',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+        singleSelect: true,
+        title: 'My variable',
+      } as ESQLControlState;
+
+      const setDataLoadingMock = jest.fn();
+      initializeESQLControlManager(uuid, dashboardApi, initialState, setDataLoadingMock);
+
+      setDataLoadingMock.mockClear();
+      // Initial fetch with timeRange
+      mockFetch$.next({
+        timeRange: { from: '2024-01-01', to: '2024-01-31' },
+        esqlVariables: [],
+      });
+
+      await waitFor(() => {
+        expect(setDataLoadingMock).toHaveBeenCalledWith(false);
+      });
+
+      // Change the timeRange (query and variables stay the same)
+      setDataLoadingMock.mockClear();
+      mockFetch$.next({
+        timeRange: { from: '2024-02-01', to: '2024-02-28' },
+        esqlVariables: [],
+      });
+
+      await waitFor(() => {
+        expect(setDataLoadingMock).toHaveBeenCalledWith(true);
+      });
+    });
   });
 });

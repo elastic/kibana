@@ -8,29 +8,47 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, render } from '@testing-library/react';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { FiltersIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import { filtersOperation } from '..';
 import { createMockedIndexPattern } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '../../../../../test_utils/test_utils';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const uiSettingsMock = {} as IUiSettingsClient;
+const coreMockStart = coreMock.createStart();
+
+const mockServices = {
+  http: coreMockStart.http,
+  storage: {} as IStorageWrapper,
+  dataViews: dataViewPluginMocks.createStartContract(),
+  data: dataPluginMock.createStartContract(),
+  uiSettings: uiSettingsMock,
+  notifications: coreMockStart.notifications,
+  kql: kqlPluginMock.createStartContract(),
+  docLinks: coreMockStart.docLinks,
+};
+
+const wrapInProviders = (component: React.ReactElement) => (
+  <KibanaContextProvider services={mockServices}>
+    <I18nProvider>
+      <EuiThemeProvider>{component}</EuiThemeProvider>
+    </I18nProvider>
+  </KibanaContextProvider>
+);
 
 const defaultProps = {
-  storage: {} as IStorageWrapper,
-  uiSettings: uiSettingsMock,
+  ...mockServices,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
-  data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-  dataViews: dataViewPluginMocks.createStartContract(),
-  http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   operationDefinitionMap: {},
   isFullscreen: false,
@@ -41,7 +59,7 @@ const defaultProps = {
 
 // @ts-expect-error
 window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
-jest.mock('@kbn/unified-search-plugin/public', () => ({
+jest.mock('@kbn/kql/public', () => ({
   QueryStringInput: () => {
     return 'QueryStringInput';
   },
@@ -300,14 +318,16 @@ describe('filters', () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      renderWithProviders(
-        <InlineOptions
-          {...defaultProps}
-          layer={layer}
-          paramEditorUpdater={updateLayerSpy}
-          columnId="col1"
-          currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
-        />
+      render(
+        wrapInProviders(
+          <InlineOptions
+            {...defaultProps}
+            layer={layer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col1"
+            currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
+          />
+        )
       );
 
       await user.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
@@ -342,14 +362,16 @@ describe('filters', () => {
     describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
         const updateLayerSpy = jest.fn();
-        renderWithProviders(
-          <InlineOptions
-            {...defaultProps}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
-          />
+        render(
+          wrapInProviders(
+            <InlineOptions
+              {...defaultProps}
+              layer={layer}
+              paramEditorUpdater={updateLayerSpy}
+              columnId="col1"
+              currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
+            />
+          )
         );
         const filtersLabels = screen
           .getAllByTestId('indexPattern-filters-existingFilterTrigger')
@@ -362,14 +384,16 @@ describe('filters', () => {
         const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         jest.useFakeTimers();
         const updateLayerSpy = jest.fn();
-        renderWithProviders(
-          <InlineOptions
-            {...defaultProps}
-            layer={layer}
-            paramEditorUpdater={updateLayerSpy}
-            columnId="col1"
-            currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
-          />
+        render(
+          wrapInProviders(
+            <InlineOptions
+              {...defaultProps}
+              layer={layer}
+              paramEditorUpdater={updateLayerSpy}
+              columnId="col1"
+              currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
+            />
+          )
         );
 
         await user.click(screen.getByTestId('lns-customBucketContainer-remove-1'));

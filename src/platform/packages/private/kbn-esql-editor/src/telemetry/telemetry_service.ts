@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { reportPerformanceMetricEvent, type PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { QuerySource } from '@kbn/esql-types';
 import type {
   TelemetryQuerySubmittedProps,
   ESQLVariableType,
   ControlTriggerSource,
+  TelemetryLatencyProps,
 } from '@kbn/esql-types';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
 import {
@@ -43,6 +45,30 @@ export class ESQLEditorTelemetryService {
       // eslint-disable-next-line no-console
       console.log('Failed to report telemetry event', error);
     }
+  }
+
+  private _reportPerformanceEvent(eventData: PerformanceMetricEvent) {
+    try {
+      reportPerformanceMetricEvent(this._analytics, eventData);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Failed to report performance metric event', error);
+    }
+  }
+
+  private _buildBaseLatencyEvent(eventName: string, payload: TelemetryLatencyProps) {
+    return {
+      eventName,
+      duration: Math.round(payload.duration),
+      key1: 'query_length' as const,
+      value1: payload.queryLength,
+      key2: 'query_lines' as const,
+      value2: payload.queryLines,
+      meta: {
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
+      },
+    };
   }
 
   /**
@@ -181,5 +207,30 @@ export class ESQLEditorTelemetryService {
       control_kind: controlType,
       reason,
     });
+  }
+
+  public trackInitLatency(duration: number, sessionId?: string) {
+    this._reportPerformanceEvent({
+      eventName: 'esql_editor_init_latency',
+      duration: Math.round(duration),
+      meta: {
+        ...(sessionId ? { session_id: sessionId } : {}),
+      },
+    });
+  }
+
+  public trackInputLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(this._buildBaseLatencyEvent('esql_editor_input_latency', payload));
+  }
+
+  public trackSuggestionsLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_suggestions_latency', payload)
+    );
+  }
+  public trackValidationLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
+    );
   }
 }

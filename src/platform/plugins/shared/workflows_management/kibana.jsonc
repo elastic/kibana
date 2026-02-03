@@ -27,7 +27,8 @@
       "dataViews",
       "fieldFormats",
       "unifiedSearch",
-      "embeddable"
+      "embeddable",
+      "licensing"
     ],
     "optionalPlugins": [
       "alerting",

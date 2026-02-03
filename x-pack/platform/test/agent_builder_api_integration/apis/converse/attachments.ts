@@ -100,9 +100,12 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
         (request) => request.matchingInterceptorName === 'handover-to-answer'
       )!.requestBody;
 
-      const userMessage = firstAgentRequest.messages[firstAgentRequest.messages.length - 1];
-
-      expect(userMessage.content).to.contain('some text content');
+      // Attachments are now injected into the LLM context via conversation-level attachments presentation,
+      // not as legacy per-round user message attachments.
+      const allMessageContent = firstAgentRequest.messages
+        .map((m: any) => String(m.content ?? ''))
+        .join('\n');
+      expect(allMessageContent).to.contain('some text content');
     });
 
     it('persists the attachment in the conversation', async () => {
@@ -128,12 +131,13 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
       const conversation = await agentBuilderApiClient.getConversation(response.conversation_id);
 
       expect(conversation.rounds.length).to.eql(1);
-      expect(conversation.rounds[0].input.attachments!.length).to.eql(1);
+      // Legacy per-round attachments are stripped; attachments are stored at the conversation level.
+      expect(conversation.rounds[0].input.attachments ?? []).to.eql([]);
 
-      const attachment = conversation.rounds[0].input.attachments![0];
-
-      expect(attachment.type).to.eql('text');
-      expect(attachment.data).to.eql({
+      expect(conversation.attachments).to.have.length(1);
+      expect(conversation.attachments?.[0].type).to.eql('text');
+      expect(conversation.attachments?.[0].current_version).to.eql(1);
+      expect(conversation.attachments?.[0].versions[0].data).to.eql({
         content: 'some text content',
       });
     });

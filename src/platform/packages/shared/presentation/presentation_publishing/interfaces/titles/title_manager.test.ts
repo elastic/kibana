@@ -12,49 +12,49 @@ import type { SerializedTitles } from './title_manager';
 import { initializeTitleManager, titleComparators } from './title_manager';
 
 describe('titles api', () => {
-  const rawState: SerializedTitles = {
+  const initialTitles: SerializedTitles = {
     title: 'very cool title',
     description: 'less cool description',
-    hidePanelTitles: false,
+    hide_title: false,
   };
 
-  it('should initialize publishing subjects with the provided rawState', () => {
-    const { api } = initializeTitleManager(rawState);
-    expect(api.title$.value).toBe(rawState.title);
-    expect(api.description$.value).toBe(rawState.description);
-    expect(api.hidePanelTitles$.value).toBe(rawState.hidePanelTitles);
+  it('should initialize publishing subjects from initialState', () => {
+    const { api } = initializeTitleManager(initialTitles);
+    expect(api.title$.value).toBe(initialTitles.title);
+    expect(api.description$.value).toBe(initialTitles.description);
+    expect(api.hideTitle$.value).toBe(initialTitles.hide_title);
   });
 
   it('should update publishing subject values when set functions are called', () => {
-    const { api } = initializeTitleManager(rawState);
+    const { api } = initializeTitleManager(initialTitles);
 
     api.setTitle('even cooler title');
     api.setDescription('super uncool description');
-    api.setHidePanelTitles(true);
+    api.setHideTitle(true);
 
     expect(api.title$.value).toEqual('even cooler title');
     expect(api.description$.value).toEqual('super uncool description');
-    expect(api.hidePanelTitles$.value).toBe(true);
+    expect(api.hideTitle$.value).toBe(true);
   });
 
   it('should correctly serialize current state', () => {
-    const titleManager = initializeTitleManager(rawState);
+    const titleManager = initializeTitleManager(initialTitles);
     titleManager.api.setTitle('UH OH, A TITLE');
 
     const serializedTitles = titleManager.getLatestState();
     expect(serializedTitles).toMatchInlineSnapshot(`
         Object {
           "description": "less cool description",
-          "hidePanelTitles": false,
+          "hide_title": false,
           "title": "UH OH, A TITLE",
         }
       `);
   });
 
-  it('should correctly compare hidePanelTitles with custom comparator', () => {
-    const comparator = titleComparators.hidePanelTitles as ComparatorFunction<
+  it('should correctly compare hide_title with custom comparator', () => {
+    const comparator = titleComparators.hide_title as ComparatorFunction<
       SerializedTitles,
-      'hidePanelTitles'
+      'hide_title'
     >;
     expect(comparator(true, false)).toBe(false);
     expect(comparator(undefined, false)).toBe(true);

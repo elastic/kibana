@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
             "label": "{\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 126,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -141,7 +145,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -705,6 +709,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -1050,6 +1056,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 127,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1070,6 +1078,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 128,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1084,6 +1094,8 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 129,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1098,6 +1110,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 130,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1112,6 +1126,8 @@
                   "Record<string, string> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 131,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1131,6 +1147,8 @@
         "label": "EsqlOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1145,6 +1163,8 @@
               "\"none\" | \"plain\" | \"unflatten\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1161,6 +1181,8 @@
           "\nAn Elasticsearch Client with a fully typed `search` method and built-in\nAPM instrumentation."
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1183,6 +1205,8 @@
               "<TDocument, TSearchRequest, { restTotalHitsAsInt: false; }>>"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1197,6 +1221,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 84,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1212,6 +1238,8 @@
                   "TSearchRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1242,6 +1270,8 @@
               "<TDocument, TSearchRequest, { restTotalHitsAsInt: false; }>[]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1256,6 +1286,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 88,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1271,6 +1303,8 @@
                   "TSearchRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 89,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1295,6 +1329,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1309,6 +1345,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 96,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1327,6 +1365,8 @@
                   ", \"index\" | \"fields\" | \"index_filter\">"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 97,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1409,6 +1449,8 @@
               "<TOutput, TEsqlOptions>>; }"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1423,6 +1465,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 100,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1444,6 +1488,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 101,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1526,6 +1572,8 @@
               "<TOutput, TEsqlOptions>>; }"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1540,6 +1588,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 107,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1561,6 +1611,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 108,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1576,6 +1628,8 @@
                   "TEsqlOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "lineNumber": 109,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1671,7 +1725,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -2235,6 +2289,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -2580,6 +2636,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2608,6 +2666,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2637,6 +2697,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2655,6 +2717,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2670,6 +2734,8 @@
           "TOptions extends { transform: \"plain\" | \"unflatten\"; } ? ParsedEsqlResponseOf<TOutput, TOptions> : UnparsedEsqlResponseOf<TOutput>"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2683,14 +2749,16 @@
         "description": [],
         "signature": [
           "{ params?: ",
-          "FieldValue",
+          "EsqlESQLParam",
           "[] | undefined; filter?: ",
           "QueryDslQueryContainer",
-          " | undefined; query: string; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
+          " | undefined; query: string; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; include_execution_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
           "EsqlTableValuesContainer",
-          ">> | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; include_ccs_metadata?: boolean | undefined; }"
+          ">> | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; include_ccs_metadata?: boolean | undefined; include_execution_metadata?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2707,6 +2775,8 @@
           " & { index: string | string[]; track_total_hits: number | boolean; size: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2738,6 +2808,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2761,6 +2833,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

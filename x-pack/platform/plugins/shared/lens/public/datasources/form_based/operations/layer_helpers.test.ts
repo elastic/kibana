@@ -803,7 +803,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top 3 values of bytes',
+          label: 'Top 9 values of bytes',
         })
       );
     });
@@ -1148,7 +1148,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top 3 values of source',
+            label: 'Top 9 values of source',
           })
         );
       });

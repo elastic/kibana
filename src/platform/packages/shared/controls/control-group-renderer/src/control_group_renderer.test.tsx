@@ -42,13 +42,11 @@ const getTestEmbeddableFactory = () =>
     buildEmbeddable: async ({ initialState, finalizeApi }) => {
       const api = finalizeApi({
         serializeState: () => ({
-          rawState: {
-            selection: initialState.rawState.selection,
-          },
+          selection: initialState.selection,
         }),
       });
       return {
-        Component: () => <div data-test-subj="testControl">{initialState.rawState.selection}</div>,
+        Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
         api: {
           ...api,
           hasUnsavedChanges$: new BehaviorSubject(false),

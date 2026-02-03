@@ -11,6 +11,7 @@ export type {
   AppDeepLinkId,
   AppId,
   ChromeBadge,
+  ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,

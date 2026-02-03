@@ -10,11 +10,13 @@ import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual, noop } from 'lodash';
 import type {
   AppendProcessor,
+  ConcatProcessor,
   Condition,
   ConvertProcessor,
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
@@ -179,6 +181,20 @@ const actionStepValidators: {
       checkFieldName(step.to);
     }
   },
+  join: (step: JoinProcessor) => {
+    checkFieldName(step.to);
+    for (const field of step.from) {
+      checkFieldName(field);
+    }
+  },
+  concat: (step: ConcatProcessor) => {
+    checkFieldName(step.to);
+    step.from.forEach((from) => {
+      if (from.type === 'field') {
+        checkFieldName(from.value);
+      }
+    });
+  },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
   manual_ingest_pipeline: () => {},
@@ -236,17 +252,4 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
   if (definition.ingest.processing?.steps) {
     validateSteps(definition.ingest.processing.steps);
   }
-}
-
-export function validateSettings(definition: Streams.ingest.all.Definition, isServerless: boolean) {
-  if (!isServerless) {
-    return;
-  }
-
-  const serverlessAllowList = ['index.refresh_interval'];
-  Object.keys(definition.ingest.settings).forEach((setting) => {
-    if (!serverlessAllowList.includes(setting)) {
-      throw new Error(`Setting [${setting}] is not allowed in serverless`);
-    }
-  });
 }

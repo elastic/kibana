@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Document, Scalar } from 'yaml';
+import { Document, LineCounter, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod/v4';
 import { getVariableSuggestions } from './get_variable_suggestions';
@@ -54,6 +54,7 @@ describe('getVariableSuggestions', () => {
     contextScopedToPath: 'consts',
     focusedStepInfo: null,
     yamlDocument: new Document(),
+    yamlLineCounter: new LineCounter(),
     focusedYamlPair: null,
     scalarType: Scalar.QUOTE_DOUBLE,
     path: ['steps', 0, 'with', 'message'],
@@ -63,6 +64,7 @@ describe('getVariableSuggestions', () => {
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
+    workflowDefinition: null,
     ...overrides,
   });
 

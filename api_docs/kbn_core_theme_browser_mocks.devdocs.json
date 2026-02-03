@@ -15,6 +15,8 @@
         "label": "themeServiceMock",
         "description": [],
         "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "() => jest.Mocked<ThemeServiceContract>"
             ],
             "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -49,6 +53,8 @@
               ">"
             ],
             "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -64,6 +70,8 @@
                   "CoreTheme"
                 ],
                 "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+                "lineNumber": 29,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -84,6 +92,8 @@
               ">"
             ],
             "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -99,6 +109,8 @@
                   "CoreTheme"
                 ],
                 "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+                "lineNumber": 29,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -116,6 +128,8 @@
               "CoreTheme"
             ],
             "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -138,6 +152,8 @@
               ">"
             ],
             "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -153,6 +169,8 @@
                   "CoreTheme"
                 ],
                 "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
+                "lineNumber": 25,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -20,7 +20,7 @@ export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
   containerReferences: Reference[],
   ignoreParentSettingsJSON?: string
-): DashboardState['controlGroupInput'] {
+): DashboardState['pinned_panels'] {
   const controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, containerReferences)
     : [];
@@ -46,5 +46,5 @@ export function transformControlGroupOut(
     }));
   }
 
-  return { controls };
+  return controls;
 }

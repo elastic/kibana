@@ -65,9 +65,13 @@ export const useMacrosFileUploadStep = ({
         addWarning({ title: i18n.NO_MISSING_MACROS_PROVIDED });
         return; // No missing macros provided
       }
-      upsertResources(migrationStats.id, macrosToUpsert);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: macrosToUpsert,
+      });
     },
-    [missingMacros, upsertResources, migrationStats.id, addWarning]
+    [missingMacros, upsertResources, migrationStats.id, migrationStats.vendor, addWarning]
   );
 
   const uploadStepStatus = useMemo(() => {

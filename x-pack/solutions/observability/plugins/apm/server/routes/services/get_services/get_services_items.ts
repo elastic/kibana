@@ -11,11 +11,13 @@ import type { RollupInterval } from '../../../../common/rollup';
 import type { ServiceGroup } from '../../../../common/service_groups';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
+import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
@@ -34,6 +36,7 @@ export async function getServicesItems({
   mlClient,
   apmEventClient,
   apmAlertsClient,
+  sloClient,
   logger,
   start,
   end,
@@ -49,6 +52,7 @@ export async function getServicesItems({
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
   apmAlertsClient: ApmAlertsClient;
+  sloClient?: ApmSloClient;
   logger: Logger;
   start: number;
   end: number;
@@ -90,13 +94,25 @@ export async function getServicesItems({
         }),
       ]);
 
+    const sloStats = await getServicesSloStats({
+      ...commonParams,
+      serviceNames: serviceStats.map(({ serviceName }) => serviceName),
+      sloClient,
+    }).catch((err) => {
+      logger.debug(err);
+      return [];
+    });
+
+    const items =
+      mergeServiceStats({
+        serviceStats,
+        healthStatuses,
+        alertCounts,
+        sloStats,
+      }) ?? [];
+
     return {
-      items:
-        mergeServiceStats({
-          serviceStats,
-          healthStatuses,
-          alertCounts,
-        }) ?? [],
+      items,
       maxCountExceeded,
       serviceOverflowCount,
     };

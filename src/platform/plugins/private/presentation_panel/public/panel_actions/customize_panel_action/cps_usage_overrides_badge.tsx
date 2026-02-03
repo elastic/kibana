@@ -129,7 +129,7 @@ export class CpsUsageOverridesBadge
   }
 
   public getIconType() {
-    return 'beaker';
+    return 'crossProjectSearch';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

@@ -1,8 +1,11 @@
 name: ids
+in: query
 description: >
   The cases that you want to removed.
-  All non-ASCII characters must be URL encoded.
-in: query
+  To get the case identifiers, use the search cases (`_find`) API.
+  In the Dev Console, you can specify the array of cases in the following format: `ids=["e58e77e3-ef8e-4251-926f-efb115f3c4ec"]`.
+  In `curl`, all non-ASCII characters must be URL encoded.
+  For example: `ids=%5B%22e58e77e3-ef8e-4251-926f-efb115f3c4ec%22%5D`
 required: true
 schema:
   type: array
@@ -10,4 +13,4 @@ schema:
     type: string
     minItems: 1
     maxItems: 100
-example: ["d4e7abb0-b462-11ec-9a8d-698504725a43"]
+    example: d4e7abb0-b462-11ec-9a8d-698504725a43

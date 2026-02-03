@@ -41,6 +41,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
             "label": "{\n  repoRoot = REPO_ROOT,\n  envOptions = getEnvOptions(),\n  packageInfo = createTestPackageInfo(),\n}",
             "description": [],
             "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+            "lineNumber": 59,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,6 +70,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+                "lineNumber": 60,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -81,6 +87,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+                "lineNumber": 61,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -96,6 +104,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+                "lineNumber": 62,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -117,6 +127,8 @@
           "RawPackageInfo"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,6 +140,8 @@
             "label": "{ dist = true }",
             "description": [],
             "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+            "lineNumber": 42,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,6 +156,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+                "lineNumber": 42,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -165,6 +181,8 @@
           "EnvOptions"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,6 +199,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
+            "lineNumber": 23,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -210,6 +230,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -250,6 +272,8 @@
           "Config"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -356,6 +380,8 @@
           "IConfigService"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -383,6 +409,8 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -397,6 +425,8 @@
         "label": "configDeprecationsMock",
         "description": [],
         "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -418,6 +448,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -434,6 +466,8 @@
         "label": "configMock",
         "description": [],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -455,6 +489,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -471,6 +507,8 @@
         "label": "configServiceMock",
         "description": [],
         "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -492,6 +530,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -507,6 +547,8 @@
                   "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
+                "lineNumber": 17,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -523,6 +565,8 @@
         "label": "rawConfigServiceMock",
         "description": [],
         "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -546,6 +590,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -563,6 +609,8 @@
                   "<Record<string, any>> | undefined; }"
                 ],
                 "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
+                "lineNumber": 18,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }

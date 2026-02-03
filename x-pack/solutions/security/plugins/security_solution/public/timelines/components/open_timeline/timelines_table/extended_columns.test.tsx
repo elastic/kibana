@@ -8,7 +8,6 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -19,9 +18,7 @@ import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,9 +35,9 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <TestProvidersComponent>
           <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
@@ -51,9 +48,9 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <TestProvidersComponent>
           <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(
@@ -67,9 +64,9 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(missingUpdatedBy),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
+        <TestProvidersComponent>
           <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(getEmptyValue());

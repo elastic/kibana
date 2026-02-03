@@ -100,10 +100,10 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
           );
           try {
             const libraryId = await embeddable.saveToLibrary(newTitle);
-            const { rawState, references } = embeddable.getSerializedStateByReference(libraryId);
+            const byReferenceState = embeddable.getSerializedStateByReference(libraryId);
             resolve({
               byRefPackage: {
-                serializedState: { rawState: { ...rawState, title: newTitle }, references },
+                serializedState: { ...byReferenceState, title: newTitle },
                 panelType: embeddable.type,
               },
               libraryTitle: newTitle,

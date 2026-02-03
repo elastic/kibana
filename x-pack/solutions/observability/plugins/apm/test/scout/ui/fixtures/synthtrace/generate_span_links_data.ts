@@ -7,6 +7,13 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
+import {
+  PRODUCTION_ENVIRONMENT,
+  SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+  SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+  SPAN_LINKS_START_DATE,
+  SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END,
+} from '../constants';
 
 /**
  * Data ingestion summary:
@@ -35,24 +42,40 @@ import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
 export function generateSpanLinksData(): SynthtraceGenerator<ApmFields> {
   // Create service instances
   const producerInternalOnly = apm
-    .service({ name: 'zzz-producer-internal-only', environment: 'production', agentName: 'go' })
+    .service({
+      name: SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'go',
+    })
     .instance('instance a');
 
   const producerExternalOnly = apm
-    .service({ name: 'zzz-producer-external-only', environment: 'production', agentName: 'java' })
+    .service({
+      name: 'zzz-producer-external-only',
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'java',
+    })
     .instance('instance b');
 
   const producerConsumer = apm
-    .service({ name: 'zzz-producer-consumer', environment: 'production', agentName: 'ruby' })
+    .service({
+      name: 'zzz-producer-consumer',
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'ruby',
+    })
     .instance('instance c');
 
   const consumerMultiple = apm
-    .service({ name: 'zzz-consumer-multiple', environment: 'production', agentName: 'nodejs' })
+    .service({
+      name: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'nodejs',
+    })
     .instance('instance d');
 
   // Generate events
   const producerInternalOnlyEvents = Array.from(
-    timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:01:00.000Z'))
+    timerange(new Date(SPAN_LINKS_START_DATE), new Date(SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END))
       .interval('1m')
       .rate(1)
       .generator((timestamp) =>

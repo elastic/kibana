@@ -158,7 +158,7 @@ describe('RetentionCard', () => {
     );
   });
 
-  it('includes edit & discover actions when privileged', () => {
+  it('includes edit action when privileged', () => {
     const openModal = jest.fn();
     const mockConfig = createMockConfig({});
     renderI18n(
@@ -171,7 +171,6 @@ describe('RetentionCard', () => {
     );
     fireEvent.click(screen.getByTestId('streamFailureStoreEditRetention'));
     expect(openModal).toHaveBeenCalledWith(true);
-    expect(screen.getByTestId('streamFailureStoreViewInDiscover')).toBeInTheDocument();
   });
 
   it('omits edit action when lacking privilege', () => {
@@ -185,7 +184,6 @@ describe('RetentionCard', () => {
       />
     );
     expect(screen.queryByTestId('streamFailureStoreEditRetention')).toBeNull();
-    expect(screen.getByTestId('streamFailureStoreViewInDiscover')).toBeInTheDocument();
   });
 
   it('renders infinite retention when lifecycle is disabled', () => {

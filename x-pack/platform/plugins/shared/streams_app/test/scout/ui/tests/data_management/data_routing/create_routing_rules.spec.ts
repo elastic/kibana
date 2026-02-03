@@ -10,6 +10,9 @@ import { test } from '../../../fixtures';
 
 const MAX_STREAM_NAME_LENGTH = 200;
 
+// Note: Condition type coverage (eq, neq, contains, and, or, not, etc.) is handled by
+// API tests in test/scout/api/tests/routing_fork_stream.spec.ts
+// These UI tests focus on the user experience: validation, navigation, and button states
 test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
@@ -107,6 +110,10 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
         streamName: 'UppercaseName',
         expectedError: 'Stream name cannot contain uppercase characters.',
       },
+      {
+        streamName: 'invalid name with spaces',
+        expectedError: 'Stream name cannot contain spaces.',
+      },
     ];
 
     for (const invalidName of invalidNames) {
@@ -121,8 +128,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
-    // Try invalid stream names
-    const invalidNames = ['invalid name with spaces', 'special>chars'];
+    // Try invalid stream names (these pass client-side validation but fail server-side)
+    const invalidNames = ['special>chars'];
 
     for (const invalidName of invalidNames) {
       await pageObjects.streams.fillRoutingRuleName(invalidName);

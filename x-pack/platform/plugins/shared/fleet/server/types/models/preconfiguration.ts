@@ -18,7 +18,7 @@ import {
   RemoteElasticSearchSchema,
 } from './output';
 
-import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
+import { AgentPolicyNamespaceSchema, AgentPolicySchemaV3 } from './agent_policy';
 import {
   PackagePolicyNamespaceSchema,
   SimplifiedPackagePolicyPreconfiguredSchema,
@@ -179,8 +179,7 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
-  schema.object({
-    ...AgentPolicyBaseSchema,
+  AgentPolicySchemaV3.extends({
     space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),

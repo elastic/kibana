@@ -11,12 +11,19 @@ import { timerange } from '@kbn/synthtrace-client';
 import {
   type LogsSynthtraceEsClient,
   generateCorrelatedLogsData,
+  createLogSequence,
   type CorrelatedLogEvent,
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { GetCorrelatedLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_correlated_logs/types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
+
+interface Log {
+  message?: string;
+  'log.level'?: string;
+  'service.name'?: string;
+}
 
 async function indexCorrelatedLogs({
   logsEsClient,
@@ -46,47 +53,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      if (logsSynthtraceEsClient) {
-        await logsSynthtraceEsClient.clean();
-      }
+      // await logsSynthtraceEsClient.clean();
     });
 
     describe('with single error and `trace.id` as correlation ID', () => {
       before(async () => {
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            {
-              level: 'info',
-              message: 'Starting payment processing',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'debug',
-              message: 'Validating payment details',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'error',
-              message: 'Payment gateway timeout',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'warn',
-              message: 'Retrying payment',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-            {
-              level: 'info',
-              message: 'Payment completed',
-              'service.name': 'payment-service',
-              'trace.id': 'trace-123',
-            },
-          ],
+          logs: createLogSequence({
+            service: 'payment-service',
+            correlation: { 'trace.id': 'trace-123' },
+            logs: [
+              { 'log.level': 'info', message: 'Starting payment processing' },
+              { 'log.level': 'debug', message: 'Validating payment details' },
+              { 'log.level': 'error', message: 'Payment gateway timeout' },
+              { 'log.level': 'warn', message: 'Retrying payment' },
+              { 'log.level': 'info', message: 'Payment completed' },
+            ],
+          }),
         });
       });
 
@@ -148,19 +132,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('with multiple errors sharing the same correlation ID', () => {
       before(async () => {
-        const sharedLogAttributes = {
-          'service.name': 'checkout-service',
-          'request.id': 'req-456',
-        };
-
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            { level: 'info', message: 'Request started', ...sharedLogAttributes },
-            { level: 'error', message: 'Database connection failed', ...sharedLogAttributes },
-            { level: 'error', message: 'Rollback failed', ...sharedLogAttributes },
-            { level: 'warn', message: 'Request aborted', ...sharedLogAttributes },
-          ],
+          logs: createLogSequence({
+            service: 'checkout-service',
+            correlation: { 'request.id': 'req-456' },
+            logs: [
+              { 'log.level': 'info', message: 'Request started' },
+              { 'log.level': 'error', message: 'Database connection failed' },
+              { 'log.level': 'error', message: 'Rollback failed' },
+              { 'log.level': 'warn', message: 'Request aborted' },
+            ],
+          }),
         });
       });
 
@@ -189,10 +172,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const group = results[0].data.sequences[0];
-        const errorLogs = group.logs.filter((log: any) => log.log?.level === 'ERROR');
+        const errorLogs = group.logs.filter(
+          (log: Log) => log['log.level']?.toUpperCase() === 'ERROR'
+        );
         expect(errorLogs.length).to.be(2);
 
-        const messages = errorLogs.map((log: any) => log.message);
+        const messages = errorLogs.map((log: Log) => log.message);
         expect(messages).to.contain('Database connection failed');
         expect(messages).to.contain('Rollback failed');
       });
@@ -204,26 +189,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Payment flow started',
               'service.name': 'multi-service',
               'trace.id': 'trace-payment',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Payment error',
               'service.name': 'multi-service',
               'trace.id': 'trace-payment',
             },
 
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Refund flow started',
               'service.name': 'multi-service',
               'transaction.id': 'txn-refund',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Refund error',
               'service.name': 'multi-service',
               'transaction.id': 'txn-refund',
@@ -258,25 +243,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { sequences } = results[0].data;
 
-        // Find payment group
+        // Find payment group by message content
         const paymentGroup = sequences.find((group) =>
-          group.logs.some((log: any) => log.message === 'Payment error')
+          group.logs.some((log: Log) => log.message === 'Payment error')
         );
         expect(paymentGroup).to.not.be(undefined);
-        expect(paymentGroup!.logs.every((log: any) => log.trace?.id === 'trace-payment')).to.be(
-          true
-        );
         expect(paymentGroup!.correlation.field).to.be('trace.id');
         expect(paymentGroup!.correlation.value).to.be('trace-payment');
 
-        // Find refund group
+        // Find refund group by message content
         const refundGroup = sequences.find((group) =>
-          group.logs.some((log: any) => log.message === 'Refund error')
+          group.logs.some((log: Log) => log.message === 'Refund error')
         );
         expect(refundGroup).to.not.be(undefined);
-        expect(refundGroup!.logs.every((log: any) => log.transaction?.id === 'txn-refund')).to.be(
-          true
-        );
         expect(refundGroup!.correlation.field).to.be('transaction.id');
         expect(refundGroup!.correlation.value).to.be('txn-refund');
       });
@@ -288,12 +267,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Uncorrelated info',
               'service.name': 'no-correlation-service',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Uncorrelated error',
               'service.name': 'no-correlation-service',
             },
@@ -323,14 +302,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Error in service A',
               'service.name': 'service-a',
               'trace.id': 'trace-a',
             },
 
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Error in service B',
               'service.name': 'service-b',
               'trace.id': 'trace-b',
@@ -356,70 +335,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('with alternative error severity formats', () => {
-      before(async () => {
-        await indexCorrelatedLogs({
-          logsEsClient: logsSynthtraceEsClient,
-          logs: [
-            {
-              level: 'info',
-              message: 'Syslog request started',
-              'service.name': 'syslog-service',
-              'trace.id': 'syslog-trace',
-              'syslog.severity': 6,
-            },
-            {
-              level: 'info',
-              message: 'Syslog error occurred',
-              'service.name': 'syslog-service',
-              'trace.id': 'syslog-trace',
-              'syslog.severity': 3,
-            },
+      // Tests that errors are detected via alternative severity formats only (not log.level)
+      // Each describe block ingests logs with only a single severity format
 
-            {
-              level: 'info',
-              message: 'OpenTelemetry request started',
-              'service.name': 'otel-service',
-              'request.id': 'otel-req',
-              SeverityNumber: 9,
-            },
-            {
-              level: 'info',
-              message: 'OpenTelemetry error occurred',
-              'service.name': 'otel-service',
-              'request.id': 'otel-req',
-              SeverityNumber: 17,
-            },
-
-            {
-              level: 'info',
-              message: 'HTTP request started',
-              'service.name': 'http-service',
-              'correlation.id': 'http-corr',
-              'http.response.status_code': 200,
-            },
-            {
-              level: 'info',
-              message: 'HTTP error occurred',
-              'service.name': 'http-service',
-              'correlation.id': 'http-corr',
-              'http.response.status_code': 500,
-            },
-          ],
+      // Syslog severity: 0=Emergency, 1=Alert, 2=Critical, 3=Error, 4=Warning, 5=Notice, 6=Info, 7=Debug
+      describe('syslog.severity', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: createLogSequence({
+              service: 'syslog-service',
+              correlation: { 'trace.id': 'syslog-trace' },
+              logs: [
+                { message: 'Syslog request started', 'syslog.severity': 6 }, // info
+                { message: 'Syslog error occurred', 'syslog.severity': 3 }, // error
+              ],
+            }),
+          });
         });
-      });
 
-      [
-        { service: 'syslog-service', format: 'syslog.severity (≤3)' },
-        { service: 'otel-service', format: 'OpenTelemetry SeverityNumber (≥17)' },
-        { service: 'http-service', format: 'HTTP status codes (≥500)' },
-      ].forEach(({ service, format }) => {
-        it(`detects errors using ${format}`, async () => {
+        it('detects errors using syslog.severity (≤4)', async () => {
           const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
             id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
             params: {
               start: 'now-10m',
               end: 'now',
-              kqlFilter: `service.name: "${service}"`,
+              kqlFilter: 'service.name: "syslog-service"',
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(2);
+        });
+      });
+
+      // OpenTelemetry SeverityNumber: 1-4=Trace, 5-8=Debug, 9-12=Info, 13-16=Warn, 17-20=Error, 21-24=Fatal
+      describe('OpenTelemetry SeverityNumber', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: createLogSequence({
+              service: 'otel-service',
+              correlation: { 'request.id': 'otel-req' },
+              logs: [
+                { message: 'OpenTelemetry request started', SeverityNumber: 9 }, // info
+                { message: 'OpenTelemetry error occurred', SeverityNumber: 17 }, // error
+              ],
+            }),
+          });
+        });
+
+        it('detects errors using SeverityNumber (≥13)', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              kqlFilter: 'service.name: "otel-service"',
+            },
+          });
+
+          const { sequences } = results[0].data;
+          expect(sequences.length).to.be(1);
+          expect(sequences[0].logs.length).to.be(2);
+        });
+      });
+
+      // HTTP status codes: 2xx=Success, 4xx=Client error, 5xx=Server error
+      describe('HTTP status codes', () => {
+        before(async () => {
+          await indexCorrelatedLogs({
+            logsEsClient: logsSynthtraceEsClient,
+            logs: createLogSequence({
+              service: 'http-service',
+              correlation: { 'correlation.id': 'http-corr' },
+              logs: [
+                { message: 'HTTP request started', 'http.response.status_code': 200 }, // success
+                { message: 'HTTP error occurred', 'http.response.status_code': 500 }, // server error
+              ],
+            }),
+          });
+        });
+
+        it('detects errors using http.response.status_code (≥500)', async () => {
+          const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+            id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+            params: {
+              start: 'now-10m',
+              end: 'now',
+              kqlFilter: 'service.name: "http-service"',
             },
           });
 
@@ -442,8 +447,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await indexCorrelatedLogs({
           logsEsClient: logsSynthtraceEsClient,
           logs: [
-            { level: 'info', message: 'Request with multiple IDs started', ...shared },
-            { level: 'error', message: 'Error with multiple correlation IDs', ...shared },
+            { 'log.level': 'info', message: 'Request with multiple IDs started', ...shared },
+            { 'log.level': 'error', message: 'Error with multiple correlation IDs', ...shared },
           ],
         });
       });
@@ -461,11 +466,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { sequences } = results[0].data;
         expect(sequences.length).to.be(1);
 
-        // Verify all logs in the group have the same trace.id (highest priority)
-        const allHaveTraceId = sequences[0].logs.every(
-          (log: any) => log.trace?.id === 'trace-priority-123'
-        );
-        expect(allHaveTraceId).to.be(true);
+        // Verify trace.id is used as the correlation field (highest priority)
         expect(sequences[0].correlation.field).to.be('trace.id');
         expect(sequences[0].correlation.value).to.be('trace-priority-123');
 
@@ -482,19 +483,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'severe',
+              'log.level': 'severe',
               message: 'Java severe error',
               'service.name': 'java-service',
               'trace.id': 'java-trace',
             },
             {
-              level: 'warning',
+              'log.level': 'warning',
               message: 'System warning',
               'service.name': 'system-service',
               'request.id': 'system-req',
             },
             {
-              level: 'warn',
+              'log.level': 'warn',
               message: 'Application warn',
               'service.name': 'app-service',
               'transaction.id': 'app-txn',
@@ -504,11 +505,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       [
-        { service: 'java-service', level: 'SEVERE', message: 'Java severe error' },
-        { service: 'system-service', level: 'WARNING', message: 'System warning' },
-        { service: 'app-service', level: 'WARN', message: 'Application warn' },
-      ].forEach(({ service, level, message }) => {
-        it(`detects errors using ${level} level`, async () => {
+        { service: 'java-service', 'log.level': 'SEVERE', message: 'Java severe error' },
+        { service: 'system-service', 'log.level': 'WARNING', message: 'System warning' },
+        { service: 'app-service', 'log.level': 'WARN', message: 'Application warn' },
+      ].forEach(({ service, 'log.level': logLevel, message }) => {
+        it(`detects errors using ${logLevel} level`, async () => {
           const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
             id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
             params: {
@@ -532,13 +533,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logs: [
             // session.id
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Session started',
               'service.name': 'session-service',
               'session.id': 'session-abc-123',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Session error',
               'service.name': 'session-service',
               'session.id': 'session-abc-123',
@@ -546,13 +547,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
             // http.request.id
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'HTTP request received',
               'service.name': 'http-server',
               'http.request.id': 'http-req-456',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'HTTP processing error',
               'service.name': 'http-server',
               'http.request.id': 'http-req-456',
@@ -560,13 +561,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
             // event.id
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Event processing started',
               'service.name': 'event-processor',
               'event.id': 'evt-789',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Event processing failed',
               'service.name': 'event-processor',
               'event.id': 'evt-789',
@@ -574,19 +575,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
             // cloud.trace_id
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Cloud trace started',
               'service.name': 'cloud-service',
               'cloud.trace_id': 'cloud-trace-xyz',
             },
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Cloud trace still running',
               'service.name': 'cloud-service',
               'cloud.trace_id': 'cloud-trace-xyz',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Cloud operation failed',
               'service.name': 'cloud-service',
               'cloud.trace_id': 'cloud-trace-xyz',
@@ -594,12 +595,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
             // no correlation ID
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Starting',
               'service.name': 'no-corr-id-service',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Crashing',
               'service.name': 'no-corr-id-service',
             },
@@ -665,13 +666,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Log for ID lookup',
               'service.name': 'id-service',
               'trace.id': 'trace-id-target',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Error correlated with ID target',
               'service.name': 'id-service',
               'trace.id': 'trace-id-target',
@@ -717,13 +718,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           logsEsClient: logsSynthtraceEsClient,
           logs: [
             {
-              level: 'info',
+              'log.level': 'info',
               message: 'Log with fields',
               'service.name': 'fields-service',
               'trace.id': 'trace-fields',
             },
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Error with fields',
               'service.name': 'fields-service',
               'trace.id': 'trace-fields',
@@ -750,13 +751,130 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(logs).to.eql([
           {
             message: 'Log with fields',
-            service: { name: 'fields-service' },
+            'service.name': 'fields-service',
           },
           {
             message: 'Error with fields',
-            service: { name: 'fields-service' },
+            'service.name': 'fields-service',
           },
         ]);
+      });
+    });
+
+    describe('with errorLogsOnly=false', () => {
+      // Tests that ANY log can be an anchor when errorLogsOnly is false
+      // Useful for investigating slow requests or specific events that aren't errors
+
+      before(async () => {
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
+          logs: createLogSequence({
+            service: 'non-error-anchor-service',
+            correlation: { 'trace.id': 'trace-non-error' },
+            logs: [
+              { 'log.level': 'info', message: 'Request started' },
+              { 'log.level': 'info', message: 'Slow database query' },
+              { 'log.level': 'info', message: 'Request completed' },
+            ],
+          }),
+        });
+      });
+
+      it('returns sequences when anchoring on non-error logs', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "non-error-anchor-service"',
+            errorLogsOnly: false,
+          },
+        });
+
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].logs.length).to.be(3);
+
+        const messages = sequences[0].logs.map((log) => log.message);
+        expect(messages).to.eql(['Request started', 'Slow database query', 'Request completed']);
+      });
+
+      it('returns empty when errorLogsOnly=true (default) and no errors exist', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "non-error-anchor-service"',
+            // errorLogsOnly defaults to true
+          },
+        });
+
+        const { sequences, message } = results[0].data;
+        expect(sequences.length).to.be(0);
+        expect(message).to.contain('No log sequences found');
+      });
+    });
+
+    describe('with custom correlationFields', () => {
+      // Tests that user-specified correlation fields work
+      // Useful when logs use non-standard correlation identifiers
+
+      before(async () => {
+        await indexCorrelatedLogs({
+          logsEsClient: logsSynthtraceEsClient,
+          logs: createLogSequence({
+            service: 'custom-correlation-service',
+            correlation: { order_id: 'ORD-12345' },
+            logs: [
+              { 'log.level': 'info', message: 'Order created' },
+              { 'log.level': 'info', message: 'Payment processing' },
+              { 'log.level': 'error', message: 'Order fulfillment failed' },
+            ],
+          }),
+        });
+      });
+
+      it('correlates logs using custom field (order_id)', async () => {
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "custom-correlation-service"',
+            correlationFields: ['order_id'],
+          },
+        });
+
+        const { sequences } = results[0].data;
+        expect(sequences.length).to.be(1);
+        expect(sequences[0].correlation.field).to.be('order_id');
+        expect(sequences[0].correlation.value).to.be('ORD-12345');
+        expect(sequences[0].logs.length).to.be(3);
+
+        const messages = sequences[0].logs.map((log) => log.message);
+        expect(messages).to.eql([
+          'Order created',
+          'Payment processing',
+          'Order fulfillment failed',
+        ]);
+      });
+
+      it('returns empty when custom field is not in default correlationFields', async () => {
+        // Without specifying correlationFields, order_id won't be recognized
+        const results = await agentBuilderApiClient.executeTool<GetCorrelatedLogsToolResult>({
+          id: OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
+          params: {
+            start: 'now-10m',
+            end: 'now',
+            kqlFilter: 'service.name: "custom-correlation-service"',
+            // correlationFields not specified, so order_id won't be used
+          },
+        });
+
+        const { sequences, message } = results[0].data;
+        expect(sequences.length).to.be(0);
+        expect(message).to.contain('No log sequences found');
       });
     });
 
@@ -764,7 +882,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       describe('maxSequences', () => {
         before(async () => {
           const logs = times(5, (i) => ({
-            level: 'error',
+            'log.level': 'error',
             message: `Error in trace ${i}`,
             'service.name': 'limit-service',
             'trace.id': `trace-limit-${i}`,
@@ -797,7 +915,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const logs = [
             // info logs
             ...times(20, (i) => ({
-              level: 'info',
+              'log.level': 'info',
               message: `Log ${i}`,
               'service.name': 'limit-logs-service',
               'trace.id': 'trace-limit-logs',
@@ -806,7 +924,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
             // anchor
             {
-              level: 'error',
+              'log.level': 'error',
               message: 'Error log',
               'service.name': 'limit-logs-service',
               'trace.id': 'trace-limit-logs',
@@ -844,7 +962,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const logs = [
           // Trace A: 60 errors (recent)
           ...times(60, (i) => ({
-            level: 'error',
+            'log.level': 'error',
             message: `Error A ${i}`,
             'service.name': 'starvation-service',
             'trace.id': 'trace-A',
@@ -852,7 +970,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           })),
           // Trace B: 1 error (older)
           {
-            level: 'error',
+            'log.level': 'error',
             message: 'Error B',
             'service.name': 'starvation-service',
             'trace.id': 'trace-B',

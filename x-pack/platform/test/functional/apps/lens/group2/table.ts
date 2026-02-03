@@ -24,6 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Sort by number
       await lens.changeTableSortingBy(2, 'ascending');
       await lens.waitForVisualization();
+      expect(await lens.getDatatableCellText(0, 0, false)).to.eql('1');
+      expect(await lens.getDatatableCellText(1, 0, false)).to.eql('2');
+      expect(await lens.getDatatableCellText(2, 0, false)).to.eql('3');
       expect(await lens.getDatatableCellText(0, 2)).to.eql('17,246');
       // Now sort by IP
       await lens.changeTableSortingBy(0, 'ascending');
@@ -45,6 +48,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openStyleSettingsFlyout();
       await lens.setDataTableDensity('compact');
       expect(await lens.checkDataTableDensity('s')).to.be(true);
+      await lens.closeFlyoutWithBackButton();
+    });
+
+    it('should allow toggling row numbers from the style settings flyout', async () => {
+      await lens.openStyleSettingsFlyout();
+
+      // Disable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(false);
+
+      // Enable row number
+      await lens.toggleShowRowNumbers();
+      expect(await lens.findRowNumberColumn()).to.be(true);
+
       await lens.closeFlyoutWithBackButton();
     });
 
@@ -144,7 +161,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: 'lnsDatatable_rows > lns-dimensionTrigger',
         to: 'lnsDatatable_columns > lns-empty-dimension',
       });
-      // await common.sleep(100000);
       expect(await lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await lens.getDatatableHeaderText(1)).to.equal('169.228.188.120 › Average of bytes');
       expect(await lens.getDatatableHeaderText(2)).to.equal('78.83.247.30 › Average of bytes');

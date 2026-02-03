@@ -33,6 +33,8 @@ import type {
   TypeOptions,
   URIOptions,
   UnionTypeOptions,
+  PropsWithDiscriminator,
+  ObjectResultUnionType,
 } from './src/types';
 import {
   AnyType,
@@ -54,6 +56,7 @@ import {
   StringType,
   Type,
   UnionType,
+  DiscriminatedUnionType,
   URIType,
   StreamType,
   Lazy,
@@ -222,6 +225,239 @@ function oneOf<RTS extends Array<Type<any>>>(
   options?: UnionTypeOptions<any>
 ): Type<any> {
   return new UnionType(types, options);
+}
+
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>,
+  H extends PropsWithDiscriminator<Discriminator, Props>,
+  I extends PropsWithDiscriminator<Discriminator, Props>,
+  J extends PropsWithDiscriminator<Discriminator, Props>,
+  K extends PropsWithDiscriminator<Discriminator, Props>,
+  L extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>,
+    ObjectType<K>,
+    ObjectType<L>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K | L>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K | L>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>,
+  H extends PropsWithDiscriminator<Discriminator, Props>,
+  I extends PropsWithDiscriminator<Discriminator, Props>,
+  J extends PropsWithDiscriminator<Discriminator, Props>,
+  K extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>,
+    ObjectType<K>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J | K>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>,
+  H extends PropsWithDiscriminator<Discriminator, Props>,
+  I extends PropsWithDiscriminator<Discriminator, Props>,
+  J extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>,
+    ObjectType<J>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I | J>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>,
+  H extends PropsWithDiscriminator<Discriminator, Props>,
+  I extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>,
+    ObjectType<I>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H | I>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H | I>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>,
+  H extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>,
+    ObjectType<H>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G | H>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G | H>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>,
+  G extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [
+    ObjectType<A>,
+    ObjectType<B>,
+    ObjectType<C>,
+    ObjectType<D>,
+    ObjectType<E>,
+    ObjectType<F>,
+    ObjectType<G>
+  ],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F | G>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F | G>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>,
+  F extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>, ObjectType<F>],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E | F>>
+): Type<ObjectResultUnionType<A | B | C | D | E | F>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>,
+  E extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>, ObjectType<E>],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D | E>>
+): Type<ObjectResultUnionType<A | B | C | D | E>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>,
+  D extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>, ObjectType<D>],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C | D>>
+): Type<ObjectResultUnionType<A | B | C | D>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>,
+  C extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>, ObjectType<C>],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B | C>>
+): Type<ObjectResultUnionType<A | B | C>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>,
+  B extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>, ObjectType<B>],
+  options?: UnionTypeOptions<ObjectResultUnionType<A | B>>
+): Type<ObjectResultUnionType<A | B>>;
+function discriminatedUnion<
+  Discriminator extends string,
+  A extends PropsWithDiscriminator<Discriminator, Props>
+>(
+  discriminator: Discriminator,
+  types: [ObjectType<A>],
+  options?: UnionTypeOptions<ObjectResultType<A>>
+): Type<ObjectResultType<A>>;
+function discriminatedUnion<Discriminator extends string, RTS extends Array<ObjectType<any>>>(
+  discriminator: Discriminator,
+  types: RTS,
+  options?: UnionTypeOptions<any>
+): Type<ObjectResultType<any>> {
+  return new DiscriminatedUnionType(discriminator, types, options);
 }
 
 function allOf<
@@ -428,6 +664,8 @@ export const schema = {
   number,
   object,
   oneOf,
+  union: oneOf,
+  discriminatedUnion,
   recordOf,
   stream,
   siblingRef,
@@ -445,6 +683,8 @@ import {
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
@@ -455,4 +695,6 @@ export const metaFields = Object.freeze({
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
   META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_DISCRIMINATOR,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
 });

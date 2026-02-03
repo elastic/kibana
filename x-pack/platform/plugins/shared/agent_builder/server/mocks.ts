@@ -8,6 +8,9 @@
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 import { createFormatContextMock } from './test_utils/attachments';
+import { createToolHandlerContextMock } from './test_utils/runner';
+
+export type { ToolHandlerContextMock } from './test_utils/runner';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {
@@ -41,5 +44,8 @@ export const agentBuilderMocks = {
   createTool: createMockedExecutableTool,
   attachments: {
     createFormatContextMock,
+  },
+  tools: {
+    createHandlerContext: createToolHandlerContextMock,
   },
 };

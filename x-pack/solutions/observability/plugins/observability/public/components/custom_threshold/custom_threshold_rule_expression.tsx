@@ -40,6 +40,7 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -58,10 +59,10 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
   'disableFilter',
 ];
 
-type Props = Omit<
+export type CustomThresholdRuleExpressionProps = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
->;
+> & { kql: KqlPluginStart };
 
 export const defaultExpression: MetricExpression = {
   comparator: COMPARATORS.GREATER_THAN,
@@ -72,16 +73,38 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
 
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.observability.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
+
 // eslint-disable-next-line import/no-default-export
-export default function Expressions(props: Props) {
-  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+export default function Expressions(props: CustomThresholdRuleExpressionProps) {
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData, kql } = props;
   const {
     data,
     dataViews,
@@ -97,7 +120,7 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
@@ -117,6 +140,9 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -384,6 +410,14 @@ export default function Expressions(props: Props) {
     };
   }, []);
 
+  const forLastExpressionErrors = useMemo(() => {
+    return {
+      aggField: [],
+      timeSizeUnit: [],
+      timeWindowSize: isTimeSizeBelowRecommended ? [RECOMMENDED_TIMESIZE_WARNING] : [],
+    };
+  }, [isTimeSizeBelowRecommended]);
+
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const ruleCriteria =
@@ -600,6 +634,7 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                kql={kql}
                 title={
                   ruleParams.criteria.length === 1 ? (
                     <FormattedMessage
@@ -631,10 +666,11 @@ export default function Expressions(props: Props) {
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={forLastExpressionErrors}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />

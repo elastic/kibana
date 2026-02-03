@@ -24,13 +24,12 @@ const createSetupContractMock = (): InternalChromeSetup => {
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    getLegacyHeaderComponentForFixedLayout: jest.fn(),
-    getClassicHeaderComponentForGridLayout: jest.fn(),
+    getClassicHeaderComponent: jest.fn(),
     getChromelessHeader: jest.fn(),
     getHeaderBanner: jest.fn(),
     getProjectAppMenuComponent: jest.fn(),
-    getProjectHeaderComponentForGridLayout: jest.fn(),
-    getProjectSideNavComponentForGridLayout: jest.fn(),
+    getProjectHeaderComponent: jest.fn(),
+    getProjectSideNavComponent: jest.fn(),
     navLinks: lazyObject({
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -106,6 +105,7 @@ const createStartContractMock = () => {
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
     getAppMenu$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setAppMenu: jest.fn(),
+    setBreadcrumbsBadges: jest.fn(),
   });
 
   return startContract;

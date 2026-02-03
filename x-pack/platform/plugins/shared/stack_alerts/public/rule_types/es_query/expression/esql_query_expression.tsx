@@ -137,7 +137,6 @@ export const EsqlQueryExpression: React.FC<
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
-  const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
   const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
@@ -287,7 +286,6 @@ export const EsqlQueryExpression: React.FC<
       if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
         clearParam('timeField');
       }
-      setDetectedTimestamp(timestampField);
     },
     [timeField, setParam, clearParam, dataViews, http]
   );
@@ -305,7 +303,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          detectedTimestamp={detectedTimestamp}
           hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}

@@ -3,7 +3,7 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, ready_for_review ]
+    types: [ opened, ready_for_review, synchronize ]
 
 jobs:
 
@@ -11,7 +11,7 @@ jobs:
     name: Test CodeQL queries
     runs-on: ubuntu-latest
     if: |
-      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) 
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
         && github.event.pull_request.draft == false
@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
@@ -48,7 +48,7 @@ jobs:
     name: Analyze javascript
     runs-on: kibana
     if: |
-      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) 
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
         && github.event.pull_request.draft == false
@@ -65,7 +65,7 @@ jobs:
         language: [ 'javascript' ]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8

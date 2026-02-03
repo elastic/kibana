@@ -23,7 +23,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS_ACTIVE,
-  type AlertStatus,
+  type PublicAlertStatus,
 } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
 import type { PropsWithChildren } from 'react';
@@ -157,7 +157,7 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
                       ).map(([status, count]) => {
                         return (
                           <EuiText size={'xs'}>
-                            {statusNameMap[status as AlertStatus]}{' '}
+                            {statusNameMap[status as PublicAlertStatus]}{' '}
                             <EuiNotificationBadge
                               size="s"
                               color={status === ALERT_STATUS_ACTIVE ? 'accent' : 'subdued'}
@@ -266,6 +266,9 @@ export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
 
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate('xpack.ml.explorer.cellSelectionPopover.alertsTableCaption', {
+        defaultMessage: 'Alerts for the selected swim lane cell',
+      })}
       css={{ width: '510px' }}
       compressed
       columns={columns}

@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
-  EuiSpacer,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -82,20 +80,6 @@ export const PrivilegedAccessDetectionInstallPrompt: React.FC<{
               'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.enablePrivilegedAccessDetection',
               { defaultMessage: 'Enable Privileged access detection.' }
             )}
-            <EuiSpacer size="m" />
-            <EuiBetaBadge
-              tooltipContent={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabelTooltip',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-              label={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.technicalPreviewLabel',
-                { defaultMessage: 'TECHNICAL PREVIEW' }
-              )}
-            />
           </h2>
         }
         body={

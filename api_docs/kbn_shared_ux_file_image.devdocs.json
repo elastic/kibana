@@ -42,6 +42,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +64,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
+            "lineNumber": 30,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -94,6 +98,8 @@
           "EuiImageProps"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/image/impl/src/image.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

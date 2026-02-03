@@ -90,6 +90,8 @@
           "[]; }[]; }>; }"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/src/examples.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,6 +108,8 @@
               "IScopedClusterClient"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/src/examples.ts",
+            "lineNumber": 34,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -126,6 +130,8 @@
           "\nField example for a category."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +145,8 @@
               "\nThe text of the field example."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,6 +170,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -178,6 +188,8 @@
           "\nResult of a field example check."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -200,6 +212,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,6 +236,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -235,6 +251,8 @@
               "\nThe message associated with the validation result."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -251,6 +269,8 @@
           "\nValidation results for a specific field."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,6 +296,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -291,6 +313,8 @@
               "\nThe total number of examples used for validation."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,6 +339,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +366,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -356,6 +384,8 @@
           "\nToken"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -369,6 +399,8 @@
               "\nThe token string."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -382,6 +414,8 @@
               "\nThe starting offset of the token."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -395,6 +429,8 @@
               "\nThe ending offset of the token."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,6 +444,8 @@
               "\nThe type of the token."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,6 +459,8 @@
               "\nThe position of the token."
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -439,6 +479,8 @@
           "\nEnum representing the validation status of category examples."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,6 +495,8 @@
           "\nEnum representing the validation results for field examples."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -473,6 +517,8 @@
           " & { analyzer?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/types/categories.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -490,6 +536,8 @@
           "0.02"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -507,6 +555,8 @@
           "1000"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -524,6 +574,8 @@
           "0.75"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -541,6 +593,8 @@
           "0.75"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -558,6 +612,8 @@
           "3"
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -574,6 +630,8 @@
           "\nDescription for each validation result."
         ],
         "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -587,6 +645,8 @@
               "/**\n   * Examples were successfully loaded.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -600,6 +660,8 @@
               "/**\n   * The loaded examples were tokenized successfully.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +675,8 @@
               "/**\n   * More than {tokenCount} tokens per example were found in over {percentage}% of the loaded examples.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -626,6 +690,8 @@
               "/**\n   * Less than {percentage}% of the loaded examples were null.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -639,6 +705,8 @@
               "/**\n   * Less than 10000 tokens were found in total in the loaded examples.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -652,6 +720,8 @@
               "/**\n   * The user has sufficient privileges to perform the checks.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

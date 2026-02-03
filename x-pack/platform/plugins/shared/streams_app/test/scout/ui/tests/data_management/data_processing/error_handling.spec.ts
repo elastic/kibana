@@ -9,8 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-// FLAKY: https://github.com/elastic/kibana/issues/246547
-test.describe.skip(
+test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -39,6 +38,8 @@ test.describe.skip(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       // Simulate network failure
       await page.route('**/streams/**/_ingest', async (route) => {
@@ -76,6 +77,8 @@ test.describe.skip(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
 
       await pageObjects.streams.saveStepsListChanges();
       await pageObjects.streams.confirmChangesInReviewModal();

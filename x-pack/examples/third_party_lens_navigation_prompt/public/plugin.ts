@@ -13,7 +13,7 @@ import type {
   LensPublicSetup,
   LensPublicStart,
 } from '@kbn/lens-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import image from './image.png';

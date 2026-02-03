@@ -14,6 +14,7 @@ import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_ca
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link_hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
+import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { GiveFeedbackHeaderLink } from './give_feedback_header_link';
 
@@ -30,6 +31,9 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
+  const canReadSlos = !!capabilities.slo?.read;
+  const canWriteSlos = !!capabilities.slo?.write;
+  const isSloAvailable = canReadSlos || canWriteSlos;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -65,6 +69,10 @@ export function ApmHeaderActionMenu() {
           canSaveAlerts={canSaveApmAlerts}
           canReadMlJobs={canReadMlJobs}
         />
+      )}
+
+      {isSloAvailable && (
+        <SloPopoverAndFlyout canReadSlos={canReadSlos} canWriteSlos={canWriteSlos} />
       )}
 
       <EuiHeaderLink

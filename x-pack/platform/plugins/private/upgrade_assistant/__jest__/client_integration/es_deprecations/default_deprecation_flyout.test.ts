@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, within } from '@testing-library/react';
 
-import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Default deprecation flyout', () => {
-  let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
@@ -38,29 +38,24 @@ describe('Default deprecation flyout', () => {
         aliases: [],
       },
     });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    testBed.component.update();
   });
 
   test('renders a flyout with deprecation details', async () => {
     const multiFieldsDeprecation = esDeprecationsMockResponse.migrationsDeprecations[2];
-    const { actions, find, exists } = testBed;
+    await setupElasticsearchPage(httpSetup);
 
-    await actions.table.clickDeprecationRowAt({ deprecationType: 'default', index: 0 });
+    fireEvent.click(screen.getAllByTestId('deprecation-default')[0]);
 
-    expect(exists('defaultDeprecationDetails')).toBe(true);
-    expect(find('defaultDeprecationDetails.flyoutTitle').text()).toContain(
+    const flyout = await screen.findByTestId('defaultDeprecationDetails');
+
+    expect(within(flyout).getByTestId('flyoutTitle')).toHaveTextContent(
       multiFieldsDeprecation.message
     );
-    expect(find('defaultDeprecationDetails.documentationLink').props().href).toBe(
-      multiFieldsDeprecation.url
-    );
-    expect(find('defaultDeprecationDetails.flyoutDescription').text()).toContain(
-      multiFieldsDeprecation.index
+    expect(
+      (within(flyout).getByTestId('documentationLink') as HTMLAnchorElement).getAttribute('href')
+    ).toBe(multiFieldsDeprecation.url);
+    expect(within(flyout).getByTestId('flyoutDescription')).toHaveTextContent(
+      String(multiFieldsDeprecation.index)
     );
   });
 });

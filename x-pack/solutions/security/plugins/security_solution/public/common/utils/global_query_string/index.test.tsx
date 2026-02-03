@@ -219,6 +219,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: `firstKey=111&${urlParamKey}='${value}'&lastKey=999`,
+        state: '',
       });
     });
 
@@ -237,6 +238,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: `${urlParamKey1}='${value1}'&${urlParamKey2}='${value2}'`,
+        state: '',
       });
     });
 
@@ -251,6 +253,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: '',
+        state: '',
       });
     });
 
@@ -267,6 +270,7 @@ describe('global query string', () => {
 
       expect(mockHistory.replace).toHaveBeenCalledWith({
         search: '',
+        state: '',
       });
     });
 
@@ -320,7 +324,8 @@ describe('global query string', () => {
 
       await waitFor(() =>
         expect(mockHistory.replace).toHaveBeenCalledWith({
-          search: ``,
+          search: '',
+          state: '',
         })
       );
     });

@@ -8,52 +8,123 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { WaterfallFlyout } from '.';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { WaterfallFlyout, type Props } from '.';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+
+jest.mock('../../../../../doc_viewer_table', () => ({
+  __esModule: true,
+  default: ({ hit, dataView }: any) => (
+    <div data-test-subj="docViewerTable" data-hit-id={hit?.id}>
+      Doc Viewer Table Mock
+    </div>
+  ),
+}));
+
+jest.mock('../../../../../doc_viewer_source', () => ({
+  __esModule: true,
+  default: ({ id, index, dataView }: any) => (
+    <div data-test-subj="docViewerSource" data-id={id} data-index={index}>
+      Doc Viewer Source Mock
+    </div>
+  ),
+}));
 
 describe('WaterfallFlyout', () => {
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
-
-  const dataView = createStubDataView({
-    spec: {
-      id: 'test-dataview',
-      title: 'test-pattern',
-      timeFieldName: '@timestamp',
+  const mockHit = buildDataTableRecord(
+    {
+      _id: 'test-doc-id',
+      _index: 'test-index',
+      _source: {
+        '@timestamp': '2023-01-01T00:00:00.000Z',
+        message: 'test message',
+      },
     },
-  });
+    dataViewMock
+  );
 
-  const hit: DataTableRecord = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
-
-  const defaultProps = {
-    title: 'Test Span',
-    flyoutId: 'test-flyout-id',
+  const defaultProps: Props = {
+    title: 'Test Flyout Title',
     onCloseFlyout: jest.fn(),
-    hit,
+    hit: mockHit,
     loading: false,
-    dataView,
-    children: <div>Test Content</div>,
+    dataView: dataViewMock,
+    children: <div data-test-subj="customChildren">Custom Children Content</div>,
   };
 
-  it('renders tabs correctly', () => {
-    const { getByRole } = render(<WaterfallFlyout {...defaultProps} />);
-
-    expect(getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
-    expect(getByRole('tab', { name: 'Table' })).toBeInTheDocument();
-    expect(getByRole('tab', { name: 'JSON' })).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('applies overflow-y: hidden to prevent double scroll in the flyout body', () => {
-    const { container } = render(<WaterfallFlyout {...defaultProps} />);
+  describe('loading state', () => {
+    it('should display skeleton when loading', () => {
+      render(<WaterfallFlyout {...defaultProps} loading={true} />);
 
-    const flyoutBody = container.querySelector('.euiFlyoutBody');
-    expect(flyoutBody).toHaveStyleRule('overflow-y', 'hidden', {
-      target: '.euiFlyoutBody__overflow',
+      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+
+    it('should display skeleton when hit is unavailable', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={null} />);
+
+      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('tab navigation', () => {
+    it('should display Overview tab by default', () => {
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+    });
+
+    it('should display table view when switching to Table tab', async () => {
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      fireEvent.click(screen.getByText('Table'));
+
+      await waitFor(() => {
+        const docViewerTable = screen.getByTestId('docViewerTable');
+        expect(docViewerTable).toHaveAttribute('data-hit-id', mockHit.id);
+      });
+
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+
+    it('should display JSON view when switching to JSON tab', async () => {
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      fireEvent.click(screen.getByText('JSON'));
+
+      await waitFor(() => {
+        const docViewerSource = screen.getByTestId('docViewerSource');
+        expect(docViewerSource).toHaveAttribute('data-id', mockHit.id);
+        expect(docViewerSource).toHaveAttribute('data-index', mockHit.raw._index);
+      });
+
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('flyout header', () => {
+    it('should display the title in the header', () => {
+      render(<WaterfallFlyout {...defaultProps} title="Custom Title" />);
+
+      expect(screen.getByRole('heading', { name: 'Custom Title' })).toBeInTheDocument();
+    });
+  });
+
+  describe('close behavior', () => {
+    it('should call onCloseFlyout when close button is clicked', () => {
+      const onCloseFlyout = jest.fn();
+      render(<WaterfallFlyout {...defaultProps} onCloseFlyout={onCloseFlyout} />);
+
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      fireEvent.click(closeButton);
+
+      expect(onCloseFlyout).toHaveBeenCalledTimes(1);
     });
   });
 });

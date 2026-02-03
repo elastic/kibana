@@ -14,7 +14,8 @@
         "text_embedding",
         "rerank",
         "completion",
-        "chat_completion"
+        "chat_completion",
+        "embedding"
       ]
     },
     "methods": [

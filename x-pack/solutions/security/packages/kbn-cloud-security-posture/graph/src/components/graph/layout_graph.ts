@@ -9,7 +9,7 @@ import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isLabelNode, isStackNode, isStackedLabel } from '../utils';
+import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
 import {
   GRID_SIZE,
   STACK_NODE_VERTICAL_PADDING,
@@ -55,7 +55,7 @@ export const layoutGraph = (
   nodes.forEach((node) => {
     let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
 
-    if (isLabelNode(node.data)) {
+    if (isConnectorNode(node.data)) {
       size = {
         height: NODE_LABEL_TOTAL_HEIGHT,
         width: NODE_LABEL_WIDTH,
@@ -100,7 +100,7 @@ export const layoutGraph = (
 
   const layoutedNodes = nodes.map((node) => {
     // For stacked nodes, we want to keep the original position relative to the parent
-    if (isLabelNode(node.data) && node.data.parentId) {
+    if (isConnectorNode(node.data) && node.data.parentId) {
       return {
         ...node,
         position: nodesById[node.data.id].position,
@@ -114,7 +114,7 @@ export const layoutGraph = (
 
     const dagreNode = g.node(node.data.id);
 
-    if (isLabelNode(node.data)) {
+    if (isConnectorNode(node.data)) {
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
       const y = Math.round(dagreNode.y - NODE_LABEL_HEIGHT / 2);
 
@@ -166,7 +166,7 @@ const layoutStackedLabels = (
   nodes: Array<Node<NodeViewModel>>
 ): { size: Size; children: Array<Node<NodeViewModel>> } => {
   const children = nodes.filter(
-    (child) => isLabelNode(child.data) && child.parentId === groupNode.id
+    (child) => isConnectorNode(child.data) && child.parentId === groupNode.id
   );
   const stackSize = children.length;
   const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;

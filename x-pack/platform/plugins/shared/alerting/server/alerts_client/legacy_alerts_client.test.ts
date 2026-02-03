@@ -550,13 +550,14 @@ describe('Legacy Alerts Client', () => {
 
     expect(determineDelayedAlerts).toHaveBeenCalledWith({
       newAlerts: {},
+      delayedAlerts: {},
       activeAlerts: {},
       trackedActiveAlerts: {},
       recoveredAlerts: {},
       trackedRecoveredAlerts: {},
       alertDelay: 5,
-      ruleRunMetricsStore,
       startedAt: null,
+      ruleRunMetricsStore,
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({

@@ -231,6 +231,7 @@ export const ToolbarSelector = ({
           singleSelection={singleSelection ?? true}
           aria-label={popoverTitle}
           data-test-subj={`${dataTestSubj}Selectable`}
+          data-is-searching={searchTerm !== searchTermDebounced}
           isPreFiltered={searchable}
           options={filteredOptions}
           onChange={onSelectionChange}

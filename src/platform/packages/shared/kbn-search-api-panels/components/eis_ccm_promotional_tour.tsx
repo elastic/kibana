@@ -17,7 +17,7 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_TOUR_DISMISS,
+  TOUR_DISMISS,
   EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
   EIS_CLOUD_CONNECT_PROMO_DESCRIPTION,
   EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
@@ -116,7 +116,7 @@ export const EisCloudConnectPromoTour = ({
           data-telemetry-id={`${dataId}-dismiss-btn`}
           onClick={onDismissPromo}
         >
-          {EIS_TOUR_DISMISS}
+          {TOUR_DISMISS}
         </EuiButtonEmpty>,
         <EuiButton
           onClick={navigateToApp}

@@ -102,7 +102,7 @@ export const tagcloudAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -241,7 +241,7 @@ export const tagcloudAttributesWithFullConfig = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -336,6 +336,6 @@ export const tagcloudESQLAttributes = {
       },
     },
   },
-  version: 1,
+  version: 2,
   references: [],
 } satisfies LensAttributes;

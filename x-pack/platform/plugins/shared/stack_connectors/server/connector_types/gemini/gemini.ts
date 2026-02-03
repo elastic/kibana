@@ -332,6 +332,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       signal,
       timeout,
       tools,
+      toolConfig,
       systemInstruction,
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -344,6 +345,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             messages,
             temperature,
             systemInstruction,
+            toolConfig,
           }),
           tools,
         }),

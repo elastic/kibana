@@ -202,4 +202,44 @@ describe('executeConnectorRoute', () => {
     expect(res.ok).not.toHaveBeenCalled();
     expect(res.badRequest).toHaveBeenCalled();
   });
+
+  it('throws an error if the executor throws', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    const actionsClient = actionsClientMock.create();
+    const errorMessage = 'an error occurred while running the action';
+
+    actionsClient.execute.mockRejectedValueOnce(new Error(errorMessage));
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          params: {
+            someData: 'data',
+          },
+        },
+        params: {
+          id: 'test-connector',
+        },
+      },
+      ['ok']
+    );
+
+    executeConnectorRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    await expect(handler(context, req, res)).rejects.toThrow(errorMessage);
+
+    expect(actionsClient.execute).toHaveBeenCalledWith({
+      actionId: 'test-connector',
+      params: {
+        someData: 'data',
+      },
+      source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
+    });
+  });
 });

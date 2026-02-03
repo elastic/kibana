@@ -79,7 +79,6 @@ export function generateClassicIngestPipelineBody(
       description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,
     },
-    // @ts-expect-error @elastic/elasticsearch field - missing in types
     field_access_pattern: 'flexible',
     version: ASSET_VERSION,
   };

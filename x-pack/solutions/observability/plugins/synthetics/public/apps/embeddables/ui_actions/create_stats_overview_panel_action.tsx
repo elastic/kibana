@@ -43,7 +43,7 @@ export function createStatusOverviewPanelAction(
         });
         embeddable.addNewPanel({
           panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-          serializedState: { rawState: initialState },
+          serializedState: initialState,
         });
       } catch (e) {
         return Promise.reject();

@@ -31,9 +31,12 @@ export const BINARY_OPERATORS: BinaryOperatorKeys[] = [
   'startsWith',
   'endsWith',
   'range',
+  'includes',
 ];
 
 export const UNARY_OPERATORS: UnaryOperatorKeys[] = ['exists'];
+
+export const ARRAY_OPERATORS: BinaryOperatorKeys[] = ['includes'];
 
 export interface RangeCondition {
   gt?: StringOrNumberOrBoolean;
@@ -53,6 +56,7 @@ export interface ShorthandBinaryFilterCondition {
   startsWith?: StringOrNumberOrBoolean;
   endsWith?: StringOrNumberOrBoolean;
   range?: RangeCondition;
+  includes?: StringOrNumberOrBoolean;
 }
 
 export const operatorToHumanReadableNameMap = {
@@ -71,6 +75,7 @@ export const operatorToHumanReadableNameMap = {
   endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
   exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
   range: i18n.translate('xpack.streams.filter.range', { defaultMessage: 'in range' }),
+  includes: i18n.translate('xpack.streams.filter.includes', { defaultMessage: 'includes' }),
 };
 
 export const rangeConditionSchema = z
@@ -95,6 +100,9 @@ export const shorthandBinaryFilterConditionSchema = z
     startsWith: stringOrNumberOrBoolean.optional().describe('Starts-with comparison value.'),
     endsWith: stringOrNumberOrBoolean.optional().describe('Ends-with comparison value.'),
     range: rangeConditionSchema.optional().describe('Range comparison values.'),
+    includes: stringOrNumberOrBoolean
+      .optional()
+      .describe('Checks if multivalue field includes the value.'),
   })
   .refine(
     (obj) =>

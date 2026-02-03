@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiSpacer,
   EuiFlyout,
   EuiFlyoutHeader,
@@ -23,7 +22,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import { SloSelector } from '../alerts/slo_selector';
+import type { SearchSLODefinitionItem } from '@kbn/slo-schema';
+import { SloDefinitionSelector } from './slo_definition_selector';
+import { SloInstanceSelector } from './slo_instance_selector';
 
 import type {
   SingleSloCustomInput,
@@ -54,60 +55,65 @@ interface GroupConfigurationProps {
 }
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<SingleSloCustomInput>();
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
+  const [selectedSloDefinition, setSelectedSloDefinition] = useState<
+    SearchSLODefinitionItem | undefined
+  >();
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | undefined>(ALL_VALUE);
   const [hasError, setHasError] = useState(false);
-  const hasGroupBy = selectedSlo && selectedSlo.sloInstanceId !== ALL_VALUE;
+  const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
-  const onConfirmClick = () =>
+  const hasGroupBy = selectedSloDefinition?.groupBy
+    ? selectedSloDefinition.groupBy.length > 0 && !selectedSloDefinition.groupBy.includes(ALL_VALUE)
+    : false;
+
+  const onConfirmClick = () => {
+    if (!selectedSloDefinition) {
+      setHasError(true);
+      return;
+    }
+
+    const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
+
     onCreate({
       showAllGroupByInstances,
-      sloId: selectedSlo?.sloId,
-      sloInstanceId: selectedSlo?.sloInstanceId,
-      remoteName: selectedSlo?.remoteName,
+      sloId: selectedSloDefinition.id,
+      sloInstanceId: selectedInstanceId ?? ALL_VALUE,
+      remoteName,
       overviewMode,
     });
+  };
 
   return (
     <>
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem data-test-subj="singleSloSelector" grow>
-                <SloSelector
-                  singleSelection={true}
-                  hasError={hasError}
+                <SloDefinitionSelector
+                  hasError={hasError && !selectedSloDefinition}
                   onSelected={(slo) => {
+                    setSelectedSloDefinition(slo);
                     setHasError(slo === undefined);
-                    if (slo && 'id' in slo) {
-                      setSelectedSlo({
-                        sloId: slo.id,
-                        sloInstanceId: slo.instanceId,
-                        remoteName: slo.remote?.remoteName,
-                      });
+                    // Reset instance selection when SLO changes
+                    if (slo) {
+                      setSelectedInstanceId(undefined);
                     }
                   }}
                 />
               </EuiFlexItem>
+              {hasGroupBy && selectedSloDefinition && (
+                <EuiFlexItem data-test-subj="singleSloInstanceSelector" grow>
+                  <SloInstanceSelector
+                    remoteName={selectedSloDefinition.remote?.remoteName}
+                    sloId={selectedSloDefinition.id}
+                    onSelected={(instanceId) => {
+                      setSelectedInstanceId(instanceId);
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
-            {hasGroupBy && (
-              <>
-                <EuiSpacer />
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel',
-                    {
-                      defaultMessage: 'Show all related group-by instances',
-                    }
-                  )}
-                  checked={showAllGroupByInstances}
-                  onChange={(e) => {
-                    setShowAllGroupByInstances(e.target.checked);
-                  }}
-                />
-              </>
-            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
@@ -122,7 +128,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
 
           <EuiButton
             data-test-subj="sloConfirmButton"
-            isDisabled={!selectedSlo || hasError}
+            isDisabled={!selectedSloDefinition || hasError || (hasGroupBy && !selectedInstanceId)}
             onClick={onConfirmClick}
             fill
           >

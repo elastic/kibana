@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
-import { EuiButton } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -22,10 +19,15 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 const ORIGINATING_APP = 'test';
-const mockExecuteAction = jest.fn();
+
 const uiActions = uiActionsPluginMock.createStartContract();
+
+const mockExecuteAction = jest.fn();
+
 const visualizeAction = new ActionInternal({
   type: ACTION_VISUALIZE_LENS_FIELD,
   id: ACTION_VISUALIZE_LENS_FIELD,
@@ -40,6 +42,7 @@ const visualizeAction = new ActionInternal({
 jest
   .spyOn(uiActions, 'getTriggerCompatibleActions')
   .mockResolvedValue([visualizeAction as ActionInternal<object>]);
+
 jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
   id: ACTION_VISUALIZE_LENS_FIELD,
   exec: mockExecuteAction,
@@ -47,16 +50,19 @@ jest.spyOn(uiActions, 'getTrigger').mockReturnValue({
 
 describe('UnifiedFieldList <FieldVisualizeButton />', () => {
   it('should render correctly', async () => {
-    const fieldName = 'extension';
-    const field = dataView.fields.find((f) => f.name === fieldName)!;
-    const fieldNameKeyword = 'extension.keyword';
-    const fieldKeyword = dataView.fields.find((f) => f.name === fieldNameKeyword)!;
+    const user = userEvent.setup();
+    const FIELD_NAME = 'extension';
+    const field = dataView.fields.find((f) => f.name === FIELD_NAME)!;
+
+    const FIELD_NAME_KEYWORD = 'extension.keyword';
+    const fieldKeyword = dataView.fields.find((f) => f.name === FIELD_NAME_KEYWORD)!;
+
     const contextualFields = ['bytes'];
+
     jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => false);
     jest.spyOn(fieldKeyword, 'visualizable', 'get').mockImplementationOnce(() => true);
-    let wrapper: ReactWrapper;
 
-    const button = await getFieldVisualizeButton({
+    const visualizeButton = await getFieldVisualizeButton({
       field,
       dataView,
       multiFields: [fieldKeyword],
@@ -64,65 +70,64 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
       originatingApp: ORIGINATING_APP,
       uiActions,
     });
-    await act(async () => {
-      wrapper = await mountWithIntl(button!);
-    });
 
-    await wrapper!.update();
+    renderWithI18n(visualizeButton);
 
     expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(VISUALIZE_FIELD_TRIGGER, {
       contextualFields,
       dataViewSpec: dataView.toSpec(false),
-      fieldName: fieldNameKeyword,
+      fieldName: FIELD_NAME_KEYWORD,
     });
 
-    expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find('a[data-test-subj="fieldVisualize-extension"]').simulate('click');
+    const visualizeLink = screen.getByText('Visualize');
+    expect(visualizeLink).toBeVisible();
+    expect(visualizeLink.closest('a')).toHaveAttribute('href', '/app/test');
+
+    await user.click(visualizeLink);
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
       contextualFields,
       dataViewSpec: dataView.toSpec(false),
-      fieldName: fieldNameKeyword,
+      fieldName: FIELD_NAME_KEYWORD,
       originatingApp: ORIGINATING_APP,
     });
-
-    expect(wrapper!.find(EuiButton).prop('href')).toBe('/app/test');
   });
 
   it('should render correctly for geo fields', async () => {
-    const fieldName = 'geo.coordinates';
-    const field = dataView.fields.find((f) => f.name === fieldName)!;
-    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
-    let wrapper: ReactWrapper;
+    const user = userEvent.setup();
+    const FIELD_NAME = 'geo.coordinates';
+    const field = dataView.fields.find((f) => f.name === FIELD_NAME)!;
 
-    const button = await getFieldVisualizeButton({
+    jest.spyOn(field, 'visualizable', 'get').mockImplementationOnce(() => true);
+
+    const visualizeButton = await getFieldVisualizeButton({
       field,
       dataView,
       originatingApp: ORIGINATING_APP,
       uiActions,
     });
-    await act(async () => {
-      wrapper = await mountWithIntl(button!);
-    });
 
-    await wrapper!.update();
+    renderWithI18n(visualizeButton);
 
     expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
       VISUALIZE_GEO_FIELD_TRIGGER,
       {
         contextualFields: [],
         dataViewSpec: dataView.toSpec(false),
-        fieldName,
+        fieldName: FIELD_NAME,
       }
     );
 
-    expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find('a[data-test-subj="fieldVisualize-geo.coordinates"]').simulate('click');
+    const visualizeLink = screen.getByText('Visualize');
+    expect(visualizeLink).toBeVisible();
+    expect(visualizeLink.closest('a')).toHaveAttribute('href', '/app/test');
+
+    await user.click(visualizeLink);
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
       contextualFields: [],
       dataViewSpec: dataView.toSpec(false),
-      fieldName,
+      fieldName: FIELD_NAME,
       originatingApp: ORIGINATING_APP,
     });
   });

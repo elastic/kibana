@@ -47,12 +47,12 @@ describe('Reranker Tech preview badge', () => {
     expect(isProviderTechPreview(mockProvider)).toEqual(true);
   });
 
-  it('should return true for jina-embeddings-v3 model', () => {
-    expect(isProviderTechPreview(mockJinaEmbeddingsV3Provider)).toEqual(true);
+  it('should return false for jina-embeddings-v3 model', () => {
+    expect(isProviderTechPreview(mockJinaEmbeddingsV3Provider)).toEqual(false);
   });
 
-  it('should return true for jina-reranker-v2 model', () => {
-    expect(isProviderTechPreview(mockJinaRerankerV2Provider)).toEqual(true);
+  it('should return false for jina-reranker-v2 model', () => {
+    expect(isProviderTechPreview(mockJinaRerankerV2Provider)).toEqual(false);
   });
 
   it('return false for rainbow-sprinkles', () => {

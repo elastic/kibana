@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
+import useObservable from 'react-use/lib/useObservable';
+import { MANAGEMENT_APP_ID } from '../../../hooks/use_navigation';
+import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { PromptLayoutVariant } from '../../common/prompt/layout';
 
 export interface AddLlmConnectionPromptProps {
   variant?: PromptLayoutVariant;
@@ -21,13 +25,32 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const llmDocsHref = docLinksService.models;
+  const {
+    services: { application },
+  } = useKibana();
+  const currentAppId = useObservable(application.currentAppId$, undefined);
+  const isInManagementApp = currentAppId === MANAGEMENT_APP_ID;
 
-  const primaryButton = (
+  const primaryAction = isInManagementApp ? (
+    <EuiCallOut
+      announceOnMount
+      size="s"
+      iconType="info"
+      title={
+        <FormattedMessage
+          id="xpack.agentBuilder.access.prompt.addLlm.onConnectorsPageCalloutTitle"
+          defaultMessage="Configure your LLM connection on this page"
+        />
+      }
+      data-test-subj="connectLLMOnConnectorsPageCallout"
+    />
+  ) : (
     <EuiButton
       fill
       onClick={() => {
         navigationService.navigateToLlmConnectorsManagement();
       }}
+      data-test-subj="connectLLMButton"
     >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.addLlm.actions.connectButton"
@@ -45,27 +68,15 @@ export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ 
     </EuiButtonEmpty>
   );
 
+  const brainImage =
+    colorMode === 'LIGHT' ? `${assetBasePath}/brain_light.svg` : `${assetBasePath}/brain_dark.svg`;
+
   return (
-    <PromptLayout
+    <ErrorPrompt
       variant={variant}
-      imageSrc={
-        colorMode === 'LIGHT'
-          ? `${assetBasePath}/brain_light.svg`
-          : `${assetBasePath}/brain_dark.svg`
-      }
-      title={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.addLlm.title"
-          defaultMessage="No Large Language Model detected"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.addLlm.description"
-          defaultMessage="Select a model to integrate with your chat experience. You can also set up your connection."
-        />
-      }
-      primaryButton={primaryButton}
+      errorType="ADD_LLM_CONNECTION"
+      imageSrc={brainImage}
+      primaryButton={primaryAction}
       secondaryButton={secondaryButton}
     />
   );

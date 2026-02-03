@@ -6,14 +6,11 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS, DEFAULT_LOG_SOURCE_FIELDS } from './constants';
+import { DEFAULT_CORRELATION_IDENTIFIER_FIELDS } from './constants';
 import { getAnchorLogs } from './fetch_anchor_logs/fetch_anchor_logs';
 import { getCorrelatedLogsForAnchor } from './get_correlated_logs_for_anchor';
 
@@ -66,30 +63,27 @@ export async function getToolHandler({
   start,
   end,
   kqlFilter,
-  errorLogsOnly = true,
+  errorLogsOnly,
   index,
-  correlationFields = DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+  correlationFields,
   logId,
-  logSourceFields = DEFAULT_LOG_SOURCE_FIELDS,
-  maxSequences = 10,
-  maxLogsPerSequence = 200,
+  logSourceFields,
+  maxSequences,
+  maxLogsPerSequence,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
   end: string;
   kqlFilter?: string;
-  errorLogsOnly?: boolean;
+  errorLogsOnly: boolean;
   index?: string;
-  correlationFields?: string[];
+  correlationFields: string[];
   logId?: string;
-  logSourceFields?: string[];
-  maxSequences?: number;
-  maxLogsPerSequence?: number;
+  logSourceFields: string[];
+  maxSequences: number;
+  maxLogsPerSequence: number;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const startTime = parseDatemath(start);

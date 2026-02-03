@@ -36,11 +36,11 @@ export const getLegacyLogStreamEmbeddableFactory = (
       searchSource.setField('index', dataView);
 
       const savedSearch: SavedSearch = {
-        title: initialState.rawState.title,
-        description: initialState.rawState.description,
-        timeRange: initialState.rawState.timeRange,
-        sort: initialState.rawState.sort ?? [],
-        columns: initialState.rawState.columns ?? [],
+        title: initialState.title,
+        description: initialState.description,
+        timeRange: initialState.timeRange,
+        sort: initialState.sort ?? [],
+        columns: initialState.columns ?? [],
         searchSource,
         managed: false,
       };
@@ -48,12 +48,9 @@ export const getLegacyLogStreamEmbeddableFactory = (
 
       initialState = {
         ...initialState,
-        rawState: {
-          ...initialState.rawState,
-          attributes: {
-            ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
-            references,
-          },
+        attributes: {
+          ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+          references,
         },
       };
 

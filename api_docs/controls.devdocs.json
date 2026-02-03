@@ -104,6 +104,8 @@
           " & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -165,6 +167,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,6 +295,8 @@
           "<boolean | undefined>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -409,6 +415,8 @@
           "<boolean | undefined>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/range_slider/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -471,6 +479,8 @@
           "<boolean | undefined>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/timeslider_control/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

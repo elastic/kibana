@@ -28,6 +28,7 @@ export type {
   CreateCloudConnectorRequest,
   CloudConnectorVars,
   CloudProvider,
+  AccountType,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
 } from './types';

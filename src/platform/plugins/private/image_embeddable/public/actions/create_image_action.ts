@@ -38,7 +38,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
           onSave: (imageConfig: ImageConfig) => {
             parentApi.addNewPanel<ImageEmbeddableState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,
-              serializedState: { rawState: { imageConfig } },
+              serializedState: { imageConfig },
             });
           },
         });

@@ -296,7 +296,7 @@ You can enable audit logging to support compliance, accountability, and security
 For more details and a reference of audit events, refer to [Audit logs](/reference/kibana-audit-events.md).
 
 xpack.security.audit.enabled ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Set to `true` to enable audit logging`. **Default:** `false`
+:   Set to `true` to enable audit logging. **Default:** `false`
 
     For example:
 

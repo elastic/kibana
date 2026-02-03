@@ -32,9 +32,7 @@ export const addControlsFromSavedSession = async (
         {
           panelType: ESQL_CONTROL,
           serializedState: {
-            rawState: {
-              ...omit(panel, ['width', 'grow', 'order']),
-            },
+            ...omit(panel, ['width', 'grow', 'order']),
           },
         },
         { beside: uuid, scrollToPanel: false }

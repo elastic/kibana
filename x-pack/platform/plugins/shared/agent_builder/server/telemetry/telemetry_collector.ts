@@ -27,17 +27,6 @@ interface TimingPercentiles {
 }
 
 /**
- * Latency stats for a specific dimension (connector, agent type)
- */
-interface LatencyStats {
-  ttft_p50: number;
-  ttft_p95: number;
-  ttlt_p50: number;
-  ttlt_p95: number;
-  sample_count: number;
-}
-
-/**
  * Telemetry payload schema for Agent Builder
  */
 export interface AgentBuilderTelemetry {
@@ -71,17 +60,6 @@ export interface AgentBuilderTelemetry {
     mean: number;
   };
   time_to_first_token: TimingPercentiles;
-  time_to_last_token: TimingPercentiles;
-  latency_by_model: Array<
-    {
-      model: string;
-    } & LatencyStats
-  >;
-  latency_by_agent_type: Array<
-    {
-      agent_id: string;
-    } & LatencyStats
-  >;
   /**
    * Token consumption grouped by model
    */
@@ -97,6 +75,15 @@ export interface AgentBuilderTelemetry {
   query_to_result_time_by_model: Array<
     {
       model: string;
+      sample_count: number;
+    } & TimingPercentiles
+  >;
+  /**
+   * Query-to-result timing (proxied by TTLT) grouped by agent
+   */
+  query_to_result_time_by_agent_type: Array<
+    {
+      agent_id: string;
       sample_count: number;
     } & TimingPercentiles
   >;
@@ -318,92 +305,7 @@ export function registerTelemetryCollector(
             },
           },
         },
-        time_to_last_token: {
-          p50: {
-            type: 'long',
-            _meta: {
-              description: '50th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p75: {
-            type: 'long',
-            _meta: {
-              description: '75th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p90: {
-            type: 'long',
-            _meta: {
-              description: '90th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p95: {
-            type: 'long',
-            _meta: {
-              description: '95th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p99: {
-            type: 'long',
-            _meta: {
-              description: '99th percentile time-to-last-token in milliseconds',
-            },
-          },
-          mean: {
-            type: 'long',
-            _meta: {
-              description: 'Mean time-to-last-token in milliseconds',
-            },
-          },
-          total_samples: {
-            type: 'long',
-            _meta: {
-              description: 'Total number of TTLT samples',
-            },
-          },
-        },
-        latency_by_model: {
-          type: 'array',
-          items: {
-            model: {
-              type: 'keyword',
-              _meta: {
-                description: 'Model identifier (e.g., gpt-4o, claude-3-sonnet)',
-              },
-            },
-            ttft_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTFT for this model',
-              },
-            },
-            ttft_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTFT for this model',
-              },
-            },
-            ttlt_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTLT for this model',
-              },
-            },
-            ttlt_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTLT for this model',
-              },
-            },
-            sample_count: {
-              type: 'long',
-              _meta: {
-                description: 'Number of samples for this model',
-              },
-            },
-          },
-        },
-        latency_by_agent_type: {
+        query_to_result_time_by_agent_type: {
           type: 'array',
           items: {
             agent_id: {
@@ -412,30 +314,13 @@ export function registerTelemetryCollector(
                 description: 'Agent ID',
               },
             },
-            ttft_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTFT for this agent',
-              },
-            },
-            ttft_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTFT for this agent',
-              },
-            },
-            ttlt_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTLT for this agent',
-              },
-            },
-            ttlt_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTLT for this agent',
-              },
-            },
+            p50: { type: 'long' },
+            p75: { type: 'long' },
+            p90: { type: 'long' },
+            p95: { type: 'long' },
+            p99: { type: 'long' },
+            mean: { type: 'long' },
+            total_samples: { type: 'long' },
             sample_count: {
               type: 'long',
               _meta: {
@@ -634,22 +519,20 @@ export function registerTelemetryCollector(
 
           const conversations = await queryUtils.getConversationMetrics();
 
-          const queryTimeCounters = await queryUtils.getCountersByPrefix(
-            AGENTBUILDER_USAGE_DOMAIN,
-            `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`
-          );
-          const queryToResultTime = queryUtils.calculatePercentilesFromBuckets(
-            queryTimeCounters,
-            AGENTBUILDER_USAGE_DOMAIN
-          );
-
           // Fetch TTFT/TTLT metrics from conversation data
           const timeToFirstToken = await queryUtils.getTTFTMetrics();
           const timeToLastToken = await queryUtils.getTTLTMetrics();
-          const latencyByModel = await queryUtils.getLatencyByModel();
-          const latencyByAgentType = await queryUtils.getLatencyByAgentType();
+          const queryToResultTime = {
+            p50: timeToLastToken.p50,
+            p75: timeToLastToken.p75,
+            p90: timeToLastToken.p90,
+            p95: timeToLastToken.p95,
+            p99: timeToLastToken.p99,
+            mean: timeToLastToken.mean,
+          };
           const tokensByModel = await queryUtils.getTokensByModel();
           const queryToResultTimeByModel = await queryUtils.getQueryToResultTimeByModel();
+          const queryToResultTimeByAgentType = await queryUtils.getQueryToResultTimeByAgentType();
           const toolCallsByModel = await queryUtils.getToolCallsByModel();
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
@@ -733,11 +616,9 @@ export function registerTelemetryCollector(
             conversations,
             query_to_result_time: queryToResultTime,
             time_to_first_token: timeToFirstToken,
-            time_to_last_token: timeToLastToken,
-            latency_by_model: latencyByModel,
-            latency_by_agent_type: latencyByAgentType,
             tokens_by_model: tokensByModel,
             query_to_result_time_by_model: queryToResultTimeByModel,
+            query_to_result_time_by_agent_type: queryToResultTimeByAgentType,
             tool_calls_by_model: toolCallsByModel,
             tool_calls: {
               total: totalToolCalls,
@@ -787,19 +668,9 @@ export function registerTelemetryCollector(
               mean: 0,
               total_samples: 0,
             },
-            time_to_last_token: {
-              p50: 0,
-              p75: 0,
-              p90: 0,
-              p95: 0,
-              p99: 0,
-              mean: 0,
-              total_samples: 0,
-            },
-            latency_by_model: [],
-            latency_by_agent_type: [],
             tokens_by_model: [],
             query_to_result_time_by_model: [],
+            query_to_result_time_by_agent_type: [],
             tool_calls_by_model: [],
             tool_calls: {
               total: 0,

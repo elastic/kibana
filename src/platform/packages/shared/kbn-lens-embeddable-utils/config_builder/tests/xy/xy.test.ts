@@ -12,12 +12,15 @@ import { xyStateSchema } from '../../schema/charts/xy';
 import type { LensAttributes } from '../../types';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
+  apiXYWithNoTitleAndCustomOutsideLegend,
+  apiXYWithNoYTitleAndInsideLegend,
   barWithTwoLayersAttributes,
   breakdownXY,
   fullBasicXY,
   minimalAttributesXY,
   mixedChartAttributes,
   multipleMetricsXY,
+  xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
 import { annotationXY } from './annotations.mock';
@@ -71,6 +74,13 @@ describe('XY', () => {
 
       it('should convert a mixed chart with 3 layers', () => {
         validateConverter(mixedChartAttributes, xyStateSchema);
+      });
+
+      it('should convert a chart with formula ref columns and rank_by in the terms bucket operation', () => {
+        validateConverter(
+          xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes,
+          xyStateSchema
+        );
       });
     });
 
@@ -295,5 +305,13 @@ describe('XY', () => {
         );
       }
     );
+
+    it('should correctly transform no title and inside legend - bug 248611', () => {
+      validateAPIConverter(apiXYWithNoYTitleAndInsideLegend, xyStateSchema);
+    });
+
+    it('should correctly transform with custom position legend - bug 248611', () => {
+      validateAPIConverter(apiXYWithNoTitleAndCustomOutsideLegend, xyStateSchema);
+    });
   });
 });

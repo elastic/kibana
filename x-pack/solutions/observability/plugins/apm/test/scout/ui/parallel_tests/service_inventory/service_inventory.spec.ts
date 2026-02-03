@@ -6,6 +6,7 @@
  */
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
@@ -31,7 +32,7 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('shows a list of environments', async () => {
-      const environmentEntrySelector = page.locator('td:has-text("production")');
+      const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
       await expect(environmentEntrySelector).toHaveCount(10);
     });
   });
@@ -48,9 +49,9 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.testSubj.click('environmentFilter > comboBoxSearchInput');
     await page
       .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-      .locator('button:has-text("production")')
+      .locator(`button:has-text("${PRODUCTION_ENVIRONMENT}")`)
       .click();
-    await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue('production');
+    await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue(PRODUCTION_ENVIRONMENT);
   });
 
   test('shows the filtered services when using the service name fast filter', async ({ page }) => {

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
@@ -32,6 +32,7 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
@@ -70,7 +71,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     '.internal.alerts-observability.test.alerts.alerts-default-000001';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('alerts as data', function () {
+  describe('alerts as data delay', function () {
     this.tags('skipFIPS');
     before(async () => {
       await esTestIndexTool.destroy();
@@ -162,7 +163,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       let state: any = await getTaskState(ruleId);
@@ -189,7 +192,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -217,7 +222,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -275,7 +282,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -329,7 +338,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -387,7 +398,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -464,7 +477,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       let state: any = await getTaskState(ruleId);
@@ -491,7 +506,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -519,7 +536,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -605,7 +624,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       let state: any = await getTaskState(ruleId);
@@ -632,7 +653,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -660,7 +683,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -718,7 +743,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -772,7 +799,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
-      const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // After the fourth run, we should have 1 alert docs for the 1 recovered alert
       expect(alertDocsRun5.length).to.equal(1);
@@ -826,7 +855,9 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
-      const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>();
+      const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: false,
+      });
 
       // Get alert state from task document
       state = await getTaskState(ruleId);
@@ -835,6 +866,149 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
 
       // After the sixth run, we should have 1 alert docs for the previously recovered alert
       expect(alertDocsRun6.length).to.equal(1);
+    });
+
+    it('should persist delayed alerts and create a new alert when limit is reached', async () => {
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire
+      const pattern = {
+        instance: [true, true, true, true, true, true],
+      };
+
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+                frequency: {
+                  summary: false,
+                  throttle: null,
+                  notify_when: RuleNotifyWhen.CHANGE,
+                },
+              },
+            ],
+            alert_delay: {
+              active: 3,
+            },
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // --------------------------
+      // RUN 1 - 0 new alerts
+      // --------------------------
+      let events: IValidatedEvent[] = await waitForEventLogDocs(
+        ruleId,
+        new Map([['execute', { equal: 1 }]])
+      );
+      let executeEvent = events[0];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
+
+      // Query for alerts
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: true,
+      });
+
+      // Get alert state from task document
+      let state: any = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
+
+      // After the first run, we should have 1 alert doc for the 1 delayed alert
+      expect(alertDocsRun1.length).to.equal(1);
+
+      const source1: PatternFiringAlert = alertDocsRun1[0]._source!;
+      expect(source1[ALERT_STATUS]).to.equal('delayed');
+
+      // --------------------------
+      // RUN 2 - 0 new alerts
+      // --------------------------
+      let runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+      executeEvent = events[1];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
+
+      // Query for alerts
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: true,
+      });
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(2);
+
+      // After the second run, we should have 1 alert doc for the 1 delayed alert
+      expect(alertDocsRun2.length).to.equal(1);
+
+      const source2: PatternFiringAlert = alertDocsRun2[0]._source!;
+      expect(source2[ALERT_STATUS]).to.equal('delayed');
+
+      // --------------------------
+      // RUN 3 - 1 new alert
+      // --------------------------
+      runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
+      executeEvent = events[2];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(1);
+      expect(get(executeEvent, NEW_PATH)).to.be(1);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(1);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
+
+      // Query for alerts
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>({
+        includeDelayedAlerts: true,
+      });
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(3);
+
+      // After the third run, we should have 1 alert doc for the 1 active alert
+      expect(alertDocsRun3.length).to.equal(1);
+
+      const source: PatternFiringAlert = alertDocsRun3[0]._source!;
+      expect(source[ALERT_STATUS]).to.equal('active');
     });
   });
 
@@ -866,13 +1040,30 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     }
   }
 
-  async function queryForAlertDocs<T>(
-    index: string = alertsAsDataIndex
-  ): Promise<Array<SearchHit<T>>> {
-    const searchResult = await es.search({
-      index,
-      query: { match_all: {} },
-    });
+  async function queryForAlertDocs<T>({
+    index = alertsAsDataIndex,
+    includeDelayedAlerts = true,
+  }: {
+    index?: string;
+    includeDelayedAlerts?: boolean;
+  }): Promise<Array<SearchHit<T>>> {
+    let query: QueryDslQueryContainer = { match_all: {} };
+
+    if (!includeDelayedAlerts) {
+      query = {
+        bool: {
+          must_not: [
+            {
+              term: {
+                'kibana.alert.status': ALERT_STATUS_DELAYED,
+              },
+            },
+          ],
+        },
+      };
+    }
+
+    const searchResult = await es.search({ index, query });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
 

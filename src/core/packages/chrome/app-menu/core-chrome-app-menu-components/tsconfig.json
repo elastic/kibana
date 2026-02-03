@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/split-button",
     "@kbn/i18n",
+    "@kbn/router-utils"
   ]
 }

@@ -7,23 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-
-/**
- * A package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any
- * strategy, this is the format that should be used.
- */
-export interface SerializedPanelState<RawStateType extends object = object> {
-  references?: Reference[];
-  rawState: RawStateType;
-}
-
-export interface HasSerializableState<State extends object = object> {
+export interface HasSerializableState<SerializedState extends object = object> {
   /**
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
-  serializeState: () => SerializedPanelState<State>;
+  serializeState: () => SerializedState;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

@@ -25,15 +25,19 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };
 const findDataView = (id: string) =>
-  Promise.resolve([
-    {
-      id,
-      title: id,
-      getFieldByName: jest.fn((name: string) => ({
-        name,
-      })),
-    },
-  ]);
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        {
+          id,
+          title: id,
+          getFieldByName: jest.fn((name: string) => ({
+            name,
+          })),
+        },
+      ]);
+    }, 0);
+  });
 
 const servicesMock = {
   api: apiService,

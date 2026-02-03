@@ -11,7 +11,9 @@ import { css } from '@emotion/react';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
-const visorPadding = '1px';
+const gradientPadding = '1px';
+const gradient =
+  'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
 
 export const visorStyles = (
   euiTheme: EuiThemeComputed,
@@ -24,25 +26,30 @@ export const visorStyles = (
     ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
     : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
 
-  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorPadding})`;
+  const totalHeight = `calc(${euiTheme.size.xl} + 2*${gradientPadding})`;
+
+  const gradientBoxStyles = {
+    background: gradient,
+    padding: gradientPadding,
+    borderRadius: `calc(${euiTheme.size.s} + 1px)`,
+    boxShadow: visorBoxShadow,
+  };
 
   return {
     visorContainer: {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-    },
-    visorWrapper: {
-      background:
-        'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);',
-      padding: visorPadding,
       width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}% )`,
-      height: isVisible ? `${totalHeight}` : '0',
       margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
-      borderRadius: `calc(${euiTheme.size.s} + 1px)`,
+      height: isVisible ? `${totalHeight}` : '0',
       opacity: isVisible ? 1 : 0,
       pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
-      overflow: 'hidden',
       transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
-      boxShadow: visorBoxShadow,
+    },
+    visorWrapper: {
+      width: `calc(100% - ${euiTheme.size.xl})`,
+    },
+    visorGradientBox: {
+      ...gradientBoxStyles,
     },
     comboBoxWrapper: {
       background: euiTheme.colors.backgroundBasePlain,
@@ -55,6 +62,14 @@ export const visorStyles = (
         isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
       }`,
       overflow: 'hidden',
+    },
+    closeButtonWrapper: {
+      ...gradientBoxStyles,
+      marginLeft: euiTheme.size.xs,
+    },
+    closeButton: {
+      borderRadius: euiTheme.size.s,
+      border: 'none',
     },
     separator: {
       width: '1px',
@@ -92,6 +107,16 @@ export const visorStyles = (
         background-color: ${euiTheme.colors.backgroundBasePlain};
         &::before {
           border: none;
+        }
+      }
+
+      .kbnQueryBar__textarea {
+        border-radius: ${euiTheme.size.s} !important;
+        box-shadow: none;
+        &:focus,
+        &:hover {
+          box-shadow: none !important;
+          outline: none !important;
         }
       }
     `,

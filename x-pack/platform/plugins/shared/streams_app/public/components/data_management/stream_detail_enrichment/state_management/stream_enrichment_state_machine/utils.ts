@@ -13,6 +13,7 @@ import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,
   EnrichmentUrlState,
+  FailureStoreDataSource,
   KqlSamplesDataSource,
   LatestSamplesDataSource,
 } from '../../../../../../common/url_schema';
@@ -60,6 +61,12 @@ export const createDefaultCustomSamplesDataSource = (
   enabled: true,
   documents: [],
   storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`,
+});
+
+export const createFailureStoreDataSource = (streamName: string): FailureStoreDataSource => ({
+  type: 'failure-store',
+  name: DATA_SOURCES_I18N.failureStore.defaultName,
+  enabled: true,
 });
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
@@ -263,6 +270,91 @@ export function reorderSteps(
     // If not found, insert at the end among siblings
     return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   }
+}
+
+/**
+ * Reorders steps for drag-and-drop operations by moving a step block directly before, after, or inside a target step.
+ * Supports cross-level moves and nesting items inside condition blocks.
+ * ============================
+ * NOTE: The parentId update is handled separately in the state machines via a step.parentChanged event.
+ * This is because the inner context of the step machine needs to be updated properly via xstate.
+ * This function only handles the reordering of the stepRefs array (the array order always mimics the hierarchy).
+ * @param stepRefs The flat array of StepActorRef
+ * @param sourceStepId The customIdentifier of the step to move
+ * @param targetStepId The customIdentifier of the target step
+ * @param operation Whether to insert 'before', 'after', or 'inside' the target
+ * @returns A new reordered array of StepActorRef
+ */
+export function reorderStepsByDragDrop(
+  stepRefs: StepActorRef[],
+  sourceStepId: string,
+  targetStepId: string,
+  operation: 'before' | 'after' | 'inside'
+): StepActorRef[] {
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+
+  // Find source and target steps
+  const sourceIndex = stepRefs.findIndex((ref) => ref.id === sourceStepId);
+  const targetIndex = stepRefs.findIndex((ref) => ref.id === targetStepId);
+
+  if (sourceIndex === -1 || targetIndex === -1) {
+    return stepRefs;
+  }
+
+  // Prevent dropping a step onto itself or its descendants
+  const sourceDescendants = collectDescendantStepIds(steps, sourceStepId);
+  if (sourceDescendants.has(targetStepId)) {
+    return stepRefs;
+  }
+
+  // Find the boundaries of the source block
+  const sourceBlockStart = sourceIndex;
+  const lastSourceDescendantId = Array.from(sourceDescendants).pop();
+  const sourceBlockEnd = lastSourceDescendantId
+    ? stepRefs.findIndex((ref) => ref.id === lastSourceDescendantId) + 1
+    : sourceIndex + 1;
+  const sourceBlock = stepRefs.slice(sourceBlockStart, sourceBlockEnd);
+
+  // Remove source block from array
+  const withoutSource = [...stepRefs.slice(0, sourceBlockStart), ...stepRefs.slice(sourceBlockEnd)];
+
+  const updatedSourceBlock = sourceBlock;
+
+  // Find target position in the filtered array
+  const targetIndexInFiltered = withoutSource.findIndex((ref) => ref.id === targetStepId);
+  if (targetIndexInFiltered === -1) {
+    return stepRefs; // Target not found
+  }
+
+  // Calculate insert position
+  let insertIndex: number;
+
+  if (operation === 'inside') {
+    // Insert as first child of target
+    // Find where target's children start (right after target)
+    insertIndex = targetIndexInFiltered + 1;
+  } else if (operation === 'before') {
+    // Insert before target
+    insertIndex = targetIndexInFiltered;
+  } else {
+    // 'after' - insert after target and all its descendants
+    const targetDescendants = collectDescendantStepIds(
+      withoutSource.map((ref) => ref.getSnapshot().context.step),
+      targetStepId
+    );
+    const lastTargetDescendantId = Array.from(targetDescendants).pop();
+    const targetBlockEnd = lastTargetDescendantId
+      ? withoutSource.findIndex((ref) => ref.id === lastTargetDescendantId) + 1
+      : targetIndexInFiltered + 1;
+    insertIndex = targetBlockEnd;
+  }
+
+  // Insert source block at the calculated position
+  return [
+    ...withoutSource.slice(0, insertIndex),
+    ...updatedSourceBlock,
+    ...withoutSource.slice(insertIndex),
+  ];
 }
 
 export type RootLevelMap = Map<string, string>;

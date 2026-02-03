@@ -62,6 +62,10 @@ export const EvaluationQualityMetricsTable: FC<{
     >
       <EuiPanel>
         <EuiInMemoryTable<ClassificationMetricItem>
+          tableCaption={i18n.translate(
+            'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRecallAndAccuracyTableCaption',
+            { defaultMessage: 'Per class recall and accuracy metrics' }
+          )}
           items={evaluationMetricsItems}
           columns={columns}
           pagination

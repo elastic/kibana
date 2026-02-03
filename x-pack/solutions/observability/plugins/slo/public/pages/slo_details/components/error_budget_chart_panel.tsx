@@ -54,7 +54,7 @@ export function ErrorBudgetChartPanel({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type: SLO_ERROR_BUDGET_ID,
       };
 

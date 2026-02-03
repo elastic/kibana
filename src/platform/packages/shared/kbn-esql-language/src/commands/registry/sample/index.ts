@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const sampleCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
 };
 
 export const sampleCommand = {
-  name: 'sample',
+  name: Commands.SAMPLE,
   methods: sampleCommandMethods,
   metadata: {
     preview: true,

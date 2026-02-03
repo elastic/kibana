@@ -8,7 +8,7 @@
 import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
+import type { ConfigSchema } from '@kbn/kql/server/config';
 import type { Observable } from 'rxjs';
 import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
@@ -168,13 +168,11 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
-  if (alertingConfig?.gapAutoFillScheduler?.enabled) {
-    createAutoFillSchedulerRoute(router, licenseState);
-    getAutoFillSchedulerRoute(router, licenseState);
-    updateAutoFillSchedulerRoute(router, licenseState);
-    deleteAutoFillSchedulerRoute(router, licenseState);
-    findAutoFillSchedulerLogsRoute(router, licenseState);
-  }
+  createAutoFillSchedulerRoute(router, licenseState);
+  getAutoFillSchedulerRoute(router, licenseState);
+  updateAutoFillSchedulerRoute(router, licenseState);
+  deleteAutoFillSchedulerRoute(router, licenseState);
+  findAutoFillSchedulerLogsRoute(router, licenseState);
 
   // Rules Settings APIs
   if (alertingConfig.rulesSettings.enabled) {

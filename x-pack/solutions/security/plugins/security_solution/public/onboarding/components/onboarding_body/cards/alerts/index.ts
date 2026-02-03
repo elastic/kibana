@@ -10,8 +10,8 @@ import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/c
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ALERTS_CARD_TITLE } from './translations';
-import alertsIcon from './images/alerts_icon.png';
-import alertsDarkIcon from './images/alerts_icon_dark.png';
+import alertsIcon from '../../../../../common/icons/alerts/icon.svg';
+import alertsDarkIcon from '../../../../../common/icons/alerts/icon_dark.svg';
 
 export const alertsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.alerts,

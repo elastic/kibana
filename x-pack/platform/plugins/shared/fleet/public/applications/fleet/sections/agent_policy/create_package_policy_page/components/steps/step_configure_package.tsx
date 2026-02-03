@@ -22,13 +22,41 @@ import {
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  RegistryInput,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
-import type { PackagePolicyValidationResults } from '../../services';
+import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
+
+/**
+ * Check if an input is compatible with the current var_group selections.
+ * An input is incompatible if any of its hide_in_var_group_options includes
+ * the currently selected option for that var_group.
+ */
+export function isInputCompatibleWithVarGroupSelections(
+  input: RegistryInput,
+  varGroupSelections: VarGroupSelection
+): boolean {
+  if (!input.hide_in_var_group_options) {
+    return true;
+  }
+
+  for (const [groupName, hiddenOptions] of Object.entries(input.hide_in_var_group_options)) {
+    const selectedOption = varGroupSelections[groupName];
+    if (selectedOption && hiddenOptions.includes(selectedOption)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -40,6 +68,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   noTopRule?: boolean;
   isEditPage?: boolean;
   isAgentlessSelected?: boolean;
+  varGroupSelections?: VarGroupSelection;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -50,6 +79,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   noTopRule = false,
   isEditPage = false,
   isAgentlessSelected = false,
+  varGroupSelections = {},
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -106,7 +136,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
               const isInputAvailable =
                 packagePolicyInput &&
-                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo);
+                isInputAllowedForDeploymentMode(packagePolicyInput, deploymentMode, packageInfo) &&
+                isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections);
 
               return isInputAvailable ? (
                 <EuiFlexItem key={packageInput.type}>
@@ -125,6 +156,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     }
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    varGroupSelections={varGroupSelections}
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>

@@ -72,6 +72,9 @@ test.describe('Custom Threshold Rule - Ad-hoc Data View', { tag: ['@ess', '@svlO
     const dataViewText = await pageObjects.rulesPage.dataViewExpression.textContent();
     expect(dataViewText).toContain(AD_HOC_DATA_VIEW_PATTERN);
 
+    // Wait for form to fully initialize with default criteria
+    await pageObjects.rulesPage.waitForFormReady();
+
     // Save the rule (navigates to rule details page)
     await pageObjects.rulesPage.saveRule();
 

@@ -417,50 +417,8 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const {
-          addControlsFromSavedSession,
-          apiPublishesEditablePauseFetch,
-          apiHasUniqueId,
-          apiPublishesESQLVariables,
-        } = await getEmbeddableServices();
-
-        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
-
-        const mightHaveVariables =
-          apiPublishesESQLVariables(container) &&
-          savedSessionAttributes.controlGroupJson &&
-          savedSessionAttributes.controlGroupJson.length > 0;
-
-        // pause fetching so that we don't try to build an ES|QL query without necessary variables
-        const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
-        if (shouldPauseFetch) container.setFetchPaused(true);
-
-        const api = await container.addNewPanel(
-          {
-            panelType: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: [],
-            },
-          },
-          {
-            displaySuccessMessage: true,
-          }
-        );
-
-        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        if (mightHaveVariables) {
-          await addControlsFromSavedSession(
-            container,
-            savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
-            uuid
-          );
-        }
-
-        // unpause fetching if necessary now that ES|QL variables exist
-        if (shouldPauseFetch) container.setFetchPaused(false);
+        const { addPanelFromLibrary } = await getEmbeddableServices();
+        await addPanelFromLibrary(container, savedObject);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {

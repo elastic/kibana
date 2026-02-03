@@ -63,6 +63,7 @@ export interface InjectedMetadata {
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
+    airgapped: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;

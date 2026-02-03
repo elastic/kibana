@@ -36,6 +36,8 @@
           " | { bool: { must_not: { term: { _tier: { value: string; }; }; }[]; }; }"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +55,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/add_exclude_frozen_to_query.ts",
+            "lineNumber": 18,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -78,6 +82,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,6 +100,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -111,6 +119,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -128,6 +138,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -145,6 +157,8 @@
               "string | { [key: string]: any; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -160,6 +174,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/build_base_filter_criteria.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -184,6 +200,8 @@
           "QueryDslQueryContainer"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/get_default_dsl_query.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -203,6 +221,8 @@
           "(fieldName: string, index: number) => string"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/get_safe_aggregation_name.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,6 +239,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/get_safe_aggregation_name.ts",
+            "lineNumber": 18,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -236,6 +258,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/get_safe_aggregation_name.ts",
+            "lineNumber": 18,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -267,6 +291,8 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/default_query.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -289,6 +315,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/default_query.ts",
+            "lineNumber": 21,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -312,6 +340,8 @@
           "(query: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/match_all_query.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,6 +358,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/match_all_query.ts",
+            "lineNumber": 25,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -351,6 +383,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/simple_query.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -367,6 +401,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/simple_query.ts",
+            "lineNumber": 22,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -389,6 +425,8 @@
           "\nRepresents simple queries that are based on a boolean filter."
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -413,6 +451,8 @@
               "<string>]; must: []; must_not: []; should?: [] | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -439,6 +479,8 @@
           "<Q>"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -457,6 +499,8 @@
               " | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -479,6 +523,8 @@
           "object"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -496,6 +542,8 @@
           "\"kuery\" | \"lucene\""
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -529,6 +577,8 @@
           "<string>"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -552,6 +602,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/es_client_total_hits_relation.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -566,6 +618,8 @@
           "\nRepresents a query that matches all documents."
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/match_all_query.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -579,6 +633,8 @@
               "/**\n   * 'match_all' property specifies a query that matches all documents.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/query_utils/src/match_all_query.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -599,6 +655,8 @@
           "{ readonly KUERY: \"kuery\"; readonly LUCENE: \"lucene\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/query_utils/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

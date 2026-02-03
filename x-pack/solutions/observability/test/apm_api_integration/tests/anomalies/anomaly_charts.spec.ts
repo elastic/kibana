@@ -317,6 +317,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               )
             );
           });
+
+          it('ensures anomaly scores are never null in timeseries (fixes #167400)', () => {
+            // Validates that the record_results filter aggregation in get_anomaly_timeseries
+            // prevents model_plot docs with null record_score from being returned
+
+            // We know anomalies should exist during the spike window
+            const spikeAnomalies = allAnomalyTimeseries.flatMap((series) =>
+              series.anomalies.filter(
+                (a) => a.x >= spikeStart.valueOf() && a.x < spikeEnd.valueOf()
+              )
+            );
+
+            // Critical: During the spike, we should have detected anomalies with scores > 0
+            const spikeAnomaliesWithScores = spikeAnomalies.filter((a) => (a.y ?? 0) > 0);
+            expect(spikeAnomaliesWithScores.length).to.be.greaterThan(0);
+
+            // ALL anomalies with scores during the spike MUST have valid actual values
+            // This proves they came from 'record' docs, not 'model_plot' docs with null record_score
+            expect(
+              spikeAnomaliesWithScores.every(
+                (a) => Number.isFinite(a.y) && (a.y ?? 0) > 0 && Number.isFinite(a.actual)
+              )
+            ).to.be(true);
+
+            // Verify all series have valid structure
+            allAnomalyTimeseries.forEach((series) => {
+              expect(series.anomalies.every((a) => Number.isFinite(a.x))).to.be(true);
+              expect(
+                series.bounds.every(
+                  (b) =>
+                    Number.isFinite(b.x) &&
+                    (b.y0 == null || Number.isFinite(b.y0)) &&
+                    (b.y1 == null || Number.isFinite(b.y1))
+                )
+              ).to.be(true);
+            });
+          });
         });
       });
     }

@@ -6,16 +6,12 @@
  */
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import systemPromptDefault from './system_prompt.text';
-import userPromptDefault from './user_prompt.text';
+import descriptionSystemPrompt from './system_prompt.text';
+import descriptionUserPrompt from './user_prompt.text';
 
-export function createGenerateStreamDescriptionPrompt({
-  systemPromptOverride,
-}: {
-  systemPromptOverride?: string;
-} = {}) {
-  const systemPrompt = systemPromptOverride ?? systemPromptDefault;
+export { descriptionSystemPrompt as descriptionPrompt };
 
+export function createGenerateStreamDescriptionPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
     name: 'generate_stream_description',
     input: z.object({
@@ -31,11 +27,9 @@ export function createGenerateStreamDescriptionPrompt({
       },
       template: {
         mustache: {
-          template: userPromptDefault,
+          template: descriptionUserPrompt,
         },
       },
     })
     .get();
 }
-
-export { systemPromptDefault as descriptionSystemPromptTemplate };

@@ -15,7 +15,10 @@ import {
   ATTACK_GROUP_LOADING_SPINNER_TEST_ID,
   useGetDefaultGroupTitleRenderers,
 } from './use_get_default_group_title_renderers';
-import { ATTACK_TITLE_TEST_ID_SUFFIX } from '../../components/attacks/table/attack_group_content';
+import {
+  ATTACK_TITLE_TEST_ID_SUFFIX,
+  EXPAND_ATTACK_BUTTON_TEST_ID,
+} from '../../components/attacks/table/attack_group_content';
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
@@ -55,7 +58,10 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     mockGetAttack.mockReturnValue(mockAttacks[0]);
 
     const { result } = renderHook(() =>
-      useGetDefaultGroupTitleRenderers({ getAttack: mockGetAttack })
+      useGetDefaultGroupTitleRenderers({
+        getAttack: mockGetAttack,
+        openAttackDetailsFlyout: jest.fn(),
+      })
     );
 
     const renderer = result.current.defaultGroupTitleRenderers;
@@ -74,7 +80,10 @@ describe('useGetDefaultGroupTitleRenderers', () => {
     mockGetAttack.mockReturnValue(undefined);
 
     const { result } = renderHook(() =>
-      useGetDefaultGroupTitleRenderers({ getAttack: mockGetAttack })
+      useGetDefaultGroupTitleRenderers({
+        getAttack: mockGetAttack,
+        openAttackDetailsFlyout: jest.fn(),
+      })
     );
 
     const renderer = result.current.defaultGroupTitleRenderers;
@@ -93,6 +102,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           showAnonymized: true,
+          openAttackDetailsFlyout: jest.fn(),
         })
       );
 
@@ -114,6 +124,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           showAnonymized: false,
+          openAttackDetailsFlyout: jest.fn(),
         })
       );
 
@@ -131,7 +142,10 @@ describe('useGetDefaultGroupTitleRenderers', () => {
       mockGetAttack.mockReturnValue(mockAttacks[0]);
 
       const { result } = renderHook(() =>
-        useGetDefaultGroupTitleRenderers({ getAttack: mockGetAttack })
+        useGetDefaultGroupTitleRenderers({
+          getAttack: mockGetAttack,
+          openAttackDetailsFlyout: jest.fn(),
+        })
       );
 
       const renderer = result.current.defaultGroupTitleRenderers;
@@ -151,6 +165,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: true,
+          openAttackDetailsFlyout: jest.fn(),
         })
       );
 
@@ -168,6 +183,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: false,
+          openAttackDetailsFlyout: jest.fn(),
         })
       );
 
@@ -186,6 +202,7 @@ describe('useGetDefaultGroupTitleRenderers', () => {
         useGetDefaultGroupTitleRenderers({
           getAttack: mockGetAttack,
           isLoading: true,
+          openAttackDetailsFlyout: jest.fn(),
         })
       );
 
@@ -195,6 +212,33 @@ describe('useGetDefaultGroupTitleRenderers', () => {
 
       const { getByTestId } = render(rendered as React.ReactElement);
       expect(getByTestId(ATTACK_GROUP_LOADING_SPINNER_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  describe('openAttackDetailsFlyout prop', () => {
+    it('should be called when the attack title button is clicked', () => {
+      mockGetAttack.mockReturnValue(mockAttacks[0]);
+      const openAttackDetailsFlyout = jest.fn();
+
+      const { result } = renderHook(() =>
+        useGetDefaultGroupTitleRenderers({
+          getAttack: mockGetAttack,
+          openAttackDetailsFlyout,
+        })
+      );
+
+      const renderer = result.current.defaultGroupTitleRenderers;
+      const bucket = { key: [mockAttacks[0].id], doc_count: 1 };
+      const rendered = renderer(ALERT_ATTACK_IDS, bucket);
+
+      // We need to render the output to simulate the click on the AttackGroupContent
+      const { getByTestId } = render(rendered as React.ReactElement);
+
+      // The button ID is defined in attack_group_content/index.tsx
+      const button = getByTestId(EXPAND_ATTACK_BUTTON_TEST_ID);
+      button.click();
+
+      expect(openAttackDetailsFlyout).toHaveBeenCalledWith(ALERT_ATTACK_IDS, bucket);
     });
   });
 });

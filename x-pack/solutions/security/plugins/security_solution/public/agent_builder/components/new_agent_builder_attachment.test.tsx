@@ -24,6 +24,7 @@ describe('NewAgentBuilderAttachment', () => {
       isAgentBuilderEnabled: true,
       hasAgentBuilderPrivilege: true,
       isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
     });
   });
 
@@ -34,8 +35,7 @@ describe('NewAgentBuilderAttachment', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
-    expect(screen.getByText(i18n.ADD_TO_CHAT)).toBeInTheDocument();
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toHaveTextContent(i18n.ADD_TO_CHAT);
   });
 
   it('renders with custom color', () => {
@@ -81,5 +81,22 @@ describe('NewAgentBuilderAttachment', () => {
     );
 
     expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+  });
+
+  it('renders disabled when license is invalid', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: false,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    });
+
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeDisabled();
   });
 });

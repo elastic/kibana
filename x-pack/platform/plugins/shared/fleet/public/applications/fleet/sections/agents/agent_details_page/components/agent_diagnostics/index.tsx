@@ -346,7 +346,16 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       {isLoading ? (
         <EuiSkeletonText lines={3} />
       ) : (
-        <EuiBasicTable<AgentDiagnostics> items={visibleDiagnosticsEntries} columns={columns} />
+        <EuiBasicTable<AgentDiagnostics>
+          items={visibleDiagnosticsEntries}
+          columns={columns}
+          tableCaption={i18n.translate(
+            'xpack.fleet.requestDiagnostics.agentDiagnosticsUploads.tableCaption',
+            {
+              defaultMessage: 'Agent diagnostics uploads',
+            }
+          )}
+        />
       )}
     </>
   );

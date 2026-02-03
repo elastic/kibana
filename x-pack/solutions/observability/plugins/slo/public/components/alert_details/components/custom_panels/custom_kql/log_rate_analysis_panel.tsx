@@ -4,41 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { pick, orderBy } from 'lodash';
-import type { GetSLOResponse } from '@kbn/slo-schema';
-import React, { useEffect, useState, useMemo } from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import moment from 'moment';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_END, ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { colorTransformer } from '@kbn/observability-shared-plugin/common';
-import type { KQLCustomIndicator, DurationUnit } from '@kbn/slo-schema';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import type { WindowSchema } from '../../../../../typings';
-import type { TimeRange } from '../../../../slo/error_rate_chart/use_lens_definition';
-import type { BurnRateAlert, BurnRateRule } from '../../../types';
-import { getActionGroupFromReason } from '../../../utils/alert';
+import { useFetchDataViews } from '@kbn/observability-plugin/public';
+import { ALERT_END } from '@kbn/rule-data-utils';
+import type { DurationUnit, GetSLOResponse, KQLCustomIndicator } from '@kbn/slo-schema';
+import { orderBy, pick } from 'lodash';
+import moment from 'moment';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import type { BurnRateAlert, BurnRateRule } from '../../../types';
+import { getActionGroupWindow } from '../../../utils/alert';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
-function getDataTimeRange(
-  timeRange: { gte: string; lte?: string },
-  window: WindowSchema
-): TimeRange {
-  const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
-  return {
-    from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
-    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
-  };
-}
 
 interface Props {
   slo: GetSLOResponse;
@@ -58,17 +44,19 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const { dataViews: dataViewsService, observabilityAIAssistant } = services;
   const ObservabilityAIAssistantContextualInsight =
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
-  const [dataView, setDataView] = useState<DataView | undefined>();
-  const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+
+  const { data: dataViews = [] } = useFetchDataViews();
+
+  const [dataView, setDataView] = useState<DataView>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
     | undefined
   >();
+
   const params = slo.indicator.params as KQLCustomIndicator['params'];
-  const groupBy = slo.groupBy;
   const groupings = slo.groupings;
+  const esSearchQuery = getESQueryForLogRateAnalysis(params, groupings);
   const { index } = params;
-  const { data: dataViews = [] } = useFetchDataViews();
 
   useEffect(() => {
     const getDataView = async () => {
@@ -79,110 +67,47 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       if (dataViewId) {
         const sloDataView = await dataViewsService.get(dataViewId);
         setDataView(sloDataView);
-        getQuery();
       }
     };
 
-    const getQuery = () => {
-      const esSearchRequest = getESQueryForLogRateAnalysis(
-        params,
-        groupBy,
-        groupings
-      ) as QueryDslQueryContainer;
-      if (esSearchRequest) {
-        setEsSearchQuery(esSearchRequest);
-      }
-    };
     getDataView();
-  }, [index, dataViews, params, dataViewsService, groupBy, groupings]);
+  }, [index, dataViews, dataViewsService]);
 
-  // Identify `intervalFactor` to adjust time ranges based on alert settings.
-  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
-  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  // If an alert is just starting, the visible time range to look back might not cover the
-  // long window yet, only then we'll take the short window to look back,
-  // otherwise it will be the long window.
-  const alertActionGroup = getActionGroupFromReason(alert.reason);
-  const relatedWindow = (
-    (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
-  ).find((window: WindowSchema) => window.actionGroup === alertActionGroup);
+  const actionGroupWindow = getActionGroupWindow(alert);
 
-  const longWindowValue = relatedWindow?.longWindow.value;
-  const longWindowUnit = relatedWindow?.longWindow.unit;
-  const longWindowLookbackDuration =
-    longWindowValue && longWindowUnit
-      ? moment.duration(longWindowValue as number, longWindowUnit as DurationUnit)
-      : moment.duration(1, 'm');
-  const longWindowLookbackDurationAsSeconds = longWindowLookbackDuration.asSeconds();
-
-  const shortWindowValue = relatedWindow?.shortWindow.value;
-  const shortWindowUnit = relatedWindow?.shortWindow.unit;
-  const shortWindowLookbackDuration =
-    shortWindowValue && shortWindowUnit
-      ? moment.duration(shortWindowValue as number, shortWindowUnit as DurationUnit)
-      : moment.duration(1, 'm');
-  const shortWindowLookbackDurationAsSeconds = shortWindowLookbackDuration.asSeconds();
-
-  // @ts-ignore
-  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], relatedWindow);
-  const timeRange = { min: moment(dataTimeRange.from), max: moment(dataTimeRange.to) };
-  const alertStart = moment(alert.start);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
-
-  const chartStartToAlertStart = (alert.start - dataTimeRange.from.getTime()) / 1000;
-
-  // Here we check if the available time range before the alert start is long enough
-  // to consider the long window lookback. We consider 3x the long window to be good enough
-  // to cover both the look back within the deviation and the baseline time range.
-  // If the available time range is shorter we fall back to the short window.
-  const lookbackDurationAsSeconds =
-    longWindowLookbackDurationAsSeconds * 3 < chartStartToAlertStart
-      ? longWindowLookbackDurationAsSeconds
-      : shortWindowLookbackDurationAsSeconds;
-  const intervalFactor = Math.max(1, lookbackDurationAsSeconds / 60);
-
-  const logRateAnalysisTitle = i18n.translate(
-    'xpack.slo.burnRateRule.alertDetails.logRateAnalysisTitle',
-    {
-      defaultMessage: 'Possible causes and remediations',
-    }
-  );
-
-  function getDeviationMax() {
-    if (alertEnd) {
-      return alertEnd
-        .clone()
-        .subtract(1 * intervalFactor, 'minutes')
-        .valueOf();
-    } else if (
-      alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .isAfter(moment(new Date()))
-    ) {
-      return moment(new Date()).valueOf();
-    } else {
-      return alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .valueOf();
-    }
-  }
+  const alertRange = {
+    from: moment(alert.start),
+    to: alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : moment(new Date()),
+  };
 
   const initialAnalysisStart = {
-    baselineMin: alertStart
+    baselineMin: alertRange.from
       .clone()
-      .subtract(13 * intervalFactor, 'minutes')
+      .subtract(
+        2 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
       .valueOf(),
-    baselineMax: alertStart
+    baselineMax: alertRange.from
       .clone()
-      .subtract(2 * intervalFactor, 'minutes')
+      .subtract(
+        1 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
       .valueOf(),
-    deviationMin: alertStart
+    deviationMin: alertRange.from
       .clone()
-      .subtract(1 * intervalFactor, 'minutes')
+      .subtract(
+        1 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
       .valueOf(),
-    deviationMax: getDeviationMax(),
+    deviationMax: alertRange.to.clone().valueOf(),
+  };
+
+  const timeRange = {
+    min: moment(initialAnalysisStart.baselineMin),
+    max: moment(initialAnalysisStart.deviationMax),
   };
 
   const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
@@ -264,6 +189,11 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
 
   if (!dataView || !esSearchQuery) return null;
 
+  const logRateAnalysisTitle = i18n.translate(
+    'xpack.slo.burnRateRule.alertDetails.logRateAnalysisTitle',
+    { defaultMessage: 'Possible causes and remediations' }
+  );
+
   return (
     <EuiPanel hasBorder={true} data-test-subj="logRateAnalysisBurnRateAlertDetails">
       <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -283,8 +213,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
             esSearchQuery={esSearchQuery}
             timeRange={timeRange}
             initialAnalysisStart={initialAnalysisStart}
-            barColorOverride={colorTransformer('color0')}
-            barHighlightColorOverride={colorTransformer('color1')}
             onAnalysisCompleted={onAnalysisCompleted}
             appContextValue={{
               embeddingOrigin: 'observability_slo_burn_rate_alert_details',

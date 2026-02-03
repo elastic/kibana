@@ -32,6 +32,8 @@
           "(width: number, height: number) => { width: number; height: number; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 26,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 26,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,6 +86,8 @@
           "({\n  width,\n  height,\n  hash,\n}: { width: number; height: number; hash: string; }) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +99,8 @@
             "label": "{\n  width,\n  height,\n  hash,\n}",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 89,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,6 +112,8 @@
                 "label": "width",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+                "lineNumber": 90,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -113,6 +125,8 @@
                 "label": "height",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+                "lineNumber": 91,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -124,6 +138,8 @@
                 "label": "hash",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+                "lineNumber": 92,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -154,6 +170,8 @@
           " | undefined>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +186,8 @@
               "Blob | File"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 56,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -187,6 +207,8 @@
           "(file: { type?: string | undefined; }) => boolean"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,6 +220,8 @@
             "label": "file",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -212,6 +236,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+                "lineNumber": 13,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -234,6 +260,8 @@
           "<T>) => T"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/use_behavior_subject.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,6 +277,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/use_behavior_subject.ts",
+            "lineNumber": 13,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -280,6 +310,8 @@
           " | undefined>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -295,6 +327,8 @@
               "Blob | File"
             ],
             "path": "src/platform/packages/shared/shared-ux/file/util/src/image_metadata.ts",
+            "lineNumber": 56,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false
           }

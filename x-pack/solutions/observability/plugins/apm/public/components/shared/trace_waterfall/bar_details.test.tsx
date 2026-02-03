@@ -412,4 +412,36 @@ describe('BarDetails', () => {
       });
     });
   });
+
+  describe('in case of cold start', () => {
+    it('renders cold start badge when coldstart is true', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: true,
+      } as unknown as TraceWaterfallItem;
+
+      const { getByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(getByText('cold start')).toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is false', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: false,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+
+    it('does not render cold start badge when coldstart is undefined', () => {
+      const mockItemWithColdStart = {
+        ...mockItem,
+        coldstart: undefined,
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
+      expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+  });
 });

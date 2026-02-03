@@ -24,11 +24,46 @@ import {
   IntegrationResponse,
 } from '../../common_attributes.gen';
 
+export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest>;
+export const ApproveIntegrationRequest = z
+  .object({
+    /**
+     * The version of the integration
+     */
+    version: NonEmptyString,
+  })
+  .strict();
+
+export type ApproveAutoImportIntegrationRequestParams = z.infer<
+  typeof ApproveAutoImportIntegrationRequestParams
+>;
+export const ApproveAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type ApproveAutoImportIntegrationRequestParamsInput = z.input<
+  typeof ApproveAutoImportIntegrationRequestParams
+>;
+
+export type ApproveAutoImportIntegrationRequestBody = z.infer<
+  typeof ApproveAutoImportIntegrationRequestBody
+>;
+export const ApproveAutoImportIntegrationRequestBody = ApproveIntegrationRequest;
+export type ApproveAutoImportIntegrationRequestBodyInput = z.input<
+  typeof ApproveAutoImportIntegrationRequestBody
+>;
+
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
 >;
 export const CreateAutoImportIntegrationRequestBody = z
   .object({
+    /**
+     * The connector id
+     */
+    connectorId: NonEmptyString,
     /**
      * The integration id
      */

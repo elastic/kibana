@@ -54,7 +54,7 @@ const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
     })
   );
 
-const setup = async () => {
+export const setup = async () => {
   const services = createDiscoverServicesMock();
   const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, switchToTab } =
     getDiscoverInternalStateMock({

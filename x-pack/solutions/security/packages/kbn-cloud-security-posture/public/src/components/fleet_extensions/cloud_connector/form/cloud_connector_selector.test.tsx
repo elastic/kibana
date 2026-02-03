@@ -289,4 +289,26 @@ describe('CloudConnectorSelector', () => {
       });
     });
   });
+
+  describe('Account Type Filtering', () => {
+    it('should call useGetCloudConnectors with correct filter options', () => {
+      renderSelector({
+        accountType: SINGLE_ACCOUNT,
+      });
+
+      expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
+        cloudProvider: 'aws',
+        accountType: SINGLE_ACCOUNT,
+      });
+    });
+
+    it('should call useGetCloudConnectors without accountType when not provided', () => {
+      renderSelector();
+
+      expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
+        cloudProvider: 'aws',
+        accountType: undefined,
+      });
+    });
+  });
 });

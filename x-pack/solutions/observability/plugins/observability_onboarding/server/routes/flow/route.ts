@@ -546,15 +546,22 @@ async function ensureInstalledIntegrations(
  * checkout_service custom /path/to/error.log
  * ```
  */
+const MAX_INTEGRATIONS_LIMIT = 100;
+
 function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
 
+  const lines = tsv.trim().split('\n');
+  if (lines.length > MAX_INTEGRATIONS_LIMIT) {
+    throw new Error(
+      `Too many entries in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${lines.length}.`
+    );
+  }
+
   return Object.values(
-    tsv
-      .trim()
-      .split('\n')
+    lines
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
         const key = `${pkgName}-${installSource}`;

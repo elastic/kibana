@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
+// Note: Processor type correctness (grok, dissect, date, rename, set, remove, uppercase,
+// lowercase, trim, convert, etc.) is covered by API tests in
+// test/scout/api/tests/processing_simulate.spec.ts
+// These UI tests focus on preview table behavior, auto-update, and UI-specific features
 test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -48,27 +46,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     }
   });
 
-  test('should display simulation preview when configuring a new processor', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Rename');
-    await pageObjects.streams.fillProcessorFieldInput('message');
-    await page.locator('input[name="to"]').fill('message');
-
-    const rows = await pageObjects.streams.getPreviewTableRows();
-    expect(rows.length).toBeGreaterThan(0);
-
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'message',
-        rowIndex,
-        value: 'Test log message',
-      });
-    }
-  });
-
+  // UI-specific test: Tests that preview auto-updates as user types (reactive behavior)
   test('should automatically update the simulation preview when changing a new processor config', async ({
     page,
     pageObjects,
@@ -232,6 +210,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     }
   });
 
+  // UI-specific test: Tests the Skipped/Dropped tabs which are UI-only features
   test('should show dropped documents in the simulation preview', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('Drop document');
@@ -269,64 +248,6 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     }
   });
 
-  test('should update the simulation preview with processed values from uppercase, lowercase and trim processors', async ({
-    page,
-    pageObjects,
-  }) => {
-    // Uppercase processor uppercases the input.type field
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Uppercase');
-    await pageObjects.streams.fillProcessorFieldInput('input.type');
-    await pageObjects.streams.clickSaveProcessor();
-
-    let updatedRows = await pageObjects.streams.getPreviewTableRows();
-    expect(updatedRows.length).toBeGreaterThan(0);
-    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'input.type',
-        rowIndex,
-        value: 'LOGS',
-      });
-    }
-
-    // Lowercase processor lowercases the input.type field
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Lowercase');
-    await pageObjects.streams.fillProcessorFieldInput('input.type');
-    await pageObjects.streams.clickSaveProcessor();
-
-    updatedRows = await pageObjects.streams.getPreviewTableRows();
-    expect(updatedRows.length).toBeGreaterThan(0);
-    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'input.type',
-        rowIndex,
-        value: 'logs',
-      });
-    }
-
-    // Trim processor trims a field
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Set');
-    await pageObjects.streams.fillProcessorFieldInput('attributes.trim_test_field', {
-      isCustomValue: true,
-    });
-    await page.locator('input[name="value"]').fill('   test message   ');
-    await pageObjects.streams.clickSaveProcessor();
-
-    await pageObjects.streams.clickAddProcessor();
-    await pageObjects.streams.selectProcessorType('Trim');
-    await pageObjects.streams.fillProcessorFieldInput('attributes.trim_test_field');
-    await pageObjects.streams.clickSaveProcessor();
-
-    updatedRows = await pageObjects.streams.getPreviewTableRows();
-    expect(updatedRows.length).toBeGreaterThan(0);
-    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'attributes.trim_test_field',
-        rowIndex,
-        value: 'test message',
-      });
-    }
-  });
+  // Note: Individual processor type tests (uppercase, lowercase, trim, etc.) have been
+  // removed as they are covered by API tests in processing_simulate.spec.ts
 });

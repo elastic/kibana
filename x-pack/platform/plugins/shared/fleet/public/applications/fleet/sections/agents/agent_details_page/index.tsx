@@ -13,6 +13,8 @@ import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { OutputsForAgentPolicy } from '../../../../../../server/types';
+
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
@@ -25,6 +27,7 @@ import {
   useIntraAppState,
   sendGetAgentTagsForRq,
   useAgentlessResources,
+  useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -62,6 +65,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
   } = useGetOneAgentPolicy(agentData?.item?.policy_id);
+
+  const { data: outputsData } = useGetInfoOutputsForPolicy(agentPolicyData?.item?.id);
 
   const {
     application: { navigateToApp },
@@ -248,7 +253,11 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           />
         ) : agent ? (
           <>
-            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            <AgentDetailsPageContent
+              agent={agent}
+              agentPolicy={agentPolicyData?.item}
+              outputs={outputsData?.item}
+            />
             {showTagsAddRemove && (
               <TagsAddRemove
                 agentId={agent?.id!}
@@ -291,7 +300,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = ({ agent, agentPolicy, outputs }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -322,7 +332,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />;
         }}
       />
     </Routes>

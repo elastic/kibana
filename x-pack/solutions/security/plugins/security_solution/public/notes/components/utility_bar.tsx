@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   UtilityBarGroup,
@@ -16,6 +16,7 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../../common/components/utility_bar';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   selectNotesPagination,
   selectNotesTableSort,
@@ -45,6 +46,13 @@ export const REFRESH = i18n.translate('xpack.securitySolution.notes.management.r
   defaultMessage: 'Refresh',
 });
 
+export const DELETE_NOTES_PERMISSION_ERROR = i18n.translate(
+  'xpack.securitySolution.notes.management.deleteNotesPermissionError',
+  {
+    defaultMessage: 'Missing privileges',
+  }
+);
+
 /**
  * Renders the utility bar for the notes management page
  */
@@ -55,9 +63,13 @@ export const NotesUtilityBar = React.memo(() => {
   const selectedItems = useSelector(selectNotesTableSelectedIds);
   const notesCreatedByFilter = useSelector(selectNotesTableCreatedByFilter);
   const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
+
+  const { notesPrivileges } = useUserPrivileges();
+  const canDeleteNotes = notesPrivileges.crud;
+
   const resultsCount = useMemo(() => {
     const { perPage, page, total } = pagination;
-    const startOfCurrentPage = perPage * (page - 1) + 1;
+    const startOfCurrentPage = total === 0 ? 0 : perPage * (page - 1) + 1;
     const endOfCurrentPage = Math.min(perPage * page, total);
     return perPage === 0 ? 'All' : `${startOfCurrentPage}-${endOfCurrentPage} of ${total}`;
   }, [pagination]);
@@ -66,19 +78,31 @@ export const NotesUtilityBar = React.memo(() => {
   }, [dispatch]);
   const notesSearch = useSelector(selectNotesTableSearch);
 
+  const isDeleteDisabled = selectedItems.length === 0 || !canDeleteNotes;
+
   const BulkActionPopoverContent = useCallback(() => {
-    return (
+    const menuItem = (
       <EuiContextMenuItem
         data-test-subj="notes-management-delete-notes"
         onClick={deleteSelectedNotes}
-        disabled={selectedItems.length === 0}
+        disabled={isDeleteDisabled}
         icon="trash"
         key="DeleteItemKey"
       >
         {DELETE_SELECTED}
       </EuiContextMenuItem>
     );
-  }, [deleteSelectedNotes, selectedItems.length]);
+
+    if (!canDeleteNotes && selectedItems.length > 0) {
+      return (
+        <EuiToolTip position="left" content={DELETE_NOTES_PERMISSION_ERROR}>
+          {menuItem}
+        </EuiToolTip>
+      );
+    }
+
+    return menuItem;
+  }, [deleteSelectedNotes, isDeleteDisabled, canDeleteNotes, selectedItems.length]);
   const refresh = useCallback(() => {
     dispatch(
       fetchNotes({

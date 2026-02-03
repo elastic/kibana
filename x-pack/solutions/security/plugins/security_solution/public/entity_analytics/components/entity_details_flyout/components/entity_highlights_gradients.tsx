@@ -16,23 +16,30 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 // Shared gradient variables
 const gradientStartPercent = 2.98;
 const gradientEndPercent = 66.24;
-const panelBackgroundGradientAngle = 98;
+
+const panelBackgroundGradientAngle = 99;
+const panelBackgroundGradientStartPercent = 3.97;
+const panelBackgroundGradientEndPercent = 65.6;
+
 const panelBorderAndButtonGradientAngle = 131;
 
 const lightModeColors = {
-  panelBackgroundGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, rgba(217, 232, 255, 0.3) ${gradientStartPercent}%, rgba(236, 226, 254, 0.3) ${gradientEndPercent}%)`,
+  panelBackgroundGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, rgba(217, 232, 255, 0.25) ${panelBackgroundGradientStartPercent}%, rgba(236, 226, 254, 0.25) ${panelBackgroundGradientEndPercent}%)`,
   panelBorderGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, rgba(23, 80, 186, 0.35) ${gradientStartPercent}%, rgba(115, 29, 207, 0.35) ${gradientEndPercent}%)`,
-  buttonGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, #0b64dd ${gradientStartPercent}%, #731dcf ${gradientEndPercent}%)`,
+  buttonGradient: `linear-gradient(99deg, #D9E8FF 3.97%, #ECE2FE 65.6%)`,
+  buttonTextGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, #1750ba ${gradientStartPercent}%, #8144cc ${gradientEndPercent}%)`,
   iconGradientStartColor: '#0B64DD',
   iconGradientEndColor: '#731DCF',
 };
 
 const darkModeColors = {
-  panelBackgroundGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, rgba(15, 40, 90, 0.15) ${gradientStartPercent}%, rgba(40, 20, 60, 0.15) ${gradientEndPercent}%)`,
-  panelBorderGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, rgba(60, 120, 220, 0.4) ${gradientStartPercent}%, rgba(140, 60, 200, 0.4) ${gradientEndPercent}%)`,
-  buttonGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, #1E7FE8 ${gradientStartPercent}%, #8B2DD6 ${gradientEndPercent}%)`,
-  iconGradientStartColor: '#1E7FE8',
-  iconGradientEndColor: '#8B2DD6',
+  // TODO: AI generated gradients, please replace it with UX designed gradients when they are available. https://github.com/elastic/security-team/issues/15312
+  panelBackgroundGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, rgba(11, 100, 221, 0.14) ${panelBackgroundGradientStartPercent}%, rgba(115, 29, 207, 0.14) ${panelBackgroundGradientEndPercent}%)`,
+  panelBorderGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, rgba(96, 165, 250, 0.4) ${gradientStartPercent}%, rgba(192, 132, 252, 0.4) ${gradientEndPercent}%)`,
+  buttonGradient: `linear-gradient(${panelBackgroundGradientAngle}deg, #123A79 ${panelBackgroundGradientStartPercent}%, #3B1D66 ${panelBackgroundGradientEndPercent}%)`,
+  buttonTextGradient: `linear-gradient(${panelBorderAndButtonGradientAngle}deg, #D9E8FF ${gradientStartPercent}%, #ECE2FE ${gradientEndPercent}%)`,
+  iconGradientStartColor: '#60A5FA',
+  iconGradientEndColor: '#C084FC',
 };
 
 export const useGradientStyles = () => {
@@ -46,7 +53,7 @@ export const useGradientStyles = () => {
       gradientSVG: (
         <svg width="0" height="0" style={{ position: 'absolute' }}>
           <defs>
-            <linearGradient id="sparkles-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="entity-summary-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset={`${gradientStartPercent}%`} stopColor={colors.iconGradientStartColor} />
               <stop offset={`${gradientEndPercent}%`} stopColor={colors.iconGradientEndColor} />
             </linearGradient>
@@ -57,7 +64,7 @@ export const useGradientStyles = () => {
         position: relative;
         background: ${colors.panelBackgroundGradient};
         border-radius: ${euiTheme.border.radius.medium};
-        padding: ${euiTheme.size.m};
+        padding: ${euiTheme.size.base};
         &::before {
           content: '';
           position: absolute;
@@ -74,22 +81,25 @@ export const useGradientStyles = () => {
       buttonGradientStyle: css`
         background: ${colors.buttonGradient} !important;
         border-radius: 4px;
-        color: #fff !important;
+
         &:hover:not(:disabled) {
           background: ${colors.buttonGradient} !important;
-          color: #fff !important;
         }
         &:focus:not(:disabled) {
           background: ${colors.buttonGradient} !important;
-          color: #fff !important;
         }
         &:disabled {
           opacity: 0.5;
         }
       `,
+      buttonTextGradientStyle: css`
+        background: ${colors.buttonTextGradient};
+        background-clip: text;
+        color: transparent;
+      `,
       iconGradientStyle: css`
         & * {
-          fill: url(#sparkles-gradient) !important;
+          fill: url(#entity-summary-icon-gradient) !important;
         }
       `,
     };

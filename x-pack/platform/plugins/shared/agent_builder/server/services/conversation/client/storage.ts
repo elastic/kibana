@@ -10,6 +10,7 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -27,6 +28,7 @@ const storageSettings = {
       updated_at: types.date({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
+      state: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -40,9 +42,10 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
+  attachments?: VersionedAttachment[];
+  state?: ConversationInternalState;
   // legacy field
   rounds?: PersistentConversationRound[];
-  attachments?: VersionedAttachment[];
 }
 
 export type ConversationStorageSettings = typeof storageSettings;

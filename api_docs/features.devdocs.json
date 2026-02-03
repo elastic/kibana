@@ -10,6 +10,8 @@
         "label": "KibanaFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,6 +49,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,6 +73,8 @@
                   "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+                "lineNumber": 182,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -82,6 +90,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,6 +106,8 @@
               "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,6 +122,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,6 +135,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,6 +151,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +167,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +183,8 @@
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,6 +199,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -191,6 +215,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +231,8 @@
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +247,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -233,6 +263,8 @@
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -247,6 +279,8 @@
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,6 +295,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -272,6 +308,8 @@
             "label": "excludeFromBasePrivileges",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -286,6 +324,8 @@
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -307,6 +347,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -328,6 +370,8 @@
           "\nFeature privilege definition"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -344,6 +388,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -360,6 +406,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -376,6 +424,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,6 +442,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,6 +460,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -424,6 +478,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,6 +496,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,6 +526,8 @@
               " | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -484,6 +544,8 @@
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -500,6 +562,8 @@
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -518,6 +582,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -542,6 +608,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 323,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -582,6 +650,8 @@
               "[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 330,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -598,6 +668,8 @@
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,6 +685,8 @@
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -626,6 +700,8 @@
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,6 +718,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +736,8 @@
               "AppCategory"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -674,6 +754,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,6 +772,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,6 +790,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -722,6 +808,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -738,6 +826,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -754,6 +844,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -771,6 +863,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -787,6 +881,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,6 +917,8 @@
               "; } | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -845,6 +943,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -861,6 +961,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -879,6 +981,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,6 +999,8 @@
               "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -911,6 +1017,8 @@
           "\nConfiguration for a sub-feature."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -924,6 +1032,8 @@
               "Display name for this sub-feature"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -940,6 +1050,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -956,6 +1068,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -980,6 +1094,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -996,6 +1112,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1030,6 +1148,8 @@
           ", \"excludeFromBasePrivileges\" | \"composedOf\" | \"replacedBy\">"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1043,6 +1163,8 @@
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1056,6 +1178,8 @@
               "\nThe display name for this privilege."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1072,6 +1196,8 @@
               "\"none\" | \"all\" | \"read\""
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1088,6 +1214,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1112,6 +1240,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1133,6 +1263,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/features/public/plugin.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1157,6 +1289,8 @@
         "[]>; }"
       ],
       "path": "x-pack/platform/plugins/shared/features/public/plugin.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1173,6 +1307,8 @@
         "label": "ElasticsearchFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1187,6 +1323,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1233,6 +1371,8 @@
                   ">; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+                "lineNumber": 65,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1248,6 +1388,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1269,6 +1411,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1291,6 +1435,8 @@
               "<string>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1320,6 +1466,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1341,6 +1489,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1357,6 +1507,8 @@
         "label": "KibanaFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1378,6 +1530,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1392,6 +1546,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1414,6 +1570,8 @@
                   "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+                "lineNumber": 182,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1429,6 +1587,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1443,6 +1603,8 @@
               "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1457,6 +1619,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1468,6 +1632,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1482,6 +1648,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1496,6 +1664,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1510,6 +1680,8 @@
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1524,6 +1696,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1538,6 +1712,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1552,6 +1728,8 @@
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1566,6 +1744,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1580,6 +1760,8 @@
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1594,6 +1776,8 @@
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1608,6 +1792,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1619,6 +1805,8 @@
             "label": "excludeFromBasePrivileges",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1633,6 +1821,8 @@
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1654,6 +1844,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1675,6 +1867,8 @@
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1690,6 +1884,8 @@
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1706,6 +1902,8 @@
               "{ [sectionId: string]: string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1722,6 +1920,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,6 +1947,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1763,6 +1965,8 @@
           "\nElasticsearch Feature privilege definition"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1779,6 +1983,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1795,6 +2001,8 @@
               "{ [indexName: string]: string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1813,6 +2021,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "trackAdoption": false,
@@ -1838,6 +2048,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1854,6 +2066,8 @@
           "\nFeature privilege definition"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1870,6 +2084,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1886,6 +2102,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1902,6 +2120,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1918,6 +2138,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1934,6 +2156,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1950,6 +2174,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1966,6 +2192,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1994,6 +2222,8 @@
               " | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,6 +2240,8 @@
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2026,6 +2258,8 @@
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2044,6 +2278,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2068,6 +2304,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 323,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2108,6 +2346,8 @@
               "[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 330,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2124,6 +2364,8 @@
           "\nDescribes public Features plugin contract returned at the `setup` stage."
         ],
         "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2146,6 +2388,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2166,6 +2410,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+                "lineNumber": 44,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2192,6 +2438,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2212,6 +2460,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+                "lineNumber": 46,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2242,6 +2492,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -2453,6 +2705,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -2482,6 +2736,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2518,6 +2774,8 @@
               "; }>"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2539,6 +2797,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "lineNumber": 46,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2553,6 +2813,8 @@
                   "FeaturePrivilegeIteratorOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/feature_privilege_iterator.ts",
+                "lineNumber": 47,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2587,6 +2849,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2608,6 +2872,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2622,6 +2888,8 @@
                   "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -2637,6 +2905,8 @@
                       "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                     ],
                     "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 23,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2655,6 +2925,8 @@
         "label": "FeaturesPluginStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2677,6 +2949,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2711,6 +2985,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2734,6 +3010,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/plugin.ts",
+                "lineNumber": 92,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2754,6 +3032,8 @@
           "\nDescribes parameters used to retrieve all Kibana features (for public consumers)."
         ],
         "path": "x-pack/platform/plugins/shared/features/server/feature_registry.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2767,6 +3047,8 @@
               "\nIf true, deprecated features will be omitted. For backward compatibility reasons, deprecated features are included\nin the result by default."
             ],
             "path": "x-pack/platform/plugins/shared/features/server/feature_registry.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2783,6 +3065,8 @@
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2798,6 +3082,8 @@
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2811,6 +3097,8 @@
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2827,6 +3115,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2843,6 +3133,8 @@
               "AppCategory"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2859,6 +3151,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2875,6 +3169,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2891,6 +3187,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2907,6 +3205,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2923,6 +3223,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2939,6 +3241,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2956,6 +3260,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2972,6 +3278,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3006,6 +3314,8 @@
               "; } | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3030,6 +3340,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3046,6 +3358,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3064,6 +3378,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3080,6 +3396,8 @@
               "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3118,6 +3436,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3141,6 +3461,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3155,6 +3477,8 @@
               "(licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3170,6 +3494,8 @@
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
                 "path": "x-pack/platform/plugins/shared/features/server/feature_privilege_iterator/sub_feature_privilege_iterator.ts",
+                "lineNumber": 19,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3191,6 +3517,8 @@
           "RegExp"
         ],
         "path": "x-pack/platform/plugins/shared/features/server/feature_schema.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3207,6 +3535,8 @@
         "label": "ElasticsearchFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3221,6 +3551,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3267,6 +3599,8 @@
                   ">; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+                "lineNumber": 65,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3282,6 +3616,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3303,6 +3639,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3325,6 +3663,8 @@
               "<string>; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3354,6 +3694,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3375,6 +3717,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3391,6 +3735,8 @@
         "label": "KibanaFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3412,6 +3758,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3426,6 +3774,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3448,6 +3798,8 @@
                   "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>[] | undefined; privilegesTooltip?: string | undefined; reserved?: Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+                "lineNumber": 182,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3463,6 +3815,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3477,6 +3831,8 @@
               "Readonly<{ readonly notice: string; readonly replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3491,6 +3847,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3502,6 +3860,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3516,6 +3876,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3530,6 +3892,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3544,6 +3908,8 @@
               "{ readonly id: string; readonly label: string; readonly ariaLabel?: string | undefined; readonly order?: number | undefined; readonly euiIconType?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3558,6 +3924,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3572,6 +3940,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3586,6 +3956,8 @@
               "Readonly<{ [x: string]: readonly string[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3600,6 +3972,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3614,6 +3988,8 @@
               "Readonly<{ all: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; read: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }> | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3628,6 +4004,8 @@
               "readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3642,6 +4020,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3653,6 +4033,8 @@
             "label": "excludeFromBasePrivileges",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3667,6 +4049,8 @@
               "Readonly<{ description: string; privileges: readonly Readonly<{ id: string; privilege: Readonly<{ excludeFromBasePrivileges?: boolean | undefined; requireAllSpaces?: boolean | undefined; disabled?: boolean | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; app?: readonly string[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; ui: readonly string[]; composedOf?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | Readonly<{ default: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; minimal: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[]; }> | undefined; }>; }>[]; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3688,6 +4072,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3704,6 +4090,8 @@
         "label": "SubFeature",
         "description": [],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3718,6 +4106,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3740,6 +4130,8 @@
                   "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+                "lineNumber": 107,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3755,6 +4147,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3777,6 +4171,8 @@
               "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3788,6 +4184,8 @@
             "label": "requireAllSpaces",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3799,6 +4197,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3821,6 +4221,8 @@
               "; privileges: readonly Readonly<{ id: string; name: string; includeIn: \"none\" | \"all\" | \"read\"; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; replacedBy?: readonly Readonly<{ feature: string; privileges: readonly string[]; }>[] | undefined; alerting?: Readonly<{ rule?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; enable?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; manual_run?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; alert?: Readonly<{ all?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; read?: readonly Readonly<{ ruleTypeId: string; consumers: readonly string[]; }>[] | undefined; }> | undefined; }> | undefined; cases?: Readonly<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; }> | undefined; disabled?: boolean | undefined; ui: readonly string[]; app?: readonly string[] | undefined; management?: Readonly<{ [x: string]: readonly string[]; }> | undefined; catalogue?: readonly string[] | undefined; api?: readonly string[] | undefined; requireAllSpaces?: boolean | undefined; savedObject: Readonly<{ all: readonly string[]; read: readonly string[]; }>; }>[]; }>[]; description?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3842,6 +4244,8 @@
           "\nInterface for registering an Elasticsearch feature.\nFeature registration allows plugins to hide their applications based\non configured cluster or index privileges."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3857,6 +4261,8 @@
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3873,6 +4279,8 @@
               "{ [sectionId: string]: string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3889,6 +4297,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3914,6 +4324,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/elasticsearch_feature.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3930,6 +4342,8 @@
           "\nElasticsearch Feature privilege definition"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3946,6 +4360,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3962,6 +4378,8 @@
               "{ [indexName: string]: string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3980,6 +4398,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": true,
             "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "trackAdoption": false,
@@ -4005,6 +4425,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_elasticsearch_privileges.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4021,6 +4443,8 @@
           "\nFeature privilege definition"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4037,6 +4461,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4053,6 +4479,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4069,6 +4497,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4085,6 +4515,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4101,6 +4533,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4117,6 +4551,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4133,6 +4569,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4161,6 +4599,8 @@
               " | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4177,6 +4617,8 @@
               "{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4193,6 +4635,8 @@
               "{ all: readonly string[]; read: readonly string[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4211,6 +4655,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4235,6 +4681,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 323,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4275,6 +4723,8 @@
               "[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges.ts",
+            "lineNumber": 330,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4291,6 +4741,8 @@
           "\nDefines a reference to a set of privileges of a specific feature."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4304,6 +4756,8 @@
               "\nThe ID of the feature."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4320,6 +4774,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/feature_kibana_privileges_reference.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4336,6 +4792,8 @@
           "\nInterface for registering a feature.\nFeature registration allows plugins to hide their applications with spaces,\nand secure access when configured for security."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4351,6 +4809,8 @@
               "\nUnique identifier for this feature.\nThis identifier is also used when generating UI Capabilities.\n"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4364,6 +4824,8 @@
               "\nDisplay name for this feature.\nThis will be displayed to end-users, so a translatable string is advised for i18n."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4380,6 +4842,8 @@
               "string | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4396,6 +4860,8 @@
               "AppCategory"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4412,6 +4878,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4428,6 +4896,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4444,6 +4914,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4460,6 +4932,8 @@
               "readonly string[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4476,6 +4950,8 @@
               "{ [sectionId: string]: readonly string[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4492,6 +4968,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4509,6 +4987,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4525,6 +5005,8 @@
               "readonly string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4559,6 +5041,8 @@
               "; } | null"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4583,6 +5067,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4599,6 +5085,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4617,6 +5105,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4633,6 +5123,8 @@
               "Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4649,6 +5141,8 @@
           "\nConfiguration for a sub-feature."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4662,6 +5156,8 @@
               "Display name for this sub-feature"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4678,6 +5174,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4694,6 +5192,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4718,6 +5218,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4734,6 +5236,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4768,6 +5272,8 @@
           ", \"excludeFromBasePrivileges\" | \"composedOf\" | \"replacedBy\">"
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4781,6 +5287,8 @@
               "\nIdentifier for this privilege. Must be unique across all other privileges within a feature."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4794,6 +5302,8 @@
               "\nThe display name for this privilege."
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4810,6 +5320,8 @@
               "\"none\" | \"all\" | \"read\""
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4826,6 +5338,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4850,6 +5364,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4866,6 +5382,8 @@
           "\nConfiguration for a sub-feature privilege group."
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4882,6 +5400,8 @@
               "\"mutually_exclusive\" | \"independent\""
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4906,6 +5426,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4928,6 +5450,8 @@
           "\"mutually_exclusive\" | \"independent\""
         ],
         "path": "x-pack/platform/plugins/shared/features/common/sub_feature.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

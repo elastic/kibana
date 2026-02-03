@@ -150,7 +150,17 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 const serviceMapDependencyNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
-    query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
+    query: t.intersection([
+      t.type({
+        dependencies: t.union([t.string, t.array(t.string)]),
+      }),
+      t.partial({
+        sourceServiceName: t.string,
+      }),
+      environmentRt,
+      rangeRt,
+      offsetRt,
+    ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
@@ -166,12 +176,13 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencyName, environment, start, end, offset },
+      query: { dependencies, sourceServiceName, environment, start, end, offset },
     } = params;
 
     return getServiceMapDependencyNodeInfo({
       apmEventClient,
-      dependencyName,
+      sourceServiceName,
+      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
       start,
       end,
       environment,

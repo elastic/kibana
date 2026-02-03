@@ -70,7 +70,7 @@ export interface StreamlangValidationOptions {
    * List of reserved/forbidden field names that cannot be modified by processors
    */
   reservedFields: string[];
-  streamType?: 'classic' | 'wired';
+  streamType: 'classic' | 'wired';
 }
 
 export interface StreamlangValidationResult {
@@ -239,6 +239,18 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'join':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
+    case 'concat':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -343,7 +355,8 @@ function getProcessorOutputType(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
-      // Dissect, replace, uppercase, lowercase, and trim always produce string output
+    case 'concat':
+      // Dissect, replace, uppercase, lowercase, trim, and concat always produce string output
       return 'string';
 
     case 'date':
@@ -378,6 +391,9 @@ function getProcessorOutputType(
       // Comparison expressions (eq, neq, lt, lte, gt, gte) return boolean
       // All other expressions return number
       return inferMathExpressionReturnType(processor.expression);
+
+    case 'join':
+      return 'string';
 
     case 'remove':
     case 'remove_by_prefix':
@@ -446,6 +462,18 @@ function getExpectedInputType(
     case 'trim':
       // Uppercase, lowercase, and trim require string input
       if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'join':
+      if (processor.from.some((from) => from === fieldName)) {
+        return ['string'];
+      }
+      return null;
+
+    case 'concat':
+      if (processor.from.some((from) => from.type === 'field' && from.value === fieldName)) {
         return ['string'];
       }
       return null;
@@ -524,6 +552,14 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'math':
         // Math expressions expect numeric inputs for all field references
         fieldsUsed.push(...extractFieldsFromMathExpression(step.expression));
+        break;
+      case 'join':
+        fieldsUsed.push(...step.from);
+        break;
+      case 'concat':
+        fieldsUsed.push(
+          ...step.from.filter((from) => from.type === 'field').map((from) => from.value)
+        );
         break;
       case 'append':
       case 'drop_document':
@@ -748,6 +784,8 @@ function validateProcessorValues(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
+    case 'join':
+    case 'concat':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`install footer should render 1`] = `
+exports[`remove footer should render 1`] = `
 <div
   class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
 >

@@ -41,6 +41,7 @@ describe('findRuleTemplates', () => {
     type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'Template 1',
+      description: 'My first template',
       ruleTypeId: 'test.rule.type',
       schedule: { interval: '1m' },
       params: { foo: 'bar' },
@@ -59,6 +60,16 @@ describe('findRuleTemplates', () => {
       schedule: { interval: '5m' },
       params: { baz: 123 },
       tags: ['tag2'],
+      artifacts: {
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+        ],
+        investigation_guide: {
+          blob: 'http://example.com/guide',
+        },
+      },
     },
     score: 1,
     references: [],
@@ -85,6 +96,7 @@ describe('findRuleTemplates', () => {
         {
           id: 'template-1',
           name: 'Template 1',
+          description: 'My first template',
           ruleTypeId: 'test.rule.type',
           schedule: { interval: '1m' },
           params: { foo: 'bar' },
@@ -97,6 +109,16 @@ describe('findRuleTemplates', () => {
           schedule: { interval: '5m' },
           params: { baz: 123 },
           tags: ['tag2'],
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
+            investigation_guide: {
+              blob: 'http://example.com/guide',
+            },
+          },
         },
       ],
     });
@@ -106,7 +128,7 @@ describe('findRuleTemplates', () => {
       page: 1,
       perPage: 10,
       search: undefined,
-      searchFields: ['name', 'tags'],
+      searchFields: ['name', 'tags', 'description'],
       defaultSearchOperator: undefined,
       sortField: undefined,
       sortOrder: undefined,
@@ -244,7 +266,7 @@ describe('findRuleTemplates', () => {
       page: 2,
       perPage: 5,
       search: 'my template',
-      searchFields: ['name', 'tags'],
+      searchFields: ['name', 'tags', 'description'],
       defaultSearchOperator: 'AND',
       sortField: 'name.keyword',
       sortOrder: 'desc',

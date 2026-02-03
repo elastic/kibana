@@ -1109,7 +1109,7 @@ export function registerConnectorRoutes({
 
         const savedObjects = _core.savedObjects;
 
-        const agentPolicyService = start.fleet!.agentPolicyService;
+        const agentlessPolicyService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
 
@@ -1119,7 +1119,7 @@ export function registerConnectorRoutes({
           soClient,
           client.asCurrentUser,
           packagePolicyService,
-          agentPolicyService,
+          agentlessPolicyService,
           agentService,
           log
         );

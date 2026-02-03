@@ -739,6 +739,81 @@ describe('.inlineParams()', () => {
       expect(query.getParams()).toEqual({});
     });
   });
+
+  describe('array params', () => {
+    test('can inline integer array', () => {
+      const query = esql(`FROM index | WHERE MV_CONTAINS(?values, field)`, {
+        values: [1, 2, 3],
+      });
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS(?values, field)');
+      expect(query.getParams()).toEqual({ values: [1, 2, 3] });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS([1, 2, 3], field)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can inline string array', () => {
+      const query = esql(`FROM index | WHERE MV_CONTAINS(?values, field)`, {
+        values: ['a', 'b', 'c'],
+      });
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS(?values, field)');
+      expect(query.getParams()).toEqual({ values: ['a', 'b', 'c'] });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS(["a", "b", "c"], field)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can inline boolean array', () => {
+      const query = esql(`FROM index | WHERE MV_CONTAINS(?values, field)`, {
+        values: [true, false],
+      });
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS(?values, field)');
+      expect(query.getParams()).toEqual({ values: [true, false] });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS([TRUE, FALSE], field)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can inline array with template syntax', () => {
+      const values = [1, 2, 3];
+      const query = esql`FROM index | WHERE MV_CONTAINS(${{ values }}, field)`;
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS(?values, field)');
+      expect(query.getParams()).toEqual({ values: [1, 2, 3] });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MV_CONTAINS([1, 2, 3], field)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('throws on empty array', () => {
+      const query = esql(`FROM index | WHERE MV_CONTAINS(?values, field)`, {
+        values: [],
+      });
+
+      expect(() => query.inlineParams()).toThrow('Cannot create an empty list literal');
+    });
+
+    test('throws on mixed type array', () => {
+      const query = esql(`FROM index | WHERE MV_CONTAINS(?values, field)`, {
+        values: [1, 'a', 2] as unknown as number[],
+      });
+
+      expect(() => query.inlineParams()).toThrow(
+        'All list elements must be of the same type. Expected "number", but found "string" at index 1'
+      );
+    });
+  });
 });
 
 describe('.toRequest()', () => {

@@ -54,7 +54,18 @@ export const createSearchToolGraph = ({
   logger: Logger;
   events: ToolEventEmitter;
 }) => {
-  const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
+  const getTools = (state: StateType) => {
+    const relevanceTool = createRelevanceSearchTool({ model, esClient, events, logger });
+    const nlSearchTool = createNaturalLanguageSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      rowLimit: state.rowLimit,
+      customInstructions: state.customInstructions,
+    });
+    return [relevanceTool, nlSearchTool];
+  };
 
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
@@ -93,17 +104,8 @@ export const createSearchToolGraph = ({
       })
     );
 
-    const nlSearchTool = createNaturalLanguageSearchTool({
-      model,
-      esClient,
-      events,
-      logger,
-      rowLimit: state.rowLimit,
-      customInstructions: state.customInstructions,
-    });
-
-    const tools = [relevanceTool, nlSearchTool];
-    const searchModel = model.chatModel.bindTools(tools).withConfig({
+    const tools = getTools(state);
+    const searchModel = model.chatModel.bindTools(tools, { tool_choice: 'any' }).withConfig({
       tags: ['agent-builder-search-tool'],
     });
 
@@ -125,16 +127,7 @@ export const createSearchToolGraph = ({
   };
 
   const executeTool = async (state: StateType) => {
-    const nlSearchTool = createNaturalLanguageSearchTool({
-      model,
-      esClient,
-      events,
-      logger,
-      rowLimit: state.rowLimit,
-      customInstructions: state.customInstructions,
-    });
-
-    const tools = [relevanceTool, nlSearchTool];
+    const tools = getTools(state);
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
     const toolNodeResult = await toolNode.invoke(state.messages);

@@ -139,6 +139,7 @@ export const GROK_PATTERN_DATASETS: Record<string, PatternExtractionEvaluationDa
     name: 'Web Server Logs - Grok Extraction',
     description: 'Apache and Nginx access and error logs with various formats',
     examples: [
+      // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       // Apache Access Log - Common Log Format
       {
         input: {
@@ -1501,6 +1502,7 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
     name: 'Structured Logs - Dissect Extraction',
     description: 'Consistently formatted logs with clear delimiters',
     examples: [
+      // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       // Simple Application Log with Brackets
       {
         input: {

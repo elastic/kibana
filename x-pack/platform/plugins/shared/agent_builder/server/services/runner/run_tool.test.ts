@@ -11,7 +11,9 @@ import type {
   AgentBuilderToolEvent,
   ToolHandlerFn,
 } from '@kbn/agent-builder-server';
+import type { ScopedRunnerRunInternalToolParams } from '@kbn/agent-builder-server/runner';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
+import { ConfirmationStatus, AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../test_utils';
 import {
   createScopedRunnerDepsMock,
@@ -19,10 +21,13 @@ import {
   createToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
-import { runTool } from './run_tool';
+import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-jest.mock('@kbn/agent-builder-server/tools/utils');
+jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
+  ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
+  getToolResultId: jest.fn(),
+}));
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 
@@ -211,6 +216,268 @@ describe('runTool', () => {
       data: {
         message: 'some progress',
       },
+    });
+  });
+});
+
+describe('runInternalTool - confirmation policy', () => {
+  let runnerDeps: CreateScopedRunnerDepsMock;
+  let runnerManager: RunnerManager;
+  let tool: MockedTool;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+
+  beforeEach(() => {
+    runnerDeps = createScopedRunnerDepsMock();
+    runnerManager = new RunnerManager(runnerDeps);
+
+    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+
+    toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+    tool = createMockedTool({});
+    tool.getSchema.mockReturnValue(
+      z.object({
+        foo: z.string(),
+      })
+    );
+    tool.getHandler.mockReturnValue(toolHandler);
+  });
+
+  describe('when source is "agent"', () => {
+    it('should prompt user when confirmation.askUser is "once" and unprompted', async () => {
+      tool.confirmation = { askUser: 'once' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'agent',
+      };
+
+      const result = await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(result).toHaveProperty('prompt');
+      expect(result.prompt).toEqual(
+        expect.objectContaining({
+          type: AgentPromptType.confirmation,
+          id: 'tools.test-tool.confirmation',
+        })
+      );
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('should prompt user when confirmation.askUser is "always" and unprompted', async () => {
+      tool.confirmation = { askUser: 'always' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-456',
+        source: 'agent',
+      };
+
+      const result = await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(result).toHaveProperty('prompt');
+      expect(result.prompt).toEqual(
+        expect.objectContaining({
+          type: AgentPromptType.confirmation,
+          id: 'tools.test-tool.confirmation.call-456',
+        })
+      );
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('should execute tool when confirmation status is accepted', async () => {
+      tool.confirmation = { askUser: 'once' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return error when confirmation status is rejected', async () => {
+      tool.confirmation = { askUser: 'once' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.rejected,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'agent',
+      };
+
+      const result = await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(result).toHaveProperty('results');
+      expect(result.results).toHaveLength(1);
+      expect(result.results![0]).toEqual(
+        expect.objectContaining({
+          type: ToolResultType.error,
+        })
+      );
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('should skip confirmation when confirmation.askUser is "never"', async () => {
+      tool.confirmation = { askUser: 'never' };
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(runnerDeps.promptManager.getConfirmationStatus).not.toHaveBeenCalled();
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip confirmation when confirmation is undefined', async () => {
+      tool.confirmation = undefined;
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(runnerDeps.promptManager.getConfirmationStatus).not.toHaveBeenCalled();
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when source is not "agent"', () => {
+    it('should skip confirmation regardless of policy', async () => {
+      tool.confirmation = { askUser: 'always' };
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-123',
+        source: 'user',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(runnerDeps.promptManager.getConfirmationStatus).not.toHaveBeenCalled();
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('"once" vs "always" mode', () => {
+    it('should use the same confirmation ID for multiple calls in "once" mode', async () => {
+      tool.confirmation = { askUser: 'once' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params1: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-1',
+        source: 'agent',
+      };
+
+      const params2: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'baz' },
+        toolCallId: 'call-2',
+        source: 'agent',
+      };
+
+      const result1 = await runInternalTool({
+        toolExecutionParams: params1,
+        parentManager: runnerManager,
+      });
+
+      const result2 = await runInternalTool({
+        toolExecutionParams: params2,
+        parentManager: runnerManager,
+      });
+
+      // Both should have the same confirmation ID (base ID without toolCallId)
+      expect(result1.prompt?.id).toBe('tools.test-tool.confirmation');
+      expect(result2.prompt?.id).toBe('tools.test-tool.confirmation');
+    });
+
+    it('should use different confirmation IDs for multiple calls in "always" mode', async () => {
+      tool.confirmation = { askUser: 'always' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params1: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-1',
+        source: 'agent',
+      };
+
+      const params2: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'baz' },
+        toolCallId: 'call-2',
+        source: 'agent',
+      };
+
+      const result1 = await runInternalTool({
+        toolExecutionParams: params1,
+        parentManager: runnerManager,
+      });
+
+      const result2 = await runInternalTool({
+        toolExecutionParams: params2,
+        parentManager: runnerManager,
+      });
+
+      // Each should have a different confirmation ID (includes toolCallId)
+      expect(result1.prompt?.id).toBe('tools.test-tool.confirmation.call-1');
+      expect(result2.prompt?.id).toBe('tools.test-tool.confirmation.call-2');
     });
   });
 });

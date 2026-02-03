@@ -53,7 +53,14 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
       }
 
       if (shouldInclude) {
-        stepInputs.push((node as EnterForeachNode).configuration.foreach);
+        // Extract template variables from the foreach expression (e.g., "{{ inputs.people }}" -> "inputs.people")
+        const foreachVariables = extractTemplateVariables(foreachInput);
+        if (foreachVariables.length > 0) {
+          stepInputs.push(...foreachVariables);
+        } else {
+          // If no template variables found, use the raw value (for cases like "steps.analysis.output")
+          stepInputs.push(foreachInput);
+        }
         stepInputsKey = enterForeachNode.stepId;
       }
     } else {

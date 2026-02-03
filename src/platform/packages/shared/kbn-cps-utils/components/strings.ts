@@ -10,6 +10,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
+  allButtonLabel: () =>
+    i18n.translate('cpsUtils.projectPicker.allButtonLabel', {
+      defaultMessage: 'All',
+    }),
   getProjectPickerButtonAriaLabel: () =>
     i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',

@@ -253,8 +253,15 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         return { cookieValue, cookieHeader };
       };
 
-      // Hide the announcements (including the sidenav tour) in the default space
-      await kbnClient.uiSettings.update({ hideAnnouncements: true });
+      // Hide the announcements (including the sidenav tour) in advance to prevent
+      // it from interfering with test flows
+      await kbnClient.uiSettings.updateGlobal({ hideAnnouncements: true });
+
+      // disable solution tour on ECH
+      if (config.isCloud && !config.serverless) {
+        log.info('Disabling Space Solution Tour globally on ECH deployment');
+        await kbnClient.uiSettings.updateGlobal({ showSpaceSolutionTour: false });
+      }
 
       await use({
         session,

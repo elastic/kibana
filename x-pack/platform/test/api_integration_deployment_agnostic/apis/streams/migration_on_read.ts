@@ -58,7 +58,7 @@ const migratedProcessing = {
         {
           set: {
             field: 'message',
-            if: "\n  try {\n  if (($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString() == \"oldValue\") || $('message', null) == \"oldValue\"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n",
+            if: '\n  try {\n  \n  def val_message = $(\'message\', null); if (val_message instanceof List && val_message.size() == 1) { val_message = val_message[0]; }\n  \n  \n  if ((val_message !== null && ((val_message instanceof Number && val_message.toString() == "oldValue") || val_message == "oldValue"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n',
             value: 'newValue',
           },
         },

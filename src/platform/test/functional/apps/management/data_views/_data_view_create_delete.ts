@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const es = getService('es');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
@@ -49,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('without creating index pattern', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickAddNewIndexPatternButton();
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await testSubjects.find('createDataViewButton');
       });
     });
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         // verify an error is displayed
         await find.byClassName('euiFormErrorText');
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
       });
     });
 
@@ -217,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
         ).to.be('logs*');
 
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await testSubjects.getVisibleText('currentIndexPatternTimeField')).to.be('utc_time');
 
@@ -244,7 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
         ).to.be('logstash-*');
 
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('currentIndexPatternTimeField');
       });

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": ["@elastic/actionable-obs-team"],
+  "owner": ["@elastic/observability-ui"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -40,7 +40,8 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams"
+      "streams",
+      "kql"
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
@@ -66,7 +67,6 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"

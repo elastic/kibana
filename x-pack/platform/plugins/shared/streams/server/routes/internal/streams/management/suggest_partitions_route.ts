@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '@kbn/streams-ai';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -72,10 +71,6 @@ export const suggestPartitionsRoute = createServerRoute({
     });
 
     const stream = await streamsClient.getStream(params.path.name);
-
-    if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
-    }
 
     const partitionsPromise = partitionStream({
       definition: stream,

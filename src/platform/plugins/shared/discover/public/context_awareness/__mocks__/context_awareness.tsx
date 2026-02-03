@@ -39,8 +39,8 @@ export const createContextAwarenessMocks = ({
         ...prev(params),
         rootProfile: () => <>root-profile</>,
       })),
-      getAdditionalCellActions: jest.fn((prev) => () => [
-        ...prev(),
+      getAdditionalCellActions: jest.fn((prev) => (params) => [
+        ...prev(params),
         {
           id: 'root-action',
           getDisplayName: () => 'Root action',
@@ -91,8 +91,8 @@ export const createContextAwarenessMocks = ({
         breakdownField: 'extension',
         hideChart: true,
       })),
-      getAdditionalCellActions: jest.fn((prev) => () => [
-        ...prev(),
+      getAdditionalCellActions: jest.fn((prev) => (params) => [
+        ...prev(params),
         {
           id: 'data-source-action',
           getDisplayName: () => 'Data source action',
@@ -137,9 +137,7 @@ export const createContextAwarenessMocks = ({
               id: 'doc_view_mock',
               title: 'Mock tab',
               order: 10,
-              component: () => {
-                return null;
-              },
+              render: () => <></>,
             });
             return prevValue.docViewsRegistry(registry);
           },

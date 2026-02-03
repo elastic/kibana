@@ -30,6 +30,8 @@
           "() => void"
         ],
         "path": "x-pack/packages/ai-infra/security-labs-artifact-builder/src/command.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

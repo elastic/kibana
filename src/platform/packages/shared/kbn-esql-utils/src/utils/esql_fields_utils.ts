@@ -8,6 +8,13 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { LeafPrinter, Walker } from '@kbn/esql-language';
+import type {
+  ESQLColumn,
+  ESQLList,
+  ESQLLiteral,
+  ESQLProperNode,
+} from '@kbn/esql-language/src/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
@@ -72,4 +79,47 @@ export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
 export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
   if (field.timeSeriesMetric === 'counter') return false;
   return isGroupable(field.type, field.esTypes?.[0]);
+};
+
+export type Terminal = ESQLColumn | ESQLLiteral | ESQLList;
+/**
+ * Retrieves a list of terminal nodes that were found in the field definition.
+ */
+export const getFieldTerminals = (definition: ESQLProperNode) => {
+  const terminals: Array<Terminal> = [];
+
+  Walker.walk(definition, {
+    visitLiteral(node) {
+      terminals.push(node);
+    },
+    visitColumn(node) {
+      terminals.push(node);
+    },
+    visitListLiteral(node) {
+      terminals.push(node);
+    },
+  });
+
+  return terminals;
+};
+
+/**
+ * Retrieves a formatted list of field names which were used for the new field
+ * construction. For example, in the below example, `x` and `y` are the
+ * existing "used" fields:
+ *
+ * ```
+ * STATS foo = agg(x) BY y, bar = x
+ * ```
+ */
+export const getUsedFields = (definition: ESQLProperNode) => {
+  const usedFields: Set<string> = new Set();
+
+  Walker.walk(definition, {
+    visitColumn(node) {
+      usedFields.add(LeafPrinter.column(node));
+    },
+  });
+
+  return usedFields;
 };

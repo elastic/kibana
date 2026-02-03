@@ -30,6 +30,8 @@
         "label": "DATA_CONNECTORS_FULL_TITLE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/data_connectors/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -45,6 +47,8 @@
           "\"/app/data_connectors\""
         ],
         "path": "x-pack/platform/plugins/shared/data_connectors/common/routes.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -57,6 +61,8 @@
         "label": "DATA_CONNECTORS_SHORT_TITLE",
         "description": [],
         "path": "x-pack/platform/plugins/shared/data_connectors/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -16,6 +17,7 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-plugin/server';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -38,34 +40,7 @@ export const dashboardLinkSchema = schema.object({
     meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        useCurrentFilters: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the filters and query from the origin dashboard',
-            },
-          })
-        ),
-        useCurrentDateRange: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the date range from the origin dashboard',
-            },
-          })
-        ),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: schema.maybe(dashboardNavigationOptionsSchema),
 });
 
 export const externalLinkSchema = schema.object({
@@ -112,10 +87,8 @@ export const layoutSchema = schema.maybe(
   })
 );
 
-export const linksSchema = schema.object(
+export const linksSchema = serializedTitlesSchema.extends(
   {
-    title: schema.string({ meta: { description: 'A human-readable title' } }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: linksArraySchema,
     layout: layoutSchema,
   },

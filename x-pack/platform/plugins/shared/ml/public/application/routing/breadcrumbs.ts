@@ -27,7 +27,7 @@ const stackManagementBreadcrumbText = i18n.translate(
 
 export const ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.anomalyDetectionManagementBreadcrumbLabel', {
-    defaultMessage: 'Anomaly Detection Jobs',
+    defaultMessage: 'Anomaly detection jobs',
   }),
   appId: 'anomaly_detection',
   path: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -44,7 +44,7 @@ export const CREATE_JOB_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
 
 export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.dataFrameAnalyticsManagementLabel', {
-    defaultMessage: 'Data Frame Analytics Jobs',
+    defaultMessage: 'Data frame analytics jobs',
   }),
   appId: 'analytics',
   path: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
@@ -53,7 +53,7 @@ export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbTyp
 
 export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.trainedModelManagementLabel', {
-    defaultMessage: 'Trained Models',
+    defaultMessage: 'Trained models',
   }),
   appId: 'trained_models',
   path: '',
@@ -71,7 +71,7 @@ export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumb
 
 export const SETTINGS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
-    defaultMessage: 'Anomaly Detection Settings',
+    defaultMessage: 'Anomaly detection settings',
   }),
   appId: 'ad_settings',
   path: '',
@@ -114,7 +114,7 @@ export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
-    defaultMessage: 'Data Visualizer',
+    defaultMessage: 'Data visualizer',
   }),
   href: '/datavisualizer',
   deepLinkId: 'ml:dataVisualizer',
@@ -145,39 +145,69 @@ export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.
 
 export const LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
-    defaultMessage: 'Log Rate Analysis',
+    defaultMessage: 'Log rate analysis',
   }),
   href: '/aiops/log_rate_analysis_index_select',
   deepLinkId: 'ml:logRateAnalysis',
 });
 
+export const LOG_RATE_ANALYSIS_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log rate analysis',
+  }),
+  href: '/aiops/log_rate_analysis',
+  deepLinkId: 'ml:logRateAnalysisPage',
+});
 export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
-    defaultMessage: 'Log Pattern Analysis',
+    defaultMessage: 'Log pattern analysis',
   }),
   href: '/aiops/log_categorization_index_select',
   deepLinkId: 'ml:logPatternAnalysis',
 });
 
+export const LOG_PATTERN_ANALYSIS_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
+    defaultMessage: 'Log pattern analysis',
+  }),
+  href: '/aiops/log_categorization',
+  deepLinkId: 'ml:logPatternAnalysisPage',
+});
 export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
-    defaultMessage: 'Change Point Detection',
+    defaultMessage: 'Change point detection',
   }),
   href: '/aiops/change_point_detection_index_select',
   deepLinkId: 'ml:changePointDetections',
 });
 
+export const CHANGE_POINT_DETECTION_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
+    defaultMessage: 'Change point detection',
+  }),
+  href: '/aiops/change_point_detection',
+  deepLinkId: 'ml:changePointDetectionsPage',
+});
+
 export const DATA_DRIFT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Data Drift',
+    defaultMessage: 'Data drift',
   }),
   href: '/data_drift_index_select',
   deepLinkId: 'ml:dataDrift',
 });
 
+export const DATA_DRIFT_PAGE: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Data drift',
+  }),
+  href: '/data_drift',
+  deepLinkId: 'ml:dataDriftPage',
+});
+
 export const DATA_DRIFT_INDEX_SELECT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Select Data View',
+    defaultMessage: 'Select data view',
   }),
   href: '/data_drift_index_select',
   deepLinkId: 'ml:dataDrift',
@@ -199,13 +229,17 @@ type ManagementBreadcrumb = keyof typeof managementBreadcrumbs;
 const breadcrumbs = {
   ML_BREADCRUMB,
   DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
+  DATA_DRIFT_PAGE,
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
   AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION,
   LOG_RATE_ANALYSIS,
+  LOG_RATE_ANALYSIS_PAGE,
   LOG_PATTERN_ANALYSIS,
+  LOG_PATTERN_ANALYSIS_PAGE,
   CHANGE_POINT_DETECTION,
+  CHANGE_POINT_DETECTION_PAGE,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 

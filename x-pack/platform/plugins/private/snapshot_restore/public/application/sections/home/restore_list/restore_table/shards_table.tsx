@@ -227,6 +227,9 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
     <EuiBasicTable
       css={styles.shardsTable}
       compressed={true}
+      tableCaption={i18n.translate('xpack.snapshotRestore.restoreList.shardTable.caption', {
+        defaultMessage: 'Snapshot restore shard details',
+      })}
       // @ts-ignore `shards` is a Partial<> but this component treats a number of fields as required
       items={shards}
       columns={columns}

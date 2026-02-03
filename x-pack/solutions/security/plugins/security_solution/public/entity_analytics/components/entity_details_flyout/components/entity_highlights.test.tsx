@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { EntityHighlightsAccordion } from './entity_highlights';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
@@ -14,17 +14,17 @@ import { TestProviders } from '../../../../common/mock';
 // Mock the hooks
 const mockUseFetchAnonymizationFields = jest.fn();
 const mockUseAssistantContext = jest.fn();
-const mockUseLoadConnectors = jest.fn();
+const mockUseLoadInferenceConnectors = jest.fn();
 const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
+const mockUseAgentBuilderAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
 const mockUseHasEntityHighlightsLicense = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
   useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-  useLoadConnectors: () => mockUseLoadConnectors(),
   AssistantProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="assistant-provider">{children}</div>
   ),
@@ -40,6 +40,10 @@ jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
 
 jest.mock('../../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: () => mockUseAssistantAvailability(),
+}));
+
+jest.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => ({
+  useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
 }));
 
 jest.mock('../../../../onboarding/components/hooks/use_stored_state', () => ({
@@ -74,6 +78,10 @@ jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => 
   }),
 }));
 
+jest.mock('../hooks/use_inference_connectors', () => ({
+  useLoadInferenceConnectors: () => mockUseLoadInferenceConnectors(),
+}));
+
 describe('EntityHighlights', () => {
   const defaultProps = {
     entityIdentifier: 'test-user',
@@ -100,25 +108,32 @@ describe('EntityHighlights', () => {
     settings: { client: { get: jest.fn() } },
   };
   const defaultLoadConnectors = {
-    data: [
-      {
-        id: 'connector-1',
-        name: 'Test Connector',
-        actionTypeId: '.gen-ai',
-      },
-    ],
+    data: {
+      hasConnectors: true,
+      connectors: [
+        {
+          connectorId: 'connector-1',
+          name: 'Test Connector',
+          actionTypeId: '.gen-ai',
+        },
+      ],
+    },
   };
   const defaultSpaceId = 'default';
   const defaultStoredAssistantConnectorId = ['connector-1', jest.fn()];
   const defaultAssistantAvailability = {
     hasAssistantPrivilege: true,
-    isAssistantEnabled: true,
+    hasConnectorsReadPrivilege: true,
     isAssistantVisible: true,
+  };
+  const defaultAgentBuilderAvailability = {
+    hasAgentBuilderPrivilege: true,
   };
   const defaultFetchEntityDetailsHighlights = {
     fetchEntityHighlights: mockFetchEntityHighlights,
     isChatLoading: false,
     result: null,
+    error: null,
   };
 
   beforeEach(() => {
@@ -127,10 +142,11 @@ describe('EntityHighlights', () => {
     // Set up default mock implementations
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
-    mockUseLoadConnectors.mockReturnValue(defaultLoadConnectors);
+    mockUseLoadInferenceConnectors.mockReturnValue(defaultLoadConnectors);
     mockUseSpaceId.mockReturnValue(defaultSpaceId);
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
+    mockUseAgentBuilderAvailability.mockReturnValue(defaultAgentBuilderAvailability);
     mockUseFetchEntityDetailsHighlights.mockReturnValue(defaultFetchEntityDetailsHighlights);
     mockUseHasEntityHighlightsLicense.mockReturnValue(true);
   });
@@ -144,11 +160,24 @@ describe('EntityHighlights', () => {
     expect(screen.getByTestId('asset-criticality-selector')).toBeInTheDocument();
   });
 
-  it('returns null when assistant is disabled due to no privileges', () => {
-    mockUseAssistantAvailability.mockReturnValue({
+  it('returns null when user has insufficent license', () => {
+    mockUseHasEntityHighlightsLicense.mockReturnValueOnce(false);
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
+  });
+
+  it('returns null when user has no assistant privilege or agent builder privilege', () => {
+    mockUseAssistantAvailability.mockReturnValueOnce({
       hasAssistantPrivilege: false,
-      isAssistantEnabled: true,
-      isAssistantVisible: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantVisible: false,
+    });
+    mockUseAgentBuilderAvailability.mockReturnValueOnce({
+      hasAgentBuilderPrivilege: false,
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
@@ -158,11 +187,14 @@ describe('EntityHighlights', () => {
     expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
-  it('returns null when assistant is not enabled', () => {
-    mockUseAssistantAvailability.mockReturnValue({
+  it('returns null when user has no connector read privilege', () => {
+    mockUseAssistantAvailability.mockReturnValueOnce({
       hasAssistantPrivilege: true,
-      isAssistantEnabled: false,
       isAssistantVisible: true,
+      hasConnectorsReadPrivilege: false,
+    });
+    mockUseAgentBuilderAvailability.mockReturnValueOnce({
+      hasAgentBuilderPrivilege: true,
     });
 
     render(<EntityHighlightsAccordion {...defaultProps} />, {
@@ -172,7 +204,59 @@ describe('EntityHighlights', () => {
     expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
-  it('shows generate button when no assistant result and not loading', () => {
+  it('renders if user has assistant privilege and no agent builder privilege', () => {
+    mockUseAssistantAvailability.mockReturnValueOnce({
+      hasAssistantPrivilege: true,
+      isAssistantVisible: true,
+      hasConnectorsReadPrivilege: true,
+    });
+    mockUseAgentBuilderAvailability.mockReturnValueOnce({
+      hasAgentBuilderPrivilege: false,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it('renders if user has agent builder privilege and no assistant privilege', () => {
+    mockUseAssistantAvailability.mockReturnValueOnce({
+      hasAssistantPrivilege: false,
+      isAssistantVisible: false,
+      hasConnectorsReadPrivilege: true,
+    });
+    mockUseAgentBuilderAvailability.mockReturnValueOnce({
+      hasAgentBuilderPrivilege: true,
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it(`shows "Add Connector" button when no assistant result, not loading and no connectors`, () => {
+    mockUseLoadInferenceConnectors.mockReturnValueOnce({
+      data: { hasConnectors: false, connectors: [] },
+    });
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const addConnectorButton = screen.getByText('Add connector');
+    expect(addConnectorButton).toBeInTheDocument();
+    expect(addConnectorButton).not.toBeDisabled();
+    expect(
+      screen.getByText(
+        'No AI connector is configured. Please configure an AI connector to generate a summary.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it(`shows "Generate" button when no assistant result and not loading when connectors are available`, () => {
     render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
     });
@@ -193,22 +277,6 @@ describe('EntityHighlights', () => {
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
-  it('does not render generate button when no connector ID is available', () => {
-    mockUseLoadConnectors.mockReturnValue({ data: [] });
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
-
-    render(<EntityHighlightsAccordion {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'No AI connector is configured. Please configure an AI connector to generate a summary.'
-      )
-    ).toBeInTheDocument();
-  });
-
   it('shows loading state with skeleton text and loading message', () => {
     mockUseFetchEntityDetailsHighlights.mockReturnValue({
       ...defaultFetchEntityDetailsHighlights,
@@ -219,9 +287,7 @@ describe('EntityHighlights', () => {
       wrapper: TestProviders,
     });
 
-    expect(
-      screen.getByText('Generating AI highlights and recommended actions...')
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Generating AI summary and recommended actions/i)).toBeInTheDocument();
     expect(screen.getByTestId('euiSkeletonLoadingAriaWrapper')).toBeInTheDocument();
   });
 
@@ -267,6 +333,92 @@ describe('EntityHighlights', () => {
 
     // Component should still render without errors
     expect(screen.getByText('Entity summary')).toBeInTheDocument();
+  });
+
+  it('shows dismissible error banner when error is present', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByText('Error generating summary')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Due to an unexpected issue, LLM could not generate the summary. Please try again.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('entity-highlights-error-banner')).toBeInTheDocument();
+    expect(screen.getByText('Regenerate')).toBeInTheDocument();
+    // Empty state should be hidden while the error banner is visible
+    expect(screen.queryByText('Generate')).not.toBeInTheDocument();
+  });
+
+  it('hides error banner after dismiss', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const callout = screen.getByTestId('entity-highlights-error-banner');
+    expect(callout).toBeInTheDocument();
+    fireEvent.click(within(callout).getByLabelText('Dismiss this callout'));
+
+    expect(screen.queryByTestId('entity-highlights-error-banner')).not.toBeInTheDocument();
+    // Empty state is visible again (generate button exists)
+    expect(screen.getByText('Generate')).toBeInTheDocument();
+  });
+
+  it('shows error banner when a summary already exists', () => {
+    const mockAssistantResult = {
+      response: {
+        highlights: [
+          {
+            title: 'Key Insights',
+            text: 'Some summary text',
+          },
+        ],
+        recommendedActions: null,
+      },
+      replacements: {},
+      summaryAsText: '{"user": "test-user"}',
+      generatedAt: Date.now(),
+    };
+
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      result: mockAssistantResult,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('entity-highlights-error-banner')).toBeInTheDocument();
+    expect(screen.getByText('Key Insights')).toBeInTheDocument();
+  });
+
+  it('calls fetchEntityHighlights when regenerate button is clicked', () => {
+    mockUseFetchEntityDetailsHighlights.mockReturnValue({
+      ...defaultFetchEntityDetailsHighlights,
+      error: new Error('LLM failed'),
+    });
+
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    fireEvent.click(screen.getByText('Regenerate'));
+
+    expect(mockFetchEntityHighlights).toHaveBeenCalled();
   });
 
   it('renders with custom space ID', () => {

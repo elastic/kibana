@@ -180,14 +180,18 @@ export class McpClient {
       arguments: params.arguments,
     });
 
-    if (response.isError) {
-      throw new Error(
-        `Error calling tool ${params.name} with ${params.arguments}: ${response.error}`
-      );
-    }
-
     const content = response.content as Array<ContentPart | null | undefined>;
     const textParts = content.filter(isTextPart);
+
+    if (response.isError) {
+      // Tool execution errors are returned as text content parts
+      // See https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling
+      throw new Error(
+        `Error calling tool '${params.name}' with arguments '${JSON.stringify(
+          params.arguments
+        )}': ${textParts.map((part) => part.text).join('\n')}`
+      );
+    }
 
     return {
       content: textParts,

@@ -12,16 +12,14 @@ import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
+import { techPreviewLabel } from '../definitions/utils/shared';
 import { SuggestionCategory } from '../../shared/sorting/types';
 import {
   ESQL_STRING_TYPES,
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
+import { getPromqlParamDefinitions } from './promql/utils';
 
 function buildCharCompleteItem(
   label: string,
@@ -78,6 +76,7 @@ export const allStarConstant: ISuggestionItem = {
 export function buildMapKeySuggestion(
   paramName: string,
   valueType: MapValueType = 'string',
+  description?: string,
   options?: MapKeySuggestionOptions
 ): ISuggestionItem {
   const text = `"${paramName}": ${MAP_VALUE_SNIPPETS[valueType]}`;
@@ -88,7 +87,7 @@ export function buildMapKeySuggestion(
     text,
     asSnippet: isSnippet,
     kind: 'Constant',
-    detail: paramName,
+    detail: description || paramName,
     ...(options?.filterText && { filterText: options.filterText }),
     ...(options?.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
   });
@@ -173,6 +172,20 @@ export function buildMapValueCompleteItem(value: string): ISuggestionItem {
   };
 }
 
+export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
+  return getPromqlParamDefinitions().map(({ name, description }) =>
+    withAutoSuggest({
+      label: name,
+      text: `${name} = `,
+      kind: 'Value',
+      detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
+        defaultMessage: description,
+      }),
+      category: SuggestionCategory.VALUE,
+    })
+  );
+}
+
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
   i18n.translate('kbn-esql-language.esql.autocomplete.commaDoc', {
@@ -180,6 +193,16 @@ export const commaCompleteItem = buildCharCompleteItem(
   }),
   { sortText: 'B', quoted: false, category: SuggestionCategory.COMMA }
 );
+
+export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
+  text: 'by ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+});
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
@@ -400,6 +423,94 @@ export const rlikePatternItems: ISuggestionItem[] = [
       defaultMessage: 'Match to the end of the string',
     }),
     sortText: '1',
+  },
+];
+
+export const confidenceLevelValueItems: ISuggestionItem[] = [
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionLabel',
+      {
+        defaultMessage: 'High precision',
+      }
+    ),
+    text: '0.99',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionDetail',
+      {
+        defaultMessage: 'High precision (99%)',
+      }
+    ),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionLabel',
+      {
+        defaultMessage: 'Standard',
+      }
+    ),
+    text: '0.95',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionDetail',
+      {
+        defaultMessage: 'Standard (95%)',
+      }
+    ),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionLabel',
+      {
+        defaultMessage: 'Exploratory',
+      }
+    ),
+    text: '0.9',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionDetail',
+      {
+        defaultMessage: 'Exploratory (90%)',
+      }
+    ),
+  },
+];
+
+export const numOfRowsValueItems: ISuggestionItem[] = [
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KLabel', {
+      defaultMessage: '100K rows',
+    }),
+    text: '100000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KDetail', {
+      defaultMessage: 'Return up to 100,000 rows',
+    }),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KLabel', {
+      defaultMessage: '500K rows',
+    }),
+    text: '500000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KDetail', {
+      defaultMessage: 'Return up to 500,000 rows',
+    }),
+    category: SuggestionCategory.VALUE,
+  },
+  {
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MLabel', {
+      defaultMessage: '1M rows',
+    }),
+    text: '1000000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MDetail', {
+      defaultMessage: 'Return up to 1,000,000 rows',
+    }),
   },
 ];
 

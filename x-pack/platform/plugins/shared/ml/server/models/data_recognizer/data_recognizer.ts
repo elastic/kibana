@@ -555,7 +555,7 @@ export class DataRecognizer {
     end?: number,
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
-    estimateModelMemory: boolean = true,
+    estimateModelMemory?: boolean,
     applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
@@ -1205,7 +1205,7 @@ export class DataRecognizer {
    */
   private async _updateModelMemoryLimits(
     moduleConfig: Module,
-    estimateMML: boolean,
+    estimateMML?: boolean,
     start?: number,
     end?: number
   ) {
@@ -1213,7 +1213,7 @@ export class DataRecognizer {
       return;
     }
 
-    if (estimateMML && this._jobsForModelMemoryEstimation.length > 0) {
+    if (estimateMML !== false && this._jobsForModelMemoryEstimation.length > 0) {
       try {
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField =
@@ -1255,11 +1255,27 @@ export class DataRecognizer {
             latestMs
           );
 
-          if (!job.config.analysis_limits) {
-            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
+          const existingLimit = job.config.analysis_limits?.model_memory_limit;
+          let shouldUseEstimate = false;
+
+          if (!existingLimit || estimateMML === true) {
+            // Use estimate if no existing limit or estimateMML is explicitly true
+            shouldUseEstimate = true;
+          } else if (estimateMML === undefined && existingLimit) {
+            // Compare existing limit with estimate and use the larger one
+            // @ts-expect-error numeral missing value
+            const existingMMLBytes: number = numeral(existingLimit.toUpperCase()).value();
+            // @ts-expect-error numeral missing value
+            const estimateMMLBytes: number = numeral(modelMemoryLimit.toUpperCase()).value();
+            shouldUseEstimate = estimateMMLBytes > existingMMLBytes;
           }
 
-          job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+          if (shouldUseEstimate) {
+            if (!job.config.analysis_limits) {
+              job.config.analysis_limits = Object.create(null) as AnalysisLimits;
+            }
+            job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+          }
         }
       } catch (error) {
         mlLog.warn(

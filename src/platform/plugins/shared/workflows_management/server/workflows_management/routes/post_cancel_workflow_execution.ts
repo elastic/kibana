@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerPostCancelWorkflowExecutionRoute({
   router,
@@ -30,7 +31,7 @@ export function registerPostCancelWorkflowExecutionRoute({
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
         const spaceId = spaces.getSpaceId(request);
@@ -40,6 +41,6 @@ export function registerPostCancelWorkflowExecutionRoute({
       } catch (error) {
         return handleRouteError(response, error, { checkNotFound: true });
       }
-    }
+    })
   );
 }

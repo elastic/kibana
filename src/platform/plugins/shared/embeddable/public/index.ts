@@ -39,7 +39,6 @@ export type {
 } from './ui_actions/triggers';
 export type { EmbeddableEditorState, EmbeddablePackageState } from './state_transfer';
 export type { EmbeddableSetup, EmbeddableStart } from './types';
-export type { EnhancementRegistryDefinition } from '../common/enhancements/types';
 
 export {
   EmbeddableRenderer,

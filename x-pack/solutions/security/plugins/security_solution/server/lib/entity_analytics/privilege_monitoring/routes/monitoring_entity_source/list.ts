@@ -19,6 +19,7 @@ import {
   ListEntitySourcesRequestQuery,
   type ListEntitySourcesResponse,
 } from '../../../../../../common/api/entity_analytics';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -43,23 +44,26 @@ export const listMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
+          try {
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.list(request.query);
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing monitoring entity sources: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing monitoring entity sources: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

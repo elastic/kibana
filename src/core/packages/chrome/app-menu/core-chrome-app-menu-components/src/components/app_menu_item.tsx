@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
@@ -38,6 +39,7 @@ export const AppMenuItem = ({
   isPopoverOpen,
   hidden,
   popoverWidth,
+  popoverTestId,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuItemProps) => {
@@ -48,7 +50,7 @@ export const AppMenuItem = ({
   const showTooltip = Boolean(content || title);
   const hasItems = items && items.length > 0;
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
@@ -56,8 +58,11 @@ export const AppMenuItem = ({
       return;
     }
 
-    run?.();
+    run?.({ triggerElement: event.currentTarget });
   };
+
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
 
   const buttonCss = css`
     background-color: ${isPopoverOpen
@@ -72,9 +77,8 @@ export const AppMenuItem = ({
   const buttonComponent = (
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiHeaderLink
-        onClick={href ? undefined : handleClick}
         id={htmlId}
-        data-test-subj={testId || `top-nav-menu-item-${id}`}
+        data-test-subj={testId || `app-menu-item-${id}`}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}
@@ -87,6 +91,7 @@ export const AppMenuItem = ({
         aria-haspopup={hasItems ? 'menu' : undefined}
         isSelected={hasItems ? isPopoverOpen : undefined}
         css={buttonCss}
+        {...routerLinkProps}
       >
         {itemText}
       </EuiHeaderLink>
@@ -116,6 +121,7 @@ export const AppMenuItem = ({
         tooltipTitle={title}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
         onClose={onPopoverClose}
       />
     );

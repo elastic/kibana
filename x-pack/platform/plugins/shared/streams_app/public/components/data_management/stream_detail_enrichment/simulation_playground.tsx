@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
@@ -78,15 +79,24 @@ export const SimulationPlayground = ({
                 append={
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
-                      <EuiButtonIcon
-                        iconType="refresh"
-                        onClick={refreshSimulation}
-                        isLoading={isDataSourceLoading}
-                        aria-label={i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
-                          { defaultMessage: 'Refresh data preview' }
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewTooltip',
+                          {
+                            defaultMessage: 'Refetch samples and rerun simulation',
+                          }
                         )}
-                      />
+                      >
+                        <EuiButtonIcon
+                          iconType="refresh"
+                          onClick={refreshSimulation}
+                          isLoading={isDataSourceLoading}
+                          aria-label={i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
+                            { defaultMessage: 'Refresh data preview' }
+                          )}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     {hasOutdatedDocuments && (
                       <EuiFlexItem data-test-subj="streamsAppProcessingOutdatedDocumentsTipAnchor">
@@ -116,7 +126,9 @@ export const SimulationPlayground = ({
                 onClick={viewSimulationDetectedFields}
                 append={
                   detectedFields.length > 0 ? (
-                    <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+                    <EuiNotificationBadge size="m" data-test-subj="streamsAppModifiedFieldsBadge">
+                      {detectedFields.length}
+                    </EuiNotificationBadge>
                   ) : undefined
                 }
               >

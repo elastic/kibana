@@ -100,7 +100,7 @@ export const simple: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 1,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;
@@ -205,7 +205,7 @@ export const withXAndYAxes: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 1,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;

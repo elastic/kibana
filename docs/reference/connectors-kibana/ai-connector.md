@@ -13,7 +13,7 @@ The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic
 
 ## Requirements
 
-* A working [LLM connector](docs-content://solutions/security/ai/set-up-connectors-for-large-language-models-llm.md).
+* A working [LLM connector](docs-content://explore-analyze/ai-features/llm-guides/llm-connectors.md).
 * {{stack}} users: An [Enterprise](https://www.elastic.co/pricing) subscription.
 * Serverless users: a project with the [Security Analytics Complete](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) feature tier.
 * The **Actions and Connectors : All** [privilege](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).

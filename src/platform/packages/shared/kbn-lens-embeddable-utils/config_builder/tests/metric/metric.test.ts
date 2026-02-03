@@ -8,9 +8,19 @@
  */
 
 import { validator } from '../utils/validator';
-import { simpleMetricAttributes } from './simple.mock';
-import { breakdownMetricAttributes } from './breakdown.mock';
-import { complexMetricAttributes } from './complex.mock';
+import {
+  simpleMetricAttributes,
+  breakdownMetricAttributes,
+  complexMetricAttributes,
+  breakdownMetricWithFormulaRefColumnsAttributes,
+} from './lens_state_config.mock';
+import {
+  simpleMetricAPIAttributes,
+  breakdownMetricAPIAttributes,
+  complexMetricAPIAttributes,
+  complexESQLMetricAPIAttributes,
+  metricAPIWithTermsRankedBySecondary,
+} from './lens_api_config.mock';
 
 describe('Metric', () => {
   describe('state transform validation', () => {
@@ -25,7 +35,31 @@ describe('Metric', () => {
     it('should convert a breakdown-by metric', () => {
       validator.metric.fromState(breakdownMetricAttributes);
     });
+
+    it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
+      validator.metric.fromState(breakdownMetricWithFormulaRefColumnsAttributes);
+    });
   });
 
-  it.todo('api transform validation');
+  describe('api transform validation', () => {
+    it('should convert a simple metric', () => {
+      validator.metric.fromApi(simpleMetricAPIAttributes);
+    });
+
+    it('should convert a complex metric', () => {
+      validator.metric.fromApi(complexMetricAPIAttributes);
+    });
+
+    it('should convert a breakdown-by metric', () => {
+      validator.metric.fromApi(breakdownMetricAPIAttributes);
+    });
+
+    it('should convert a complex ESQL metric chart', () => {
+      validator.metric.fromApi(complexESQLMetricAPIAttributes);
+    });
+
+    it('should convert a metric with a terms agg ranked by secondary metric', () => {
+      validator.metric.fromApi(metricAPIWithTermsRankedBySecondary);
+    });
+  });
 });

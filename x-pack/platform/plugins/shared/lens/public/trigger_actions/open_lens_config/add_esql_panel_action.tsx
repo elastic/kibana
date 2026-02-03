@@ -57,11 +57,9 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
           maybePanelId: uuid,
           panelType: 'lens',
           serializedState: {
-            rawState: {
-              id: uuid,
-              isNewPanel: true,
-              attributes: { references: [] },
-            },
+            id: uuid,
+            isNewPanel: true,
+            attributes: { references: [] },
           },
         });
         if (!embeddable) {

@@ -158,7 +158,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -196,7 +196,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -234,7 +234,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

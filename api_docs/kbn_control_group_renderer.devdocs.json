@@ -14,6 +14,8 @@
           "(parentApi: unknown) => parentApi is HasEditorConfig"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -55,6 +59,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer_lazy.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,6 +81,8 @@
               }
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer_lazy.tsx",
+            "lineNumber": 21,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +101,8 @@
         "label": "ControlGroupCreationOptions",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,6 +125,8 @@
               "<{}>> | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,6 +149,8 @@
               ", \"controlStateTransform\"> | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -153,6 +167,8 @@
         "label": "ControlGroupEditorConfig",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,6 +183,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +199,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +215,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,6 +232,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +255,8 @@
               "<Readonly<{ title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -245,6 +271,8 @@
         "label": "ControlGroupRendererProps",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,6 +295,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -287,6 +317,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 48,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -363,6 +395,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -384,6 +418,8 @@
                   "<{}>"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -441,6 +477,8 @@
                   "<{}>>, controlId?: string | undefined) => void; }"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -466,6 +504,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,6 +527,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,6 +550,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -529,6 +573,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -543,6 +589,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -557,6 +605,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -581,6 +631,8 @@
           "<State>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -602,6 +654,8 @@
               "<State>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -623,6 +677,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -647,6 +703,8 @@
           "<ControlState>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -669,6 +727,8 @@
               "<ControlState>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -799,6 +859,8 @@
           "<Readonly<{ title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>> | undefined; } | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -856,6 +918,8 @@
           "<{}>>, controlId?: string | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -873,6 +937,8 @@
           " & { type: string; order: number; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -888,6 +954,8 @@
           "(newState: Partial<State>, controlType: string) => Partial<State>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -903,6 +971,8 @@
               "{ [P in keyof State]?: State[P] | undefined; }"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -914,6 +984,8 @@
             "label": "controlType",
             "description": [],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -930,6 +1002,8 @@
         "label": "controlGroupStateBuilder",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -962,6 +1036,8 @@
               ", controlId?: string | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -984,6 +1060,8 @@
                   "<{}>>"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1001,6 +1079,8 @@
                   ">, \"type\">"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1022,6 +1102,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1037,6 +1119,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1063,6 +1147,8 @@
               "<{}>>, controlState: Omit<Omit<Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"description\" | \"fieldName\" | \"dataViewId\" | \"useGlobalFilters\" | \"ignoreValidations\" | \"displaySettings\" | \"searchTechnique\" | \"existsSelected\" | \"runPastTimeout\" | \"singleSelect\" | \"exclude\" | \"selectedOptions\"> & Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>, \"type\">, controlId?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1085,6 +1171,8 @@
                   "<{}>>"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 63,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1100,6 +1188,8 @@
                   "Omit<Omit<Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"description\" | \"fieldName\" | \"dataViewId\" | \"useGlobalFilters\" | \"ignoreValidations\" | \"displaySettings\" | \"searchTechnique\" | \"existsSelected\" | \"runPastTimeout\" | \"singleSelect\" | \"exclude\" | \"selectedOptions\"> & Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>, \"type\">"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 64,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1115,6 +1205,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1141,6 +1233,8 @@
               "<{}>>, controlState: Omit<Omit<Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"step\" | \"description\" | \"fieldName\" | \"dataViewId\" | \"useGlobalFilters\" | \"ignoreValidations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>, \"type\">, controlId?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1163,6 +1257,8 @@
                   "<{}>>"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1178,6 +1274,8 @@
                   "Omit<Omit<Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; selectedOptions?: (string | number)[] | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ timesliceStartAsPercentageOfTimeRange?: number | undefined; timesliceEndAsPercentageOfTimeRange?: number | undefined; isAnchored?: boolean | undefined; } & {}>; }> | Readonly<{ width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ sort?: Readonly<{} & { by: \"_key\" | \"_count\"; direction: \"asc\" | \"desc\"; }> | undefined; title?: string | undefined; description?: string | undefined; displaySettings?: Readonly<{ placeholder?: string | undefined; hideActionBar?: boolean | undefined; hideExclude?: boolean | undefined; hideExists?: boolean | undefined; hideSort?: boolean | undefined; } & {}> | undefined; searchTechnique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; existsSelected?: boolean | undefined; runPastTimeout?: boolean | undefined; singleSelect?: boolean | undefined; exclude?: boolean | undefined; availableOptions?: string[] | undefined; } & { selectedOptions: string[]; variableName: string; variableType: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esqlQuery: string; controlType: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"step\" | \"description\" | \"fieldName\" | \"dataViewId\" | \"useGlobalFilters\" | \"ignoreValidations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>, \"type\">"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 82,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1193,6 +1291,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1219,6 +1319,8 @@
               "<{}>>, controlId?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1241,6 +1343,8 @@
                   "<{}>>"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1256,6 +1360,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 99,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false

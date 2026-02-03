@@ -42,9 +42,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
+import {
+  getIsExperimentalFeatureEnabled,
+  type TriggersAndActionsUIPublicPluginSetup,
+  type TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap, switchMap } from 'rxjs';
 
@@ -69,6 +70,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -167,6 +169,7 @@ export interface ObservabilityPublicPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
@@ -337,6 +340,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
+      coreSetup.getStartServices,
       logsLocator
     );
 
@@ -502,10 +506,12 @@ export class Plugin
       )
     );
 
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -529,10 +535,12 @@ export class Plugin
       );
     });
 
+    const unifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
     };
   }
 }

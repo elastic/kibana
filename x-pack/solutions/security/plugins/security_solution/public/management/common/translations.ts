@@ -73,6 +73,15 @@ export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
   }
 );
 
+/** Used by multiple command */
+export const ENDPOINT_EXECUTION_TIMEOUT = i18n.translate(
+  'xpack.securitySolution.endpointConsoleCommands.executionTimeout',
+  {
+    defaultMessage:
+      'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
+  }
+);
+
 export const getGenericErrorMessage = (errorTitlePrefix: string, code: string) => {
   return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.genericError', {
     defaultMessage: '{prefix}Error {code}',
@@ -232,13 +241,7 @@ export const CONSOLE_COMMANDS = {
     }),
     args: {
       timeout: {
-        about: i18n.translate(
-          'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
-          {
-            defaultMessage:
-              'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
-          }
-        ),
+        about: ENDPOINT_EXECUTION_TIMEOUT,
       },
     },
   },

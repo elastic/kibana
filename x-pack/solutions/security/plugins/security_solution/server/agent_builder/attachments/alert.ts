@@ -16,8 +16,9 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ALERTS_TOOL_ID,
 } from '../tools';
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const alertAttachmentDataSchema = z.object({
+export const alertAttachmentDataSchema = securityAttachmentDataSchema.extend({
   alert: z.string(),
 });
 

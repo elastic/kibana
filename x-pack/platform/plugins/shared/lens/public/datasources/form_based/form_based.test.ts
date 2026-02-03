@@ -51,6 +51,7 @@ import { filterAndSortUserMessages } from '../../app_plugin/get_application_user
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import type { Query } from '@kbn/es-query';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -210,6 +211,7 @@ describe('IndexPattern Data Source', () => {
 
     FormBasedDatasource = getFormBasedDatasource({
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data,

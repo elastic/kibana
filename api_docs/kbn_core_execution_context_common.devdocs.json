@@ -35,6 +35,8 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/execution-context/common/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

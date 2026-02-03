@@ -33,25 +33,11 @@ import {
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
 import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
+import { AGGREGATION_LABELS } from '../../../../../../../common/snapshot_metric_i18n';
 
 interface SelectedOption {
   label: string;
 }
-
-const AGGREGATION_LABELS = {
-  ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
-    defaultMessage: 'Average',
-  }),
-  ['max']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.max', {
-    defaultMessage: 'Max',
-  }),
-  ['min']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.min', {
-    defaultMessage: 'Min',
-  }),
-  ['rate']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.rate', {
-    defaultMessage: 'Rate',
-  }),
-};
 
 interface Props {
   metric?: SnapshotCustomMetricInput;

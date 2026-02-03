@@ -15,6 +15,8 @@ export { AppMenuPopover } from './components';
 export { AppMenuPopoverActionButtons } from './components';
 
 export type {
+  AppMenuRunAction,
+  AppMenuRunActionParams,
   AppMenuConfig,
   AppMenuItemType,
   AppMenuSecondaryActionItem,
@@ -27,6 +29,7 @@ export {
   APP_MENU_ITEM_LIMIT,
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
+  DEFAULT_POPOVER_WIDTH,
 } from './constants';
 
 export {

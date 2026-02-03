@@ -63,7 +63,7 @@ import {
   validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import type { AutocompleteStart } from '@kbn/kql/public';
 import type { HttpStart } from '@kbn/core/public';
 
 import { getEmptyValue } from '../../../common/empty_value';

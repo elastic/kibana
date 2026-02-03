@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { createPrompt } from '@kbn/inference-common';
-import systemPromptDefault from './system_prompt.text';
-import userPromptDefault from './user_prompt.text';
+import significantEventsSystemPrompt from './system_prompt.text';
+import significantEventsUserPrompt from './user_prompt.text';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -17,19 +17,16 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
 
-export function createGenerateSignificantEventsPrompt({
-  systemPromptOverride,
-}: {
-  systemPromptOverride?: string;
-} = {}) {
-  const systemPrompt = systemPromptOverride ?? systemPromptDefault;
+export { significantEventsSystemPrompt as significantEventsPrompt };
 
+export function createGenerateSignificantEventsPrompt({ systemPrompt }: { systemPrompt: string }) {
   return createPrompt({
     name: 'generate_significant_events',
     input: z.object({
       name: z.string(),
       description: z.string(),
       dataset_analysis: z.string(),
+      features: z.string(),
     }),
   })
     .version({
@@ -40,7 +37,7 @@ export function createGenerateSignificantEventsPrompt({
       },
       template: {
         mustache: {
-          template: userPromptDefault,
+          template: significantEventsUserPrompt,
         },
       },
       tools: {
@@ -93,5 +90,3 @@ export function createGenerateSignificantEventsPrompt({
     })
     .get();
 }
-
-export { systemPromptDefault as significantEventsSystemPromptTemplate };

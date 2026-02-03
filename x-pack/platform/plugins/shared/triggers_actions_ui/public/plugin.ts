@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin as CorePlugin,
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -434,6 +440,68 @@ export class Plugin
           category: 'admin',
         });
       }
+    }
+
+    // unified rules page /app/rules (hidden from navigation)
+    if (this.experimentalFeatures.unifiedRulesPage) {
+      core.application.register({
+        id: 'rules',
+        appRoute: '/app/rules',
+        title: i18n.translate('xpack.triggersActionsUI.rulesPage.title', {
+          defaultMessage: 'Rules',
+        }),
+        category: DEFAULT_APP_CATEGORIES.management,
+        visibleIn: [], // right now page is hidden from navigation
+        async mount(params: AppMountParameters) {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
+
+          const { renderRulesPageApp } = await import('./application/rules_page_app');
+
+          // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+          // subset of this privilege are not authorized to access this endpoint and will receive a 404
+          // error that causes the Alerting view to fail to load.
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
+
+          return renderRulesPageApp({
+            ...coreStart,
+            actions: plugins.actions,
+            cloud: plugins.cloud,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme: coreStart.theme,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
+            contentManagement: pluginsStart.contentManagement,
+            share: pluginsStart.share,
+          });
+        },
+      });
     }
 
     return {

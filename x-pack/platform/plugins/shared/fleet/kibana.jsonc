@@ -23,6 +23,7 @@
       "share",
       "security",
       "unifiedSearch",
+      "kql",
       "savedObjectsTagging",
       "taskManager",
       "files",
@@ -53,7 +54,6 @@
       "logsShared",
       "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

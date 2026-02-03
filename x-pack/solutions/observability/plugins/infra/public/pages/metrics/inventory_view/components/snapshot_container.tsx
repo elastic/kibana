@@ -15,7 +15,7 @@ import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { FilterBar } from './filter_bar';
 import { LayoutView } from './layout_view';
 
-export const SnapshotContainer = React.memo(() => {
+export const SnapshotContainer = React.memo(function SnapshotContainer() {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
     useWaffleOptionsContext();

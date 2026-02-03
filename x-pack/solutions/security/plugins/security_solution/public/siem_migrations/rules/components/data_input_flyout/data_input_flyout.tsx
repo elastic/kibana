@@ -129,7 +129,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
         }
 
         startMigration(
-          migrationStats?.id as string,
+          migrationStats,
           isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
           settings
         );

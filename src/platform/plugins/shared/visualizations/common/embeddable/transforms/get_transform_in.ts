@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import type {
@@ -24,14 +24,16 @@ import type {
 
 export const VIS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(
+  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
+) {
   function transformIn(state: VisualizeEmbeddableState): {
     state: StoredVisualizeEmbeddableState;
     references: Reference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
+    const enhancementsResults = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+      : { state: undefined, references: [] };
 
     // by ref
     if ((state as VisualizeByReferenceState).savedObjectId) {
@@ -39,7 +41,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       return {
         state: {
           ...rest,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
         } as StoredVisualizeByReferenceState,
         references: [
           {
@@ -47,7 +49,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             type: VISUALIZE_SAVED_OBJECT_TYPE,
             id: savedObjectId!,
           },
-          ...enhancementsReferences,
+          ...enhancementsResults.references,
         ],
       };
     }
@@ -61,19 +63,19 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       return {
         state: {
           ...state,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
           savedVis,
         } as StoredVisualizeByValueState,
-        references: [...references, ...enhancementsReferences],
+        references: [...references, ...enhancementsResults.references],
       };
     }
 
     return {
       state: {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
       } as StoredVisualizeEmbeddableState,
-      references: enhancementsReferences,
+      references: enhancementsResults.references,
     };
   }
   return transformIn;

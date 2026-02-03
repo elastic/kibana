@@ -42,6 +42,7 @@ export interface UsageStats {
   'observability:enableServiceGroups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];
@@ -49,11 +50,10 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:enabled': boolean;
   'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
-  'dataConnectors:enabled': boolean;
+  'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
@@ -185,7 +185,7 @@ export interface UsageStats {
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
-  'observability:streamsEnableGroupStreams': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'securitySolution:entityStoreEnableV2': boolean;
 }

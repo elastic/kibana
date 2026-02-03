@@ -19,3 +19,23 @@ Custom Instruction:
 ${instructions}
 """`;
 };
+
+export const structuredOutputDescription = (outputSchema?: Record<string, unknown>): string => {
+  if (!outputSchema) {
+    return '';
+  }
+
+  return `## STRUCTURED OUTPUT
+
+The user has requested a structured response following a specific schema. While you are **NOT** responsible for formatting the final output (the answering agent will handle that), you should use this schema to guide your research:
+
+- **Identify required data points**: Each field in the schema represents information the user expects. Ensure your research covers these areas.
+- **Prioritize schema-relevant findings**: Focus on gathering information that directly maps to the schema fields.
+- **Note data availability**: If certain fields cannot be populated based on available information, acknowledge this in your findings.
+
+Requested output schema:
+\`\`\`json
+${JSON.stringify(outputSchema, null, 2)}
+\`\`\`
+`;
+};

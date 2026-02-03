@@ -22,23 +22,21 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformControlGroupIn', () => {
-  const mockControlsGroupState: ControlsGroupState = {
-    controls: [
-      {
-        uid: 'control1',
-        type: 'type1',
-        width: CONTROL_WIDTH_SMALL,
-        config: { bizz: 'buzz' },
-        grow: false,
-      } as unknown as PinnedControlState,
-      {
-        type: 'type2',
-        grow: true,
-        width: CONTROL_WIDTH_SMALL,
-        config: { boo: 'bear' },
-      } as unknown as PinnedControlState,
-    ],
-  };
+  const mockControlsGroupState: ControlsGroupState = [
+    {
+      uid: 'control1',
+      type: 'type1',
+      width: CONTROL_WIDTH_SMALL,
+      config: { bizz: 'buzz' },
+      grow: false,
+    } as unknown as PinnedControlState,
+    {
+      type: 'type2',
+      grow: true,
+      width: CONTROL_WIDTH_SMALL,
+      config: { boo: 'bear' },
+    } as unknown as PinnedControlState,
+  ];
 
   it('should return empty references if controlsGroupState is undefined', () => {
     const result = transformControlGroupIn(undefined);
@@ -69,10 +67,7 @@ describe('transformControlGroupIn', () => {
   });
 
   it('should handle empty controls array', () => {
-    const controlsGroupState: ControlsGroupState = {
-      ...mockControlsGroupState,
-      controls: [],
-    };
+    const controlsGroupState: ControlsGroupState = [];
 
     const result = transformControlGroupIn(controlsGroupState);
 

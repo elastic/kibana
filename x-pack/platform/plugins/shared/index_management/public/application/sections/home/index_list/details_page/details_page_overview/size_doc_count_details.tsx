@@ -17,12 +17,13 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiI18nNumber } from '@elastic/eui';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 
 export const SizeDocCountDetails: FunctionComponent<{
-  size: Index['size'];
+  size: string;
   documents: Index['documents'];
 }> = ({ size, documents }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
@@ -65,7 +66,9 @@ export const SizeDocCountDetails: FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiIcon type="documents" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{documents}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiI18nNumber value={documents || 0} />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="subdued">
                 {i18n.translate(

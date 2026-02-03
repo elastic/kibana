@@ -20,11 +20,6 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
   const messages: ESQLMessage[] = [];
   const sourcesMap = new Set<string>(context?.sources?.map((source) => source.name) || []);
 
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
-
   for (const source of sources) {
     if (source.incomplete) {
       return messages;
@@ -35,29 +30,10 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
       const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
-      if (sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, sourcesMap) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
       if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, sourcesMap) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
+        messages.push(errors.unknownIndex(source));
       }
     }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(errors.unknownIndex(source));
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(errors.unknownIndex(source));
-    });
   }
 
   return messages;

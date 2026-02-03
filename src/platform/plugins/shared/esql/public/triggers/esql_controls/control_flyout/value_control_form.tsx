@@ -280,7 +280,6 @@ export function ValueControlForm({
             onTextLangQueryChange={(q) => {
               setValuesQuery(q.esql);
             }}
-            hideTimeFilterInfo={true}
             disableAutoFocus={true}
             errors={esqlQueryErrors}
             editorIsInline

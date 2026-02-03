@@ -145,7 +145,7 @@ ${Object.entries(connectorInfo.examples.params || {})
         documentation: 'Configure recipient, subject, and message content',
         examples: {
           params: {
-            to: 'user@example.com',
+            to: ['user@example.com', 'other@example.com'],
             subject: 'Workflow Notification',
             message: 'Your workflow has completed successfully.',
           },

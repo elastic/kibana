@@ -9,6 +9,7 @@
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 
+/** The base API path for dashboard endpoints. */
 export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_API_VERSION = '1';
 

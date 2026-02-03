@@ -102,7 +102,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
-    "@kbn/ai-assistant-common"
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

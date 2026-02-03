@@ -122,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 9 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -131,8 +131,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           list.map((elem: WebElementWrapper) => elem.getVisibleText())
         );
 
-        expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
+        expect(await breakdownLabel.getVisibleText()).to.eql('Top 9 values of extension.raw');
+        // Shows all 5 extension types (no Other bucket since all values fit within top 9)
+        expect(values).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
       });
     });
 
@@ -284,10 +285,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization();
       expect(await testSubjects.exists('lnsDataTable')).to.be(true);
 
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
-      await lens.removeDimension('lnsDatatable_metrics');
+      // Removing all except one columns one
+      let count = 9;
+      while (count-- > 0) {
+        await lens.removeDimension('lnsDatatable_metrics');
+      }
 
       await lens.configureTextBasedLanguagesDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',

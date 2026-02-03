@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
@@ -83,6 +84,7 @@ export const useRuleDetailsTabs = ({
   const ruleExecutionSettings = useRuleExecutionSettings();
 
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
 
   useEffect(() => {
     const hiddenTabs = [];
@@ -96,6 +98,9 @@ export const useRuleDetailsTabs = ({
     if (!canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
     }
+    if (!canReadExceptions) {
+      hiddenTabs.push(RuleDetailTabs.exceptions);
+    }
     if (rule != null) {
       const hasEndpointList = (rule.exceptions_list ?? []).some(
         (list) => list.type === ExceptionListTypeEnum.ENDPOINT
@@ -108,7 +113,14 @@ export const useRuleDetailsTabs = ({
     const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
 
     setTabs(tabs);
-  }, [canReadEndpointExceptions, hasIndexRead, rule, ruleDetailTabs, ruleExecutionSettings]);
+  }, [
+    canReadEndpointExceptions,
+    canReadExceptions,
+    hasIndexRead,
+    rule,
+    ruleDetailTabs,
+    ruleExecutionSettings,
+  ]);
 
   return pageTabs;
 };

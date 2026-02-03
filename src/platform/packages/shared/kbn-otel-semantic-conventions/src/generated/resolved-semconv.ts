@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 138
- * Metric groups: 492
+ * Registry groups: 142
+ * Metric groups: 497
  * Hardcoded fields: 34
- * Total fields: 1177
+ * Total fields: 1191
  *
  * @internal
  *
- * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1191+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1883,8 +1883,9 @@ export const semconvFlat = {
   },
   'gen_ai.operation.name': {
     name: 'gen_ai.operation.name',
-    description: 'The name of the operation being performed.',
+    description: 'The name of the GenAI operation being performed.',
     type: 'keyword',
+    example: 'execute_tool',
   },
   'gen_ai.output.messages': {
     name: 'gen_ai.output.messages',
@@ -1898,6 +1899,12 @@ export const semconvFlat = {
     name: 'gen_ai.output.type',
     description: 'Represents the content type requested by the client.',
     type: 'keyword',
+  },
+  'gen_ai.prompt.name': {
+    name: 'gen_ai.prompt.name',
+    description: 'The name of the prompt or prompt template provided in the request or response.',
+    type: 'keyword',
+    example: 'analyze-code',
   },
   'gen_ai.provider.name': {
     name: 'gen_ai.provider.name',
@@ -1989,6 +1996,19 @@ export const semconvFlat = {
     description: 'The name of the model that generated the response.',
     type: 'keyword',
     example: 'gpt-4-0613',
+  },
+  'gen_ai.retrieval.documents': {
+    name: 'gen_ai.retrieval.documents',
+    description: 'The documents retrieved.',
+    type: 'keyword',
+    example:
+      '[{"id":"doc_123","score":0.95},{"id":"doc_456","score":0.87},{"id":"doc_789","score":0.82}]',
+  },
+  'gen_ai.retrieval.query.text': {
+    name: 'gen_ai.retrieval.query.text',
+    description: 'The query text used for retrieval.',
+    type: 'keyword',
+    example: 'What is the capital of France?',
   },
   'gen_ai.system_instructions': {
     name: 'gen_ai.system_instructions',
@@ -3041,6 +3061,31 @@ export const semconvFlat = {
       'Name of the logical partition that hosts a systems with a mainframe operating system.',
     type: 'keyword',
     example: 'LPAR01',
+  },
+  'mcp.method.name': {
+    name: 'mcp.method.name',
+    description: 'The name of the request or notification method.',
+    type: 'keyword',
+  },
+  'mcp.protocol.version': {
+    name: 'mcp.protocol.version',
+    description:
+      'The [version](https://modelcontextprotocol.io/specification/versioning) of the Model Context Protocol used.',
+    type: 'keyword',
+    example: 'Wed Jun 18 2025 00:00:00 GMT+0000 (Coordinated Universal Time)',
+  },
+  'mcp.resource.uri': {
+    name: 'mcp.resource.uri',
+    description: 'The value of the resource uri.',
+    type: 'keyword',
+    example: 'postgres://database/customers/schema',
+  },
+  'mcp.session.id': {
+    name: 'mcp.session.id',
+    description:
+      'Identifies [MCP session](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management).',
+    type: 'keyword',
+    example: '191c4850af6c49e08843a3f6c80e5046',
   },
   'messaging.batch.message_count': {
     name: 'messaging.batch.message_count',
@@ -4761,6 +4806,28 @@ export const semconvFlat = {
     description: 'Number of connections that are currently upgraded (WebSockets). .',
     type: 'double',
   },
+  'metrics.mcp.client.operation.duration': {
+    name: 'metrics.mcp.client.operation.duration',
+    description:
+      'The duration of the MCP request or notification as observed on the sender from the time it was sent until the response or ack is received.',
+    type: 'double',
+  },
+  'metrics.mcp.client.session.duration': {
+    name: 'metrics.mcp.client.session.duration',
+    description: 'The duration of the MCP session as observed on the MCP client.',
+    type: 'double',
+  },
+  'metrics.mcp.server.operation.duration': {
+    name: 'metrics.mcp.server.operation.duration',
+    description:
+      'MCP request or notification duration as observed on the receiver from the time it was received until the result or ack is sent.',
+    type: 'double',
+  },
+  'metrics.mcp.server.session.duration': {
+    name: 'metrics.mcp.server.session.duration',
+    description: 'The duration of the MCP session as observed on the MCP server.',
+    type: 'double',
+  },
   'metrics.messaging.attributes': {
     name: 'metrics.messaging.attributes',
     description: 'Common messaging metrics attributes.',
@@ -5181,29 +5248,9 @@ export const semconvFlat = {
     description: 'Measures the duration of outbound remote procedure calls (RPC).',
     type: 'double',
   },
-  'metrics.rpc.client.request.size': {
-    name: 'metrics.rpc.client.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.client.response.size': {
-    name: 'metrics.rpc.client.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
-    type: 'double',
-  },
   'metrics.rpc.server.call.duration': {
     name: 'metrics.rpc.server.call.duration',
     description: 'Measures the duration of inbound remote procedure calls (RPC).',
-    type: 'double',
-  },
-  'metrics.rpc.server.request.size': {
-    name: 'metrics.rpc.server.request.size',
-    description: 'Measures the size of RPC request messages (uncompressed).',
-    type: 'double',
-  },
-  'metrics.rpc.server.response.size': {
-    name: 'metrics.rpc.server.response.size',
-    description: 'Measures the size of RPC response messages (uncompressed).',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
@@ -5300,15 +5347,15 @@ export const semconvFlat = {
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
     type: 'double',
   },
+  'metrics.system.memory.linux.shared': {
+    name: 'metrics.system.memory.linux.shared',
+    description: 'Shared memory used (mostly by tmpfs).',
+    type: 'double',
+  },
   'metrics.system.memory.linux.slab.usage': {
     name: 'metrics.system.memory.linux.slab.usage',
     description:
       'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-    type: 'double',
-  },
-  'metrics.system.memory.shared': {
-    name: 'metrics.system.memory.shared',
-    description: 'Shared memory used (mostly by tmpfs).',
     type: 'double',
   },
   'metrics.system.memory.usage': {
@@ -5662,6 +5709,44 @@ export const semconvFlat = {
     description: 'Parent-child Reference type',
     type: 'keyword',
   },
+  'oracle.db.domain': {
+    name: 'oracle.db.domain',
+    description: 'The database domain associated with the connection.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'oracle.db.instance.name': {
+    name: 'oracle.db.instance.name',
+    description:
+      'The instance name associated with the connection in an Oracle Real Application Clusters environment.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.name': {
+    name: 'oracle.db.name',
+    description: 'The database name associated with the connection.',
+    type: 'keyword',
+    example: 'ORCL1',
+  },
+  'oracle.db.pdb': {
+    name: 'oracle.db.pdb',
+    description: 'The pluggable database (PDB) name associated with the connection.',
+    type: 'keyword',
+    example: 'PDB1',
+  },
+  'oracle.db.service': {
+    name: 'oracle.db.service',
+    description: 'The service name currently associated with the database connection.',
+    type: 'keyword',
+    example: 'order-processing-service',
+  },
+  'oracle_cloud.realm': {
+    name: 'oracle_cloud.realm',
+    description:
+      'The OCI realm identifier that indicates the isolated partition in which the tenancy and its resources reside.',
+    type: 'keyword',
+    example: 'oc1',
+  },
   'os.build_id': {
     name: 'os.build_id',
     description: 'Unique identifier for a particular build or compilation of the operating system.',
@@ -5759,13 +5844,6 @@ export const semconvFlat = {
     description: "The span_id of this span's parent span.",
     type: 'keyword',
   },
-  'peer.service': {
-    name: 'peer.service',
-    description:
-      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
-    type: 'keyword',
-    example: 'A',
-  },
   'pprof.location.is_folded': {
     name: 'pprof.location.is_folded',
     description:
@@ -5798,6 +5876,26 @@ export const semconvFlat = {
       'Free-form text associated with the profile. This field should not be used to store any machine-readable information, it is only for human-friendly content.',
     type: 'keyword',
     example: 'hello world,bazinga',
+  },
+  'pprof.profile.doc_url': {
+    name: 'pprof.profile.doc_url',
+    description: 'Documentation link for this profile type.',
+    type: 'keyword',
+    example: 'http://pprof.example.com/cpu-profile.html',
+  },
+  'pprof.profile.drop_frames': {
+    name: 'pprof.profile.drop_frames',
+    description:
+      'Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.',
+    type: 'keyword',
+    example: '/foobar/',
+  },
+  'pprof.profile.keep_frames': {
+    name: 'pprof.profile.keep_frames',
+    description:
+      'Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.',
+    type: 'keyword',
+    example: '/bazinga/',
   },
   'process.args_count': {
     name: 'process.args_count',
@@ -6030,32 +6128,18 @@ export const semconvFlat = {
     description: 'The Schema URL for the resource.',
     type: 'keyword',
   },
-  'rpc.message.compressed_size': {
-    name: 'rpc.message.compressed_size',
-    description: 'Compressed size of the message in bytes.',
-    type: 'long',
-  },
-  'rpc.message.id': {
-    name: 'rpc.message.id',
-    description:
-      'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
-    type: 'long',
-  },
-  'rpc.message.type': {
-    name: 'rpc.message.type',
-    description: 'Whether this is a received or sent message.',
-    type: 'keyword',
-  },
-  'rpc.message.uncompressed_size': {
-    name: 'rpc.message.uncompressed_size',
-    description: 'Uncompressed size of the message in bytes.',
-    type: 'long',
-  },
   'rpc.method': {
     name: 'rpc.method',
-    description: 'This is the logical name of the method from the RPC interface perspective.',
+    description:
+      'The fully-qualified logical name of the method from the RPC interface perspective.',
     type: 'keyword',
-    example: 'e',
+    example: 'com.example.ExampleService/exampleMethod',
+  },
+  'rpc.method_original': {
+    name: 'rpc.method_original',
+    description: 'The original name of the method used by the client.',
+    type: 'keyword',
+    example: 'com.myservice.EchoService/catchAll',
   },
   'rpc.request.metadata': {
     name: 'rpc.request.metadata',
@@ -6076,13 +6160,6 @@ export const semconvFlat = {
     description: 'Status code of the RPC returned by the RPC server or generated by the client',
     type: 'keyword',
     example: 'OK',
-  },
-  'rpc.service': {
-    name: 'rpc.service',
-    description:
-      'The full (logical) name of the service being called, including its package name, if applicable.',
-    type: 'keyword',
-    example: 'm',
   },
   'rpc.system.name': {
     name: 'rpc.system.name',
@@ -6174,6 +6251,12 @@ export const semconvFlat = {
     type: 'long',
     example: '80',
   },
+  'service.criticality': {
+    name: 'service.criticality',
+    description: 'The operational criticality of the service.',
+    type: 'keyword',
+    example: 'critical',
+  },
   'service.instance.id': {
     name: 'service.instance.id',
     description: 'The string ID of the service instance.',
@@ -6189,6 +6272,20 @@ export const semconvFlat = {
   'service.namespace': {
     name: 'service.namespace',
     description: 'A namespace for `service.name`.',
+    type: 'keyword',
+    example: 'Shop',
+  },
+  'service.peer.name': {
+    name: 'service.peer.name',
+    description:
+      'Logical name of the service on the other side of the connection. SHOULD be equal to the actual [`service.name`](/docs/resource/README.md#service) resource attribute of the remote service if any.',
+    type: 'keyword',
+    example: 'shoppingcart',
+  },
+  'service.peer.namespace': {
+    name: 'service.peer.namespace',
+    description:
+      'Logical namespace of the service on the other side of the connection. SHOULD be equal to the actual [`service.namespace`](/docs/resource/README.md#service) resource attribute of the remote service if any.',
     type: 'keyword',
     example: 'Shop',
   },

@@ -240,12 +240,21 @@ describe('DocumentationSection', () => {
         expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
       });
 
+      const initialCalls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls
+        .length;
       fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
 
       await waitFor(() => {
         expect(mockProductDocBase.installation.install).toHaveBeenCalledWith({
           inferenceId: '.elser-2-elasticsearch',
+          resourceType: ResourceTypes.productDoc,
         });
+      });
+
+      // Regression: successful install should invalidate/refetch status without requiring a page refresh.
+      await waitFor(() => {
+        const calls = (mockProductDocBase.installation.getStatus as jest.Mock).mock.calls.length;
+        expect(calls).toBeGreaterThan(initialCalls);
       });
     });
 
@@ -270,7 +279,7 @@ describe('DocumentationSection', () => {
       });
 
       const toastArg = (coreStart.notifications.toasts.addDanger as jest.Mock).mock.calls[0][0];
-      expect(toastArg.title).toBe('Failed to install documentation');
+      expect(toastArg.title).toBe('Failed to install Elastic documentation');
 
       // toMountPoint is mocked to return a React node, so we can assert on its contents.
       const { container } = render(<>{toastArg.text}</>);
@@ -317,6 +326,45 @@ describe('DocumentationSection', () => {
           inferenceId: '.elser-2-elasticsearch',
           resourceType: ResourceTypes.securityLabs,
         });
+      });
+    });
+
+    it('keeps both rows in an installing UI state for back-to-back install clicks', async () => {
+      // Make installs never resolve so the mutation stays "loading"
+      const never = new Promise(() => {});
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'uninstalled',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'uninstalled',
+            perProducts: {},
+          });
+        });
+      mockProductDocBase.installation.install = jest.fn().mockReturnValue(never as any);
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-install-elastic_documents')).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-install-security_labs')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-install-elastic_documents'));
+      fireEvent.click(screen.getByTestId('documentation-install-security_labs'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('documentation-installing-elastic_documents')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-installing-security_labs')).toBeInTheDocument();
       });
     });
 
@@ -385,6 +433,7 @@ describe('DocumentationSection', () => {
       await waitFor(() => {
         expect(mockProductDocBase.installation.uninstall).toHaveBeenCalledWith({
           inferenceId: '.elser-2-elasticsearch',
+          resourceType: ResourceTypes.productDoc,
         });
       });
     });
@@ -420,6 +469,45 @@ describe('DocumentationSection', () => {
           inferenceId: '.elser-2-elasticsearch',
           resourceType: ResourceTypes.securityLabs,
         });
+      });
+    });
+
+    it('keeps both rows in an uninstalling UI state for back-to-back uninstall clicks', async () => {
+      // Make uninstalls never resolve so the mutation stays "loading"
+      const never = new Promise(() => {});
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            perProducts: {},
+          });
+        });
+      mockProductDocBase.installation.uninstall = jest.fn().mockReturnValue(never as any);
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-uninstall-security_labs')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('documentation-uninstall-elastic_documents'));
+      fireEvent.click(screen.getByTestId('documentation-uninstall-security_labs'));
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('documentation-uninstalling-elastic_documents')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-uninstalling-security_labs')).toBeInTheDocument();
       });
     });
   });

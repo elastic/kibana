@@ -23,7 +23,7 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 9.3 9.2 9.1 8.19 7.17
+      branch_configuration: main 9.3 9.2 9.1 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge_unsupported_ftrs.yml

@@ -12,11 +12,13 @@ import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
 import { validate } from './validate';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 
 const rowCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const rowCommand = {

@@ -38,12 +38,14 @@ import { pricingConfig } from '@kbn/core-pricing-server-internal';
 import { config as dataStreamsConfig } from '@kbn/core-data-streams-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
+import { airgappedConfig } from './root/airgapped_config';
 import { coreConfig } from './core_config';
 
 const rootConfigPath = '';
 
 export function registerServiceConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+    airgappedConfig,
     coreConfig,
     cspConfig,
     deprecationConfig,

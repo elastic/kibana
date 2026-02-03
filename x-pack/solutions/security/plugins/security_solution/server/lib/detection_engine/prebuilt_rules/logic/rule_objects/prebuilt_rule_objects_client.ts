@@ -50,7 +50,7 @@ interface FetchInstalledRulesByIdsArgs {
   sortOrder?: SortOrder;
 }
 
-interface RuleSummary {
+export interface RuleSummary {
   id: RuleObjectId;
   rule_id: RuleSignatureId;
   version: RuleVersion;

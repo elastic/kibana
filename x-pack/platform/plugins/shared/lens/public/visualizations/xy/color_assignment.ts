@@ -55,24 +55,29 @@ export function getColorAssignments(
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
-      if (layer.collapseFn || !layer.splitAccessor) {
+      if (layer.collapseFn || !layer.splitAccessors || layer.splitAccessors.length === 0) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
-      const splitAccessor = layer.splitAccessor;
-      const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
-      const columnFormatter = column && formatFactory(column.meta.params);
+      const splitAccessors = layer.splitAccessors;
+      const columns = data.tables[layer.layerId]?.columns.filter(({ id }) =>
+        splitAccessors.includes(id)
+      );
+
       const splits =
-        !column || !data.tables[layer.layerId]
+        !columns || columns.length === 0 || !data.tables[layer.layerId]
           ? []
           : uniq(
-              data.tables[layer.layerId].rows.map((row) => {
-                let value = row[splitAccessor];
-                if (value && !isPrimitive(value)) {
-                  value = columnFormatter?.convert(value) ?? value;
-                } else {
-                  value = String(value);
-                }
-                return value;
+              data.tables[layer.layerId].rows.flatMap((row) => {
+                return columns.map((column) => {
+                  let value = row[column.id];
+                  if (value && !isPrimitive(value)) {
+                    const columnFormatter = formatFactory(column.meta.params);
+                    value = columnFormatter?.convert(value) ?? value;
+                  } else {
+                    value = String(value);
+                  }
+                  return value;
+                });
               })
             );
       return { numberOfSeries: (splits.length || 1) * layer.accessors.length, splits };
@@ -93,7 +98,7 @@ export function getColorAssignments(
             : seriesPerLayer
                 .slice(0, layerIndex)
                 .reduce((sum, perLayer) => sum + perLayer.numberOfSeries, 0)) +
-          (sortedLayer.splitAccessor && splitRank !== -1
+          (sortedLayer.splitAccessors && splitRank !== -1
             ? splitRank * sortedLayer.accessors.length
             : 0) +
           sortedLayer.accessors.indexOf(yAccessor)
@@ -130,7 +135,8 @@ export function getAssignedColorConfig(
         : defaultAnnotationColor,
     };
   }
-  const layerContainsSplits = isDataLayer(layer) && !layer.collapseFn && layer.splitAccessor;
+  const layerContainsSplits =
+    isDataLayer(layer) && !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
   const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
 
@@ -177,7 +183,7 @@ export function getAccessorColorConfigs(
   if (isAnnotationsLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
-  const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;
+  const layerContainsSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   return layer.accessors.map((accessor) => {
     if (layerContainsSplits) {
       return getDisabledConfig(accessor);

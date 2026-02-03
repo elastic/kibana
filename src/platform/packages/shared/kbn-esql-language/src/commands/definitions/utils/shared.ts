@@ -6,12 +6,21 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '../../../types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../../types';
 import type { SupportedDataType } from '../types';
+
+export const techPreviewLabel = i18n.translate(
+  'kbn-esql-language.esql.autocomplete.techPreviewLabel',
+  {
+    defaultMessage: `Technical Preview`,
+  }
+);
+
 /**
  * In several cases we don't want to count the last arg if it is
  * of type unknown.

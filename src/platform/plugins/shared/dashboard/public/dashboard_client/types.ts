@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-
 import type {
   DashboardSearchRequestBody,
   DashboardSearchResponseBody,
@@ -20,7 +18,7 @@ import type {
  */
 
 export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: DashboardState; references: Reference[] }
+  | { status: 'success'; attributes: DashboardState }
   | { status: 'error'; notFound: boolean; error: Error }
 );
 

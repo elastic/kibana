@@ -206,7 +206,7 @@ describe('useCytoscapeEventHandlers', () => {
   });
 
   describe('when an edge is hovered', () => {
-    it('does not set the cursor to pointer', () => {
+    it('sets the cursor to pointer', () => {
       const cy = cytoscape({
         elements: [
           { data: { id: 'test', source: 'a', target: 'b' } },
@@ -222,7 +222,94 @@ describe('useCytoscapeEventHandlers', () => {
       renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
       cy.getElementById('test').trigger('mouseover');
 
-      expect(container.style.cursor).toEqual('default');
+      expect(container.style.cursor).toEqual('pointer');
+    });
+
+    it('applies the hover class', () => {
+      const cy = cytoscape({
+        elements: [
+          { data: { id: 'test', source: 'a', target: 'b' } },
+          { data: { id: 'a' } },
+          { data: { id: 'b' } },
+        ],
+      });
+      const edge = cy.getElementById('test');
+
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
+      edge.trigger('mouseover');
+
+      expect(edge.hasClass('hover')).toEqual(true);
+    });
+
+    it('tracks an event', () => {
+      const cy = cytoscape({
+        elements: [
+          { data: { id: 'test', source: 'a', target: 'b' } },
+          { data: { id: 'a' } },
+          { data: { id: 'b' } },
+        ],
+      });
+      const trackApmEvent = jest.fn();
+      (useUiTracker as jest.Mock).mockReturnValueOnce(trackApmEvent);
+      jest.spyOn(lodash, 'debounce').mockImplementationOnce((fn: any) => {
+        fn();
+        return fn;
+      });
+
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
+      cy.getElementById('test').trigger('mouseover');
+
+      expect(trackApmEvent).toHaveBeenCalledWith({
+        metric: 'service_map_node_or_edge_hover',
+      });
+    });
+  });
+
+  describe('when an edge is selected', () => {
+    it('tracks an event', () => {
+      const cy = cytoscape({
+        elements: [
+          { data: { id: 'test', source: 'a', target: 'b' } },
+          { data: { id: 'a' } },
+          { data: { id: 'b' } },
+        ],
+      });
+      const trackApmEvent = jest.fn();
+      (useUiTracker as jest.Mock).mockReturnValueOnce(trackApmEvent);
+      jest.spyOn(lodash, 'debounce').mockImplementationOnce((fn: any) => {
+        fn();
+        return fn;
+      });
+
+      renderHook(() => useCytoscapeEventHandlers({ cy, euiTheme }));
+      cy.getElementById('test').trigger('select');
+
+      expect(trackApmEvent).toHaveBeenCalledWith({
+        metric: 'service_map_edge_select',
+      });
+    });
+  });
+
+  describe('when an edge is unselected', () => {
+    it('resets connected edge styles', () => {
+      const cy = cytoscape({
+        elements: [
+          { data: { id: 'test' } },
+          { data: { id: 'edge', source: 'test', target: 'test2' } },
+          { data: { id: 'test2' } },
+        ],
+      });
+
+      renderHook(() =>
+        useCytoscapeEventHandlers({
+          serviceName: 'test',
+          cy,
+          euiTheme,
+        })
+      );
+      cy.getElementById('edge').trigger('unselect');
+
+      expect(cy.getElementById('edge').hasClass('highlight')).toEqual(true);
     });
   });
 

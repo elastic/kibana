@@ -26,7 +26,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
           name: schema.string(),
         }),
         body: schema.object({
-          roles: schema.arrayOf(schema.string(), { defaultValue: [] }),
+          roles: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
           role_templates: schema.arrayOf(
             schema.object({
               // Not validating `template` because the ES API currently accepts invalid payloads here.
@@ -36,7 +36,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
                 schema.oneOf([schema.literal('string'), schema.literal('json')])
               ),
             }),
-            { defaultValue: [] }
+            { defaultValue: [], maxSize: 100 }
           ),
           enabled: schema.boolean(),
           // Also lax on validation here because the real rules get quite complex,

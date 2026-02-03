@@ -953,7 +953,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
       expect(statefulPlatformGroup).toBeDefined();
-      expect(statefulPlatformGroup.deploymentType).toBe('general');
+      expect(statefulPlatformGroup.deploymentType).toBe('classic');
       expect(statefulPlatformGroup.configs).toContain(
         'pluginPlatform/config1.playwright.config.ts'
       );
@@ -1055,9 +1055,9 @@ describe('runDiscoverPlaywrightConfigs', () => {
           g.group === 'platform' &&
           g.scoutCommand === 'node scripts/scout run-tests --stateful --testTarget=cloud'
       );
-      // For stateful (ECH), deploymentType should be based on group: 'test' => 'general' (unknown group defaults to general)
+      // For stateful (ECH), deploymentType should be based on group: 'test' => 'classic' (unknown group defaults to classic)
       expect(statefulGroup).toBeDefined();
-      expect(statefulGroup.deploymentType).toBe('general');
+      expect(statefulGroup.deploymentType).toBe('classic');
       expect(statefulGroup.configs).toContain('pluginMultiMode/config1.playwright.config.ts');
 
       const serverlessEsGroup = savedData.find(

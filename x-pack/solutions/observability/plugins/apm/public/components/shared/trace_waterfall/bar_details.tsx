@@ -23,7 +23,7 @@ import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge, SyncBadge } from './badges';
+import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -51,6 +51,12 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
       },
     }
   );
+
+  const compositePrefix = item.composite?.compressionStrategy === 'exact_match' ? 'x' : '';
+
+  const displayName = item.composite
+    ? `${item.composite.count}${compositePrefix} ${item.name}`
+    : item.name;
 
   return (
     <div
@@ -87,7 +93,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           `}
         >
           <EuiText css={{ overflow: 'hidden' }} size="s">
-            <TruncateWithTooltip content={item.name} text={item.name} />
+            <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -124,6 +130,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                       docId: item.id,
                       errorCount,
                       errorDocId: errorCount > 1 ? undefined : item.errors[0].errorDocId,
+                      docIndex: errorCount > 1 ? undefined : item.errors[0].errorDocIndex,
                     });
                   }
                 }}
@@ -166,6 +173,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
         />
+        {item.coldstart && <ColdStartBadge />}
       </EuiFlexGroup>
     </div>
   );
