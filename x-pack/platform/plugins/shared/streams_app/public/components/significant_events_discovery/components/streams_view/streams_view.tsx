@@ -9,11 +9,11 @@ import type { EuiSearchBarProps, Query } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
@@ -49,7 +49,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   } = useKibana();
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const streamsListFetch = useDiscoveryStreams();
-  const [selectedStreams, setSelectedStreams] = useState<ListStreamDetail[]>([]);
+  const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
   >({});

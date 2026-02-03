@@ -65,7 +65,7 @@ export function StreamsTreeTable({
   streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
   loading?: boolean;
   searchQuery?: Query;
-  selection: EuiTableSelectionType<ListStreamDetail>;
+  selection: EuiTableSelectionType<TableRow>;
   onOnboardStreamActionClick: (streamName: string) => void;
   onStopOnboardingActionClick: (streamName: string) => void;
 }) {
