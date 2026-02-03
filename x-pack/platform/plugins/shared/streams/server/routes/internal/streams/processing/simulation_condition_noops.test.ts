@@ -32,6 +32,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
     expect((processors[0] as any).set.field).toBe('_streams_condition_noop');
     expect(typeof (processors[0] as any).set.if).toBe('string');
     expect(processors[1]).toHaveProperty('remove');
+    expect((processors[1] as any).remove.tag).toBe('cond-1:noop-cleanup');
     expect((processors[1] as any).remove.field).toBe('_streams_condition_noop');
   });
 
@@ -60,6 +61,7 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     expect(processors).toHaveLength(3);
     expect((processors[0] as any).set.tag).toBe('cond-1');
+    expect((processors[1] as any).remove.tag).toBe('cond-1:noop-cleanup');
     expect((processors[1] as any).remove.field).toBe('_streams_condition_noop');
     expect((processors[2] as any).set.tag).toBe('proc-1');
     expect(typeof (processors[2] as any).set.if).toBe('string');
@@ -99,8 +101,10 @@ describe('buildSimulationProcessorsWithConditionNoops', () => {
 
     expect(processors).toHaveLength(5);
     expect((processors[0] as any).set.tag).toBe('cond-parent');
+    expect((processors[1] as any).remove.tag).toBe('cond-parent:noop-cleanup');
     expect((processors[1] as any).remove.field).toBe('_streams_condition_noop');
     expect((processors[2] as any).set.tag).toBe('cond-child');
+    expect((processors[3] as any).remove.tag).toBe('cond-child:noop-cleanup');
     expect((processors[3] as any).remove.field).toBe('_streams_condition_noop');
     expect((processors[4] as any).set.tag).toBe('proc-1');
 

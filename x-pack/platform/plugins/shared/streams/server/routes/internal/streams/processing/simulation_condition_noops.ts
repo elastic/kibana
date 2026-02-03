@@ -38,6 +38,10 @@ function createConditionNoopProcessor({
   // This creates a true no-op that doesn't require painless to be enabled.
   const tempField = '_streams_condition_noop';
 
+  // The remove processor uses a distinct tag suffix so it gets filtered out
+  // but doesn't double-count in processor metrics (which aggregate by tag).
+  const removeTag = `${conditionId}:noop-cleanup`;
+
   return [
     {
       set: {
@@ -49,6 +53,7 @@ function createConditionNoopProcessor({
     },
     {
       remove: {
+        tag: removeTag,
         field: tempField,
         ignore_missing: true,
         if: painlessIf,

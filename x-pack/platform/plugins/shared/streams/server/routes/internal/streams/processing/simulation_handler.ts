@@ -795,11 +795,23 @@ const collectProcessedByProcessorIds = (
   return Array.from(processedBy);
 };
 
+const NOOP_CLEANUP_SUFFIX = ':noop-cleanup';
+
 const filterOutConditionNoopProcessorResults = (
   processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results'],
   conditionProcessorTags: Set<string>
 ) => {
-  return processorResults.filter((proc) => !proc.tag || !conditionProcessorTags.has(proc.tag));
+  return processorResults.filter((proc) => {
+    if (!proc.tag) return true;
+    // Filter out condition noop processors (set processor tagged with condition ID)
+    if (conditionProcessorTags.has(proc.tag)) return false;
+    // Filter out noop cleanup processors (remove processor tagged with conditionId:noop-cleanup)
+    if (proc.tag.endsWith(NOOP_CLEANUP_SUFFIX)) {
+      const conditionId = proc.tag.slice(0, -NOOP_CLEANUP_SUFFIX.length);
+      if (conditionProcessorTags.has(conditionId)) return false;
+    }
+    return true;
+  });
 };
 
 const collectConditionBlockIds = (processing: StreamlangDSL): Set<string> => {
