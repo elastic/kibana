@@ -14,9 +14,9 @@ import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/
 import { markdownEmbeddableSchema } from './schemas';
 import type { StoredMarkdownState } from '.';
 import { markdownSavedObjectType } from './markdown_saved_object';
-import { MarkdownStorage } from './content_management/markdown_storage';
+import { MarkdownStorage } from './content_management';
 import type { SetupDeps, StartDeps } from './types';
-import { getTransforms } from './embeddable/transforms/get_transforms';
+import { getTransforms } from './embeddable';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {

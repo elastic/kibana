@@ -8,8 +8,18 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { APP_ICON, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ICON, MARKDOWN_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { markdownAttributesSchema } from './schema/v1';
+
+const modelVersion1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: markdownAttributesSchema.extends({}, { unknowns: 'ignore' }),
+    create: markdownAttributesSchema,
+  },
+};
 
 export const markdownSavedObjectType: SavedObjectsType = {
   name: MARKDOWN_SAVED_OBJECT_TYPE,
@@ -23,6 +33,9 @@ export const markdownSavedObjectType: SavedObjectsType = {
     getTitle(obj) {
       return obj.attributes.title;
     },
+  },
+  modelVersions: {
+    '1': modelVersion1,
   },
   mappings: {
     dynamic: false,
