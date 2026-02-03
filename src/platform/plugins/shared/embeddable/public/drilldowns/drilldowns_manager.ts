@@ -10,7 +10,7 @@
 import { BehaviorSubject, map } from "rxjs";
 import { v4 as uuidv4 } from 'uuid';
 import { DrilldownsManager, DrilldownsState, DrilldownState, DrilldownStateInternal } from "./types";
-import { StateComparators } from "@kbn/presentation-publishing";
+import { PublishingSubject, StateComparators } from "@kbn/presentation-publishing";
 import { createAction } from "./create_action";
 import { deleteAction } from "./delete_action";
 
@@ -20,7 +20,7 @@ export function initializeDrilldownsManager(
 ): DrilldownsManager {
   const drilldowns$ = new BehaviorSubject<DrilldownStateInternal[]>([]);
   const api: DrilldownsManager['api'] = {
-    drilldowns$,
+    drilldowns$: drilldowns$ as unknown as PublishingSubject<DrilldownState[]>,
     setDrilldowns: (drilldowns: DrilldownState[]) => {
       deleteActions();
       const drilldownsInternal = drilldowns.map((drilldown) => {
