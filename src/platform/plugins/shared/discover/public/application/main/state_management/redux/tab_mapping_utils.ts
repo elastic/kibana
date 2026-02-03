@@ -147,8 +147,8 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField,
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
-    visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.attributes?.controlGroupJson,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupJson,
   };
 };
 
