@@ -9,7 +9,7 @@
 
 import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
-import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing/state_manager';
+import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 
 export type EditorState = Pick<
