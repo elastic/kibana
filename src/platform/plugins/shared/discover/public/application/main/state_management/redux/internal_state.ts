@@ -30,6 +30,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { type AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
@@ -549,6 +550,28 @@ const createMiddleware = (options: InternalStateDependencies) => {
           );
         }
       });
+    },
+  });
+
+  startListening({
+    actionCreator: internalStateSlice.actions.setAppState,
+    effect: (action, listenerApi) => {
+      const { services } = listenerApi.extra;
+      const tabId = action.payload.tabId;
+
+      const previousState = listenerApi.getOriginalState();
+      const previousTabState = previousState.tabs.byId[tabId];
+
+      const wasEsqlQuery = isOfAggregateQueryType(previousTabState.appState.query);
+      const isEsqlQuery = isOfAggregateQueryType(action.payload.appState.query);
+
+      // Still ES|QL so we don't need to do anything
+      if (wasEsqlQuery && isEsqlQuery) return;
+      // Updated from ES|QL to Data View
+      else if (wasEsqlQuery && !isEsqlQuery)
+        services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
+      // Updated from Data View to ES|QL
+      else if (!wasEsqlQuery && isEsqlQuery) services.storage.set(DISCOVER_QUERY_MODE_KEY, 'esql');
     },
   });
 
