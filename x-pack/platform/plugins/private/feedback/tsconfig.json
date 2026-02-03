@@ -13,11 +13,12 @@
     "@kbn/test-jest-helpers",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-chrome-browser-internal",
     "@kbn/cloud-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/config-schema",
-    "@kbn/feedback-registry"
+    "@kbn/feedback-registry",
+    "@kbn/core-security-browser-mocks",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [
     "target/**/*",
