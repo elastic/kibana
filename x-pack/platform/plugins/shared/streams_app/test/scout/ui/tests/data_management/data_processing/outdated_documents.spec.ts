@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import moment from 'moment';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
