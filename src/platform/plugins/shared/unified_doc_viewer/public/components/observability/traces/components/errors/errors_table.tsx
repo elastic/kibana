@@ -72,6 +72,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       tabLabel: sectionTitle,
       dataTestSubj: 'docViewerErrorsOpenInDiscoverButton',
     });
+    const actions = useMemo(
+      () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+      [openInDiscoverSectionAction]
+    );
 
     const { columns } = useMemo(() => {
       const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
@@ -94,7 +98,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
               'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
               { defaultMessage: 'Errors that occurred during this span and their causes' }
             )}
-            actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
+            actions={actions}
           >
             <EuiSpacer size="s" />
             {error ? (

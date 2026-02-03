@@ -130,6 +130,10 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
     tabLabel: sectionTitle,
     dataTestSubj: 'docViewerSpanLinksOpenInDiscoverButton',
   });
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
+  );
 
   if (
     loading ||
@@ -147,7 +151,7 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.description',
         { defaultMessage: 'Links to spans or transactions that are causally related' }
       )}
-      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
+      actions={actions}
     >
       <EuiSpacer size="s" />
       {error ? (

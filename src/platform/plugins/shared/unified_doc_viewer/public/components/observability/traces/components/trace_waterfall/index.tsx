@@ -10,7 +10,7 @@
 import { EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
@@ -62,6 +62,20 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
   });
+  const actions = useMemo(
+    () => [
+      {
+        icon: 'fullScreen',
+        onClick: () => setShowFullScreenWaterfall(true),
+        label: fullScreenButtonLabel,
+        ariaLabel: fullScreenButtonLabel,
+        id: actionId,
+        dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+      },
+      ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    ],
+    [openInDiscoverSectionAction]
+  );
 
   const actionId = 'traceWaterfallFullScreenAction';
 
@@ -85,17 +99,7 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         id="trace-waterfall"
         title={sectionTitle}
         description={sectionTip}
-        actions={[
-          {
-            icon: 'fullScreen',
-            onClick: () => setShowFullScreenWaterfall(true),
-            label: fullScreenButtonLabel,
-            ariaLabel: fullScreenButtonLabel,
-            id: actionId,
-            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
-          },
-          ...(openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
-        ]}
+        actions={actions}
       >
         {docId ? (
           <FocusedTraceWaterfall

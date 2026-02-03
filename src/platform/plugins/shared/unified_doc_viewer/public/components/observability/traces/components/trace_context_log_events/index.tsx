@@ -65,6 +65,11 @@ export function TraceContextLogEvents({
     dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
   });
 
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
+  );
+
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
   if (!LogEvents || !indexes.logs) {
@@ -79,7 +84,7 @@ export function TraceContextLogEvents({
       description={logsDescription}
       id="traceContextLogEvents"
       forceState="closed"
-      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : undefined}
+      actions={actions}
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
         <LogEventsComponent

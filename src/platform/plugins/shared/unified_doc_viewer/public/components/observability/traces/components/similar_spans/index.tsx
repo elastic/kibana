@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
@@ -67,12 +67,17 @@ export function SimilarSpans({
     dataTestSubj: 'docViewerSimilarSpansOpenInDiscoverButton',
   });
 
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
+  );
+
   return (
     <ContentFrameworkSection
       id="similarSpans"
       data-test-subj="docViewerSimilarSpansSection"
       title={sectionTitle}
-      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
+      actions={actions}
     >
       <ContentFrameworkChart
         data-test-subj="docViewerSimilarSpansLatencyChart"
