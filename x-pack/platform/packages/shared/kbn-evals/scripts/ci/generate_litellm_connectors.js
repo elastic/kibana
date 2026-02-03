@@ -17,7 +17,44 @@
  * Auth: LiteLLM *virtual key* (sk-...) via Authorization Bearer.
  */
 
-const minimist = require('minimist');
+function parseArgs(argv, { defaults = {} } = {}) {
+  const out = { ...defaults };
+  const rest = [];
+
+  for (let i = 0; i < argv.length; i++) {
+    const token = argv[i];
+    if (token === '--') {
+      rest.push(...argv.slice(i + 1));
+      break;
+    }
+
+    if (!token.startsWith('--')) {
+      rest.push(token);
+      continue;
+    }
+
+    const eqIdx = token.indexOf('=');
+    if (eqIdx !== -1) {
+      const key = token.slice(2, eqIdx);
+      const value = token.slice(eqIdx + 1);
+      out[key] = value;
+      continue;
+    }
+
+    const key = token.slice(2);
+    const next = argv[i + 1];
+    if (next == null || next.startsWith('--')) {
+      out[key] = 'true';
+      continue;
+    }
+
+    out[key] = next;
+    i++;
+  }
+
+  out._ = rest;
+  return out;
+}
 
 function die(message) {
   process.stderr.write(`${message}\n`);
@@ -170,9 +207,8 @@ async function fetchTeams(baseUrl, apiKey) {
 }
 
 async function main() {
-  const argv = minimist(process.argv.slice(2), {
-    string: ['base-url', 'api-key', 'team-id', 'team-name', 'model-prefix', 'format'],
-    default: {
+  const argv = parseArgs(process.argv.slice(2), {
+    defaults: {
       'base-url': 'https://elastic.litellm-prod.ai',
       'team-name': 'kibana-ci-evals',
       'model-prefix': 'llm-gateway/',

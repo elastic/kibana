@@ -48,21 +48,31 @@ export EVALUATIONS_ES_API_KEY
 export TRACING_ES_URL
 export TRACING_ES_API_KEY
 
-export KIBANA_TESTING_AI_CONNECTORS="$(
-  if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
+# NOTE: bash `set -e` does not reliably fail the script for errors inside `$(...)` in all contexts.
+# Generate into a variable, then explicitly validate it, so we never feed empty/invalid data into JSON.parse below.
+if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
+  KIBANA_TESTING_AI_CONNECTORS="$(
     node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
       --base-url "$LITELLM_BASE_URL" \
       --team-id "$LITELLM_TEAM_ID" \
       --api-key "$LITELLM_VIRTUAL_KEY" \
       --model-prefix "llm-gateway/"
-  else
+  )"
+else
+  KIBANA_TESTING_AI_CONNECTORS="$(
     node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
       --base-url "$LITELLM_BASE_URL" \
       --team-name "$LITELLM_TEAM_NAME" \
       --api-key "$LITELLM_VIRTUAL_KEY" \
       --model-prefix "llm-gateway/"
-  fi
-)"
+  )"
+fi
+export KIBANA_TESTING_AI_CONNECTORS
+
+if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
+  echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
+  exit 1
+fi
 
 # Print a safe summary (no secrets)
 CONNECTOR_COUNT="$(
