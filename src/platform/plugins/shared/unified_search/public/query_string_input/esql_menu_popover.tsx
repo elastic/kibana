@@ -73,7 +73,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         categorizationField: tempCategorizationField,
       };
     }
-
     return {
       queryForRecommendedQueries: '',
       timeFieldName: undefined,
