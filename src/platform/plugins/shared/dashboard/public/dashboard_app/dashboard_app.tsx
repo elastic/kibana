@@ -256,6 +256,30 @@ export function DashboardApp({
     return () => appStateSubscription.unsubscribe();
   }, [dashboardApi, kbnUrlStateStorage, savedDashboardId]);
 
+  /**
+   * Watch for location.state changes to support navigation with different panel state
+   * but the same dashboardId (e.g., from agent builder attachments)
+   */
+  useEffect(() => {
+    if (!dashboardApi) return;
+
+    console.log('[DASHBOARD_APP] Setting up history listener');
+    const unlistenHistory = history.listen(() => {
+      const newState = getScopedHistory().location.state;
+      console.log('[DASHBOARD_APP] History changed, location.state:', newState);
+      // If location.state has changed and contains dashboard state, force remount
+      if (newState && typeof newState === 'object' && Object.keys(newState).length > 0) {
+        console.log('[DASHBOARD_APP] Forcing remount with new regenerateId');
+        setRegenerateId(uuidv4());
+      }
+    });
+
+    return () => {
+      console.log('[DASHBOARD_APP] Cleaning up history listener');
+      unlistenHistory();
+    };
+  }, [dashboardApi, history, getScopedHistory]);
+
   const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
 
   return showNoDataPage ? (

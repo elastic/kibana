@@ -38,7 +38,7 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onClick: ({ attachment }) => {
+    onClick: async ({ attachment }) => {
       if (!share) return;
 
       const data = attachment.data as DashboardAttachmentData | undefined;
@@ -59,17 +59,22 @@ export const registerDashboardAttachmentUiDefinition = ({
         ...normalizePanels(panels, yOffset),
       ];
 
-      // Navigate to dashboard using client-side navigation to keep agent open
-      // Pass dashboardId if it exists to load the saved dashboard, otherwise create new in-memory one
-      locator.navigate({
+      const locatorParams = {
         dashboardId: savedObjectId,
         panels: dashboardPanels,
         title,
         description,
-        viewMode: 'edit',
+        viewMode: 'edit' as const,
         time_range: { from: 'now-24h', to: 'now' },
-        dashboardAttachmentId: attachment.id,
-      });
+        // Use a unique attachment ID that includes timestamp to force URL change
+        // This ensures navigation triggers even when clicking the same attachment multiple times
+        dashboardAttachmentId: `${attachment.id}-${Date.now()}`,
+      };
+
+      // Navigate to dashboard with panel state
+      // The dashboard app now watches for location.state changes and will remount
+      // when navigating to the same dashboardId with different panel configuration
+      await locator.navigate(locatorParams);
     },
   });
 };
