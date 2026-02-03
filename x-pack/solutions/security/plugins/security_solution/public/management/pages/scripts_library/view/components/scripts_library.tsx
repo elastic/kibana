@@ -7,6 +7,7 @@
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiButton } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
@@ -44,11 +45,14 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     show: showFromUrl,
   } = useScriptsLibraryUrlParams();
 
-  const shouldShowFlyoutForm = useMemo(() => {
-    return showFromUrl === 'create' || showFromUrl === 'edit' || showFromUrl === 'details';
-  }, [showFromUrl]);
+  const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
-  const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const shouldShowFlyoutForm = useMemo(() => {
+    return (
+      (canWriteScriptsLibrary && (showFromUrl === 'create' || showFromUrl === 'edit')) ||
+      showFromUrl === 'details'
+    );
+  }, [canWriteScriptsLibrary, showFromUrl]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -207,6 +211,18 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
       title={pageLabels.pageTitle}
       subtitle={pageLabels.pageAboutInfo}
       hideHeader={false}
+      actions={
+        canWriteScriptsLibrary ? (
+          <EuiButton
+            fill
+            iconType="upload"
+            onClick={() => onClickAction({ show: 'create' })}
+            data-test-subj={getTestId('uploadScriptButton')}
+          >
+            {pageLabels.pageAddButtonTitle}
+          </EuiButton>
+        ) : null
+      }
     >
       {shouldShowFlyoutForm && (
         <EndpointScriptFlyout

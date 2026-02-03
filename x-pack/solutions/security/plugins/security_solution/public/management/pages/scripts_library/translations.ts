@@ -16,7 +16,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
     defaultMessage: 'View and manage scripts to upload and execute on Elastic Defend agents.',
   }),
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.pageAddButtonTitle', {
-    defaultMessage: 'Add script',
+    defaultMessage: 'Upload script',
   }),
   fetchListErrorMessage: (errorMessage: string) =>
     i18n.translate('xpack.securitySolution.scriptsLibrary.fetchListErrorMessage', {
