@@ -298,7 +298,6 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
   action: 'network_direction' as const,
   source_ip: '',
   destination_ip: '',
-  internal_networks: [],
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -699,7 +698,9 @@ export const convertFormStateToProcessor = (
           source_ip,
           destination_ip,
           internal_networks:
-            'internal_networks' in formState ? formState.internal_networks : undefined,
+            'internal_networks' in formState
+              ? formState.internal_networks?.map((internalNetwork) => internalNetwork.value)
+              : undefined,
           internal_networks_field:
             'internal_networks_field' in formState ? formState.internal_networks_field : undefined,
           target_field,

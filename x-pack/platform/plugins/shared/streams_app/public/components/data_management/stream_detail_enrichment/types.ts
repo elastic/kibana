@@ -40,6 +40,10 @@ export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
   patterns: GrokPatternField[];
 };
 
+export interface InternalNetworksValue {
+  value: string;
+}
+
 export type DissectFormState = DissectProcessor;
 export type DateFormState = DateProcessor;
 export type DropFormState = DropDocumentProcessor;
@@ -64,7 +68,9 @@ export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
 export type JoinFormState = JoinProcessor;
 export type ConcatFormState = ConcatProcessor;
-export type NetworkDirectionFormState = NetworkDirectionProcessor;
+export type NetworkDirectionFormState = Omit<NetworkDirectionProcessor, 'internal_networks'> & {
+  internal_networks?: InternalNetworksValue[];
+};
 
 export type SpecialisedFormState =
   | GrokFormState

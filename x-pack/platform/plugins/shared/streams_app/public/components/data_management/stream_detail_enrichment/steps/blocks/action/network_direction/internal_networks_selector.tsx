@@ -8,7 +8,9 @@
 import {
   EuiButtonIcon,
   EuiCheckableCard,
+  EuiFieldText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormFieldset,
   EuiFormRow,
   EuiSpacer,
@@ -16,10 +18,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import { ProcessorFieldSelector } from '../processor_field_selector';
+import type { NetworkDirectionFormState } from '../../../../types';
 
 const InternalNetworksContent = () => {
+  const { fields, append, remove } = useFieldArray<
+    Pick<NetworkDirectionFormState, 'internal_networks'>
+  >({
+    name: 'internal_networks',
+  });
+
+  const handleAdd = () => append({ value: '' });
+
+  const handleRemove = (index: number) => remove(index);
+
   return (
     <EuiFormRow
       label={i18n.translate(
@@ -28,11 +41,28 @@ const InternalNetworksContent = () => {
       )}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
+        {fields.map((field, index) => (
+          <EuiFlexItem key={field.id}>
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFieldText value={field.value} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  size="m"
+                  onClick={() => handleRemove(index)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
         <EuiButtonIcon
           iconType="plus"
           display="base"
           color="text"
-          onClick={() => {}}
+          onClick={handleAdd}
           aria-label={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksAddButton',
             { defaultMessage: 'Add' }
