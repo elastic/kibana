@@ -324,7 +324,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
                   name: (
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
-                      defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+                      defaultMessage="Remove root privilege for {agentCount, plural, one {# agent} other {# agents}}"
                       values={{ agentCount }}
                     />
                   ),
