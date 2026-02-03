@@ -24,6 +24,7 @@ function createMinimalFeature(overrides: Partial<Feature> = {}): Feature {
     meta: {},
     status: 'active',
     last_seen: '2025-01-01T00:00:00Z',
+    stream_name: 'test-stream',
     ...overrides,
   };
 }
