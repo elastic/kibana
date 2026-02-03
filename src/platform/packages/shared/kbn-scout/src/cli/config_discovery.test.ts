@@ -320,6 +320,73 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
   });
 
+  it('includes custom-server configs alongside defaults when "include-custom-servers" is true', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => flag === 'include-custom-servers');
+
+    mockTestableModules.modules = [
+      {
+        name: 'pluginCustom',
+        group: 'groupCustom',
+        type: 'plugin' as const,
+        visibility: 'private' as const,
+        root: 'x-pack/platform/plugins/private/pluginCustom',
+        configs: [
+          {
+            path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginCustom/test/scout_custom/config.playwright.config.ts',
+              exists: true,
+              lastModified: '2024-01-01T00:00:00Z',
+              sha1: 'custom123',
+              tests: [
+                {
+                  id: 'customTest1',
+                  title: 'Custom Test 1',
+                  expectedStatus: 'passed',
+                  location: { file: 'custom.spec.ts', line: 1, column: 1 },
+                  tags: ['@ess'],
+                },
+              ],
+            },
+          },
+          {
+            path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+            category: 'ui',
+            type: 'playwright',
+            manifest: {
+              path: 'x-pack/platform/plugins/private/pluginCustom/config.playwright.config.ts',
+              exists: true,
+              lastModified: '2024-01-01T00:00:00Z',
+              sha1: 'normal456',
+              tests: [
+                {
+                  id: 'normalTest1',
+                  title: 'Normal Test 1',
+                  expectedStatus: 'passed',
+                  location: { file: 'normal.spec.ts', line: 1, column: 1 },
+                  tags: ['@ess'],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    const infoCalls = log.info.mock.calls;
+    const configLogs = infoCalls.filter((call) => call[0].startsWith('- '));
+    expect(configLogs.length).toBeGreaterThan(0);
+    expect(configLogs.some((call) => call[0].includes('/test/scout_custom/'))).toBe(true);
+    expect(
+      configLogs.some((call) => call[0].includes('/pluginCustom/config.playwright.config.ts'))
+    ).toBe(true);
+  });
+
   it('filters config tags to only include cross tags', () => {
     flagsReader.enum.mockReturnValue('ech'); // ESS_ONLY = ['@ess']
     flagsReader.boolean.mockReturnValue(false);

@@ -86,14 +86,18 @@ const CUSTOM_SERVERS_PATH_PATTERN = /\/test\/scout_[^/]+/;
 
 const filterModulesByCustomServerPaths = (
   modules: ModuleDiscoveryInfo[],
-  includeCustomServersOnly: boolean
+  includeCustomServers: boolean
 ): ModuleDiscoveryInfo[] => {
+  if (includeCustomServers) {
+    return modules;
+  }
+
   return modules
     .map((module) => ({
       ...module,
       configs: module.configs.filter((config) => {
         const isCustomServerConfig = CUSTOM_SERVERS_PATH_PATTERN.test(config.path);
-        return includeCustomServersOnly ? isCustomServerConfig : !isCustomServerConfig;
+        return !isCustomServerConfig;
       }),
     }))
     .filter((module) => module.configs.length > 0);
@@ -220,12 +224,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const target = (flagsReader.enum('target', TARGET_TYPES) || 'all') as TargetType;
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
-  const includeCustomServersOnly = flagsReader.boolean('custom-servers');
-
-  if (includeCustomServersOnly && target !== 'all') {
-    log.error('The --custom-servers flag is only supported with --target all.');
-    return;
-  }
+  const includeCustomServers = flagsReader.boolean('include-custom-servers');
 
   // Build initial module discovery info
   const modulesWithTests = buildModuleDiscoveryInfo();
@@ -233,7 +232,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const filteredModulesByTags = filterModulesByTargetTags(modulesWithTests, targetTags);
   const filteredModules = filterModulesByCustomServerPaths(
     filteredModulesByTags,
-    includeCustomServersOnly
+    includeCustomServers
   );
   // Handle output based on flatten flag
   if (flatten) {
@@ -273,7 +272,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                        - 'all': deployment-agnostic tags (default)
                        - 'mki': serverless-only tags
                        - 'ech': stateful-only tags
-    --custom-servers   Only return configs under 'test/scout_*' (local only)
+    --include-custom-servers   Include configs under 'test/scout_*' (local only)
     --validate         Validate that all discovered modules are registered in Scout CI config
     --save             Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten          Output configs in flattened format grouped by mode, group, and scout command
@@ -287,7 +286,7 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     node scripts/scout discover-playwright-configs --target mki
 
     # Discover local custom-server configs only
-    node scripts/scout discover-playwright-configs --custom-servers
+    node scripts/scout discover-playwright-configs --include-custom-servers
 
     # Validate discovered configs against CI configuration
     node scripts/scout discover-playwright-configs --validate
@@ -300,13 +299,13 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   `,
   flags: {
     string: ['target'],
-    boolean: ['save', 'validate', 'flatten', 'custom-servers'],
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
     default: {
       target: 'all',
       save: false,
       validate: false,
       flatten: false,
-      'custom-servers': false,
+      'include-custom-servers': false,
     },
   },
   run: ({ flagsReader, log }) => {
