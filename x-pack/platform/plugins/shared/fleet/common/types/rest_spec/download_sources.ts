@@ -40,7 +40,8 @@ export interface PutDownloadSourceRequest {
       username?: string;
       password?: string;
       api_key?: string;
-    };
+      headers?: Array<{ key: string; value: string }>;
+    } | null;
     secrets?: DownloadSourceSecrets;
   };
 }
@@ -61,6 +62,7 @@ export interface PostDownloadSourceRequest {
       username?: string;
       password?: string;
       api_key?: string;
+      headers?: Array<{ key: string; value: string }>;
     };
     secrets?: DownloadSourceSecrets;
   };

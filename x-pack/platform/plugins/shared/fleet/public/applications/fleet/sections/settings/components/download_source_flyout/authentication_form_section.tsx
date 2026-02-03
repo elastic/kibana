@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { SecretFormRow } from '../edit_output_flyout/output_form_secret_form_row';
 
 import type { AuthType, DownloadSourceFormInputsType } from './use_download_source_flyout_form';
+import { DownloadSourceHeaders } from './download_source_headers';
 
 const AUTH_TYPE_OPTIONS = [
   {
@@ -257,6 +258,8 @@ export const AuthenticationFormSection: React.FunctionComponent<AuthenticationFo
               )}
             </>
           )}
+
+          {authType !== 'none' && <DownloadSourceHeaders inputs={inputs} />}
         </EuiPanel>
       </EuiAccordion>
       <EuiSpacer size="m" />

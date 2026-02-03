@@ -3053,5 +3053,70 @@ describe('getBinarySourceSettings', () => {
         },
       });
     });
+
+    it('should return agent download config with auth headers', () => {
+      const downloadSourceWithHeaders = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      });
+    });
+
+    it('should filter out empty headers', () => {
+      const downloadSourceWithEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: '', value: '' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      });
+    });
+
+    it('should not include headers in auth if all headers are empty', () => {
+      const downloadSourceWithOnlyEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [{ key: '', value: '' }],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithOnlyEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+        },
+      });
+    });
   });
 });

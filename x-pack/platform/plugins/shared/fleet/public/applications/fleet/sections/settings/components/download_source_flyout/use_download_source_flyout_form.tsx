@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useSecretInput, useComboInput, useRadioInput } from '../../../../hooks';
+import { useSecretInput, useComboInput, useRadioInput, useKeyValueInput } from '../../../../hooks';
 import {
   sendPostDownloadSource,
   useInput,
@@ -42,6 +42,7 @@ export interface DownloadSourceFormInputsType {
   passwordSecretInput: ReturnType<typeof useSecretInput>;
   apiKeyInput: ReturnType<typeof useInput>;
   apiKeySecretInput: ReturnType<typeof useSecretInput>;
+  headersInput: ReturnType<typeof useKeyValueInput>;
 }
 
 function getInitialAuthType(downloadSource?: DownloadSource): AuthType {
@@ -120,6 +121,13 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     isEditDisabled
   );
 
+  const headersInput = useKeyValueInput(
+    'downloadSourceHeadersInput',
+    (downloadSource as DownloadSourceBase)?.auth?.headers ?? [{ key: '', value: '' }],
+    validateDownloadSourceHeaders,
+    isEditDisabled
+  );
+
   const inputs = {
     nameInput,
     hostInput,
@@ -135,6 +143,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     passwordSecretInput,
     apiKeyInput,
     apiKeySecretInput,
+    headersInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -153,6 +162,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const passwordSecretValid = passwordSecretInput.validate();
     const apiKeyValid = apiKeyInput.validate();
     const apiKeySecretValid = apiKeySecretInput.validate();
+    const headersValid = headersInput.validate();
 
     // Validate username and password are provided together when username_password auth type is selected
     const authType = authTypeInput.value as AuthType;
@@ -195,6 +205,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       passwordSecretValid &&
       apiKeyValid &&
       apiKeySecretValid &&
+      headersValid &&
       authValid
     );
   }, [
@@ -208,6 +219,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     passwordSecretInput,
     apiKeyInput,
     apiKeySecretInput,
+    headersInput,
     authTypeInput.value,
   ]);
 
@@ -219,18 +231,28 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       setIsloading(true);
 
       // Build auth object based on selected auth type
+      // When auth type is "none", we don't include any auth fields (including headers)
       const authType = authTypeInput.value as AuthType;
       let auth: PostDownloadSourceRequest['body']['auth'];
+
+      // Filter out empty headers (both key and value are empty)
+      const filteredHeaders = headersInput.value.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+
       if (authType === 'username_password') {
         auth = {
           username: usernameInput.value || undefined,
           password: passwordInput.value || undefined,
+          headers: filteredHeaders.length > 0 ? filteredHeaders : undefined,
         };
       } else if (authType === 'api_key') {
         auth = {
           api_key: apiKeyInput.value || undefined,
+          headers: filteredHeaders.length > 0 ? filteredHeaders : undefined,
         };
       }
+      // When authType is 'none', auth remains undefined, clearing any existing auth settings
 
       // Build secrets object
       const sslSecrets =
@@ -276,7 +298,11 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
           return;
         }
 
-        const res = await sendPutDownloadSource(downloadSource.id, data);
+        // For updates, explicitly set auth to null when auth type is "none"
+        // to clear any existing auth settings (username, password, api_key, headers)
+        const updateData = authType === 'none' ? { ...data, auth: null } : data;
+
+        const res = await sendPutDownloadSource(downloadSource.id, updateData);
         if (res.error) {
           throw res.error;
         }
@@ -317,6 +343,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     passwordSecretInput.value,
     apiKeyInput.value,
     apiKeySecretInput.value,
+    headersInput.value,
     validate,
   ]);
 
@@ -357,5 +384,71 @@ export function validateHost(value: string) {
         defaultMessage: 'Invalid URL',
       }),
     ];
+  }
+}
+
+export function validateDownloadSourceHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors: Array<{
+    message: string;
+    index: number;
+    hasKeyError: boolean;
+    hasValueError: boolean;
+  }> = [];
+
+  const existingKeys: Set<string> = new Set();
+
+  pairs.forEach((pair, index) => {
+    const { key, value } = pair;
+
+    const hasKey = !!key;
+    const hasValue = !!value;
+
+    if (hasKey && !hasValue) {
+      errors.push({
+        message: i18n.translate(
+          'xpack.fleet.settings.dowloadSourceFlyoutForm.headersMissingValueError',
+          {
+            defaultMessage: 'Missing value for key "{key}"',
+            values: { key },
+          }
+        ),
+        index,
+        hasKeyError: false,
+        hasValueError: true,
+      });
+    } else if (!hasKey && hasValue) {
+      errors.push({
+        message: i18n.translate(
+          'xpack.fleet.settings.dowloadSourceFlyoutForm.headersMissingKeyError',
+          {
+            defaultMessage: 'Missing key for value "{value}"',
+            values: { value },
+          }
+        ),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    } else if (hasKey && hasValue) {
+      if (existingKeys.has(key)) {
+        errors.push({
+          message: i18n.translate(
+            'xpack.fleet.settings.dowloadSourceFlyoutForm.headersDuplicateKeyError',
+            {
+              defaultMessage: 'Duplicate key "{key}"',
+              values: { key },
+            }
+          ),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        });
+      } else {
+        existingKeys.add(key);
+      }
+    }
+  });
+  if (errors.length) {
+    return errors;
   }
 }

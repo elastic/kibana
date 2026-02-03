@@ -25,6 +25,10 @@ export interface DownloadSourceBase {
     key?: string;
   };
   auth?: {
+    headers?: Array<{
+      key: string;
+      value: string;
+    }>;
     username?: string;
     password?: string;
     api_key?: string;

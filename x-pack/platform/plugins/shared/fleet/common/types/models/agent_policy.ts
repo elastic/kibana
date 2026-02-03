@@ -195,6 +195,10 @@ export interface FullAgentPolicyDownloadAuth {
   username?: string;
   password?: string;
   api_key?: string;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
 }
 
 export interface FullAgentPolicyDownloadAuthSecrets {

@@ -533,6 +533,55 @@ export default function (providerContext: FtrProviderContext) {
         // @ts-ignore _source unknown type
         expect(secret._source.value).to.eql('secretpassword');
       });
+
+      it('should allow creating a download source with auth headers', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with headers ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+              headers: [
+                { key: 'X-Custom-Header', value: 'custom-value' },
+                { key: 'X-Another-Header', value: 'another-value' },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(postResponse.item.auth.username).to.eql('testuser');
+        expect(postResponse.item.auth.headers).to.eql([
+          { key: 'X-Custom-Header', value: 'custom-value' },
+          { key: 'X-Another-Header', value: 'another-value' },
+        ]);
+      });
+
+      it('should allow creating a download source with api_key and headers', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Download source with api_key and headers ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              api_key: 'my-api-key',
+              headers: [{ key: 'X-Custom-Header', value: 'custom-value' }],
+            },
+          })
+          .expect(200);
+
+        const apiKey =
+          postResponse.item.auth?.api_key ?? postResponse.item.secrets?.auth?.api_key?.id;
+        expect(apiKey).to.be.ok();
+        expect(postResponse.item.auth.headers).to.eql([
+          { key: 'X-Custom-Header', value: 'custom-value' },
+        ]);
+      });
     });
 
     describe('PUT /agent_download_sources/{sourceId}', () => {
@@ -863,6 +912,89 @@ export default function (providerContext: FtrProviderContext) {
         const secret = await getSecretById(secretId);
         // @ts-ignore _source unknown type
         expect(secret._source.value).to.eql('plaintextpassword');
+      });
+
+      it('should allow updating headers on existing download source', async function () {
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Update headers test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+              headers: [{ key: 'X-Original-Header', value: 'original-value' }],
+            },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        expect(createRes.item.auth.headers).to.eql([
+          { key: 'X-Original-Header', value: 'original-value' },
+        ]);
+
+        const { body: updateRes } = await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Update headers test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+              headers: [
+                { key: 'X-Updated-Header', value: 'updated-value' },
+                { key: 'X-New-Header', value: 'new-value' },
+              ],
+            },
+          })
+          .expect(200);
+
+        expect(updateRes.item.auth.headers).to.eql([
+          { key: 'X-Updated-Header', value: 'updated-value' },
+          { key: 'X-New-Header', value: 'new-value' },
+        ]);
+      });
+
+      it('should clear auth and headers when setting auth to null', async function () {
+        const { body: createRes } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Clear auth test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: {
+              username: 'testuser',
+              password: 'testpassword',
+              headers: [{ key: 'X-Custom-Header', value: 'custom-value' }],
+            },
+          })
+          .expect(200);
+
+        const dsId = createRes.item.id;
+        expect(createRes.item.auth.username).to.eql('testuser');
+        expect(createRes.item.auth.headers).to.have.length(1);
+
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${dsId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Clear auth test ${Date.now()}`,
+            host: 'http://test.fr:443',
+            is_default: false,
+            auth: null,
+          })
+          .expect(200);
+
+        const { body: getRes } = await supertest
+          .get(`/api/fleet/agent_download_sources/${dsId}`)
+          .expect(200);
+
+        expect(getRes.item.auth).to.be(undefined);
       });
     });
 

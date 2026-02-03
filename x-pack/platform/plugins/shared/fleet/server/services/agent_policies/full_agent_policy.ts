@@ -869,6 +869,15 @@ export function getBinarySourceSettings(
     if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
       authConfig.api_key = downloadSource.auth.api_key;
     }
+    // Filter out empty headers (both key and value are empty)
+    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
+      const filteredHeaders = downloadSource.auth.headers.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+      if (filteredHeaders.length > 0) {
+        authConfig.headers = filteredHeaders;
+      }
+    }
     if (Object.keys(authConfig).length > 0) {
       config.auth = authConfig;
     }
