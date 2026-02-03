@@ -8,7 +8,7 @@
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Walker, within } from '../../ast';
-import { parse } from '../../parser';
+import { Parser } from '../../parser';
 
 import { type ESQLFunction, type ESQLSingleAstItem, type ESQLSource } from '../../types';
 
@@ -21,6 +21,7 @@ import { getQueryForFields } from '../shared/get_query_for_fields';
 import { getFunctionArgumentHover } from './get_function_argument_hover';
 import { getColumnHover } from './get_column_hover';
 import { findSubquery } from '../shared/subqueries_helpers';
+import { arithmeticOperators, comparisonFunctions } from '../../commands/definitions/all_operators';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
@@ -28,7 +29,7 @@ interface HoverContent {
 
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
   const correctedQuery = correctQuerySyntax(fullText, offset);
-  const { root } = parse(correctedQuery);
+  const { root } = Parser.parse(correctedQuery);
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
   let node: ESQLSingleAstItem | undefined;
@@ -93,8 +94,10 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     hoverContent.contents.push(...argHints);
   }
 
+  const mathOperators = arithmeticOperators.concat(comparisonFunctions).map(({ name }) => name);
+  const operators = ['='].concat(mathOperators);
   // Function signature hover
-  if (node.type === 'function') {
+  if (node.type === 'function' && !operators.includes(node.name)) {
     const functionSignature = await getFunctionSignatureHover(node);
     hoverContent.contents.push(...functionSignature);
   }
