@@ -47,6 +47,7 @@ interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
+  configPath?: string;
 }
 
 function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
@@ -54,7 +55,16 @@ function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
     const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
     const raw = Fs.readFileSync(filePath, 'utf-8');
     const parsed = JSON.parse(raw) as { suites?: EvalsSuiteMetadataEntry[] };
-    return Array.isArray(parsed.suites) ? parsed.suites : [];
+    const suites = Array.isArray(parsed.suites) ? parsed.suites : [];
+    // Ignore suites whose configPath does not exist to avoid "ghost suites" from stale metadata.
+    return suites.filter((suite) => {
+      if (!suite?.configPath) return true;
+      try {
+        return Fs.existsSync(Path.resolve(process.cwd(), suite.configPath));
+      } catch {
+        return false;
+      }
+    });
   } catch {
     return [];
   }
@@ -561,10 +571,6 @@ function buildEvalsYaml(selectedSuites: EvalsSuiteMetadataEntry[]): string {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
       );
-    }
-
-    if (GITHUB_PR_LABELS.includes('ci:kbn-evals-esql')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/evals/esql_evals.yml'));
     }
 
     // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).

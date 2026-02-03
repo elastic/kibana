@@ -2,13 +2,28 @@
 
 set -euo pipefail
 
+die() {
+  echo "$*" >&2
+  # If this script is sourced, never exit the parent shell (tmux pane).
+  if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    return 1
+  fi
+  exit 1
+}
+
+# NOTE: `source` ignores the shebang and runs in the *current* shell.
+# This file uses bash features (`[[ ]]`, here-strings, etc.), so sourcing it from zsh will behave poorly
+# and can terminate the session. Ensure we're running under bash.
+if [[ -z "${BASH_VERSION:-}" ]]; then
+  die "This script must be sourced from bash. Try: bash -lc 'source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json && env | rg \"^(LITELLM_|EVALUATION_|EVALUATIONS_ES_|TRACING_ES_|KIBANA_TESTING_AI_CONNECTORS)\"'"
+fi
+
 CONFIG_PATH="${1:-x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json}"
 
 if [[ ! -f "$CONFIG_PATH" ]]; then
-  echo "Missing config file: $CONFIG_PATH"
-  echo "Copy the example and fill it out locally:"
-  echo "  cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json $CONFIG_PATH"
-  exit 1
+  die "Missing config file: $CONFIG_PATH
+Copy the example and fill it out locally:
+  cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json $CONFIG_PATH"
 fi
 
 CONFIG_JSON="$(cat "$CONFIG_PATH")"
@@ -30,13 +45,11 @@ TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$CONFIG_JSON")"
 TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$CONFIG_JSON")"
 
 if [[ -z "$LITELLM_BASE_URL" || -z "$LITELLM_VIRTUAL_KEY" ]]; then
-  echo "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
-  exit 1
+  die "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
 fi
 
 if [[ -z "$EVALUATION_CONNECTOR_ID" ]]; then
-  echo "Missing evaluationConnectorId in $CONFIG_PATH"
-  exit 1
+  die "Missing evaluationConnectorId in $CONFIG_PATH"
 fi
 
 export LITELLM_BASE_URL
@@ -70,8 +83,7 @@ fi
 export KIBANA_TESTING_AI_CONNECTORS
 
 if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
-  echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
-  exit 1
+  die "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
 fi
 
 # Print a safe summary (no secrets)
@@ -84,10 +96,10 @@ EVALUATION_CONNECTOR_PRESENT="$(
 )"
 
 if [[ "$EVALUATION_CONNECTOR_PRESENT" != "true" ]]; then
-  echo "ERROR: evaluationConnectorId ($EVALUATION_CONNECTOR_ID) is not present in generated connectors."
-  echo "Sample generated connector ids:"
+  echo "ERROR: evaluationConnectorId ($EVALUATION_CONNECTOR_ID) is not present in generated connectors." >&2
+  echo "Sample generated connector ids:" >&2
   node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
-  exit 1
+  return 1
 fi
 
 echo "Loaded kbn-evals CI env from: $CONFIG_PATH"

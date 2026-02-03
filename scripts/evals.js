@@ -43,6 +43,38 @@ function readMetadata(repoRoot) {
   }
 }
 
+function filterMetadataWithExistingConfigs(metadata, repoRoot) {
+  var filtered = [];
+  var missing = [];
+
+  for (var i = 0; i < metadata.length; i++) {
+    var entry = metadata[i];
+    if (!entry || typeof entry !== 'object' || !entry.configPath) {
+      continue;
+    }
+
+    var abs = Path.resolve(repoRoot, entry.configPath);
+    if (Fs.existsSync(abs)) {
+      filtered.push(entry);
+    } else {
+      missing.push({ id: entry.id, configPath: entry.configPath });
+    }
+  }
+
+  if (missing.length > 0) {
+    logWarning(
+      'Ignoring ' +
+        missing.length +
+        ' suite(s) from evals.suites.json because their configPath does not exist.'
+    );
+    for (var j = 0; j < missing.length; j++) {
+      logWarning('- ' + String(missing[j].id) + ': ' + String(missing[j].configPath));
+    }
+  }
+
+  return filtered;
+}
+
 function deriveSuiteRoot(configPath) {
   var relPath = String(configPath).replace(/\\/g, '/');
   var parts = relPath.split('/');
@@ -120,7 +152,7 @@ function printSuiteTable(suites) {
 }
 
 function runFastList(repoRoot, args) {
-  var metadata = readMetadata(repoRoot);
+  var metadata = filterMetadataWithExistingConfigs(readMetadata(repoRoot), repoRoot);
   if (metadata.length === 0) {
     return false;
   }
@@ -144,7 +176,7 @@ function runFastList(repoRoot, args) {
 }
 
 function runFastCiMap(repoRoot, args) {
-  var metadata = readMetadata(repoRoot);
+  var metadata = filterMetadataWithExistingConfigs(readMetadata(repoRoot), repoRoot);
   if (metadata.length === 0) {
     return false;
   }
@@ -311,7 +343,7 @@ function main() {
   }
 
   if (command === 'list' && hasFlag(args, '--refresh') && !hasFlag(args, '--json')) {
-    var metadata = readMetadata(repoRoot);
+    var metadata = filterMetadataWithExistingConfigs(readMetadata(repoRoot), repoRoot);
     if (metadata.length > 0) {
       var suites = [];
       for (var i = 0; i < metadata.length; i++) {

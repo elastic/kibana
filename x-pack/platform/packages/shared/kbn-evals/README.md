@@ -417,6 +417,44 @@ evaluate('my test', async ({ executorClient }) => {
 
 The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
 
+### Golden cluster API key privileges (required)
+
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `.kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `.kibana-evaluations*` pattern.
+
+Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
+
+```http
+POST /_security/api_key
+{
+  "name": "kbn-evals-golden-cluster-writer",
+  "expiration": "365d",
+  "role_descriptors": {
+    "kbn-evals-evaluations-writer": {
+      "cluster": ["manage_index_templates"],
+      "indices": [
+        {
+          "names": [".kibana-evaluations*"],
+          "privileges": [
+            "auto_configure",
+            "create_index",
+            "create_doc",
+            "read",
+            "view_index_metadata"
+          ]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "application": "kbn-evals",
+    "purpose": "export evaluation results",
+    "environment": "ci"
+  }
+}
+```
+
+Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
+
 ### Exporting to a separate Elasticsearch cluster
 
 By default, exports go to the same Elasticsearch cluster used by the Scout test environment (`esClient` fixture).

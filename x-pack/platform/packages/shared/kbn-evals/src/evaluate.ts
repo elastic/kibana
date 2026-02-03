@@ -167,7 +167,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  phoenixClient: [
+  executorClient: [
     async (
       { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
       use
@@ -197,7 +197,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
 
-      const phoenixClient = usePhoenixExecutor
+      const executorClient = usePhoenixExecutor
         ? new KibanaPhoenixClient({
             config: getPhoenixConfig(),
             log,
@@ -212,10 +212,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             repetitions,
           });
 
-      await use(phoenixClient);
+      await use(executorClient);
 
       const report = await buildEvaluationReport({
-        experiments: await phoenixClient.getRanExperiments(),
+        experiments: await executorClient.getRanExperiments(),
         model,
         evaluatorModel,
         repetitions,
@@ -241,9 +241,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       scope: 'worker',
     },
   ],
-  executorClient: [
-    async ({ phoenixClient }, use) => {
-      await use(phoenixClient);
+  phoenixClient: [
+    async ({ executorClient }, use) => {
+      await use(executorClient);
     },
     { scope: 'worker' },
   ],
