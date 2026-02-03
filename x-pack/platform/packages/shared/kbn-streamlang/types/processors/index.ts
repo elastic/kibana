@@ -561,7 +561,7 @@ export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
  * Network direction processor
  */
 
-interface NetworkDirectionWithInternalNetworks {
+export interface NetworkDirectionWithInternalNetworks {
   internal_networks: string[];
 }
 
@@ -569,7 +569,7 @@ const networkDirectionWithInternalNetworksSchema = z.object({
   internal_networks: z.array(z.string()),
 }) satisfies z.Schema<NetworkDirectionWithInternalNetworks>;
 
-interface NetworkDirectionWithInternalNetworksField {
+export interface NetworkDirectionWithInternalNetworksField {
   internal_networks_field: string;
 }
 
@@ -577,7 +577,7 @@ const networkDirectionWithInternalNetworksFieldSchema = z.object({
   internal_networks_field: StreamlangSourceField,
 }) satisfies z.Schema<NetworkDirectionWithInternalNetworksField>;
 
-interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
+export interface NetworkDirectionCommonFields extends ProcessorBaseWithWhere {
   action: 'network_direction';
   source_ip: string;
   destination_ip: string;
