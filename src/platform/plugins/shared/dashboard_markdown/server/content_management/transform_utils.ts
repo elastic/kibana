@@ -26,7 +26,6 @@ export function savedObjectToItem(savedObject: SavedObject<StoredMarkdownState>)
 
   return {
     ...rest,
-    ...attributes,
     updatedBy,
     updatedAt,
     createdAt,
