@@ -9,7 +9,7 @@ import { caseTemplateSavedObjectType } from '.';
 
 describe('caseTemplateSavedObjectType', () => {
   it('has the correct configuration', () => {
-    expect(caseTemplateSavedObjectType.name).toBe('cases-template');
+    expect(caseTemplateSavedObjectType.name).toBe('cases-templates');
     expect(caseTemplateSavedObjectType.hidden).toBe(true);
     expect(caseTemplateSavedObjectType.namespaceType).toBe('multiple-isolated');
     expect(caseTemplateSavedObjectType.convertToMultiNamespaceTypeVersion).toBe('8.0.0');
