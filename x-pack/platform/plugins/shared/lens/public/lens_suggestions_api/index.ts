@@ -56,6 +56,7 @@ const createSuggestionWithAttributes = (
 // - For PromQL queries, a line chart is always considered suitable.
 // - For other ESQL queries, a line chart is suitable when:
 //   - A date/time column is available
+//   - There is only one time series
 //
 // Returns `undefined` if the context is not applicable
 // (e.g., non-ESQL queries or when `textBasedColumns` is unavailable).
@@ -169,8 +170,11 @@ export const suggestionsApi = ({
       (!sug.hide && sug.visualizationId !== 'lnsLegacyMetric')
   );
 
-  const chartType =
-    preferredChartType?.toLowerCase() ?? shouldShowLineChart(context) ? 'line' : undefined;
+  const chartType = preferredChartType
+    ? preferredChartType.toLowerCase()
+    : shouldShowLineChart(context)
+    ? 'line'
+    : undefined;
 
   // to return line / area instead of a bar chart
   const xyResult = switchVisualizationType({
