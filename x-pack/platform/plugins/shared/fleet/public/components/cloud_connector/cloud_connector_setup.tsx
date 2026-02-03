@@ -101,6 +101,22 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     }
   }, [newPolicy, updatePolicy]);
 
+  // Write effective account type to policy so it can be sent to the backend
+  // This is needed when accountType is not provided via prop (var_group flow)
+  useEffect(() => {
+    if (
+      showAccountTypeSelector &&
+      newPolicy.cloud_connector_account_type !== effectiveAccountType
+    ) {
+      updatePolicy({
+        updatedPolicy: {
+          ...newPolicy,
+          cloud_connector_account_type: effectiveAccountType,
+        },
+      });
+    }
+  }, [effectiveAccountType, newPolicy, showAccountTypeSelector, updatePolicy]);
+
   const tabs: CloudConnectorTab[] = [
     {
       id: TABS.NEW_CONNECTION,

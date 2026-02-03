@@ -370,7 +370,7 @@ export const isCloudConnectorReusableEnabled = (
       return gte(packageInfoVersion, CLOUD_CONNECTOR_AZURE_ASSET_INVENTORY_REUSABLE_MIN_VERSION);
     }
   }
-  return false;
+  return true;
 };
 
 /**

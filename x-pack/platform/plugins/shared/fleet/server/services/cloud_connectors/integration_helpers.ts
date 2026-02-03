@@ -35,7 +35,11 @@ import type {
 import type { NewPackagePolicy } from '../../types';
 
 /**
- * Extracts the account type from package policy variables
+ * Extracts the account type from package policy
+ *
+ * Priority order:
+ * 1. cloud_connector_account_type field on policy (set by CloudConnectorSetup UI selector)
+ * 2. Provider-specific account type vars (legacy approach for CSPM)
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param packagePolicy - The package policy containing account type vars
@@ -47,7 +51,15 @@ export function extractAccountType(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): AccountType | undefined {
-  // Use accessor to get vars from the correct location (package-level or input-level)
+  // First, check if account type was set by the CloudConnectorSetup UI selector
+  const policyAccountType = validateAccountType(
+    packagePolicy.cloud_connector_account_type ?? undefined
+  );
+  if (policyAccountType) {
+    return policyAccountType;
+  }
+
+  // Fallback: extract from provider-specific vars (legacy approach for CSPM)
   const vars = extractRawCredentialVars(packagePolicy, packageInfo);
 
   if (!vars) {

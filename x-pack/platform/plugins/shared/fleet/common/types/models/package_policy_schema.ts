@@ -173,6 +173,16 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
+  cloud_connector_account_type: schema.maybe(
+    schema.nullable(
+      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+        meta: {
+          description:
+            'Transient field for cloud connector account type during creation. Set by UI selector.',
+        },
+      })
+    )
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
@@ -414,6 +424,16 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         defaultValue: false,
         meta: {
           description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
+  cloud_connector_account_type: schema.maybe(
+    schema.nullable(
+      schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+        meta: {
+          description:
+            'Transient field for cloud connector account type during creation. Set by UI selector.',
         },
       })
     )

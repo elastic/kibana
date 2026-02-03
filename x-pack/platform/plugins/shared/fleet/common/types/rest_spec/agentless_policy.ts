@@ -68,6 +68,14 @@ export const CreateAgentlessPolicyRequestSchema = {
             },
           })
         ),
+        account_type: schema.maybe(
+          schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+            meta: {
+              description:
+                'Account type for the cloud connector (single-account or organization-account).',
+            },
+          })
+        ),
       })
     ),
   }),

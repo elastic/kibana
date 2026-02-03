@@ -88,6 +88,7 @@ export interface NewPackagePolicy {
   output_id?: string | null;
   cloud_connector_id?: string | null;
   cloud_connector_name?: string | null;
+  cloud_connector_account_type?: 'single-account' | 'organization-account' | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;

@@ -55,6 +55,7 @@ export async function createAndIntegrateCloudConnector(params: {
   esClient: ElasticsearchClient;
   logger: Logger;
   cloudConnectorName?: string;
+  accountType?: 'single-account' | 'organization-account';
 }): Promise<CloudConnectorIntegrationResult> {
   const {
     packagePolicy,
@@ -65,6 +66,7 @@ export async function createAndIntegrateCloudConnector(params: {
     esClient,
     logger,
     cloudConnectorName: providedCloudConnectorName,
+    accountType: providedAccountType,
   } = params;
 
   // Check if cloud connectors are enabled for this agentless policy
@@ -147,8 +149,9 @@ export async function createAndIntegrateCloudConnector(params: {
       packageInfo
     );
 
-  // Extract account type from package policy vars
-  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy, packageInfo);
+  // Use provided account type from API request, or fall back to extraction from package policy vars
+  const accountType =
+    providedAccountType ?? extractAccountType(cloudProvider, updatedPackagePolicy, packageInfo);
 
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {
