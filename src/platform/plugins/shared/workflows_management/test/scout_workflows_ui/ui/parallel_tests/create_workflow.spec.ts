@@ -13,6 +13,10 @@ const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
 description: Dummy workflow description
 enabled: true
+inputs:
+  - name: message
+    type: string
+    default: "hello world"
 triggers:
   - type: manual
 steps:
@@ -22,28 +26,49 @@ steps:
       message: "{{ inputs.message }}"
 `;
 
-test.describe('Create and save a workflow', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('should display dashboard', async ({ page }) => {
+  test('Create, save, run and view a dummy workflow', async ({ page }) => {
     await page.gotoApp('workflows');
     await page.testSubj.click('createWorkflowButton');
     const yamlEditor = page.testSubj.locator('workflowYamlEditor');
-    const kbnCodeEditorWrapper = new KibanaCodeEditorWrapper(page);
+    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
     await expect(yamlEditor).toBeVisible();
 
     const workflowName = `Dummy workflow ${Math.floor(Math.random() * 1000)}`;
 
     // Set the editor value
-    await kbnCodeEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
+    await yamlEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
 
     // Now the save button should be enabled and clicking it will save the correct value
     await page.testSubj.click('saveWorkflowHeaderButton');
     await page.testSubj.waitForSelector('workflowSavedChangesBadge');
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-    await expect(page.getByRole('link', { name: workflowName })).toBeVisible();
+
+    const workflowRow = page.testSubj
+      .locator('workflowListTable')
+      .getByRole('row', { name: workflowName });
+    await expect(workflowRow).toBeVisible();
+    await workflowRow.getByLabel('Run').click();
+    await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
+
+    const inputEditor = page.testSubj.locator('workflow-manual-json-editor');
+    await expect(inputEditor).toBeVisible();
+    const inputEditorWrapper = new KibanaCodeEditorWrapper(page);
+    await inputEditorWrapper.setCodeEditorValue('{"message": "Hello Kibana"}');
+    await page.testSubj.click('executeWorkflowButton');
+
+    await page.waitForURL('**/workflows/*?executionId=*');
+
+    const executionPanel = page.testSubj.locator('workflowExecutionPanel');
+    await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
+
+    await expect(
+      page.testSubj.locator('workflowStepExecutionDetails').getByTestId('jsonDataTable')
+    ).toContainText('Hello Kibana');
   });
 });

@@ -71,6 +71,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         justifyContent="flexStart"
         gutterSize="none"
         css={{ height: '100%' }}
+        data-test-subj="workflowExecutionPanel"
       >
         {showBackButton && (
           <EuiFlexItem grow={false}>
