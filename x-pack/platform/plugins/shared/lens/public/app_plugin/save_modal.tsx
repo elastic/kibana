@@ -56,6 +56,7 @@ export const SaveModal = (props: Props) => {
     managed,
   } = props;
 
+  // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
   if (originatingApp && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
