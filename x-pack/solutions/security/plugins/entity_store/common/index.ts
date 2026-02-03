@@ -30,4 +30,8 @@ export const euid = {
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
 };
 
+export {
+  buildEntityFiltersFromEntityIdentifiers,
+  buildGenericEntityFlyoutPreviewQuery,
+} from './domain/euid';
 export type { EntityType } from './domain/definitions/entity_schema';

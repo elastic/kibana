@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { euid } from '@kbn/entity-store/common';
+import { euid, buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import {
@@ -30,47 +29,7 @@ export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: strin
   return { terms: { [EntityTypeToIdentifierField[riskEntity]]: entityNames } };
 };
 
-/**
- * Unified method to build Elasticsearch query filters from entityIdentifiers following entity store EUID priority logic.
- * Priority order for hosts: host.entity.id > host.id > (host.name/hostname + host.domain) > (host.name/hostname + host.mac) > host.name > host.hostname
- * Priority order for users: user.entity.id > user.id > user.email > user.name (with related fields)
- *
- * @param entityIdentifiers - Key-value pairs of field names and their values
- * @returns Array of QueryDslQueryContainer filters
- */
-export const buildEntityFiltersFromEntityIdentifiers = (
-  entityIdentifiers: Record<string, string>
-): QueryDslQueryContainer[] => {
-  // Try host entity identifiers first
-  const hostFilters = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
-  if (hostFilters) {
-    return [hostFilters];
-  }
-
-  // Try user entity identifiers
-  const userFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
-  if (userFilters) {
-    return [userFilters];
-  }
-
-  // IP address fields (source.ip, destination.ip) - fallback for network pages
-  if (entityIdentifiers['source.ip']) {
-    return [{ term: { 'source.ip': entityIdentifiers['source.ip'] } }];
-  }
-
-  if (entityIdentifiers['destination.ip']) {
-    return [{ term: { 'destination.ip': entityIdentifiers['destination.ip'] } }];
-  }
-
-  // Fallback: if no standard entity identifiers found, use the first available field-value pair
-  const entries = Object.entries(entityIdentifiers);
-  if (entries.length > 0) {
-    const [field, value] = entries[0];
-    return [{ term: { [field]: value } }];
-  }
-
-  return [];
-};
+export { buildEntityFiltersFromEntityIdentifiers };
 
 /**
  * Builds an Elasticsearch filter for host queries based on entityIdentifiers.

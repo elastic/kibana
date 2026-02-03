@@ -13,3 +13,7 @@ export {
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
 } from './esql';
+export {
+  buildEntityFiltersFromEntityIdentifiers,
+  buildGenericEntityFlyoutPreviewQuery,
+} from './entity_filters';
