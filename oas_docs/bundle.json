@@ -2410,7 +2410,7 @@
     },
     "/api/agent_builder/tools/_execute": {
       "post": {
-        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_onechat.",
         "operationId": "post-agent-builder-tools-execute",
         "parameters": [
           {
@@ -2706,7 +2706,7 @@
             "description": "Indicates a successful response"
           }
         },
-        "summary": "Execute a Tool",
+        "summary": "Run a tool",
         "tags": [
           "agent builder"
         ],
