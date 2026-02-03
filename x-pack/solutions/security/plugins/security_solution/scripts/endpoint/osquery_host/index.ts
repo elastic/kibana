@@ -17,13 +17,13 @@ import {
   createVm,
   generateVmName,
   findVm,
-  createMultipassHostVmClient,
+  getHostVmClient,
+  type CreateVmOptions,
 } from '../common/vm_services';
 import {
   createAgentPolicy,
   enrollHostVmWithFleet,
   fetchAgentPolicyList,
-  fetchFleetAgents,
 } from '../common/fleet_services';
 import {
   isFleetServerRunning,
@@ -64,9 +64,20 @@ To add more VMs, simply increase --vmCount (e.g., from 2 to 5 creates 3 more).
 Fleet Server starts automatically if not running.
 Use --verbose to see detailed logs for every operation.`,
     flags: {
-      string: ['kibanaUrl', 'username', 'password', 'version', 'vmName', 'apiKey'],
+      string: [
+        'kibanaUrl',
+        'username',
+        'password',
+        'version',
+        'vmName',
+        'apiKey',
+        'vmType',
+        'vmOs',
+        'vmArch',
+        'templateVm',
+      ],
       number: ['vmCount'],
-      boolean: ['verbose'],
+      boolean: ['verbose', 'staging'],
       default: {
         vmCount: 2,
         kibanaUrl: 'http://127.0.0.1:5601',
@@ -74,11 +85,32 @@ Use --verbose to see detailed logs for every operation.`,
         password: 'changeme',
         apiKey: '',
         verbose: false,
+        vmType: 'multipass',
+        vmOs: 'linux',
+        vmArch: 'auto',
+        staging: false,
       },
       help: `
       --vmCount           Optional. Number of VMs to manage (Default: 2)
                           Increase this number to add more VMs (e.g., 2 → 5 adds 3 more).
                           Existing VMs and policies are automatically reused.
+      --vmType            Optional. Type of VM manager to use (Default: multipass)
+                          Options: multipass, vagrant, utm
+                          - multipass: Linux VMs (default, fastest for Ubuntu)
+                          - vagrant: Linux VMs via VirtualBox
+                          - utm: Windows/macOS VMs (experimental)
+      --vmOs              Optional. Operating system for the VMs (Default: linux)
+                          Options: linux, windows, darwin
+                          This helps determine the correct agent download.
+      --vmArch            Optional. Architecture of the VM (Default: auto)
+                          Options: auto, x86_64, arm64
+                          - auto: Uses the host machine's architecture
+                          - x86_64: Force x86_64/AMD64 agent download
+                          - arm64: Force ARM64 agent download
+                          Use this if your VM arch differs from your host (e.g., x86 Windows VM on Apple Silicon)
+      --templateVm        Optional. Name of existing UTM VM to clone from (required for --vmType utm)
+                          List your UTM VMs: /Applications/UTM.app/Contents/MacOS/utmctl list
+                          Example: --templateVm "Windows 11"
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
       --username          Optional. User name to be used for auth (Default: elastic)
       --password          Optional. Password associated with the username (Default: changeme)
@@ -86,8 +118,12 @@ Use --verbose to see detailed logs for every operation.`,
                           Default: uses the same version as the stack (kibana). Version
                           can also be from 'SNAPSHOT'.
                           Examples: 8.6.0, 8.7.0-SNAPSHOT
+      --staging           Optional. Use staging builds for testing upcoming releases (Default: false)
+                          IMPORTANT: Staging builds are currently hardcoded to version 9.2.0 build 65fce82d
+                          Downloads from staging.elastic.co for pre-release testing
+                          Example: --staging --version 9.2.0
       --vmName            Optional. Custom prefix for VM names
-                          Default: [username]-osquery-[index]-[random]
+                          Default: [username]-osquery-[index]-[os]-[random]
       --verbose           Optional. Show detailed logs for every operation (Default: false)
                           By default, only summary logs are shown. Use this flag to see individual
                           VM names, policy IDs, and detailed operation logs.
@@ -107,6 +143,11 @@ const runCli: RunFn = async ({ log, flags }) => {
   const verbose = flags.verbose as boolean;
   const version = flags.version as string | undefined;
   const vmNamePrefix = flags.vmName as string | undefined;
+  const vmType = (flags.vmType as 'multipass' | 'vagrant' | 'utm') || 'multipass';
+  const vmOs = (flags.vmOs as 'linux' | 'windows' | 'darwin') || 'linux';
+  const vmArch = (flags.vmArch as 'auto' | 'x86_64' | 'arm64') || 'auto';
+  const templateVm = flags.templateVm as string | undefined;
+  const staging = flags.staging as boolean;
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
@@ -147,16 +188,29 @@ const runCli: RunFn = async ({ log, flags }) => {
 
     // Phase 2: VM Management and Discovery
     log.info(`${EMOJIS.VM} --- Phase 2: VM Discovery and Management ---`);
-    // Note: This script currently only supports multipass VMs
-    const vmType: 'multipass' = 'multipass';
+    log.info(`${EMOJIS.INFO} Using VM type: ${vmType} (OS: ${vmOs})`);
     const existingVms: HostVm[] = [];
 
     log.info(`${EMOJIS.CLOCK} Checking for existing Osquery VMs...`);
     const allVmNames = await findVm(vmType, undefined, log);
 
-    // Filter VMs that match our naming pattern: {username}-osquery-{number}(-{random})?
-    const osqueryVmPattern = new RegExp(`^${systemUsername}-osquery-\\d+(-\\d+)?$`);
-    const matchingVmNames = allVmNames.data.filter((vmName) => osqueryVmPattern.test(vmName));
+    // Only match VMs with the requested OS type
+    const osNameForPattern = vmOs === 'linux' ? 'ubuntu' : vmOs === 'darwin' ? 'macos' : vmOs;
+    const osqueryVmPattern = new RegExp(
+      `^${systemUsername}-osquery-\\d+(?:-${osNameForPattern}-\\d+|-\\d+)?$`
+    );
+    const matchingVmNames = allVmNames.data.filter((vmName) => {
+      const matches = osqueryVmPattern.test(vmName);
+      // For more specific filtering, also check if VM name contains the OS identifier
+      if (matches && vmName.includes('-')) {
+        const parts = vmName.split('-');
+        // If VM has an OS identifier in the name, it must match the requested OS
+        if (parts.includes('ubuntu') || parts.includes('macos') || parts.includes('windows')) {
+          return parts.includes(osNameForPattern);
+        }
+      }
+      return matches;
+    });
 
     if (matchingVmNames.length > 0) {
       log.info(`${EMOJIS.SUCCESS} Found ${matchingVmNames.length} existing Osquery VM(s)`);
@@ -166,7 +220,9 @@ const runCli: RunFn = async ({ log, flags }) => {
         }
       }
       for (const vmName of matchingVmNames) {
-        existingVms.push(await createMultipassHostVmClient(vmName, log));
+        existingVms.push(
+          getHostVmClient(vmName, vmType, undefined, log, vmOs as 'windows' | 'darwin')
+        );
       }
       if (verbose) {
         log.info(`${EMOJIS.INFO} These VMs will be reused\n`);
@@ -269,24 +325,50 @@ const runCli: RunFn = async ({ log, flags }) => {
 
         // Create new VM
         const vmIdentifier = `osquery-${vmIndex}`;
-        const vmName = vmNamePrefix ? `${vmNamePrefix}-${vmIndex}` : generateVmName(vmIdentifier);
+        const osNameForVm = vmOs === 'linux' ? 'ubuntu' : vmOs === 'darwin' ? 'macos' : vmOs;
+        const vmName = vmNamePrefix
+          ? `${vmNamePrefix}-${vmIndex}`
+          : generateVmName(vmIdentifier, osNameForVm);
 
         if (verbose) {
           log.info(`${EMOJIS.VM} VM ${vmIndex}/${vmCount}: Creating new VM: ${vmName}`);
         }
 
-        const vm = await createVm({
-          type: vmType,
-          name: vmName,
-          cpus: 1,
-          memory: '1G',
-          disk: '8G',
-          log,
-        });
+        // Build VM options based on type
+        let vmOptions: CreateVmOptions;
+
+        if (vmType === 'utm') {
+          vmOptions = {
+            type: vmType,
+            name: vmName,
+            cpus: 1,
+            memory: '1G',
+            disk: '8G',
+            log,
+            os: vmOs as 'windows' | 'darwin' | 'linux',
+            templateVm,
+          };
+        } else {
+          // For non-UTM types (multipass, vagrant), construct appropriate options
+          vmOptions = {
+            type: vmType as 'multipass',
+            name: vmName,
+            cpus: 1,
+            memory: '1G',
+            disk: '8G',
+            log,
+          };
+        }
+
+        const vm = await createVm(vmOptions);
 
         if (verbose) {
           log.info(`${EMOJIS.SUCCESS} VM ${vmIndex}/${vmCount} created successfully: ${vmName}`);
         }
+
+        // Note: Hostname configuration is handled during Fleet enrollment
+        // (see enrollHostVmWithFleet in fleet_services.ts)
+
         return { success: true as const, vm, policy, reused: false, vmIndex };
       } catch (error) {
         log.error(`${EMOJIS.ERROR} Failed to create VM ${vmIndex}: ${error.message}`);
@@ -359,25 +441,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
         const enrollmentPromise = (async () => {
           try {
-            // Check if agent is already enrolled
-            const hostname = vm.name;
-            const existingAgents = await fetchFleetAgents(kbnClient, {
-              perPage: 1,
-              kuery: `local_metadata.host.hostname.keyword : "${hostname}"`,
-              showInactive: false,
-            });
-
-            if (existingAgents.items && existingAgents.items.length > 0) {
-              const existingAgent = existingAgents.items[0];
-              if (verbose) {
-                log.info(
-                  `${EMOJIS.SUCCESS} Agent ${vmIndex} already enrolled: ${hostname} (${existingAgent.id})`
-                );
-              }
-              return { success: true as const, vm, policy, vmIndex, alreadyEnrolled: true };
-            }
-
-            // Agent not enrolled, proceed with enrollment
+            // Proceed with enrollment
             await enrollHostVmWithFleet({
               hostVm: vm,
               kbnClient,
@@ -387,6 +451,9 @@ const runCli: RunFn = async ({ log, flags }) => {
               closestVersionMatch: true,
               useAgentCache: true,
               timeoutMs: 240000, // 4 minutes
+              os: vmOs,
+              arch: vmArch,
+              staging,
             });
 
             return { success: true as const, vm, policy, vmIndex, alreadyEnrolled: false };
