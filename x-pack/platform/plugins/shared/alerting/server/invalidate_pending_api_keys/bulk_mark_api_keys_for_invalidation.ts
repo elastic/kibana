@@ -25,12 +25,13 @@ export const bulkMarkApiKeysForInvalidation = async (
           let apiKeyId;
           let apiKeyValue;
 
-          if (key.indexOf('essu_') !== -1) {
-            const [id, val] = key.split(':');
+          const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
+
+          // TODO get the prefix from security plugin
+          if (apiKey && apiKey.indexOf('essu_') !== -1) {
             apiKeyId = id;
-            apiKeyValue = val;
+            apiKeyValue = apiKey;
           } else {
-            const [id, _] = Buffer.from(key, 'base64').toString().split(':');
             apiKeyId = id;
           }
 

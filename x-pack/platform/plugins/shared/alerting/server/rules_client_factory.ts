@@ -263,12 +263,29 @@ export class RulesClientFactory {
         return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
       },
       getAuthenticationAPIKey(name: string) {
-        // Should we still allow users to pass old API Keys?
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
           const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
+
+          const isUiamApiKey = apiKey[1]?.startsWith('essu_');
+          if (isUiamApiKey && this.isServerless) {
+            return {
+              apiKeysEnabled: true,
+              // TODO: Remove empty id when UIAM API keys support getting their own ID
+              result: {
+                name,
+                id: '',
+                api_key: '',
+              },
+              uiamResult: {
+                name: `uiam-${name}`,
+                id: apiKey[0],
+                api_key: apiKey[1],
+              },
+            };
+          }
           return {
             apiKeysEnabled: true,
             result: {

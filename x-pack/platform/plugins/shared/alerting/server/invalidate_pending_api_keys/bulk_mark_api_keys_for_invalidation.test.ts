@@ -44,8 +44,8 @@ describe('bulkMarkApiKeysForInvalidation', () => {
         apiKeys: [
           Buffer.from('123').toString('base64'),
           Buffer.from('456').toString('base64'),
-          `111:essu_uiam_key_value_1`,
-          `222:essu_uiam_key_value_2`,
+          Buffer.from('111:essu_uiam_key_value_1').toString('base64'),
+          Buffer.from('222:essu_uiam_key_value_2').toString('base64'),
         ],
       },
       loggingSystemMock.create().get(),

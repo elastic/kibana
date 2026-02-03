@@ -275,7 +275,7 @@ describe('bulkDelete', () => {
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw==', 'OTc4Onh5eg==', '123:essu_abc', 'NTc2Onh5eg=='],
+        apiKeys: ['MTIzOmFiYw==', 'OTc4Onh5eg==', 'MTIzOmVzc3VfYWJj', 'NTc2Onh5eg=='],
       },
       expect.anything(),
       expect.anything()

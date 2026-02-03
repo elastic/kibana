@@ -203,7 +203,7 @@ describe('updateRuleApiKey()', () => {
         consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
-        uiamApiKey: 'uiam-234:essu_abc',
+        uiamApiKey: 'dWlhbS0yMzQ6ZXNzdV9hYmM=',
         apiKeyOwner: 'elastic',
         apiKeyCreatedByUser: false,
         revision: 0,

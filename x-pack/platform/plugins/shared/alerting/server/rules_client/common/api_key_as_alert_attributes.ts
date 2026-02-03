@@ -21,12 +21,15 @@ export function apiKeyAsAlertAttributes(
   if (apiKey && apiKey.apiKeysEnabled) {
     const uiamApiKey = apiKey.uiamResult?.api_key;
     const uiamApiKeyId = apiKey.uiamResult?.id;
-    // TODO use from security plugin
     return {
       apiKeyOwner: username,
       apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
       apiKeyCreatedByUser: createdByUser,
-      ...(uiamApiKey ? { uiamApiKey: `${uiamApiKeyId}:${uiamApiKey}` } : {}),
+      ...(uiamApiKey
+        ? {
+            uiamApiKey: Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64'),
+          }
+        : {}),
     };
   }
   return {

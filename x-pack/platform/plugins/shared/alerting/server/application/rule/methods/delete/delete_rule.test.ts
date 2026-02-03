@@ -135,7 +135,7 @@ describe('delete()', () => {
     attributes: {
       ...existingAlert.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
-      uiamApiKey: '123:essu_uiam',
+      uiamApiKey: Buffer.from('123:essu_uiam').toString('base64'),
     },
   };
 
@@ -194,7 +194,7 @@ describe('delete()', () => {
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw==', '123:essu_uiam'],
+        apiKeys: ['MTIzOmFiYw==', 'MTIzOmVzc3VfdWlhbQ=='],
       },
       expect.any(Object),
       expect.any(Object)

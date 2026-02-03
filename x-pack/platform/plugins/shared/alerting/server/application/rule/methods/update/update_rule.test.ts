@@ -2143,7 +2143,7 @@ describe('update()', () => {
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
-        apiKeys: ['MjM0OmFiYw==', 'uiam-234:def'],
+        apiKeys: ['MjM0OmFiYw==', 'dWlhbS0yMzQ6ZGVm'],
       },
       expect.any(Object),
       expect.any(Object)
@@ -4716,7 +4716,7 @@ describe('update()', () => {
       ...existingDecryptedAlert,
       attributes: {
         ...existingDecryptedAlert.attributes,
-        uiamApiKey: `001:essu_222`,
+        uiamApiKey: Buffer.from('001:essu_222').toString('base64'),
       },
     });
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
@@ -4789,7 +4789,7 @@ describe('update()', () => {
 
     expect(bulkMarkApiKeysForInvalidationMock).toHaveBeenCalledWith(
       {
-        apiKeys: ['MTIzOmFiYw==', '001:essu_222'],
+        apiKeys: ['MTIzOmFiYw==', 'MDAxOmVzc3VfMjIy'],
       },
       expect.any(Object),
       expect.any(Object)
@@ -4798,7 +4798,7 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toEqual(
       expect.objectContaining({
         apiKey: 'MTIzOmFiYw==',
-        uiamApiKey: '456:essu_def',
+        uiamApiKey: 'NDU2OmVzc3VfZGVm',
       })
     );
   });

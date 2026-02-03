@@ -186,7 +186,7 @@ export const enabledRuleForBulkOpsWithActions1WithUiam = {
   attributes: {
     ...enabledRuleForBulkOpsWithActions1.attributes,
     apiKey: Buffer.from('978:xyz').toString('base64'),
-    uiamApiKey: '123:essu_abc',
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
   },
 };
 
@@ -225,7 +225,7 @@ export const enabledRuleForBulkOpsWithActions2WithUiam = {
   id: 'uiam-2',
   attributes: {
     ...enabledRuleForBulkOpsWithActions2.attributes,
-    uiamApiKey: '123:essu_abc',
+    uiamApiKey: Buffer.from('123:essu_abc').toString('base64'),
     apiKey: Buffer.from('576:xyz').toString('base64'),
   },
 };
