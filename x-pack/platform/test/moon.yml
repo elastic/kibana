@@ -170,6 +170,7 @@ dependsOn:
   - '@kbn/automatic-import-v2-plugin'
   - '@kbn/connector-specs'
   - '@kbn/ftr-llm-proxy'
+  - '@kbn/dev-cli-runner'
 tags:
   - test-helper
   - package
