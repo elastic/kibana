@@ -54,34 +54,4 @@ export const getInputUnitsByPackage = (
     .flat()
     .filter((u) => !!u && u.id.match(re));
 };
-<<<<<<< HEAD
-=======
 
-export const getOutputUnitsByPackage = (
-  agentComponents: FleetServerAgentComponent[],
-  inputOrPackagePolicyId: string
-): FleetServerAgentComponentUnit[] => {
-  const reId = new RegExp(inputOrPackagePolicyId);
-
-  return agentComponents
-    .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId)))
-    .map((c) => c.units || [])
-    .flat()
-    .filter((u) => !!u && u.type === 'output');
-};
-
-export const getOutputUnitsByPackageAndInputType = (
-  agentComponents: FleetServerAgentComponent[],
-  inputOrPackagePolicyId: string,
-  unitType: string
-): FleetServerAgentComponentUnit | undefined => {
-  const reId = new RegExp(inputOrPackagePolicyId);
-  const reUnitType = new RegExp(unitType);
-
-  return agentComponents
-    .filter((c) => (c.units ?? []).some((unit) => unit.id.match(reId) && unit.id.match(reUnitType)))
-    .map((c) => c.units || [])
-    .flat()
-    .find((u) => !!u && u.type === 'output');
-};
->>>>>>> 84b021818eb ([Fleet] Use package policy input when available to retrieve agent health components  (#251093))
