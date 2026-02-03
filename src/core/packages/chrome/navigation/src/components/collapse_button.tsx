@@ -15,8 +15,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
@@ -271,8 +269,8 @@ export const SideNavCollapseButton: FC<Props> = ({
         <EuiModal
           onClose={closeModal}
           aria-labelledby="navigation-modal-title"
-          maxWidth={800}
-          style={{ width: '600px' }}
+          maxWidth={400}
+          style={{ width: '400px' }}
           outsideClickCloses={true}
         >
           <EuiModalHeader>
@@ -283,26 +281,21 @@ export const SideNavCollapseButton: FC<Props> = ({
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiFlexGroup direction="row" gutterSize="l">
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
-                    defaultMessage: 'Show labels',
-                  })}
-                  checked={showLabels}
-                  onChange={(e) => onSetShowLabels(e.target.checked)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSwitch
-                  label={i18n.translate('core.ui.chrome.sideNavigation.showSecondaryNavigationLabel', {
-                    defaultMessage: 'Show secondary navigation',
-                  })}
-                  checked={showSecondaryPanel}
-                  onChange={(e) => onSetShowSecondaryPanel(e.target.checked)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiSwitch
+              label={i18n.translate('core.ui.chrome.sideNavigation.showLabelsLabel', {
+                defaultMessage: 'Show labels',
+              })}
+              checked={showLabels}
+              onChange={(e) => onSetShowLabels(e.target.checked)}
+            />
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              label={i18n.translate('core.ui.chrome.sideNavigation.showSecondaryNavigationLabel', {
+                defaultMessage: 'Show secondary navigation',
+              })}
+              checked={showSecondaryPanel}
+              onChange={(e) => onSetShowSecondaryPanel(e.target.checked)}
+            />
             <EuiSpacer size="l" />
             <EuiTitle size="xs">
               <h3>
