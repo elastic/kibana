@@ -7,8 +7,8 @@
 
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
-import type { Props } from '../definition/definition';
-import { Definition as Component } from '../definition/definition';
+import { SloDetailsPageDefinition as Component } from '../definition/page_definition';
+import type { SloDetailsDefinitionProps } from '../definition';
 
 export default {
   component: Component,
@@ -16,7 +16,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const defaultProps: Props = {
+const defaultProps: SloDetailsDefinitionProps = {
   slo: buildSlo(),
 };
 

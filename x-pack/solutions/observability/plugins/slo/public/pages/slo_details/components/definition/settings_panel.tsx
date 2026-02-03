@@ -19,18 +19,14 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import {
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowTypeSchema,
-  type SLOWithSummaryResponse,
-} from '@kbn/slo-schema';
+import { occurrencesBudgetingMethodSchema, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
-  toDurationAdverbLabel,
   toDurationLabel,
+  toTimeWindowLabel,
 } from '../../../../utils/slo/labels';
 
 export interface Props {
@@ -174,22 +170,4 @@ export function SettingsPanel({ slo }: Props) {
       </EuiDescriptionList>
     </EuiPanel>
   );
-}
-
-function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
-  if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
-    return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
-      defaultMessage: '{duration} rolling',
-      values: {
-        duration: toDurationLabel(timeWindow.duration),
-      },
-    });
-  }
-
-  return i18n.translate('xpack.slo.sloDetails.overview.calendarAlignedTimeWindow', {
-    defaultMessage: '{duration} calendar aligned',
-    values: {
-      duration: toDurationAdverbLabel(timeWindow.duration),
-    },
-  });
 }
