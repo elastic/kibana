@@ -26,9 +26,6 @@ export default async function (ftrContext: FtrConfigProviderContext) {
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();
   const eisServerArg = `xpack.inference.elastic.url=${EIS_QA_URL}`;
 
-  // eslint-disable-next-line no-console
-  console.log(`[EIS Config] Adding ES server arg: ${eisServerArg}`);
-
   const config = await createStatefulTestConfig({
     services: agentBuilderApiServices,
     testFiles: [require.resolve('./tests')],
@@ -43,9 +40,6 @@ export default async function (ftrContext: FtrConfigProviderContext) {
       serverArgs: [`--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`],
     },
   })(ftrContext);
-
-  // eslint-disable-next-line no-console
-  console.log(`[EIS Config] Final esTestCluster.serverArgs:`, config.esTestCluster?.serverArgs);
 
   return config;
 }
