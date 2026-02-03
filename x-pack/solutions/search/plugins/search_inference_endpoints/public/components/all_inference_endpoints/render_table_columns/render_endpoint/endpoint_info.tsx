@@ -22,6 +22,12 @@ import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 
 const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 
+const containerStyles = css`
+  &:hover .copyButton {
+    opacity: 1;
+  }
+`;
+
 export interface EndpointInfoProps {
   inferenceId: string;
   endpointInfo: InferenceInferenceEndpointInfo;
@@ -56,12 +62,6 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
     transition: opacity ${euiTheme.animation.fast} ease-in-out;
 
     &:focus {
-      opacity: 1;
-    }
-  `;
-
-  const containerStyles = css`
-    &:hover .copyButton {
       opacity: 1;
     }
   `;
