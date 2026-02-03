@@ -13,4 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart } from './plugin';
-export type { UseCloudConnectStatusResult } from './hooks';
+export type { UseCloudConnectStatusHook, UseCloudConnectStatusResult } from './hooks';
