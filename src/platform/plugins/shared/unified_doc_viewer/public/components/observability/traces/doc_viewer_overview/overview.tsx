@@ -24,6 +24,7 @@ import {
 import { getFlattenedTraceDocumentOverview } from '@kbn/discover-utils';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import type { ScrollableSectionWrapperApi } from '../../../doc_viewer_logs_overview/scrollable_section_wrapper';
@@ -45,6 +46,7 @@ export type OverviewProps = DocViewRenderProps & {
   indexes: ObservabilityIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
+  docViewActions?: DocViewActions;
 };
 
 export type TraceOverviewSections = 'errors-table';
@@ -64,7 +66,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
       showWaterfall = true,
       dataView,
       decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
-      actions,
+      docViewActions,
     },
     ref
   ) => {
@@ -106,7 +108,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
 
     return (
       <DataSourcesProvider indexes={indexes}>
-        <DocViewerExtensionActionsProvider actions={actions}>
+        <DocViewerExtensionActionsProvider actions={docViewActions}>
           <TraceRootSpanProvider traceId={traceId}>
             <div
               ref={setContainerRef}

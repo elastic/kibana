@@ -25,6 +25,7 @@ import type {
 import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -48,6 +49,7 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   indexes: ObservabilityIndexes;
   showTraceWaterfall?: boolean;
+  docViewActions?: DocViewActions;
 };
 
 export interface LogsOverviewApi {
@@ -70,7 +72,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamProcessingLink,
       indexes,
       showTraceWaterfall = true,
-      actions,
+      docViewActions,
     },
     ref
   ) => {
@@ -133,7 +135,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             dataView={dataView}
           />
           <DataSourcesProvider indexes={indexes}>
-            <DocViewerExtensionActionsProvider actions={actions}>
+            <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
                 {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}

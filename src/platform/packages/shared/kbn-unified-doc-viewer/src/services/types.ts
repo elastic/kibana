@@ -67,7 +67,6 @@ export interface DocViewRenderProps {
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
-  actions?: DocViewActions;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   hideFilteringOnComputedColumns?: boolean;
