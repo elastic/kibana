@@ -307,6 +307,9 @@
       "createdBy": {
         "type": "keyword"
       },
+      "name": {
+        "type": "text"
+      },
       "updatedAt": {
         "type": "date"
       },

@@ -90,9 +90,9 @@
     "updatedBy"
   ],
   "alerting_notification_policy": [
-    "name",
     "createdAt",
     "createdBy",
+    "name",
     "updatedAt",
     "updatedBy",
     "workflow_id"
