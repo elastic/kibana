@@ -12,14 +12,14 @@ import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { AiInsightResult, ContextEvent } from './types';
+import { createAiInsightResult, type AiInsightResult } from './types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -62,6 +62,8 @@ export async function getAlertAiInsight({
   request,
   logger,
 }: GetAlertAiInsightParams): Promise<AiInsightResult> {
+  const urlPrefix = core.http.basePath.get(request);
+
   const relatedContext = await fetchAlertContext({
     core,
     plugins,
@@ -74,15 +76,11 @@ export async function getAlertAiInsight({
     inferenceClient,
     connectorId,
     alertDoc,
+    urlPrefix,
     context: relatedContext,
   });
 
-  const streamWithContext$ = concat(
-    of<ContextEvent>({ type: 'context', context: relatedContext }),
-    events$
-  );
-
-  return { events$: streamWithContext$, context: relatedContext };
+  return createAiInsightResult(relatedContext, events$);
 }
 
 // Time window offsets in minutes before alert start
@@ -208,11 +206,13 @@ async function fetchAlertContext({
 
 function generateAlertSummary({
   inferenceClient,
+  urlPrefix,
   connectorId,
   alertDoc,
   context,
 }: {
   inferenceClient: InferenceClient;
+  urlPrefix: string;
   connectorId: string;
   alertDoc: AlertDocForInsight;
   context: string;
@@ -242,6 +242,8 @@ function generateAlertSummary({
     3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
+
+    ${getEntityLinkingInstructions({ urlPrefix })}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;

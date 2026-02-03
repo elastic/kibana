@@ -200,6 +200,9 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
 
   return (
     <EuiInMemoryTable<FlattenedItem>
+      tableCaption={i18n.translate('xpack.securitySolution.fieldsTable.tableCaption', {
+        defaultMessage: 'Fields',
+      })}
       // @ts-ignore
       items={sortedItems}
       columns={columns}
