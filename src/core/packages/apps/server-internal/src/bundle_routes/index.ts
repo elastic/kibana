@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerBundleRoutes } from './register_bundle_routes';
+export { registerBundleRoutes, type ViteOptions } from './register_bundle_routes';
 export { type IFileHashCache, FileHashCache } from './file_hash_cache';
-export { registerRouteForBundle } from './bundles_route';
+export { registerRouteForBundle, type BundleRouteOptions } from './bundles_route';
+export {
+  createViteProxyMiddleware,
+  createViteWsProxy,
+  registerViteProxyRoutes,
+  tryViteProxy,
+  tryViteAssetProxy,
+  setViteConfig,
+  getViteConfig,
+  type ViteProxyConfig,
+  type DynamicViteProxyConfig,
+  type LocalViteConfig,
+} from './vite_proxy';

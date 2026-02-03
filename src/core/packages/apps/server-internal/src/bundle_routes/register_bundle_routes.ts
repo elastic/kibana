@@ -88,6 +88,21 @@ export function registerBundleRoutes({
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,
+      // Pass plugin info for Vite proxy support in dev mode
+      pluginId: id,
+      pluginVersion: version,
     });
   });
+}
+
+/**
+ * Options for Vite development mode
+ */
+export interface ViteOptions {
+  /** Whether Vite is enabled */
+  enabled: boolean;
+  /** Vite server URL */
+  serverUrl?: string;
+  /** Plugin IDs served by Vite */
+  pluginIds?: string[];
 }

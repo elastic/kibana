@@ -43,8 +43,9 @@ import {
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
-import { registerBundleRoutes } from './bundle_routes';
+import { registerBundleRoutes, tryViteAssetProxy } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
 /** @internal */
@@ -160,6 +161,35 @@ export class CoreAppsService {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
+
+    // In dev mode, intercept requests for static assets from source directories
+    // and proxy them to the Vite dev server
+    if (!this.env.packageInfo.dist && this.env.cliArgs.useVite) {
+      httpSetup.registerOnPreRouting(async (request, response, toolkit) => {
+        const path = request.url.pathname;
+
+        // Only intercept paths that look like source file paths with static assets
+        if (
+          (path.startsWith('/x-pack/') ||
+            path.startsWith('/src/') ||
+            path.startsWith('/packages/')) &&
+          /\.(svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|css)$/i.test(path)
+        ) {
+          const result = await tryViteAssetProxy(path);
+          if (result) {
+            // Use KibanaResponse directly since LifecycleResponseFactory doesn't have ok()
+            return new KibanaResponse(200, result.body, {
+              headers: {
+                'content-type': result.contentType,
+                'cache-control': 'no-cache',
+              },
+            });
+          }
+        }
+
+        return toolkit.next();
+      });
+    }
 
     router.get(
       {
