@@ -21,6 +21,5 @@ export function getReadResponseBodySchema() {
     id: schema.string(),
     data: markdownByValueEmbeddableSchema,
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
-    warnings: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

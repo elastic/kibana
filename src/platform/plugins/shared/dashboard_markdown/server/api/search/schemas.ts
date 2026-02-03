@@ -10,6 +10,8 @@
 import { schema } from '@kbn/config-schema';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
+const MAX_PER_PAGE = 10000;
+
 export const searchRequestBodySchema = schema.object({
   page: schema.maybe(
     schema.number({
@@ -23,6 +25,7 @@ export const searchRequestBodySchema = schema.object({
       meta: {
         description: 'The number of markdown embeddables to return per page',
       },
+      max: MAX_PER_PAGE,
     })
   ),
   search: schema.maybe(
@@ -44,7 +47,8 @@ export const searchResponseBodySchema = schema.object({
         title: schema.string(),
       }),
       meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    })
+    }),
+    { minSize: 0, maxSize: MAX_PER_PAGE }
   ),
   total: schema.number(),
   page: schema.number(),
