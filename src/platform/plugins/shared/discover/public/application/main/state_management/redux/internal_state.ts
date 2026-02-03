@@ -556,6 +556,12 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     actionCreator: internalStateSlice.actions.setAppState,
     effect: (action, listenerApi) => {
+      // This listener updates the default query mode based on the last used query type (ES|QL vs Data View), we use
+      // this so new discover sessions use that query mode as a default.
+      //
+      // NOTE: In the short term we will add a feature flag to default to ES|QL when there is no existing preference saved.
+      // Right now we use classic - this means that users will have to switch to ES|QL manually the first time if they already
+      // had classic stored as their last used mode.
       const { services } = listenerApi.extra;
       const tabId = action.payload.tabId;
 
