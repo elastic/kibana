@@ -37,6 +37,7 @@ export const FeedbackContainer = ({
   const [allowEmailContact, setAllowEmailContact] = useState(true);
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
 
   const solutionView = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -44,9 +45,13 @@ export const FeedbackContainer = ({
 
   const questions = getFeedbackQuestionsForApp(appId);
 
-  const isSendFeedbackButtonDisabled =
-    !selectedCsatOptionId &&
-    Object.values(questionAnswers).every((answer) => answer.trim().length === 0);
+  const isFormFilled =
+    selectedCsatOptionId ||
+    Object.values(questionAnswers).some((answer) => answer.trim().length > 0);
+
+  const isEmailFilled = !allowEmailContact || isEmailValid;
+
+  const isSendFeedbackButtonDisabled = !isFormFilled || !isEmailFilled;
 
   const handleChangeCsatOptionId = (optionId: string) => {
     setSelectedCsatOptionId(optionId);
@@ -65,6 +70,10 @@ export const FeedbackContainer = ({
 
   const handleChangeEmail = (emailValue: string) => {
     setEmail(emailValue);
+  };
+
+  const handleEmailValidationChange = (isValid: boolean) => {
+    setIsEmailValid(isValid);
   };
 
   const getSolutionType = () => {
@@ -139,6 +148,7 @@ export const FeedbackContainer = ({
         handleChangeQuestionAnswer={handleChangeQuestionAnswer}
         handleChangeAllowEmailContact={handleChangeAllowEmailContact}
         handleChangeEmail={handleChangeEmail}
+        onEmailValidationChange={handleEmailValidationChange}
       />
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}

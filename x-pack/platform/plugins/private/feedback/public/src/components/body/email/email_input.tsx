@@ -5,22 +5,51 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import type { ChangeEvent } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { SecurityServiceStart } from '@kbn/core/public';
+import { parseOneAddress } from 'email-addresses';
 
 interface Props {
   email: string;
   security?: SecurityServiceStart;
   handleChangeEmail: (email: string) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-export const EmailInput = ({ email, security, handleChangeEmail }: Props) => {
+const validateEmail = (value: string): boolean => {
+  if (!value) {
+    return false;
+  }
+  try {
+    const parsed = parseOneAddress(value);
+    return parsed !== null;
+  } catch {
+    return false;
+  }
+};
+
+export const EmailInput = ({ email, security, handleChangeEmail, onValidationChange }: Props) => {
   const hasFetchedEmailRef = useRef(false);
+  const [touched, setTouched] = useState(false);
+
+  const isValid = useMemo(() => validateEmail(email), [email]);
+
+  const showError = touched && !isValid;
+
+  useEffect(() => {
+    if (onValidationChange) {
+      onValidationChange(isValid);
+    }
+  }, [isValid, onValidationChange]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleChangeEmail(e.target.value);
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
   };
 
   useEffect(() => {
@@ -45,12 +74,16 @@ export const EmailInput = ({ email, security, handleChangeEmail }: Props) => {
   }, [security, email, handleChangeEmail]);
 
   return (
-    <EuiFieldText
-      data-test-subj="feedbackEmailInput"
-      onChange={handleChange}
-      type="email"
-      value={email}
-      fullWidth
-    />
+    <EuiFormRow isInvalid={showError} fullWidth>
+      <EuiFieldText
+        data-test-subj="feedbackEmailInput"
+        onChange={handleChange}
+        onBlur={handleBlur}
+        type="email"
+        value={email}
+        fullWidth
+        isInvalid={showError}
+      />
+    </EuiFormRow>
   );
 };

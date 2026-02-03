@@ -39,4 +39,18 @@ describe('EmailSection', () => {
 
     expect(screen.getByTestId('feedbackEmailInput')).toBeInTheDocument();
   });
+
+  it('should call onEmailValidationChange when validation changes', () => {
+    const onEmailValidationChange = jest.fn();
+    renderWithI18n(
+      <EmailSection
+        {...mockProps}
+        allowEmailContact={true}
+        email="capybara@elastic.co"
+        onEmailValidationChange={onEmailValidationChange}
+      />
+    );
+
+    expect(onEmailValidationChange).toHaveBeenCalled();
+  });
 });

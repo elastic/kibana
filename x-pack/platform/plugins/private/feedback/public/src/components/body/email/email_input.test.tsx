@@ -76,4 +76,33 @@ describe('EmailInput', () => {
       expect(mockSecurityService.authc.getCurrentUser).not.toHaveBeenCalled();
     });
   });
+
+  it('should call onValidationChange with false for empty email', () => {
+    const onValidationChange = jest.fn();
+    renderWithI18n(<EmailInput {...mockProps} email="" onValidationChange={onValidationChange} />);
+
+    expect(onValidationChange).toHaveBeenCalledWith(false);
+  });
+
+  it('should call onValidationChange with true for valid email', () => {
+    const onValidationChange = jest.fn();
+    renderWithI18n(
+      <EmailInput
+        {...mockProps}
+        email="capybara@elastic.co"
+        onValidationChange={onValidationChange}
+      />
+    );
+
+    expect(onValidationChange).toHaveBeenCalledWith(true);
+  });
+
+  it('should call onValidationChange with false for invalid email', () => {
+    const onValidationChange = jest.fn();
+    renderWithI18n(
+      <EmailInput {...mockProps} email="invalid-email" onValidationChange={onValidationChange} />
+    );
+
+    expect(onValidationChange).toHaveBeenCalledWith(false);
+  });
 });

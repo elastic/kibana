@@ -28,6 +28,7 @@ interface Props {
   handleChangeQuestionAnswer: (questionId: string, answer: string) => void;
   handleChangeAllowEmailContact: (allow: boolean) => void;
   handleChangeEmail: (email: string) => void;
+  onEmailValidationChange?: (isValid: boolean) => void;
 }
 export const FeedbackBody = ({
   core,
@@ -41,6 +42,7 @@ export const FeedbackBody = ({
   handleChangeQuestionAnswer,
   handleChangeAllowEmailContact,
   handleChangeEmail,
+  onEmailValidationChange,
 }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -87,6 +89,7 @@ export const FeedbackBody = ({
             security={core?.security}
             handleChangeAllowEmailContact={handleChangeAllowEmailContact}
             handleChangeEmail={handleChangeEmail}
+            onEmailValidationChange={onEmailValidationChange}
           />
         </EuiForm>
       </EuiFlexItem>

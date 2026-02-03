@@ -17,6 +17,7 @@ interface Props {
   security?: SecurityServiceStart;
   handleChangeAllowEmailContact: (allow: boolean) => void;
   handleChangeEmail: (email: string) => void;
+  onEmailValidationChange?: (isValid: boolean) => void;
 }
 
 export const EmailSection = ({
@@ -25,6 +26,7 @@ export const EmailSection = ({
   security,
   handleChangeAllowEmailContact,
   handleChangeEmail,
+  onEmailValidationChange,
 }: Props) => {
   return (
     <EuiFormRow display="center">
@@ -37,7 +39,12 @@ export const EmailSection = ({
         </EuiFlexItem>
         {allowEmailContact && (
           <EuiFlexItem>
-            <EmailInput email={email} security={security} handleChangeEmail={handleChangeEmail} />
+            <EmailInput
+              email={email}
+              security={security}
+              handleChangeEmail={handleChangeEmail}
+              onValidationChange={onEmailValidationChange}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

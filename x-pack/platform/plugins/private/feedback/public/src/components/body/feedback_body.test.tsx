@@ -102,4 +102,20 @@ describe('FeedbackBody', () => {
 
     expect(screen.getByTestId('feedbackEmailConsentCheckbox')).toBeInTheDocument();
   });
+
+  it('should call onEmailValidationChange when provided', async () => {
+    const onEmailValidationChange = jest.fn();
+    await act(async () => {
+      renderWithI18n(
+        <FeedbackBody
+          {...propsMock}
+          allowEmailContact={true}
+          email="capybara@elastic.co"
+          onEmailValidationChange={onEmailValidationChange}
+        />
+      );
+    });
+
+    expect(onEmailValidationChange).toHaveBeenCalled();
+  });
 });

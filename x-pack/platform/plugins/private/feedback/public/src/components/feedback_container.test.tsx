@@ -60,13 +60,16 @@ describe('FeedbackContainer', () => {
   it('should enable send button when CSAT score is selected', async () => {
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
-    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    await userEvent.click(emailConsentCheckbox);
 
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
     await userEvent.click(csatButtons[2]);
 
-    const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
-
-    expect(sendButton).not.toBeDisabled();
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).not.toBeDisabled();
+    });
   });
 
   it('should submit feedback with correct data', async () => {
@@ -74,8 +77,16 @@ describe('FeedbackContainer', () => {
 
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    await userEvent.click(emailConsentCheckbox);
+
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
     await userEvent.click(csatButtons[3]);
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).not.toBeDisabled();
+    });
 
     const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
     await userEvent.click(sendButton);
@@ -92,8 +103,16 @@ describe('FeedbackContainer', () => {
 
     renderWithI18n(<FeedbackContainer {...mockProps} />);
 
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    await userEvent.click(emailConsentCheckbox);
+
     const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
     await userEvent.click(csatButtons[3]);
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).not.toBeDisabled();
+    });
 
     const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
     await userEvent.click(sendButton);
@@ -103,6 +122,80 @@ describe('FeedbackContainer', () => {
         title: expect.stringContaining('Thanks for your feedback'),
       });
       expect(mockProps.hideFeedbackContainer).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should disable send button when email is invalid and email consent is checked', async () => {
+    renderWithI18n(<FeedbackContainer {...mockProps} />);
+
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    expect(emailConsentCheckbox).toBeChecked();
+
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    await userEvent.click(csatButtons[3]);
+
+    const emailInput = await screen.findByTestId('feedbackEmailInput');
+    await userEvent.clear(emailInput);
+    await userEvent.type(emailInput, 'invalid-email');
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).toBeDisabled();
+    });
+  });
+
+  it('should enable send button when email is valid and email consent is checked', async () => {
+    renderWithI18n(<FeedbackContainer {...mockProps} />);
+
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    expect(emailConsentCheckbox).toBeChecked();
+
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    await userEvent.click(csatButtons[3]);
+
+    const emailInput = await screen.findByTestId('feedbackEmailInput');
+    await userEvent.clear(emailInput);
+    await userEvent.type(emailInput, 'capybara@elastic.co');
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).not.toBeDisabled();
+    });
+  });
+
+  it('should disable send button when email is empty and email consent is checked', async () => {
+    renderWithI18n(<FeedbackContainer {...mockProps} />);
+
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    expect(emailConsentCheckbox).toBeChecked();
+
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    await userEvent.click(csatButtons[3]);
+
+    await screen.findByTestId('feedbackEmailInput');
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).toBeDisabled();
+    });
+  });
+
+  it('should enable send button when email consent is unchecked', async () => {
+    renderWithI18n(<FeedbackContainer {...mockProps} />);
+
+    const emailConsentCheckbox = screen.getByTestId('feedbackEmailConsentCheckbox');
+    expect(emailConsentCheckbox).toBeChecked();
+
+    const csatButtons = screen.getAllByRole('button', { name: /^\d$/ });
+    await userEvent.click(csatButtons[3]);
+
+    await userEvent.click(emailConsentCheckbox);
+
+    expect(emailConsentCheckbox).not.toBeChecked();
+
+    await waitFor(() => {
+      const sendButton = screen.getByTestId('feedbackFooterSendFeedbackButton');
+      expect(sendButton).not.toBeDisabled();
     });
   });
 });
