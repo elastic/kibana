@@ -25,14 +25,9 @@ const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 export interface EndpointInfoProps {
   inferenceId: string;
   endpointInfo: InferenceInferenceEndpointInfo;
-  isCloudEnabled?: boolean;
 }
 
-export const EndpointInfo: React.FC<EndpointInfoProps> = ({
-  inferenceId,
-  endpointInfo,
-  isCloudEnabled,
-}) => {
+export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpointInfo }) => {
   const { euiTheme } = useEuiTheme();
   const [isCopied, setIsCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -83,9 +78,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
               css={containerStyles}
             >
               <EuiFlexItem grow={false}>
-                <span>
-                  <strong>{inferenceId}</strong>
-                </span>
+                <strong>{inferenceId}</strong>
               </EuiFlexItem>
               <EuiFlexItem grow={false} className="copyButton" css={copyButtonStyles}>
                 <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
@@ -108,32 +101,28 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isProviderTechPreview(endpointInfo) ? (
+          {isProviderTechPreview(endpointInfo) && (
             <EuiFlexItem grow={false}>
-              <span>
-                <EuiBetaBadge
-                  label={i18n.TECH_PREVIEW_LABEL}
-                  size="s"
-                  color="subdued"
-                  alignment="middle"
-                />
-              </span>
+              <EuiBetaBadge
+                label={i18n.TECH_PREVIEW_LABEL}
+                size="s"
+                color="subdued"
+                alignment="middle"
+              />
             </EuiFlexItem>
-          ) : null}
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isEndpointPreconfigured(inferenceId) ? (
+      {isEndpointPreconfigured(inferenceId) && (
         <EuiFlexItem grow={false}>
-          <span>
-            <EuiBetaBadge
-              label={i18n.PRECONFIGURED_LABEL}
-              size="s"
-              color="hollow"
-              alignment="middle"
-            />
-          </span>
+          <EuiBetaBadge
+            label={i18n.PRECONFIGURED_LABEL}
+            size="s"
+            color="hollow"
+            alignment="middle"
+          />
         </EuiFlexItem>
-      ) : null}
+      )}
     </EuiFlexGroup>
   );
 };
