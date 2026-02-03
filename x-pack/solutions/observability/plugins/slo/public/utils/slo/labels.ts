@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { toDuration } from './duration';
 
@@ -147,4 +147,22 @@ export function toDurationAdverbLabel(durationStr: string): string {
         defaultMessage: 'Monthly',
       });
   }
+}
+
+export function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): string {
+  if (rollingTimeWindowTypeSchema.is(timeWindow.type)) {
+    return i18n.translate('xpack.slo.sloDetails.overview.rollingTimeWindow', {
+      defaultMessage: '{duration} rolling',
+      values: {
+        duration: toDurationLabel(timeWindow.duration),
+      },
+    });
+  }
+
+  return i18n.translate('xpack.slo.sloDetails.overview.calendarAlignedTimeWindow', {
+    defaultMessage: '{duration} calendar aligned',
+    values: {
+      duration: toDurationAdverbLabel(timeWindow.duration),
+    },
+  });
 }

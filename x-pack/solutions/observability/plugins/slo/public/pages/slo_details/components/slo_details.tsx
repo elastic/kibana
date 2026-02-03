@@ -15,11 +15,11 @@ import { BurnRatePanel } from './burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts/historical_data_charts';
 import { SloDetailsHistory } from './history/slo_details_history';
-import { Definition } from './definition/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
 import { ActionModalProvider } from '../../../context/action_modal';
+import { SloDetailsDefinition } from './definition';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -54,7 +54,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId, isFlyout }: P
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
-    return <Definition slo={slo} />;
+    return <SloDetailsDefinition slo={slo} isFlyout={isFlyout} />;
   }
 
   if (selectedTabId === ALERTS_TAB_ID) {
