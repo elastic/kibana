@@ -275,43 +275,95 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    it('filters by partitionFieldValue with wildcard', async () => {
+    it('filters by group', async () => {
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { start: START_ISO, end: END_ISO, partitionFieldValue: 'service-*' },
+          params: { start: START_ISO, end: END_ISO, group: 'apm' },
+        });
+
+      expect(toolResults[0].data.jobs).to.have.length(1);
+      expect(toolResults[0].data.jobs[0].jobId).to.contain('apm');
+    });
+
+    it('returns empty response for non-existent group', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, group: 'nonexistent-group' },
+        });
+
+      expect(toolResults[0].data.jobs).to.be.empty();
+    });
+
+    it('filters by single influencer', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: {
+            start: START_ISO,
+            end: END_ISO,
+            influencers: [{ 'service.name': SERVICE_NAME }],
+          },
         });
 
       const { topAnomalies } = toolResults[0].data.jobs[0];
       expect(topAnomalies.length).to.be.greaterThan(0);
       topAnomalies.forEach((anomaly) => {
-        expect(anomaly.partitionFieldValue).to.match(/^service-/);
+        const serviceInfluencer = anomaly.influencers?.find(
+          (inf) => inf.fieldName === 'service.name'
+        );
+        expect(serviceInfluencer?.fieldValues).to.contain(SERVICE_NAME);
       });
     });
 
-    it('filters by byFieldValue', async () => {
+    it('filters by multiple influencers (OR logic)', async () => {
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { start: START_ISO, end: END_ISO, byFieldValue: 'request' },
+          params: {
+            start: START_ISO,
+            end: END_ISO,
+            influencers: [{ 'service.name': SERVICE_NAME }, { 'transaction.type': 'request' }],
+          },
         });
 
       const { topAnomalies } = toolResults[0].data.jobs[0];
       expect(topAnomalies.length).to.be.greaterThan(0);
-      topAnomalies.forEach((anomaly) => {
-        expect(anomaly.byFieldValue).to.be('request');
-      });
     });
 
-    it('returns empty anomalies when filter matches nothing', async () => {
+    it('returns empty anomalies when influencer filter matches nothing', async () => {
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { start: START_ISO, end: END_ISO, partitionFieldValue: 'nonexistent-*' },
+          params: {
+            start: START_ISO,
+            end: END_ISO,
+            influencers: [{ 'service.name': 'nonexistent-service' }],
+          },
         });
 
       const { topAnomalies } = toolResults[0].data.jobs[0];
       expect(topAnomalies).to.be.empty();
+    });
+
+    it('includes influencers in anomaly response', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.greaterThan(0);
+      topAnomalies.forEach((anomaly) => {
+        expect(anomaly).to.have.property('influencers');
+        expect(anomaly.influencers).to.be.an('array');
+        anomaly.influencers?.forEach((inf) => {
+          expect(inf).to.have.property('fieldName');
+          expect(inf).to.have.property('fieldValues');
+        });
+      });
     });
 
     it('limits anomaly records per job with anomalyRecordsLimit', async () => {

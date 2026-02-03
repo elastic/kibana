@@ -40,6 +40,10 @@ export interface GetAnomalyDetectionJobsToolResult {
 }
 
 const getAnomalyDetectionJobsSchema = z.object({
+  group: z
+    .string()
+    .optional()
+    .describe('Filter jobs by ML job group name (e.g., "apm", "network").'),
   jobIds: z
     .array(z.string().min(1))
     .min(1)
@@ -76,17 +80,11 @@ const getAnomalyDetectionJobsSchema = z.object({
     .describe(
       'Include detailed anomaly score explanations. Disabled by default to reduce response size.'
     ),
-  partitionFieldValue: z
-    .string()
+  influencers: z
+    .array(z.record(z.string(), z.string()))
     .optional()
     .describe(
-      'Filter anomalies by partition field value (e.g., service name). Supports wildcards like "prod-*".'
-    ),
-  byFieldValue: z
-    .string()
-    .optional()
-    .describe(
-      'Filter anomalies by "by" field value (e.g., transaction type). Supports wildcards like "request*".'
+      'Filter anomalies by influencers. Each object has one key (field name) and value. Example: [{ "service.name": "frontend" }, { "host.name": "server-1" }]. Returns anomalies matching ANY of the specified influencers.'
     ),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
@@ -124,13 +122,13 @@ When to use:
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
       const {
+        group,
         jobIds,
         jobsLimit,
         anomalyRecordsLimit,
         minAnomalyScore,
         includeExplanation,
-        partitionFieldValue,
-        byFieldValue,
+        influencers,
         start: rangeStart,
         end: rangeEnd,
       } = toolParams;
@@ -144,13 +142,13 @@ When to use:
           mlClient,
           request,
           logger,
+          group,
           jobIds,
           jobsLimit,
           anomalyRecordsLimit,
           minAnomalyScore,
           includeExplanation,
-          partitionFieldValue,
-          byFieldValue,
+          influencers,
           rangeStart,
           rangeEnd,
         });

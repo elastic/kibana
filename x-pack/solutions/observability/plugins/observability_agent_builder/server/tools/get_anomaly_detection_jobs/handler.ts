@@ -22,13 +22,13 @@ export async function getToolHandler({
   mlClient,
   request,
   logger,
+  group,
   jobIds = [],
   jobsLimit,
   anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
-  partitionFieldValue,
-  byFieldValue,
+  influencers = [],
   rangeStart,
   rangeEnd,
 }: {
@@ -37,13 +37,13 @@ export async function getToolHandler({
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;
+  group?: string;
   jobIds?: string[];
   jobsLimit: number;
   anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
-  partitionFieldValue?: string;
-  byFieldValue?: string;
+  influencers?: Array<Record<string, string>>;
   rangeStart: string;
   rangeEnd: string;
 }) {
@@ -55,7 +55,13 @@ export async function getToolHandler({
     throw new Error('Machine Learning plugin is unavailable.');
   }
 
-  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') }).catch((error) => {
+  // The ML getJobs API job_id parameter accepts: job identifiers, group names,
+  // comma-separated lists, or wildcard expressions. When a group name is passed,
+  // it automatically expands to all jobs belonging to that group.
+  // See: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs
+  const jobIdParam = [group, ...jobIds].filter(Boolean).join(',');
+
+  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIdParam }).catch((error) => {
     if (error.statusCode === 404) {
       return { jobs: [] };
     }
@@ -65,7 +71,7 @@ export async function getToolHandler({
 
   // Get job stats for state information
   const { jobs: jobsStats = [] } = await mlClient
-    .getJobStats({ job_id: jobIds.join(',') })
+    .getJobStats({ job_id: jobIdParam })
     .catch((error) => {
       if (error.statusCode === 404) {
         return { jobs: [] };
@@ -86,8 +92,7 @@ export async function getToolHandler({
               anomalyRecordsLimit,
               minAnomalyScore,
               includeExplanation,
-              partitionFieldValue,
-              byFieldValue,
+              influencers,
               start: rangeStart,
               end: rangeEnd,
             })
@@ -122,8 +127,7 @@ async function getTopAnomalyRecords({
   anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
-  partitionFieldValue,
-  byFieldValue,
+  influencers,
   start,
   end,
 }: {
@@ -132,8 +136,7 @@ async function getTopAnomalyRecords({
   anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
-  partitionFieldValue?: string;
-  byFieldValue?: string;
+  influencers: Array<Record<string, string>>;
   start: string;
   end: string;
 }) {
@@ -147,10 +150,11 @@ async function getTopAnomalyRecords({
     'field_name',
     'typical',
     'actual',
+    'influencers',
     ...(includeExplanation ? ['anomaly_score_explanation'] : []),
   ];
 
-  // Build filter array with optional wildcard filters
+  // Build filter array
   const filters: Array<Record<string, unknown>> = [
     { term: { job_id: jobId } },
     { term: { result_type: 'record' } },
@@ -159,12 +163,30 @@ async function getTopAnomalyRecords({
     { range: { record_score: { gte: minAnomalyScore } } },
   ];
 
-  if (partitionFieldValue) {
-    filters.push({ wildcard: { partition_field_value: partitionFieldValue } });
-  }
-
-  if (byFieldValue) {
-    filters.push({ wildcard: { by_field_value: byFieldValue } });
+  // Add nested query for influencer filtering
+  // Returns anomalies matching ANY of the specified influencers
+  if (influencers.length > 0) {
+    filters.push({
+      bool: {
+        should: influencers.map((influencer) => {
+          const [fieldName, fieldValue] = Object.entries(influencer)[0];
+          return {
+            nested: {
+              path: 'influencers',
+              query: {
+                bool: {
+                  must: [
+                    { match: { 'influencers.influencer_field_name': fieldName } },
+                    { match: { 'influencers.influencer_field_values': fieldValue } },
+                  ],
+                },
+              },
+            },
+          };
+        }),
+        minimum_should_match: 1,
+      },
+    });
   }
 
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
@@ -196,6 +218,10 @@ async function getTopAnomalyRecords({
     fieldName: record.field_name,
     typicalValue: record.typical,
     actualValue: record.actual,
+    influencers: record.influencers?.map((inf) => ({
+      fieldName: inf.influencer_field_name,
+      fieldValues: inf.influencer_field_values,
+    })),
     ...(includeExplanation && { anomalyScoreExplanation: record.anomaly_score_explanation }),
   }));
 }
