@@ -112,7 +112,7 @@ async function getTopAnomalyRecords({
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
     {
       track_total_hits: false,
-      size: 100,
+      size: 10,
       sort: [{ record_score: { order: 'desc' as const } }],
       query: {
         bool: {
