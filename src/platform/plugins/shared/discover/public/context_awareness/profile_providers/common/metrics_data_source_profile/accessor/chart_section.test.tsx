@@ -59,7 +59,7 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const getChartSection = createChartSection();
   const configFactory = getChartSection(
-    () => ({ replaceDefaultChart: false }) as ChartSectionConfiguration,
+    () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
     { context: {} as object }
   );
 
