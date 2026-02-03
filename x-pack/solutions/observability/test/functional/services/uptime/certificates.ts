@@ -62,9 +62,9 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
       });
     },
     async displaysEmptyMessage() {
-      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
-      const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
-      expect(emptyText).to.eql('No Certificates found.');
+      // .euiBasicTable is a stable class name
+      const table = await find.byCssSelector('.euiBasicTable');
+      expect(await table.getVisibleText()).to.include.string('No Certificates found.');
     },
   };
 }
