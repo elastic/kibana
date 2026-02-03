@@ -86,10 +86,10 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.esql).toContain('EVAL static_0 = 100');
-      // Check that the static value column is in esAggsIdMap
-      expect(result.esAggsIdMap).toHaveProperty('static_0');
-      expect(result.esAggsIdMap.static_0[0].id).toBe('3');
+      // Single static value uses 'static' without index suffix
+      expect(result.esql).toContain('EVAL static = 100');
+      expect(result.esAggsIdMap).toHaveProperty('static');
+      expect(result.esAggsIdMap.static[0].id).toBe('3');
     }
   });
 
@@ -133,8 +133,69 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.esql).toContain('EVAL static_0 = 50');
+      // Single static value uses 'static' without index suffix
+      expect(result.esql).toContain('EVAL static = 50');
+      expect(result.esAggsIdMap).toHaveProperty('static');
+    }
+  });
+
+  it('should use indexed names for multiple static values', () => {
+    uiSettings.get.mockImplementation((key: string) => {
+      return defaultUiSettingsGet(key);
+    });
+
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'static_value',
+            label: 'Static value: 100',
+            dataType: 'number',
+            isBucketed: false,
+            references: [],
+            params: {
+              value: '100',
+            },
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'static_value',
+            label: 'Static value: 200',
+            dataType: 'number',
+            isBucketed: false,
+            references: [],
+            params: {
+              value: '200',
+            },
+          },
+        ],
+      ],
+      layer,
+      {
+        title: 'myIndexPattern',
+        getFieldByName: (field: string) => {
+          if (field === 'records') return undefined;
+          return { name: field };
+        },
+        getFormatterForField: () => ({ convert: (v: unknown) => v }),
+      } as unknown as IndexPattern,
+      uiSettings,
+      {
+        fromDate: '2021-01-01T00:00:00.000Z',
+        toDate: '2021-01-01T23:59:59.999Z',
+      },
+      new Date()
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // Multiple static values use indexed names
+      expect(result.esql).toContain('EVAL static_0 = 100, static_1 = 200');
       expect(result.esAggsIdMap).toHaveProperty('static_0');
+      expect(result.esAggsIdMap).toHaveProperty('static_1');
     }
   });
 });

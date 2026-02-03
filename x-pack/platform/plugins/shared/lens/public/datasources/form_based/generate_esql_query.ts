@@ -152,7 +152,8 @@ export function generateEsqlQuery(
     const value = staticCol.params?.value ?? '100';
 
     // Generate a unique column name for the static value
-    const esAggsId = `static_${index}`;
+    // Use 'static' for single value, 'static_0', 'static_1' etc. for multiple
+    const esAggsId = staticValueEntries.length === 1 ? 'static' : `static_${index}`;
 
     const format = isColumnFormatted(col) ? col.params?.format : undefined;
 
