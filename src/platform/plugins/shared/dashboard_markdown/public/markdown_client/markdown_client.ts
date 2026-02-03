@@ -10,7 +10,6 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 
 import type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from '../../server/api';
 import {
@@ -35,12 +34,11 @@ const cache = new LRUCache<string, MarkdownReadResponseBody>({
 });
 
 export const markdownClient = {
-  create: async (markdownState: MarkdownState, references: Reference[]) => {
+  create: async (markdownState: MarkdownState) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       body: JSON.stringify({
         data: markdownState,
-        references,
       }),
     });
   },
@@ -85,14 +83,13 @@ export const markdownClient = {
       }),
     });
   },
-  update: async (id: string, markdownState: MarkdownState, references: Reference[]) => {
+  update: async (id: string, markdownState: MarkdownState) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
       `${MARKDOWN_API_PATH}/${id}`,
       {
         version: MARKDOWN_API_VERSION,
         body: JSON.stringify({
           data: markdownState,
-          references,
         }),
       }
     );

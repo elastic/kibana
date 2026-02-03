@@ -9,4 +9,3 @@
 
 export { MarkdownStorage } from './markdown_storage';
 export * from './transform_utils';
-export * from './types';

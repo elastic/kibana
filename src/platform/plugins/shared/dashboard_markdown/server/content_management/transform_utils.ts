@@ -8,7 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import type { Reference, SOWithMetadata } from '@kbn/content-management-utils/src/types';
+import type { SOWithMetadata } from '@kbn/content-management-utils/src/types';
 import type { StoredMarkdownState } from '..';
 
 export type MarkdownItem = SOWithMetadata<StoredMarkdownState>;
@@ -16,7 +16,6 @@ export type MarkdownItem = SOWithMetadata<StoredMarkdownState>;
 export function savedObjectToItem(savedObject: SavedObject<StoredMarkdownState>) {
   const {
     attributes,
-    references,
     updated_at: updatedAt,
     updated_by: updatedBy,
     created_at: createdAt,
@@ -31,16 +30,13 @@ export function savedObjectToItem(savedObject: SavedObject<StoredMarkdownState>)
     createdAt,
     createdBy,
     attributes,
-    references: references.filter(({ type }) => type === 'tag'),
   };
 }
 
 export function itemToAttributes(state: StoredMarkdownState): {
   attributes: StoredMarkdownState;
-  references: Reference[];
 } {
   return {
     attributes: state,
-    references: [],
   };
 }

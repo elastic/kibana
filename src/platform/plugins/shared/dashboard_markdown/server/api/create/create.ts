@@ -25,7 +25,6 @@ export async function create(
     createBody.data,
     {
       ...(createBody.id && { id: createBody.id }),
-      ...(createBody.references && { references: createBody.references }),
       ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
     }
   );

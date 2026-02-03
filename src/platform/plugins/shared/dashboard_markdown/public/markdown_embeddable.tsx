@@ -154,14 +154,11 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ),
       // Library transforms
       saveToLibrary: async (title: string) => {
-        const { id } = await markdownClient.create(
-          {
-            ...titleManager.getLatestState(),
-            ...markdownStateManager.getLatestState(),
-            title,
-          },
-          []
-        );
+        const { id } = await markdownClient.create({
+          ...titleManager.getLatestState(),
+          ...markdownStateManager.getLatestState(),
+          title,
+        });
         return id;
       },
       getSerializedStateByValue: serializeByValue,
@@ -220,15 +217,11 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 resetEditingState();
                 markdownStateManager.api.setContent(value);
                 if (savedObjectId) {
-                  await markdownClient.update(
-                    savedObjectId!,
-                    {
-                      content: value,
-                      title: titleManager.api.title$!.getValue(),
-                      description: titleManager.api.description$!.getValue(),
-                    },
-                    []
-                  );
+                  await markdownClient.update(savedObjectId!, {
+                    content: value,
+                    title: titleManager.api.title$!.getValue(),
+                    description: titleManager.api.description$!.getValue(),
+                  });
                 }
                 if (isNewPanel$.getValue()) {
                   isNewPanel$.next(false);
