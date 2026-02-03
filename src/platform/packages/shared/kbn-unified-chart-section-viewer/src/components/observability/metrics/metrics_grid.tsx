@@ -52,7 +52,6 @@ export const MetricsGrid = ({
   searchTerm,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { euiTheme } = useEuiTheme();
 
   const [expandedMetric, setExpandedMetric] = useState<
@@ -75,14 +74,6 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const setChartRef = useCallback((id: string, element: HTMLDivElement | null) => {
-    if (element) {
-      chartRefs.current.set(id, element);
-    } else {
-      chartRefs.current.delete(id);
-    }
-  }, []);
-
   const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
     setExpandedMetric({ index, metric, esqlQuery });
   }, []);
@@ -99,17 +90,6 @@ export const MetricsGrid = ({
       focusCell(rowIndex, colIndex);
     });
   }, [expandedMetric, focusCell, getRowColFromIndex]);
-
-  const getChartRefForFocus = useCallback(() => {
-    if (expandedMetric !== undefined) {
-      const chartId = getItemKey(expandedMetric.metric, expandedMetric.index);
-      const chartElement = chartRefs.current.get(chartId);
-      if (chartElement) {
-        return { current: chartElement };
-      }
-    }
-    return { current: null };
-  }, [expandedMetric]);
 
   if (fields.length === 0) {
     return <EmptyState />;
@@ -153,7 +133,6 @@ export const MetricsGrid = ({
                 <ChartItem
                   id={id}
                   index={index}
-                  ref={(element) => setChartRef(id, element)}
                   metric={metric}
                   size="s"
                   dimensions={dimensions}
@@ -178,7 +157,6 @@ export const MetricsGrid = ({
       </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
-          chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
           onClose={handleCloseFlyout}
