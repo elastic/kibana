@@ -12,7 +12,7 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
 
-// Do not change constan value - part of public REST API
+// Do not change constant value - part of public REST API
 export const URL_DRILLDOWN_TYPE = 'url_drilldown';
 
 // Only additive changes are allowed, part of public REST API
