@@ -12,9 +12,8 @@ import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import type { AiInsightResult, ContextEvent } from './types';
+import { createAiInsightResult, type AiInsightResult } from './types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -81,12 +80,7 @@ export async function getAlertAiInsight({
     context: relatedContext,
   });
 
-  const streamWithContext$ = concat(
-    of<ContextEvent>({ type: 'context', context: relatedContext }),
-    events$
-  );
-
-  return { events$: streamWithContext$, context: relatedContext };
+  return createAiInsightResult(relatedContext, events$);
 }
 
 // Time window offsets in minutes before alert start
@@ -128,27 +122,27 @@ async function fetchAlertContext({
   const fetchConfigs = [
     {
       key: 'apmServiceSummary' as const,
-      window: START_TIME_OFFSETS.serviceSummary,
+      startOffset: START_TIME_OFFSETS.serviceSummary,
       params: { serviceName, serviceEnvironment, transactionType },
     },
     {
       key: 'apmDownstreamDependencies' as const,
-      window: START_TIME_OFFSETS.downstream,
+      startOffset: START_TIME_OFFSETS.downstream,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmErrors' as const,
-      window: START_TIME_OFFSETS.errors,
+      startOffset: START_TIME_OFFSETS.errors,
       params: { serviceName, serviceEnvironment },
     },
     {
       key: 'apmServiceChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment, transactionType, transactionName },
     },
     {
       key: 'apmExitSpanChangePoints' as const,
-      window: START_TIME_OFFSETS.changePoints,
+      startOffset: START_TIME_OFFSETS.changePoints,
       params: { serviceName, serviceEnvironment },
     },
   ];
@@ -159,6 +153,7 @@ async function fetchAlertContext({
   async function fetchLogGroups() {
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
+      const end = alertStart;
       const result = await getLogGroups({
         core,
         plugins,
@@ -166,7 +161,7 @@ async function fetchAlertContext({
         logger,
         esClient,
         start,
-        end: alertStart,
+        end,
         kqlFilter: `service.name: "${serviceName}"`,
         fields: ['service.name'],
         includeStackTrace: false,
@@ -174,7 +169,7 @@ async function fetchAlertContext({
         size: 50,
       });
 
-      return result.length > 0 ? { key: 'logGroups' as const, start, data: result } : null;
+      return result.length > 0 ? { key: 'logGroups' as const, start, end, data: result } : null;
     } catch (err) {
       logger.debug(`AI insight: logGroups failed: ${err}`);
       return null;
@@ -184,14 +179,15 @@ async function fetchAlertContext({
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
-        const start = getStart(config.window);
+        const start = getStart(config.startOffset);
+        const end = alertStart;
         const data = await dataRegistry.getData(config.key, {
           request,
           ...config.params,
           start,
-          end: alertStart,
+          end,
         });
-        return isEmpty(data) ? null : { key: config.key, start, data };
+        return isEmpty(data) ? null : { key: config.key, start, end, data };
       } catch (err) {
         logger.debug(`AI insight: ${config.key} failed: ${err}`);
         return null;
@@ -202,8 +198,8 @@ async function fetchAlertContext({
 
   const results = await Promise.all(allFetchers);
   const contextParts = compact(results).map(
-    ({ key, start, data }) =>
-      `<${key}>\nTime window: ${start} to ${alertStart}\n\`\`\`json\n${JSON.stringify(
+    ({ key, start, end, data }) =>
+      `<${key}>\nTime window: ${start} to ${end}\n\`\`\`json\n${JSON.stringify(
         data,
         null,
         2
