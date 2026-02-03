@@ -181,6 +181,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/ftr-llm-proxy",
+    "@kbn/dev-cli-runner"
   ]
 }
