@@ -63,7 +63,6 @@ export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSche
       getDrilldownsSchemas(IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS),
       schema.object({
         imageConfig: imageConfigSchema,
-        enhancements: schema.maybe(schema.any()),
       }),
       serializedTitlesSchema,
     ],
