@@ -74,9 +74,6 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
   maps: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
-  ml: {
-    defaultAccess: ProjectRoutingAccess.EDITABLE,
-  },
   management: {
     defaultAccess: ProjectRoutingAccess.DISABLED,
     routeRules: [
