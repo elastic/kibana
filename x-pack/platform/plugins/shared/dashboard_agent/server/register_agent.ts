@@ -166,7 +166,6 @@ Tool response includes:
   "data": {
     "dashboardAttachmentId": "dash-abc123",
     "version": 1,
-    "url": "/app/dashboards#/create?...",
     "title": "My Dashboard",
     "description": "Dashboard showing metrics",
     "markdownContent": "## Overview\nThis dashboard shows...",

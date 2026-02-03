@@ -10,8 +10,6 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   createVisualizationGraph,
   guessChartType,
@@ -27,13 +25,7 @@ import {
 } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
-import {
-  checkDashboardToolsAvailability,
-  normalizePanels,
-  buildMarkdownPanel,
-  getMarkdownPanelHeight,
-  resolveLensConfigFromAttachment,
-} from '../utils';
+import { checkDashboardToolsAvailability, resolveLensConfigFromAttachment } from '../utils';
 
 export { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT };
 
@@ -99,13 +91,9 @@ const manageDashboardSchema = z.object({
     .describe('(optional) Array of panel IDs to remove from the dashboard.'),
 });
 
-export const manageDashboardTool = ({
-  dashboardLocator,
-  spaces,
-}: {
-  dashboardLocator: DashboardAppLocator;
-  spaces?: SpacesPluginStart;
-}): BuiltinToolDefinition<typeof manageDashboardSchema> => {
+export const manageDashboardTool = ({}: {}): BuiltinToolDefinition<
+  typeof manageDashboardSchema
+> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,
@@ -138,7 +126,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         addVisualizationAttachments,
         removePanelIds,
       },
-      { logger, request, attachments, esClient, modelProvider, events }
+      { logger, attachments, esClient, modelProvider, events }
     ) => {
       try {
         const isNewDashboard = !dashboardAttachmentId;
@@ -200,6 +188,9 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         // Start with existing panels
         let panels: AttachmentPanel[] = [...previousData.panels];
 
+        // Track failures to report to the user
+        const failures: Array<{ type: string; identifier: string; error: string }> = [];
+
         // Remove panels if specified
         if (removePanelIds && removePanelIds.length > 0) {
           const removeSet = new Set(removePanelIds);
@@ -246,11 +237,15 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
               });
               addedCount++;
             } catch (error) {
+              const errorMessage = getErrorMessage(error);
               logger.error(
-                `Error resolving visualization attachment "${attachmentId}": ${getErrorMessage(
-                  error
-                )}`
+                `Error resolving visualization attachment "${attachmentId}": ${errorMessage}`
               );
+              failures.push({
+                type: 'visualization_attachment',
+                identifier: attachmentId,
+                error: errorMessage,
+              });
             }
           }
           logger.debug(
@@ -331,57 +326,29 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
               logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
             } catch (error) {
-              logger.error(
-                `Error creating visualization for query "${nlQuery}": ${getErrorMessage(error)}`
-              );
-              // Continue with other visualizations even if one fails
+              const errorMessage = getErrorMessage(error);
+              logger.error(`Error creating visualization for query "${nlQuery}": ${errorMessage}`);
+              failures.push({
+                type: 'inline_visualization',
+                identifier: nlQuery,
+                error: errorMessage,
+              });
             }
           }
         }
 
-        // Build the dashboard panels for the URL
-        const markdownPanel = updatedMarkdownContent
-          ? buildMarkdownPanel(updatedMarkdownContent)
-          : undefined;
-        const yOffset = updatedMarkdownContent ? getMarkdownPanelHeight(updatedMarkdownContent) : 0;
-
-        const dashboardPanels = [
-          ...(markdownPanel ? [markdownPanel] : []),
-          ...normalizePanels(panels, yOffset),
-        ];
-
-        // Update the dashboard attachment first to get the version
-        const updatedDashboardData: DashboardAttachmentData = {
-          title: updatedTitle,
-          description: updatedDescription,
-          markdownContent: updatedMarkdownContent,
-          panels,
-        };
-
         const updatedAttachment = await attachments.update(currentAttachmentId!, {
-          data: updatedDashboardData,
+          data: {
+            title: updatedTitle,
+            description: updatedDescription,
+            markdownContent: updatedMarkdownContent,
+            panels,
+          },
           description: `Dashboard: ${updatedTitle}`,
         });
 
         logger.info(
           `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panels.length} panels`
-        );
-
-        const spaceId = spaces?.spacesService?.getSpaceId(request);
-
-        // Generate dashboard URL with attachmentId and version for agent context persistence
-        // The versionAttachmentId ensures each version gets a unique URL to trigger navigation
-        const dashboardUrl = await dashboardLocator.getRedirectUrl(
-          {
-            panels: dashboardPanels,
-            title: updatedTitle,
-            description: updatedDescription,
-            viewMode: 'edit',
-            time_range: { from: 'now-24h', to: 'now' },
-            dashboardAttachmentId: currentAttachmentId,
-            versionAttachmentId: updatedAttachment?.version?.id,
-          },
-          { spaceId }
         );
 
         return {
@@ -392,16 +359,16 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
               data: {
                 dashboardAttachmentId: currentAttachmentId,
                 version: updatedAttachment?.current_version ?? 1,
-                url: dashboardUrl,
                 title: updatedTitle,
                 description: updatedDescription,
                 markdownContent: updatedMarkdownContent,
-                panelCount: dashboardPanels.length,
+                panelCount: panels.length + (updatedMarkdownContent ? 1 : 0),
                 panels: panels.map((panel) => ({
                   type: panel.type,
                   panelId: getPanelId(panel),
                   title: panel.title,
                 })),
+                failures: failures.length > 0 ? failures : undefined,
               },
             },
           ],
