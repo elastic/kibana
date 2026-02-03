@@ -48,6 +48,25 @@
   "type": "doc",
   "value": {
     "data_stream": ".entities.v2.updates.security_host_default",
+    "id": "eEzh_5sBzpZGGHYpLUFD",
+    "index": ".ds-.entities.v2.updates.security_host_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:02Z",
+      "host": {
+        "entity": {
+          "id": "host-with-entity-id"
+        },
+        "domain": "example.com",
+        "name": "server-01"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_host_default",
     "id": "eUzh_5sBzpZGGHYpLUFB",
     "index": ".ds-.entities.v2.updates.security_host_default-2026.01.27-000001",
     "source": {

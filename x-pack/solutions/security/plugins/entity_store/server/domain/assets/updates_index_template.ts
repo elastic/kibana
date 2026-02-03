@@ -6,7 +6,7 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '../definitions/entity_schema';
+import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import {
   ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
