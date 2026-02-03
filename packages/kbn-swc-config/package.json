@@ -1,0 +1,11 @@
+{
+  "name": "@kbn/swc-config",
+  "private": true,
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts",
+    "./node": "./src/node.ts"
+  }
+}

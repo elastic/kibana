@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { default as themeLoader } from './theme_loader';
-export { default as requireInteropLoader } from './require_interop_loader';
+export { getSharedConfig, type SharedTranspilerConfig } from './shared_config';
+export { USES_STYLED_COMPONENTS } from './styled_components_files';
+export { EMOTION_LABEL_FORMAT, TYPESCRIPT_CONFIG, REACT_CONFIG } from './constants';

@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import type { RuleSetRule, Configuration } from '@rspack/core';
+import { getSharedConfig } from '@kbn/transpiler-config';
 import type { ThemeTag } from '../types';
 
 /**
@@ -17,11 +18,19 @@ import type { ThemeTag } from '../types';
  */
 export function getSharedResolveConfig(repoRoot: string): Configuration['resolve'] {
   return {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.peggy', '.scss', '.css'],
+    extensions: ['.js', '.ts', '.tsx', '.json'],
     mainFields: ['browser', 'module', 'main'],
-    conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     alias: {
-      '@elastic/eui$': '@elastic/eui/optimize/es',
+      'react-dom$': 'react-dom/profiling',
+      'scheduler/tracing': 'scheduler/tracing-profiling',
+      buffer: [
+        Path.resolve(repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+        require.resolve('buffer'),
+      ],
+      punycode: [
+        Path.resolve(repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+        require.resolve('punycode'),
+      ],
     },
     tsConfig: Path.resolve(repoRoot, 'tsconfig.base.json'),
   };
@@ -50,8 +59,100 @@ export function getSharedResolveFallback(): Record<string, false> {
 }
 
 /**
- * Get the Babel loader configuration.
- * Shared between main build and external plugins.
+ * Get SWC loader rule for JavaScript/TypeScript files.
+ *
+ * Uses RSPack's native `builtin:swc-loader` for maximum performance.
+ * This is faster than the webpack `swc-loader` because it's implemented
+ * in Rust and integrated directly into RSPack.
+ *
+ * Uses @swc/plugin-emotion for CSS-in-JS. styled-components files
+ * will still work at runtime - we just won't have build-time optimizations
+ * like better debugging labels for styled-components.
+ *
+ * This is acceptable because:
+ * 1. Kibana is migrating from styled-components to Emotion
+ * 2. styled-components still works without a build plugin
+ * 3. Simplifies the configuration significantly
+ *
+ * This replaces the previous babel-loader configuration.
+ */
+/**
+ * Common SWC options for both TypeScript and JavaScript files.
+ * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
+ */
+function getSwcOptions(dist: boolean) {
+  const sharedConfig = getSharedConfig();
+
+  return {
+    jsc: {
+      parser: {
+        syntax: 'typescript',
+        tsx: true,
+        decorators: true,
+      },
+      transform: {
+        // Use shared TypeScript config for decorator settings
+        legacyDecorator: sharedConfig.typescript.decoratorsLegacy,
+        decoratorMetadata: true,
+        react: {
+          // Use shared React config
+          runtime: sharedConfig.react.runtime,
+          development: !dist,
+          // Use Emotion's JSX runtime to handle the css prop natively.
+          // This works because @emotion/react/jsx-runtime is externalized
+          // to __kbnSharedDeps__.EmotionReact (which exports jsx, jsxs, Fragment).
+          importSource: '@emotion/react',
+        },
+      },
+      // No plugins needed - Emotion's JSX runtime handles css prop directly
+      // Target ES2020 for browser builds (matches Kibana's browserslist)
+      target: 'es2020',
+      // Keep class names for debugging and error messages
+      keepClassNames: true,
+      // Use @swc/helpers for smaller output (like @babel/plugin-transform-runtime)
+      externalHelpers: true,
+    },
+    sourceMaps: !dist,
+    inlineSourcesContent: !dist,
+  };
+}
+
+export function getSwcLoaderRules(dist: boolean): RuleSetRule[] {
+  const swcOptions = getSwcOptions(dist);
+
+  return [
+    // TypeScript files - SWC only
+    {
+      test: /\.tsx?$/,
+      exclude: /node_modules/,
+      loader: 'builtin:swc-loader',
+      options: swcOptions,
+    },
+    // JavaScript files - require interop loader + SWC
+    // The interop loader transforms CJS require() calls to handle ESM default exports
+    // This matches webpack's babel-plugin-transform-require-default behavior
+    {
+      test: /\.jsx?$/,
+      exclude: /node_modules/,
+      use: [
+        {
+          loader: 'builtin:swc-loader',
+          options: swcOptions,
+        },
+        {
+          // Runs first (loaders execute bottom to top)
+          // Transforms: const foo = require('bar') -> const foo = __kbnInteropDefault(require('bar'))
+          loader: Path.resolve(__dirname, '../loaders/require_interop_loader.ts'),
+        },
+      ],
+    },
+  ];
+}
+
+/**
+ * Get the Babel loader configuration (fallback for compatibility).
+ * Used when SWC is not available or has issues.
+ * @deprecated Prefer getSwcLoaderRules() for better performance
  */
 export function getBabelLoaderRule(dist: boolean): RuleSetRule {
   return {
@@ -288,15 +389,27 @@ export function getPeggyLoaderRule(): RuleSetRule {
 /**
  * Get all shared module rules.
  * These rules are used by both main build and external plugins.
+ *
+ * @param repoRoot - Root of the Kibana repository
+ * @param dist - Whether this is a production build
+ * @param themeTags - Theme tags to generate (default: light and dark)
+ * @param bundleId - Bundle ID for theme loader
+ * @param useBabel - Use Babel instead of SWC (default: false)
  */
 export function getSharedModuleRules(
   repoRoot: string,
   dist: boolean,
   themeTags: ThemeTag[] = ['borealislight', 'borealisdark'],
-  bundleId: string = 'kibana'
+  bundleId: string = 'kibana',
+  useBabel: boolean = false
 ): RuleSetRule[] {
+  // Use SWC by default for better performance.
+  // The css prop is handled by Emotion's JSX runtime (importSource: '@emotion/react')
+  // which is externalized to use the shared Emotion instance.
+  const jsRules = useBabel ? [getBabelLoaderRule(dist)] : getSwcLoaderRules(dist);
+
   return [
-    getBabelLoaderRule(dist),
+    ...jsRules,
     getCssLoaderRule(dist),
     getScssLoaderRule(repoRoot, dist, themeTags, bundleId),
     getNodeModulesScssLoaderRule(repoRoot, dist),

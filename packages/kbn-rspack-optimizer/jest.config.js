@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { default as themeLoader } from './theme_loader';
-export { default as requireInteropLoader } from './require_interop_loader';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-rspack-optimizer'],
+};

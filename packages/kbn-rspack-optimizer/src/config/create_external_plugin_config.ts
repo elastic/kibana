@@ -89,7 +89,8 @@ export async function createExternalPluginConfig(
   return {
     name: `plugin-${pluginId}`,
     mode: dist ? 'production' : 'development',
-    devtool: dist ? false : 'cheap-module-source-map',
+    // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
+    devtool: dist ? false : 'cheap-source-map',
     target: 'web',
     context: pluginDir,
 
@@ -125,6 +126,7 @@ export async function createExternalPluginConfig(
 
     module: {
       // Use shared module rules (same loaders as main build)
+      // SWC for performance + require_interop_loader for ESM/CJS interop
       rules: getSharedModuleRules(repoRoot, dist, themeTags, `plugin-${pluginId}`),
     },
 
@@ -156,8 +158,24 @@ export async function createExternalPluginConfig(
       cache: cache
         ? {
             type: 'persistent',
-            buildDependencies: [Path.resolve(pluginDir, 'package.json')],
-            version: `external-plugin-v1-${dist ? 'prod' : 'dev'}`,
+            // Build dependencies - cache is invalidated when any of these change
+            buildDependencies: [
+              // Plugin's own package.json
+              Path.resolve(pluginDir, 'package.json'),
+              // RSPack optimizer config files
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
+              // Shared deps built outputs - invalidate when shared deps are rebuilt
+              Path.resolve(
+                repoRoot,
+                'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets/kbn-ui-shared-deps-npm.dll.js'
+              ),
+              Path.resolve(
+                repoRoot,
+                'target/build/src/platform/packages/private/kbn-ui-shared-deps-src/shared_built_assets/kbn-ui-shared-deps-src.js'
+              ),
+            ],
+            version: `external-plugin-v2-${dist ? 'prod' : 'dev'}`,
           }
         : false,
     },

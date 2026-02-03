@@ -13,11 +13,14 @@ module.exports = {
    * Please keep this list up-to-date when converting component styles
    * from styled-components to Emotion.
    *
+   * This is the SINGLE SOURCE OF TRUTH for styled-components detection.
+   * Other packages (@kbn/transpiler-config, @kbn/swc-config) import from here.
+   *
    * Babel's MatchPattern can be a regex or a string which follows standard
    * Node.js path logic as described here:
    * https://babeljs.io/docs/options#matchpattern
    *
-   * Used by `kbn-babel-preset` and `kbn-eslint-config`.
+   * Used by `kbn-babel-preset`, `kbn-eslint-config`, and `kbn-transpiler-config`.
    */
   USES_STYLED_COMPONENTS: [
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,

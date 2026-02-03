@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { default as themeLoader } from './theme_loader';
-export { default as requireInteropLoader } from './require_interop_loader';
+export { getBrowserSwcConfig, type BrowserSwcOptions, type SwcLoaderOptions } from './browser';
+export { getNodeSwcConfig, type NodeSwcOptions } from './node';

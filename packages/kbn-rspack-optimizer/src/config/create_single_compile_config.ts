@@ -223,7 +223,8 @@ export async function createSingleCompileConfig(
   return {
     name: 'kibana-plugins',
     mode: dist ? 'production' : 'development',
-    devtool: dist ? false : 'cheap-module-source-map',
+    // Match legacy webpack optimizer: no sourcemaps in dist, cheap-source-map in dev
+    devtool: dist ? false : 'cheap-source-map',
     target: 'web',
     context: repoRoot,
 
@@ -281,6 +282,7 @@ export async function createSingleCompileConfig(
     module: {
       // Use shared module rules (same loaders as external plugins)
       // Plus additional rules specific to main build
+      // SWC for performance + require_interop_loader for ESM/CJS interop
       rules: [
         ...getSharedModuleRules(repoRoot, dist, themeTags, 'kibana'),
         // URL imports (?asUrl query) - specific to main build
@@ -396,13 +398,36 @@ export async function createSingleCompileConfig(
       cache: cache
         ? {
             type: 'persistent',
-            // Use package.json as build dependencies (more stable than compiled JS)
+            // Build dependencies - cache is invalidated when any of these change
             buildDependencies: [
+              // RSPack optimizer config files
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/package.json'),
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
+              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts'),
+              // Root package.json (dependency versions)
               Path.resolve(repoRoot, 'package.json'),
+              // Shared deps built outputs - invalidate when shared deps are rebuilt
+              Path.resolve(
+                repoRoot,
+                'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets/kbn-ui-shared-deps-npm.dll.js'
+              ),
+              Path.resolve(
+                repoRoot,
+                'target/build/src/platform/packages/private/kbn-ui-shared-deps-src/shared_built_assets/kbn-ui-shared-deps-src.js'
+              ),
+              // Shared deps source files (in case builds are stale)
+              Path.resolve(
+                repoRoot,
+                'src/platform/packages/private/kbn-ui-shared-deps-src/src/entry.js'
+              ),
+              Path.resolve(
+                repoRoot,
+                'src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js'
+              ),
             ],
             // Version string to invalidate cache when config changes
-            version: `v3-${dist ? 'prod' : 'dev'}`,
+            version: `v4-${dist ? 'prod' : 'dev'}`,
           }
         : false,
     },
