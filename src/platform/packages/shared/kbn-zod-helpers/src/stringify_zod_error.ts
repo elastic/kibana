@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodError, ZodIssue } from '@kbn/zod';
+import type { ZodError, core } from '@kbn/zod/v4';
 
 const MAX_ERRORS = 5;
 
-export function stringifyZodError(err: ZodError<any>) {
+export function stringifyZodError(err: ZodError<unknown>) {
   const errorMessages: string[] = [];
 
   const issues = err.issues;
@@ -23,7 +23,7 @@ export function stringifyZodError(err: ZodError<any>) {
     // If the issue is an invalid union, we need to traverse all issues in the
     // "unionErrors" array
     if (issue.code === 'invalid_union') {
-      issues.push(...issue.unionErrors.flatMap((e) => e.issues));
+      issues.push(...issue.errors.flat());
       continue;
     }
 
@@ -39,7 +39,7 @@ export function stringifyZodError(err: ZodError<any>) {
   return errorMessages.join(', ');
 }
 
-function stringifyIssue(issue: ZodIssue) {
+function stringifyIssue(issue: core.$ZodIssue) {
   if (issue.path.length === 0) {
     return issue.message;
   }
