@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.sharepoint.download'
-description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id); downloadItemFromURL (download_url); getSitePageContents (site_id, page_id).'
+description: 'Download SharePoint content. Actions and inputs: downloadDriveItem (drive_id, item_id); downloadItemFromURL + ingest extract (download_url, extracted text available in simulate response under docs[0].doc._source.attachment.content); getSitePageContents (site_id, page_id).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -41,6 +41,24 @@ steps:
     connector-id: <%= stackConnectorId %>
     with:
       downloadUrl: "${{ inputs.download_url }}"
+  - name: extract-content
+    type: elasticsearch.request
+    if: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+    with:
+      method: POST
+      path: /_ingest/pipeline/_simulate
+      body:
+        pipeline:
+          processors:
+            - attachment:
+                field: data
+                indexed_chars: -1
+                remove_binary: true
+        docs:
+          - _id: "${{ inputs.download_url }}"
+            _source:
+              filename: "${{ inputs.download_url }}"
+              data: "${{ steps.download-item-from-url.output.base64 }}"
   - name: get-site-page-contents
     type: sharepoint-online.getSitePageContents
     if: "${{ inputs.download_action == 'getSitePageContents' }}"
@@ -48,3 +66,25 @@ steps:
     with:
       siteId: "${{ inputs.site_id }}"
       pageId: "${{ inputs.page_id }}"
+  - name: set-download-result
+    type: if
+    condition: "${{ inputs.download_action == 'downloadDriveItem' }}"
+    steps:
+      - name: set-download-drive-item-output
+        type: data.set
+        with:
+          result: "${{ steps.download-drive-item.output }}"
+    else:
+      - name: set-download-result-from-url
+        type: if
+        condition: "${{ inputs.download_action == 'downloadItemFromURL' }}"
+        steps:
+          - name: set-download-extract-output
+            type: data.set
+            with:
+              result: "${{ steps.extract-content.output }}"
+        else:
+          - name: set-site-page-contents-output
+            type: data.set
+            with:
+              result: "${{ steps.get-site-page-contents.output }}"
