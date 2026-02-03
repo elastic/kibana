@@ -131,18 +131,6 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
-export const OAUTH_USE_BASIC_AUTH_LABEL = i18n.translate('connectorSpecs.oauthUseBasicAuth.label', {
-  defaultMessage: 'Use HTTP Basic Authentication for token endpoint',
-});
-
-export const OAUTH_USE_BASIC_AUTH_HELP_TEXT = i18n.translate(
-  'connectorSpecs.oauthUseBasicAuth.helpText',
-  {
-    defaultMessage:
-      'Send client credentials via HTTP Basic Auth header instead of request body (recommended)',
-  }
-);
-
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });

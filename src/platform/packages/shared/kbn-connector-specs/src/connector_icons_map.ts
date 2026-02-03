@@ -64,13 +64,4 @@ export const ConnectorIconsMap: Map<
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
-  [
-    '.sharepointOnline',
-    lazy(
-      () =>
-        import(
-          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
-        )
-    ),
-  ],
 ]);
