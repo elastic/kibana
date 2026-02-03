@@ -1508,14 +1508,14 @@ export class CstToAstConverter {
     command: ast.ESQLAstRerankCommand
   ): void {
     const onToken = ctx.ON();
-    const rerankFieldsCtx = ctx.rerankFields();
+    const fieldsCtx = ctx.fields();
 
-    if (!onToken || !rerankFieldsCtx) {
+    if (!onToken || !fieldsCtx) {
       return;
     }
 
-    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
-    const fields = this.fromRerankFields(rerankFieldsCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), fieldsCtx);
+    const fields = this.fromFields(fieldsCtx);
 
     onOption.args.push(...fields);
     onOption.location.min = onToken.symbol.start;
@@ -1574,97 +1574,6 @@ export class CstToAstConverter {
         command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
       }
     }
-  }
-
-  /**
-   * Collects all ON fields for RERANK.
-   *
-   * - Accepts simple columns (e.g. `title`).
-   * - Accepts assignments (e.g. `title = X(title, 2)`).
-   * - Accepts expressions after a qualified name (e.g. `field < 10`).
-   */
-  private fromRerankFields(ctx: cst.RerankFieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const fieldCtx of ctx.rerankField_list()) {
-        const field = this.fromRerankField(fieldCtx);
-
-        if (field) {
-          fields.push(field);
-        }
-      }
-    } catch (e) {
-      // do nothing
-    }
-    return fields;
-  }
-
-  /**
-   * Parses a single RERANK field entry.
-   *
-   * Supports three forms:
-   * 1) Assignment: qualifiedName '=' booleanExpression
-   * 2) Column only: qualifiedName
-   */
-  private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
-    try {
-      const qualifiedNameCtx = ctx.qualifiedName();
-
-      if (!qualifiedNameCtx) {
-        return undefined;
-      }
-
-      // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN()) {
-        const left = this.toColumn(qualifiedNameCtx);
-        const assignment = this.toFunction(
-          ctx.ASSIGN().getText(),
-          ctx,
-          undefined,
-          'binary-expression'
-        ) as ast.ESQLBinaryExpression;
-
-        if (ctx.booleanExpression()) {
-          const right = this.fromBooleanExpression(ctx.booleanExpression());
-          const hasIncompleteItem = !!right?.incomplete;
-          const hasException = !!ctx.booleanExpression()?.exception;
-
-          if (!right || hasIncompleteItem || hasException) {
-            assignment.incomplete = true;
-          }
-
-          assignment.args.push(left);
-
-          if (right) {
-            assignment.args.push(right);
-          }
-
-          assignment.location = this.extendLocationToArgs(assignment);
-        } else {
-          // User typed something like `ON col0 =` and stopped.
-          // Build an assignment with only the left operand, mark it as incomplete,
-          assignment.args.push(left, []);
-          assignment.incomplete = true;
-          assignment.location = {
-            min: left.location.min,
-            max: ctx.ASSIGN()!.symbol.stop,
-          };
-        }
-
-        return assignment;
-      }
-
-      // 2) simple column reference
-      return this.toColumn(qualifiedNameCtx);
-    } catch (e) {
-      // do nothing
-    }
-
-    return undefined;
   }
 
   // --------------------------------------------------------------------- FUSE
