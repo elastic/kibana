@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createDashboardJourney } from './utils/dashboard_journey';
+import { createDashboardJourney } from '../utils/dashboard_journey';
 
 export const journey = createDashboardJourney({
   esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],

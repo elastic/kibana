@@ -34,7 +34,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
   onPaginationChange,
 }) => {
   const {
-    services: { data },
+    services: { data, chrome },
   } = useKibana();
   const [dataView, setDataView] = useState<DataView | null>(null);
   useEffect(() => {
@@ -66,7 +66,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
 
       {flyoutDocId && dataView && hit && (
         <UnifiedDocViewerFlyout
-          services={{}}
+          services={{ chrome }}
           onClose={() => setFlyoutDocId(undefined)}
           isEsqlQuery={false}
           columns={[]}
