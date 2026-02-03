@@ -7,6 +7,8 @@
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiButton } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { getScriptsLibraryPath } from '../../../../common/url_routing';
 import type {
   EndpointScript,
@@ -25,7 +27,12 @@ import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 
-export const ScriptsLibrary = memo(() => {
+interface ScriptsLibraryProps {
+  'data-test-subj'?: string;
+}
+
+export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dataTestSubj }) => {
+  const getTestId = useTestIdGenerator(dataTestSubj ?? 'ScriptsLibraryPage');
   const history = useHistory();
   const toasts = useToasts();
   const { pagination: paginationFromUrlParams } = useUrlPagination();
@@ -38,11 +45,14 @@ export const ScriptsLibrary = memo(() => {
     show: showFromUrl,
   } = useScriptsLibraryUrlParams();
 
-  const shouldShowFlyoutForm = useMemo(() => {
-    return showFromUrl === 'create' || showFromUrl === 'edit' || showFromUrl === 'details';
-  }, [showFromUrl]);
+  const { canReadScriptsLibrary, canWriteScriptsLibrary } = useUserPrivileges().endpointPrivileges;
 
-  const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+  const shouldShowFlyoutForm = useMemo(() => {
+    return (
+      (canWriteScriptsLibrary && (showFromUrl === 'create' || showFromUrl === 'edit')) ||
+      showFromUrl === 'details'
+    );
+  }, [canWriteScriptsLibrary, showFromUrl]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -197,10 +207,22 @@ export const ScriptsLibrary = memo(() => {
 
   return (
     <AdministrationListPage
-      data-test-subj="scriptsLibraryPage"
+      data-test-subj={getTestId()}
       title={pageLabels.pageTitle}
       subtitle={pageLabels.pageAboutInfo}
       hideHeader={false}
+      actions={
+        canWriteScriptsLibrary ? (
+          <EuiButton
+            fill
+            iconType="upload"
+            onClick={() => onClickAction({ show: 'create' })}
+            data-test-subj={getTestId('uploadScriptButton')}
+          >
+            {pageLabels.pageAddButtonTitle}
+          </EuiButton>
+        ) : null
+      }
     >
       {shouldShowFlyoutForm && (
         <EndpointScriptFlyout
@@ -210,7 +232,7 @@ export const ScriptsLibrary = memo(() => {
           onSuccess={onSuccessCreateOrEdit}
           show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
           scriptItem={selectedItemForFlyout}
-          data-test-subj={`endpointScriptFlyout-${showFromUrl}`}
+          data-test-subj={getTestId(`endpointScriptFlyout-${showFromUrl}`)}
         />
       )}
 
@@ -225,7 +247,7 @@ export const ScriptsLibrary = memo(() => {
       )}
       {isFetched && (
         <ScriptsLibraryTable
-          data-test-subj="scriptsLibraryTable"
+          data-test-subj={getTestId('table')}
           items={tableItems}
           isLoading={isFetching}
           onChange={onChangeScriptsTable}
