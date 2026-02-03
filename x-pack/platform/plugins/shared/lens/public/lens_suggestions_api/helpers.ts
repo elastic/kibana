@@ -17,6 +17,7 @@ import type {
   TypedLensByValueInput,
   TypedLensSerializedState,
   TextBasedPrivateState,
+  XYState,
 } from '@kbn/lens-common';
 
 const datasourceHasIndexPatternRefs = (
@@ -85,6 +86,103 @@ export const injectESQLQueryIntoLensLayers = (
   };
 };
 
+type XYColumnDependentKey = 'layers';
+type XYColumnIndependentKey = Exclude<keyof XYState, XYColumnDependentKey>;
+type DatasourceId = keyof TypedLensByValueInput['attributes']['state']['datasourceStates'];
+
+/**
+ * Column-independent XY visualization settings that should be preserved when columns change.
+ */
+const XY_COLUMN_INDEPENDENT_KEYS = [
+  'preferredSeriesType',
+  'legend',
+  'valueLabels',
+  'fittingFunction',
+  'emphasizeFitting',
+  'endValue',
+  'xExtent',
+  'yLeftExtent',
+  'yRightExtent',
+  'xTitle',
+  'yTitle',
+  'yRightTitle',
+  'yLeftScale',
+  'yRightScale',
+  'axisTitlesVisibilitySettings',
+  'tickLabelsVisibilitySettings',
+  'gridlinesVisibilitySettings',
+  'labelsOrientation',
+  'curveType',
+  'fillOpacity',
+  'minBarHeight',
+  'hideEndzones',
+  'showCurrentTimeMarker',
+  'pointVisibility',
+] as const satisfies ReadonlyArray<XYColumnIndependentKey>;
+
+// Make sure the listed keys include all column-independent XYState keys
+type MissingXYKeys = Exclude<XYColumnIndependentKey, (typeof XY_COLUMN_INDEPENDENT_KEYS)[number]>;
+const _xyKeysCheck: MissingXYKeys extends never ? true : MissingXYKeys = true;
+void _xyKeysCheck;
+
+function mergeColumnIndependentVisContext({
+  suggestion,
+  visAttributes,
+}: {
+  suggestion: Suggestion;
+  visAttributes: TypedLensByValueInput['attributes'];
+}) {
+  if (visAttributes.visualizationType !== suggestion.visualizationId) {
+    return suggestion;
+  }
+
+  const existingVisState = visAttributes.state.visualization as XYState;
+  const suggestionVisState = suggestion.visualizationState as XYState;
+
+  // Preserve only chart-level settings that do not depend on column IDs.
+  const preservedSettings: Partial<
+    Record<XYColumnIndependentKey, XYState[XYColumnIndependentKey]>
+  > = {};
+  for (const key of XY_COLUMN_INDEPENDENT_KEYS) {
+    if (existingVisState[key] !== undefined) {
+      preservedSettings[key] = existingVisState[key];
+    }
+  }
+
+  return {
+    ...suggestion,
+    visualizationState: {
+      ...suggestionVisState,
+      ...preservedSettings,
+    },
+  };
+}
+
+function mergeAllVisContext({
+  suggestion,
+  updatedVisAttributes,
+  datasourceId,
+  layerIds,
+}: {
+  suggestion: Suggestion;
+  updatedVisAttributes: TypedLensByValueInput['attributes'];
+  datasourceId: DatasourceId;
+  layerIds: string[];
+}) {
+  return {
+    title: updatedVisAttributes.title,
+    visualizationId: updatedVisAttributes.visualizationType,
+    visualizationState: updatedVisAttributes.state.visualization,
+    keptLayerIds: layerIds,
+    datasourceState: updatedVisAttributes.state.datasourceStates[datasourceId],
+    datasourceId,
+    columns: suggestion.columns,
+    changeType: suggestion.changeType,
+    score: suggestion.score,
+    previewIcon: suggestion.previewIcon,
+  };
+}
+
 /**
  * Returns the suggestion updated with external visualization state for ES|QL charts
  * The visualization state is merged with the suggestion if the datasource is textBased, the columns match the context and the visualization type matches
@@ -129,10 +227,6 @@ export function mergeSuggestionWithVisContext({
     )
   );
 
-  if (hasInvalidColumns) {
-    return suggestion;
-  }
-
   const layerIds = Object.keys(datasourceState.layers);
 
   // Update attributes with current query if available
@@ -142,18 +236,14 @@ export function mergeSuggestionWithVisContext({
       : visAttributes;
 
   try {
-    return {
-      title: updatedVisAttributes.title,
-      visualizationId: updatedVisAttributes.visualizationType,
-      visualizationState: updatedVisAttributes.state.visualization,
-      keptLayerIds: layerIds,
-      datasourceState: updatedVisAttributes.state.datasourceStates[datasourceId],
-      datasourceId,
-      columns: suggestion.columns,
-      changeType: suggestion.changeType,
-      score: suggestion.score,
-      previewIcon: suggestion.previewIcon,
-    };
+    return hasInvalidColumns
+      ? mergeColumnIndependentVisContext({ suggestion, visAttributes })
+      : mergeAllVisContext({
+          suggestion,
+          updatedVisAttributes,
+          datasourceId: datasourceId as DatasourceId,
+          layerIds,
+        });
   } catch {
     return suggestion;
   }
