@@ -6,4 +6,9 @@
  */
 
 export { DATA_SOURCES_ROUTE } from './routes';
-export { DATA_SOURCES_FULL_TITLE, DATA_SOURCES_SHORT_TITLE } from './constants';
+export {
+  DATA_SOURCES_FULL_TITLE,
+  DATA_SOURCES_SHORT_TITLE,
+  GITHUB_MCP_SERVER_URL,
+  MCP_AUTH_TYPE,
+} from './constants';
