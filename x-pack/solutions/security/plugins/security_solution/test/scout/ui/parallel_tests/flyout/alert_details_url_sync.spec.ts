@@ -20,6 +20,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
 
   spaceTest.afterEach(async ({ apiServices }) => {
     await apiServices.detectionRule.deleteAll();
+    await apiServices.detectionAlerts.deleteAll();
   });
 
   spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
@@ -29,6 +30,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
     await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+    await pageObjects.alertsTablePage.alertsTable.scrollIntoViewIfNeeded();
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
