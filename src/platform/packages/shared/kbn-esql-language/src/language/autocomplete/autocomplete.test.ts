@@ -323,6 +323,7 @@ describe('autocomplete', () => {
 
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
+      '= ',
       'col0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),

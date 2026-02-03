@@ -17,7 +17,7 @@ import {
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isSource } from '../../../ast/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting';
 import { techPreviewLabel } from './shared';
 
@@ -152,6 +152,21 @@ export function getIndexFromPromQLParams({
     );
 
     const { value } = indexEntry ?? {};
+
+    if (isList(value) && value.values.length > 0) {
+      const listText = value.text?.trim();
+      if (listText) {
+        return listText;
+      }
+
+      const names = value.values
+        .map((item) => (isIdentifier(item) || isSource(item) ? item.name : ''))
+        .filter(Boolean);
+
+      if (names.length > 0) {
+        return names.join(',');
+      }
+    }
 
     if ((isIdentifier(value) || isSource(value)) && !value.name.includes(EDITOR_MARKER)) {
       return value.name;
