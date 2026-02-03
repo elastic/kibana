@@ -22,6 +22,7 @@ export async function getToolHandler({
   mlClient,
   request,
   logger,
+  jobIds = [],
   jobsLimit,
   anomalyRecordsLimit,
   minAnomalyScore,
@@ -36,6 +37,7 @@ export async function getToolHandler({
   mlClient: Ml;
   request: KibanaRequest;
   logger: Logger;
+  jobIds?: string[];
   jobsLimit: number;
   anomalyRecordsLimit: number;
   minAnomalyScore: number;
@@ -53,15 +55,21 @@ export async function getToolHandler({
     throw new Error('Machine Learning plugin is unavailable.');
   }
 
-  const { jobs = [] } = await mlClient.getJobs({ allow_no_match: true }).catch((error) => {
+  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') }).catch((error) => {
+    if (error.statusCode === 404) {
+      return { jobs: [] };
+    }
     logger.error(`Error retrieving ML jobs: ${error.message}`);
     throw error;
   });
 
   // Get job stats for state information
   const { jobs: jobsStats = [] } = await mlClient
-    .getJobStats({ allow_no_match: true })
+    .getJobStats({ job_id: jobIds.join(',') })
     .catch((error) => {
+      if (error.statusCode === 404) {
+        return { jobs: [] };
+      }
       logger.error(`Error retrieving ML job stats: ${error.message}`);
       return { jobs: [] };
     });
