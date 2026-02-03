@@ -113,7 +113,13 @@ export async function updateObjectsSpaces({
   const expectedBulkGetResults: Array<
     Either<
       SavedObjectsUpdateObjectsSpacesResponseObject,
-      { type: string; id: string; version: string | undefined; esRequestIndex: number }
+      {
+        type: string;
+        id: string;
+        version: string | undefined;
+        esRequestIndex: number;
+        multiIsolated: boolean | undefined;
+      }
     >
   > = objects.map((object) => {
     const { type, id, version } = object;
@@ -122,10 +128,21 @@ export async function updateObjectsSpaces({
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
       return left({ id, type, spaces: [], error });
     }
-    if (!registry.isShareable(type)) {
+
+    if (!registry.isMultiNamespace(type)) {
       const error = errorContent(
         SavedObjectsErrorHelpers.createBadRequestError(
-          `${type} doesn't support multiple namespaces`
+          `${type} has unsupported namespace type. Only 'multiple' and 'multiple-isolated' types are supported.`
+        )
+      );
+      return left({ id, type, spaces: [], error });
+    }
+
+    const multiIsolated = !registry.isShareable(type);
+    if (multiIsolated && spacesToAdd.length !== 1) {
+      const error = errorContent(
+        SavedObjectsErrorHelpers.createBadRequestError(
+          `Cannot update ${type}. To update objects with 'multiple-isolated' namespace type number of spaces to add must be 1`
         )
       );
       return left({ id, type, spaces: [], error });
@@ -136,6 +153,7 @@ export async function updateObjectsSpaces({
       id,
       version,
       esRequestIndex: bulkGetRequestIndexCounter++,
+      multiIsolated,
     });
   });
 
@@ -215,6 +233,16 @@ export async function updateObjectsSpaces({
     }
 
     const currentSpaces = doc._source?.namespaces ?? [];
+
+    if (expectedBulkGetResult.value.multiIsolated && !spacesToRemove.includes(currentSpaces[0])) {
+      const error = errorContent(
+        SavedObjectsErrorHelpers.createBadRequestError(
+          `Cannot update ${expectedBulkGetResult.value.type}:${expectedBulkGetResult.value.id}. Spaces to remove must include the current space of 'multiple-isolated' objects.`
+        )
+      );
+      return left({ id, type, spaces: [], error });
+    }
+
     // @ts-expect-error MultiGetHit._source is optional
     const versionProperties = getExpectedVersionProperties(version, doc);
 
