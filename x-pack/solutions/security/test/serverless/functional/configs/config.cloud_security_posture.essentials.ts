@@ -32,4 +32,5 @@ export default createTestConfig({
       '../test_suites/ftr/cloud_security_posture/csp_integrations_form.essentials.ts'
     ),
   ],
+  enableFleetDockerRegistry: false,
 });
