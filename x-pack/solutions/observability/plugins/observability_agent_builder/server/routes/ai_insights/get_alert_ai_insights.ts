@@ -173,11 +173,8 @@ async function fetchAlertContext({
         includeFirstSeen: false,
         size: 50,
       });
-      const hasGroups =
-        (result.nonExceptionLogGroups?.length ?? 0) > 0 ||
-        (result.spanExceptionGroups?.length ?? 0) > 0 ||
-        (result.logExceptionGroups?.length ?? 0) > 0;
-      return hasGroups ? { key: 'logGroups' as const, start, data: result } : null;
+
+      return result.length > 0 ? { key: 'logGroups' as const, start, data: result } : null;
     } catch (err) {
       logger.debug(`AI insight: logGroups failed: ${err}`);
       return null;
