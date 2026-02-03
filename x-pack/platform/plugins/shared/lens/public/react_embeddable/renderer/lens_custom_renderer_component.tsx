@@ -158,12 +158,7 @@ export function LensRenderer({
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)
-          getSerializedStateForChild: () => {
-            const transformedState = transformToApiConfig(initialStateRef.current);
-            return {
-              rawState: transformedState,
-            };
-          },
+          getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
           hideTitle$,

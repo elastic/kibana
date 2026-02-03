@@ -20,6 +20,8 @@ export const executeAgent$ = ({
   agentId,
   request,
   capabilities,
+  structuredOutput,
+  outputSchema,
   agentService,
   conversation,
   nextInput,
@@ -30,6 +32,8 @@ export const executeAgent$ = ({
   agentId: string;
   request: KibanaRequest;
   capabilities?: AgentCapabilities;
+  structuredOutput?: boolean;
+  outputSchema?: Record<string, unknown>;
   agentService: AgentsServiceStart;
   conversation: Conversation;
   nextInput: ConverseInput;
@@ -49,6 +53,8 @@ export const executeAgent$ = ({
           conversation,
           capabilities,
           browserApiTools,
+          structuredOutput,
+          outputSchema,
         },
         onEvent: (event) => {
           observer.next(event);

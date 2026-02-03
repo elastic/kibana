@@ -30,6 +30,8 @@
           "(errors: (Error | FailError)[]) => Error"
         ],
         "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "(Error | FailError)[]"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "lineNumber": 45,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "(reason: string, options: FailErrorOptions) => FailError"
         ],
         "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "lineNumber": 25,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +100,8 @@
               "FailErrorOptions"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "lineNumber": 25,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -111,6 +121,8 @@
           "(reason: string) => FailError"
         ],
         "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -125,6 +137,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "lineNumber": 35,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,6 +158,8 @@
           "(error: any) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,6 +174,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-dev-cli-errors/src/dev_cli_errors.ts",
+            "lineNumber": 41,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

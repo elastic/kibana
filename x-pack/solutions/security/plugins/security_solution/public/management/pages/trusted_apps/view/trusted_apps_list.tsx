@@ -13,7 +13,7 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 import { TrustedAppsApiClient } from '../service';
@@ -25,7 +25,7 @@ import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_
 import type { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
 import { TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
 
-const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
     defaultMessage: 'Trusted applications',
   }),
@@ -36,6 +36,30 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.trustedApps.pageAddButtonTitle', {
     defaultMessage: 'Add trusted application',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import trusted application list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export trusted application list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted application list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted application list export failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedApps.showingTotal', {
       defaultMessage:

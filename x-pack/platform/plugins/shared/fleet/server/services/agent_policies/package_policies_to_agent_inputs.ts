@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apm from 'elastic-apm-node';
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
@@ -17,6 +19,7 @@ import type {
   PackageInfo,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicySOAttributes,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
@@ -26,6 +29,9 @@ import {
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../../common/constants/epm';
+import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
+import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { appContextService } from '../app_context';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -99,6 +105,7 @@ export const storedPackagePolicyToAgentInputs = (
           version: packagePolicy.package.version ?? packageInfo?.version,
           ...(input.policy_template ? { policy_template: input.policy_template } : {}),
           ...(packageInfo?.release ? { release: packageInfo.release } : {}),
+          agentVersion: packageInfo?.conditions?.agent?.version,
         },
       };
     }
@@ -173,12 +180,38 @@ export const getFullInputStreams = (
   };
 };
 
+export const recompileInputsWithAgentVersion = async (
+  packageInfo: PackageInfo,
+  packagePolicy: PackagePolicy,
+  agentVersion: string,
+  soClient: SavedObjectsClientContract
+): Promise<PackagePolicyInput[]> => {
+  const logger = appContextService.getLogger();
+  const assetsMap = await getAgentTemplateAssetsMap({
+    logger,
+    packageInfo: packageInfo!,
+    savedObjectsClient: soClient,
+  });
+
+  const inputs = _compilePackagePolicyInputs(
+    packageInfo!,
+    packagePolicy.vars || {},
+    packagePolicy.inputs,
+    assetsMap,
+    agentVersion
+  );
+  return inputs;
+};
+
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
-  globalDataTags?: GlobalDataTag[]
+  globalDataTags?: GlobalDataTag[],
+  agentVersion?: string,
+  soClient?: SavedObjectsClientContract,
+  hasAgentVersionConditions?: boolean
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -197,9 +230,34 @@ export const storedPackagePoliciesToAgentInputs = async (
         ? globalDataTagsToAddFields(filteredGlobalDataTags)
         : undefined;
 
+    let packagePolicyWithUpdatedInputs = packagePolicy;
+    // recompile inputs to apply agent version conditions
+    if (
+      agentVersion &&
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      hasAgentVersionConditions
+    ) {
+      const span = apm.startSpan(
+        `read packagePolicySO inputs_for_versions ${packageInfo!.name}-${
+          packageInfo!.version
+        } ${agentVersion}`,
+        'full-agent-policy'
+      );
+      const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
+        await getPackagePolicySavedObjectType(),
+        packagePolicy.id
+      );
+      packagePolicyWithUpdatedInputs = {
+        ...packagePolicy,
+        inputs:
+          packagePolicySO?.attributes.inputs_for_versions?.[agentVersion] ?? packagePolicy.inputs,
+      };
+      span?.end();
+    }
+
     fullInputs.push(
       ...storedPackagePolicyToAgentInputs(
-        packagePolicy,
+        packagePolicyWithUpdatedInputs,
         packageInfo,
         agentPolicyOutputId,
         agentPolicyNamespace,

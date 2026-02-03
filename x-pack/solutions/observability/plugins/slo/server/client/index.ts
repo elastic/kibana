@@ -6,24 +6,32 @@
  */
 import type {
   ElasticsearchClient,
+  IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { GetSLOGroupedStatsParams, GetSLOGroupedStatsResponse } from '@kbn/slo-schema';
 import { once } from 'lodash';
+import { GetSLOGroupedStats } from '../services/get_slo_grouped_stats';
 import { DefaultSLOSettingsRepository } from '../services/slo_settings_repository';
 import { getSummaryIndices } from '../services/utils/get_summary_indices';
 
 export interface SloClient {
   getSummaryIndices(): Promise<string[]>;
+  getGroupedStats(params: GetSLOGroupedStatsParams): Promise<GetSLOGroupedStatsResponse>;
 }
 
 export function getSloClientWithRequest({
   esClient,
+  scopedClusterClient,
   soClient,
+  spaceId,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
+  scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  spaceId: string;
 }): SloClient {
   const settingsRepository = new DefaultSLOSettingsRepository(soClient);
 
@@ -37,6 +45,12 @@ export function getSloClientWithRequest({
   return {
     getSummaryIndices: async () => {
       return await getSummaryIndicesOnce();
+    },
+
+    getGroupedStats: async (params: GetSLOGroupedStatsParams) => {
+      const settings = await settingsRepository.get();
+      const service = new GetSLOGroupedStats(scopedClusterClient, spaceId, settings);
+      return await service.execute(params);
     },
   };
 }

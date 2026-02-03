@@ -16,31 +16,31 @@ import { getErrorRateChart } from './trace_charts_definition';
 
 const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
-export const ErrorRateChart = () => {
-  const {
-    filters,
-    services,
-    fetchParams,
-    discoverFetch$,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
-  const { abortController, timeRange } = fetchParams;
+type UseChartLayersFromEsqlArgs = Parameters<typeof useChartLayersFromEsql>[0];
 
-  const { esqlQuery, seriesType, unit, color, title } = getErrorRateChart({
-    dataSource,
-    indexes,
-    filters,
-  });
+type ErrorRateChartContentProps = Pick<
+  UseChartLayersFromEsqlArgs,
+  'query' | 'seriesType' | 'unit' | 'color'
+> & {
+  title: string;
+};
+
+const ErrorRateChartContent = ({
+  query,
+  seriesType,
+  unit,
+  color,
+  title,
+}: ErrorRateChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter } = useTraceMetricsContext();
+  const { abortController, timeRange } = fetchParams;
 
   const {
     layers: chartLayers,
     loading: isLoadingColumns,
     error: columnsError,
   } = useChartLayersFromEsql({
-    query: esqlQuery,
+    query,
     seriesType,
     services,
     timeRange,
@@ -51,7 +51,7 @@ export const ErrorRateChart = () => {
 
   return (
     <Chart
-      esqlQuery={esqlQuery}
+      esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
@@ -65,6 +65,32 @@ export const ErrorRateChart = () => {
       yBounds={ERROR_RATE_Y_BOUNDS}
       isLoading={isLoadingColumns}
       error={columnsError}
+    />
+  );
+};
+
+export const ErrorRateChart = () => {
+  const { filters, dataSource, indexes } = useTraceMetricsContext();
+
+  const errorRateChart = getErrorRateChart({
+    dataSource,
+    indexes,
+    filters,
+  });
+
+  if (!errorRateChart) {
+    return null;
+  }
+
+  const { esqlQuery, seriesType, unit, color, title } = errorRateChart;
+
+  return (
+    <ErrorRateChartContent
+      query={esqlQuery}
+      seriesType={seriesType}
+      unit={unit}
+      color={color}
+      title={title}
     />
   );
 };

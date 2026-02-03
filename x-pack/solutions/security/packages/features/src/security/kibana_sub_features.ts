@@ -390,6 +390,47 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
     },
   ],
 });
+
+export const scriptsManagementSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsManagement',
+    { defaultMessage: 'Elastic Defend Scripts Management' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsManagement.description',
+    { defaultMessage: 'Management of scripts used with Elastic Defend response actions.' }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeScriptsManagement`, `${APP_ID}-readScriptsManagement`],
+          id: 'scripts_management_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeScriptsManagement', 'readScriptsManagement'],
+        },
+        {
+          api: [`${APP_ID}-readScriptsManagement`],
+          id: 'scripts_management_read',
+          includeIn: 'none',
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readScriptsManagement'],
+        },
+      ],
+    },
+  ],
+});
+
 export const hostIsolationSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation',

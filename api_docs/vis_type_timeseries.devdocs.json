@@ -24,6 +24,8 @@
           "(keys: Record<any, any>) => string"
         ],
         "path": "src/platform/plugins/shared/vis_types/timeseries/server/create_request_hash.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "Record<any, any>"
             ],
             "path": "src/platform/plugins/shared/vis_types/timeseries/server/create_request_hash.ts",
+            "lineNumber": 18,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,6 +64,8 @@
           "SeriesData"
         ],
         "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,6 +80,8 @@
               "TimeseriesVisData"
             ],
             "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
+            "lineNumber": 16,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +104,8 @@
           "TableData"
         ],
         "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,6 +120,8 @@
               "TimeseriesVisData"
             ],
             "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
+            "lineNumber": 13,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -135,6 +147,8 @@
           "TableData"
         ],
         "path": "src/platform/plugins/shared/vis_types/timeseries/common/types/vis_data.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -149,6 +163,8 @@
       "label": "VisTypeTimeseriesSetup",
       "description": [],
       "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
+      "lineNumber": 63,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -175,6 +191,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
+          "lineNumber": 64,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -195,6 +213,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
+              "lineNumber": 65,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -211,6 +231,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
+              "lineNumber": 66,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -226,6 +248,8 @@
                 "any"
               ],
               "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
+              "lineNumber": 67,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

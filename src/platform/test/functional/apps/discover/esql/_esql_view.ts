@@ -743,7 +743,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('filtering by clicking on the table', () => {
+    describe('filtering by clicking on the table in Discover', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
@@ -879,6 +879,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '~indexPattern-dimension-colorPicker'
         );
         expect(await colorPickerInputAfterFilter.getAttribute('value')).to.be('#FF0000');
+      });
+    });
+
+    describe('filtering by clicking on the table in Dashboards', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('should append a filter badge by clicking the table', async () => {
+        const savedSearchName = 'esql filter from table';
+        await discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+
+        await testSubjects.click('querySubmitButton');
+        await discover.waitUntilTabIsLoaded();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await discover.saveSearch(savedSearchName);
+
+        await discover.waitUntilTabIsLoaded();
+
+        // Add to dashboard
+        await common.navigateToApp('dashboard');
+        await dashboard.clickNewDashboard();
+
+        await timePicker.setDefaultAbsoluteRange();
+        await dashboardAddPanel.clickAddFromLibrary();
+        await dashboardAddPanel.addSavedSearch(savedSearchName);
+        await header.waitUntilLoadingHasFinished();
+
+        const gridCellGroupBy = '[role="gridcell"]:nth-child(4)';
+        const gridCellAggValue = '[role="gridcell"]:nth-child(3)';
+        const filterForButton = '[data-test-subj="filterForButton"]';
+
+        // This should add a filter badge
+        await retry.try(async () => {
+          await find.clickByCssSelector(gridCellGroupBy);
+          await find.clickByCssSelector(filterForButton);
+          await header.waitUntilLoadingHasFinished();
+          const filterCount = await filterBar.getFilterCount();
+          expect(filterCount).to.equal(1);
+        });
+
+        // This shound not add another filter badge
+        await header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          await find.clickByCssSelector(gridCellAggValue);
+          const filterButtonExists = await find.existsByCssSelector(filterForButton);
+          expect(filterButtonExists).to.be(false);
+        });
       });
     });
 

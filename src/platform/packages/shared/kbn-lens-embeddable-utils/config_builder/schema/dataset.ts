@@ -84,7 +84,8 @@ export const datasetTypeSchema = schema.oneOf([
               },
             })
           ),
-        })
+        }),
+        { maxSize: 100 }
       )
     ),
   }),

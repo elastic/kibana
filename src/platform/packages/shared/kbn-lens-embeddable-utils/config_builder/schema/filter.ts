@@ -51,6 +51,7 @@ const FilterQueryType = schema.object({
   wildcard: schema.maybe(schema.any({})),
   bool: schema.maybe(schema.any({})),
   range: schema.maybe(schema.any({})),
+  terms: schema.maybe(schema.any({})),
 });
 
 /**

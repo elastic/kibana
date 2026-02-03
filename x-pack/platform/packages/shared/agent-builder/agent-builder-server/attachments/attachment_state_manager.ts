@@ -20,6 +20,7 @@ import {
   getVersion,
   isAttachmentActive,
 } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from './type_definition';
 
 /**
  * Input for updating an existing attachment.
@@ -66,9 +67,11 @@ export interface AttachmentStateManager {
   getDiff(id: string, fromVersion: number, toVersion: number): AttachmentDiff | undefined;
 
   /** Add a new attachment */
-  add(input: VersionedAttachmentInput): VersionedAttachment;
+  add<TType extends string>(
+    input: VersionedAttachmentInput<TType>
+  ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
-  update(id: string, input: AttachmentUpdateInput): VersionedAttachment | undefined;
+  update(id: string, input: AttachmentUpdateInput): Promise<VersionedAttachment | undefined>;
   /** Soft delete an attachment (sets active=false) */
   delete(id: string): boolean;
   /** Restore a deleted attachment (sets active=true) */
@@ -88,18 +91,48 @@ export interface AttachmentStateManager {
   markClean(): void;
 }
 
+export interface CreateAttachmentStateManagerOptions {
+  /**
+   * Function to fetch the type definition from the attachment type registry.
+   * Used to validate attachment data before storing it into conversation state.
+   */
+  getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
+}
+
 /**
  * Private implementation of AttachmentStateManager.
  */
 class AttachmentStateManagerImpl implements AttachmentStateManager {
   private attachments: Map<string, VersionedAttachment>;
   private dirty: boolean = false;
+  private readonly options: CreateAttachmentStateManagerOptions;
 
-  constructor(initialAttachments: VersionedAttachment[] = []) {
+  constructor(
+    initialAttachments: VersionedAttachment[] = [],
+    options: CreateAttachmentStateManagerOptions
+  ) {
     // Deep clone to avoid external mutation
     this.attachments = new Map();
+    this.options = options;
     for (const attachment of initialAttachments) {
       this.attachments.set(attachment.id, structuredClone(attachment));
+    }
+  }
+
+  private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {
+    const typeDefinition = this.options.getTypeDefinition(type);
+    if (!typeDefinition) {
+      throw new Error(`Unknown attachment type: ${type}`);
+    }
+
+    try {
+      const validationResult = await typeDefinition.validate(data);
+      if (validationResult.valid) {
+        return validationResult.data;
+      }
+      throw new Error(validationResult.error);
+    } catch (e) {
+      throw new Error(`Invalid attachment data for type "${type}": ${e.message}`);
     }
   }
 
@@ -178,15 +211,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     };
   }
 
-  add(input: VersionedAttachmentInput): VersionedAttachment {
+  async add<TType extends string>(
+    input: VersionedAttachmentInput<TType>
+  ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
-    const contentHash = hashContent(input.data);
-    const tokens = estimateTokens(input.data);
+    const validatedData = await this.validateAttachmentData(input.type, input.data);
+    const contentHash = hashContent(validatedData);
+    const tokens = estimateTokens(validatedData);
 
     const version: AttachmentVersion = {
       version: 1,
-      data: input.data,
+      data: validatedData,
       created_at: now,
       content_hash: contentHash,
       estimated_tokens: tokens,
@@ -205,10 +241,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     this.attachments.set(id, attachment);
     this.dirty = true;
 
-    return attachment;
+    return attachment as VersionedAttachment<TType>;
   }
 
-  update(id: string, input: AttachmentUpdateInput): VersionedAttachment | undefined {
+  async update(id: string, input: AttachmentUpdateInput): Promise<VersionedAttachment | undefined> {
     const attachment = this.attachments.get(id);
     if (!attachment) {
       return undefined;
@@ -224,18 +260,19 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     if (input.data !== undefined) {
-      const newHash = hashContent(input.data);
+      const validatedData = await this.validateAttachmentData(attachment.type, input.data);
+      const newHash = hashContent(validatedData);
       const currentVersion = getLatestVersion(attachment);
 
       // Only create new version if content actually changed
       if (!currentVersion || currentVersion.content_hash !== newHash) {
         const now = new Date().toISOString();
-        const tokens = estimateTokens(input.data);
+        const tokens = estimateTokens(validatedData);
         const newVersionNum = attachment.current_version + 1;
 
         const newVersion: AttachmentVersion = {
           version: newVersionNum,
-          data: input.data,
+          data: validatedData,
           created_at: now,
           content_hash: newHash,
           estimated_tokens: tokens,
@@ -352,7 +389,8 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
  * Factory function to create an AttachmentStateManager.
  */
 export const createAttachmentStateManager = (
-  initialAttachments: VersionedAttachment[] = []
+  initialAttachments: VersionedAttachment[] = [],
+  options: CreateAttachmentStateManagerOptions
 ): AttachmentStateManager => {
-  return new AttachmentStateManagerImpl(initialAttachments);
+  return new AttachmentStateManagerImpl(initialAttachments, options);
 };

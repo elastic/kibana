@@ -11,12 +11,14 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
 
 const enrichCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
   autocomplete,
   columnsAfter,
+  summary,
 };
 
 export const enrichCommand = {

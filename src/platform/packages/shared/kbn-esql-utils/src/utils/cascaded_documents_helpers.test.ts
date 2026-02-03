@@ -14,7 +14,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './cascaded_documents_helpers';
 
@@ -172,6 +171,31 @@ describe('cascaded documents helpers utils', () => {
         { identifier: 'average', aggregation: 'AVG' },
       ]);
     });
+
+    it('should return an empty array of group by fields and applied functions if the query has a keep command that does not specify the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS count = COUNT(*) BY clientip | KEEP count
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([{ aggregation: 'COUNT', identifier: 'count' }]);
+    });
+
+    it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
+      const queryString = `
+        FROM kibana_sample_data_logs | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes) BY response.keyword | KEEP Visits, Unique, p95, median, response.keyword | LIMIT 123
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([{ field: 'response.keyword', type: 'column' }]);
+      expect(result.appliedFunctions).toEqual([
+        { aggregation: 'COUNT', identifier: 'Visits' },
+        { aggregation: 'COUNT_DISTINCT', identifier: 'Unique' },
+        { aggregation: 'PERCENTILE', identifier: 'p95' },
+        { aggregation: 'MEDIAN', identifier: 'median' },
+      ]);
+    });
   });
 
   describe('constructCascadeQuery', () => {
@@ -179,6 +203,31 @@ describe('cascaded documents helpers utils', () => {
       const nodeType = 'leaf';
 
       describe('record field column group operations', () => {
+        it('should not include the stats command in the cascade query if it does not have any aggregates', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS BY clientip
+            `,
+          };
+
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: '192.168.1.1' };
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1"'
+          );
+        });
+
         it('should construct a valid cascade leaf query for a query with just one column', () => {
           const editorQuery: AggregateQuery = {
             esql: `
@@ -340,7 +389,54 @@ describe('cascaded documents helpers utils', () => {
 
           expect(cascadeQuery).toBeDefined();
           expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | INLINE STATS count = COUNT(bytes), average = AVG(memory) BY tags | WHERE MATCH_PHRASE(tags, "some random pattern")'
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
+          );
+        });
+
+        it('uses match phrase query when the selected column is a multi field with a parent field that is a text or keyword field that is not aggregatable', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY tags.keyword
+            `,
+          };
+
+          const nodePath = ['tags.keyword'];
+          const nodePathMap = { 'tags.keyword': 'some random pattern' };
+
+          const mockImpl: jest.Mocked<typeof dataViewMock.fields.getByName> = (fieldName) => {
+            return {
+              esTypes: ['text', 'keyword'],
+              aggregatable: fieldName === 'tags.keyword',
+              ...(fieldName === 'tags.keyword'
+                ? {
+                    subType: {
+                      multi: {
+                        parent: 'tags',
+                      },
+                    },
+                  }
+                : {}),
+            } as unknown as DataViewField;
+          };
+
+          // only apply this mock for this test
+          jest
+            .spyOn(dataViewMock.fields, 'getByName')
+            .mockImplementationOnce(mockImpl) // satisfies first the call to getByName that marks the field as subType
+            .mockImplementationOnce(mockImpl); // satisfies the call to getByName for the parent field
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(`tags.keyword`, "some random pattern")'
           );
         });
       });
@@ -397,7 +493,7 @@ describe('cascaded documents helpers utils', () => {
 
             expect(cascadeQuery).toBeDefined();
             expect(cascadeQuery!.esql).toBe(
-              'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | SAMPLE 0.001 | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+              'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
             );
           });
 
@@ -543,71 +639,6 @@ describe('cascaded documents helpers utils', () => {
           });
         });
       });
-    });
-  });
-
-  describe('mutateQueryStatsGrouping', () => {
-    it('should return a valid query that only contains the root group by column in the stats by option', () => {
-      const editorQuery: AggregateQuery = {
-        esql: `
-          FROM kibana_sample_data_logs
-            | STATS count = COUNT(bytes), average = AVG(memory)
-              BY CATEGORIZE(message), agent.keyword, url.keyword
-        `,
-      };
-
-      const result = mutateQueryStatsGrouping(editorQuery, ['agent.keyword']);
-
-      expect(result.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY agent.keyword'
-      );
-    });
-
-    it('should return a valid query that only contains the root group by column in the stats by option when the root group is a named function', () => {
-      const editorQuery: AggregateQuery = {
-        esql: `
-          FROM kibana_sample_data_logs
-            | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(message), agent.keyword, url.keyword
-        `,
-      };
-
-      const result = mutateQueryStatsGrouping(editorQuery, ['Pattern']);
-
-      expect(result.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)'
-      );
-    });
-
-    it('should return the original query if the root group is the only column in the stats by option', () => {
-      const editorQuery: AggregateQuery = {
-        esql: `
-          FROM kibana_sample_data_logs
-          | STATS COUNT() BY clientip
-          | LIMIT 100
-        `,
-      };
-
-      const result = mutateQueryStatsGrouping(editorQuery, ['clientip']);
-
-      expect(result.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS COUNT() BY clientip | LIMIT 100'
-      );
-    });
-
-    it('ignores specified columns to pick that are not present in the stats by option', () => {
-      const editorQuery: AggregateQuery = {
-        esql: `
-          FROM kibana_sample_data_logs
-            | STATS count = COUNT(bytes), average = AVG(memory)
-              BY CATEGORIZE(message), agent.keyword, url.keyword
-        `,
-      };
-
-      const result = mutateQueryStatsGrouping(editorQuery, ['non_existent_column']);
-
-      expect(result.esql).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, url.keyword'
-      );
     });
   });
 
@@ -816,6 +847,21 @@ describe('cascaded documents helpers utils', () => {
       });
 
       describe('function field group', () => {
+        it('it correctly handles scenarios where a grouping function has whitespace between the function name and the opening parenthesis', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE (message) | SORT average ASC',
+              [],
+              dataViewMock,
+              'CATEGORIZE (message)',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '+'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message) | WHERE `CATEGORIZE(message)` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+
         it("appends filter operation for a param field declared in the stats command function field group using it's param definition value before the driving stats command", () => {
           expect(
             appendFilteringWhereClauseForCascadeLayout(

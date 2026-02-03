@@ -8,22 +8,17 @@
  */
 
 import { getElasticsearchConnectors } from '../spec/elasticsearch';
+import type { RequestOptions } from '../types/latest';
 
 /**
  * Builds an Elasticsearch request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
 // eslint-disable-next-line complexity
-export function buildRequestFromConnector(
+export function buildElasticsearchRequest(
   stepType: string,
   params: Record<string, unknown>
-): {
-  method: string;
-  path: string;
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  headers?: Record<string, string>;
-} {
+): RequestOptions {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Special case: elasticsearch.request type uses raw API format at top level
@@ -110,11 +105,11 @@ export function buildRequestFromConnector(
       }
     }
 
-    const result = {
+    const result: RequestOptions = {
       method,
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
-      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     };
 
     // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));

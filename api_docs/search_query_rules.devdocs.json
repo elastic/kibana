@@ -23,6 +23,8 @@
       "label": "SearchQueryRulesPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_query_rules/common/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -37,6 +39,8 @@
       "label": "SearchQueryRulesPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_query_rules/common/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -61,6 +65,8 @@
           "\"searchQueryRules\""
         ],
         "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -76,6 +82,8 @@
           "\"Query rules\""
         ],
         "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -88,6 +96,8 @@
         "label": "PLUGIN_TITLE",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

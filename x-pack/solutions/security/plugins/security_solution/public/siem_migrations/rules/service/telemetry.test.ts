@@ -11,7 +11,21 @@ import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/si
 import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { migrationRules } from '../__mocks__/migration_rules';
 import { SiemRulesMigrationsTelemetry } from './telemetry';
-import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../common/types';
+
+const defaultMigrationStats = {
+  id: 'mig-1',
+  name: 'test-migration',
+  vendor: MigrationSource.SPLUNK,
+  status: SiemMigrationTaskStatus.READY,
+  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+  created_at: '2025-01-01T00:00:00Z',
+  last_updated_at: '2025-01-01T01:00:00Z',
+};
 
 describe('SiemRulesMigrationsTelemetry', () => {
   let telemetryService: jest.Mocked<Pick<TelemetryServiceStart, 'reportEvent'>>;
@@ -52,6 +66,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
     telemetry.reportSetupMigrationOpenResources({
       migrationId: 'abc',
       missingResourcesCount: 5,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsRuleEventTypes.SetupMigrationOpenResources,
@@ -60,12 +75,17 @@ describe('SiemRulesMigrationsTelemetry', () => {
           siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationOpenResources],
         migrationId: 'abc',
         missingResourcesCount: 5,
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports setup migration created', () => {
-    telemetry.reportSetupMigrationCreated({ migrationId: 'def', count: 10 });
+    telemetry.reportSetupMigrationCreated({
+      migrationId: 'def',
+      count: 10,
+      vendor: MigrationSource.SPLUNK,
+    });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsRuleEventTypes.SetupMigrationCreated,
       {
@@ -73,6 +93,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
         migrationId: 'def',
         count: 10,
         result: 'success',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
@@ -81,6 +102,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
     const error = new Error('test error');
     telemetry.reportSetupMigrationCreated({
       migrationId: 'def',
+      vendor: MigrationSource.SPLUNK,
       count: 10,
       error,
     });
@@ -89,6 +111,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationCreated],
         migrationId: 'def',
+        vendor: MigrationSource.SPLUNK,
         count: 10,
         result: 'failed',
         errorMessage: 'test error',
@@ -97,12 +120,13 @@ describe('SiemRulesMigrationsTelemetry', () => {
   });
 
   it('reports setup migration deleted', () => {
-    telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi' });
+    telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsRuleEventTypes.SetupMigrationDeleted,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupMigrationDeleted],
         migrationId: 'ghi',
+        vendor: MigrationSource.SPLUNK,
         result: 'success',
       }
     );
@@ -111,6 +135,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
   it('reports setup resource uploaded', () => {
     telemetry.reportSetupResourceUploaded({
       migrationId: 'jkl',
+      vendor: MigrationSource.SPLUNK,
       type: 'macro',
       count: 3,
     });
@@ -119,6 +144,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupResourcesUploaded],
         migrationId: 'jkl',
+        vendor: MigrationSource.SPLUNK,
         type: 'macro',
         count: 3,
         result: 'success',
@@ -127,19 +153,21 @@ describe('SiemRulesMigrationsTelemetry', () => {
   });
 
   it('reports setup rules query copied', () => {
-    telemetry.reportSetupQueryCopied({ migrationId: 'mno' });
+    telemetry.reportSetupQueryCopied({ migrationId: 'mno', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsRuleEventTypes.SetupQueryCopied,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.SetupQueryCopied],
         migrationId: 'mno',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports start rule migration', () => {
     telemetry.reportStartTranslation({
-      migrationId: 'pqr',
+      migrationId: defaultMigrationStats.id,
+      vendor: defaultMigrationStats.vendor,
       settings: {
         connectorId: 'test-connector',
         skipPrebuiltRulesMatching: true,
@@ -149,7 +177,8 @@ describe('SiemRulesMigrationsTelemetry', () => {
       SiemMigrationsRuleEventTypes.StartMigration,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.StartMigration],
-        migrationId: 'pqr',
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
         connectorId: 'test-connector',
         isRetry: false,
         skipPrebuiltRulesMatching: true,
@@ -160,7 +189,8 @@ describe('SiemRulesMigrationsTelemetry', () => {
 
   it('reports retry rule migration', () => {
     telemetry.reportStartTranslation({
-      migrationId: 'stu',
+      migrationId: defaultMigrationStats.id,
+      vendor: defaultMigrationStats.vendor,
       settings: {
         connectorId: 'test-connector',
         skipPrebuiltRulesMatching: false,
@@ -171,7 +201,8 @@ describe('SiemRulesMigrationsTelemetry', () => {
       SiemMigrationsRuleEventTypes.StartMigration,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.StartMigration],
-        migrationId: 'stu',
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
         connectorId: 'test-connector',
         isRetry: true,
         skipPrebuiltRulesMatching: false,
@@ -191,7 +222,8 @@ describe('SiemRulesMigrationsTelemetry', () => {
       SiemMigrationsRuleEventTypes.TranslatedItemInstall,
       {
         eventName: siemMigrationEventNames[SiemMigrationsRuleEventTypes.TranslatedItemInstall],
-        migrationId: 'test-migration-1',
+        migrationId: migrationRule.migration_id,
+        vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         author: 'elastic',
         enabled: true,

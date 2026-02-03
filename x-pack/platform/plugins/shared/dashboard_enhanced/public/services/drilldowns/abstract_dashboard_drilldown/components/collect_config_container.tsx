@@ -9,9 +9,9 @@ import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
 import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
-import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
+import { DashboardDrilldownEditor } from './dashboard_drilldown_editor';
 import { txtDestinationDashboardNotFound } from './i18n';
-import type { Config } from '../types';
+import type { DashboardDrilldownConfig } from '../types';
 import type { Params } from '../abstract_dashboard_drilldown';
 
 const mergeDashboards = (
@@ -30,7 +30,8 @@ const dashboardToMenuItem = (dashboardId: string, title: string) => ({
   label: title,
 });
 
-export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
+export interface DashboardDrilldownCollectConfigProps
+  extends CollectConfigProps<DashboardDrilldownConfig, object> {
   params: Params;
 }
 
@@ -74,7 +75,7 @@ export class CollectConfigContainer extends React.Component<
     const { dashboards, selectedDashboard, isLoading, error } = this.state;
 
     return (
-      <DashboardDrilldownConfig
+      <DashboardDrilldownEditor
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
         isLoading={isLoading}
         error={error}
@@ -86,7 +87,7 @@ export class CollectConfigContainer extends React.Component<
         }}
         onSearchChange={this.debouncedLoadDashboards}
         config={config}
-        onConfigChange={(changes: Partial<Config>) => {
+        onConfigChange={(changes: Partial<DashboardDrilldownConfig>) => {
           onConfig({ ...config, ...changes });
         }}
       />

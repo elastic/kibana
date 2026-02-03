@@ -11,32 +11,17 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 
 const path = require('path');
-const fs = require('fs');
 
 const ERROR_MSG_MISSING_HOOK =
   '`global.setup.ts` must explicitly call `globalSetupHook`. Without it, ES security indexes are not pre-generated and tests become flaky.';
 
-const ERROR_MSG_MISSING_FILE =
-  'The `parallel_tests` directory must contain a `global.setup.ts` file and call `globalSetupHook`. Without it, ES security indexes are not pre-generated and tests become flaky.';
-
 /**
- * Gets the parallel_tests directory from a filename, if the file is inside one
- * @param {string} filename
- * @returns {string|null}
- */
-const getParallelTestsDir = (filename) => {
-  const match = filename.match(/^(.+\/parallel_tests)\//);
-  return match ? match[1] : null;
-};
-
-/**
- * Checks if a file is a global.setup.ts file inside a parallel_tests directory
+ * Checks if a file is a global.setup.ts file
  * @param {string} filename
  * @returns {boolean}
  */
-const isGlobalSetupInParallelTests = (filename) => {
-  const basename = path.basename(filename);
-  return basename === 'global.setup.ts' && filename.includes('/parallel_tests/');
+const isGlobalSetupFile = (filename) => {
+  return path.basename(filename) === 'global.setup.ts';
 };
 
 /**
@@ -48,16 +33,12 @@ const isGlobalSetupHookCall = (node) => {
   return node.callee.type === 'Identifier' && node.callee.name === 'globalSetupHook';
 };
 
-// Track folders that have already been reported for missing global.setup.ts.
-// Without this, the rule would fire for every file linted inside a parallel_tests directory with a missing `global.setups.ts` file.
-const reportedMissingSetupDirs = new Set();
-
 /** @type {Rule} */
 module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require global.setup.ts with globalSetupHook in parallel_tests directories',
+      description: 'Require globalSetupHook call in global.setup.ts files',
       category: 'Best Practices',
     },
     fixable: null,
@@ -65,43 +46,24 @@ module.exports = {
   },
   create: (context) => {
     const filename = context.getFilename();
-    const parallelTestsDir = getParallelTestsDir(filename);
 
-    // Not inside a parallel_tests directory
-    if (!parallelTestsDir) {
+    if (!isGlobalSetupFile(filename)) {
       return {};
     }
 
-    // Check 1: If this is global.setup.ts, verify it calls globalSetupHook
-    if (isGlobalSetupInParallelTests(filename)) {
-      let hasGlobalSetupHook = false;
+    let hasGlobalSetupHook = false;
 
-      return {
-        CallExpression(node) {
-          if (isGlobalSetupHookCall(node)) {
-            hasGlobalSetupHook = true;
-          }
-        },
-        'Program:exit'(node) {
-          if (!hasGlobalSetupHook) {
-            context.report({
-              node,
-              message: ERROR_MSG_MISSING_HOOK,
-            });
-          }
-        },
-      };
-    }
-
-    // Check 2: For any other file in parallel_tests, verify global.setup.ts exists
     return {
+      CallExpression(node) {
+        if (isGlobalSetupHookCall(node)) {
+          hasGlobalSetupHook = true;
+        }
+      },
       'Program:exit'(node) {
-        const globalSetupPath = path.join(parallelTestsDir, 'global.setup.ts');
-        if (!fs.existsSync(globalSetupPath) && !reportedMissingSetupDirs.has(parallelTestsDir)) {
-          reportedMissingSetupDirs.add(parallelTestsDir);
+        if (!hasGlobalSetupHook) {
           context.report({
             node,
-            message: ERROR_MSG_MISSING_FILE,
+            message: ERROR_MSG_MISSING_HOOK,
           });
         }
       },

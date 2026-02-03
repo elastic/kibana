@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React from 'react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
@@ -40,6 +41,12 @@ export class HeaderExtension extends React.Component<Props> {
   public render() {
     return (
       <div
+        css={css`
+          &:empty {
+            // empty containers should be removed from the layout flow
+            display: contents;
+          }
+        `}
         ref={this.ref}
         className={this.props.containerClassName}
         style={{ display: this.props.display === 'inlineBlock' ? 'inline-block' : undefined }}

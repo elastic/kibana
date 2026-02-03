@@ -63,7 +63,8 @@ export class AutomaticImportV2Plugin
     this.automaticImportService = new AutomaticImportService(
       this.logger,
       core.savedObjects,
-      plugins.taskManager
+      plugins.taskManager,
+      core
     );
 
     const requestContextFactory = new RequestContextFactory({

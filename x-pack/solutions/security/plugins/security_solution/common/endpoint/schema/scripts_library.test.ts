@@ -155,6 +155,29 @@ describe('Scripts library schemas', () => {
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
     });
 
+    it('should accept `tags` array with valid values', () => {
+      reqBody.tags = ['dataCollection', 'threatHunting'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
+    });
+
+    it('should error if `tags` is not an array', () => {
+      // @ts-expect-error
+      reqBody.tags = 'invalid';
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains invalid values', () => {
+      reqBody.tags = ['invalid'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+    });
+
+    it('should error if `tags` contains duplicates', () => {
+      reqBody.tags = ['dataCollection', 'dataCollection'];
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        '[tags]: Duplicate values are not allowed'
+      );
+    });
+
     // ------------------------------------
     // Field: `description`
     // Field: `instructions`
@@ -281,6 +304,7 @@ describe('Scripts library schemas', () => {
       ----------             -------------
       ${'name'}             | ${{ name: 'foo' }}
       ${'platform'}         | ${{ platform: ['windows'] }}
+      ${'tags'}             | ${{ tags: ['dataCollection'] }}
       ${'file'}             | ${{ file: createFileStream() }}
       ${'requiresInput'}    | ${{ requiresInput: true }}
       ${'description'}      | ${{ description: 'some description' }}

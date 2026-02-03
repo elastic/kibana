@@ -121,13 +121,18 @@ export const pieStateSchemaNoESQL = schema.object(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
         {
           minSize: 1,
+          maxSize: 100,
           meta: { description: 'Array of breakdown dimensions (minimum 1, maximum 3)' },
         }
       )
@@ -158,7 +163,11 @@ const pieStateSchemaESQL = schema.object(
         ],
         { meta: { description: 'ES|QL column reference for primary metric' } }
       ),
-      { minSize: 1, meta: { description: 'Array of metric configurations (minimum 1)' } }
+      {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of metric configurations (minimum 1)' },
+      }
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -167,6 +176,7 @@ const pieStateSchemaESQL = schema.object(
         }),
         {
           minSize: 1,
+          maxSize: 100,
           meta: { description: 'Array of breakdown dimensions (minimum 1, maximum 3)' },
         }
       )

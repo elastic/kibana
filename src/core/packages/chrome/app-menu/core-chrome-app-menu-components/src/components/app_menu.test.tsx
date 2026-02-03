@@ -63,7 +63,7 @@ describe('AppMenu', () => {
     it('should render the top nav menu when config has items', () => {
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu')).toBeInTheDocument();
     });
 
     it('should render menu items at xl breakpoint', () => {
@@ -137,7 +137,7 @@ describe('AppMenu', () => {
 
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
     });
 
     it('should render overflow button with all items at small breakpoint', () => {
@@ -145,7 +145,7 @@ describe('AppMenu', () => {
 
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
     });
 
     it('should render individual menu items at xl breakpoint', () => {

@@ -81,14 +81,24 @@ describe('SET Autocomplete', () => {
 
     describe('Project routing setting', () => {
       it('suggests common project routing values after assignment operator', async () => {
-        await setExpectSuggestions('SET project_routing = ', ['"_alias: *";', '"_alias:_origin";']);
+        await setExpectSuggestions('SET project_routing = ', ['"_alias:*";', '"_alias:_origin";']);
       });
 
       it('suggests common project routing values for partial input', async () => {
         await setExpectSuggestions('SET project_routing = "_alias:', [
-          '_alias: *',
+          '_alias:*',
           '_alias:_origin',
         ]);
+      });
+    });
+
+    describe('Unmapped fields setting', () => {
+      it('suggests unmapped fields values after assignment operator', async () => {
+        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"LOAD";', '"NULLIFY";']);
+      });
+
+      it('suggests unmapped fields values for partial input', async () => {
+        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'LOAD', 'NULLIFY']);
       });
     });
   });

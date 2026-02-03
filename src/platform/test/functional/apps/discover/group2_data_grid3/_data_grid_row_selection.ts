@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:sampleRowsPerPage': PAGE_SIZE,
-    hideAnnouncements: true,
   };
 
   describe('discover data grid row selection', function describeIndexTests() {

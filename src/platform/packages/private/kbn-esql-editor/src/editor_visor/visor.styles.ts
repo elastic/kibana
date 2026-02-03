@@ -40,7 +40,6 @@ export const visorStyles = (
       borderRadius: `calc(${euiTheme.size.s} + 1px)`,
       opacity: isVisible ? 1 : 0,
       pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
-      overflow: 'hidden',
       transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
       boxShadow: visorBoxShadow,
     },
@@ -92,6 +91,16 @@ export const visorStyles = (
         background-color: ${euiTheme.colors.backgroundBasePlain};
         &::before {
           border: none;
+        }
+      }
+
+      .kbnQueryBar__textarea {
+        border-radius: ${euiTheme.size.s} !important;
+        box-shadow: none;
+        &:focus,
+        &:hover {
+          box-shadow: none !important;
+          outline: none !important;
         }
       }
     `,

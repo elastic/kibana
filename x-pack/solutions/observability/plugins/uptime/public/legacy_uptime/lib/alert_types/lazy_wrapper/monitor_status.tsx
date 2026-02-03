@@ -31,7 +31,7 @@ export default function MonitorStatusAlert({ core, plugins, params, stackVersion
         <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
           <AlertMonitorStatus
             {...params}
-            autocomplete={plugins.unifiedSearch.autocomplete}
+            autocomplete={plugins.kql.autocomplete}
             stackVersion={stackVersion}
           />
         </UptimeDataViewContextProvider>

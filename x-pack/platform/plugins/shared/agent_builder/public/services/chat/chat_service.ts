@@ -10,7 +10,10 @@ import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent, AgentCapabilities } from '@kbn/agent-builder-common';
-import { getKibanaDefaultAgentCapabilities } from '@kbn/agent-builder-common/agents';
+import {
+  getKibanaDefaultAgentCapabilities,
+  type PromptResponse,
+} from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
@@ -35,7 +38,7 @@ export type ChatParams = BaseConverseParams & {
 
 export type ResumeRoundParams = BaseConverseParams & {
   conversationId: string;
-  confirm: boolean;
+  prompts: Record<string, PromptResponse>;
 };
 
 export class ChatService {
@@ -68,7 +71,7 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
-      confirm: params.confirm,
+      prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
     });
   }

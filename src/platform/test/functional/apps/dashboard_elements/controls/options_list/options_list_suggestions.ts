@@ -13,9 +13,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
-
+export default function ({ getPageObjects }: FtrProviderContext) {
   const { dashboardControls, dashboard, header } = getPageObjects([
     'dashboardControls',
     'dashboard',
@@ -110,12 +108,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('non-default sort value should cause unsaved changes', async () => {
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('returning to default sort value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('can sort numeric options lists suggestions', async () => {
@@ -162,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('wildcard searching works as expected', async () => {
@@ -206,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.editExistingControl(controlId);
         await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
         await dashboardControls.controlEditorSave();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('can search numeric options list', async () => {

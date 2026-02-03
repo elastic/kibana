@@ -9,9 +9,9 @@ import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { RequestHandler } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
-import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import type { ConfigSchema } from '@kbn/kql/server/config';
+import { termsEnumSuggestions } from '@kbn/kql/server/autocomplete/terms_enum';
+import { termsAggSuggestions } from '@kbn/kql/server/autocomplete/terms_agg';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {

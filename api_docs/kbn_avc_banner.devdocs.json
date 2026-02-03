@@ -14,6 +14,8 @@
           "({ onDismiss }: { onDismiss: () => void; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "{ onDismiss: () => void; }"
             ],
             "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+            "lineNumber": 25,
+            "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -47,6 +51,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -7,7 +7,6 @@
 
 import type {
   BrowserAuthFixture,
-  KibanaUrl,
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
@@ -30,7 +29,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     }: {
       pageObjects: ExtendedScoutTestFixtures['pageObjects'];
       page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
     },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {

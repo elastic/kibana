@@ -21,7 +21,7 @@
       "dataViews",
       "fieldFormats",
       "usageCollection",
-      "unifiedSearch",
+      "kql",
       "expressionXY",
       "uiActions",
       "embeddable"
@@ -30,7 +30,6 @@
       "home"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
       "fieldFormats"

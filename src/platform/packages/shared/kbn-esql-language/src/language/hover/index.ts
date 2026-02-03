@@ -95,7 +95,7 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
 
   // Function signature hover
   if (node.type === 'function') {
-    const functionSignature = await getFunctionSignatureHover(node, getColumnMap);
+    const functionSignature = await getFunctionSignatureHover(node);
     hoverContent.contents.push(...functionSignature);
   }
 

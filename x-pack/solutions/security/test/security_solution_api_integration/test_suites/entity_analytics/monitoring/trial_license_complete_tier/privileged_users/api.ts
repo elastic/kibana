@@ -144,6 +144,20 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.body.stats.total).to.be(3);
       });
 
+      it('should upload large volume of users without deleting any non-duplicate users via a csv file', async () => {
+        log.info(`Uploading multiple users via CSV`);
+        const users = Array.from({ length: 999 }).map((_, i) => `csv_user_${i + 1}`);
+        const csv = users.join('\n');
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
+        if (res.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res.body));
+        }
+        expect(res.status).eql(200);
+        expect(res.body.stats.successful).to.be(999);
+        expect(res.body.stats.total).to.be(999);
+      });
+
       it('should add source labels and `is_privileged` field to the uploaded users', async () => {
         log.info(`Uploading multiple users via CSV`);
         const csv = ['csv_user_1', 'csv_user_2', 'csv_user_3'].join('\n');

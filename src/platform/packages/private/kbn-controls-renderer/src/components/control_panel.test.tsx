@@ -59,9 +59,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: 'optionsListControl' }> 
     const api = finalizeApi({
       parentApi,
       serializeState: () => ({
-        rawState: {
-          type: 'optionsListControl',
-        },
+        type: 'optionsListControl',
       }),
     });
     return {

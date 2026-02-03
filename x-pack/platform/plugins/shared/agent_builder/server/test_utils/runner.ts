@@ -76,6 +76,9 @@ export const createAttachmentsService = (): AttachmentsServiceMock => {
 export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
+    get: jest.fn(),
+    dump: jest.fn(),
+    getConfirmationStatus: jest.fn(),
     clear: jest.fn(),
     forTool: jest.fn(),
   };
@@ -114,6 +117,7 @@ export interface CreateScopedRunnerDepsMock extends CreateScopedRunnerDeps {
   modelProvider: ModelProviderMock;
   toolsService: ToolsServiceStartMock;
   agentsService: AgentsServiceStartMock;
+  promptManager: PromptManagerMock;
   logger: MockedLogger;
   request: KibanaRequest;
 }

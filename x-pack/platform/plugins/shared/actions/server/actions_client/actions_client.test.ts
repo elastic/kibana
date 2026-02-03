@@ -2551,6 +2551,10 @@ describe('update()', () => {
 });
 
 describe('execute()', () => {
+  beforeEach(() => {
+    actionTypeRegistry.register(getConnectorType());
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
@@ -2766,6 +2770,7 @@ describe('execute()', () => {
     const actionId = uuidv4();
     const actionExecutionId = uuidv4();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
+    unsecuredSavedObjectsClient.get.mockResolvedValue(actionTypeIdFromSavedObjectMock());
     await expect(
       actionsClient.execute({
         actionId,
@@ -2960,6 +2965,7 @@ describe('isActionTypeEnabled()', () => {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
   });
+
   beforeEach(() => {
     actionTypeRegistry.register(fooActionType);
   });

@@ -8,3 +8,4 @@
  */
 
 export { extractFilters } from './extract_filters';
+export { extractWhereCommand } from './extract_where_command';

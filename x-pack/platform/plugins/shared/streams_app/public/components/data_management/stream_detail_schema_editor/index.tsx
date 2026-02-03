@@ -90,7 +90,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
-          description: `[ttfmp_streams] streamType: ${streamType}`,
+          description: `[ttfmp_streams_detail_schema] streamType: ${streamType}`,
         },
         customMetrics: {
           key1: 'schema_editor_fields_count',

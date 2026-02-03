@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
@@ -54,23 +50,10 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
+
 class DownloadSourceService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {
@@ -208,7 +191,7 @@ class DownloadSourceService {
     let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
-    logger.debug(`Updating download source ${id} with ${newData}`);
+    logger.debug(`Updating download source ${id}`);
 
     const originalItem = await this.get(id);
     const updateData: Partial<DownloadSourceSOAttributes> = {

@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { DashboardsUploadSubSteps } from '.';
 import { TestProviders } from '../../../../../../../common/mock';
 import { getDashboardMigrationStatsMock } from '../../../../../__mocks__';
+import { MigrationSource } from '../../../../../../common/types';
 
 const MIGRATION_NAME_TITLE = 'Migration name';
 const COPY_EXPORT_QUERY_TITLE = 'Export Splunk dashboards';
@@ -48,6 +49,7 @@ jest.mock('../../common/check_resources', () => ({
 
 describe('DashboardsUploadSubSteps', () => {
   const defaultProps = {
+    migrationSource: MigrationSource.SPLUNK,
     onMissingResourcesFetched: jest.fn(),
     onMigrationCreated: jest.fn(),
   };

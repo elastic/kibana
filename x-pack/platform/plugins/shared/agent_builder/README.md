@@ -12,30 +12,6 @@ The agentBuilder plugin has 4 main packages:
 - `@kbn/agent-builder-browser`: browser-specific types and utilities.
 - `@kbn/agent-builder-genai-utils`: server-side utilities for our built-in tools and agents.
 
-## Enable all feature flags
-
-All features in the AgentBuilder plugin are developed behind UI settings (feature flags). 
-By default, in-progress or experimental features are disabled. 
-To enable all features for development or testing, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:enabled: true
-```
-
-This will ensure all AgentBuilder features are available in your Kibana instance.
-
-If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:enabled": true
-   }
-}
-```
-
 ## Enabling tracing
 
 AgentBuilder agents are compatible with the Kibana inference tracing.
@@ -95,28 +71,6 @@ Tools can come from multiple sources:
 - index_search: An agentic search tool that can be scoped to an index pattern.
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
-
-### Enabling MCP tools
-
-MCP tools allow you to connect to external MCP servers and use their tools within Agent Builder. To enable MCP tools, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:externalMcp: true
-```
-
-Or via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:externalMcp": true
-   }
-}
-```
-
-Once enabled, you can create MCP tools by configuring an MCP connector and selecting tools from the connected MCP server.
 
 ### Registering a tool
 

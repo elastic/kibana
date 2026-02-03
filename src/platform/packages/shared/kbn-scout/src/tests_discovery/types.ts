@@ -14,7 +14,7 @@ export type TargetType = 'all' | 'mki' | 'ech';
 export const TARGET_TYPES: TargetType[] = ['all', 'mki', 'ech'];
 
 export type DeploymentType =
-  | 'general'
+  | 'classic'
   | 'elasticsearch'
   | 'security'
   | 'observability'

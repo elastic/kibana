@@ -246,6 +246,13 @@ export const createFiltersFromValueClickAction = async ({
   );
 };
 
+function getOperationForWhere(value: unknown, negate: boolean) {
+  if (value == null) {
+    return negate ? 'is_not_null' : 'is_null';
+  }
+  return negate ? '-' : '+';
+}
+
 /** @public */
 export const appendFilterToESQLQueryFromValueClickAction = ({
   data,
@@ -277,7 +284,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           queryString,
           column.name,
           value,
-          value == null ? 'is_null' : negate ? '-' : '+',
+          getOperationForWhere(value, negate || false),
           column.meta?.type
         );
 

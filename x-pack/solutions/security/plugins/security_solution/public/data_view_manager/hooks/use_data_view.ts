@@ -15,6 +15,7 @@ import { PageScope } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
+import { useDataViewManagerLogger } from './use_data_view_logger';
 
 const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,
@@ -40,6 +41,7 @@ export const useDataView = (
     sourcererAdapterSelector(dataViewManagerScope)
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const logger = useDataViewManagerLogger('useDataView');
   const [localStatus, setLocalStatus] =
     useState<SharedDataViewSelectionState['status']>('pristine');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(INITIAL_DV);
@@ -52,10 +54,16 @@ export const useDataView = (
       }
 
       if (!dataViewId || internalStatus !== 'ready') {
+        logger.debug(
+          `Data view not loaded yet. dataViewId: ${dataViewId}, internalStatus: ${internalStatus}`
+        );
         return;
       }
 
       if (loadedForTheFirstTimeRef.current) {
+        logger.debug(
+          `DataView has loaded once already. Updating data view status to loading for scope ${dataViewManagerScope}...`
+        );
         setLocalStatus('loading');
       }
 
@@ -63,13 +71,16 @@ export const useDataView = (
         // TODO: remove conditional .get call when new data view picker is stabilized
         // this is due to the fact that many of our tests mock kibana hook and do not provide proper
         // double for dataViews service
+        logger.debug(`Fetching data view with ID: ${dataViewId}...`);
         const currDv = await dataViews?.get(dataViewId);
         if (!loadedForTheFirstTimeRef.current) {
           loadedForTheFirstTimeRef.current = true;
         }
+        logger.debug(`Data view with ID: ${dataViewId} fetched successfully.`);
         setRetrievedDataView(currDv);
         setLocalStatus('ready');
       } catch (error) {
+        logger.error(`Error fetching data view with ID: ${dataViewId}`, error);
         // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
         notifications?.toasts?.addDanger({
           title: 'Error retrieving data view',
@@ -78,7 +89,17 @@ export const useDataView = (
         setLocalStatus('error');
       }
     })();
-  }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
+    // This is specifically for the logger as it looks to create a new instance on every run of this hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataViews,
+    dataViewId,
+    internalStatus,
+    notifications,
+    newDataViewPickerEnabled,
+    // logger,
+    dataViewManagerScope,
+  ]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {

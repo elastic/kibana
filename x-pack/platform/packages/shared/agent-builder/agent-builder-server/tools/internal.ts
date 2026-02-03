@@ -9,7 +9,12 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerFn } from './handler';
-import type { ToolAvailabilityContext, ToolAvailabilityResult } from './builtin';
+import type {
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
+  ToolReturnSummarizerFn,
+  ToolConfirmationPolicy,
+} from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
 /**
@@ -37,6 +42,16 @@ export interface InternalToolDefinition<
    * when specified, this will fully replace the description when converting to LLM tools.
    */
   getLlmDescription?: LlmDescriptionHandler<TConfig>;
+  /**
+   * Optional function to summarize a tool return for conversation history.
+   * When provided, this function will be called when processing conversation history
+   * to replace large tool results with compact summaries.
+   */
+  summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Tool call policy to control tool call confirmation behavior
+   */
+  confirmation?: ToolConfirmationPolicy;
 }
 
 export type InternalToolAvailabilityHandler = (

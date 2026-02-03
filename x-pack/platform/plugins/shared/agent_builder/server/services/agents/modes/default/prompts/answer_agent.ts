@@ -9,6 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../../utils/attachment_presentation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
@@ -19,10 +20,12 @@ import { attachmentTypeInstructions } from './utils/attachments';
 interface AnswerAgentPromptParams {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
 }
 
@@ -38,6 +41,7 @@ export const getAnswerAgentPrompt = (params: AnswerAgentPromptParams): BaseMessa
 
 export const getAnswerSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   capabilities,
   attachmentTypes,
 }: AnswerAgentPromptParams): string => {
@@ -75,7 +79,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I answered with a text response
@@ -90,6 +94,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 export const getStructuredAnswerPrompt = ({
   customInstructions,
   initialMessages,
+  conversationTimestamp,
   actions,
   answerActions,
   capabilities,
@@ -97,10 +102,12 @@ export const getStructuredAnswerPrompt = ({
 }: {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
 
@@ -139,7 +146,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I responded using the structured output format with all required fields filled

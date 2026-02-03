@@ -33,6 +33,8 @@
           "\"monitoring\" | \"integrations\" | \"management\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/deep_links.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"data_management\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"fleet\" | \"monitoring\" | \"integrations\" | \"management\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/deep_links.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "\"transform\" | \"watcher\" | \"tags\" | \"cases\" | \"overview\" | \"cross_cluster_replication\" | \"settings\" | \"dataViews\" | \"spaces\" | \"analytics\" | \"users\" | \"migrate_data\" | \"search_sessions\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"trained_models\" | \"pipelines\" | \"maintenanceWindows\" | \"anomaly_detection\" | \"roles\" | \"reporting\" | \"ad_settings\" | \"aiAssistantManagementSelection\" | \"securityAiAssistantManagement\" | \"observabilityAiAssistantManagement\" | \"api_keys\" | \"content_connectors\" | \"license_management\" | \"index_lifecycle_management\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"remote_clusters\" | \"role_mappings\" | \"rollup_jobs\" | \"snapshot_restore\" | \"supplied_configurations\" | \"triggersActions\" | \"triggersActionsAlerts\" | \"triggersActionsConnectors\" | \"upgrade_assistant\" | \"genAiSettings\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/deep_links.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "\"monitoring\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "\"stack_management\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

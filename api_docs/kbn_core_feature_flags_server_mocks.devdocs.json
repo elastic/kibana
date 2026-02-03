@@ -25,6 +25,8 @@
           "\nMocks for the Feature Flags service (browser-side)"
         ],
         "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               ">>"
             ],
             "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -71,6 +75,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,6 +97,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -111,6 +119,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -131,6 +141,8 @@
               ">"
             ],
             "path": "src/core/packages/feature-flags/server-mocks/index.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

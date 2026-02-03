@@ -10,10 +10,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GroupStats } from './group_stats';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 
 const onTakeActionsOpen = jest.fn();
 const testProps = {
@@ -30,13 +27,20 @@ const testProps = {
     { title: 'Rules:', badge: { value: 2 } },
     { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
   ],
-  takeActionItems: () => ({
-    items: [
-      { key: '1', 'data-test-subj': 'takeActionItem-1' },
-      { key: '2', 'data-test-subj': 'takeActionItem-2' },
-    ] as EuiContextMenuPanelItemDescriptor[],
-    panels: [] as EuiContextMenuPanelDescriptor[],
-  }),
+  takeActionItems: () => (
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={[
+        {
+          id: 0,
+          items: [
+            { key: '1', 'data-test-subj': 'takeActionItem-1', name: '1' },
+            { key: '2', 'data-test-subj': 'takeActionItem-2', name: '2' },
+          ],
+        },
+      ]}
+    />
+  ),
 };
 describe('Group stats', () => {
   beforeEach(() => {
@@ -78,16 +82,24 @@ describe('Group stats', () => {
     const { queryByTestId } = render(
       <GroupStats
         {...testProps}
-        takeActionItems={() => ({ items: [{ name: 'test' }], panels: [] })}
+        takeActionItems={() => (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                items: [{ name: 'test' }],
+              },
+            ]}
+          />
+        )}
       />
     );
     expect(queryByTestId('take-action-button')).toBeInTheDocument();
   });
 
   it('hides the Take Actions menu when no action item is provided', () => {
-    const { queryByTestId } = render(
-      <GroupStats {...testProps} takeActionItems={() => ({ items: [], panels: [] })} />
-    );
+    const { queryByTestId } = render(<GroupStats {...testProps} takeActionItems={undefined} />);
     expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
   });
 });

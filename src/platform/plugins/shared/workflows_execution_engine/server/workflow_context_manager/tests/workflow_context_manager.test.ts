@@ -216,7 +216,7 @@ describe('WorkflowContextManager', () => {
   });
 
   describe('inputs', () => {
-    const workflow: WorkflowYaml = {
+    const workflow = {
       name: 'Test Workflow',
       version: '1',
       description: 'A test workflow',
@@ -232,7 +232,7 @@ describe('WorkflowContextManager', () => {
           default: '',
         },
       ],
-    };
+    } as WorkflowYaml;
     let testContainer: ReturnType<typeof createTestContainer>;
 
     beforeEach(() => {
@@ -275,6 +275,7 @@ describe('WorkflowContextManager', () => {
 
       const context = testContainer.underTest.getContext();
       expect(context.inputs).toEqual({
+        name: '', // Default value from workflow definition
         remainingKey: 'some string',
         overridenKey: false,
         newKey: 123,

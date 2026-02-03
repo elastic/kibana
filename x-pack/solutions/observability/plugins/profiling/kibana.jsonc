@@ -23,6 +23,7 @@
       "observability",
       "observabilityShared",
       "unifiedSearch",
+      "kql",
       "share",
       "profilingDataAccess"
     ],

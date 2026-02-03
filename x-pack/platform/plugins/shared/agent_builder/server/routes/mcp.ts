@@ -36,7 +36,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -87,7 +86,11 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
               tool.description,
               toolSchema.shape,
               async (args: { [x: string]: any }) => {
-                const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
+                const toolResult = await registry.execute({
+                  toolId: tool.id,
+                  toolParams: args,
+                  source: 'mcp',
+                });
                 return {
                   content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
                 };

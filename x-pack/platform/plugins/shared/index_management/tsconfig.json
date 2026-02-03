@@ -69,7 +69,8 @@
     "@kbn/react-query",
     "@kbn/scout",
     "@kbn/deeplinks-management",
-    "@kbn/test-eui-helpers"
+    "@kbn/test-eui-helpers",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

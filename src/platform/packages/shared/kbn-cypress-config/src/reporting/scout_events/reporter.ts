@@ -106,16 +106,17 @@ export class ScoutCypressReporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
+    const areas = this.getOwnerAreas(fileOwners);
 
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 

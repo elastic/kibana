@@ -91,6 +91,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
   ) {
     const packagePolicyId = data.id || uuidv4();
 
+    const policyTemplate = data.policy_template;
+
     const agentPolicyId = packagePolicyId; // Use the same ID for agent policy and package policy
     const force = data.force;
     this.logger.debug('Creating agentless policy');
@@ -185,7 +187,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           }),
       };
 
-      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
+      let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        policyTemplate,
+      });
 
       // Integrate cloud connector if enabled for this agentless policy
       const {

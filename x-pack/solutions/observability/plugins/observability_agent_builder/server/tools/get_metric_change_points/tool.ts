@@ -8,12 +8,12 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
 import { getToolHandler } from './handler';
@@ -26,14 +26,16 @@ const getMetricChangePointsSchema = z.object({
   index: z.string().describe('The index or index pattern to find the metrics').optional(),
   kqlFilter: z
     .string()
-    .describe('A KQL filter to filter the metric documents, e.g.: my_field:foo')
+    .describe(
+      "A KQL filter to filter the metric documents. Examples: 'service.name: \"my-service\"', 'my_field: foo'."
+    )
     .optional(),
   aggregation: z
     .object({
       field: z
         .string()
         .describe(
-          `Numeric field to aggregate and observe for changes (e.g., 'transaction.duration.us').`
+          `Numeric field to aggregate and observe for changes. Example: "transaction.duration.us".`
         ),
       type: z
         .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])
@@ -42,13 +44,10 @@ const getMetricChangePointsSchema = z.object({
     .optional(),
   groupBy: z
     .array(z.string())
+    .default([])
     .describe(
-      `Optional keyword fields to break down metrics by to identify which specific group experienced a change.
-Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance.
-Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone']
-`
-    )
-    .optional(),
+      `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
+    ),
 });
 
 export function createGetMetricChangePointsTool({
@@ -56,10 +55,7 @@ export function createGetMetricChangePointsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }) {
@@ -73,7 +69,13 @@ When to use:
 `,
     schema: getMetricChangePointsSchema,
     tags: ['observability', 'metrics'],
-    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy = [] }, { esClient }) => {
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => {
+        return getAgentBuilderResourceAvailability({ core, request, logger });
+      },
+    },
+    handler: async ({ start, end, index, kqlFilter, aggregation, groupBy }, { esClient }) => {
       try {
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 

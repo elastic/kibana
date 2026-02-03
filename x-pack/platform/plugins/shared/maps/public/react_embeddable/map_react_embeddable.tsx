@@ -53,7 +53,7 @@ export function getControlledBy(id: string) {
 export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = initialState.rawState;
+    const state = initialState;
     const savedMap = new SavedMap({ mapEmbeddableState: state });
     await savedMap.whenReady();
 
@@ -106,17 +106,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
     }
 
     function serializeByReference(libraryId: string) {
-      return {
-        rawState: getByReferenceState(getLatestState(), libraryId),
-        references: [],
-      };
+      return getByReferenceState(getLatestState(), libraryId);
     }
 
     function serializeByValue() {
-      return {
-        rawState: getByValueState(getLatestState(), savedMap.getAttributes()),
-        references: [],
-      };
+      return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
     function serializeState() {
@@ -148,12 +142,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
         };
       },
       onReset: async (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        timeRangeManager.reinitializeState(lastSaved?.rawState);
-        titleManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
         if (lastSaved) {
-          await savedMap.reset(lastSaved.rawState);
+          await savedMap.reset(lastSaved);
         }
       },
     });

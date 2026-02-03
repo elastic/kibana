@@ -11,7 +11,8 @@ export type {
   DashboardCapabilities,
   DashboardLocatorParams,
   DashboardState,
-  DashboardControlsState,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanel,
 } from './types';
 
 export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_utils';

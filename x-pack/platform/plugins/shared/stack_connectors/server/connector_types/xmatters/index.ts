@@ -8,7 +8,7 @@
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -38,6 +38,7 @@ export type XmattersConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,

@@ -37,20 +37,13 @@ describe('getVersions', () => {
   it('includes migrationVersions and generated model versions and reverses newest-to-oldest', () => {
     const typeSnapshot = makeTypeSnapshot(['7.10.0', '8.0.0'], 2); // modelVersions -> 10.1.0, 10.2.0
 
-    expect(getVersions(typeSnapshot)).toEqual([
-      '10.2.0',
-      '10.1.0',
-      '10.0.0',
-      '8.0.0',
-      '7.10.0',
-      '0.0.0',
-    ]);
+    expect(getVersions(typeSnapshot)).toEqual(['10.2.0', '10.1.0', '8.0.0', '7.10.0', '0.0.0']);
   });
 
   it('handles single migrationVersion and single modelVersion', () => {
     const typeSnapshot = makeTypeSnapshot(['1.0.0'], 1); // -> 10.1.0
 
-    expect(getVersions(typeSnapshot)).toEqual(['10.1.0', '10.0.0', '1.0.0', '0.0.0']);
+    expect(getVersions(typeSnapshot)).toEqual(['10.1.0', '1.0.0', '0.0.0']);
   });
 
   it('preserves duplicates from migrationVersions and includes model versions accordingly', () => {
@@ -60,7 +53,6 @@ describe('getVersions', () => {
       '10.3.0',
       '10.2.0',
       '10.1.0',
-      '10.0.0',
       '2.0.0',
       '2.0.0',
       '0.0.0',

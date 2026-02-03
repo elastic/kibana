@@ -8,6 +8,7 @@
  */
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -29,8 +30,12 @@ describe('Quick search visor', () => {
     return Promise.resolve([]);
   });
 
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     core: corePluginMock,
+    kql: kqlMock,
   };
 
   function renderESQLVisor(testProps: QuickSearchVisorProps) {
@@ -46,7 +51,6 @@ describe('Quick search visor', () => {
       query: 'FROM test_index',
       isSpaceReduced: false,
       isVisible: true,
-      onClose: jest.fn(),
       onUpdateAndSubmitQuery: jest.fn(),
     };
   });
@@ -54,13 +58,12 @@ describe('Quick search visor', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
-  it('should render the sources dropdown and the search input test', async () => {
+  it('should render the sources dropdown and the KQL query input', async () => {
     const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     // find the dropdown
     expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
 
-    // find the search input
-    expect(getByTestId('ESQLEditor-visor-search-input')).toBeInTheDocument();
+    expect(kqlMock.QueryStringInput).toHaveBeenCalled();
   });
 
   it('should display the available sources in the dropdown list', async () => {
@@ -80,22 +83,5 @@ describe('Quick search visor', () => {
       expect(screen.getAllByText('test_index').length).toBeGreaterThan(0);
       expect(screen.getAllByText('logs').length).toBeGreaterThan(0);
     });
-  });
-
-  it('should call the onUpdateAndSubmitQuery after pressing Enter in the search input', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    const searchInput = getByTestId('ESQLEditor-visor-search-input');
-    await act(async () => {
-      await userEvent.type(searchInput, 'error');
-    });
-
-    await act(async () => {
-      await userEvent.keyboard('{Enter}');
-    });
-
-    expect(props.onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      'FROM test_index | WHERE KQL("""error""")'
-    );
   });
 });

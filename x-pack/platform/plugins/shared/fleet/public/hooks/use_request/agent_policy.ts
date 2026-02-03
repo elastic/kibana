@@ -63,15 +63,20 @@ export const useGetAgentPoliciesQuery = (
 
 export const useBulkGetAgentPoliciesQuery = (
   ids: string[],
-  options?: { full?: boolean; ignoreMissing?: boolean }
+  options?: { full?: boolean; ignoreMissing?: boolean; enabled?: boolean }
 ) => {
-  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
-    sendRequestForRq<BulkGetAgentPoliciesResponse>({
-      path: agentPolicyRouteService.getBulkGetPath(),
-      method: 'post',
-      body: JSON.stringify({ ids, full: options?.full }),
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(
+    ['agentPolicies', ids],
+    () =>
+      sendRequestForRq<BulkGetAgentPoliciesResponse>({
+        path: agentPolicyRouteService.getBulkGetPath(),
+        method: 'post',
+        body: JSON.stringify({ ids, full: options?.full }),
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      enabled: options?.enabled,
+    }
   );
 };
 

@@ -71,7 +71,13 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
       end: testData.END_DATE,
     });
 
-    await test.step('Click on waterfall accordion', async () => {
+    await test.step('Verify waterfall item is initially visible', async () => {
+      await expect(page.getByLabel('View details for child1')).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
+      });
+    });
+
+    await test.step('Click on waterfall accordion to fold', async () => {
       await page.getByTestId('apmWaterfallButton').click();
     });
 
@@ -79,7 +85,7 @@ test.describe('Service Overview - Transaction Details', { tag: ['@ess', '@svlObl
       await expect(page.getByLabel('View details for child1')).toBeHidden();
     });
 
-    await test.step('Click on the same waterfall accordion', async () => {
+    await test.step('Click on the same waterfall accordion to unfold', async () => {
       await page.getByTestId('apmWaterfallButton').click();
     });
 

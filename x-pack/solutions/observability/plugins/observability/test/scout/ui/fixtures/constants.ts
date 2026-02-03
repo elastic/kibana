@@ -30,6 +30,14 @@ export const RULE_LIST_TEST_SUBJECTS = {
   // Rule Actions
   RULE_SIDEBAR_EDIT_ACTION: 'ruleSidebarEditAction',
   EDIT_ACTION_HOVER_BUTTON: 'editActionHoverButton',
+
+  // Rule Status Dropdown
+  STATUS_DROPDOWN: 'statusDropdown',
+  STATUS_DROPDOWN_DISABLED_ITEM: 'statusDropdownDisabledItem',
+  STATUS_DROPDOWN_ENABLED_ITEM: 'statusDropdownEnabledItem',
+
+  // Rule Status Cell
+  RULES_TABLE_CELL_STATUS: 'rulesTableCell-status',
 } as const;
 
 /**
@@ -55,6 +63,13 @@ export const LOGS_TAB_TEST_SUBJECTS = {
 } as const;
 
 /**
+ * Constants for generated metrics used in metric threshold rule tests
+ */
+export const GENERATED_METRICS = {
+  metricName: 'system.diskio.write.bytes',
+};
+
+/**
  * Constants for data-test-subj values used in custom threshold rule tests
  */
 export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
@@ -70,7 +85,41 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
   EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
 
+  // Metric Row / Custom Equation
+  AGGREGATION_NAME_A: 'aggregationNameA',
+  AGGREGATION_TYPE_SELECT: 'aggregationTypeSelect',
+
+  // KQL Filter
+  KQL_SEARCH_FIELD: 'o11ySearchField',
+  KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
+
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',
+} as const;
+
+/**
+ * Constants for data-test-subj values used in rule details page tests
+ */
+export const RULE_DETAILS_TEST_SUBJECTS = {
+  // Page elements
+  RULE_DETAILS: 'ruleDetails',
+  RULE_NAME: 'ruleName',
+  RULE_TYPE: 'ruleSummaryRuleType',
+  RULE_STATUS_PANEL: 'ruleStatusPanel',
+  RULE_DEFINITION: 'ruleSummaryRuleDefinition',
+
+  // Actions
+  ACTIONS_BUTTON: 'actions',
+  EDIT_RULE_BUTTON: 'editRuleButton',
+  DELETE_RULE_BUTTON: 'deleteRuleButton',
+
+  // Alert Summary Widget
+  ALERT_SUMMARY_WIDGET_COMPACT: 'alertSummaryWidgetCompact',
+  ACTIVE_ALERT_COUNT: 'activeAlertCount',
+  TOTAL_ALERT_COUNT: 'totalAlertCount',
+
+  // Rule Edit Form
+  RULE_DETAILS_NAME_INPUT: 'ruleDetailsNameInput',
+  DASHBOARDS_SELECTOR: 'dashboardsSelector',
 } as const;

@@ -16,6 +16,7 @@ import {
   ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
+  ScriptTagsSchema,
 } from './common';
 
 export const CreateScriptRequestSchema = {
@@ -28,6 +29,7 @@ export const CreateScriptRequestSchema = {
     instructions: schema.maybe(ScriptInstructionsSchema),
     example: schema.maybe(ScriptExampleSchema),
     pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
+    tags: schema.maybe(ScriptTagsSchema),
   }),
 };
 

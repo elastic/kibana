@@ -57,7 +57,7 @@ exports[`Table render conflict summary modal  1`] = `
           />
         }
         rowHeader="firstName"
-        tableCaption="Demo of EuiBasicTable"
+        tableCaption="Field type conflicts across indices"
         tableLayout="auto"
       />
     </EuiText>
@@ -327,6 +327,7 @@ exports[`Table should render normally 1`] = `
       },
     }
   }
+  tableCaption="Indexed fields"
   tableLayout="fixed"
 />
 `;

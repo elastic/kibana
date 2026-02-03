@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -20,7 +16,6 @@ import {
   EuiToolTip,
   useEuiTheme,
   useEuiFontSize,
-  EuiContextMenu,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
@@ -34,13 +29,7 @@ interface GroupStatsProps<T> {
   groupNumber: number;
   onTakeActionsOpen?: () => void;
   stats?: GroupStatsItem[];
-  takeActionItems?: (
-    groupFilters: Filter[],
-    groupNumber: number
-  ) => {
-    items: EuiContextMenuPanelItemDescriptor[];
-    panels: EuiContextMenuPanelDescriptor[];
-  };
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
   /** Optional array of additional action buttons to display before the Take actions button */
   additionalActionButtons?: React.ReactElement[];
 }
@@ -73,20 +62,9 @@ const GroupStatsComponent = <T,>({
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const { items: takeActionItems, panels: takeActionPanels } = useMemo(() => {
-    return getTakeActionItems?.(groupFilter, groupNumber) ?? { items: [], panels: [] };
+  const takeActionItems = useMemo(() => {
+    return getTakeActionItems?.(groupFilter, groupNumber);
   }, [getTakeActionItems, groupFilter, groupNumber]);
-
-  const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: takeActionItems,
-      } as EuiContextMenuPanelDescriptor,
-      ...takeActionPanels,
-    ],
-    [takeActionItems, takeActionPanels]
-  );
 
   const onButtonClick = useCallback(() => {
     return !isPopoverOpen && onTakeActionsOpen ? onTakeActionsOpen() : setPopover(!isPopoverOpen);
@@ -151,7 +129,7 @@ const GroupStatsComponent = <T,>({
 
   const takeActionMenu = useMemo(
     () =>
-      takeActionItems.length ? (
+      takeActionItems ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
@@ -169,11 +147,11 @@ const GroupStatsComponent = <T,>({
             isOpen={isPopoverOpen}
             panelPaddingSize="none"
           >
-            <EuiContextMenu panels={panels} initialPanelId={0} />
+            {takeActionItems}
           </EuiPopover>
         </EuiFlexItem>
       ) : null,
-    [isPopoverOpen, onButtonClick, takeActionItems, panels]
+    [isPopoverOpen, onButtonClick, takeActionItems]
   );
 
   return (

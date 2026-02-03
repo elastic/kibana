@@ -7,6 +7,10 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
+import {
+  SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+  SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+} from '../../fixtures/constants';
 
 const timeRange = {
   rangeFrom: testData.SPAN_LINKS_START_DATE,
@@ -22,7 +26,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-producer-internal-only', timeRange);
+    await transactionDetailsPage.gotoServiceInventory(
+      SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+      timeRange
+    );
     await page.getByText('Transaction A').click();
     await page.waitForLoadingIndicatorHidden();
 
@@ -51,11 +58,13 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
       const transactionCLink = page.getByRole('link', { name: 'Transaction C' });
       await expect(transactionCLink).toBeVisible();
 
-      const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
+      const consumerMultipleLink = page.getByRole('link', {
+        name: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      });
       await expect(consumerMultipleLink).toBeVisible();
       await expect(consumerMultipleLink).toHaveAttribute(
         'href',
-        /\/services\/zzz-consumer-multiple\/overview/
+        new RegExp(`/services/${SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE}/overview`)
       );
 
       const transactionDLink = page.getByRole('link', { name: 'Transaction D' });
@@ -90,7 +99,9 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.locator('button').filter({ hasText: 'Span B100 ms' }).click();
       await transactionDetailsPage.getSpanLinksTab().click();
 
-      const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
+      const consumerMultipleLink = page.getByRole('link', {
+        name: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      });
       await expect(consumerMultipleLink).toBeVisible();
 
       const spanELink = page.getByRole('link', { name: 'Span E' });
@@ -116,7 +127,9 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
       await page.getByRole('button', { name: '1 View details for' }).click();
       await transactionDetailsPage.getSpanLinksTab().click();
 
-      const consumerMultipleLink = page.getByRole('link', { name: 'zzz-consumer-multiple' });
+      const consumerMultipleLink = page.getByRole('link', {
+        name: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      });
       await expect(consumerMultipleLink).toBeVisible();
 
       const spanELink = page.getByRole('link', { name: 'Span E' });
@@ -126,7 +139,9 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     await test.step('switches to outgoing links and shows linked services', async () => {
       await transactionDetailsPage.getSpanLinkTypeSelect().selectOption('Outgoing links (1)');
 
-      const producerInternalLink = page.getByRole('link', { name: 'zzz-producer-internal-only' });
+      const producerInternalLink = page.getByRole('link', {
+        name: SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+      });
       await expect(producerInternalLink).toBeVisible();
 
       const spanALink = page.getByRole('link', { name: 'Span A' });
@@ -138,7 +153,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-consumer-multiple', timeRange);
+    await transactionDetailsPage.gotoServiceInventory(
+      SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      timeRange
+    );
     await page.getByText('Transaction D').click();
     await page.waitForLoadingIndicatorHidden();
 
@@ -152,7 +170,9 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
       const spanCLink = page.getByRole('link', { name: 'Span C' });
       await expect(spanCLink).toBeVisible();
 
-      const producerInternalLink = page.getByRole('link', { name: 'zzz-producer-internal-only' });
+      const producerInternalLink = page.getByRole('link', {
+        name: SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+      });
       await expect(producerInternalLink).toBeVisible();
 
       const spanALink = page.getByRole('link', { name: 'Span A' });
@@ -168,7 +188,10 @@ test.describe('Span links', { tag: ['@ess', '@svlOblt'] }, () => {
     page,
     pageObjects: { transactionDetailsPage },
   }) => {
-    await transactionDetailsPage.gotoServiceInventory('zzz-consumer-multiple', timeRange);
+    await transactionDetailsPage.gotoServiceInventory(
+      SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+      timeRange
+    );
     await page.getByText('Transaction D').click();
     await page.waitForLoadingIndicatorHidden();
 

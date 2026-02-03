@@ -85,7 +85,6 @@ stack: ga 9.3
 `xpack.fleet.integrationRollbackTTL`
 :   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
 
-
 `xpack.reporting.csv.maxRows`
 :    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
 
@@ -128,6 +127,15 @@ stack: ga 9.1
 
 `xpack.fleet.autoUpgrades.retryDelays`:
 :   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 8.18+ [ec_version_8_18]
 

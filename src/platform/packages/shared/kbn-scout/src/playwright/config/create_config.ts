@@ -88,6 +88,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      runGlobalSetup: options.runGlobalSetup,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
@@ -96,6 +97,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
+      timezoneId: 'GMT',
     },
 
     // Timeout for each test, includes test, hooks and fixtures

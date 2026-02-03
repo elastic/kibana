@@ -14,6 +14,7 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
   SubscriptionResponse,
+  UpdateClusterRequest,
 } from '../types';
 
 export class CloudConnectClient {
@@ -197,20 +198,19 @@ export class CloudConnectClient {
   }
 
   /**
-   * Updates cluster services configuration
-   * Used to enable or disable services for a cluster
+   * Updates cluster configuration, including services and license
    */
-  async updateClusterServices(
+  async updateCluster(
     apiKey: string,
     clusterId: string,
-    services: Record<string, { enabled: boolean }>
+    clusterData: Partial<UpdateClusterRequest>
   ): Promise<OnboardClusterResponse> {
     try {
       this.logger.debug(`Updating services for cluster ID: ${clusterId}`);
 
       const response = await this.axiosInstance.patch<OnboardClusterResponse>(
         `/cloud-connected/clusters/${clusterId}`,
-        { services },
+        clusterData,
         {
           headers: {
             Authorization: `apiKey ${apiKey}`,

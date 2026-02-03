@@ -1,0 +1,13 @@
+Please give me a summary of the events from this query for this data stream.
+
+`data stream`
+{{{streamName}}}
+
+`query name`
+{{{queryTitle}}}
+
+`query KQL filter`
+{{{queryKql}}}
+
+`events`
+{{{events}}}

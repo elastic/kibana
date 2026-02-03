@@ -12,6 +12,7 @@ import type { ControlsGroupState, LegacyIgnoreParentSettings } from '@kbn/contro
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
+/** The attributes of a dashboard saved object. */
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
   projectRouting?: string;
 };
@@ -31,13 +32,10 @@ export type SavedDashboardSection = TypeOf<typeof sectionSchema>;
 /**
  * A saved sticky dashboard control parsed directly from the Dashboard Attributes control panels JSON
  */
-export type StoredControlState = Pick<
-  ControlsGroupState['controls'][number],
-  'grow' | 'type' | 'width'
-> & {
+export type StoredControlState = Pick<ControlsGroupState[number], 'grow' | 'type' | 'width'> & {
   order: number; // order is generated from the array order
   id: string; // id is required
-  explicitInput: ControlsGroupState['controls'][number]['config'] & { dataViewRefName?: string };
+  explicitInput: ControlsGroupState[number]['config'] & { dataViewRefName?: string };
 };
 
 export type StoredControlGroupInput = Omit<

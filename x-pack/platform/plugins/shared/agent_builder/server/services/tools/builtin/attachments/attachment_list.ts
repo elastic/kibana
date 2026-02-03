@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -31,7 +32,7 @@ export const createAttachmentListTool = ({
     'List all attachments in the conversation with their metadata. Use this to see what data is available.',
   schema: attachmentListSchema,
   tags: ['attachment'],
-  handler: async ({ include_deleted: includeDeleted }, _context) => {
+  handler: async ({ include_deleted: includeDeleted }) => {
     const attachments = includeDeleted ? attachmentManager.getAll() : attachmentManager.getActive();
 
     const attachmentList = attachments.map((attachment) => {
@@ -55,5 +56,21 @@ export const createAttachmentListTool = ({
         },
       ],
     };
+  },
+  summarizeToolReturn: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
+    if (!isOtherResult(result)) return undefined;
+    const data = result.data as Record<string, unknown>;
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Listed ${data.count ?? '?'} attachments`,
+          count: data.count,
+        },
+      },
+    ];
   },
 });

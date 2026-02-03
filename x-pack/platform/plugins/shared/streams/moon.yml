@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core-http-server-utils'
   - '@kbn/core-analytics-server'
   - '@kbn/features-plugin'
   - '@kbn/server-route-repository-utils'

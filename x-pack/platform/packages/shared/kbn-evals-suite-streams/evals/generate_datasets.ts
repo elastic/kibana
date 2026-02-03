@@ -8,9 +8,9 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { SampleParserClient } from '@kbn/sample-log-parser';
 import type {
-  FeatureIdentificationEvaluationDataset,
-  FeatureIdentificationEvaluationExample,
-} from './feature_identification_datasets';
+  SystemIdentificationEvaluationDataset,
+  SystemIdentificationEvaluationExample,
+} from './system_identification_datasets';
 
 const LOGHUB_SYSTEMS = [
   'Apache',
@@ -122,7 +122,7 @@ function buildMixedCriteria(loghubSelected: string[], serverlessSelected: string
  * Each scenario uses an independent seeded selection (not a shared shuffle) so that modifying
  * counts does not cascade.
  */
-export async function getLoghubDatasets(): Promise<FeatureIdentificationEvaluationDataset[]> {
+export async function getLoghubDatasets(): Promise<SystemIdentificationEvaluationDataset[]> {
   // scenario definitions
   // We represent individual scenarios as simple objects; two 5-system scenarios need distinct ids
   const picks = [
@@ -147,7 +147,7 @@ export async function getLoghubDatasets(): Promise<FeatureIdentificationEvaluati
         weight,
       },
       metadata: {},
-    } as FeatureIdentificationEvaluationExample;
+    } as SystemIdentificationEvaluationExample;
   });
 
   // Android example (no explicit systems list)
@@ -183,7 +183,7 @@ export async function getServerlessDatasets({
   log,
 }: {
   log: ToolingLog;
-}): Promise<FeatureIdentificationEvaluationDataset[]> {
+}): Promise<SystemIdentificationEvaluationDataset[]> {
   const client = new SampleParserClient({ logger: log });
   const serverlessSystems = await client.listServerlessSystems();
 
@@ -195,7 +195,7 @@ export async function getServerlessDatasets({
     { count: 12, id: 'serverless-12', weight: 3 },
   ];
 
-  const examples: FeatureIdentificationEvaluationExample[] = counts
+  const examples: SystemIdentificationEvaluationExample[] = counts
     .filter(({ count }) => serverlessSystems.length >= Math.min(count, serverlessSystems.length))
     .map(({ count, id, weight }) => {
       const actualCount = Math.min(count, serverlessSystems.length);
@@ -213,7 +213,7 @@ export async function getServerlessDatasets({
           weight,
         },
         metadata: {},
-      } as FeatureIdentificationEvaluationExample;
+      } as SystemIdentificationEvaluationExample;
     });
 
   return [
@@ -228,7 +228,7 @@ export async function getServerlessDatasets({
 /**
  * Pick 1 loghub + 3 serverless, 2 + 5, 3 + 12, in logs.mixed
  */
-export async function getMixedDatasets(): Promise<FeatureIdentificationEvaluationDataset[]> {
+export async function getMixedDatasets(): Promise<SystemIdentificationEvaluationDataset[]> {
   // We need serverless system names; create a short-lived logger
   const log = new ToolingLog({ level: 'error', writeTo: process.stdout });
   const client = new SampleParserClient({ logger: log });
@@ -243,7 +243,7 @@ export async function getMixedDatasets(): Promise<FeatureIdentificationEvaluatio
     { loghub: 8, serverless: 8, id: 'mixed-8-8', weight: 5 },
   ];
 
-  const examples: FeatureIdentificationEvaluationExample[] = scenarios
+  const examples: SystemIdentificationEvaluationExample[] = scenarios
     .filter(
       (s) =>
         LOGHUB_SYSTEMS.length >= s.loghub &&
@@ -267,7 +267,7 @@ export async function getMixedDatasets(): Promise<FeatureIdentificationEvaluatio
           weight: s.weight,
         },
         metadata: {},
-      } as FeatureIdentificationEvaluationExample;
+      } as SystemIdentificationEvaluationExample;
     });
 
   return [
@@ -281,9 +281,9 @@ export async function getMixedDatasets(): Promise<FeatureIdentificationEvaluatio
 }
 
 interface GeneratedDatasets {
-  loghub: FeatureIdentificationEvaluationDataset[];
-  serverless: FeatureIdentificationEvaluationDataset[];
-  mixed: FeatureIdentificationEvaluationDataset[];
+  loghub: SystemIdentificationEvaluationDataset[];
+  serverless: SystemIdentificationEvaluationDataset[];
+  mixed: SystemIdentificationEvaluationDataset[];
 }
 
 async function run() {

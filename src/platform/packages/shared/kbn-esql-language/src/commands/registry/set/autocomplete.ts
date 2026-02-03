@@ -34,12 +34,13 @@ export async function autocomplete(
   const settingLeftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : null;
   const settingRightSide = isBinaryExpression(settingArg) ? settingArg.args[1] : null;
 
-  // SET /
   if (!settingArg) {
     // settingLeftSide is not built until user types '=', so we need to check with regex if the leftside is present
     const hasSettingLeftSide = /SET\s+\S+\s+$/.test(innerText);
+    // SET <setting> /
     if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
+      // SET /
     } else {
       return getSettingsCompletionItems(callbacks?.isServerless);
     }
@@ -50,7 +51,11 @@ export async function autocomplete(
     COMPLETIONS_BY_SETTING_NAME[isIdentifier(settingLeftSide) ? settingLeftSide.text : ''] ?? [];
 
   // SET <setting> = /
-  if (!settingRightSide || isUnknownNode(settingRightSide)) {
+  if (
+    !settingRightSide ||
+    isUnknownNode(settingRightSide) ||
+    (Array.isArray(settingRightSide) && settingRightSide.length === 0)
+  ) {
     return settingsValueCompletions.map((item) => ({
       ...item,
       text: `"${item.text}";`,

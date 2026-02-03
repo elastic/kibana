@@ -1,0 +1,24 @@
+{
+  "10.2.0": [
+    {
+      "id": "id",
+      "status": "active",
+      "updated_at": "2022-10-11T13:45:20.123Z",
+      "updated_by": "user",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0
+    }
+  ],
+  "10.3.0": [
+    {
+      "id": "id",
+      "status": "active",
+      "updated_at": "2022-10-11T13:45:20.123Z",
+      "updated_by": "user",
+      "name": "Policy 1",
+      "namespace": "default",
+      "inactivity_timeout": 0
+    }
+  ]
+}

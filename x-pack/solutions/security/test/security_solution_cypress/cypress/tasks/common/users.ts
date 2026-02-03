@@ -6,6 +6,7 @@
  */
 
 import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { getFullname } from '../common';
 
 type DefaultUsername = 'platform_engineer' | 'system_indices_superuser';
 
@@ -13,3 +14,9 @@ export const getDefaultUsername = (): DefaultUsername => {
   const isServerless: boolean = Cypress.env(IS_SERVERLESS);
   return isServerless ? 'platform_engineer' : 'system_indices_superuser';
 };
+
+export const getDefaultUserFullname = (): Cypress.Chainable<string> =>
+  (getFullname(getDefaultUsername()) as Cypress.Chainable<string>).then((rawUsername) => {
+    expect(rawUsername).to.be.a('string');
+    return rawUsername;
+  });

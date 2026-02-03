@@ -24,6 +24,8 @@
         }
       ],
       "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -42,6 +44,8 @@
         "label": "CreateTagAssignmentServiceOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +60,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -70,6 +76,8 @@
         "label": "CreateTagClientOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,6 +92,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,6 +120,8 @@
           ") => Promise<void>; }"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/services/assignments/assignment_service.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -124,6 +136,8 @@
       "label": "SavedObjectTaggingStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -155,6 +169,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -175,6 +191,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 37,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -210,6 +228,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -230,6 +250,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 49,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -256,6 +278,8 @@
             "[]) => string | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -270,6 +294,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 51,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -292,6 +318,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 51,
+              "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -330,6 +358,8 @@
             "[]; }"
           ],
           "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "lineNumber": 52,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -345,6 +375,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 53,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -367,6 +399,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 54,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -389,6 +423,8 @@
             "[]"
           ],
           "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+          "lineNumber": 56,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -404,6 +440,8 @@
                 "[]"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 57,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -419,6 +457,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/types.ts",
+              "lineNumber": 58,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -453,6 +493,8 @@
           "[]) => string | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,6 +509,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 96,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -489,6 +533,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 96,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -528,6 +574,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,6 +587,8 @@
             "label": "object",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 102,
+            "columnNumber": 11,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -554,6 +604,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+                "lineNumber": 102,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -577,6 +629,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -612,6 +666,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 108,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -626,6 +682,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 108,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -648,6 +706,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 108,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -667,6 +727,8 @@
           "(references: SavedObjectReferenceLike[]) => string[]"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -681,6 +743,8 @@
               "SavedObjectReferenceLike[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 111,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -709,6 +773,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -723,6 +789,8 @@
               "Capabilities"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 23,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -762,6 +830,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -777,6 +847,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 75,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -799,6 +871,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 75,
+            "columnNumber": 75,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -824,6 +898,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -839,6 +915,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -854,6 +932,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -876,6 +956,8 @@
           "SavedObjectReference"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -890,6 +972,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts",
+            "lineNumber": 22,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -909,6 +993,8 @@
           "(color: string) => string | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -923,6 +1009,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 27,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -942,6 +1030,8 @@
           "(description: string) => string | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -956,6 +1046,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 54,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -975,6 +1067,8 @@
           "(name: string) => string | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -989,6 +1083,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 35,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1009,6 +1105,8 @@
           "\nRepresent the UI capabilities for the `savedObjectsTagging` section of `Capabilities`"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1020,6 +1118,8 @@
             "label": "view",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1031,6 +1131,8 @@
             "label": "create",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1042,6 +1144,8 @@
             "label": "edit",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1053,6 +1157,8 @@
             "label": "delete",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1064,6 +1170,8 @@
             "label": "assign",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,6 +1183,8 @@
             "label": "viewConnections",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/capabilities.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1089,6 +1199,8 @@
         "label": "TagValidation",
         "description": [],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1100,6 +1212,8 @@
             "label": "valid",
             "description": [],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1114,6 +1228,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1128,6 +1244,8 @@
               "{ id?: string | undefined; name?: string | undefined; color?: string | undefined; description?: string | undefined; managed?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1148,6 +1266,8 @@
           "100"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1165,6 +1285,8 @@
           "\"savedObjectsTagging\""
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1182,6 +1304,8 @@
           "\"tags\""
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1197,6 +1321,8 @@
           "50"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1212,6 +1338,8 @@
           "2"
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/validation.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1229,6 +1357,8 @@
           "\"tag\""
         ],
         "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

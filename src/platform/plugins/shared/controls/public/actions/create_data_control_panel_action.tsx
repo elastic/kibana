@@ -89,9 +89,7 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
 
   const newControl = {
     panelType: type,
-    serializedState: {
-      rawState: state,
-    },
+    serializedState: state,
   };
 
   if (controlId) {

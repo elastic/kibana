@@ -45,6 +45,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +58,8 @@
             "label": "dataStream",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +74,8 @@
               "TimeRangeConfig | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +90,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +106,8 @@
               "{ table?: DegradedFieldsTable | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,6 +122,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -126,6 +138,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -157,6 +171,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -171,6 +187,8 @@
               "Filters | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -202,6 +220,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,6 +233,8 @@
             "label": "dependencyName",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +249,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,6 +265,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,6 +281,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -286,6 +314,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,6 +330,8 @@
               "{ id: \"application-log-onboarding\"; } | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -331,6 +363,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,6 +381,8 @@
               "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"kubernetes-otel\" | \"otel-logs\" | \"firehose\" | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +397,8 @@
               "\"application\" | \"host\" | \"kubernetes\" | \"cloud\" | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,6 +430,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,6 +443,8 @@
             "label": "ruleId",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -424,6 +466,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -438,6 +482,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,6 +498,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,6 +514,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,6 +537,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -518,6 +570,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -532,6 +586,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,6 +602,8 @@
               "Record<string, string | number> | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -560,6 +618,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +641,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -595,6 +657,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -626,6 +690,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -637,6 +703,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,6 +719,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -665,6 +735,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -696,6 +768,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -707,6 +781,8 @@
             "label": "sloId",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -721,6 +797,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -742,6 +820,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -773,6 +853,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -787,6 +869,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -818,6 +902,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -829,6 +915,8 @@
             "label": "serviceName",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -840,6 +928,8 @@
             "label": "transactionName",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -854,6 +944,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -868,6 +960,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -899,6 +993,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -913,6 +1009,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -927,6 +1025,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,6 +1041,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -952,6 +1054,8 @@
             "label": "traceId",
             "description": [],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -983,6 +1087,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -997,6 +1103,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,6 +1119,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1025,6 +1135,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1039,6 +1151,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1070,6 +1184,8 @@
           }
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1084,6 +1200,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1098,6 +1216,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1112,6 +1232,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1132,6 +1254,8 @@
           "\"observabilityAIAssistant\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1147,6 +1271,8 @@
           "\"alerts\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1162,6 +1288,8 @@
           "\"profiling\" | \"streams\" | \"uptime\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1177,6 +1305,8 @@
           "\"DATA_QUALITY_DETAILS_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality_details.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1192,6 +1322,8 @@
           "\"DATA_QUALITY_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/dataset_quality.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1214,6 +1346,8 @@
           " | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1229,6 +1363,8 @@
           "\"definition\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1244,6 +1380,8 @@
           "\"dependencyOverviewLocator\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1259,6 +1397,8 @@
           "\"history\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1274,6 +1414,8 @@
           "\"last-used-logs-viewer\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1289,6 +1431,8 @@
           "\"logs\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1304,6 +1448,8 @@
           "\"profiling\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1319,6 +1465,8 @@
           "\"ux\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1334,6 +1482,8 @@
           "\"obs-logs-explorer:lastUsedViewer\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1349,6 +1499,8 @@
           "\"observability-logs-explorer\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1364,6 +1516,8 @@
           "\"observabilityOnboarding\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1379,6 +1533,8 @@
           "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1394,6 +1550,8 @@
           "\"observability-overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1409,6 +1567,8 @@
           "\"overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1424,6 +1584,8 @@
           "\"RULE_DETAILS_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1439,6 +1601,8 @@
           "\"alerts\" | \"execution\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1454,6 +1618,8 @@
           "\"RULES_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1469,6 +1635,8 @@
           "\"enabled\" | \"disabled\" | \"snoozed\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1484,6 +1652,8 @@
           "\"SLO_DETAILS_HISTORY_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1499,6 +1669,8 @@
           "\"SLO_DETAILS_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1514,6 +1686,8 @@
           "\"SLO_EDIT_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1529,6 +1703,8 @@
           "\"SLO_LIST_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1544,6 +1720,8 @@
           "\"definition\" | \"history\" | \"alerts\" | \"overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1559,6 +1737,8 @@
           "\"STREAMS_APP_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/streams.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1574,6 +1754,8 @@
           "\"TransactionDetailsByNameLocator\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1589,6 +1771,8 @@
           "\"TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1604,6 +1788,8 @@
           "\"UPTIME_OVERVIEW_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/uptime.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

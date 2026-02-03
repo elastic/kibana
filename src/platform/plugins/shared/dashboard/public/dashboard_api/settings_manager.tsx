@@ -99,7 +99,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
     },
     internalApi: {
       serializeSettings,
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
           debounceTime(100),
           map(() => stateManager.getLatestState()),

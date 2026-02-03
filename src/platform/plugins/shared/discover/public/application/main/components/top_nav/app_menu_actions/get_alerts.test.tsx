@@ -19,6 +19,7 @@ import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_wi
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
+import { internalStateActions } from '../../../state_management/redux';
 
 const mount = (
   dataView = dataViewMock,
@@ -26,7 +27,11 @@ const mount = (
   authorizedRuleTypeIds = [ES_QUERY_ID]
 ) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.actions.setDataView(dataView);
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+      dataView,
+    })
+  );
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
@@ -107,6 +112,30 @@ describe('OpenAlertsPopover', () => {
     it('should render the manage rules and connectors link', () => {
       const component = mount();
       expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
+    });
+  });
+
+  describe('Manage rules and connectors link', () => {
+    it('should link to the unified rules page when rules app is registered', () => {
+      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(true);
+      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string) => `/app/${appId}`
+      );
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain('/app/rules');
+    });
+
+    it('should link to the management page when rules app is not registered', () => {
+      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(false);
+      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string) => `/app/${appId}`
+      );
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain(
+        '/app/management/insightsAndAlerting/triggersActions/rules'
+      );
     });
   });
 });

@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 60,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,6 +64,8 @@
         "label": "BaseToolbarProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +77,8 @@
             "label": "'data-test-subj'",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,6 +93,8 @@
               "string | string[] | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,6 +109,8 @@
               "string | React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -113,6 +125,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -127,6 +141,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +177,8 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,6 +190,8 @@
             "label": "searchable",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -187,6 +207,8 @@
               "<{}> | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,6 +223,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -215,6 +239,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -229,6 +255,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -243,6 +271,8 @@
         "label": "ToolbarMultiSelectorProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -257,6 +287,8 @@
               "false"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -291,6 +323,8 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -325,6 +359,8 @@
                   ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+                "lineNumber": 54,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -343,6 +379,8 @@
         "label": "ToolbarSingleSelectorProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -357,6 +395,8 @@
               "true | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,6 +431,8 @@
               ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -425,6 +467,8 @@
                   ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+                "lineNumber": 49,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -449,6 +493,8 @@
           "\"__EMPTY_SELECTOR_OPTION__\""
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -484,6 +530,8 @@
           ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -522,6 +570,8 @@
           ")"
         ],
         "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

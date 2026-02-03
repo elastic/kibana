@@ -107,6 +107,10 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
         streamName: 'UppercaseName',
         expectedError: 'Stream name cannot contain uppercase characters.',
       },
+      {
+        streamName: 'invalid name with spaces',
+        expectedError: 'Stream name cannot contain spaces.',
+      },
     ];
 
     for (const invalidName of invalidNames) {
@@ -121,8 +125,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   }) => {
     await pageObjects.streams.clickCreateRoutingRule();
 
-    // Try invalid stream names
-    const invalidNames = ['invalid name with spaces', 'special>chars'];
+    // Try invalid stream names (these pass client-side validation but fail server-side)
+    const invalidNames = ['special>chars'];
 
     for (const invalidName of invalidNames) {
       await pageObjects.streams.fillRoutingRuleName(invalidName);

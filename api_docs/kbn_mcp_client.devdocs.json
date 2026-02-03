@@ -28,6 +28,8 @@
           "\nMcpClient is a wrapper around the MCP client SDK.\nIt provides a simple interface for connecting to an MCP client,\nlisting tools, and calling tools."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -64,6 +70,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,6 +92,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -105,6 +115,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -126,6 +138,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,6 +160,8 @@
               "() => boolean"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -164,6 +180,8 @@
               "() => Promise<{ connected: boolean; capabilities?: any; }>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -182,6 +200,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -208,6 +228,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -242,6 +264,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -264,6 +288,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/client.ts",
+                "lineNumber": 172,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -286,6 +312,8 @@
           " extends Error"
         ],
         "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+        "lineNumber": 4,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,6 +328,8 @@
               "number | undefined"
             ],
             "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "lineNumber": 5,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -314,6 +344,8 @@
               "any"
             ],
             "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+            "lineNumber": 6,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -328,6 +360,8 @@
                   "number | undefined"
                 ],
                 "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "lineNumber": 6,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -343,6 +377,8 @@
                   "string | undefined"
                 ],
                 "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.d.ts",
+                "lineNumber": 6,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -365,6 +401,8 @@
           " extends Error"
         ],
         "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -379,6 +417,8 @@
               "any"
             ],
             "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+            "lineNumber": 146,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -393,6 +433,8 @@
                   "string | undefined"
                 ],
                 "path": "node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.d.ts",
+                "lineNumber": 146,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -416,6 +458,8 @@
           "\nParameters for calling a tool on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -427,6 +471,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,6 +487,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -457,6 +505,8 @@
           "\nResponse from calling a tool on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -478,6 +528,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,6 +553,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -517,6 +571,8 @@
           "\nDetails about the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -528,6 +584,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,6 +597,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,6 +610,8 @@
             "label": "url",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -566,6 +628,8 @@
           "\nResponse from listing the tools available on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -589,6 +653,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -605,6 +671,8 @@
           "\nOptions for the MCP client.\nThese map to reconnection options for the StreamableHTTPClientTransport."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -619,6 +687,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,6 +703,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -647,6 +719,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -661,6 +735,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -675,6 +751,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -691,6 +769,8 @@
           "\nNon-text content as part of a tool call response."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -702,6 +782,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -716,6 +798,8 @@
               "[key: string]:  unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -732,6 +816,8 @@
           "\nA text content as part of a tool call response."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -746,6 +832,8 @@
               "\"text\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -757,6 +845,8 @@
             "label": "text",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -773,6 +863,8 @@
           "\nA tool available on the MCP client."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -784,6 +876,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -798,6 +892,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,6 +908,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,6 +933,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -851,6 +951,8 @@
           "\nMetadata about the provider of a tool.\nUsed for attribution, audit trails, and UI display."
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -864,6 +966,8 @@
               "\nProvider identifier (e.g., 'mcp.github')"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -877,6 +981,8 @@
               "\nHuman-readable provider name (e.g., 'GitHub MCP Server')"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -893,6 +999,8 @@
               "\"mcp\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -906,6 +1014,8 @@
               "\nUnique ID of the MCP connector (from config.uniqueId)"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -922,6 +1032,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -956,6 +1068,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-mcp-client/mcp/src/types.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

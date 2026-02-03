@@ -355,3 +355,12 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 
 `xpack.fleet.integrationRollbackTTL` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
 :   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.

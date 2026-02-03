@@ -33,6 +33,8 @@
           "HelperDelegate"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,6 +49,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -75,6 +79,8 @@
           ", \"fn\" | \"inverse\">"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +92,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -101,6 +109,8 @@
               "<any>"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -116,6 +126,8 @@
                   "T | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -137,6 +149,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -154,6 +168,8 @@
               "<any>"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -169,6 +185,8 @@
                   "T | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -190,6 +208,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -206,6 +226,8 @@
               "{ start: hbs.AST.Position; end: hbs.AST.Position; }"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -220,6 +242,8 @@
               "<T = any>(parent: Record<string, any>, propertyName: string) => T"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -235,6 +259,8 @@
                   "{ [x: string]: any; }"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 167,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -246,6 +272,8 @@
                 "label": "propertyName",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 167,
+                "columnNumber": 62,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -276,6 +304,8 @@
           ", \"data\" | \"blockParams\">"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,6 +321,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -306,6 +338,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -321,6 +355,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -341,6 +377,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,6 +393,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -369,6 +409,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -384,6 +426,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -406,6 +450,8 @@
           "\"compile\" | \"compileAST\""
         ],
         "path": "src/platform/packages/private/kbn-handlebars/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -423,6 +469,8 @@
           "{ strict?: boolean | undefined; data?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; preventIndent?: boolean | undefined; explicitPartialContext?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -444,6 +492,8 @@
           ", options: any) => any"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 149,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -460,6 +510,8 @@
               "<any>"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -475,6 +527,8 @@
                   "T | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -496,6 +550,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -512,6 +568,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,6 +584,8 @@
               "Container"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,6 +600,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -562,6 +624,8 @@
           "node_modules/handlebars/types/index.d.ts"
         ],
         "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -578,6 +642,8 @@
           "node_modules/handlebars/types/index.d.ts"
         ],
         "path": "node_modules/handlebars/types/index.d.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

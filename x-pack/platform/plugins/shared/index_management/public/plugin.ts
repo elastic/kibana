@@ -74,9 +74,9 @@ export class IndexMgmtUIPlugin
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   private canUseSyntheticSource: boolean = false;
-  private canUseEis: boolean = false;
   private licensingSubscription?: Subscription;
 
   private capabilities$ = new Subject<Capabilities>();
@@ -100,8 +100,12 @@ export class IndexMgmtUIPlugin
       enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
+
+    const isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
     this.config = {
       isIndexManagementUiEnabled,
+      isServerless,
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
@@ -112,7 +116,7 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
-      enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }
@@ -148,7 +152,6 @@ export class IndexMgmtUIPlugin
               config: this.config,
               cloud,
               canUseSyntheticSource: this.canUseSyntheticSource,
-              canUseEis: this.canUseEis,
               reindexService,
             });
           },
@@ -179,7 +182,6 @@ export class IndexMgmtUIPlugin
           config: this.config,
           cloud,
           canUseSyntheticSource: this.canUseSyntheticSource,
-          canUseEis: this.canUseEis,
           reindexService,
         });
       },
@@ -226,7 +228,6 @@ export class IndexMgmtUIPlugin
       config: this.config,
       history: deps.history,
       canUseSyntheticSource: this.canUseSyntheticSource,
-      canUseEis: this.canUseEis,
       overlays: core.overlays,
       privs: {
         monitor: !!monitor,
@@ -252,7 +253,6 @@ export class IndexMgmtUIPlugin
 
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
-      this.canUseEis = next.hasAtLeast('enterprise');
     });
     return {
       apiService: this.apiService!,

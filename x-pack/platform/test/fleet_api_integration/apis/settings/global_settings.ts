@@ -20,7 +20,8 @@ export default function (providerContext: FtrProviderContext) {
   const apiClient = new SpaceTestApiClient(supertest);
   const retry = getService('retry');
 
-  describe('Global Settings', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246592
+  describe.skip('Global Settings', function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicy: CreateAgentPolicyResponse;

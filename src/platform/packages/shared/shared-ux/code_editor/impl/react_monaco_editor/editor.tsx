@@ -28,10 +28,11 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
-import { useEuiTheme, EuiPortal, type EuiPortalProps } from '@elastic/eui';
+import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
+import { Global } from '@emotion/react';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
   import(
@@ -128,6 +129,7 @@ export interface MonacoEditorProps {
 initializeSupportedLanguages();
 
 export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
+const OVERFLOW_WIDGETS_CONTAINER_CLASS = 'monaco-editor-overflowing-widgets-container';
 
 export function MonacoEditor({
   width = '100%',
@@ -151,6 +153,7 @@ export function MonacoEditor({
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const _subscription = useRef<monaco.IDisposable | null>(null);
+  const _markersSubscription = useRef<monaco.IDisposable | null>(null);
 
   const __preventTriggerChangeEvent = useRef<boolean | null>(null);
 
@@ -210,6 +213,8 @@ export function MonacoEditor({
       // add the monaco class name to the overflow widgets dom node so that styles,
       // for it's widgets still apply
       overflowWidgetsDomNode.current?.classList.add('monaco-editor');
+      // for applying styles specific to the overflow widgets container
+      overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
 
       // Before initializing monaco editor
@@ -225,10 +230,18 @@ export function MonacoEditor({
         overflowWidgetsDomNode: overflowWidgetsDomNode.current,
       });
 
-      monaco.editor.onDidChangeMarkers(() => {
-        let currentEditorModel: monaco.editor.ITextModel | null;
+      // Ensure we don't leak global marker listeners across mounts/unmounts.
+      // Leaked listeners can run after editor disposal and throw, which then gets caught
+      // by consumers' error boundaries (e.g. management settings fields).
+      _markersSubscription.current?.dispose();
+      _markersSubscription.current = monaco.editor.onDidChangeMarkers(() => {
+        const currentEditor = editor.current;
+        if (!currentEditor) {
+          return;
+        }
 
-        if (!editor.current || (currentEditorModel = editor.current?.getModel()) === null) {
+        const currentEditorModel = currentEditor.getModel();
+        if (!currentEditorModel || currentEditorModel.isDisposed()) {
           return;
         }
 
@@ -238,8 +251,7 @@ export function MonacoEditor({
 
         const hasErrors = markers.some((m) => m.severity === monaco.MarkerSeverity.Error);
 
-        const $editor = editor.current.getDomNode();
-
+        const $editor = currentEditor.getDomNode();
         if ($editor) {
           const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
           textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
@@ -318,9 +330,13 @@ export function MonacoEditor({
       if (editor.current) {
         handleEditorWillUnmount();
         editor.current.dispose();
+        editor.current = null;
       }
       if (_subscription.current) {
         _subscription.current.dispose();
+      }
+      if (_markersSubscription.current) {
+        _markersSubscription.current.dispose();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -339,6 +355,15 @@ export function MonacoEditor({
       <div ref={containerElement} style={style} className="react-monaco-editor-container" />
       {/** @ts-expect-error -- we are using the portal component to render elements produced by monaco here, so no need to provide the expected children prop  */}
       <EuiPortal portalRef={setOverflowWidgetsDomNode} />
+      <Global
+        styles={({ euiTheme: _euiTheme }) => ({
+          [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
+            // ensure the overflow widgets are above headers and flyouts
+            // Fallback if euiTheme is not available
+            zIndex: _euiTheme?.levels?.menu ?? 2000,
+          },
+        })}
+      />
     </>
   );
 }

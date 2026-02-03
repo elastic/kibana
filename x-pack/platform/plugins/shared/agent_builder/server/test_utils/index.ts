@@ -43,6 +43,7 @@ export {
   createConversationClientMock,
   createConversationServiceMock,
   createEmptyConversation,
+  createRound,
   type ConversationServiceMock,
   type ConversationClientMock,
 } from './conversations';

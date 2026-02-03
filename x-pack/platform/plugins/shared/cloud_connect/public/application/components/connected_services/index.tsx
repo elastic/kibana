@@ -21,6 +21,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import { useCloudConnectedAppContext } from '../../app_context';
 import { OverviewSection } from './overview_section';
 import { ServicesSection } from './services_section';
@@ -42,11 +43,20 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission, docLinks, telemetryService, apiService } =
-    useCloudConnectedAppContext();
+  const {
+    notifications,
+    hasConfigurePermission,
+    docLinks,
+    telemetryService,
+    apiService,
+    licensing,
+  } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+
+  const localLicense = useObservable(licensing.license$);
+  const currentLicenseType = localLicense?.type;
 
   const closeActionsPopover = () => setIsActionsPopoverOpen(false);
   const toggleActionsPopover = () => setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -146,11 +156,10 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
                   href={docLinks.links.cloud.cloudConnect}
                   target="_blank"
                   external
-                  onClick={() => {
-                    // Track telemetry for learn more documentation link
-                    telemetryService.trackLinkClicked({
-                      destination_type: 'cloud_connect_docs',
-                    });
+                  onMouseDown={() => {
+                    // Track telemetry for learn more documentation link.
+                    // We intentionally avoid `onClick` to keep `href` (open-in-new-tab) without violating lint rules.
+                    telemetryService.trackLinkClicked({ destination_type: 'cloud_connect_docs' });
                   }}
                 >
                   <FormattedMessage
@@ -194,6 +203,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
           services={clusterDetails.services}
           onServiceUpdate={onServiceUpdate}
           subscription={clusterDetails.metadata.subscription}
+          currentLicenseType={currentLicenseType}
         />
 
         <MigrationSection />

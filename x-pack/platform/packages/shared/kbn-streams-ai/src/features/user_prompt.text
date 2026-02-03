@@ -1,11 +1,2 @@
-`stream.name`:
-{{{stream.name}}}
-
-`stream.description`:
-{{{stream.description}}}
-
-`dataset_analysis`:
-{{{dataset_analysis}}}
-
-`initial_clustering`
-{{{initial_clustering}}}
+`sample_documents`:
+{{{sample_documents}}}

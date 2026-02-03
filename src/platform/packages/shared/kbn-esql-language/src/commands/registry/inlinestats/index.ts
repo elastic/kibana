@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { columnsAfter } from './columns_after';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
 import type { ICommandMethods } from '../registry';
 
@@ -17,6 +18,7 @@ const inlineStatsCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const inlineStatsCommand = {

@@ -51,6 +51,7 @@ export const SyntheticsSharedContext: React.FC<
         spaces: startPlugins.spaces,
         fleet: startPlugins.fleet,
         share: startPlugins.share,
+        kql: startPlugins.kql,
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,

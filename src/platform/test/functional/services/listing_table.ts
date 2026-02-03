@@ -24,6 +24,7 @@ export class ListingTableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly flyout = this.ctx.getService('flyout');
 
   private readonly tagPopoverToggle = this.ctx.getService('menuToggle').create({
     name: 'Tag Popover',
@@ -210,7 +211,7 @@ export class ListingTableService extends FtrService {
   }
 
   public async closeInspector() {
-    await this.testSubjects.click('closeFlyoutButton');
+    await this.flyout.closeFlyout();
   }
 
   /**

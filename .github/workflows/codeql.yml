@@ -49,6 +49,7 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
+      id: analyze
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
@@ -56,6 +57,48 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
+        output: sarif-results
+    - name: Dismiss alerts
+      id: dismiss-alerts
+      continue-on-error: true
+      uses: advanced-security/dismiss-alerts@046d6b48d2e43cf563f96f67332c47c432eff83e # 2.0.2
+      env:
+        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+      with:
+        sarif-id: ${{ steps.analyze.outputs.sarif-id }}
+        sarif-file: sarif-results/${{ matrix.language }}.sarif
+
+    - name: Notify Slack on suppression failure
+      if: steps.dismiss-alerts.outcome == 'failure'
+      continue-on-error: true
+      uses: slackapi/slack-github-action@91efab103c0de0a537f72a35f6b8cda0ee76bf0a # v2.1.1
+      with:
+        method: chat.postMessage
+        token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
+        payload: |
+          channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+          "blocks": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": ":warning: CodeQL alerts suppression step failed for ${{ github.repository }}."
+              }
+            },
+            {
+              "type": "actions",
+              "elements": [
+                {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "View Workflow Run"
+                  },
+                  "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }
+              ]
+            }
+          ]
   alert:
     name: Alert
     runs-on: ubuntu-latest

@@ -374,5 +374,5 @@ setCommand
     ;
 
 setField
-    : identifier ASSIGN constant
+    : identifier ASSIGN ( constant | mapExpression )
     ;

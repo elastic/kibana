@@ -149,7 +149,6 @@ export interface DatastreamFlyoutProps {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
-  hasUpdateMappingsPrivilege?: boolean;
 }
 export interface IndexSettingProps {
   indexName: string;

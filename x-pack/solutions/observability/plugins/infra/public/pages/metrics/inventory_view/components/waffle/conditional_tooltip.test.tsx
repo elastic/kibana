@@ -160,6 +160,7 @@ describe('ConditionalToolTip', () => {
       groupBy: [],
       nodeType: 'host',
       sourceId: 'default',
+      includeTimeseries: true,
       currentTime,
       accountId: '',
       region: '',

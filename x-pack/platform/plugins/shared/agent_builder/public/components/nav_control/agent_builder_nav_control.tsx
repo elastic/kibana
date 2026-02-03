@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
 import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
 
 interface AgentBuilderNavControlServices {

@@ -310,38 +310,4 @@ describe('AssistantSettingsContextMenu', () => {
       expect(tryAiAgentButton).toBeDisabled();
     });
   });
-
-  describe('isAiAgentsEnabled', () => {
-    it('does not render try-ai-agent button when isAiAgentsEnabled is false', async () => {
-      render(
-        <TestProviders
-          assistantAvailability={{
-            ...mockAssistantAvailability,
-            isAiAgentsEnabled: false,
-          }}
-        >
-          <AssistantSettingsContextMenu {...props} />
-        </TestProviders>
-      );
-
-      await userEvent.click(screen.getByTestId('chat-context-menu'));
-      expect(screen.queryByTestId('try-ai-agent')).not.toBeInTheDocument();
-    });
-
-    it('does not render try-ai-agent button when isAiAgentsEnabled is undefined', async () => {
-      render(
-        <TestProviders
-          assistantAvailability={{
-            ...mockAssistantAvailability,
-            isAiAgentsEnabled: undefined,
-          }}
-        >
-          <AssistantSettingsContextMenu {...props} />
-        </TestProviders>
-      );
-
-      await userEvent.click(screen.getByTestId('chat-context-menu'));
-      expect(screen.queryByTestId('try-ai-agent')).not.toBeInTheDocument();
-    });
-  });
 });

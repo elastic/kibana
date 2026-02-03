@@ -286,21 +286,51 @@ export class CstToAstConverter {
 
   private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
-    const rightCtx = ctx.constant();
+    const constantCtx = ctx.constant();
+    const mapExpressionCtx = ctx.mapExpression();
+    const assignToken = ctx.ASSIGN();
 
-    if (!leftCtx || !rightCtx) {
+    if (!leftCtx) {
       return null;
     }
 
     const left = this.toIdentifierFromContext(leftCtx);
-    const right = this.fromConstantToArray(rightCtx) as ast.ESQLLiteral;
-    const expression = this.toBinaryExpression('=', ctx, [left, right]);
 
-    if (left.incomplete || right.incomplete) {
-      expression.incomplete = true;
+    // Handle constant value
+    if (constantCtx) {
+      const right = this.fromConstantToArray(constantCtx) as ast.ESQLLiteral;
+      const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+      if (left.incomplete || right.incomplete) {
+        expression.incomplete = true;
+      }
+
+      return expression;
     }
 
-    return expression;
+    // Handle map expression
+    if (mapExpressionCtx) {
+      const right = this.fromMapExpression(mapExpressionCtx);
+      const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+      if (left.incomplete || right?.incomplete) {
+        expression.incomplete = true;
+      }
+
+      return expression;
+    }
+    // Handle missing value (incomplete assignment)
+    if (assignToken) {
+      const expression = this.toBinaryExpression('=', ctx, [left, []]);
+      expression.incomplete = true;
+      expression.location = {
+        min: left.location.min,
+        max: assignToken.symbol.stop,
+      };
+      return expression;
+    }
+
+    return null;
   }
 
   private toIdentifierFromContext(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
@@ -345,6 +375,12 @@ export class CstToAstConverter {
 
     if (showCommandCtx) {
       return this.fromShowCommand(showCommandCtx);
+    }
+
+    const promqlCommandCtx = ctx.promqlCommand();
+
+    if (promqlCommandCtx) {
+      return this.fromPromqlCommand(promqlCommandCtx);
     }
 
     // throw new Error(`Unknown source command: ${this.getSrc(ctx)}`);
@@ -469,13 +505,6 @@ export class CstToAstConverter {
     if (forkCommandCtx) {
       return this.fromForkCommand(forkCommandCtx);
     }
-
-    // TODO: Commented out to merge the new grammar: https://github.com/elastic/kibana/pull/245489
-    // const promqlCommandCtx = ctx.promqlCommand();
-
-    // if (promqlCommandCtx) {
-    //   return this.fromPromqlCommand(promqlCommandCtx);
-    // }
 
     // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`;
   }
@@ -1735,176 +1764,267 @@ export class CstToAstConverter {
   // ------------------------------------------------------------------- PROMQL
 
   /**
-   * Syntax:
+   * Expanded all forms of the PROMQL command:
    *
    * ```
-   * PROMQL key1 value1 key2 value2... ( promql_query_text )
+   * PROMQL query
+   * PROMQL ( query )
+   * PROMQL name = ( query )
+   * PROMQL key1=value1 key2=value2... query
+   * PROMQL key1=value1 key2=value2... ( query )
+   * PROMQL key1=value1 key2=value2... name = ( query )
    * ```
    */
-  // TODO: Commented out to merge the new grammar: https://github.com/elastic/kibana/pull/245489
-  // private fromPromqlCommand(ctx: cst.PromqlCommandContext): ast.ESQLAstPromqlCommand {
-  //   const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
-  //   const args: ast.ESQLAstExpression[] = command.args;
+  private fromPromqlCommand(ctx: cst.PromqlCommandContext): ast.ESQLAstPromqlCommand {
+    const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
+    const args: ast.ESQLAstExpression[] = command.args;
+    const paramCtxs = ctx.promqlParam_list();
+    const query = this.toPromqlCommandQuery(ctx);
 
-  //   // Process promql params (key-value pairs) as a map with "listpairs" representation
-  //   const paramCtxs = ctx.promqlParam_list();
-  //   const paramsMap = this.fromPromqlParamsToMap(paramCtxs);
+    // PromQL params (key=value pairs)
+    if (paramCtxs.length > 0) {
+      const params = this.fromPromqlParamsToMap(paramCtxs);
+      command.params = params;
+      args.push(params);
+      command.incomplete ||= params.incomplete;
+    }
 
-  //   command.incomplete ||= paramsMap.incomplete;
-  //   args.push(paramsMap);
+    // PromQL query
+    if (query) {
+      command.query = query;
+      args.push(query);
+      command.incomplete ||= query.incomplete;
+    } else {
+      command.incomplete = true;
+    }
 
-  //   const query = this.toPromqlQuery(ctx);
-
-  //   if (query) {
-  //     command.incomplete ||= query.incomplete;
-  //     args.push(query);
-  //   } else {
-  //     command.incomplete = true;
-  //   }
-
-  //   return command;
-  // }
-
-  // TODO: Commented out to merge the new grammar: https://github.com/elastic/kibana/pull/245489
-  // private fromPromqlParamsToMap(paramCtxs: cst.PromqlParamContext[]): ast.ESQLMap {
-  //   const entries: ast.ESQLMapEntry[] = [];
-
-  //   for (const paramCtx of paramCtxs) {
-  //     const entry = this.fromPromqlParam(paramCtx);
-
-  //     if (entry) {
-  //       entries.push(entry);
-  //     }
-  //   }
-
-  //   const firstParam = paramCtxs[0];
-  //   const lastParam = paramCtxs[paramCtxs.length - 1];
-  //   const node = Builder.expression.map(
-  //     { entries, representation: 'listpairs' },
-  //     {
-  //       location: getPosition(firstParam.start, lastParam.stop),
-  //       incomplete: entries.some((e) => e.incomplete) || !entries.length,
-  //     }
-  //   );
-
-  //   return node;
-  // }
-
-  // private fromPromqlParam(ctx: cst.PromqlParamContext): ast.ESQLMapEntry | undefined {
-  //   const nameCtx = ctx._name;
-  //   const valueCtx = ctx._value;
-
-  //   if (!nameCtx) {
-  //     return undefined;
-  //   }
-
-  //   const key = this.fromPromqlParamContentToAst(nameCtx);
-  //   if (!key) {
-  //     return undefined;
-  //   }
-
-  //   const value = valueCtx
-  //     ? this.fromPromqlParamContentToAst(valueCtx)
-  //     : Builder.identifier({ name: '' }, { incomplete: true });
-
-  //   if (!value) {
-  //     return undefined;
-  //   }
-
-  //   const entry = Builder.expression.entry(key, value, {
-  //     text: ctx.getText(),
-  //     location: getPosition(ctx.start, ctx.stop),
-  //     incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
-  //   });
-
-  //   return entry;
-  // }
-
-  // TODO: Commented out to merge the new grammar: https://github.com/elastic/kibana/pull/245489
-  // TODO: Review this whole method
-  // private fromPromqlParamContentToAst(
-  //   ctx: cst.PromqlParamContentContext
-  // ): (ast.ESQLAstExpression & { incomplete: boolean }) | undefined {
-  //   const parserFields = this.getParserFields(ctx);
-
-  //   const unquotedId = ctx.PROMQL_UNQUOTED_IDENTIFIER();
-  //   if (unquotedId) {
-  //     return Builder.identifier({ name: unquotedId.getText() }, parserFields);
-  //   }
-
-  //   const quotedId = ctx.QUOTED_IDENTIFIER();
-  //   if (quotedId) {
-  //     const text = quotedId.getText();
-  //     const name = text.slice(1, -1).replace(/``/g, '`');
-  //     return Builder.identifier({ name }, parserFields);
-  //   }
-
-  //   const quotedString = ctx.QUOTED_STRING();
-  //   if (quotedString) {
-  //     const text = quotedString.getText();
-  //     let valueUnquoted: string;
-  //     if (text.startsWith('"""') && text.endsWith('"""')) {
-  //       valueUnquoted = text.slice(3, -3);
-  //     } else {
-  //       valueUnquoted = text.slice(1, -1).replace(/\\"/g, '"');
-  //     }
-  //     return Builder.expression.literal.string(valueUnquoted, { name: text }, parserFields);
-  //   }
-
-  //   const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
-  //   if (namedParam) {
-  //     const text = namedParam.getText();
-  //     // Text starts with '?' - parse it as named or positional param
-  //     const value = text.slice(1); // Remove the leading '?'
-  //     const valueAsNumber = Number(value);
-  //     const isPositional = String(valueAsNumber) === value;
-
-  //     if (isPositional) {
-  //       return Builder.param.positional({ value: valueAsNumber }, parserFields);
-  //     } else {
-  //       return Builder.param.named({ value }, parserFields);
-  //     }
-  //   }
-
-  //   return undefined;
-  // }
+    return command;
+  }
 
   /**
-   * Parses the `<promql_query_text>` part of the PROMQL command.
-   *
-   * ```
-   * PROMQL map... ( <promql_query_tex> )
-   * ```
+   * Converts promql params to a map with "assignment" representation.
    */
-  // TODO: Commented out to merge the new grammar: https://github.com/elastic/kibana/pull/245489
-  // private toPromqlQuery(commandCtx: cst.PromqlCommandContext): ast.ESQLParens | undefined {
-  //   const lp = commandCtx.LP();
-  //   const rp = commandCtx.RP();
-  //   const closeParenText = rp?.getText() ?? '';
-  //   const hasCloseParen = rp && !/<missing /.test(closeParenText);
-  //   const location = getPosition(
-  //     lp ? lp.symbol : commandCtx.start,
-  //     hasCloseParen ? rp.symbol : commandCtx.stop
-  //   );
+  private fromPromqlParamsToMap(paramCtxs: cst.PromqlParamContext[]): ast.ESQLMap {
+    const entries: ast.ESQLMapEntry[] = [];
 
-  //   // NOTE: In the future this will not be "unknown" but a proper PromQL AST node.
-  //   const query = this.fromParserRuleToUnknown(commandCtx.promqlParam(0));
-  //   const queryMin = location.min + 1;
-  //   const queryMax = Math.max(queryMin, location.max - 1);
+    for (const paramCtx of paramCtxs) {
+      const entry = this.fromPromqlParam(paramCtx);
 
-  //   query.location = {
-  //     min: queryMin,
-  //     max: queryMax,
-  //   };
-  //   query.text = this.parser.src.slice(query.location.min, query.location.max + 1);
+      if (entry) {
+        entries.push(entry);
+      }
+    }
 
-  //   const node = Builder.expression.parens(query, {
-  //     location,
-  //     incomplete: !lp || !hasCloseParen || location.max - location.min <= 1,
-  //   });
+    const firstParam = paramCtxs[0];
+    const lastParam = paramCtxs[paramCtxs.length - 1];
+    const node = Builder.expression.map(
+      { entries, representation: 'assignment' },
+      {
+        location: getPosition(firstParam.start, lastParam.stop),
+        incomplete: entries.some((e) => e.incomplete) || !entries.length,
+      }
+    );
 
-  //   return node;
-  // }
+    return node;
+  }
+
+  /**
+   * Converts a single promql param (key=value) to a map entry.
+   */
+  private fromPromqlParam(ctx: cst.PromqlParamContext): ast.ESQLMapEntry | undefined {
+    const nameCtx = ctx._name;
+    const valueCtx = ctx._value;
+
+    if (!nameCtx) {
+      return undefined;
+    }
+
+    const key = this.fromPromqlParamName(nameCtx);
+    if (!key) {
+      return undefined;
+    }
+
+    const value = valueCtx
+      ? this.fromPromqlParamValue(valueCtx)
+      : Builder.identifier({ name: '' }, { incomplete: true });
+
+    if (!value) {
+      return undefined;
+    }
+
+    const entry = Builder.expression.entry(key, value, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
+    });
+
+    return entry;
+  }
+
+  /**
+   * Converts a promql param name to an AST node.
+   * Grammar: UNQUOTED_IDENTIFIER | QUOTED_IDENTIFIER | QUOTED_STRING | NAMED_OR_POSITIONAL_PARAM
+   */
+  private fromPromqlParamName(
+    ctx: cst.PromqlParamNameContext
+  ): (ast.ESQLAstExpression & { incomplete: boolean }) | undefined {
+    const parserFields = this.getParserFields(ctx);
+
+    const unquotedId = ctx.UNQUOTED_IDENTIFIER();
+    if (unquotedId) {
+      return Builder.identifier({ name: unquotedId.getText() }, parserFields);
+    }
+
+    const quotedId = ctx.QUOTED_IDENTIFIER();
+    if (quotedId) {
+      const text = quotedId.getText();
+      const name = text.slice(1, -1).replace(/``/g, '`');
+      return Builder.identifier({ name }, parserFields);
+    }
+
+    const quotedString = ctx.QUOTED_STRING();
+    if (quotedString) {
+      const text = quotedString.getText();
+      let valueUnquoted: string;
+      if (text.startsWith('"""') && text.endsWith('"""')) {
+        valueUnquoted = text.slice(3, -3);
+      } else {
+        valueUnquoted = text.slice(1, -1).replace(/\\"/g, '"');
+      }
+      return Builder.expression.literal.string(valueUnquoted, { name: text }, parserFields);
+    }
+
+    const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+    if (namedParam) {
+      const text = namedParam.getText();
+      const paramValue = text.slice(1); // Remove the leading '?'
+      const valueAsNumber = Number(paramValue);
+      const isPositional = String(valueAsNumber) === paramValue;
+
+      if (isPositional) {
+        return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      } else {
+        return Builder.param.named({ value: paramValue }, parserFields);
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Converts a promql param value to an AST node.
+   * Grammar: promqlIndexPattern (COMMA promqlIndexPattern)* | QUOTED_IDENTIFIER | NAMED_OR_POSITIONAL_PARAM
+   */
+  private fromPromqlParamValue(
+    ctx: cst.PromqlParamValueContext
+  ): (ast.ESQLAstExpression & { incomplete: boolean }) | undefined {
+    const parserFields = this.getParserFields(ctx);
+
+    // Check for index patterns first
+    const indexPatterns = ctx.promqlIndexPattern_list();
+    if (indexPatterns.length > 0) {
+      // If multiple index patterns, join them with comma in the text representation
+      // For now, we'll return the first one as an identifier with the full text
+      const fullText = ctx.getText();
+      return Builder.identifier({ name: fullText }, parserFields);
+    }
+
+    const quotedId = ctx.QUOTED_IDENTIFIER();
+    if (quotedId) {
+      const text = quotedId.getText();
+      const name = text.slice(1, -1).replace(/``/g, '`');
+      return Builder.identifier({ name }, parserFields);
+    }
+
+    const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+    if (namedParam) {
+      const text = namedParam.getText();
+      const paramValue = text.slice(1); // Remove the leading '?'
+      const valueAsNumber = Number(paramValue);
+      const isPositional = String(valueAsNumber) === paramValue;
+
+      if (isPositional) {
+        return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      } else {
+        return Builder.param.named({ value: paramValue }, parserFields);
+      }
+    }
+
+    return undefined;
+  }
+
+  private toPromqlCommandQuery(
+    ctx: cst.PromqlCommandContext
+  ): ast.ESQLAstPromqlCommandQuery | undefined {
+    const queryPartCtxs = ctx.promqlQueryPart_list();
+    const lp = ctx.LP();
+    const rp = ctx.RP();
+    const valueNameCtx = ctx.valueName();
+    let node: ast.ESQLAstPromqlCommandQuery | undefined = this.fromPromqlQueryParts(queryPartCtxs);
+
+    // No parenthesis: ( promqlQueryPart+ )
+    if (!lp) {
+      return node;
+    }
+
+    const closeParenText = rp?.getText() ?? '';
+    const hasCloseParen = rp && !/<missing /.test(closeParenText);
+    const parensLocation = getPosition(lp.symbol, hasCloseParen ? rp.symbol : ctx.stop);
+
+    node = Builder.expression.parens(node, {
+      location: parensLocation,
+      incomplete: !hasCloseParen || node.incomplete,
+    });
+
+    // There's a "name = ( query )"" assignment
+    if (valueNameCtx) {
+      const valueNameId = this.fromIdentifier(valueNameCtx);
+      node = Builder.expression.func.binary(
+        '=',
+        [valueNameId, node],
+        {},
+        {
+          location: getPosition(valueNameCtx.start, hasCloseParen ? rp.symbol : ctx.stop),
+          incomplete: node.incomplete,
+        }
+      );
+    }
+
+    return node;
+  }
+
+  /**
+   * Converts promql query parts to an "unknown" node.
+   * The detailed parsing of PromQL query will be done later.
+   */
+  private fromPromqlQueryParts(queryPartCtxs: cst.PromqlQueryPartContext[]): ast.ESQLUnknownItem {
+    if (queryPartCtxs.length === 0) {
+      return {
+        type: 'unknown',
+        name: 'unknown',
+        text: '',
+        location: { min: 0, max: 0 },
+        incomplete: true,
+      };
+    }
+
+    const firstPart = queryPartCtxs[0];
+    const lastPart = queryPartCtxs[queryPartCtxs.length - 1];
+    const location = getPosition(firstPart.start, lastPart.stop);
+    const text = this.parser.src.slice(location.min, location.max + 1);
+
+    // If the text is empty, only whitespace, or only empty parens like "()", mark as incomplete
+    const trimmedText = text.trim();
+    const isEmpty = !trimmedText || trimmedText === '()';
+
+    return {
+      type: 'unknown',
+      name: 'unknown',
+      text,
+      location,
+      incomplete: isEmpty,
+    };
+  }
 
   // --------------------------------------------------------------------- FORK
 

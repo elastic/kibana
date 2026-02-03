@@ -281,8 +281,15 @@ const BaseSecretsSchema = schema
     unknowns: 'allow',
   });
 
-export const NewAgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchemaV3 = schema
+  .object({
+    ...AgentPolicyBaseSchema,
+  })
+  .extends({
+    has_agent_version_conditions: schema.maybe(schema.boolean()),
+  });
+
+export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -299,8 +306,7 @@ export const NewAgentPolicySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
-export const AgentPolicySchema = schema.object({
-  ...AgentPolicyBaseSchema,
+export const AgentPolicySchema = AgentPolicySchemaV3.extends({
   id: schema.string(),
   is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
@@ -574,7 +580,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 1000 }
+      { maxSize: 10000 }
     )
   ),
   signed: schema.maybe(

@@ -317,6 +317,7 @@ export {
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
+  LEGACY_SINGLE_ROW_HEIGHT_MODE,
 } from './visualizations/datatable/constants';
 export {
   LENS_GAUGE_ID,
@@ -382,3 +383,10 @@ export {
   getLensLayerTypeTabDisplayName,
   lensLayerTypeTabDisplayNames,
 } from './visualizations/layer_type_tab_display_name';
+
+export {
+  hasStateFormulaColumn,
+  getFormulaColumnsFromLayer,
+  getReferencedColumnIds,
+  cleanupFormulaReferenceColumns,
+} from './datasources/form_based/helpers';

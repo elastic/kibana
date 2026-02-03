@@ -12,9 +12,17 @@ import {
   getAttackDiscoveryMarkdown,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import { i18n } from '@kbn/i18n';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+
+const DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.agentBuilder.attachmentLabel',
+  {
+    defaultMessage: 'Attack discovery',
+  }
+);
 
 export const useAttackDiscoveryAttachment = (
   attackDiscovery?: AttackDiscovery | AttackDiscoveryAlert,
@@ -30,7 +38,7 @@ export const useAttackDiscoveryAttachment = (
               replacements,
             })
           : '',
-        attachmentLabel: attackDiscovery?.title,
+        attachmentLabel: attackDiscovery?.title ?? DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL,
       },
       attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
     }),

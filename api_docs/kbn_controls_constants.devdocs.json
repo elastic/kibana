@@ -33,6 +33,8 @@
           "\"createControl\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"createEsqlControl\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"createTimeSlider\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_action_constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "\"CONTROL_HOVER_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "\"CONTROL_MENU_TRIGGER\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "\"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +135,8 @@
           "\"medium\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -140,6 +154,8 @@
           "\"small\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -157,6 +173,8 @@
           "\"control_group\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,6 +190,8 @@
           "true"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,6 +207,8 @@
           "false"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,6 +224,8 @@
           "\"medium\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -217,6 +241,8 @@
           "false"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -232,6 +258,8 @@
           "\"prefix\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -247,6 +275,8 @@
           "true"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -262,6 +292,8 @@
           "\"esqlControl\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -277,6 +309,8 @@
           "\"optionsListControl\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -292,6 +326,8 @@
           "\"rangeSliderControl\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,6 +343,8 @@
           "\"timeSlider\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,6 +362,8 @@
           "{ readonly by: \"_count\"; readonly direction: \"desc\"; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

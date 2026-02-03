@@ -36,7 +36,7 @@ export class DiscoverApp {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await this.page.testSubj.waitForSelector('indexPattern-switcher', { state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.waitUntilFieldListHasCountOfFields();
   }
 
   getSelectedDataView(): Locator {
@@ -47,7 +47,7 @@ export class DiscoverApp {
     await this.page.testSubj.hover('discoverNewButton');
     await this.page.testSubj.click('discoverNewButton');
     await this.page.testSubj.hover('unifiedFieldListSidebar__toggle-collapse'); // cancel tooltips
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
   async saveSearch(name: string) {
@@ -56,6 +56,12 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
     await this.page.waitForLoadingIndicatorHidden();
+  }
+
+  async waitUntilFieldListHasCountOfFields() {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
   }
 
   async waitForHistogramRendered() {

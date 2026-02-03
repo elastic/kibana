@@ -1036,4 +1036,32 @@ describe('Textbased Data Source', () => {
       ]);
     });
   });
+
+  describe('#getRenderEventCounters', () => {
+    it('should return correct counter for esql query', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [
+              {
+                columnId: 'col1',
+                fieldName: 'Test 1',
+                meta: {
+                  type: 'number',
+                },
+              },
+            ],
+            query: { esql: 'FROM foo' },
+            index: 'foo',
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const counters =
+        TextBasedDatasource.getRenderEventCounters &&
+        TextBasedDatasource.getRenderEventCounters(state);
+
+      expect(counters).toEqual(['esql_chart']);
+    });
+  });
 });

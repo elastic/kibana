@@ -18,6 +18,8 @@
         "label": "SavedObjectConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
             "label": "maxImportPayloadBytes",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -40,6 +44,8 @@
             "label": "maxImportExportSize",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,6 +57,8 @@
             "label": "allowHttpApiAccess",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +89,8 @@
               "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,6 +102,8 @@
             "label": "enableAccessControl",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +118,8 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,6 +142,8 @@
                   "; maxImportExportSize: number; allowHttpApiAccess: boolean; enableAccessControl: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -159,6 +175,8 @@
                   "; scrollDuration: string; retryAttempts: number; useCumulativeLogger: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -187,6 +205,8 @@
           "SavedObjectsMappingProperties"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/aggregate_model_changes.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,6 +222,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/aggregate_model_changes.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -223,6 +245,8 @@
           "(modelVersion: string | number) => number"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -237,6 +261,8 @@
               "string | number"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+            "lineNumber": 80,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -262,6 +288,8 @@
           "<unknown, unknown>"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/build_transform_fn.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,6 +305,8 @@
               "[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/build_transform_fn.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -299,6 +329,8 @@
           "CompareModelVersionResult"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -313,6 +345,8 @@
               "CompareModelVersionMapParams"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 42,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -335,6 +369,8 @@
           "ConvertedSchema"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/backward_conversion_schema.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -350,6 +386,8 @@
               "<unknown, unknown>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/backward_conversion_schema.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -371,6 +409,8 @@
           "(version: string | undefined) => { if_seq_no: number; if_primary_term: number; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_request_version.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -385,6 +425,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_request_version.ts",
+            "lineNumber": 16,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -406,6 +448,8 @@
           "(version: string | undefined) => { _seq_no: number; _primary_term: number; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_version.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -420,6 +464,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_version.ts",
+            "lineNumber": 17,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -441,6 +487,8 @@
           "(response: { _seq_no?: number | undefined; _primary_term?: number | undefined; }) => string"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -452,6 +500,8 @@
             "label": "response",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
+            "lineNumber": 16,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -466,6 +516,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
+                "lineNumber": 16,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -480,6 +532,8 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
+                "lineNumber": 16,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -502,6 +556,8 @@
           "(seqNo: number | undefined, primaryTerm: number | undefined) => string"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -516,6 +572,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
+            "lineNumber": 17,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -531,6 +589,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
+            "lineNumber": 17,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -554,6 +614,8 @@
           "<any>, useModelVersionsOnly: boolean) => string"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -569,6 +631,8 @@
               "<any>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -584,6 +648,8 @@
               "boolean"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -607,6 +673,8 @@
           ") => string[]"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -621,6 +689,8 @@
               "SavedObjectsTypeMappingDefinition"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -645,6 +715,8 @@
           "FieldListMap"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -659,6 +731,8 @@
               "SavedObjectsTypeMappingDefinitions"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -678,6 +752,8 @@
           "({ type, typeRegistry, defaultIndex, kibanaVersion, }: GetIndexForTypeOptions) => string"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_index_for_type.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -692,6 +768,8 @@
               "GetIndexForTypeOptions"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_index_for_type.ts",
+            "lineNumber": 19,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -716,6 +794,8 @@
           "VirtualVersionMap"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 139,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -731,6 +811,8 @@
               "<any>[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -754,6 +836,8 @@
           "<any>) => number"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -769,6 +853,8 @@
               "<any>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 39,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -790,6 +876,8 @@
           "({ currentVersions, targetVersions, deletedTypes, }: GetModelVersionDeltaOpts) => ModelVersionDeltaResult"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/get_version_delta.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -804,6 +892,8 @@
               "GetModelVersionDeltaOpts"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/get_version_delta.ts",
+            "lineNumber": 46,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -828,6 +918,8 @@
           "ModelVersionMap"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -843,6 +935,8 @@
               "<any>[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 63,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -868,6 +962,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -884,6 +980,8 @@
               "IndexMapping"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -899,6 +997,8 @@
               "string | string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -923,6 +1023,8 @@
           "SavedObjectsMappingProperties"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -937,6 +1039,8 @@
               "IndexMapping"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties.ts",
+            "lineNumber": 27,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -959,6 +1063,8 @@
           "SavedObjectsMappingProperties"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -973,6 +1079,8 @@
               "IndexMapping"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
+            "lineNumber": 34,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -996,6 +1104,8 @@
           ") => string[]"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1010,6 +1120,8 @@
               "IndexMapping"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_types.ts",
+            "lineNumber": 15,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1033,6 +1145,8 @@
           ") => string[]"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1047,6 +1161,8 @@
               "SavedObjectsModelVersion"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
+            "lineNumber": 35,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1071,6 +1187,8 @@
           "SavedObjectsMappingProperties"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1085,6 +1203,8 @@
               "SavedObjectsModelVersion"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1109,6 +1229,8 @@
           "VirtualVersionMap"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1123,6 +1245,8 @@
               "GetVirtualVersionMapParams"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+            "lineNumber": 99,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1148,6 +1272,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1162,6 +1288,8 @@
               "GetModelVersionsFromMappingMetaOpts"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "lineNumber": 55,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1187,6 +1315,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1201,6 +1331,8 @@
               "GetModelVersionsFromMappingsOpts"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "lineNumber": 26,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1222,6 +1354,8 @@
           "(version: string) => boolean"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1236,6 +1370,8 @@
               "string"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+            "lineNumber": 38,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1257,6 +1393,8 @@
           "(modelVersion: string | number) => string"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1271,6 +1409,8 @@
               "string | number"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+            "lineNumber": 22,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1292,6 +1432,8 @@
           "(virtualVersion: string) => number"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1306,6 +1448,8 @@
               "string"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
+            "lineNumber": 55,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1324,6 +1468,8 @@
         "label": "CompareModelVersionDetails",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1338,6 +1484,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1352,6 +1500,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1366,6 +1516,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1380,6 +1532,8 @@
         "label": "CompareModelVersionMapParams",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1396,6 +1550,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1412,6 +1568,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,6 +1586,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1442,6 +1602,8 @@
         "label": "CompareModelVersionResult",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1456,6 +1618,8 @@
               "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1470,6 +1634,8 @@
               "CompareModelVersionDetails"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1486,6 +1652,8 @@
           "\nOptions for {@link IDocumentMigrator.migrate}"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1502,6 +1670,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1518,6 +1688,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1534,6 +1706,8 @@
           "\nManages transformations of individual documents."
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1556,6 +1730,8 @@
               "<unknown>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1571,6 +1747,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1587,6 +1765,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1611,6 +1791,8 @@
               "<unknown>[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1626,6 +1808,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+                "lineNumber": 31,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1650,6 +1834,8 @@
               " | undefined) => boolean"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1665,6 +1851,8 @@
                   "<unknown>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1681,6 +1869,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1704,6 +1894,8 @@
           "ISavedObjectTypeRegistry"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_type_registry.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1719,6 +1911,8 @@
           "\nOptions for {@link IDocumentMigrator.isDowngradeRequired}"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1735,6 +1929,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1757,6 +1953,8 @@
           "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1772,6 +1970,8 @@
           "{ [x: string]: string[]; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1789,6 +1989,8 @@
           "\"8.10.0\""
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1806,6 +2008,8 @@
           "\"10.0.0\""
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1823,6 +2027,8 @@
           "{ [x: string]: number; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1840,6 +2046,8 @@
           "10"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1863,6 +2071,8 @@
           "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; readonly enableAccessControl: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1894,6 +2104,8 @@
           "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1911,6 +2123,8 @@
           "{ [x: string]: string; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1927,6 +2141,8 @@
           "\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1941,6 +2157,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1955,6 +2173,8 @@
               "string[]"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1971,6 +2191,8 @@
           "\nIn order to be FIPS compliant, the migration logic has switched\nfrom using hashes (stored in _meta.migrationMappingPropertyHashes)\nto using model versions (stored in _meta.mappingVersions).\n\nThis map holds a breakdown of md5 hashes to model versions.\nThis allows keeping track of changes in mappings for the different SO types:\nWhen upgrading from a Kibana version prior to the introduction of model versions for V2,\nthe V2 logic will map stored hashes to their corresponding model versions.\nThese model versions will then be compared against the ones defined in the typeRegistry,\nin order to determine which types' mappings have changed."
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1982,6 +2204,8 @@
             "label": "'action_task_params|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1993,6 +2217,8 @@
             "label": "'action|0be88ebcc8560a075b6898236a202eb1'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2004,6 +2230,8 @@
             "label": "'alert|96a5a144778243a9f4fece0e71c2197f'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2015,6 +2243,8 @@
             "label": "'api_key_pending_invalidation|16f515278a295f6245149ad7c5ddedb7'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2026,6 +2256,8 @@
             "label": "'apm-custom-dashboards|561810b957ac3c09fcfc08f32f168e97'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2037,6 +2269,8 @@
             "label": "'apm-indices|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2048,6 +2282,8 @@
             "label": "'apm-server-schema|b1d71908f324c17bf744ac72af5038fb'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2059,6 +2295,8 @@
             "label": "'apm-service-group|2af509c6506f29a858e5a0950577d9fa'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2070,6 +2308,8 @@
             "label": "'apm-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2081,6 +2321,8 @@
             "label": "'app_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2092,6 +2334,8 @@
             "label": "'application_usage_daily|43b8830d5d0df85a6823d290885fc9fd'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2103,6 +2347,8 @@
             "label": "'application_usage_totals|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2114,6 +2360,8 @@
             "label": "'canvas-element|7390014e1091044523666d97247392fc'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2125,6 +2373,8 @@
             "label": "'canvas-workpad-template|ae2673f678281e2c055d764b153e9715'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2136,6 +2386,8 @@
             "label": "'canvas-workpad|b0a1706d356228dbdcb4a17e6b9eb231'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2147,6 +2399,8 @@
             "label": "'cases-comments|93535d41ca0279a4a2e5d08acd3f28e3'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2158,6 +2412,8 @@
             "label": "'cases-configure|c124bd0be4c139d0f0f91fb9eeca8e37'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2169,6 +2425,8 @@
             "label": "'cases-connector-mappings|a98c33813f364f0b068e8c592ac6ef6d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2180,6 +2438,8 @@
             "label": "'cases-rules|1cb4b03690489e07aa86f283dcea5ce1'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2191,6 +2451,8 @@
             "label": "'cases-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2202,6 +2464,8 @@
             "label": "'cases-user-actions|07a6651cf37853dd5d64bfb2c796e102'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2213,6 +2477,8 @@
             "label": "'cases|8f7dc53b17c272ea19f831537daa082d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2224,6 +2490,8 @@
             "label": "'cloud-security-posture-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2235,6 +2503,8 @@
             "label": "'config-global|c63748b75f39d0c54de12d12c1ccbc20'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2246,6 +2516,8 @@
             "label": "'config|c63748b75f39d0c54de12d12c1ccbc20'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2257,6 +2529,8 @@
             "label": "'connector_token|740b3fd18387d4097dca8d177e6a35c6'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,6 +2542,8 @@
             "label": "'core-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2279,6 +2555,8 @@
             "label": "'csp-rule-template|6ee70dc06c0ca3ddffc18222f202ab25'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2290,6 +2568,8 @@
             "label": "'dashboard|b8aa800aa5e0d975c5e8dc57f03d41f8'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2301,6 +2581,8 @@
             "label": "'endpoint:unified-user-artifact-manifest|393c6e4f5f16288c24ef9057e4d76a4c'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2312,6 +2594,8 @@
             "label": "'endpoint:user-artifact-manifest|7502b5c5bc923abe8aa5ccfd636e8c3d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2323,6 +2607,8 @@
             "label": "'enterprise_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2334,6 +2620,8 @@
             "label": "'epm-packages-assets|44621b2f6052ef966da47b7c3a00f33b'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2345,6 +2633,8 @@
             "label": "'epm-packages|8ce219acd0f6f3529237d52193866afb'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2356,6 +2646,8 @@
             "label": "'event_loop_delays_daily|5df7e292ddd5028e07c1482e130e6654'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2367,6 +2659,8 @@
             "label": "'event-annotation-group|df07b1a361c32daf4e6842c1d5521dbe'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2378,6 +2672,8 @@
             "label": "'exception-list-agnostic|8a1defe5981db16792cb9a772e84bb9a'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2389,6 +2685,8 @@
             "label": "'exception-list|8a1defe5981db16792cb9a772e84bb9a'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2400,6 +2698,8 @@
             "label": "'file-upload-usage-collection-telemetry|a34fbb8e3263d105044869264860c697'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2411,6 +2711,8 @@
             "label": "'file|8e9dd7f8a22efdb8fb1c15ed38fde9f6'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2422,6 +2724,8 @@
             "label": "'fileShare|aa8f7ac2ddf8ab1a91bd34e347046caa'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2433,6 +2737,8 @@
             "label": "'fleet-fleet-server-host|c28ce72481d1696a9aac8b2cdebcecfa'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2444,6 +2750,8 @@
             "label": "'fleet-message-signing-keys|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2455,6 +2763,8 @@
             "label": "'fleet-preconfiguration-deletion-record|4c36f199189a367e43541f236141204c'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2466,6 +2776,8 @@
             "label": "'fleet-proxy|05b7a22977de25ce67a77e44dd8e6c33'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2477,6 +2789,8 @@
             "label": "'fleet-uninstall-tokens|cdb2b655f6b468ecb57d132972425f2e'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2488,6 +2802,8 @@
             "label": "'graph-workspace|27a94b2edcb0610c6aea54a7c56d7752'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2499,6 +2815,8 @@
             "label": "'guided-onboarding-guide-state|a3db59c45a3fd2730816d4f53c35c7d9'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2510,6 +2828,8 @@
             "label": "'guided-onboarding-plugin-state|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2521,6 +2841,8 @@
             "label": "'index-pattern|83c02d842fe2a94d14dfa13f7dcd6e87'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2532,6 +2854,8 @@
             "label": "'infra-custom-dashboards|1eb3c9e1888b8daea8495769e8d3ba2d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2543,6 +2867,8 @@
             "label": "'infrastructure-monitoring-log-view|c50526fc6040c5355ed027d34d05b35c'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2554,6 +2880,8 @@
             "label": "'infrastructure-ui-source|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2565,6 +2893,8 @@
             "label": "'ingest_manager_settings|b91ffb075799c78ffd7dbd51a279c8c9'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2576,6 +2906,8 @@
             "label": "'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2587,6 +2919,8 @@
             "label": "'ingest-download-sources|0b0f6828e59805bd07a650d80817c342'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2598,6 +2932,8 @@
             "label": "'ingest-outputs|b1237f7fdc0967709e75d65d208ace05'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2609,6 +2945,8 @@
             "label": "'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 187,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2620,6 +2958,8 @@
             "label": "'inventory-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2631,6 +2971,8 @@
             "label": "'kql-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2642,6 +2984,8 @@
             "label": "'legacy-url-alias|0750774cf16475f88f2361e99cc5c8f0'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2653,6 +2997,8 @@
             "label": "'lens-ui-telemetry|509bfa5978586998e05f9e303c07a327'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2664,6 +3010,8 @@
             "label": "'lens|b0da10d5ab9ebd81d61700737ddc76c9'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2675,6 +3023,8 @@
             "label": "'links|3378bb9b651572865d9f61f5b448e415'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2686,6 +3036,8 @@
             "label": "'maintenance-window|a58ac2ef53ff5103710093e669dcc1d8'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2697,6 +3049,8 @@
             "label": "'map|9134b47593116d7953f6adba096fc463'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2708,6 +3062,8 @@
             "label": "'metrics-data-source|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2719,6 +3075,8 @@
             "label": "'metrics-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2730,6 +3088,8 @@
             "label": "'ml-job|3bb64c31915acf93fc724af137a0891b'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2741,6 +3101,8 @@
             "label": "'ml-module|f6c6b7b7ebdca4154246923f24d6340d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 199,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2752,6 +3114,8 @@
             "label": "'ml-trained-model|d2f03c1a5dd038fa58af14a56944312b'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2763,6 +3127,8 @@
             "label": "'monitoring-telemetry|2669d5ec15e82391cf58df4294ee9c68'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2774,6 +3140,8 @@
             "label": "'observability-onboarding-state|a4e5c9d018037114140bdb1647c2d568'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2785,6 +3153,8 @@
             "label": "'osquery-manager-usage-metric|4dc4f647d27247c002f56f22742175fe'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 203,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2796,6 +3166,8 @@
             "label": "'osquery-pack-asset|fe0dfa13c4c24ac37ce1aec04c560a81'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2807,6 +3179,8 @@
             "label": "'osquery-pack|6bc20973adab06f00156cbc4578a19ac'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2818,6 +3192,8 @@
             "label": "'osquery-saved-query|a05ec7031231a4b71bfb4493a07b2dc5'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2829,6 +3205,8 @@
             "label": "'policy-settings-protection-updates-note|37d4035a1dc3c5e58f1b519f99093f21'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2840,6 +3218,8 @@
             "label": "'query|aa811b49f48906074f59110bfa83984c'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2851,6 +3231,8 @@
             "label": "'risk-engine-configuration|431232781a82926aad5b1fd849715c0f'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2862,6 +3244,8 @@
             "label": "'rules-settings|001f60645e96c71520214b57f3ea7590'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2873,6 +3257,8 @@
             "label": "'sample-data-telemetry|7d3cfeb915303c9641c59681967ffeb4'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2884,6 +3270,8 @@
             "label": "'search-session|fea3612a90b81672991617646f229a61'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2895,6 +3283,8 @@
             "label": "'search-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2906,6 +3296,8 @@
             "label": "'search|df07b1a361c32daf4e6842c1d5521dbe'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 214,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2917,6 +3309,8 @@
             "label": "'security-rule|9d9d11b97e3aaa87fbaefbace2b5c25f'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2928,6 +3322,8 @@
             "label": "'security-solution-signals-migration|4060b5a63dddfd54d2cd56450882cc0e'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2939,6 +3335,8 @@
             "label": "'siem-detection-engine-rule-actions|f5c218f837bac10ab2c3980555176cf9'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 217,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2950,6 +3348,8 @@
             "label": "'siem-ui-timeline-note|28393dfdeb4e4413393eb5f7ec8c5436'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 218,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2961,6 +3361,8 @@
             "label": "'siem-ui-timeline-pinned-event|293fce142548281599060e07ad2c9ddb'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2972,6 +3374,8 @@
             "label": "'siem-ui-timeline|f6739fd4b17646a6c86321a746c247ef'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2983,6 +3387,8 @@
             "label": "'slo-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 221,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2994,6 +3400,8 @@
             "label": "'slo|dc7f35c0cf07d71bb36f154996fe10c6'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3005,6 +3413,8 @@
             "label": "'space|c3aec2a5d4afcb75554fed96411170e1'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3016,6 +3426,8 @@
             "label": "'spaces-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3027,6 +3439,8 @@
             "label": "'synthetics-monitor|918c09d935b1dcb6a84935b176262c3a'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3038,6 +3452,8 @@
             "label": "'synthetics-param|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3049,6 +3465,8 @@
             "label": "'synthetics-privates-locations|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 227,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3060,6 +3478,8 @@
             "label": "'tag|83d55da58f6530f7055415717ec06474'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3071,6 +3491,8 @@
             "label": "'task|b4a368fd68cd32ef6990877634639db6'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 229,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3082,6 +3504,8 @@
             "label": "'telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3093,6 +3517,8 @@
             "label": "'threshold-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3104,6 +3530,8 @@
             "label": "'ui-metric|0d409297dc5ebe1e3a1da691c6ee32e3'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3115,6 +3543,8 @@
             "label": "'upgrade-assistant-ml-upgrade-operation|3caf305ad2da94d80d49453b0970156d'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 233,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3126,6 +3556,8 @@
             "label": "'upgrade-assistant-reindex-operation|6d1e2aca91767634e1829c30f20f6b16'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 234,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3137,6 +3569,8 @@
             "label": "'uptime-dynamic-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3148,6 +3582,8 @@
             "label": "'uptime-synthetics-api-key|c3178f0fde61e18d3530ba9a70bc278a'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3159,6 +3595,8 @@
             "label": "'url|a37dbae7645ad5811045f4dd3dc1c0a8'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3170,6 +3608,8 @@
             "label": "'usage-counters|8cc260bdceffec4ffc3ad165c97dc1b4'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3181,6 +3621,8 @@
             "label": "'visualization|4891c012863513388881fc109fec4809'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3192,6 +3634,8 @@
             "label": "'workplace_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3206,6 +3650,8 @@
         "label": "savedObjectsConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3217,6 +3663,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3278,6 +3726,8 @@
               "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3292,6 +3742,8 @@
         "label": "savedObjectsMigrationConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3303,6 +3755,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 71,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3452,6 +3906,8 @@
               "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
+            "lineNumber": 72,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }

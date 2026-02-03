@@ -47,8 +47,9 @@ export class ServiceMapPage {
 
   async typeInTheSearchBar(text: string) {
     await this.getSearchBar();
-    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text);
-    return this.page.getByTestId('querySubmitButton').press('Enter');
+    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text, { delay: 150 });
+    // extra delay needed for MKI/ECH environments to process the input
+    await this.page.getByTestId('querySubmitButton').press('Enter');
   }
 
   async waitForServiceMapToLoad() {

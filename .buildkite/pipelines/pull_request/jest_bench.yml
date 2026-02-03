@@ -7,11 +7,3 @@ steps:
     key: jest_bench
     timeout_in_minutes: 60
     soft_fail: true
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot

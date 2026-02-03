@@ -9,12 +9,16 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import {
   useAssistantContext,
@@ -48,11 +52,20 @@ export const EntityHighlightsAccordion: React.FC<{
   const spaceId = useSpaceId();
   const [selectedConnectorId, setConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
   const connectorId = selectedConnectorId ?? firstConnector?.id ?? '';
+  const connectorName = useMemo(() => {
+    if (!aiConnectors || !connectorId) return '';
+    return aiConnectors.find((c) => c.id === connectorId)?.name ?? '';
+  }, [aiConnectors, connectorId]);
   const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
     useAssistantAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
-  const { gradientPanelStyle, buttonGradientStyle, iconGradientStyle, gradientSVG } =
-    useGradientStyles();
+  const {
+    gradientPanelStyle,
+    buttonGradientStyle,
+    iconGradientStyle,
+    gradientSVG,
+    buttonTextGradientStyle,
+  } = useGradientStyles();
 
   const [showAnonymizedValues, setShowAnonymizedValues] = useState(false);
   const onChangeShowAnonymizedValues = useCallback(
@@ -66,6 +79,7 @@ export const EntityHighlightsAccordion: React.FC<{
     fetchEntityHighlights,
     isChatLoading,
     result: assistantResult,
+    error,
   } = useFetchEntityDetailsHighlights({
     connectorId,
     anonymizationFields: anonymizationFields?.data ?? [],
@@ -90,6 +104,12 @@ export const EntityHighlightsAccordion: React.FC<{
   const isLoading = useMemo(
     () => isChatLoading || isAnonymizationFieldsLoading,
     [isAnonymizationFieldsLoading, isChatLoading]
+  );
+
+  const [dismissedError, setDismissedError] = useState<Error | null>(null);
+  const showErrorBanner = useMemo(
+    () => error != null && error !== dismissedError,
+    [dismissedError, error]
   );
 
   if (disabled) {
@@ -121,6 +141,7 @@ export const EntityHighlightsAccordion: React.FC<{
             onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
             setConnectorId={setConnectorId}
             connectorId={connectorId}
+            connectorName={connectorName}
             closePopover={closePopover}
             openPopover={onButtonClick}
             isLoading={isLoading}
@@ -132,6 +153,47 @@ export const EntityHighlightsAccordion: React.FC<{
         }
       >
         <EuiSpacer size="m" />
+        {showErrorBanner && (
+          <>
+            <EuiCallOut
+              color="danger"
+              data-test-subj="entity-highlights-error-banner"
+              announceOnMount
+              size="s"
+              heading="p"
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.errorBannerTitle"
+                  defaultMessage="Error generating summary"
+                />
+              }
+              onDismiss={() => setDismissedError(error)}
+            >
+              <EuiText size="xs">
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.highlights.errorBannerBody"
+                    defaultMessage="Due to an unexpected issue, LLM could not generate the summary. Please try again."
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={fetchEntityHighlights}
+                isDisabled={!connectorId || isLoading}
+                data-test-subj="entity-highlights-error-regenerate"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.errorBannerRegenerate"
+                  defaultMessage="Regenerate"
+                />
+              </EuiButtonEmpty>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {assistantResult && !isLoading && (
           <EntityHighlightsResult
             assistantResult={assistantResult}
@@ -146,54 +208,50 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiText size="xs" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.highlights.loadingMessage"
-                defaultMessage="Generating AI highlights and recommended actions..."
+                defaultMessage="Generating AI summary and recommended actions..."
               />
               <EuiSpacer size="xs" />
             </EuiText>
-            <EuiSkeletonText lines={4} />
+            <EuiSkeletonText lines={2} size="xs" />
           </div>
         )}
 
-        {!assistantResult && !isLoading && (
+        {!assistantResult && !isLoading && !showErrorBanner && (
           <div css={gradientPanelStyle}>
-            <EuiTitle size="xs">
-              <h4>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardTitle"
-                  defaultMessage="Generate entity summary"
-                />
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="xs" textAlign="left">
-              {!connectorId ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
-                  defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
-                  defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-                />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={4}>
+                <EuiText size="xs" textAlign="left">
+                  {!connectorId ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+                      defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+                      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+                    />
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              {connectorId && (
+                <EuiFlexItem grow={1}>
+                  <EuiButton
+                    onClick={fetchEntityHighlights}
+                    isDisabled={!connectorId}
+                    css={buttonGradientStyle}
+                    size="s"
+                  >
+                    <div css={buttonTextGradientStyle}>
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
+                        defaultMessage="Generate"
+                      />
+                    </div>
+                  </EuiButton>
+                </EuiFlexItem>
               )}
-            </EuiText>
-            <EuiSpacer size="m" />
-            {connectorId && (
-              <EuiButton
-                iconType="sparkles"
-                color="primary"
-                onClick={fetchEntityHighlights}
-                isDisabled={!connectorId}
-                fill
-                css={buttonGradientStyle}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.highlights.generateButton"
-                  defaultMessage="Generate"
-                />
-              </EuiButton>
-            )}
+            </EuiFlexGroup>
           </div>
         )}
       </EuiAccordion>

@@ -31,6 +31,8 @@
         "label": "calculateAuto",
         "description": [],
         "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +47,8 @@
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -57,6 +61,8 @@
                 "label": "buckets",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -71,6 +77,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -87,6 +95,8 @@
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -99,6 +109,8 @@
                 "label": "buckets",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -113,6 +125,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -129,6 +143,8 @@
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -141,6 +157,8 @@
                 "label": "buckets",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -155,6 +173,8 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
+                "lineNumber": 59,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }

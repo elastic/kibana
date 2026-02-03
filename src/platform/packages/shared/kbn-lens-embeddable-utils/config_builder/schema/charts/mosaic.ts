@@ -122,6 +122,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
       {
         minSize: 1,
+        maxSize: 100,
         meta: {
           description:
             'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
@@ -133,6 +134,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
         {
           minSize: 1,
+          maxSize: 100,
           meta: {
             description:
               'Array of horizontal breakdown dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
@@ -177,6 +179,7 @@ const mosaicStateSchemaESQL = schema.object(
       schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema]),
       {
         minSize: 1,
+        maxSize: 100,
         meta: {
           description:
             'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',
@@ -186,6 +189,7 @@ const mosaicStateSchemaESQL = schema.object(
     inner_grouping: schema.maybe(
       schema.arrayOf(schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema]), {
         minSize: 1,
+        maxSize: 100,
         meta: {
           description:
             'Array of vertical grouping dimensions: it can contains multiple collapsed by dimensions, but only a single non-collapsed one',

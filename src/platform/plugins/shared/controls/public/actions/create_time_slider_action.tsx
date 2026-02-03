@@ -17,12 +17,17 @@ import { map } from 'rxjs';
 
 import { apiPublishesControlsLayout } from './types';
 
+interface SupportsTimeSliderControl {
+  hasTimeSliderControl: boolean;
+}
+const apiSupportsTimeSliderControl = (api: unknown): api is SupportsTimeSliderControl =>
+  typeof (api as SupportsTimeSliderControl).hasTimeSliderControl === 'boolean';
+
 const compatibilityCheck = (api: unknown | null) =>
   apiCanPinPanels(api) &&
   apiPublishesControlsLayout(api) &&
-  !Object.values(api.layout$.getValue().controls).find(
-    (control) => control.type === TIME_SLIDER_CONTROL
-  );
+  apiSupportsTimeSliderControl(api) &&
+  !api.hasTimeSliderControl;
 
 export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_TIME_SLIDER,
@@ -39,10 +44,8 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
-        rawState: {
-          grow: true,
-          width: 'large',
-        },
+        grow: true,
+        width: 'large',
       },
     });
   },

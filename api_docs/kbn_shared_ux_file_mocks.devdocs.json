@@ -46,6 +46,8 @@
           "<unknown>>"
         ],
         "path": "src/platform/packages/shared/shared-ux/file/mocks/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

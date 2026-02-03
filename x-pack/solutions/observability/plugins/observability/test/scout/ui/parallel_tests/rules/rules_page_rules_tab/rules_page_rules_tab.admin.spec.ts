@@ -57,4 +57,17 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.rulesPage.closeEditRuleFlyout();
     await expect(pageObjects.rulesPage.editRuleFlyout).toBeHidden({ timeout: SHORTER_TIMEOUT });
   });
+
+  test('changes the rule status to "disabled"', async ({ pageObjects }) => {
+    await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
+
+    await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
+    await pageObjects.rulesPage.clickDisableFromDropDownMenu();
+
+    await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
+    await pageObjects.rulesPage.confirmModalButton.click();
+
+    // Wait for the rule status to change
+    await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
+  });
 });

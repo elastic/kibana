@@ -6,7 +6,7 @@
  */
 
 import type { CreateExceptionListItemSchema, OsType } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type { EffectScope, NewTrustedApp } from '../../../../../common/endpoint/types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts/constants';
@@ -42,7 +42,7 @@ export const newTrustedAppToCreateExceptionListItem = ({
     comments: [],
     description,
     entries: conditionEntriesToEntries(entries, true),
-    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
     meta: undefined,
     name,
     namespace_type: 'agnostic',

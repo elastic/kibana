@@ -19,7 +19,7 @@ import type {
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 
-type ControlState = ControlsGroupState['controls'][number];
+type ControlState = ControlsGroupState[number];
 export type ControlPanelState = Pick<ControlState, 'width' | 'grow'> & { order: number };
 
 export interface ControlRendererServices {
@@ -51,4 +51,8 @@ export type ControlsRendererParentApi = Pick<
 
 export interface HasPrependWrapperRef {
   prependWrapperRef: React.RefObject<HTMLDivElement>;
+}
+
+export interface PublishesFocusedPanelId {
+  focusedPanelId$: BehaviorSubject<string | undefined>;
 }

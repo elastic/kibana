@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { LlmProxy } from '../llm_proxy';
+import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
+  mockTitleGenerationWithError,
   mockHandoverToAnswer,
   mockFinalAnswer,
   mockAgentToolCall,
@@ -33,6 +34,26 @@ export const setupAgentDirectAnswer = async ({
   }
   mockHandoverToAnswer(proxy, 'ready to answer');
   mockFinalAnswer(proxy, response);
+};
+
+/**
+ * Simple request scenario - response with the given response directly
+ */
+export const setupAgentDirectError = async ({
+  error,
+  titleError,
+  proxy,
+  continueConversation = false,
+}: {
+  error: LLmError;
+  titleError?: LLmError;
+  proxy: LlmProxy;
+  continueConversation?: boolean;
+}) => {
+  if (!continueConversation) {
+    mockTitleGenerationWithError(proxy, titleError ?? error);
+  }
+  mockHandoverToAnswer(proxy, error);
 };
 
 /**

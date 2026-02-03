@@ -22,6 +22,7 @@ import { useWatch } from 'react-hook-form';
 import type { DissectProcessorResult } from '@kbn/dissect-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useAbortController } from '@kbn/react-hooks';
+import { isNoSuggestionsError } from '../utils/no_suggestions_error';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
@@ -49,7 +50,7 @@ export const DissectPatternAISuggestions = ({
   const abortController = useAbortController();
   const [suggestionsState, refreshSuggestions] = useDissectPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -58,6 +59,63 @@ export const DissectPatternAISuggestions = ({
         )
     );
   }, [previewDocuments, fieldValue]);
+
+  // Show inline message when LLM couldn't generate suggestions
+  if (
+    suggestionsState.error &&
+    isNoSuggestionsError(suggestionsState.error) &&
+    !suggestionsState.loading
+  ) {
+    return (
+      <>
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.noSuggestionsTitle',
+            { defaultMessage: 'Could not generate suggestions' }
+          )}
+          color="primary"
+          size="s"
+          onDismiss={() => refreshSuggestions(null)}
+        >
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.noSuggestionsDescription',
+              {
+                defaultMessage:
+                  'The AI assistant was unable to generate pattern suggestions for your data. You can try again.',
+              }
+            )}
+          </p>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                iconType="refresh"
+                size="s"
+                onClick={(connectorId) => {
+                  refreshSuggestions({
+                    connectorId,
+                    streamName: stream.name,
+                    fieldName: fieldValue,
+                  });
+                }}
+                isLoading={false}
+                isDisabled={!isValidField}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.dissectProcessorFlyout.tryAgain',
+                  { defaultMessage: 'Try again' }
+                )}
+              </GenerateSuggestionButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
 
   if (suggestionsState.value) {
     return (

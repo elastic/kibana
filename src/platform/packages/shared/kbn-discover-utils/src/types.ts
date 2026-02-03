@@ -82,6 +82,7 @@ export interface LogDocumentOverview
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;

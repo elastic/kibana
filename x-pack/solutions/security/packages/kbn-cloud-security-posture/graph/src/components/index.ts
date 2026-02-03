@@ -17,8 +17,12 @@ export {
 } from './graph_grouped_node_preview_panel/constants';
 export type { EntityOrEventItem } from './graph_grouped_node_preview_panel/components/grouped_item/types';
 export { GRAPH_SCOPE_ID, NETWORK_PREVIEW_BANNER } from './constants';
-export { GraphPopover } from './graph/graph_popover';
-export { useGraphPopover } from './graph/use_graph_popover';
+export { GraphPopover } from './popovers/primitives/graph_popover';
+export {
+  useGraphPopoverState,
+  /** @deprecated Use useGraphPopoverState instead */
+  useGraphPopoverState as useGraphPopover,
+} from './popovers/primitives/use_graph_popover_state';
 export { groupedItemClick$, emitGroupedItemClick } from './graph_grouped_node_preview_panel/events';
 export type { GraphProps } from './graph/graph';
 export type {

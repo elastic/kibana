@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AgentBuilder Endpoints', function () {
-    const kibanaServer = getService('kibanaServer');
-
-    before(async () => {
-      await kibanaServer.uiSettings.update({
-        [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
-      });
-    });
-
-    after(async () => {
-      await kibanaServer.uiSettings.update({
-        [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
-      });
-    });
-
     loadTestFile(require.resolve('./converse/simple_conversation.ts'));
     loadTestFile(require.resolve('./converse/multi_rounds.ts'));
     loadTestFile(require.resolve('./converse/tool_calling.ts'));

@@ -52,9 +52,7 @@ export class EsqlService {
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: 'open',
-      querystring: {
-        mode,
-      },
+      mode,
     })) as ResolveIndexResponse;
 
     sources.indices?.forEach((index) => {

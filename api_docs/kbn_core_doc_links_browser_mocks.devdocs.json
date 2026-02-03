@@ -15,6 +15,8 @@
         "label": "docLinksServiceMock",
         "description": [],
         "path": "src/core/packages/doc-links/browser-mocks/src/doc_links_service.mock.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "() => jest.Mocked<DocLinksServiceContract>"
             ],
             "path": "src/core/packages/doc-links/browser-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -45,6 +49,8 @@
               "() => jest.Mock<any, any, any>"
             ],
             "path": "src/core/packages/doc-links/browser-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -62,6 +68,8 @@
               "DocLinksStart"
             ],
             "path": "src/core/packages/doc-links/browser-mocks/src/doc_links_service.mock.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -78,6 +78,92 @@ Array [
 ]
 `;
 
+exports[`TableActions getFieldValueCellActions should render correctly for hideFilteringOnComputedColumns set to true 1`] = `
+Array [
+  <FilterIn
+    Component={[Function]}
+    hideFilteringOnComputedColumns={true}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "isComputedColumn": true,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <FilterOut
+    Component={[Function]}
+    hideFilteringOnComputedColumns={true}
+    isEsqlMode={false}
+    onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "isComputedColumn": true,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <Copy
+    Component={[Function]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "isComputedColumn": true,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "displayNameOverride": undefined,
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+    toasts={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
+  />,
+]
+`;
+
 exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `
 Array [
   <Copy

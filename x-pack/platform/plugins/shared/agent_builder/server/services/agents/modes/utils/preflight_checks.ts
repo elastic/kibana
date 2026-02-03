@@ -16,9 +16,8 @@ export const ensureValidInput = ({
   input: ConverseInput;
   conversation?: Conversation;
 }) => {
-  const lastRoundStatus = conversation?.rounds.length
-    ? conversation.rounds[conversation.rounds.length - 1].status
-    : ConversationRoundStatus.completed;
+  const lastRound = conversation?.rounds[conversation?.rounds.length - 1];
+  const lastRoundStatus = lastRound?.status ?? ConversationRoundStatus.completed;
 
   // standard scenario - we need input to continue
   if (lastRoundStatus === ConversationRoundStatus.completed) {
@@ -28,8 +27,8 @@ export const ensureValidInput = ({
   }
 
   // prompt pending - we need a prompt response to continue
-  if (lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
-    if (!hasPromptResponse(input)) {
+  if (lastRound?.pending_prompt && lastRoundStatus === ConversationRoundStatus.awaitingPrompt) {
+    if (!hasPromptResponse(lastRound.pending_prompt.id, input)) {
       throw createBadRequestError(
         `Conversation is awaiting a prompt response, but none was provided.`
       );
@@ -41,6 +40,6 @@ const hasStandardInput = (input: ConverseInput): boolean => {
   return input.message !== undefined || (input.attachments?.length ?? 0) > 0;
 };
 
-const hasPromptResponse = (input: ConverseInput): boolean => {
-  return input.prompt_response !== undefined && Object.keys(input.prompt_response).length > 0;
+const hasPromptResponse = (promptId: string, input: ConverseInput): boolean => {
+  return input.prompts !== undefined && Object.keys(input.prompts).includes(promptId);
 };

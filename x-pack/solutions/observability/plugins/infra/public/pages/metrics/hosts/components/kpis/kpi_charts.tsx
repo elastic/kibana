@@ -67,7 +67,7 @@ export const getSubtitle = ({
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
-  const { hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
 
@@ -113,6 +113,8 @@ export const KpiCharts = () => {
       lastReloadRequestTime={afterLoadedState.reloadRequestTime}
       getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
+      error={error}
+      hasData={!!hostNodes.length}
       schema={searchCriteria.preferredSchema}
     />
   );

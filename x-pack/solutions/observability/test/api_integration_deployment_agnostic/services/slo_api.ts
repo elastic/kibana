@@ -242,7 +242,8 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
     async findInstances(
       sloId: string,
       params: { search?: string; size?: string; searchAfter?: string },
-      roleAuthc: RoleCredentials
+      roleAuthc: RoleCredentials,
+      expectedStatus: number = 200
     ): Promise<FindSLOInstancesResponse> {
       const { body } = await supertestWithoutAuth
         .get(`/internal/observability/slos/${sloId}/_instances`)
@@ -250,7 +251,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
-        .expect(200);
+        .expect(expectedStatus);
 
       return body;
     },

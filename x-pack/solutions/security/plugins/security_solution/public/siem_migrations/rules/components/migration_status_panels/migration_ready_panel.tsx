@@ -66,6 +66,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     telemetry.reportSetupMigrationOpenResources({
       migrationId: migrationStats.id,
       missingResourcesCount: missingResourceCount,
+      vendor: migrationStats.vendor,
     });
   }, [openFlyout, migrationStats, telemetry, missingResourceCount]);
 
@@ -88,9 +89,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   const { startMigration, isLoading: isStarting } = useStartMigration();
   const onStartMigrationWithSettings = useCallback(
     (settings: RuleMigrationSettings) => {
-      startMigration(migrationStats.id, undefined, settings);
+      startMigration(migrationStats, undefined, settings);
     },
-    [migrationStats.id, startMigration]
+    [migrationStats, startMigration]
   );
   const { modal: startMigrationModal, showModal: showStartMigrationModal } =
     useStartRulesMigrationModal({ type: 'start', migrationStats, onStartMigrationWithSettings });
@@ -122,7 +123,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="ruleMigrationMissingResourcesButton"
-                aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE}
                 iconType="download"
                 iconSide="right"
                 onClick={onOpenFlyout}
@@ -135,7 +136,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
           )}
           <EuiFlexItem grow={false}>
             <StartTranslationButton
-              migrationId={migrationStats.id}
+              migrationStats={migrationStats}
               isStopped={isStopped}
               startMigration={isStopped ? startMigration : showStartMigrationModal}
               isStarting={isStarting}
