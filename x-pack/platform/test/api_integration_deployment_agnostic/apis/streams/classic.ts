@@ -137,6 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: TEST_STREAM_NAME,
           description: '',
           updated_at: stream.updated_at,
+          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
