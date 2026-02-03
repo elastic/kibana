@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { queryResponseToRecords } from './query_response_to_records';
 
 describe('queryResponseToRecords', () => {
   it('should convert ES|QL response to array of objects', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [
         { name: 'rule_id', type: 'keyword' },
         { name: 'alert_series_id', type: 'keyword' },
@@ -40,7 +40,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should handle missing column names in response', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [
         { name: 'rule_id', type: 'keyword' },
         { name: 'alert_series_id', type: 'keyword' },
@@ -67,7 +67,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should handle empty values response', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [{ name: 'field', type: 'keyword' }],
       values: [],
     };
@@ -79,7 +79,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should handle empty columns response', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [],
       values: [['value']],
     };
@@ -91,7 +91,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should un-flatten column names with dots into nested objects', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [
         { name: 'rule.id', type: 'keyword' },
         { name: 'rule.name', type: 'keyword' },
@@ -125,7 +125,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should handle multiple levels of nesting', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [
         { name: 'a.b.c', type: 'keyword' },
         { name: 'a.b.d', type: 'keyword' },
@@ -153,7 +153,7 @@ describe('queryResponseToRecords', () => {
   });
 
   it('should handle mixed flattened and non-flattened column names', () => {
-    const mockResponse: ESQLSearchResponse = {
+    const mockResponse: EsqlQueryResponse = {
       columns: [
         { name: 'simple_field', type: 'keyword' },
         { name: 'nested.field', type: 'keyword' },
