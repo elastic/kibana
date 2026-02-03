@@ -24,6 +24,7 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -41,6 +42,10 @@ describe('Perform bulk action route', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
     bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
