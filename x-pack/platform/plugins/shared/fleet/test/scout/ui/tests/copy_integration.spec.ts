@@ -10,6 +10,8 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 
 test.describe('Copy integration', { tag: ['@ess'] }, () => {
+  // This test can take a bit longer on ECH
+  test.setTimeout(2 * 60 * 1000); // 2 minutes
   const testAgentPolicyName = 'Test Agent Policy for Copy';
   const packagePolicyName = 'nginx-test-copy';
   let agentPolicyId: string;
