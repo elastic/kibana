@@ -110,7 +110,6 @@ export async function getSharingData(
        * Otherwise, the requests will ask for all fields, even if only a few are really needed.
        * Discover does not set fields, since having all fields is needed for the UI.
        */
-      searchSourceUpdated.removeField('fieldsFromSource');
       const fields = columns.length
         ? columns.map((column) => {
             let field = column;

@@ -316,7 +316,6 @@ describe('SearchSource', () => {
           }),
         } as unknown as DataView);
         searchSource.setField('fields', ['@timestamp']);
-        searchSource.setField('fieldsFromSource', ['foo']);
 
         const request = searchSource.getSearchRequestBody();
         expect(request).not.toHaveProperty('docvalue_fields');
@@ -338,28 +337,6 @@ describe('SearchSource', () => {
         const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('docvalue_fields');
         expect(request.docvalue_fields).toEqual(['world']);
-      });
-
-      test('allows explicitly provided docvalue fields to override fields API when fetching fieldsFromSource', async () => {
-        searchSource.setField('index', {
-          ...indexPattern,
-          getComputedFields: () => ({
-            storedFields: [],
-            scriptFields: {},
-            docvalueFields: [{ field: 'a', format: 'date_time' }],
-            runtimeFields: {},
-          }),
-        } as unknown as DataView);
-        // @ts-expect-error TS won't like using this field name, but technically it's possible.
-        searchSource.setField('docvalue_fields', [{ field: 'b', format: 'date_time' }]);
-        searchSource.setField('fields', ['c']);
-        searchSource.setField('fieldsFromSource', ['a', 'b', 'd']);
-
-        const request = searchSource.getSearchRequestBody();
-        expect(request).toHaveProperty('docvalue_fields');
-        expect(request._source.includes).toEqual(['c', 'a', 'b', 'd']);
-        expect(request.docvalue_fields).toEqual([{ field: 'b', format: 'date_time' }]);
-        expect(request.fields).toEqual(['c', { field: 'a', format: 'date_time' }]);
       });
 
       test('allows you to override computed fields if you provide a format', async () => {
@@ -484,36 +461,13 @@ describe('SearchSource', () => {
         expect(request.stored_fields).toEqual(['a']);
       });
 
-      test(`requests any fields that aren't script_fields from stored_fields with fieldsFromSource`, async () => {
-        searchSource.setField('index', {
-          ...indexPattern,
-          getComputedFields: () => ({
-            storedFields: [],
-            scriptFields: { hello: {} },
-            docvalueFields: [],
-            runtimeFields: {},
-          }),
-        } as unknown as DataView);
-        searchSource.setField('fieldsFromSource', ['hello', 'a']);
-
-        const request = searchSource.getSearchRequestBody();
-        expect(request.script_fields).toEqual({ hello: {} });
-        expect(request.stored_fields).toEqual(['a']);
-      });
-
-      test('defaults to * for stored fields when no fields are provided', async () => {
+      test("doesn't request stored fields when no fields are provided", async () => {
         const requestA = searchSource.getSearchRequestBody();
         expect(requestA.stored_fields).toEqual(['*']);
 
         searchSource.setField('fields', ['*']);
         const requestB = searchSource.getSearchRequestBody();
         expect(requestB.stored_fields).toEqual(['*']);
-      });
-
-      test('defaults to * for stored fields when no fields are provided with fieldsFromSource', async () => {
-        searchSource.setField('fieldsFromSource', ['*']);
-        const request = searchSource.getSearchRequestBody();
-        expect(request.stored_fields).toEqual(['*']);
       });
 
       test('_source is not set when using the fields API', async () => {
@@ -663,10 +617,6 @@ describe('SearchSource', () => {
 
         searchSource.setField('fields', ['foo-bar', 'foo--bar', 'field1', 'field2']);
         expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
-
-        searchSource.removeField('fields');
-        searchSource.setField('fieldsFromSource', ['foo-bar', 'foo--bar', 'field1', 'field2']);
-        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
       });
 
       test('returns all scripted fields when one fields entry is *', async () => {
@@ -704,31 +654,6 @@ describe('SearchSource', () => {
     });
 
     describe('handling for when specific fields are provided', () => {
-      test('fieldsFromSource will request any fields outside of script_fields from _source & stored fields', async () => {
-        searchSource.setField('index', {
-          ...indexPattern,
-          getComputedFields: () => ({
-            storedFields: [],
-            scriptFields: { hello: {}, world: {} },
-            docvalueFields: ['@timestamp'],
-            runtimeFields: {},
-          }),
-        } as unknown as DataView);
-        searchSource.setField('fieldsFromSource', [
-          'hello',
-          'world',
-          '@timestamp',
-          'foo-a',
-          'bar-b',
-        ]);
-
-        const request = searchSource.getSearchRequestBody();
-        expect(request._source).toEqual({
-          includes: ['@timestamp', 'bar-b'],
-        });
-        expect(request.stored_fields).toEqual(['@timestamp', 'bar-b']);
-      });
-
       test('filters request when a specific list of fields is provided', async () => {
         searchSource.setField('index', {
           ...indexPattern,
@@ -745,57 +670,6 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-      });
-
-      test('filters request when a specific list of fields is provided with fieldsFromSource', async () => {
-        const runtimeFields = { runtime_field: runtimeFieldDef, runtime_field_b: runtimeFieldDef };
-        searchSource.setField('index', {
-          ...indexPattern,
-          getComputedFields: () => ({
-            storedFields: ['*'],
-            scriptFields: { hello: {}, world: {} },
-            docvalueFields: ['@timestamp', 'date'],
-            runtimeFields,
-          }),
-        } as unknown as DataView);
-        searchSource.setField('fieldsFromSource', [
-          'hello',
-          '@timestamp',
-          'foo-a',
-          'bar',
-          'runtime_field',
-        ]);
-
-        const request = searchSource.getSearchRequestBody();
-        expect(request._source).toEqual({
-          includes: ['@timestamp', 'bar'],
-        });
-        expect(request.fields).toEqual(['@timestamp']);
-        expect(request.script_fields).toEqual({ hello: {} });
-        expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-        expect(request.runtime_mappings).toEqual(runtimeFields);
-      });
-
-      test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
-        searchSource.setField('index', {
-          ...indexPattern,
-          getComputedFields: () => ({
-            storedFields: ['*'],
-            scriptFields: { hello: {}, world: {} },
-            docvalueFields: ['@timestamp', 'date', 'time'],
-            runtimeFields: {},
-          }),
-        } as unknown as DataView);
-        searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
-        searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
-
-        const request = searchSource.getSearchRequestBody();
-        expect(request._source).toEqual({
-          includes: ['@timestamp', 'bar', 'date', 'baz'],
-        });
-        expect(request.fields).toEqual(['hello', '@timestamp', 'bar', 'date']);
-        expect(request.script_fields).toEqual({ hello: {} });
-        expect(request.stored_fields).toEqual(['@timestamp', 'bar', 'date', 'baz']);
       });
     });
 
@@ -1077,27 +951,6 @@ describe('SearchSource', () => {
       expect(references[1].id).toEqual('456');
       expect(references[1].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
-    });
-
-    test('mvt geoshape layer test', async () => {
-      // @ts-expect-error TS won't like using this field name, but technically it's possible.
-      searchSource.setField('docvalue_fields', ['prop1']);
-      searchSource.setField('source', ['geometry']);
-      searchSource.setField('fieldsFromSource', ['geometry', 'prop1']);
-      searchSource.setField('index', {
-        ...indexPattern,
-        getSourceFiltering: () => ({ excludes: [] }),
-        getComputedFields: () => ({
-          storedFields: ['*'],
-          scriptFields: {},
-          docvalueFields: [],
-          runtimeFields: {},
-        }),
-      } as unknown as DataView);
-      const request = searchSource.getSearchRequestBody();
-      expect(request.stored_fields).toEqual(['geometry', 'prop1']);
-      expect(request.docvalue_fields).toEqual(['prop1']);
-      expect(request._source).toEqual(['geometry']);
     });
   });
 

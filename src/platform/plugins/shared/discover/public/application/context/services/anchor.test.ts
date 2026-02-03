@@ -170,9 +170,7 @@ describe('context app', function () {
 
     return doFetchAnchor().then(() => {
       const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
-      const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
       expect(setFieldsSpy.calledOnce).toBe(true);
-      expect(removeFieldsSpy.calledOnce).toBe(true);
       expect(setFieldsSpy.firstCall.args[1]).toEqual([{ field: '*', include_unmapped: true }]);
     });
   });

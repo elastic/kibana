@@ -51,6 +51,5 @@ export function updateVolatileSearchSource(
     );
   }
 
-  searchSource.removeField('fieldsFromSource');
   searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 }

@@ -137,7 +137,6 @@ export function updateSearchSource(
   dataView: DataView,
   filters: Filter[]
 ) {
-  searchSource.removeField('fieldsFromSource');
   searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 
   return searchSource

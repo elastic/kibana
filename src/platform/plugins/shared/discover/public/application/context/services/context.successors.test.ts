@@ -269,8 +269,6 @@ describe('context successors', function () {
             })
           );
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
-          const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
-          expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
           expect(interceptedWarnings).toEqual([]);
         }
