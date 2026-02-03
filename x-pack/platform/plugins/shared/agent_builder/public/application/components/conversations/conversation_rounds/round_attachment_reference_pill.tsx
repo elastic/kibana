@@ -95,7 +95,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
               id: attachment.id,
               type: attachment.type,
               data: versionData.data,
-            } as any,
+            },
             version: versionData,
           })
       : undefined;

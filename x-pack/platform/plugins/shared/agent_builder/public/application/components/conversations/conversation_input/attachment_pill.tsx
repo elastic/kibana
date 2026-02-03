@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { type KeyboardEvent, useState } from 'react';
+import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
@@ -43,9 +43,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;
   const canRemoveAttachment = Boolean(onRemoveAttachment);
   const iconType = uiDefinition?.getIcon?.() ?? DEFAULT_ICON;
-  const onPillClick = uiDefinition?.onClick
-    ? () => uiDefinition.onClick?.({ attachment })
-    : undefined;
 
   const iconContainerStyles = css`
     display: flex;
@@ -75,18 +72,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       css={css`
         max-width: 200px;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-        ${onPillClick ? 'cursor: pointer;' : ''}
       `}
-      role={onPillClick ? 'button' : undefined}
-      tabIndex={onPillClick ? 0 : undefined}
-      onClick={onPillClick}
-      onKeyDown={(event?: KeyboardEvent<HTMLDivElement> | KeyboardEvent<HTMLButtonElement>) => {
-        if (!onPillClick) return;
-        if (event?.key === 'Enter' || event?.key === ' ') {
-          event?.preventDefault();
-          onPillClick();
-        }
-      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
