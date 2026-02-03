@@ -218,13 +218,16 @@ export class CliDevMode {
   /**
    * Get Vite server information for the Kibana server
    */
-  getViteConfig(): { serverUrl: string; pluginIds: string[] } | undefined {
+  getViteConfig():
+    | { serverUrl: string; pluginIds: string[]; pluginDependencies: Record<string, string[]> }
+    | undefined {
     if (!this.viteServer || !this.viteServer.serverUrl) {
       return undefined;
     }
     return {
       serverUrl: this.viteServer.serverUrl,
       pluginIds: this.viteServer.pluginIds,
+      pluginDependencies: this.viteServer.pluginDependencies,
     };
   }
 

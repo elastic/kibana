@@ -82,6 +82,11 @@ export class ViteServer {
    */
   public pluginIds: string[] = [];
 
+  /**
+   * Map of plugin ID to its required plugin IDs
+   */
+  public pluginDependencies: Record<string, string[]> = {};
+
   constructor(options: ViteServerOptions) {
     if (!options.enabled) {
       this.run$ = Rx.EMPTY;
@@ -117,6 +122,7 @@ export class ViteServer {
 
           this.serverUrl = this.devServer.getUrl();
           this.pluginIds = this.devServer.pluginIds;
+          this.pluginDependencies = this.devServer.pluginDependencies;
 
           log('info', `Vite dev server ready at ${this.serverUrl}`);
           log('info', `Serving ${this.pluginIds.length} plugins with HMR`);

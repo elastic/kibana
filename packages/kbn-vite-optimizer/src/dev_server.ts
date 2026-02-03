@@ -41,6 +41,8 @@ export interface DevServer {
   getHmrClientUrl(): string;
   isReady(): boolean;
   pluginIds: string[];
+  /** Map of plugin ID to its required plugin IDs */
+  pluginDependencies: Record<string, string[]>;
   getImportMap(): Record<string, string>;
 }
 
@@ -284,9 +286,22 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
   // Create plugin path aliases and collect entry points for pre-bundling
   const pluginAliases: Record<string, string> = {};
   const pluginEntryPoints: string[] = [];
+
+  // Plugins to exclude from dependency scanning due to broken exports
+  // These plugins have import/export issues that break the esbuild scan
+  const excludeFromScan = new Set<string>([]);
+
   for (const plugin of plugins) {
     const entryFile = Path.resolve(plugin.publicDir, 'index.ts');
     pluginAliases[`plugin/${plugin.id}`] = entryFile;
+
+    // Skip plugins with known broken exports for dependency scanning
+    if (excludeFromScan.has(plugin.id)) {
+      // eslint-disable-next-line no-console
+      console.log(`[vite] Excluding plugin '${plugin.id}' from dependency scan (known issues)`);
+      continue;
+    }
+
     // Check for .tsx if .ts doesn't exist
     if (Fs.existsSync(entryFile)) {
       pluginEntryPoints.push(entryFile);
@@ -372,7 +387,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         },
       },
 
-      // React Fast Refresh for HMR
+      // React Fast Refresh for HMR using Oxc (v5.0.0+ uses Oxc instead of Babel)
       // Runtime is injected in render_template.ts bootstrap
       reactPlugin.default({
         jsxImportSource: '@emotion/react',
@@ -501,7 +516,6 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         'util',
         'chroma-js',
         '@elastic/eui',
-        'd3',
         'memoize-one',
         // Additional common dependencies to reduce reload cycles
         'react-router-dom',
@@ -523,11 +537,36 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         '@dnd-kit/core',
         '@dnd-kit/sortable',
         '@dnd-kit/utilities',
+        // More dependencies to prevent discovery-triggered reloads
+        '@emotion/css',
+        '@emotion/styled',
+        '@elastic/datemath',
+        '@elastic/numeral',
+        'tslib',
+        'prop-types',
+        'hoist-non-react-statics',
+        'use-sync-external-store',
+        'use-sync-external-store/shim',
+        'use-sync-external-store/shim/with-selector',
+        'scheduler',
+        'object-assign',
+        'react-is',
+        'deep-equal',
+        'fast-deep-equal',
+        'shallowequal',
+        '@tanstack/react-query-devtools',
+        'monaco-editor',
+        'xstate',
+        '@xstate/react',
       ],
+      // Force pre-bundling on startup to avoid reload cycles from dependency discovery
+      force: true,
       exclude: [
         '@kbn/*',
         // Exclude ems-client due to broken exports in its published build
         '@elastic/ems-client',
+        // Exclude d3 v3 - it accesses window.navigator during init which fails in pre-bundling
+        'd3',
       ],
       // Analyze all plugin entry points upfront to discover their dependencies
       // This prevents reload cycles when navigating to new plugins
@@ -540,6 +579,8 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
       // Wait for dependency crawling to complete before serving
       // This prevents multiple reloads when new dependencies are discovered
       holdUntilCrawlEnd: true,
+      // Packages with mixed ESM/CJS that need interop handling
+      needsInterop: ['monaco-editor'],
       esbuildOptions: {
         loader: { '.js': 'jsx' },
         jsx: 'automatic',
@@ -692,10 +733,58 @@ ${contents
     console.log(`[vite] HMR enabled at ws://${host}:${hmrPort}`);
   }
 
+  // Add diagnostic logging for HMR and reload events
+  server.ws.on('connection', () => {
+    // eslint-disable-next-line no-console
+    console.log(`[vite-debug] New WebSocket connection established`);
+  });
+
+  // Listen for when Vite sends messages to clients
+  const originalSend = server.ws.send.bind(server.ws);
+  server.ws.send = (...args: Parameters<typeof server.ws.send>) => {
+    const payload = args[0];
+    if (typeof payload === 'object' && payload !== null) {
+      const msg = payload as { type?: string; path?: string; updates?: unknown[] };
+      if (msg.type === 'full-reload') {
+        // eslint-disable-next-line no-console
+        console.log(`[vite-debug] FULL RELOAD triggered for path: ${msg.path || '(all)'}`);
+        // Log stack trace to see what triggered the reload
+        // eslint-disable-next-line no-console
+        console.log(`[vite-debug] Reload stack:`, new Error().stack);
+      } else if (msg.type === 'update') {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[vite-debug] HMR update:`,
+          (msg.updates as Array<{ path?: string }>)?.map((u) => u.path).join(', ')
+        );
+      }
+    }
+    return originalSend(...args);
+  };
+
+  // Log when new dependencies are discovered during runtime
+  const depsOptimizer =
+    (server as any)._depsOptimizer || (server as any).environments?.client?.depsOptimizer;
+  if (depsOptimizer && depsOptimizer.registerMissingImport) {
+    const originalRegister = depsOptimizer.registerMissingImport.bind(depsOptimizer);
+    depsOptimizer.registerMissingImport = (id: string, resolved: string) => {
+      // eslint-disable-next-line no-console
+      console.log(`[vite-debug] NEW DEPENDENCY DISCOVERED: ${id} -> ${resolved}`);
+      return originalRegister(id, resolved);
+    };
+  }
+
+  // Build plugin dependencies map
+  const pluginDependencies: Record<string, string[]> = {};
+  for (const plugin of plugins) {
+    pluginDependencies[plugin.id] = plugin.requiredPlugins || [];
+  }
+
   return {
     server,
     middleware: server.middlewares,
     pluginIds: plugins.map((p) => p.id),
+    pluginDependencies,
 
     async close() {
       await server.close();
