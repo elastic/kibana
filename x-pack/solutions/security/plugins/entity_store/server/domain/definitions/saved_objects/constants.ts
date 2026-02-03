@@ -40,7 +40,7 @@ export const LogExtractionState = z.object({
 export type EngineError = z.infer<typeof EngineError>;
 export const EngineError = z.object({
   message: z.string(),
-  action: z.literal('init'),
+  action: z.enum(['init', 'extractLogs']),
 });
 
 export type VersionState = z.infer<typeof VersionState>;
