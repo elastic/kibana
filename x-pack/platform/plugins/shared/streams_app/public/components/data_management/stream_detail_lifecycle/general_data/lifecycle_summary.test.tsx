@@ -100,6 +100,12 @@ describe('LifecycleSummary', () => {
       },
     } as unknown as Streams.ingest.all.GetResponse);
 
+  const createDisabledDefinition = () =>
+    ({
+      stream: { name: 'test-stream' },
+      effective_lifecycle: { disabled: {} },
+    } as Streams.ingest.all.GetResponse);
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -130,6 +136,13 @@ describe('LifecycleSummary', () => {
       render(<LifecycleSummary definition={definition} />);
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
+    });
+    it('should lifecycle summary for disabled lifecycle', () => {
+      const definition = createDisabledDefinition();
+      render(<LifecycleSummary definition={definition} />);
+
+      expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecyclePhase-Hot-name')).toBeInTheDocument();
     });
   });
 

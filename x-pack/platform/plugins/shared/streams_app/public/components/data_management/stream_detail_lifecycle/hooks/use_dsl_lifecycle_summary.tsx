@@ -6,7 +6,11 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { isDslLifecycle, type IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import {
+  isDisabledLifecycle,
+  isDslLifecycle,
+  type IngestStreamLifecycleDSL,
+} from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -37,13 +41,14 @@ export const useDslLifecycleSummary = ({
 
   const effectiveLifecycle = definition.effective_lifecycle;
   const isDsl = isDslLifecycle(effectiveLifecycle);
+  const isRetentionDisabled = isDisabledLifecycle(effectiveLifecycle);
 
   const getPhases = (): LifecyclePhase[] => {
-    if (!isDsl) {
+    if (!isDsl && !isRetentionDisabled) {
       return [];
     }
 
-    const retentionPeriod = effectiveLifecycle.dsl.data_retention;
+    const retentionPeriod = isDsl ? effectiveLifecycle.dsl.data_retention : undefined;
     const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
 
     return buildLifecyclePhases({
