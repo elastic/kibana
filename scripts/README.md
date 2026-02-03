@@ -66,3 +66,31 @@ node scripts/es_archiver.js save <archive name for kibana data> [space separated
 
 You may want to store the .kibana index separate from data. Since adding a lot of data will bloat our repo size, we have many tests that reuse the same
 data indices but use their own `.kibana` index.
+
+### Sync logs
+
+**`node scripts/sync_logs.js [options]`**
+
+Continuously syncs documents from a source Elasticsearch cluster to a destination cluster. Each cycle fetches documents (24h `@timestamp` window) from the source, optionally rewrites the target index, and bulk-pushes to the destination. Source config via env or CLI; destination uses the same cluster as Kibana (read from `config/kibana.dev.yml` or `--config`, with env overrides `ELASTICSEARCH_HOST`, `ELASTICSEARCH_USERNAME`, `ELASTICSEARCH_PASSWORD`), like the otel_demo script. Config is read from `process.env` (set in the shell or pass inline); CLI flags override env, same as other scripts in this directory (e.g. `workflows_import_export.js`).
+
+Example with env vars inline:
+
+```sh
+SOURCE_ELASTICSEARCH_HOST=https://source:9200 SOURCE_ELASTICSEARCH_API_KEY=... node scripts/sync_logs.js
+```
+
+Example with env vars in the shell (set once per session):
+
+```sh
+export SOURCE_ELASTICSEARCH_HOST=https://source:9200
+export SOURCE_ELASTICSEARCH_API_KEY=...
+node scripts/sync_logs.js
+```
+
+Example with CLI:
+
+```sh
+node scripts/sync_logs.js --source-host=https://source:9200 --source-api-key=... --index-pattern="logs*" --size=100 --interval=5
+```
+
+Required: `SOURCE_ELASTICSEARCH_HOST` and `SOURCE_ELASTICSEARCH_API_KEY` (or `--source-host` and `--source-api-key`). Destination is read from Kibana config (default `config/kibana.dev.yml`) or env; defaults to `http://localhost:9200` with basic auth `elastic`/`changeme`. Use `node scripts/sync_logs.js --help` for all options.
