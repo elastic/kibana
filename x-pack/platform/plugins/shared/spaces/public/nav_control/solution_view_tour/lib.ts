@@ -19,7 +19,8 @@ import type { SpacesManager } from '../../spaces_manager';
 
 export function initTour(core: CoreStart, spacesManager: SpacesManager) {
   const showTourUiSettingValue = core.settings.globalClient.get(SHOW_SPACE_SOLUTION_TOUR_SETTING);
-  const showTour$ = new BehaviorSubject(showTourUiSettingValue ?? true);
+  const isTourEnabled = core.notifications.tours.isEnabled();
+  const showTour$ = new BehaviorSubject((showTourUiSettingValue ?? true) && isTourEnabled);
 
   const allSpaces$ = defer(() => from(spacesManager.getSpaces())).pipe(shareReplay(1));
 
