@@ -16,6 +16,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { parseControlGroupJson } from './utils';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -67,7 +68,9 @@ export const fromSavedObjectTabToTabState = ({
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       visContext: tab.visContext,
-      controlGroupJson: tab.controlGroupJson,
+      controlGroupState: tab.controlGroupJson
+        ? parseControlGroupJson(tab.controlGroupJson)
+        : undefined,
     },
   };
 };
@@ -148,7 +151,9 @@ export const fromTabStateToSavedObjectTab = ({
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
     visContext: tab.attributes.visContext,
-    controlGroupJson: tab.attributes.controlGroupJson,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
   };
 };
 
@@ -191,6 +196,8 @@ export const fromSavedSearchToSavedObjectTab = ({
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
     visContext: tab.attributes?.visContext,
-    controlGroupJson: tab.attributes?.controlGroupJson,
+    controlGroupJson: tab.attributes?.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
   };
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy, orderBy, pick, uniqBy } from 'lodash';
+import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -26,13 +26,8 @@ import type { TabsUrlState } from '../../../../common/types';
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
-interface LegacyInternalState {
-  visContext?: TabState['attributes']['visContext']; // visContext got moved from internalState to attributes
-  controlGroupJson?: TabState['attributes']['controlGroupJson']; // controlGroupJson got moved from internalState to attributes
-}
-
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
-  internalState: (TabState['initialInternalState'] & LegacyInternalState) | undefined;
+  internalState: TabState['initialInternalState'] | undefined;
   attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
@@ -222,38 +217,42 @@ export const createTabsStorageManager = ({
       tabStateInStorage.globalState || defaultTabState.globalState
     );
 
-    let controlGroupJson = attributes?.controlGroupJson;
+    let controlGroupState = attributes?.controlGroupState;
 
     // migration from the older format where controlGroupJson was stored in internalState
-    if (internalState?.controlGroupJson && !attributes?.controlGroupJson) {
-      controlGroupJson = internalState.controlGroupJson;
+    if (internalState && 'controlGroupJson' in internalState && !attributes?.controlGroupState) {
+      controlGroupState =
+        internalState.controlGroupJson && typeof internalState.controlGroupJson === 'string'
+          ? parseControlGroupJson(internalState.controlGroupJson)
+          : undefined;
     }
 
-    const controlGroupState = controlGroupJson
-      ? parseControlGroupJson(controlGroupJson)
-      : undefined;
     const esqlVariables = controlGroupState
       ? extractEsqlVariables(controlGroupState)
       : defaultTabState.esqlVariables;
 
-    const tabState = {
+    const tabState: TabState = {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
-      initialInternalState: internalState,
+      initialInternalState: internalState
+        ? omit(internalState, 'visContext', 'controlGroupJson')
+        : undefined,
       attributes: {
         ...defaultTabState.attributes,
         ...attributes,
-        controlGroupJson,
+        controlGroupState,
       },
       appState: appState || {},
       globalState: globalState || {},
-      controlGroupState,
       esqlVariables,
     };
 
     // migration from the older format where visContext was stored in internalState
-    if (internalState?.visContext && !tabState.attributes.visContext) {
-      tabState.attributes.visContext = internalState.visContext;
+    if (internalState && 'visContext' in internalState && !tabState.attributes.visContext) {
+      tabState.attributes.visContext =
+        internalState.visContext && typeof internalState.visContext === 'object'
+          ? internalState.visContext
+          : undefined;
     }
 
     return tabState;

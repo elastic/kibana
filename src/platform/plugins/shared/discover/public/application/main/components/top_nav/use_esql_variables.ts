@@ -14,7 +14,6 @@ import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-g
 import {
   extractEsqlVariables,
   internalStateActions,
-  parseControlGroupJson,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
@@ -51,14 +50,10 @@ export const useESQLVariables = ({
 } => {
   const dispatch = useInternalStateDispatch();
   const fetchData = useCurrentTabAction(internalStateActions.fetchData);
-  const setAttributeControlGroupJson = useCurrentTabAction(
-    internalStateActions.setAttributeControlGroupJson
-  );
-  const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
+  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
   const setEsqlVariables = useCurrentTabAction(internalStateActions.setEsqlVariables);
-  const currentControlGroupState = useCurrentTabSelector((tab) => tab.controlGroupState);
-  const controlGroupJson = useCurrentTabSelector((tab) => tab.attributes.controlGroupJson);
-  const activeControlGroupJsonRef = useRef<string | undefined>(controlGroupJson);
+  const currentControlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
+  const previousControlGroupStateRef = useRef(currentControlGroupState);
   const pendingQueryUpdate = useRef<string>();
 
   useEffect(() => {
@@ -68,12 +63,11 @@ export const useESQLVariables = ({
     }
 
     // Handling the reset unsaved changes badge
-    if (activeControlGroupJsonRef.current !== controlGroupJson) {
-      activeControlGroupJsonRef.current = controlGroupJson;
-      const savedControlGroupState = parseControlGroupJson(controlGroupJson);
-      controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
+    if (!isEqual(previousControlGroupStateRef.current, currentControlGroupState)) {
+      previousControlGroupStateRef.current = currentControlGroupState;
+      controlGroupApi.updateInput({ initialChildControlState: currentControlGroupState });
     }
-  }, [controlGroupJson, controlGroupApi, isEsqlMode]);
+  }, [currentControlGroupState, controlGroupApi, isEsqlMode]);
 
   useEffect(() => {
     // Only proceed if in ESQL mode and controlGroupApi is available
@@ -88,16 +82,13 @@ export const useESQLVariables = ({
       const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
         return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
       }, {});
-      const nextControlGroupJson = JSON.stringify(transformedState);
-      activeControlGroupJsonRef.current = nextControlGroupJson;
+      const nextControlGroupState = transformedState;
+      previousControlGroupStateRef.current = nextControlGroupState;
       dispatch(
-        setAttributeControlGroupJson({
-          controlGroupJson: nextControlGroupJson,
-        })
-      );
-      dispatch(
-        setControlGroupState({
-          controlGroupState: transformedState,
+        updateAttributes({
+          attributes: {
+            controlGroupState: nextControlGroupState,
+          },
         })
       );
 
@@ -123,8 +114,7 @@ export const useESQLVariables = ({
     dispatch,
     isEsqlMode,
     onUpdateESQLQuery,
-    setAttributeControlGroupJson,
-    setControlGroupState,
+    updateAttributes,
     setEsqlVariables,
     fetchData,
   ]);
@@ -156,8 +146,8 @@ export const useESQLVariables = ({
     if (currentControlGroupState && Object.keys(currentControlGroupState).length > 0) {
       return currentControlGroupState;
     }
-    return parseControlGroupJson(controlGroupJson);
-  }, [currentControlGroupState, controlGroupJson]);
+    return {};
+  }, [currentControlGroupState]);
 
   return {
     onSaveControl,

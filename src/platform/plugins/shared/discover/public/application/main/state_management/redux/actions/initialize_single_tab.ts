@@ -36,7 +36,7 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
-import { fetchData } from './tab_state';
+import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 
 export interface InitializeSingleTabsParams {
@@ -96,17 +96,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     if (esqlControls) {
       dispatch(
-        internalStateSlice.actions.setAttributeControlGroupJson({
+        updateAttributes({
           tabId,
-          controlGroupJson: JSON.stringify(esqlControls),
-        })
-      );
-
-      // TODO later: refactor from having controlGroupState and esqlVariables in Redux state to have selectors for them
-      dispatch(
-        internalStateSlice.actions.setControlGroupState({
-          tabId,
-          controlGroupState: esqlControls,
+          attributes: {
+            controlGroupState: esqlControls,
+          },
         })
       );
 

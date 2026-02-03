@@ -191,7 +191,7 @@ export const useDiscoverHistogram = (
    * Request params
    */
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
-  const currentTabControlState = useCurrentTabSelector((tab) => tab.controlGroupState);
+  const currentTabControlState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const {
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
@@ -321,7 +321,7 @@ export const useDiscoverHistogram = (
     }
   }, [collectedFetchParams, triggerUnifiedHistogramFetch]);
 
-  const setAttributeVisContext = useCurrentTabAction(internalStateActions.setAttributeVisContext);
+  const updateAttributes = useCurrentTabAction(internalStateActions.updateAttributes);
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
@@ -335,7 +335,11 @@ export const useDiscoverHistogram = (
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
           // (only this action should trigger Unsaved changes badge)
-          dispatch(setAttributeVisContext({ visContext: nextVisContext }));
+          dispatch(
+            updateAttributes({
+              attributes: { visContext: nextVisContext },
+            })
+          );
           dispatch(
             setOverriddenVisContextAfterInvalidation({
               overriddenVisContextAfterInvalidation: undefined,
@@ -370,7 +374,7 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, setAttributeVisContext]
+    [dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
   );
 
   const onBreakdownFieldChange = useCallback<

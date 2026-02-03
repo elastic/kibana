@@ -144,14 +144,13 @@ export interface TabState extends TabItem {
   // Persistable attributes of the tab (stored in Discover Session and in local storage).
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
-    controlGroupJson: string | undefined;
+    controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;

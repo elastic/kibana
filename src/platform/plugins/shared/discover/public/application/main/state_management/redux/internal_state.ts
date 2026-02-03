@@ -242,12 +242,12 @@ export const internalStateSlice = createSlice({
         tab.appState = action.payload.appState;
       }),
 
-    setAttributeVisContext: (
-      state,
-      action: TabAction<{ visContext: TabState['attributes']['visContext'] }>
-    ) =>
+    /**
+     * Set the tab attributes state
+     */
+    setAttributes: (state, action: TabAction<Pick<TabState, 'attributes'>>) =>
       withTab(state, action.payload, (tab) => {
-        tab.attributes.visContext = action.payload.visContext;
+        tab.attributes = action.payload.attributes;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
@@ -257,24 +257,6 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation =
           action.payload.overriddenVisContextAfterInvalidation;
-      }),
-
-    setAttributeControlGroupJson: (
-      state,
-      action: TabAction<{ controlGroupJson: TabState['attributes']['controlGroupJson'] }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.attributes.controlGroupJson = action.payload.controlGroupJson;
-      }),
-
-    setControlGroupState: (
-      state,
-      action: TabAction<{
-        controlGroupState: TabState['controlGroupState'];
-      }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.controlGroupState = action.payload.controlGroupState;
       }),
 
     setCascadedDocumentsState: (

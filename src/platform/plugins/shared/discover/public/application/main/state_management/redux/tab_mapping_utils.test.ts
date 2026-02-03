@@ -28,7 +28,7 @@ const tab1 = getTabStateMock({
   },
   attributes: {
     visContext: { foo: 'bar' },
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-7d', to: 'now' },
@@ -44,7 +44,7 @@ const tab2 = getTabStateMock({
   },
   attributes: {
     visContext: { bar: 'foo' },
-    controlGroupJson: undefined,
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
@@ -86,7 +86,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
-            "controlGroupJson": undefined,
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
@@ -95,7 +95,6 @@ describe('tab mapping utils', () => {
             "availableCascadeGroups": Array [],
             "selectedCascadeGroups": Array [],
           },
-          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
             "searchSessionId": undefined,
@@ -173,7 +172,7 @@ describe('tab mapping utils', () => {
             "viewMode": undefined,
           },
           "attributes": Object {
-            "controlGroupJson": undefined,
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
@@ -182,7 +181,6 @@ describe('tab mapping utils', () => {
             "availableCascadeGroups": Array [],
             "selectedCascadeGroups": Array [],
           },
-          "controlGroupState": undefined,
           "dataRequestParams": Object {
             "isSearchSessionRestored": false,
             "searchSessionId": undefined,
