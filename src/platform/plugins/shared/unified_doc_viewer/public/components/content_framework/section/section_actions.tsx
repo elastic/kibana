@@ -50,8 +50,8 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
           : undefined;
 
         const buttonProps = {
-          ...(href ? { href } : {}),
-          ...(handleClick ? { onClick: handleClick } : {}),
+          href,
+          onClick: handleClick,
         };
 
         return (

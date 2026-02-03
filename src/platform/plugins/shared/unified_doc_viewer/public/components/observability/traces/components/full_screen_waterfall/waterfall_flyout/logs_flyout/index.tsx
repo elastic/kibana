@@ -33,7 +33,7 @@ export function LogFlyoutContent({ hit, logDataView }: LogFlyoutContentProps) {
       dataView={logDataView}
       indexes={indexes}
       showTraceWaterfall={false}
-      actions={actions}
+      docViewActions={actions}
     />
   );
 }

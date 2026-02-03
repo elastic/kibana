@@ -39,7 +39,7 @@ export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutCo
   return (
     <Overview
       ref={setFlyoutRef}
-      actions={actions}
+      docViewActions={actions}
       hit={hit}
       indexes={indexes}
       showWaterfall={false}

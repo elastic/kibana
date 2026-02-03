@@ -118,6 +118,11 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     dataTestSubj: 'docViewerSimilarErrorsOpenInDiscoverButton',
   });
 
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
+  );
+
   const hasAtLeastOneErrorField = culpritValue || messageValue || typeValue;
   if (!serviceNameValue || !hasAtLeastOneErrorField) {
     return undefined;
@@ -128,7 +133,7 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       id="similarErrors"
       data-test-subj="docViewerSimilarErrorsSection"
       title={sectionTitle}
-      actions={openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []}
+      actions={actions}
       description={sectionDescription}
     >
       <SimilarErrorsOccurrencesChart

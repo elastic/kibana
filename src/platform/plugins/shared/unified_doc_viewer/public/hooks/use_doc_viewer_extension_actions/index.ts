@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import createContainer from 'constate';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 
 interface UseDocViewerExtensionActionsParams {
-  actions?: DocViewRenderProps['actions'];
+  actions?: DocViewActions;
 }
 
 const useDocViewerExtensionActions = ({ actions }: UseDocViewerExtensionActionsParams) => {
-  return actions ?? undefined;
+  return actions;
 };
 
 export const [DocViewerExtensionActionsProvider, useDocViewerExtensionActionsContext] =
