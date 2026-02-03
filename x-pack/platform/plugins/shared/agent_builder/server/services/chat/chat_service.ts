@@ -15,6 +15,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   type ChatEvent,
+  ConversationRoundStatus,
   type ConverseInput,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -104,6 +105,7 @@ class ChatServiceImpl implements ChatService {
         if (resend && conversationId) {
           const conversation = await services.conversationClient.get(conversationId);
           const lastRound = conversation.rounds[conversation.rounds.length - 1];
+          lastRound.status = ConversationRoundStatus.inProgress;
           lastRound.response = {
             message: '',
           };

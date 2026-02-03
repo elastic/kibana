@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
@@ -101,7 +101,6 @@ const withScreenContextAttachment = async ({
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
-  const queryClient = useQueryClient();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
     useConversationContext();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
@@ -260,15 +259,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     onMutate: async () => {
       removeError();
       resendControllerRef.current = new AbortController();
-
-      // Cancel any in-flight queries for this conversation to prevent stale data
-      // from overwriting the streaming response during resend.
-      // The actual clearing of the response is handled by the roundResending event
-      // emitted by the backend when the stream starts.
-      // await queryClient.cancelQueries({
-      //   queryKey: queryKeys.conversations.byId(conversationId!),
-      // });
-
+      conversationActions.clearLastRoundResponse();
+      setIsResponseLoading(true);
       setIsResending(true);
     },
     onSettled: () => {
@@ -278,9 +270,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       if (isResending) {
         setIsResending(false);
       }
+      setIsResponseLoading(false);
     },
     onError: (err) => {
       setError(err);
+      setIsResponseLoading(false);
     },
   });
 

@@ -165,19 +165,53 @@ const createConversationActions = ({
         console.log('[clearLastRoundResponse] No conversationId, skipping fetch');
         return;
       }
+      // eslint-disable-next-line no-console
+      console.log('[clearLastRoundResponse] Starting:', {
+        queryKey: JSON.stringify(queryKey),
+        conversationId,
+      });
 
       try {
-        // also update the lat round state locally
+        // Synchronously clear local state BEFORE the async fetch
+        // This ensures streaming chunks append to empty string, not old message
+        // Get current state before clearing for logging
+        const currentData = queryClient.getQueryData<Conversation>(queryKey);
+        const currentRound = currentData?.rounds?.at(-1);
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] Before clear:', {
+          messageLength: currentRound?.response?.message?.length ?? 0,
+          stepsCount: currentRound?.steps?.length ?? 0,
+        });
+
         setCurrentRound((round) => {
           round.response.message = '';
           round.steps = [];
           round.status = ConversationRoundStatus.inProgress;
         });
-        // fetchQuery bypasses the `enabled` check and directly fetches + updates cache
+
+        // Verify the clear worked
+        const afterData = queryClient.getQueryData<Conversation>(queryKey);
+        const afterRound = afterData?.rounds?.at(-1);
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] After clear:', {
+          messageLength: afterRound?.response?.message?.length ?? 0,
+          stepsCount: afterRound?.steps?.length ?? 0,
+        });
+
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] Local state cleared, starting fetch...');
+
         const conversation = await conversationsService.get({ conversationId });
+        const lastRound = conversation.rounds?.at(-1);
+        // eslint-disable-next-line no-console
+        console.log('[clearLastRoundResponse] Fetched from server:', {
+          messageLength: lastRound?.response?.message?.length ?? 0,
+          stepsCount: lastRound?.steps?.length ?? 0,
+        });
+
         queryClient.setQueryData(queryKey, conversation);
         // eslint-disable-next-line no-console
-        console.log('[clearLastRoundResponse] Updated cache with fetched conversation');
+        console.log('[clearLastRoundResponse] Cache updated');
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('[clearLastRoundResponse] Failed to fetch:', error);

@@ -43,6 +43,8 @@ export const useConversation = () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
       }
+      // eslint-disable-next-line no-console
+      console.log('[useConversation] queryFn executing - fetching from server');
       return conversationsService.get({ conversationId });
     },
     retry: (failureCount, httpError: IHttpFetchError) => {
@@ -52,6 +54,18 @@ export const useConversation = () => {
       }
       return failureCount < 3;
     },
+  });
+
+  // Debug: log when conversation data changes
+  const lastRound = conversation?.rounds?.at(-1);
+  // eslint-disable-next-line no-console
+  console.log('[useConversation] Returning data:', {
+    queryKey: JSON.stringify(queryKey),
+    conversationId,
+    isSendingMessage,
+    enabled: Boolean(conversationId) && !isSendingMessage,
+    roundsCount: conversation?.rounds?.length ?? 0,
+    lastRoundMessageLength: lastRound?.response?.message?.length ?? 0,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
@@ -133,6 +147,18 @@ export const useConversationRounds = () => {
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];
+
+    // Debug: log when useMemo recomputes and what data we have
+    const lastRound = rounds.at(-1);
+    // eslint-disable-next-line no-console
+    console.log('[useConversationRounds] useMemo recomputing:', {
+      roundsCount: rounds.length,
+      lastRoundMessageLength: lastRound?.response?.message?.length ?? 0,
+      lastRoundStepsCount: lastRound?.steps?.length ?? 0,
+      hasPendingMessage: Boolean(pendingMessage),
+      hasError: Boolean(error),
+    });
+
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
