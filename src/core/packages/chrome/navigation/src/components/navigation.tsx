@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -113,19 +113,123 @@ export const Navigation = ({
   const sidePanelItemPrefix = `${NAVIGATION_SELECTOR_PREFIX}-sidePanelItem`;
   const moreMenuTriggerTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-moreMenuTrigger`;
 
+  const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
+
+  const NAV_ITEMS_ORDER_KEY = 'core.chrome.sideNav.itemsOrder';
+  const NAV_ITEMS_VISIBILITY_KEY = 'core.chrome.sideNav.itemsVisibility';
+  const LOCKED_IDS = ['discover', 'dashboards'];
+
+  // State for navigation items order and visibility
+  const [navItemsOrder, setNavItemsOrder] = useState<string[]>(() => {
+    try {
+      const orderStr = localStorage.getItem(NAV_ITEMS_ORDER_KEY);
+      return orderStr ? JSON.parse(orderStr) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [navItemsVisibility, setNavItemsVisibility] = useState<Record<string, boolean>>(() => {
+    try {
+      const visibilityStr = localStorage.getItem(NAV_ITEMS_VISIBILITY_KEY);
+      return visibilityStr ? JSON.parse(visibilityStr) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Listen for localStorage changes (from other tabs/windows)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === NAV_ITEMS_ORDER_KEY && e.newValue) {
+        try {
+          setNavItemsOrder(JSON.parse(e.newValue));
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+      if (e.key === NAV_ITEMS_VISIBILITY_KEY && e.newValue) {
+        try {
+          setNavItemsVisibility(JSON.parse(e.newValue));
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Callbacks to update navigation items
+  const handleSetNavItemsOrder = useCallback((itemIds: string[]) => {
+    setNavItemsOrder(itemIds);
+    try {
+      localStorage.setItem(NAV_ITEMS_ORDER_KEY, JSON.stringify(itemIds));
+    } catch {
+      // Ignore storage errors
+    }
+  }, []);
+
+  const handleSetNavItemVisibility = useCallback((itemId: string, visible: boolean) => {
+    setNavItemsVisibility((prev) => {
+      const updated = { ...prev, [itemId]: visible };
+      try {
+        localStorage.setItem(NAV_ITEMS_VISIBILITY_KEY, JSON.stringify(updated));
+      } catch {
+        // Ignore storage errors
+      }
+      return updated;
+    });
+  }, []);
+
+  // Filter and sort primary items based on saved preferences
+  const filteredAndSortedItems = useMemo(() => {
+    // Filter by visibility (default to visible if not set)
+    const visibleItems = items.primaryItems.filter(
+      (item) => navItemsVisibility[item.id] !== false
+    );
+
+    // Separate locked and unlocked items
+    const lockedItems = visibleItems.filter((item) =>
+      LOCKED_IDS.includes(item.id.toLowerCase())
+    );
+    const unlockedItems = visibleItems.filter(
+      (item) => !LOCKED_IDS.includes(item.id.toLowerCase())
+    );
+
+    // Sort unlocked items by saved order
+    const sortedUnlocked =
+      navItemsOrder.length > 0
+        ? navItemsOrder
+            .map((id) => unlockedItems.find((item) => item.id === id))
+            .filter((item): item is MenuItem => item !== undefined)
+            .concat(unlockedItems.filter((item) => !navItemsOrder.includes(item.id)))
+        : unlockedItems;
+
+    return [...lockedItems, ...sortedUnlocked];
+  }, [items.primaryItems, navItemsOrder, navItemsVisibility]);
+
+  // Create filtered navigation structure for useNavigation hook
+  const filteredNavigationStructure = useMemo(
+    () => ({
+      ...items,
+      primaryItems: filteredAndSortedItems,
+    }),
+    [items, filteredAndSortedItems]
+  );
+
   const {
     actualActiveItemId,
     visuallyActivePageId,
     visuallyActiveSubpageId,
     isSidePanelOpen,
     openerNode,
-  } = useNavigation(isCollapsed, showSecondaryPanel, items, logo.id, activeItemId);
-
-  const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
+  } = useNavigation(isCollapsed, showSecondaryPanel, filteredNavigationStructure, logo.id, activeItemId);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
     !showLabels,
-    items.primaryItems
+    filteredAndSortedItems
   );
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
@@ -138,9 +242,12 @@ export const Navigation = ({
       isCollapsed={isCollapsed}
       showLabels={showLabels}
       showSecondaryPanel={showSecondaryPanel}
+      primaryItems={items.primaryItems}
       toggle={onToggleCollapsed}
       onSetShowLabels={onSetShowLabels}
       onSetShowSecondaryPanel={onSetShowSecondaryPanel}
+      onSetNavItemsOrder={handleSetNavItemsOrder}
+      onSetNavItemVisibility={handleSetNavItemVisibility}
     />
   ) : null;
 
