@@ -43,34 +43,41 @@ describe('partitionStream feature serialization', () => {
     },
   ];
 
-  it('should serialize features omitting id, status, and last_seen', () => {
+  it('should serialize features omitting id, status, last_seen, expires_at, evidence, and meta', () => {
     // This mirrors the serialization pattern used in partitionStream:
-    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen'])))
+    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])))
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
 
     expect(parsed).toHaveLength(2);
 
-    // Verify first feature
+    // Verify first feature - omitted fields should not be present
     expect(parsed[0]).not.toHaveProperty('id');
     expect(parsed[0]).not.toHaveProperty('status');
     expect(parsed[0]).not.toHaveProperty('last_seen');
+    expect(parsed[0]).not.toHaveProperty('expires_at');
+    expect(parsed[0]).not.toHaveProperty('evidence');
+    expect(parsed[0]).not.toHaveProperty('meta');
+    // Essential semantic fields should be preserved
     expect(parsed[0]).toHaveProperty('type', 'framework');
     expect(parsed[0]).toHaveProperty('name', 'nodejs');
     expect(parsed[0]).toHaveProperty('description');
     expect(parsed[0]).toHaveProperty('value');
     expect(parsed[0]).toHaveProperty('confidence', 0.95);
-    expect(parsed[0]).toHaveProperty('evidence');
     expect(parsed[0]).toHaveProperty('tags');
-    expect(parsed[0]).toHaveProperty('meta');
 
     // Verify second feature
     expect(parsed[1]).not.toHaveProperty('id');
     expect(parsed[1]).not.toHaveProperty('status');
     expect(parsed[1]).not.toHaveProperty('last_seen');
+    expect(parsed[1]).not.toHaveProperty('expires_at');
+    expect(parsed[1]).not.toHaveProperty('evidence');
+    expect(parsed[1]).not.toHaveProperty('meta');
     expect(parsed[1]).toHaveProperty('type', 'service');
     expect(parsed[1]).toHaveProperty('name', 'api-gateway');
   });
@@ -78,13 +85,15 @@ describe('partitionStream feature serialization', () => {
   it('should handle empty features array', () => {
     const emptyFeatures: Feature[] = [];
     const serialized = JSON.stringify(
-      emptyFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      emptyFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     expect(serialized).toBe('[]');
   });
 
-  it('should preserve nested value objects', () => {
+  it('should preserve nested value objects but omit meta', () => {
     const featureWithComplexValue: Feature[] = [
       {
         id: 'feature-3',
@@ -108,7 +117,9 @@ describe('partitionStream feature serialization', () => {
     ];
 
     const serialized = JSON.stringify(
-      featureWithComplexValue.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      featureWithComplexValue.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
@@ -120,25 +131,30 @@ describe('partitionStream feature serialization', () => {
         port: 5432,
       },
     });
-    expect(parsed[0].meta).toEqual({ tables: ['users', 'orders'] });
+    // meta should be omitted
+    expect(parsed[0]).not.toHaveProperty('meta');
+    expect(parsed[0]).not.toHaveProperty('evidence');
   });
 
-  it('should preserve evidence arrays', () => {
+  it('should omit evidence arrays', () => {
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
 
-    expect(Array.isArray(parsed[0].evidence)).toBe(true);
-    expect(parsed[0].evidence).toHaveLength(2);
-    expect(parsed[0].evidence).toContain('require statement');
-    expect(parsed[0].evidence).toContain('package.json reference');
+    // Evidence should be omitted as it's internal/operational data
+    expect(parsed[0]).not.toHaveProperty('evidence');
+    expect(parsed[1]).not.toHaveProperty('evidence');
   });
 
   it('should result in valid JSON that can be embedded in prompts', () => {
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     // The serialized string should be valid JSON

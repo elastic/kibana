@@ -72,7 +72,9 @@ export async function suggestProcessingPipeline({
     initial_dataset_analysis: JSON.stringify(simulationMetrics),
     parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
     features: JSON.stringify(
-      features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      features.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     ),
   };
 
