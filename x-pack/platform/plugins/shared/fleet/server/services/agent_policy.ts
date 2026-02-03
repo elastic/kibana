@@ -1794,7 +1794,7 @@ class AgentPolicyService {
         continue;
       }
       try {
-        // await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+        await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
         logger.debug(
           `[Agentless API] Successfully deployed agentless deployment for single agent policy id ${agentPolicy.id}`
         );
