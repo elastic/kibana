@@ -41,6 +41,7 @@
     "@kbn/kql",
     "@kbn/control-group-renderer",
     "@kbn/utility-types",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
