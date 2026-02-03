@@ -85,6 +85,13 @@ interface State {
   mbMap: MapboxMap | undefined;
 }
 
+// At low zooms, complete a revolution every two minutes.
+const secondsPerRevolution = 120;
+// Above zoom level 5, do not rotate.
+const maxSpinZoom = 5;
+// Rotate at intermediate speeds between zoom levels 3 and 5.
+const slowSpinZoom = 3;
+
 export class MbMap extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
@@ -94,6 +101,7 @@ export class MbMap extends Component<Props, State> {
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
   private _navigationControl = new maplibregl.NavigationControl({ showCompass: false });
+  private _userInteracting = false;
 
   state: State = {
     mbMap: undefined,
@@ -241,21 +249,63 @@ export class MbMap extends Component<Props, State> {
       this._loadMakiSprites(mbMap);
       this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapExtentState());
+      this._spinGlobe();
     });
   }
 
+  _spinGlobe() {
+    if (!this.state.mbMap || this._userInteracting) return;
+
+    let distancePerSecond = 360 / secondsPerRevolution;
+    /*if (zoom > slowSpinZoom) {
+        // Slow spinning at higher zooms
+        const zoomDif =
+            (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+        distancePerSecond *= zoomDif;
+    }*/
+    const center = this.state.mbMap.getCenter();
+    center.lng -= distancePerSecond;
+    // Smoothly animate the map over one second.
+    // When this animation is complete, it calls a 'moveend' event.
+    this.state.mbMap.easeTo({ center, duration: 1000, easing: (n) => n });
+
+  }
+
   _registerMapEventListeners(mbMap: MapboxMap) {
+    mbMap.on('mousedown', () => {
+      this._userInteracting = true;
+    });
+    mbMap.on('mouseup', () => {
+      this._userInteracting = false;
+      this._spinGlobe();
+    });
+    /*mbMap.on('dragend', () => {
+      this._userInteracting = false;
+      this._spinGlobe();
+    });
+    mbMap.on('pitchend', () => {
+      this._userInteracting = false;
+      this._spinGlobe();
+    });
+    mbMap.on('rotateend', () => {
+      this._userInteracting = false;
+      this._spinGlobe();
+  });*/
+
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
     // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
     // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
     mbMap.on(
       'moveend',
-      _.debounce(() => {
-        if (this._isMounted) {
-          this.props.extentChanged(this._getMapExtentState());
-        }
-      }, 100)
+      () => {
+        this._spinGlobe();
+        _.debounce(() => {
+          if (this._isMounted) {
+            this.props.extentChanged(this._getMapExtentState());
+          }
+        }, 100);
+      }
     );
 
     // do not update redux state on 'move' event for performance reasons
