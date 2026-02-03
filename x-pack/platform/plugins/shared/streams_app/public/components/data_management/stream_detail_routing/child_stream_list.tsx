@@ -42,6 +42,7 @@ import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggesti
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
+import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bulk_create_streams_confirmation_modal';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
@@ -172,7 +173,17 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     acceptSuggestion,
     rejectSuggestion,
     updateSuggestion,
+    selectedSuggestionIndexes,
+    toggleSuggestionSelection,
+    isSuggestionSelected,
+    bulkAcceptSuggestions,
   } = useReviewSuggestionsForm();
+
+  const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+
+  const handleBulkAccept = () => {
+    setShowBulkAcceptModal(true);
+  };
 
   const currentRuleId = useStreamsRoutingSelector((snapshot) => snapshot.context.currentRuleId);
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
@@ -262,6 +273,11 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     );
   };
 
+  const handleBulkAcceptSuccess = (successfulIndexes: number[]) => {
+    bulkAcceptSuggestions(successfulIndexes);
+    setShowBulkAcceptModal(false);
+  };
+
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <NoDataEmptyPrompt
       createNewRule={createNewRule}
@@ -282,6 +298,14 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     </NoDataEmptyPrompt>
   ) : (
     <>
+      {showBulkAcceptModal && suggestions && (
+        <BulkCreateStreamsConfirmationModal
+          suggestions={suggestions}
+          selectedIndexes={selectedSuggestionIndexes}
+          onClose={() => setShowBulkAcceptModal(false)}
+          onSuccess={handleBulkAcceptSuccess}
+        />
+      )}
       {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
@@ -369,6 +393,10 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   resetForm={resetForm}
                   suggestions={suggestions}
                   updateSuggestion={updateSuggestion}
+                  selectedSuggestionIndexes={selectedSuggestionIndexes}
+                  toggleSuggestionSelection={toggleSuggestionSelection}
+                  isSuggestionSelected={isSuggestionSelected}
+                  onBulkAccept={handleBulkAccept}
                 />
               )
             ) : null}
