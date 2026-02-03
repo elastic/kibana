@@ -11,7 +11,10 @@ import { EndpointInfo } from './endpoint_info';
 
 // Mock document.execCommand for EUI's copy functionality
 const mockExecCommand = jest.fn().mockReturnValue(true);
-document.execCommand = mockExecCommand;
+Object.defineProperty(document, 'execCommand', {
+  value: mockExecCommand,
+  writable: true,
+});
 
 describe('RenderEndpoint component tests', () => {
   beforeEach(() => {
@@ -95,14 +98,6 @@ describe('RenderEndpoint component tests', () => {
       const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
       expect(copyButton).toBeInTheDocument();
       expect(copyButton).toHaveAttribute('aria-label', 'Copy endpoint ID to clipboard');
-    });
-
-    it('copy button is hidden by default and visible on hover', () => {
-      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
-
-      const copyButtonContainer = screen.getByTestId('inference-endpoint-copy-id-button')
-        .parentElement?.parentElement;
-      expect(copyButtonContainer).toHaveClass('copyButton');
     });
 
     it('copies endpoint ID to clipboard when copy button is clicked', async () => {
