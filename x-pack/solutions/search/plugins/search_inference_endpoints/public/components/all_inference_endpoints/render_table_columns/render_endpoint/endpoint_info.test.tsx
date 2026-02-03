@@ -5,11 +5,28 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import React from 'react';
 import { EndpointInfo } from './endpoint_info';
 
+// Mock clipboard API
+const mockWriteText = jest.fn().mockResolvedValue(undefined);
+Object.assign(navigator, {
+  clipboard: {
+    writeText: mockWriteText,
+  },
+});
+
 describe('RenderEndpoint component tests', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockWriteText.mockClear();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders the component with inference id', () => {
     const mockProvider = {
       inference_id: 'cohere-2',
@@ -66,5 +83,78 @@ describe('RenderEndpoint component tests', () => {
 
     expect(screen.getByText('elastic-rerank')).toBeInTheDocument();
     expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
+  });
+
+  describe('copy to clipboard functionality', () => {
+    const mockProvider = {
+      inference_id: 'test-endpoint',
+      service: 'elasticsearch',
+      service_settings: {},
+      task_settings: {},
+    } as any;
+
+    it('renders copy button with correct aria-label', () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
+      expect(copyButton).toBeInTheDocument();
+      expect(copyButton).toHaveAttribute('aria-label', 'Copy endpoint ID to clipboard');
+    });
+
+    it('copy button is hidden by default and visible on hover', () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButtonContainer = screen.getByTestId('inference-endpoint-copy-id-button')
+        .parentElement?.parentElement;
+      expect(copyButtonContainer).toHaveClass('copyButton');
+    });
+
+    it('copies endpoint ID to clipboard when copy button is clicked', async () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
+      fireEvent.click(copyButton);
+
+      await waitFor(() => {
+        expect(mockWriteText).toHaveBeenCalledWith('test-endpoint');
+      });
+    });
+
+    it('shows checkmark icon after successful copy', async () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
+      fireEvent.click(copyButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inference-endpoint-copy-id-button-copied')).toBeInTheDocument();
+      });
+    });
+
+    it('reverts to copy icon after 2 seconds', async () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
+      fireEvent.click(copyButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inference-endpoint-copy-id-button-copied')).toBeInTheDocument();
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(2000);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('inference-endpoint-copy-id-button')).toBeInTheDocument();
+      });
+    });
+
+    it('is keyboard accessible', () => {
+      render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
+
+      const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
+      expect(copyButton.tagName.toLowerCase()).toBe('button');
+    });
   });
 });
