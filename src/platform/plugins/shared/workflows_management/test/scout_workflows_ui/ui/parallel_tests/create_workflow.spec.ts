@@ -9,8 +9,8 @@
 
 import { expect, KibanaCodeEditorWrapper, tags, spaceTest as test } from '@kbn/scout';
 
-const demoYaml = `
-name: Dummy workflow
+const getDummyWorkflowYaml = (name: string) => `
+name: ${name}
 description: Dummy workflow description
 enabled: true
 triggers:
@@ -34,18 +34,16 @@ test.describe('Create and save a workflow', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     const kbnCodeEditorWrapper = new KibanaCodeEditorWrapper(page);
     await expect(yamlEditor).toBeVisible();
 
-    // Set the editor value
-    await kbnCodeEditorWrapper.setCodeEditorValue(demoYaml);
+    const workflowName = `Dummy workflow ${Math.floor(Math.random() * 1000)}`;
 
-    // Wait for debounced changes to sync to Redux (data-yaml-synced="true")
-    // This ensures the save button is enabled and will save the latest value
-    await expect(page.locator('[data-yaml-synced="true"]')).toBeVisible({ timeout: 5000 });
+    // Set the editor value
+    await kbnCodeEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
 
     // Now the save button should be enabled and clicking it will save the correct value
     await page.testSubj.click('saveWorkflowHeaderButton');
     await page.testSubj.waitForSelector('workflowSavedChangesBadge');
     await page.gotoApp('workflows');
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-    await expect(page.getByRole('link', { name: 'Dummy workflow' })).toBeVisible();
+    await expect(page.getByRole('link', { name: workflowName })).toBeVisible();
   });
 });

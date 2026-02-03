@@ -35,7 +35,6 @@ export const YamlEditor = React.memo(
     ...props
   }: YamlEditorProps) => {
     const [internalValue, setInternalValue] = useState(value);
-    const [isSynced, setIsSynced] = useState(true);
     const onSyncStateChangeRef = useRef(onSyncStateChange);
     onSyncStateChangeRef.current = onSyncStateChange;
 
@@ -43,7 +42,6 @@ export const YamlEditor = React.memo(
     const onChangeWithSync = useCallback(
       (newValue: string) => {
         onChange(newValue);
-        setIsSynced(true);
         onSyncStateChangeRef.current?.(true);
       },
       [onChange]
@@ -61,8 +59,7 @@ export const YamlEditor = React.memo(
       (newValue: string) => {
         // Update internal state quickly so the change is reflected instantly in the editor
         setInternalValue(newValue);
-        // Mark as not synced since we have pending changes
-        setIsSynced(false);
+        // Notify that the changes are not synced since we have pending changes
         onSyncStateChangeRef.current?.(false);
         // Debounce the call to onChange to prevent excessive re-renders upstream
         onChangeDebounced(newValue);
@@ -85,15 +82,13 @@ export const YamlEditor = React.memo(
     }, [_editorWillUnmount, onChangeDebounced]);
 
     return (
-      <div data-yaml-synced={isSynced} style={{ height: '100%', width: '100%' }}>
-        <CodeEditor
-          languageId="yaml"
-          value={internalValue}
-          onChange={onChangeInternal}
-          editorWillUnmount={handleEditorWillUnmount}
-          {...props}
-        />
-      </div>
+      <CodeEditor
+        languageId="yaml"
+        value={internalValue}
+        onChange={onChangeInternal}
+        editorWillUnmount={handleEditorWillUnmount}
+        {...props}
+      />
     );
   }
 );
