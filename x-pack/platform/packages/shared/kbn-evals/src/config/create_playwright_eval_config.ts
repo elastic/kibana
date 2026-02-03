@@ -85,7 +85,7 @@ export function createPlaywrightEvalsConfig({
   });
 
   return defineConfig<{}, EvaluationTestOptions>({
-    ...config,
+    ...config,     
     // some reports write to disk, which we don't need
     reporter: Array.isArray(reporter)
       ? reporter.filter(([name]) => {
@@ -97,6 +97,7 @@ export function createPlaywrightEvalsConfig({
     },
     projects: nextProjects,
     globalSetup: require.resolve('./setup.js'),
+    globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
   });
 }
