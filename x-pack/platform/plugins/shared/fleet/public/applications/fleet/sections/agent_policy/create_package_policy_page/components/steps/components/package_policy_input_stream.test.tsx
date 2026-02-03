@@ -606,9 +606,15 @@ describe('PackagePolicyInputStreamConfig', () => {
         expect(radioGroup).toBeInTheDocument();
 
         // Check that all three signal types are available
-        expect(renderResult.getByText('Logs')).toBeInTheDocument();
-        expect(renderResult.getByText('Metrics')).toBeInTheDocument();
-        expect(renderResult.getByText('Traces')).toBeInTheDocument();
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Logs')
+        ).toBeInTheDocument();
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Metrics')
+        ).toBeInTheDocument();
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Traces')
+        ).toBeInTheDocument();
       });
     });
   });
