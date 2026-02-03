@@ -31,22 +31,26 @@ export function transformPinnedPanelsOut(
 ): DashboardState['pinned_panels'] {
   if (pinnedPanels) {
     /**
-     * >=9.4, pinned panels are stored under the key `pinned_panels` without any JSON bucketing
+     * >=9.4, pinned panels are stored in the SO under the key `pinned_panels` without any JSON bucketing
      */
     return injectPinnedPanelReferences(
-      flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
+      flow(
+        transformPinnedPanelsObjectToArray,
+        transformLegacyPinnedPanelProperties
+      )(pinnedPanels.panels),
       containerReferences
     );
   } else if (controlGroupInput) {
     /**
      * <9.4, pinned panels were stored in the SO under `controlGroupInput` with the JSON bucket `panelsJSON`
+     * This was before pinned panels were transformed to be generic - they **only** stored controls
      */
     const controls = controlGroupInput.panelsJSON
       ? injectPinnedPanelReferences(
           flow(
             JSON.parse,
             transformPinnedPanelsObjectToArray,
-            transformPinnedPanelProperties
+            transformLegacyPinnedPanelProperties
           )(controlGroupInput.panelsJSON),
           containerReferences
         )
@@ -79,16 +83,18 @@ export function transformPinnedPanelsOut(
 }
 
 /**
- * Transform functions for serialized pinned panels
+ * The SO stores pinned panel as an object with `order` while the Dashboard API expects an array
  */
-
 function transformPinnedPanelsObjectToArray(
   controls: StoredPinnedPanels
 ): Array<StoredPinnedPanels[string] & { id: string }> {
   return Object.entries(controls).map(([id, control]) => ({ ...control, id }));
 }
 
-function transformPinnedPanelProperties(
+/**
+ * The SO stores the panel config under `explicitInput`
+ */
+function transformLegacyPinnedPanelProperties(
   controls: Array<StoredPinnedPanels[string] & { id: string }>
 ): PinnedPanelsState {
   return controls
@@ -104,6 +110,9 @@ function transformPinnedPanelProperties(
     });
 }
 
+/**
+ * Inject references via the embeddable transforms
+ */
 function injectPinnedPanelReferences(
   controls: PinnedPanelsState,
   containerReferences: Reference[]

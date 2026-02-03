@@ -15,7 +15,6 @@ export type {
   ControlWidth,
   DataControlState,
   HasCustomPrepend,
-  LegacyIgnoreParentSettings,
   OptionsListControlState,
   OptionsListDisplaySettings,
   OptionsListDSLControlState,
@@ -32,8 +31,10 @@ export type {
 } from './src/types';
 
 export type {
-  LegacyStoredPinnedControls,
-  LegacyStoredPinnedControlState,
+  LegacyIgnoreParentSettings,
+  LegacyStoredDataControlState,
+  LegacyStoredOptionsListExplicitInput,
   LegacyStoredRangeSliderExplicitInput,
+  LegacyStoredESQLControlExplicitInput,
   LegacyStoredTimeSliderExplicitInput,
-} from './src/legacy_stored';
+} from './src/legacy_types';

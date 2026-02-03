@@ -8,20 +8,17 @@
  */
 
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { TimeSliderControlState } from '@kbn/controls-schemas';
+import type {
+  LegacyStoredTimeSliderExplicitInput,
+  TimeSliderControlState,
+} from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-
-interface StoredTimeSliderExplicitInput {
-  isAnchored?: boolean;
-  timesliceEndAsPercentageOfTimeRange?: number;
-  timesliceStartAsPercentageOfTimeRange?: number;
-}
 
 export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(TIME_SLIDER_CONTROL, {
     transformOut: <
-      StoredStateType extends Partial<StoredTimeSliderExplicitInput & TimeSliderControlState>
+      StoredStateType extends Partial<LegacyStoredTimeSliderExplicitInput & TimeSliderControlState>
     >(
       state: StoredStateType
     ): TimeSliderControlState => {
@@ -34,7 +31,9 @@ export const registerTimeSliderControlTransforms = (embeddable: EmbeddableSetup)
         timeslice_end_as_percentage_of_time_range,
         start_percentage_of_time_range,
         end_percentage_of_time_range,
-      } = convertCamelCasedKeysToSnakeCase(state);
+      } = convertCamelCasedKeysToSnakeCase(
+        state as LegacyStoredTimeSliderExplicitInput & TimeSliderControlState
+      );
       return {
         is_anchored,
         /**

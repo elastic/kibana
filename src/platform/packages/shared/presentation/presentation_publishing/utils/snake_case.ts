@@ -17,9 +17,9 @@ import type { SnakeCasedKeys } from './types';
  * @returns The object with `snake_cased` keys
  */
 export const convertCamelCasedKeysToSnakeCase = <StateType extends object = object>(
-  input: Partial<StateType> & Partial<SnakeCasedKeys<StateType>>
-): Partial<SnakeCasedKeys<StateType>> => {
-  const snakeCased: Partial<SnakeCasedKeys<StateType>> = {};
+  input: StateType
+): SnakeCasedKeys<StateType> => {
+  const snakeCased = {} as SnakeCasedKeys<StateType>;
 
   const convertSubObject = (subObject: object, path: string = '') => {
     for (const [key, value] of Object.entries(subObject)) {

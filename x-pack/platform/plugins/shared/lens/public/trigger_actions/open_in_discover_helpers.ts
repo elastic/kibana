@@ -27,6 +27,7 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { isControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {

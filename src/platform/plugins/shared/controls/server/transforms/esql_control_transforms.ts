@@ -8,26 +8,12 @@
  */
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type {
+  LegacyStoredESQLControlExplicitInput,
+  OptionsListESQLControlState,
+} from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-
-interface LegacyStoredESQLControlExplicitInput {
-  availableOptions?: string[];
-  controlType: string;
-  displaySettings?: {
-    placeholder?: string;
-    hideActionBar?: boolean;
-    hideExclude?: boolean;
-    hideExists?: boolean;
-    hideSort?: boolean;
-  };
-  esqlQuery: string;
-  selectedOptions?: string[];
-  singleSelect?: boolean;
-  variableName: string;
-  variableType: string;
-}
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(ESQL_CONTROL, {
@@ -50,7 +36,9 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
         single_select,
         variable_name,
         variable_type,
-      } = convertCamelCasedKeysToSnakeCase(state);
+      } = convertCamelCasedKeysToSnakeCase<LegacyStoredESQLControlExplicitInput>(
+        state as LegacyStoredESQLControlExplicitInput
+      );
       return {
         available_options,
         control_type: control_type as OptionsListESQLControlState['control_type'],
