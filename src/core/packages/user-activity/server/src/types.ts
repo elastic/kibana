@@ -12,13 +12,9 @@
  * @public
  */
 export interface UserActivityObject {
-  /** Unique identifier of the object */
   id: string;
-  /** Display name of the object */
   name: string;
-  /** Object type, e.g., 'dashboard', 'visualization', 'lens' */
   type: string;
-  /** Tags associated with the object */
   tags: string[];
 }
 
@@ -47,37 +43,30 @@ export type UserActivityEventType =
   | 'user';
 
 /**
- * Information about the action being performed.
+ * Information about the event being performed by the user.
  * @public
  */
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: string;
-  /** ECS event type categorizing the action */
   type: UserActivityEventType;
 }
 
-/**
- * Parameters for tracking a user action.
- * @public
- */
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
   message?: string;
-  /** Information about the action being performed */
   event: UserActivityEvent;
-  /** Information about the object being acted upon */
   object: UserActivityObject;
 }
 
 /**
- * Allows plugins to record user actions for auditing and compliance.
+ * Allows plugins to record user actions.
  * Contextual information (user, session, space, IP) is automatically injected.
  *
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'create', type: 'creation' },
+ *   event: { action: 'create_dashboard', type: 'creation' },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```
@@ -92,7 +81,7 @@ export interface UserActivityServiceSetup {
 }
 
 /**
- * Allows plugins to record user actions for auditing and compliance.
+ * Allows plugins to record user actions.
  * Contextual information (user, session, space, IP) is automatically injected.
  * @public
  */

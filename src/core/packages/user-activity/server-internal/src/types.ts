@@ -58,7 +58,7 @@ export interface InternalUserActivityServiceSetup extends UserActivityServiceSet
 export interface InternalUserActivityServiceStart extends UserActivityServiceStart {
   /**
    * Sets request-scoped context that will be included in tracked actions.
-   * Multiple calls merge the context
+   * Multiple calls merge the context.
    *
    * @param newContext {@link InjectedContext}.
    */

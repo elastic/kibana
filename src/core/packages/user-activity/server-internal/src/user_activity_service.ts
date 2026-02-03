@@ -28,7 +28,6 @@ interface UserActivitySetupDeps {
 /**
  * Service for recording user actions within Kibana.
  *
- * Supports custom logging appenders using the same schema as the core logging service.
  * @internal
  */
 export class UserActivityService
