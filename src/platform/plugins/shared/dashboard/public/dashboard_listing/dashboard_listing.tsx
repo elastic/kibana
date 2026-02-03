@@ -49,7 +49,9 @@ export const DashboardListing = ({
     [goToDashboard, getDashboardUrl, useSessionStorageIntegration, initialFilter, getTabs]
   );
 
-  const activeTabId = tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+  const activeTabId = useMemo(() => {
+    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+  }, [tabs, activeTabParam]);
 
   const changeActiveTab = (tabId: string) => {
     history.push(`/list/${tabId}`);
