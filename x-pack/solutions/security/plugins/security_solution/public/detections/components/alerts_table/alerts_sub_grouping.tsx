@@ -326,7 +326,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     (
       groupFilters: Filter[],
       groupNumber: number,
-      groupBucket: GroupingBucket<AlertsGroupingAggregation>
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>,
+      closePopover: () => void
     ) => {
       const takeActionParams = {
         groupNumber,
@@ -334,6 +335,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         selectedGroup,
         tableId,
         groupBucket,
+        closePopover,
       };
 
       return groupTakeActionItems?.(takeActionParams);
