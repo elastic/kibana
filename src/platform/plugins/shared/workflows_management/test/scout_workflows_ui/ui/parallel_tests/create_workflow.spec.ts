@@ -26,6 +26,14 @@ steps:
       message: "{{ inputs.message }}"
 `;
 
+const getInvalidWorkflowYaml = (name: string) => `
+name: ${name}
+description: Invalid workflow - missing steps
+enabled: true
+triggers:
+  - type: manual
+`;
+
 test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
@@ -70,5 +78,34 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await expect(
       page.testSubj.locator('workflowStepExecutionDetails').getByTestId('jsonDataTable')
     ).toContainText('Hello Kibana');
+  });
+
+  test('should show validation errors for invalid workflow YAML and clear them when fixed', async ({
+    page,
+  }) => {
+    await page.gotoApp('workflows');
+    await page.testSubj.click('createWorkflowButton');
+
+    const yamlEditor = page.testSubj.locator('workflowYamlEditor');
+    await expect(yamlEditor).toBeVisible();
+
+    const workflowName = `Invalid workflow ${Math.floor(Math.random() * 1000)}`;
+    const yamlEditorWrapper = new KibanaCodeEditorWrapper(page);
+    await yamlEditorWrapper.setCodeEditorValue(getInvalidWorkflowYaml(workflowName));
+
+    // Wait for validation to complete and show errors
+    const validationAccordion = page.getByTestId('wf-yaml-editor-validation-errors-list');
+    await expect(validationAccordion).toBeVisible();
+    await expect(validationAccordion).toContainText('error');
+
+    // Click to expand the accordion and verify the specific error message
+    await validationAccordion.getByRole('button', { name: 'error' }).click();
+    await expect(validationAccordion.getByText('missing property "steps"')).toBeVisible();
+
+    // Fix the workflow by pasting valid YAML
+    await yamlEditorWrapper.setCodeEditorValue(getDummyWorkflowYaml(workflowName));
+
+    // Validation errors should disappear
+    await expect(validationAccordion).toContainText('No validation errors');
   });
 });
