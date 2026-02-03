@@ -24,6 +24,7 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   euiDragDropReorder,
 } from '@elastic/eui';
@@ -32,9 +33,10 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PRIMARY_NAVIGATION_ID } from '../constants';
+import { PRIMARY_NAVIGATION_ID, TOOLTIP_OFFSET } from '../constants';
 import type { MenuItem } from '../../types';
 import type { IconType } from '@elastic/eui';
+import { useTooltip } from '../hooks/use_tooltip';
 
 interface NavItemConfig {
   id: string;
@@ -90,6 +92,7 @@ export const SideNavCollapseButton: FC<Props> = ({
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { tooltipRef, handleMouseOut } = useTooltip();
 
   // Determine locked items (first 2: Discover and Dashboards)
   const LOCKED_IDS = ['discover', 'dashboards'];
@@ -226,21 +229,43 @@ export const SideNavCollapseButton: FC<Props> = ({
     [onSetNavItemVisibility]
   );
 
+  const button = (
+    <EuiButtonIcon
+      data-test-subj="sideNavCollapseButton"
+      css={styles.sideNavCollapseButton}
+      size="s"
+      color="text"
+      iconType={iconType}
+      aria-label={i18n.translate('core.ui.chrome.sideNavigation.openModalButtonLabel', {
+        defaultMessage: 'Open navigation menu',
+      })}
+      aria-controls={PRIMARY_NAVIGATION_ID}
+      onClick={openModal}
+    />
+  );
+
+  const tooltipContent = i18n.translate('core.ui.chrome.sideNavigation.navigationPreferencesTooltip', {
+    defaultMessage: 'Navigation preferences',
+  });
+
   return (
     <>
       <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
-        <EuiButtonIcon
-          data-test-subj="sideNavCollapseButton"
-          css={styles.sideNavCollapseButton}
-          size="s"
-          color="text"
-          iconType={iconType}
-          aria-label={i18n.translate('core.ui.chrome.sideNavigation.openModalButtonLabel', {
-            defaultMessage: 'Open navigation menu',
-          })}
-          aria-controls={PRIMARY_NAVIGATION_ID}
-          onClick={openModal}
-        />
+        {!showLabels ? (
+          <EuiToolTip
+            ref={tooltipRef}
+            content={tooltipContent}
+            disableScreenReaderOutput
+            onMouseOut={handleMouseOut}
+            position="right"
+            repositionOnScroll
+            offset={TOOLTIP_OFFSET}
+          >
+            {button}
+          </EuiToolTip>
+        ) : (
+          button
+        )}
       </div>
       {isModalOpen && (
         <EuiModal
