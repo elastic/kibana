@@ -13,7 +13,9 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 import type { UserItem } from '../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../../common/components/link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -24,11 +26,18 @@ interface UserPanelHeaderProps {
   userName: string;
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
+  /** When provided, used to build the user details page URL with entityIdentifiers segment */
+  entityIdentifiers?: EntityIdentifiers;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
-export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
+export const UserPanelHeader = ({
+  userName,
+  observedUser,
+  managedUser,
+  entityIdentifiers,
+}: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
@@ -45,6 +54,7 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
     [oktaTimestamp, entraTimestamp, observedUser.lastSeen]
   );
 
+  console.log('entityIdentifiers', entityIdentifiers);
   return (
     <FlyoutHeader data-test-subj="user-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -57,7 +67,12 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.users}
-            path={getUsersDetailsUrl(userName)}
+            path={getTabsOnUsersDetailsUrl(
+              userName,
+              UsersTableType.events,
+              undefined,
+              entityIdentifiers
+            )}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}

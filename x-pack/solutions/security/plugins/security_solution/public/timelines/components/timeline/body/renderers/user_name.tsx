@@ -82,6 +82,7 @@ const UserNameComponent: React.FC<Props> = ({
         isButton={isButton}
         onClick={isInTimelineContext || !isInSecurityApp ? openUserDetailsSidePanel : undefined}
         title={title}
+        entityIdentifiers={entityIdentifiers ?? undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
       </UserDetailsLink>
@@ -94,6 +95,7 @@ const UserNameComponent: React.FC<Props> = ({
       Component,
       title,
       isInSecurityApp,
+      entityIdentifiers,
     ]
   );
 

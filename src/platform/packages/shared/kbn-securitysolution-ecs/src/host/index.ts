@@ -18,6 +18,12 @@ export interface HostEcs {
 
   name?: string[];
 
+  /** Host domain; used with name or hostname for EUID (e.g. name.domain). */
+  domain?: string[];
+
+  /** Hostname; used for EUID when host.name is absent. */
+  hostname?: string[];
+
   os?: OsEcs;
 
   type?: string[];

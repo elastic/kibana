@@ -21,7 +21,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
-import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import {
+  buildHostFilterFromEntityIdentifiers,
+  buildHostNamesFilter,
+} from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
@@ -80,14 +83,16 @@ export const HostPanel = ({
   }, [entityIdentifiers]);
 
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
-  const hostNameFilterQuery = useMemo(
-    () => (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [effectiveHostName]
+  const hostFilterQuery = useMemo(
+    () =>
+      buildHostFilterFromEntityIdentifiers(entityIdentifiers) ??
+      (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
+    [entityIdentifiers, effectiveHostName]
   );
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.host,
-    filterQuery: hostNameFilterQuery,
+    filterQuery: hostFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
@@ -186,7 +191,7 @@ export const HostPanel = ({
               isRulePreview={scopeId === TableId.rulePreview}
             />
             <HostPanelHeader
-              hostName={effectiveHostName}
+              entityIdentifiers={entityIdentifiers}
               observedHost={observedHostWithAnomalies}
             />
             <HostPanelContent

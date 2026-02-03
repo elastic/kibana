@@ -36,11 +36,12 @@ export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs<UsersRouteSpyState> 
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {
+    const encodedSegment = params.state?.entityIdentifiers;
     breadcrumb = [
       {
         text: params.detailName,
         href: getSecuritySolutionUrl({
-          path: getUsersDetailsUrl(params.detailName, ''),
+          path: getUsersDetailsUrl(params.detailName, '', encodedSegment),
           deepLinkId: SecurityPageName.users,
         }),
       },

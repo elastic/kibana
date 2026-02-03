@@ -20,9 +20,10 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { euid } from '@kbn/entity-store/common';
+import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getField } from '../../shared/utils';
@@ -100,13 +101,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
     [from, to]
   );
 
-  const filterQuery = useMemo(
-    () =>
-      entityIdentifiers['user.name']
-        ? buildUserNamesFilter([entityIdentifiers['user.name']])
-        : undefined,
-    [entityIdentifiers]
-  );
+  const filterQuery = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers) as ESQuery;
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
     endDate: to,
     entityIdentifiers,

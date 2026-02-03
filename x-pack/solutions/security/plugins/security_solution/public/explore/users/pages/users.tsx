@@ -67,7 +67,11 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const UsersComponent = () => {
+const UsersComponent = ({
+  encodedEntityIdentifiersSegment,
+}: {
+  encodedEntityIdentifiersSegment?: string;
+}) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -90,7 +94,7 @@ const UsersComponent = () => {
   const { globalFullScreen } = useGlobalFullScreen();
   const { uiSettings } = useKibana().services;
 
-  const { tabName } = useParams<{ tabName: string }>();
+  const { tabName } = useParams<{ tabName: string; entityIdentifiers?: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === UsersTableType.events) {
       return [...globalFilters, ...userNameExistsFilter];
@@ -179,7 +183,10 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
+  const navTabs = useMemo(
+    () => navTabsUsers(hasMlUserPermissions(capabilities), encodedEntityIdentifiersSegment),
+    [capabilities, encodedEntityIdentifiersSegment]
+  );
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -235,7 +242,14 @@ const UsersComponent = () => {
         <EmptyPrompt />
       )}
 
-      <SpyRoute pageName={SecurityPageName.users} />
+      <SpyRoute
+        pageName={SecurityPageName.users}
+        state={
+          encodedEntityIdentifiersSegment
+            ? { entityIdentifiers: encodedEntityIdentifiersSegment }
+            : undefined
+        }
+      />
     </>
   );
 };

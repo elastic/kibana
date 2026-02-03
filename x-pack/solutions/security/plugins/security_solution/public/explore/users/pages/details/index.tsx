@@ -82,6 +82,7 @@ const QUERY_ID = 'UsersDetailsQueryId';
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   entityIdentifiers,
   usersDetailsPagePath,
+  encodedEntityIdentifiersSegment,
 }) => {
   const detailName = useMemo(() => entityIdentifiers['user.name'], [entityIdentifiers]);
   const dispatch = useDispatch();
@@ -302,7 +303,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <TabNavigation
-              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
+              navTabs={navTabsUsersDetails(
+                detailName,
+                hasMlUserPermissions(capabilities),
+                entityIdentifiers
+              )}
             />
             <EuiSpacer />
             <UsersDetailsTabs
@@ -325,7 +330,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <EmptyPrompt />
       )}
 
-      <SpyRoute pageName={SecurityPageName.users} />
+      <SpyRoute
+        pageName={SecurityPageName.users}
+        state={
+          encodedEntityIdentifiersSegment
+            ? { entityIdentifiers: encodedEntityIdentifiersSegment }
+            : undefined
+        }
+      />
     </>
   );
 };

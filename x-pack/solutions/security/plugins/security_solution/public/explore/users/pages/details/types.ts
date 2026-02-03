@@ -33,6 +33,8 @@ interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchPr
 export interface UsersDetailsProps {
   entityIdentifiers: Record<string, string>;
   usersDetailsPagePath: string;
+  /** Encoded entityIdentifiers URL segment for breadcrumbs/SpyRoute state */
+  encodedEntityIdentifiersSegment?: string;
 }
 
 export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &

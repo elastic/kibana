@@ -8,6 +8,7 @@
 import { get } from 'lodash/fp';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
+import { decodeEntityIdentifiersFromUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 
@@ -38,12 +39,16 @@ export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs<HostRouteSpyState> =
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {
+    const entityIdentifiersForUrl =
+      params.entityIdentifiers != null
+        ? decodeEntityIdentifiersFromUrl(params.entityIdentifiers)
+        : undefined;
     breadcrumb = [
       ...breadcrumb,
       {
         text: params.detailName,
         href: getSecuritySolutionUrl({
-          path: getHostDetailsUrl(params.detailName, ''),
+          path: getHostDetailsUrl(params.detailName, '', entityIdentifiersForUrl ?? undefined),
           deepLinkId: SecurityPageName.hosts,
         }),
       },

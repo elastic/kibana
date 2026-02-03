@@ -12,7 +12,7 @@ import { HostPanelHeader } from './header';
 import { mockObservedHostData } from '../mocks';
 
 const mockProps = {
-  hostName: 'test',
+  entityIdentifiers: { 'host.name': 'test' },
   observedHost: mockObservedHostData,
 };
 

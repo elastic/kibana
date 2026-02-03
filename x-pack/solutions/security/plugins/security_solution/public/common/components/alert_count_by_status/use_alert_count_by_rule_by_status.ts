@@ -16,7 +16,7 @@ import { useQueryAlerts } from '../../../detections/containers/detection_engine/
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useQueryInspector } from '../page/manage_query';
 import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
-import { buildEntityFiltersFromEntityIdentifiers as buildEntityFiltersFromEntityIdentifiersBase } from '../../../../common/search_strategy/security_solution/risk_score/common';
+import { buildEntityFiltersFromEntityIdentifiers } from '../../../../common/search_strategy/security_solution/risk_score/common';
 
 export interface AlertCountByRuleByStatusItem {
   ruleName: string;
@@ -116,17 +116,6 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
 };
 
 export const KIBANA_RULE_ID = 'kibana.alert.rule.uuid';
-
-/**
- * Builds ESBoolQuery filters from entityIdentifiers following entity store EUID priority logic.
- * Priority order for hosts: host.entity.id > host.id > (host.name/hostname + host.domain) > (host.name/hostname + host.mac) > host.name > host.hostname
- * Priority order for users: user.entity.id > user.id > user.email > user.name (with related fields)
- */
-export const buildEntityFiltersFromEntityIdentifiers = (
-  entityIdentifiers: EntityIdentifiers
-): ESBoolQuery[] => {
-  return buildEntityFiltersFromEntityIdentifiersBase(entityIdentifiers) as ESBoolQuery[];
-};
 
 export const buildRuleAlertsByEntityQuery = ({
   additionalFilters = [],

@@ -15,6 +15,7 @@
       "securitySolution"
     ],
     "requiredPlugins": [
+      "entityStore",
       "actions",
       "alerting",
       "cases",

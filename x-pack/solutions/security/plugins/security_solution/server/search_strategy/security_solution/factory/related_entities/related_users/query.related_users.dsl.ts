@@ -6,8 +6,8 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { euid } from '@kbn/entity-store/common';
 import type { RelatedUsersRequestOptions } from '../../../../../../common/api/search_strategy';
-import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 export const buildRelatedUsersQuery = ({
   entityIdentifiers,
@@ -15,9 +15,9 @@ export const buildRelatedUsersQuery = ({
   from,
 }: RelatedUsersRequestOptions): ISearchRequestParams => {
   const now = new Date();
-  const entityFilters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
   const filter = [
-    ...entityFilters,
+    ...(entityFilters ? [entityFilters] : []),
     { term: { 'event.category': 'authentication' } },
     { term: { 'event.outcome': 'success' } },
     {

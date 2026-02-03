@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { euid } from '@kbn/entity-store/common';
 import { EntityTypeToIdentifierField, EntityType } from '../../../../entity_analytics/types';
 import type { ESQuery } from '../../../../typed_json';
 import {
@@ -30,105 +31,6 @@ export const buildEntityNameFilter = (riskEntity: EntityType, entityNames: strin
 };
 
 /**
- * Adds optional related host filters to the filters array
- */
-const addRelatedHostFilters = (
-  filters: QueryDslQueryContainer[],
-  entityIdentifiers: Record<string, string>
-): void => {
-  if (entityIdentifiers['host.id']) {
-    filters.push({ term: { 'host.id': entityIdentifiers['host.id'] } });
-  }
-  if (entityIdentifiers['host.domain']) {
-    filters.push({ term: { 'host.domain': entityIdentifiers['host.domain'] } });
-  }
-  if (entityIdentifiers['host.name']) {
-    filters.push({ term: { 'host.name': entityIdentifiers['host.name'] } });
-  }
-  if (entityIdentifiers['host.hostname']) {
-    filters.push({ term: { 'host.hostname': entityIdentifiers['host.hostname'] } });
-  }
-};
-
-/**
- * Builds host entity filters following EUID priority logic
- */
-const buildHostEntityFilters = (
-  entityIdentifiers: Record<string, string>
-): QueryDslQueryContainer[] | null => {
-  const filters: QueryDslQueryContainer[] = [];
-
-  if (entityIdentifiers['host.entity.id']) {
-    filters.push({ term: { 'host.entity.id': entityIdentifiers['host.entity.id'] } });
-    return filters;
-  }
-
-  if (entityIdentifiers['host.id']) {
-    filters.push({ term: { 'host.id': entityIdentifiers['host.id'] } });
-    return filters;
-  }
-
-  if (entityIdentifiers['host.name']) {
-    filters.push({ term: { 'host.name': entityIdentifiers['host.name'] } });
-    if (entityIdentifiers['host.domain']) {
-      filters.push({ term: { 'host.domain': entityIdentifiers['host.domain'] } });
-    }
-    if (entityIdentifiers['host.mac']) {
-      filters.push({ term: { 'host.mac': entityIdentifiers['host.mac'] } });
-    }
-    return filters;
-  }
-
-  if (entityIdentifiers['host.hostname']) {
-    filters.push({ term: { 'host.hostname': entityIdentifiers['host.hostname'] } });
-    if (entityIdentifiers['host.domain']) {
-      filters.push({ term: { 'host.domain': entityIdentifiers['host.domain'] } });
-    }
-    if (entityIdentifiers['host.mac']) {
-      filters.push({ term: { 'host.mac': entityIdentifiers['host.mac'] } });
-    }
-    return filters;
-  }
-
-  return null;
-};
-
-/**
- * Builds user entity filters following EUID priority logic
- */
-const buildUserEntityFilters = (
-  entityIdentifiers: Record<string, string>
-): QueryDslQueryContainer[] | null => {
-  const filters: QueryDslQueryContainer[] = [];
-
-  if (entityIdentifiers['user.entity.id']) {
-    filters.push({ term: { 'user.entity.id': entityIdentifiers['user.entity.id'] } });
-    return filters;
-  }
-
-  if (entityIdentifiers['user.id']) {
-    filters.push({ term: { 'user.id': entityIdentifiers['user.id'] } });
-    return filters;
-  }
-
-  if (entityIdentifiers['user.email']) {
-    filters.push({ term: { 'user.email': entityIdentifiers['user.email'] } });
-    return filters;
-  }
-
-  if (entityIdentifiers['user.name']) {
-    filters.push({ term: { 'user.name': entityIdentifiers['user.name'] } });
-    if (entityIdentifiers['user.domain']) {
-      filters.push({ term: { 'user.domain': entityIdentifiers['user.domain'] } });
-    }
-    addRelatedHostFilters(filters, entityIdentifiers);
-    return filters;
-  }
-
-  return null;
-};
-
-/**
  * Unified method to build Elasticsearch query filters from entityIdentifiers following entity store EUID priority logic.
  * Priority order for hosts: host.entity.id > host.id > (host.name/hostname + host.domain) > (host.name/hostname + host.mac) > host.name > host.hostname
  * Priority order for users: user.entity.id > user.id > user.email > user.name (with related fields)
@@ -140,15 +42,15 @@ export const buildEntityFiltersFromEntityIdentifiers = (
   entityIdentifiers: Record<string, string>
 ): QueryDslQueryContainer[] => {
   // Try host entity identifiers first
-  const hostFilters = buildHostEntityFilters(entityIdentifiers);
+  const hostFilters = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
   if (hostFilters) {
-    return hostFilters;
+    return [hostFilters];
   }
 
   // Try user entity identifiers
-  const userFilters = buildUserEntityFilters(entityIdentifiers);
+  const userFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
   if (userFilters) {
-    return userFilters;
+    return [userFilters];
   }
 
   // IP address fields (source.ip, destination.ip) - fallback for network pages
@@ -172,29 +74,15 @@ export const buildEntityFiltersFromEntityIdentifiers = (
 
 /**
  * Builds an Elasticsearch filter for host queries based on entityIdentifiers.
- * Follows entity store EUID priority: host.entity.id > host.id > host.name/hostname
- * @param entityIdentifiers - Key-value pairs of field names and their values
+ * Uses EUID priority from entity_store common (see getEuidDslFilterBasedOnDocument).
+ * @param entityIdentifiers - Key-value pairs of field names and their values (used as document for EUID)
  * @returns ESQuery filter object, or undefined if no valid identifiers found
  */
 export const buildHostFilterFromEntityIdentifiers = (
   entityIdentifiers: Record<string, string>
 ): ESQuery | undefined => {
-  const filters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
-  // Return the first filter if it's a host-related filter, otherwise undefined
-  if (filters.length > 0) {
-    const firstFilter = filters[0];
-    if (
-      'term' in firstFilter &&
-      firstFilter.term &&
-      ('host.entity.id' in firstFilter.term ||
-        'host.id' in firstFilter.term ||
-        'host.name' in firstFilter.term ||
-        'host.hostname' in firstFilter.term)
-    ) {
-      return firstFilter as ESQuery;
-    }
-  }
-  return undefined;
+  const filter = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
+  return filter as ESQuery | undefined;
 };
 
 export { EntityType };

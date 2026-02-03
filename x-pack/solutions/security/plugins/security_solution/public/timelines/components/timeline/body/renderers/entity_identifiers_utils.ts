@@ -27,6 +27,7 @@ const getFieldValue = (data: TimelineNonEcsData[], fieldName: string): string | 
 export const getUserEntityIdentifiersFromTimelineData = (
   data: TimelineNonEcsData[]
 ): EntityIdentifiers | null => {
+  console.log('getUserEntityIdentifiersFromTimelineData data', data);
   const identifiers: EntityIdentifiers = {};
 
   // Check fields in priority order (same as entity store EUID logic)

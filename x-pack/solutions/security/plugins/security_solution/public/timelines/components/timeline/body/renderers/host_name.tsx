@@ -62,7 +62,7 @@ const HostNameComponent: React.FC<Props> = ({
 
       const { timelineID } = eventContext;
       // Use entityIdentifiers from source event if available, otherwise fall back to host.name only
-      const finalEntityIdentifiers = entityIdentifiers || { 'host.name': hostName };
+      const finalEntityIdentifiers = entityIdentifiers;
       openFlyout({
         right: {
           id: HostPanelKey,
@@ -74,7 +74,7 @@ const HostNameComponent: React.FC<Props> = ({
         },
       });
     },
-    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout, entityIdentifiers]
+    [contextId, eventContext, isInTimelineContext, onClick, openFlyout, entityIdentifiers]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -87,6 +87,7 @@ const HostNameComponent: React.FC<Props> = ({
         isButton={isButton}
         onClick={isInTimelineContext || !isInSecurityApp ? openHostDetailsSidePanel : undefined}
         title={title}
+        entityIdentifiers={entityIdentifiers ?? undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
@@ -96,9 +97,10 @@ const HostNameComponent: React.FC<Props> = ({
       hostName,
       isButton,
       isInTimelineContext,
+      isInSecurityApp,
       openHostDetailsSidePanel,
       title,
-      isInSecurityApp,
+      entityIdentifiers,
     ]
   );
 

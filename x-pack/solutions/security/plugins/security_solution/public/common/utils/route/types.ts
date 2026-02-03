@@ -19,6 +19,7 @@ import type { SecurityPageName } from '../../../app/types';
 interface GenericRouteSpyState<Page = string, Tabs = string> {
   pageName: Page;
   detailName: string | undefined;
+  entityIdentifiers?: string;
   tabName?: Tabs;
   search: string;
   pathName: string;

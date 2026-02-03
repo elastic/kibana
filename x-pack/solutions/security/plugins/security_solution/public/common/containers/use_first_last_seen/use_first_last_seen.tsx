@@ -9,6 +9,7 @@ import { useEffect, useMemo } from 'react';
 import * as i18n from './translations';
 
 import { useSearchStrategy } from '../use_search_strategy';
+import { useSpaceId } from '../../hooks/use_space_id';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
@@ -32,6 +33,7 @@ export const useFirstLastSeen = ({
   defaultIndex,
   filterQuery,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
+  const spaceId = useSpaceId();
   const { loading, result, search, error } = useSearchStrategy<typeof FirstLastSeenQuery>({
     factoryQueryType: FirstLastSeenQuery,
     initialResult: {
@@ -47,8 +49,9 @@ export const useFirstLastSeen = ({
       entityIdentifiers,
       order,
       filterQuery,
+      spaceId,
     });
-  }, [defaultIndex, entityIdentifiers, order, search, filterQuery]);
+  }, [defaultIndex, entityIdentifiers, order, search, filterQuery, spaceId]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

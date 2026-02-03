@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { euid } from '@kbn/entity-store/common';
+import type { ESQuery } from '../../../../common/typed_json';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -22,7 +24,6 @@ import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
@@ -77,14 +78,11 @@ export const UserPanel = ({
     return userNameFromIdentifiers as string;
   }, [entityIdentifiers]);
 
-  const userNameFilterQuery = useMemo(
-    () => (effectiveUserName ? buildUserNamesFilter([effectiveUserName]) : undefined),
-    [effectiveUserName]
-  );
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: userNameFilterQuery,
+    filterQuery: entityFilters as ESQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
@@ -190,6 +188,7 @@ export const UserPanel = ({
               userName={effectiveUserName}
               observedUser={observedUserWithAnomalies}
               managedUser={managedUser}
+              entityIdentifiers={entityIdentifiers}
             />
             <UserPanelContent
               entityIdentifiers={entityIdentifiers}
