@@ -114,6 +114,10 @@ export const getSearchEmbeddableFactory = ({
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: dynamicActionsManager?.getLatestState,
+          serializeTabState: () => ({
+            tabs: searchEmbeddable.stateManager.tabs.getValue(),
+            selectedTabId: searchEmbeddable.stateManager.selectedTabId.getValue(),
+          }),
           savedObjectId,
         });
 
@@ -147,6 +151,7 @@ export const getSearchEmbeddableFactory = ({
             controlGroupJson: 'skip',
             visContext: 'skip',
             tabs: 'skip',
+            selectedTabId: 'referenceEquality',
           };
         },
         onReset: async (lastSaved) => {

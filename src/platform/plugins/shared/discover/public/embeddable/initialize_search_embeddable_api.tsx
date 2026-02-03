@@ -10,7 +10,7 @@
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, skip } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -22,7 +22,11 @@ import type {
   ProjectRoutingOverrides,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
-import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverGridSettings,
+  DiscoverSessionTab,
+  SavedSearch,
+} from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
@@ -65,6 +69,9 @@ const initializeSearchSource = async (
   return { searchSource, dataView };
 };
 
+// Keys that are not part of SavedSearch and should be excluded when building it
+const NON_SAVED_SEARCH_KEYS: Array<keyof SearchEmbeddableStateManager> = ['tabs', 'selectedTabId'];
+
 const initializedSavedSearch = (
   stateManager: SearchEmbeddableStateManager,
   searchSource: ISearchSource,
@@ -72,6 +79,10 @@ const initializedSavedSearch = (
 ): SavedSearch => {
   return {
     ...Object.keys(stateManager).reduce((prev, key) => {
+      // Exclude keys that are not part of SavedSearch
+      if (NON_SAVED_SEARCH_KEYS.includes(key as keyof SearchEmbeddableStateManager)) {
+        return prev;
+      }
       return {
         ...prev,
         [key]: stateManager[key as keyof SearchEmbeddableStateManager].getValue(),
@@ -126,6 +137,11 @@ export const initializeSearchEmbeddableApi = async (
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
+  const tabs$ = new BehaviorSubject<DiscoverSessionTab[]>(initialState.tabs ?? []);
+  const selectedTabId$ = new BehaviorSubject<string | undefined>(initialState.selectedTabId);
+  const selectedTabNotFound$ = new BehaviorSubject<boolean>(
+    initialState.selectedTabNotFound ?? false
+  );
 
   /**
    * This is the state that comes from the search source that needs individual publishing subjects for the API
@@ -170,6 +186,9 @@ export const initializeSearchEmbeddableApi = async (
     viewMode: savedSearchViewMode$,
     density: density$,
     inspectorAdapters: inspectorAdapters$,
+    tabs: tabs$,
+    selectedTabId: selectedTabId$,
+    selectedTabNotFound: selectedTabNotFound$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -203,6 +222,42 @@ export const initializeSearchEmbeddableApi = async (
 
   const setColumns = (columns: string[] | undefined) => {
     stateManager.columns.next(columns);
+  };
+
+  const setSelectedTabId = async (tabId: string) => {
+    const tabs = tabs$.getValue();
+    const tab = tabs.find((t) => t.id === tabId);
+    if (!tab) return;
+
+    selectedTabId$.next(tabId);
+    selectedTabNotFound$.next(false);
+
+    const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+      discoverServices,
+      tab.serializedSearchSource
+    );
+
+    newSearchSource.setParent(searchSource$.getValue().getParent());
+    searchSource$.next(newSearchSource);
+    if (newDataView) {
+      dataViews$.next([newDataView]);
+    }
+
+    columns$.next(tab.columns);
+    sort$.next(tab.sort);
+    grid$.next(tab.grid);
+    rowHeight$.next(tab.rowHeight);
+    headerRowHeight$.next(tab.headerRowHeight);
+    rowsPerPage$.next(tab.rowsPerPage);
+    sampleSize$.next(tab.sampleSize);
+    savedSearchViewMode$.next(tab.viewMode);
+    density$.next(tab.density);
+
+    const newQuery = newSearchSource.getField('query');
+    const newFilters = newSearchSource.getField('filter') as Filter[];
+    query$.next(newQuery);
+    filters$.next(newFilters);
+    projectRoutingOverrides$.next(getProjectRoutingOverrides(newQuery));
   };
 
   /** Keep the saved search in sync with any state changes */
@@ -245,9 +300,16 @@ export const initializeSearchEmbeddableApi = async (
       projectRoutingOverrides$,
       canEditUnifiedSearch,
       setColumns,
+      setSelectedTabId,
     },
     stateManager,
-    anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
+    anyStateChange$: merge(
+      onAnyStateChange.pipe(map(() => undefined)),
+      selectedTabId$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     comparators: {
       sort: (a, b) => deepEqual(a ?? [], b ?? []),
       columns: 'deepEquality',
@@ -271,6 +333,8 @@ export const initializeSearchEmbeddableApi = async (
       headerRowHeight$.next(lastSaved?.headerRowHeight);
       savedSearchViewMode$.next(lastSaved?.viewMode);
       density$.next(lastSaved?.density);
+      selectedTabId$.next(lastSaved?.selectedTabId);
+      selectedTabNotFound$.next(lastSaved?.selectedTabNotFound ?? false);
     },
   };
 };

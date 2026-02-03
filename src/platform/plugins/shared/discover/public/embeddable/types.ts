@@ -34,6 +34,7 @@ import type {
   DynamicActionsSerializedState,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type {
   EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
@@ -56,6 +57,9 @@ export type SearchEmbeddablePublicState = Pick<
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
+  tabs: DiscoverSessionTab[];
+  selectedTabId: string | undefined;
+  selectedTabNotFound: boolean;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -66,7 +70,14 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  | 'rows'
+  | 'columnsMeta'
+  | 'totalHitCount'
+  | 'searchSource'
+  | 'inspectorAdapters'
+  | 'tabs'
+  | 'selectedTabId'
+  | 'selectedTabNotFound'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 
@@ -79,6 +90,9 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    tabs?: DiscoverSessionTab[];
+    selectedTabId?: string;
+    selectedTabNotFound?: boolean;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
@@ -104,6 +118,7 @@ export interface PublishesSavedSearch {
 
 export interface PublishesWritableSavedSearch extends PublishesSavedSearch {
   setColumns: (columns: string[] | undefined) => void;
+  setSelectedTabId: (tabId: string) => Promise<void>;
 }
 
 export const apiPublishesSavedSearch = (

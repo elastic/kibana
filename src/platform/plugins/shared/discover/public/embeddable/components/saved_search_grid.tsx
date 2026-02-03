@@ -21,6 +21,8 @@ import {
   getRowHeight,
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import { EuiSuperSelect, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
@@ -37,13 +39,26 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
+  isEditMode?: boolean;
+  tabs: DiscoverSessionTab[];
+  selectedTabId?: string;
+  selectedTabNotFound?: boolean;
+  onTabChange: (tabId: string) => Promise<void>;
 }
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
-
+  const {
+    interceptedWarnings,
+    isEditMode,
+    enableDocumentViewer,
+    tabs,
+    selectedTabId,
+    selectedTabNotFound,
+    onTabChange,
+    ...gridProps
+  } = props;
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
   const docViewerRef = useRef<DocViewerApi>(null);
@@ -141,6 +156,36 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       dataTestSubj="embeddedSavedSearchDocTable"
       interceptedWarnings={props.interceptedWarnings}
     >
+      {selectedTabNotFound && (
+        <>
+          <EuiCallOut
+            title="The previously selected tab no longer exists"
+            color="warning"
+            iconType="warning"
+            size="s"
+            announceOnMount
+          >
+            <p>
+              The tab that was saved with this panel has been deleted from the Discover session.
+              Showing the first available tab instead.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {isEditMode && tabs.length > 1 && (
+        <EuiSuperSelect
+          aria-label="Select discover tab you want to explore"
+          options={tabs.map((tab) => ({
+            value: tab.id,
+            inputDisplay: tab.label,
+          }))}
+          valueOfSelected={selectedTabId ?? tabs[0]?.id}
+          onChange={(value) => {
+            onTabChange(value);
+          }}
+        />
+      )}
       <DiscoverGridMemoized
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}

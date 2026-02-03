@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
@@ -16,9 +16,13 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getSortArray,
 } from '@kbn/discover-utils';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  apiPublishesViewMode,
+  useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -83,6 +87,9 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
+    tabs,
+    selectedTabId,
+    selectedTabNotFound,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -99,7 +106,10 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$
+    esqlVariables$ ?? emptyEsqlVariables$,
+    stateManager.tabs,
+    stateManager.selectedTabId,
+    stateManager.selectedTabNotFound
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -165,6 +175,12 @@ export function SearchEmbeddableGridComponent({
   // things working as they do currently until we can migrate their actions to One Discover
   const isInSecuritySolution =
     useObservable(discoverServices.application.currentAppId$) === 'securitySolutionUI';
+
+  const viewMode = useStateFromPublishingSubject(
+    apiPublishesViewMode(api.parentApi)
+      ? api.parentApi?.viewMode$
+      : (of<ViewMode>('view') as PublishingSubject<ViewMode>)
+  );
 
   const onStateEditedProps = useMemo(
     () => ({
@@ -247,6 +263,7 @@ export function SearchEmbeddableGridComponent({
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
+      isEditMode={viewMode === 'edit'}
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
@@ -258,6 +275,10 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      selectedTabNotFound={selectedTabNotFound}
+      onTabChange={api.setSelectedTabId}
     />
   );
 }

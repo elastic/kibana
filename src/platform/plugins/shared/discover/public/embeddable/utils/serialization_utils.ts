@@ -14,7 +14,11 @@ import {
   type SerializedTitles,
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
+import {
+  toSavedSearchAttributes,
+  type DiscoverSessionTab,
+  type SavedSearch,
+} from '@kbn/saved-search-plugin/common';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
@@ -38,23 +42,33 @@ export const deserializeState = async ({
     .savedObjectId;
   if (savedObjectId) {
     // by reference
-    const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId, true);
+    const session = await discoverServices.savedSearch.getDiscoverSession(savedObjectId);
 
-    const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
+    const savedSelectedTabId = (panelState as { selectedTabId?: string }).selectedTabId;
+    const foundTab = savedSelectedTabId
+      ? session.tabs.find((tab) => tab.id === savedSelectedTabId)
+      : undefined;
+    const selectedTab = foundTab ?? session.tabs[0];
+
+    const selectedTabNotFound = Boolean(savedSelectedTabId && !foundTab);
+
+    const rawSavedObjectAttributes = pick(selectedTab, EDITABLE_SAVED_SEARCH_KEYS);
     const savedObjectOverride = pick(serializedState.rawState, EDITABLE_SAVED_SEARCH_KEYS);
     return {
       // ignore the time range from the saved object - only global time range + panel time range matter
-      ...omit(so, 'timeRange'),
+      ...omit(selectedTab, 'timeRange'),
       savedObjectId,
-      savedObjectTitle: so.title,
-      savedObjectDescription: so.description,
+      savedObjectTitle: session.title,
+      savedObjectDescription: session.description,
       // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
       ...panelState,
       ...savedObjectOverride,
 
       // back up the original saved object attributes for comparison
       rawSavedObjectAttributes,
+      tabs: session.tabs,
+      selectedTabId: selectedTab.id,
+      selectedTabNotFound,
     };
   } else {
     // by value
@@ -64,10 +78,15 @@ export const deserializeState = async ({
       serializedState.rawState as SearchEmbeddableByValueState,
       true
     );
+
+    const { tabs: _tabs, ...savedSearchWithoutTabs } = savedSearch;
     return {
-      ...savedSearch,
+      ...savedSearchWithoutTabs,
       ...panelState,
       nonPersistedDisplayOptions: serializedState.rawState.nonPersistedDisplayOptions,
+      tabs: [],
+      selectedTabId: undefined,
+      selectedTabNotFound: false,
     };
   }
 };
@@ -79,6 +98,7 @@ export const serializeState = ({
   serializeTitles,
   serializeTimeRange,
   serializeDynamicActions,
+  serializeTabState,
   savedObjectId,
 }: {
   uuid: string;
@@ -87,6 +107,7 @@ export const serializeState = ({
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
+  serializeTabState: () => { tabs: DiscoverSessionTab[]; selectedTabId: string | undefined };
   savedObjectId?: string;
 }): SerializedPanelState<SearchEmbeddableState> => {
   const searchSource = savedSearch.searchSource;
@@ -95,7 +116,9 @@ export const serializeState = ({
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
-    const [{ attributes }] = savedSearchAttributes.tabs;
+
+    const firstTab = savedSearchAttributes.tabs?.[0];
+    const attributes = firstTab?.attributes ?? savedSearchAttributes;
 
     // only save the current state that is **different** than the saved object state
     const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
@@ -105,6 +128,12 @@ export const serializeState = ({
       return { ...prev, [key]: attributes[key] };
     }, {});
 
+    const currentTabState = serializeTabState();
+    const tabState =
+      currentTabState.tabs && currentTabState.tabs.length > 0
+        ? { selectedTabId: currentTabState.selectedTabId }
+        : {};
+
     return {
       rawState: {
         // Serialize the current dashboard state into the panel state **without** updating the saved object
@@ -112,6 +141,7 @@ export const serializeState = ({
         ...serializeTimeRange(),
         ...serializeDynamicActions?.(),
         ...overwriteState,
+        ...tabState,
         savedObjectId,
       },
       references: [],
