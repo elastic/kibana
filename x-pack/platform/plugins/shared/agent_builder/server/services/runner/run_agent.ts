@@ -33,6 +33,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    savedObjects,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -45,6 +46,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
+  const toolRegistry = await toolsService.getRegistry({ request });
 
   return {
     request,
@@ -52,9 +54,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(request),
+    savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
+    toolRegistry,
     toolProvider: createToolProvider({
-      registry: await toolsService.getRegistry({ request }),
+      registry: toolRegistry,
       runner: manager.getRunner(),
       request,
     }),
