@@ -1,0 +1,22 @@
+version: '1'
+name: 'sources.github.search_issues'
+description: 'Search for issues in a GitHub repository'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+  - name: repo
+    type: string
+  - name: query
+    type: string
+    required: false
+steps:
+  - name: search-issues
+    type: github.searchIssues
+    connector-id: {{stackConnectorId}}
+    with:
+      owner: "${{inputs.owner}}"
+      repo: "${{inputs.repo}}"
+      query: "${{inputs.query}}"

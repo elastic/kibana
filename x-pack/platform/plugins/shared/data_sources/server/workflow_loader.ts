@@ -1,0 +1,130 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { promises as fs } from 'fs';
+import { join, extname } from 'path';
+import type {
+  WorkflowInfo,
+  WorkflowsConfig,
+} from '@kbn/data-catalog-plugin/common/data_source_spec';
+import type { WorkflowRegistry } from './workflow_registry';
+import { loadWorkflowsFromRegistry } from './workflow_registry';
+
+/**
+ * Loads workflow YAML files from a directory and converts them to WorkflowInfo objects.
+ *
+ * @param workflowsDir - Absolute path to the directory containing workflow YAML files
+ * @param stackConnectorId - Stack connector ID to substitute in workflow templates
+ * @returns Array of WorkflowInfo objects
+ *
+ * @throws Error if the directory doesn't exist or can't be read
+ */
+export async function loadWorkflowsFromDirectory(
+  workflowsDir: string,
+  stackConnectorId?: string
+): Promise<WorkflowInfo[]> {
+  try {
+    const files = await fs.readdir(workflowsDir);
+
+    // Filter for YAML files
+    const yamlFiles = files.filter((file) => {
+      const ext = extname(file);
+      return ext === '.yaml' || ext === '.yml';
+    });
+
+    if (yamlFiles.length === 0) {
+      throw new Error(`No YAML workflow files found in directory: ${workflowsDir}`);
+    }
+
+    // Load and process each YAML file
+    return await Promise.all(
+      yamlFiles.map(async (file) => {
+        const filePath = join(workflowsDir, file);
+        let content = await fs.readFile(filePath, 'utf-8');
+        // Replace template variables
+        if (stackConnectorId) {
+          content = content.replace(/\{\{stackConnectorId\}\}/g, stackConnectorId);
+        }
+        const shouldGenerateABTool = hasAgentBuilderToolTag(content);
+
+        return {
+          content,
+          shouldGenerateABTool,
+        };
+      })
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        throw new Error(`Workflows directory does not exist: ${workflowsDir}`, { cause: error });
+      }
+      throw new Error(`Failed to load workflows from ${workflowsDir}: ${error.message}`, {
+        cause: error,
+      });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Determines if a workflow has the 'agent-builder-tool' tag.
+ * Checks for the tag in the tags array of the YAML.
+ *
+ * @param yamlContent - The YAML content as a string
+ * @returns true if the workflow has the 'agent-builder-tool' tag
+ */
+function hasAgentBuilderToolTag(yamlContent: string): boolean {
+  // Simple regex-based check for the tag in a tags array
+  // Matches patterns like:
+  //   tags: ['agent-builder-tool']
+  //   tags: ["agent-builder-tool"]
+  //   tags:
+  //     - agent-builder-tool
+  const tagPatterns = [
+    /tags:\s*\[\s*['"]agent-builder-tool['"]\s*(?:,|\])/m,
+    /tags:\s*\[\s*['"]agent-builder-tool['"]/m,
+    /tags:\s*\n\s*-\s*['"]?agent-builder-tool['"]?/m,
+  ];
+
+  return tagPatterns.some((pattern) => pattern.test(yamlContent));
+}
+
+export async function loadWorkflows(
+  workflowsConfig: WorkflowsConfig,
+  registry: WorkflowRegistry | undefined,
+  stackConnectorId?: string
+): Promise<WorkflowInfo[]> {
+  const workflows: WorkflowInfo[] = [];
+
+  // Load from directory if specified
+  if (workflowsConfig.directory) {
+    const directoryWorkflows = await loadWorkflowsFromDirectory(
+      workflowsConfig.directory,
+      stackConnectorId
+    );
+    workflows.push(...directoryWorkflows);
+  }
+
+  // Load from registry if specified
+  if (workflowsConfig.registry && workflowsConfig.registry.length > 0) {
+    if (!registry) {
+      throw new Error('WorkflowRegistry is required when using registry workflow references');
+    }
+    const registryWorkflows = await loadWorkflowsFromRegistry(
+      registry,
+      workflowsConfig.registry,
+      stackConnectorId
+    );
+    workflows.push(...registryWorkflows);
+  }
+
+  if (workflows.length === 0) {
+    throw new Error('No workflows configured: specify either directory or registry');
+  }
+
+  return workflows;
+}

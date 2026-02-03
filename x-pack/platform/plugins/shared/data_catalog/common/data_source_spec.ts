@@ -38,6 +38,24 @@ export interface WorkflowInfo {
 }
 
 /**
+ * Reference to a workflow in a third-party workflow registry
+ */
+export interface WorkflowReference {
+  /** Unique identifier of the workflow in the registry */
+  // assuming referencing by ID makes the most sense, at least for now;
+  // not sure if we'd want to reference by a tag or a collection of some sort in the future
+  id: string;
+  /** Optional version of the workflow to use; defaults to latest */
+  version?: string;
+  /**
+   * Optional override to control AB tool generation.
+   * If not specified, the registry's default behavior will be used,
+   * which relies on whether there is an ` agent-builder-tool ` tag or not.
+   */
+  shouldGenerateABTool?: boolean;
+}
+
+/**
  * Configuration for OAuth authentication using EARS (Elastic-owned OAuth apps)
  */
 export interface EARSOAuthConfiguration {
@@ -64,6 +82,20 @@ export interface StackConnectorConfig {
 }
 
 /**
+ * Workflow configuration for a data type.
+ * Supports three approaches:
+ * 1. Local directory: { directory: '/path/to/workflows' }
+ * 2. Registry references: { registry: [{ id: 'workflow-1' }, { id: 'workflow-2' }] }
+ * 3. Mixed: { directory: '/path', registry: [...] }
+ */
+export interface WorkflowsConfig {
+  /** Path to a directory containing local workflow YAML files */
+  directory?: string;
+  /** Array of workflow references from a third-party registry */
+  registry?: WorkflowReference[];
+}
+
+/**
  * Abstraction defining a federated data source ("fetcher").
  * This defines:
  * - Connectivity (OAuth) configuration
@@ -85,10 +117,8 @@ export interface DataSource {
    */
   iconType: string;
 
-  /**
-   * Generates workflows for interacting with the third-party data source.
-   * Workflows are the only model for "taking action" against the third party.
-   */
+  // this would replace `generateWorkflows` in the future and become non-optional
+  workflows?: WorkflowsConfig;
   generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
 
   /**

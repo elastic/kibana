@@ -1,0 +1,15 @@
+version: '1'
+name: 'sources.github.list_repos'
+description: 'List repositories for a specific owner (user or organization)'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: owner
+    type: string
+steps:
+  - name: list-repos
+    type: github.listRepos
+    connector-id: {{stackConnectorId}}
+    with:
+      owner: "${{inputs.owner}}"

@@ -11,9 +11,11 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { DataSource } from '@kbn/data-catalog-plugin';
+import type { DataSource, WorkflowInfo } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
+import { loadWorkflows } from '../workflow_loader';
+import type { WorkflowRegistry } from '../workflow_registry';
 import { createStackConnector } from '../utils/create_stack_connector';
 import type {
   DataSourcesServerSetupDependencies,
@@ -33,6 +35,11 @@ interface CreateDataSourceAndResourcesParams {
   actions: DataSourcesServerStartDependencies['actions'];
   dataSource: DataSource;
   agentBuilder: DataSourcesServerStartDependencies['agentBuilder'];
+  /**
+   * Optional workflow registry for loading workflows from a third-party source.
+   * Required if the data connector uses registry-based workflows.
+   */
+  workflowRegistry?: WorkflowRegistry;
 }
 
 function slugify(input: string): string {
@@ -66,6 +73,7 @@ export async function createDataSourceAndRelatedResources(
     actions,
     dataSource,
     agentBuilder,
+    workflowRegistry,
   } = params;
 
   const workflowIds: string[] = [];
@@ -98,13 +106,25 @@ export async function createDataSourceAndRelatedResources(
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
-  const workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+
+  // Load workflows
+  let workflowInfos: WorkflowInfo[];
+  if (dataSource.workflows) {
+    workflowInfos = await loadWorkflows(
+      dataSource.workflows,
+      workflowRegistry,
+      finalStackConnectorId
+    );
+  } else {
+    workflowInfos = dataSource.generateWorkflows(finalStackConnectorId);
+  }
+
   const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
   for (const workflowInfo of workflowInfos) {
-    // Extract original workflow name from YAML and prefix it with the data source name
+    // Extract the original workflow name from YAML and prefix it with the data source name
     const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
     const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
     const prefixedName = `${slugify(name)}.${originalName}`;
