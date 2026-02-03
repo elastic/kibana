@@ -32,6 +32,8 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
   return filter.meta && filter.meta.negate === reverse;
 };
 
+/** Hallo!*/
+
 /**
  * Translate a filter into a query to support es 5+
  * @param  {Object} filter - The filter to translate

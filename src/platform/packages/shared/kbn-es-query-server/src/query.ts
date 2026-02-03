@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+/** Hallo!*/
 export const querySchema = schema.object(
   {
     query: schema.oneOf([
