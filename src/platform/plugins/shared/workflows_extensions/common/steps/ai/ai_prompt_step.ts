@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { JsonModelSchema } from '@kbn/workflows';
+import { JsonModelShapeSchema } from '@kbn/workflows/spec/json_model_shape_schema';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -32,7 +32,7 @@ export const MetadataSchema = z.record(z.string(), z.any());
 export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
-  schema: JsonModelSchema.optional().describe('The schema for the output of the step.'),
+  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the step.'),
   temperature: z.number().min(0).max(1).optional(),
 });
 
