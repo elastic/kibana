@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
 import {
   BasicPrettyPrinter,
   esqlCommandRegistry,
@@ -86,7 +86,7 @@ function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWi
 
 function createGetPromqlFields(
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
-  resourceRetriever?: ESQLCallbacks
+  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>
 ) {
   return async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
     if (command.name !== 'promql') {
@@ -96,7 +96,7 @@ function createGetPromqlFields(
     const indexName = getIndexFromPromQLParams(command as ESQLAstPromqlCommand);
 
     if (!indexName) {
-      const indices = (await resourceRetriever?.getTimeseriesIndices?.())?.indices ?? [];
+      const indices = (await getTimeseriesIndices?.())?.indices ?? [];
       const indexNames = indices.map(({ name }) => name);
 
       if (indexNames.length > 0) {
@@ -176,9 +176,9 @@ export async function getCurrentQueryAvailableColumns(
   previousPipeFields: ESQLColumnData[],
   fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   getPolicies: () => Promise<Map<string, ESQLPolicy>>,
+  getTimeseriesIndices: () => Promise<{ indices: IndexAutocompleteItem[] }>,
   originalQueryText: string,
-  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
-  resourceRetriever?: ESQLCallbacks
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ) {
   if (commands.length === 0) {
     return previousPipeFields;
@@ -189,7 +189,7 @@ export async function getCurrentQueryAvailableColumns(
   const getJoinFields = createGetJoinFields(fetchFields);
   const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
   const getFromFields = createGetFromFields(fetchFields);
-  const getPromqlFields = createGetPromqlFields(fetchFields, resourceRetriever);
+  const getPromqlFields = createGetPromqlFields(fetchFields, getTimeseriesIndices);
 
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,

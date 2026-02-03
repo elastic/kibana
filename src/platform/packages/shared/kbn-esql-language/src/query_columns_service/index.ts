@@ -188,9 +188,9 @@ export class QueryColumns {
         fields,
         fetchFields,
         getPolicies,
+        this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
         this.originalQueryText,
-        this.unmappedFieldsStrategy,
-        this.resourceRetriever
+        this.unmappedFieldsStrategy
       );
     }
 
@@ -219,9 +219,9 @@ export class QueryColumns {
       fieldsAvailableAfterPreviousCommand,
       fetchFields,
       getPolicies,
+      this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
       this.originalQueryText,
-      this.unmappedFieldsStrategy,
-      this.resourceRetriever
+      this.unmappedFieldsStrategy
     );
 
     return availableFields;
