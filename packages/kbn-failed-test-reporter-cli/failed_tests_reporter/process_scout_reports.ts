@@ -48,6 +48,13 @@ const updateScoutHtmlReport = ({
         /<a id="github-issue-link"[^>]*>.*?<\/a>/,
         `<a id="github-issue-link" href="${githubIssue}" target="_blank">${githubIssue}</a>`
       );
+  } else {
+    updatedContent = updatedContent
+      .replace(
+        /<strong>Failures in tracked branches<\/strong>/,
+        '<strong>No failures found in tracked branches</strong>'
+      )
+      .replace(/<span class="badge rounded-pill bg-danger" id="failure-count">\d+<\/span>/, '');
   }
 
   if (updatedContent === fileContent) {
