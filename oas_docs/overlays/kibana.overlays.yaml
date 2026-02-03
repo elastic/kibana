@@ -91,7 +91,7 @@ actions:
 
         **Elastic Agent Builder requires an Enterprise subscription.**
       externalDocs:
-        description: Agent Builder docs
+        description: Learn about working with Agent Builder programmatically
         url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
       # externalDocs:
         # description: 
