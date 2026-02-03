@@ -32,6 +32,10 @@ export interface SignificantEventsQueriesGenerationTaskParams {
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
   'streams_significant_events_queries_generation';
 
+export function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
+  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
+}
+
 export function createStreamsSignificantEventsQueriesGenerationTask(taskContext: TaskContext) {
   return {
     [SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE]: {
