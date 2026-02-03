@@ -7,13 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import { getDetailedErrorMessage } from '@kbn/es-errors';
+
 import type { RouteDefinitionParams } from '..';
 import { KIBANA_ADMIN_ROLE_NAME, KIBANA_USER_ROLE_NAME } from '../../deprecations';
-import {
-  getDetailedErrorMessage,
-  getErrorStatusCode,
-  wrapIntoCustomErrorResponse,
-} from '../../errors';
+import { getErrorStatusCode, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /**

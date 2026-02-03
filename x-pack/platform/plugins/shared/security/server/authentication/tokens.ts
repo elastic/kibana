@@ -6,10 +6,10 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getDetailedErrorMessage } from '@kbn/es-errors';
 
 import type { AuthenticationInfo } from '../elasticsearch';
 import {
-  getDetailedErrorMessage,
   getErrorStatusCode,
   InvalidGrantError,
   isCredentialMismatchError,
