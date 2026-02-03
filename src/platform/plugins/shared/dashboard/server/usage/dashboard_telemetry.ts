@@ -9,7 +9,7 @@
 
 import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { StoredPinnedControls } from '@kbn/controls-schemas';
+import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
 import type { SavedDashboardPanel } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
@@ -91,7 +91,7 @@ export const collectSectionsAndAccessControl = (
 };
 
 export const collectPinnedControls = (
-  controls: StoredPinnedControls,
+  controls: LegacyStoredPinnedControlState,
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {

@@ -31,6 +31,7 @@ export type {
 } from './src/types';
 
 export type {
+  LegacyStoredPinnedControlState,
   LegacyIgnoreParentSettings,
   LegacyStoredDataControlState,
   LegacyStoredOptionsListExplicitInput,

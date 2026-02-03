@@ -13,6 +13,20 @@ import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
  * These values only exist for control saved objects prior to version 9.4
  */
 
+export interface LegacyStoredPinnedControlState {
+  [id: string]: {
+    type: string;
+    order: number; // order is generated from the array order of the API schema
+    width?: string;
+    grow?: boolean;
+    explicitInput:
+      | LegacyStoredOptionsListExplicitInput
+      | LegacyStoredRangeSliderExplicitInput
+      | LegacyStoredRangeSliderExplicitInput
+      | LegacyStoredTimeSliderExplicitInput;
+  };
+}
+
 export interface LegacyStoredDataControlState extends SerializedTitles {
   fieldName: string;
   useGlobalFilters?: boolean;
