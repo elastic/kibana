@@ -15,10 +15,10 @@ export const jiraDataSource: DataSource = {
     defaultMessage: 'Connect to Jira to pull data from your project.',
   }),
 
-  iconType: '.jira',
+  iconType: '.jira-cloud',
 
   stackConnector: {
-    type: '.jira',
+    type: '.jira-cloud',
     config: {},
   },
 

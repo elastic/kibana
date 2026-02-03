@@ -7,8 +7,8 @@ const buildBaseUrl = (ctx: ActionContext) =>
 
 export const JiraConnector: ConnectorSpec = {
   metadata: {
-    id: '.jira',
-    displayName: 'Jira',
+    id: '.jira-cloud',
+    displayName: 'Jira Cloud',
     description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
       defaultMessage: 'Connect to Jira to pull data from your project.',
     }),
@@ -53,8 +53,7 @@ export const JiraConnector: ConnectorSpec = {
           maxResults?: number;
           nextPageToken?: string;
         };
-        const subdomain = (ctx.config?.subdomain as string) ?? '';
-        const baseUrl = `https://${subdomain.trim()}.atlassian.net`;
+        const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(`${baseUrl}/rest/api/3/search/jql`, typedInput);
         return response.data;
       },

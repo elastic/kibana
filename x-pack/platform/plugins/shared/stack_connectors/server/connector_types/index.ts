@@ -7,6 +7,7 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
+import { getConnectorType as getJiraConnectorType } from './jira';
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
@@ -67,6 +68,7 @@ export function registerConnectorTypes({
   actions.registerType(getTorqConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
+  actions.registerType(getJiraConnectorType());
   actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());

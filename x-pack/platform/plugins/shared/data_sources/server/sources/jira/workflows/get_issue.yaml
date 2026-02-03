@@ -10,7 +10,7 @@ inputs:
     type: string
 steps:
   - name: get-issue
-    type: jira.getIssue
+    type: jira-cloud.getIssue
     connector-id: <%= stackConnectorId %>
     with:
       issueId: "${{inputs.issueId}}"

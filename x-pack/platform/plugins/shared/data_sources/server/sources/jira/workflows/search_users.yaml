@@ -26,7 +26,7 @@ inputs:
     required: false
 steps:
   - name: search-users
-    type: jira.searchUsers
+    type: jira-cloud.searchUsers
     connector-id: <%= stackConnectorId %>
     with:
       query: "${{inputs.query}}"

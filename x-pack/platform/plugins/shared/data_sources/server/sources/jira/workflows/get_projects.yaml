@@ -17,7 +17,7 @@ inputs:
     required: false
 steps:
   - name: get-projects
-    type: jira.getProjects
+    type: jira-cloud.getProjects
     connector-id: <%= stackConnectorId %>
     with:
       maxResults: ${{inputs.maxResults}}

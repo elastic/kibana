@@ -16,7 +16,7 @@ inputs:
     required: false
 steps:
   - name: search-issues-with-jql
-    type: jira.searchIssuesWithJql
+    type: jira-cloud.searchIssuesWithJql
     connector-id: <%= stackConnectorId %>
     with:
       jql: "${{inputs.jql}}"
