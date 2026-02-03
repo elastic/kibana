@@ -15105,10 +15105,6 @@
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/rule_types/degraded_docs/rule_form/rule_form.tsx"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.test.ts"
               },
@@ -15175,6 +15171,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "securitySolution",

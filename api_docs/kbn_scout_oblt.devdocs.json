@@ -8207,6 +8207,10 @@
                         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
                       },
                       {
+                        "plugin": "streamsApp",
+                        "path": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/page_objects/streams_app.ts"
+                      },
+                      {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"
                       }
@@ -9461,10 +9465,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts"
               }
             ],
             "children": [

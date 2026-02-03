@@ -11,10 +11,11 @@
         "label": "apiHasEditorConfig",
         "description": [],
         "signature": [
-          "(parentApi: unknown) => parentApi is HasEditorConfig"
+          "(parentApi: unknown) => parentApi is ",
+          "HasEditorConfig"
         ],
-        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 70,
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -29,9 +30,53 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 70,
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+            "lineNumber": 24,
             "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.isControlGroupRendererApi",
+        "type": "Function",
+        "tags": [],
+        "label": "isControlGroupRendererApi",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRendererApi",
+            "text": "ControlGroupRendererApi"
+          }
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.isControlGroupRendererApi.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+            "lineNumber": 37,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,7 +146,7 @@
         "label": "ControlGroupCreationOptions",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 102,
+        "lineNumber": 101,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +170,7 @@
               "<{}>> | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -149,7 +194,7 @@
               ", \"controlStateTransform\"> | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -167,7 +212,7 @@
         "label": "ControlGroupEditorConfig",
         "description": [],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 74,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -183,7 +228,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -199,7 +244,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +260,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 77,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -232,7 +277,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -255,7 +300,7 @@
               "<Readonly<{ title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -496,9 +541,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.ViewMode",
+                "section": "def-common.ViewMode",
                 "text": "ViewMode"
               },
               " | undefined"
@@ -631,7 +676,7 @@
           "<State>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 97,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -654,7 +699,7 @@
               "<State>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -677,7 +722,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -703,7 +748,7 @@
           "<ControlState>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 109,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -727,7 +772,7 @@
               "<ControlState>"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 110,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -754,20 +799,20 @@
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
-          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\"> & Partial<",
+          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\" | \"removePanel\"> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnifiedSearch",
+            "section": "def-common.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
+            "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
           " & ",
@@ -781,9 +826,9 @@
           "<object> & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesDisabledActionIds",
+            "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
           "> & { registerChildApi: (api: ",
@@ -794,16 +839,14 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<object>) => void; layout$: ",
-          "BehaviorSubject",
-          "<",
-          "ControlsLayout",
-          ">; isCompressed?: (() => boolean) | undefined; } & HasEditorConfig & Pick<",
+          "<object>) => void; isCompressed?: (() => boolean) | undefined; } & ",
+          "HasEditorConfig",
+          " & Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesFilters",
+            "section": "def-common.AppliesFilters",
             "text": "AppliesFilters"
           },
           ", \"appliedFilters$\"> & ",
@@ -817,9 +860,9 @@
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.AppliesTimeslice",
+            "section": "def-common.AppliesTimeslice",
             "text": "AppliesTimeslice"
           },
           " & { reload: () => void; updateInput: (input: Partial<",
@@ -848,7 +891,15 @@
             "section": "def-public.ControlGroupRuntimeState",
             "text": "ControlGroupRuntimeState"
           },
-          "<{}>; openAddDataControlFlyout: (options?: { controlStateTransform?: ",
+          "<{}>; getControls: () => { [id: string]: ",
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.PinnedControlLayoutState",
+            "text": "PinnedControlLayoutState"
+          },
+          "; }; openAddDataControlFlyout: (options?: { controlStateTransform?: ",
           {
             "pluginId": "@kbn/control-group-renderer",
             "scope": "public",
@@ -859,7 +910,7 @@
           "<Readonly<{ title?: string | undefined; description?: string | undefined; useGlobalFilters?: boolean | undefined; ignoreValidations?: boolean | undefined; } & { fieldName: string; dataViewId: string; }>> | undefined; } | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -918,7 +969,7 @@
           "<{}>>, controlId?: string | undefined) => void; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 107,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -937,7 +988,7 @@
           " & { type: string; order: number; }"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 113,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -954,7 +1005,7 @@
           "(newState: Partial<State>, controlType: string) => Partial<State>"
         ],
         "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-        "lineNumber": 82,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -971,7 +1022,7 @@
               "{ [P in keyof State]?: State[P] | undefined; }"
             ],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -984,7 +1035,7 @@
             "label": "controlType",
             "description": [],
             "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

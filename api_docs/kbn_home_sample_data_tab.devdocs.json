@@ -32,7 +32,7 @@
           "() => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/sample_data_tab.tsx",
-        "lineNumber": 34,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -129,65 +129,7 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
-        "description": [
-          "\nTest Subject name for the Demo Environment button."
-        ],
-        "signature": [
-          "\"goToDemoEnvButton\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataAccordion\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "lineNumber": 29,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataButton\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "lineNumber": 24,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

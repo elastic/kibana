@@ -3753,7 +3753,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"unknown\" | \"cell\" | \"wifi\" | \"unavailable\" | \"wired\""
+              "\"unknown\" | \"cell\" | \"wifi\" | \"wired\" | \"unavailable\""
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_device.ts",
             "lineNumber": 33,

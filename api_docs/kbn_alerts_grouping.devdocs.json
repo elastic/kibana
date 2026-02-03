@@ -363,7 +363,9 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[], groupNumber: number) => JSX.Element | undefined) | undefined"
+              "[], groupNumber: number, groupBucket: ",
+              "GroupingBucket",
+              "<T>) => JSX.Element | undefined) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "lineNumber": 54,
