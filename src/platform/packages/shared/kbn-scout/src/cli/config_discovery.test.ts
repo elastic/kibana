@@ -218,7 +218,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
                   title: 'Test 4',
                   expectedStatus: 'passed',
                   location: { file: 'test4.spec.ts', line: 1, column: 1 },
-                  tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in DEPLOYMENT_AGNOSTIC
+                  tags: ['@cloud-serverless-workplaceai'], // Only serverless, not in tags.deploymentAgnostic
                 },
               ],
             },
@@ -273,15 +273,15 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(callArgs[1])).toBe(true);
   });
 
-  it('filters configs based on target tags for "all" target (DEPLOYMENT_AGNOSTIC)', () => {
+  it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
-    // pluginA has stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in DEPLOYMENT_AGNOSTIC
-    // pluginB has serverless-workplaceai which is NOT in DEPLOYMENT_AGNOSTIC, it should be excluded
-    // packageA has stateful-classic and serverless-observability_complete which are in DEPLOYMENT_AGNOSTIC
+    // pluginA has stateful-classic, serverless-observability_complete, serverless-security_complete, serverless-search which are in tags.deploymentAgnostic
+    // pluginB has serverless-workplaceai which is NOT in tags.deploymentAgnostic, it should be excluded
+    // packageA has stateful-classic and serverless-observability_complete which are in tags.deploymentAgnostic
 
     const infoCalls = log.info.mock.calls;
     const foundMessage = infoCalls.find((call) =>
