@@ -114,7 +114,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
