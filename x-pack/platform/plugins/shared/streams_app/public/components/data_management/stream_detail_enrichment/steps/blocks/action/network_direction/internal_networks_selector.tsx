@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, type ReactNode } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 
 const InternalNetworksContent = () => {
@@ -78,9 +79,16 @@ const internalNetworksOptions: InternalNetworksOptions[] = [
 ];
 
 export const InternalNetworksSelector = () => {
-  const [selectedOption, setSelectedOption] = useState<string>(internalNetworksOptions[0].id);
+  const { unregister, watch } = useFormContext();
+  const internalNetworks = watch('internal_networks');
+  const initialSelectedOption = internalNetworks ? 'internal_networks' : 'internal_networks_field';
+  const [selectedOption, setSelectedOption] = useState<string>(initialSelectedOption);
+
   const handleOptionChange = (optionId: string) => {
     setSelectedOption(optionId);
+    const unregisterOption =
+      optionId === 'internal_networks' ? 'internal_networks_field' : 'internal_networks';
+    unregister(unregisterOption);
   };
 
   return (
