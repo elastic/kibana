@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createDashboardJourney } from './utils/dashboard_journey';
+import { createDashboardJourney } from '../utils/dashboard_journey';
 
 export const journey = createDashboardJourney({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
