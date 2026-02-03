@@ -7,7 +7,11 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { SERVICE_OPBEANS_JAVA, SERVICE_OPBEANS_NODE } from '../../fixtures/constants';
+import {
+  SERVICE_OPBEANS_JAVA,
+  SERVICE_OPBEANS_NODE,
+  DEPENDENCY_POSTGRESQL,
+} from '../../fixtures/constants';
 
 /**
  * React Flow Service Map tests
@@ -26,13 +30,8 @@ test.describe('React Flow Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   test('renders service map with controls', async ({
     pageObjects: { reactFlowServiceMapPage },
   }) => {
-    // Verify the React Flow container is visible (data-test-subj)
     await expect(reactFlowServiceMapPage.reactFlowServiceMap).toBeVisible();
-
-    // Verify the controls panel is visible (data-test-subj)
     await expect(reactFlowServiceMapPage.reactFlowControls).toBeVisible();
-
-    // Verify individual control buttons are visible (accessible roles)
     await expect(reactFlowServiceMapPage.reactFlowZoomInBtn).toBeVisible();
     await expect(reactFlowServiceMapPage.reactFlowZoomOutBtn).toBeVisible();
     await expect(reactFlowServiceMapPage.reactFlowFitViewBtn).toBeVisible();
@@ -44,7 +43,6 @@ test.describe('React Flow Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
       await reactFlowServiceMapPage.clickReactFlowZoomOut();
       await reactFlowServiceMapPage.clickReactFlowFitView();
 
-      // Verify controls still visible after interactions
       await expect(reactFlowServiceMapPage.reactFlowControls).toBeVisible();
     });
 
@@ -63,5 +61,73 @@ test.describe('React Flow Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
       const edge = reactFlowServiceMapPage.getEdgeById(edgeId);
       await expect(edge).toBeVisible();
     });
+  });
+
+  test('shows popover when clicking on a service node', async ({
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+
+    await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+    await expect(reactFlowServiceMapPage.serviceMapPopover).toBeVisible();
+
+    const popoverTitle = await reactFlowServiceMapPage.getPopoverTitle();
+    expect(popoverTitle).toContain(SERVICE_OPBEANS_JAVA);
+
+    const serviceDetailsLink = reactFlowServiceMapPage.serviceMapServiceDetailsButton;
+
+    await expect(serviceDetailsLink).toBeVisible();
+
+    const focusMapLink = reactFlowServiceMapPage.serviceMapFocusMapButton;
+    await expect(focusMapLink).toBeVisible();
+  });
+
+  test('dismisses popover when clicking outside', async ({
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+
+    await reactFlowServiceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+    await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeVisible();
+
+    // Click any button outside the popover to dismiss it (Fit View button for example)
+    await reactFlowServiceMapPage.clickReactFlowFitView();
+    await reactFlowServiceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+
+    await reactFlowServiceMapPage.waitForPopoverToBeHidden();
+    await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeHidden();
+  });
+
+  test('shows popover when clicking on an edge', async ({
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    const edgeId = `${SERVICE_OPBEANS_JAVA}~>${SERVICE_OPBEANS_NODE}`;
+    await reactFlowServiceMapPage.waitForEdgeToLoad(edgeId);
+
+    await reactFlowServiceMapPage.clickEdge(edgeId);
+
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+    await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeVisible();
+
+    const popoverTitle = await reactFlowServiceMapPage.getPopoverTitle();
+    expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → >${SERVICE_OPBEANS_NODE}`);
+  });
+
+  test('shows popover when clicking on a dependency node', async ({
+    pageObjects: { reactFlowServiceMapPage },
+  }) => {
+    await reactFlowServiceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
+
+    await reactFlowServiceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
+
+    await reactFlowServiceMapPage.waitForPopoverToBeVisible();
+    await expect(reactFlowServiceMapPage.serviceMapPopoverContent).toBeVisible();
+
+    const popoverTitle = await reactFlowServiceMapPage.getPopoverTitle();
+    expect(popoverTitle).toContain(DEPENDENCY_POSTGRESQL);
+    await expect(reactFlowServiceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
   });
 });
