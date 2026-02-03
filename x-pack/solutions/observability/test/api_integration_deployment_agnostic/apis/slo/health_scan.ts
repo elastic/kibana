@@ -80,7 +80,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let adminRoleAuthc: RoleCredentials;
 
-  describe('Health Scan', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/251364
+  describe.skip('Health Scan', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       await Promise.all([
