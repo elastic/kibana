@@ -160,14 +160,6 @@ describe('attachment tools', () => {
     });
 
     it('resolves visualization_ref attachments when savedObjectsClient is available', async () => {
-      const attachment = await attachmentManager.add({
-        type: AttachmentType.visualizationRef,
-        data: {
-          saved_object_id: 'so-123',
-        },
-        description: 'Lens ref',
-      });
-
       const customAttachmentsService = {
         getTypeDefinition: () =>
           ({
@@ -195,8 +187,18 @@ describe('attachment tools', () => {
             },
           } as unknown as AttachmentTypeDefinition),
       } as any;
+      const resolveAttachmentManager = createAttachmentStateManager([], {
+        getTypeDefinition: customAttachmentsService.getTypeDefinition,
+      });
+      const attachment = await resolveAttachmentManager.add({
+        type: AttachmentType.visualizationRef,
+        data: {
+          saved_object_id: 'so-123',
+        },
+        description: 'Lens ref',
+      });
       const tool = createAttachmentTools({
-        attachmentManager,
+        attachmentManager: resolveAttachmentManager,
         attachmentsService: customAttachmentsService,
         formatContext,
       }).find((t) => t.id === 'platform.core.attachment_read')!;
