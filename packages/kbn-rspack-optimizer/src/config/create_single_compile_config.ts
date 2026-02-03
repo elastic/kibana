@@ -401,33 +401,26 @@ export async function createSingleCompileConfig(
             // Build dependencies - cache is invalidated when any of these change
             buildDependencies: [
               // RSPack optimizer config files
-              Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/package.json'),
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/externals.ts'),
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/shared_config.ts'),
               Path.resolve(repoRoot, 'packages/kbn-rspack-optimizer/src/config/create_single_compile_config.ts'),
+              // Transpiler config (SWC settings)
+              Path.resolve(repoRoot, 'packages/kbn-swc-config/src/browser.ts'),
+              Path.resolve(repoRoot, 'packages/kbn-transpiler-config/src/shared_config.ts'),
               // Root package.json (dependency versions)
               Path.resolve(repoRoot, 'package.json'),
-              // Shared deps built outputs - invalidate when shared deps are rebuilt
-              Path.resolve(
-                repoRoot,
-                'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets/kbn-ui-shared-deps-npm.dll.js'
-              ),
-              Path.resolve(
-                repoRoot,
-                'target/build/src/platform/packages/private/kbn-ui-shared-deps-src/shared_built_assets/kbn-ui-shared-deps-src.js'
-              ),
-              // Shared deps source files (in case builds are stale)
-              Path.resolve(
-                repoRoot,
-                'src/platform/packages/private/kbn-ui-shared-deps-src/src/entry.js'
-              ),
+              // Shared deps source files that affect externals
               Path.resolve(
                 repoRoot,
                 'src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js'
               ),
+              Path.resolve(
+                repoRoot,
+                'src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js'
+              ),
             ],
             // Version string to invalidate cache when config changes
-            version: `v4-${dist ? 'prod' : 'dev'}`,
+            version: `v7-${dist ? 'prod' : 'dev'}`,
           }
         : false,
     },
