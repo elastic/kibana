@@ -85,16 +85,6 @@ export function FeaturesTable() {
       },
     },
     {
-      field: 'stream_name',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.streamColumn', {
-        defaultMessage: 'Stream',
-      }),
-      width: '15%',
-      render: (_streamName: string, feature: Feature) => (
-        <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
-      ),
-    },
-    {
       field: 'type',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.typeColumn', {
         defaultMessage: 'Type',
@@ -113,6 +103,16 @@ export function FeaturesTable() {
       width: '12%',
       render: (confidence: number) => (
         <EuiHealth color={getConfidenceColor(confidence)}>{confidence}</EuiHealth>
+      ),
+    },
+    {
+      field: 'stream_name',
+      name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.streamColumn', {
+        defaultMessage: 'Stream',
+      }),
+      width: '15%',
+      render: (_streamName: string, feature: Feature) => (
+        <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
       ),
     },
   ];
