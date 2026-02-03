@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/core-theme-browser-mocks'
   - '@kbn/presentation-publishing'
   - '@kbn/config-schema'
+  - '@kbn/ui-actions-browser'
 tags:
   - plugin
   - prod
