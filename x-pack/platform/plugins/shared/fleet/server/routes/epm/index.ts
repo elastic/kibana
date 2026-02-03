@@ -877,6 +877,27 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              required: true,
+              content: {
+                'application/gzip': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+                'application/zip': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: InstallPackageByUploadRequestSchema,
           response: {
