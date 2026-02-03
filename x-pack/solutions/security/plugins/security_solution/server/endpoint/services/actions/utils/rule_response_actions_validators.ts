@@ -120,15 +120,18 @@ export const validateRuleResponseActions = async <
   logger.debug(() => `All response actions validated successfully`);
 };
 
-export type ValidateRuleImportResponseActionsOptions = Omit<
-  ValidateRuleResponseActionsOptions,
-  'existingRule' | 'rulePayload'
-> & {
-  rulesToImport: RuleToImport[];
+type ImportRuleResponseActions = Pick<RuleToImport, 'response_actions' | 'id' | 'rule_id'>;
+
+export type ValidateRuleImportResponseActionsOptions<
+  T extends ImportRuleResponseActions = ImportRuleResponseActions
+> = Pick<ValidateRuleResponseActionsOptions, 'endpointAuthz' | 'endpointService' | 'spaceId'> & {
+  rulesToImport: T[];
 };
 
-export interface ValidateRuleImportResponseActionsResult {
-  valid: RuleToImport[];
+export interface ValidateRuleImportResponseActionsResult<
+  T extends ImportRuleResponseActions = ImportRuleResponseActions
+> {
+  valid: T[];
   errors: BulkError[];
 }
 
@@ -140,14 +143,18 @@ export interface ValidateRuleImportResponseActionsResult {
  * @param spaceId
  * @param ruleResponseActions
  */
-export const validateRuleImportResponseActions = async ({
+export const validateRuleImportResponseActions = async <
+  T extends ImportRuleResponseActions = ImportRuleResponseActions
+>({
   endpointService,
   endpointAuthz,
   spaceId,
   rulesToImport,
-}: ValidateRuleImportResponseActionsOptions): Promise<ValidateRuleImportResponseActionsResult> => {
+}: ValidateRuleImportResponseActionsOptions<T>): Promise<
+  ValidateRuleImportResponseActionsResult<T>
+> => {
   const logger = endpointService.createLogger('validateRuleImportResponseActions');
-  const response: ValidateRuleImportResponseActionsResult = { valid: [], errors: [] };
+  const response: ValidateRuleImportResponseActionsResult<T> = { valid: [], errors: [] };
 
   logger.debug(() => `Validating response actions for import of [${rulesToImport.length}] rules`);
 
@@ -165,8 +172,8 @@ export const validateRuleImportResponseActions = async ({
         response.valid.push(rule);
       } catch (error) {
         response.errors.push({
-          id: rule.id,
-          rule_id: rule.rule_id,
+          id: (rule as unknown as RuleToImport).id ?? '',
+          rule_id: (rule as unknown as RuleToImport).rule_id ?? '',
           error: {
             message: error.message,
             status_code: error.statusCode,

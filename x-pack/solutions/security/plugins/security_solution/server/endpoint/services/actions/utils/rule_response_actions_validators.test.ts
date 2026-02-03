@@ -13,7 +13,10 @@ import type {
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { ValidateRuleResponseActionsOptions } from './rule_response_actions_validators';
-import { validateRuleResponseActions } from './rule_response_actions_validators';
+import {
+  validateRuleImportResponseActions,
+  validateRuleResponseActions,
+} from './rule_response_actions_validators';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { getRuleMock } from '../../../../lib/detection_engine/routes/__mocks__/request_responses';
@@ -103,7 +106,7 @@ describe('Rules Endpoint response actions validators', () => {
       permission: keyof EndpointAuthz;
       responseAction: ResponseAction;
     }
-    const authzTests: AuthzTestCase[] = [
+    const getAuthzTests = (): AuthzTestCase[] => [
       {
         actionName: 'isolate',
         permission: 'canIsolateHost',
@@ -125,7 +128,7 @@ describe('Rules Endpoint response actions validators', () => {
       },
     ];
 
-    it.each(authzTests)(
+    it.each(getAuthzTests())(
       `should error if user does not have authz to $actionName response action`,
       async ({ actionName, responseAction, permission }) => {
         rulePayload.response_actions = [responseAction];
@@ -137,7 +140,7 @@ describe('Rules Endpoint response actions validators', () => {
       }
     );
 
-    it.each(authzTests)(
+    it.each(getAuthzTests())(
       `should NOT error if user has authz to $actionName response action`,
       async ({ responseAction, permission }) => {
         rulePayload.response_actions = [responseAction];
@@ -175,6 +178,96 @@ describe('Rules Endpoint response actions validators', () => {
   });
 
   describe('validateRuleImportResponseActions()', () => {
-    // TODO: implement
+    it('should return list of valid rules and list of errors', async () => {
+      endpointAuthz.canIsolateHost = false;
+
+      const rulesToImport = [
+        // Valid rule with multiple actions
+        {
+          response_actions: [
+            createRulePayloadResponseActionMock({
+              params: { command: 'suspend-process', config: { overwrite: true } },
+            }),
+            createRulePayloadResponseActionMock({
+              params: { command: 'kill-process', config: { overwrite: true } },
+            }),
+          ],
+          id: 'foo',
+          rule_id: 'bar',
+        },
+        // Invalid rule: kill-process action with no `field` defined
+        {
+          response_actions: [
+            createRulePayloadResponseActionMock({
+              params: { command: 'kill-process', config: { overwrite: false, field: '' } },
+            }),
+          ],
+          id: 'foo2',
+          rule_id: 'bar2',
+        },
+        // Invalid rule: user has no Isolate permission
+        {
+          response_actions: [createRulePayloadResponseActionMock()],
+          id: 'foo3',
+          rule_id: 'foo3',
+        },
+      ];
+
+      await expect(
+        validateRuleImportResponseActions({
+          endpointAuthz,
+          endpointService,
+          spaceId: 'foo',
+          rulesToImport,
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "errors": Array [
+            Object {
+              "error": Object {
+                "message": "Invalid [kill-process] response action configuration: 'field' is required when 'overwrite' is 'false'",
+                "status_code": 400,
+              },
+              "id": "foo2",
+              "rule_id": "bar2",
+            },
+            Object {
+              "error": Object {
+                "message": "User is not authorized to create/update isolate response action",
+                "status_code": 403,
+              },
+              "id": "foo3",
+              "rule_id": "foo3",
+            },
+          ],
+          "valid": Array [
+            Object {
+              "id": "foo",
+              "response_actions": Array [
+                Object {
+                  "action_type_id": ".endpoint",
+                  "params": Object {
+                    "command": "suspend-process",
+                    "config": Object {
+                      "overwrite": true,
+                    },
+                  },
+                },
+                Object {
+                  "action_type_id": ".endpoint",
+                  "params": Object {
+                    "command": "kill-process",
+                    "config": Object {
+                      "overwrite": true,
+                    },
+                  },
+                },
+              ],
+              "rule_id": "bar",
+            },
+          ],
+        }
+      `);
+    });
   });
 });
