@@ -34,6 +34,9 @@
     "typescript": "^5.1.6",
     "yarn": "^1.22.22"
   },
+  "overrides": {
+    "lodash": "^4.17.23"
+  },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
     "#pipeline-utils/*": "./pipeline-utils/*"
