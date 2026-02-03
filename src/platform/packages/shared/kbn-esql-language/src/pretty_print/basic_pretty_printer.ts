@@ -102,7 +102,7 @@ export class BasicPrettyPrinter {
     node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    return node.type === 'query'
+    return node.type === 'query' && 'commands' in node
       ? BasicPrettyPrinter.query(node, opts)
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
@@ -270,6 +270,14 @@ export class BasicPrettyPrinter {
         return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
       }
 
+      if (ctx.node.text) {
+        let text = ctx.node.text;
+        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
+        text = text.replace(/<EOF>/g, '').trim();
+
+        return this.decorateWithComments(ctx.node, text || '<UNKNOWN>');
+      }
+
       return '<EXPRESSION>';
     })
 
@@ -335,7 +343,13 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
+      const subtype = ctx.node.subtype;
+      const formatted =
+        subtype === 'tuple'
+          ? '(' + elements + ')'
+          : subtype === 'bare'
+          ? elements
+          : '[' + elements + ']';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -524,7 +538,12 @@ export class BasicPrettyPrinter {
               return undefined;
             }
 
-            if (branch.type === 'parens' && branch.child.type === 'query') {
+            // Check for ESQLAstQueryExpression specifically (has 'commands' property)
+            if (
+              branch.type === 'parens' &&
+              branch.child.type === 'query' &&
+              'commands' in branch.child
+            ) {
               return ctx.visitSubQuery(branch.child);
             }
 

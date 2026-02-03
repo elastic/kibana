@@ -6,7 +6,7 @@
  */
 
 import { randomInt } from 'crypto';
-import type { ErrorResult } from '@kbn/agent-builder-common';
+import type { ErrorResult, OtherResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -31,5 +31,13 @@ export const createErrorResult = (message: string | ErrorResult['data']): ErrorR
     tool_result_id: getToolResultId(),
     type: ToolResultType.error,
     data: typeof message === 'string' ? { message } : message,
+  };
+};
+
+export const createOtherResult = <T extends Object>(data: T): OtherResult<T> => {
+  return {
+    tool_result_id: getToolResultId(),
+    type: ToolResultType.other,
+    data,
   };
 };
