@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Actions and Triggers app - Rules', function () {
+  describe('Rules list', () => {
     loadTestFile(require.resolve('./rules_list'));
-    loadTestFile(require.resolve('./details'));
-    loadTestFile(require.resolve('./rules_settings'));
-    loadTestFile(require.resolve('./rules_page'));
+    loadTestFile(require.resolve('./bulk_actions'));
   });
 };

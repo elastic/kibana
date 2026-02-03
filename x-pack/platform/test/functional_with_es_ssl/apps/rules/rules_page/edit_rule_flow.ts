@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rules list', () => {
       it('navigates to edit page when clicking edit button', async () => {
         // Navigate to rules page
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Search for our test rule
@@ -80,11 +80,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (
-            !url.includes(`/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}`)
-          ) {
+          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -103,9 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rules list after saving', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(
-          `/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}`
-        );
+        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
 
         // Make a small change to the rule name
         const updatedName = `${testRuleName}-updated`;
@@ -125,7 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
           if (
-            !url.includes('/app/management/insightsAndAlerting/triggersActions') ||
+            !url.includes('/app/rules') ||
             url.includes('/edit/') ||
             url.includes(`/${testRuleId}`)
           ) {
@@ -158,7 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rules list after clicking cancel', async () => {
         // Navigate to rules page
-        await pageObjects.common.navigateToApp('triggersActions');
+        await pageObjects.common.navigateToApp('rules');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Search for our test rule
@@ -180,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
           if (
-            !url.includes('/app/management/insightsAndAlerting/triggersActions') ||
+            !url.includes('/app/rules') ||
             url.includes('/edit/') ||
             url.includes(`/${testRuleId}`)
           ) {
@@ -198,13 +194,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rule details page', () => {
       it('navigates to edit page when clicking edit button from details', async () => {
         // Navigate directly to rule details page
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActions/rule/' + testRuleId,
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+          shouldUseHashForSubUrl: false,
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify we're on the details page
@@ -218,11 +210,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (
-            !url.includes(`/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}`)
-          ) {
+          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -236,9 +226,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rule details page after saving from details', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(
-          `/app/management/insightsAndAlerting/triggersActions/edit/${testRuleId}`
-        );
+        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
 
         // Make a small change
         const updatedName = `${testRuleName}-details-updated`;
@@ -257,12 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (
-            !url.includes(
-              `/app/management/insightsAndAlerting/triggersActions/rule/${testRuleId}`
-            ) ||
-            url.includes('/edit/')
-          ) {
+          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });
@@ -292,13 +275,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rule details page after clicking cancel from details', async () => {
         // Navigate to rule details page
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActions/rule/' + testRuleId,
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+          shouldUseHashForSubUrl: false,
+        });
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Click the edit button
@@ -316,12 +295,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (
-            !url.includes(
-              `/app/management/insightsAndAlerting/triggersActions/rule/${testRuleId}`
-            ) ||
-            url.includes('/edit/')
-          ) {
+          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });
