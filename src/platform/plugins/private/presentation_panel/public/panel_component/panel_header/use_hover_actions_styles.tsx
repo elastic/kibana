@@ -83,7 +83,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         }
       }
     `;
-  }, [euiTheme]);
+  }, [euiTheme, euiThemeContext]);
 
   const containerStyles = useMemo(() => {
     const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`;
