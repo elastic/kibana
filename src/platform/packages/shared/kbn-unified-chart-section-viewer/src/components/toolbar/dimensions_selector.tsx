@@ -105,12 +105,27 @@ export const DimensionsSelector = ({
         key: dimension.name,
       };
     });
-    // Sort so that selected options appear first
-    return sortBy(mappedOptions, (option) => (option.checked === 'on' ? 0 : 1));
+    // Sort by selected > available > unavailable options
+    return sortBy(mappedOptions, [
+      (option) => {
+        if (option.checked === 'on') return 0;
+        if (option.disabled) return 2;
+        return 1;
+      },
+      (option) => {
+        if (option.checked === 'on') {
+          const selectionIndex = localSelectedDimensions.findIndex(
+            (dim) => dim.name === option.value
+          );
+          return selectionIndex !== -1 ? selectionIndex : Infinity;
+        }
+        return option.label.toLowerCase();
+      },
+    ]);
   }, [
     dimensions,
     selectedNamesSet,
-    localSelectedDimensions.length,
+    localSelectedDimensions,
     intersectingDimensions,
     singleSelection,
   ]);
@@ -142,19 +157,19 @@ export const DimensionsSelector = ({
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      const selectedValues = new Set(opts.map((p) => p.value));
-      const newSelection = dimensions.filter((d) => selectedValues.has(d.name));
-      // Enforce the maximum limit
-      const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
+      const newSelection = opts
+        .map((opt) => dimensions.find((d) => d.name === opt.value))
+        .filter((d): d is Dimension => d !== undefined)
+        .slice(0, MAX_DIMENSIONS_SELECTIONS);
 
       // For single selection, call onChange immediately
       if (singleSelection || !debouncedOnChange) {
-        setLocalSelectedDimensions(limitedSelection);
-        onChange(limitedSelection);
+        setLocalSelectedDimensions(newSelection);
+        onChange(newSelection);
       } else {
-        setLocalSelectedDimensions(limitedSelection);
+        setLocalSelectedDimensions(newSelection);
         debouncedOnChange.cancel();
-        debouncedOnChange(limitedSelection);
+        debouncedOnChange(newSelection);
       }
     },
     [onChange, dimensions, singleSelection, debouncedOnChange]
