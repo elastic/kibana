@@ -235,13 +235,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
+      const overrides = newProvider ? getOverrides(newProvider) : undefined;
+      const newProviderSchema: ConfigEntryView[] = newProvider
+        ? mapProviderFields(taskType, newProvider, overrides)
+        : [];
       if (newProvider) {
-        const overrides = getOverrides(newProvider);
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
-          taskType,
-          newProvider,
-          overrides
-        );
         setProviderSchema(newProviderSchema);
       }
 
@@ -266,7 +264,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           newProvider?.configurations[k]?.supported_task_types &&
           newProvider?.configurations[k].supported_task_types.includes(taskType)
         ) {
-          newConfig[k] = newProvider?.configurations[k]?.default_value ?? null;
+          // Get default value from schema (which includes overridden defaults from INTERNAL_OVERRIDE_FIELDS)
+          const schemaField = newProviderSchema.find((f) => f.key === k);
+          newConfig[k] = schemaField?.default_value ?? null;
         }
       });
 
@@ -318,11 +318,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
       newProviderSchema.forEach((fieldConfig) => {
         if (!fieldConfig.sensitive) {
-          if (fieldConfig && !!fieldConfig.default_value) {
-            defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
-          } else {
-            defaultProviderConfig[fieldConfig.key] = null;
-          }
+          // default_value now includes overridden defaults from INTERNAL_OVERRIDE_FIELDS
+          defaultProviderConfig[fieldConfig.key] = fieldConfig.default_value;
         } else {
           defaultProviderSecrets[fieldConfig.key] = null;
         }
