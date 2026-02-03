@@ -64,7 +64,11 @@ export function getDrilldownRegistry() {
               drilldownSchemas as unknown as [
                 Type<Readonly<{} & { label: string; type: string; trigger: string }>>
               ]
-            )
+            ),
+            {
+              // 100 is an arbitrary limit
+              maxSize: 100
+            }
           )
         ),
       });
