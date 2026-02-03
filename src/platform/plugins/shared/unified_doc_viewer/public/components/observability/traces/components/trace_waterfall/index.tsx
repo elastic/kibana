@@ -62,6 +62,8 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     tabLabel: sectionTitle,
     dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
   });
+  const actionId = 'traceWaterfallFullScreenAction';
+
   const actions = useMemo(
     () => [
       {
@@ -76,8 +78,6 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
     ],
     [openInDiscoverSectionAction]
   );
-
-  const actionId = 'traceWaterfallFullScreenAction';
 
   if (!FocusedTraceWaterfall) return null;
 
