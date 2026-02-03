@@ -298,6 +298,7 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
   action: 'network_direction' as const,
   source_ip: '',
   destination_ip: '',
+  internal_networks: [],
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -364,6 +365,24 @@ export const getFormStateFromActionStep = (
     };
   }
 
+  if (step.action === 'network_direction') {
+    const clone: NetworkDirectionFormState = structuredClone({
+      ...omit(step, 'internal_networks', 'internal_networks_field'),
+    });
+
+    if ('internal_networks' in step) {
+      clone.internal_networks = step.internal_networks?.map((internalNetwork) => ({
+        value: internalNetwork,
+      }));
+    }
+
+    if ('internal_networks_field' in step) {
+      clone.internal_networks_field = step.internal_networks_field;
+    }
+
+    return clone;
+  }
+
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
@@ -377,8 +396,7 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
-    step.action === 'concat' ||
-    step.action === 'network_direction'
+    step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -692,6 +710,7 @@ export const convertFormStateToProcessor = (
 
     if (formState.action === 'network_direction') {
       const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
+
       return {
         processorDefinition: {
           action: 'network_direction',

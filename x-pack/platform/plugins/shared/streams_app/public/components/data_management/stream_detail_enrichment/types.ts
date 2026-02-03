@@ -68,8 +68,12 @@ export type LowercaseFormState = LowercaseProcessor;
 export type TrimFormState = TrimProcessor;
 export type JoinFormState = JoinProcessor;
 export type ConcatFormState = ConcatProcessor;
-export type NetworkDirectionFormState = Omit<NetworkDirectionProcessor, 'internal_networks'> & {
+export type NetworkDirectionFormState = Omit<
+  NetworkDirectionProcessor,
+  'internal_networks' | 'internal_networks_field'
+> & {
   internal_networks?: InternalNetworksValue[];
+  internal_networks_field?: string;
 };
 
 export type SpecialisedFormState =
