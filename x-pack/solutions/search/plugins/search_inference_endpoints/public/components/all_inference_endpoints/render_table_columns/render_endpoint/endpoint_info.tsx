@@ -13,7 +13,7 @@ import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoin
 import * as i18n from './translations';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 
-const COPIED_ICON_DISPLAY_DURATION_MS = 2000;
+const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 
 export interface EndpointInfoProps {
   inferenceId: string;

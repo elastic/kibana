@@ -131,7 +131,7 @@ describe('RenderEndpoint component tests', () => {
       });
     });
 
-    it('reverts to copy icon after 2 seconds', async () => {
+    it('reverts to copy icon after 1 second', async () => {
       render(<EndpointInfo inferenceId={'test-endpoint'} endpointInfo={mockProvider} />);
 
       const copyButton = screen.getByTestId('inference-endpoint-copy-id-button');
@@ -142,7 +142,7 @@ describe('RenderEndpoint component tests', () => {
       });
 
       act(() => {
-        jest.advanceTimersByTime(2000);
+        jest.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {
