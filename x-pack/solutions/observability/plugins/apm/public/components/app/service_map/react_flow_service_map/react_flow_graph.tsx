@@ -18,6 +18,7 @@ import {
   type EdgeTypes,
   type FitViewOptions,
   type NodeMouseHandler,
+  type EdgeMouseHandler,
 } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +31,8 @@ import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
 import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
+import { ReactFlowPopover } from './react_flow_popover';
+import type { Environment } from '../../../../../common/environment_rt';
 import type {
   ServiceMapNode,
   ServiceMapEdge as ServiceMapEdgeType,
@@ -51,25 +54,38 @@ interface ReactFlowGraphProps {
   height: number;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
+  /** Currently focused service name (for service-specific map) */
+  serviceName?: string;
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
 }
 
 function ReactFlowGraphInner({
   height,
   nodes: initialNodes,
   edges: initialEdges,
+  serviceName,
+  environment,
+  kuery,
+  start,
+  end,
 }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
+  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+    null
+  );
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
 
-  // Use the edge highlighting hook
   const { applyEdgeHighlighting } = useEdgeHighlighting();
 
-  // Apply layout to nodes
   const layoutedNodes = useMemo(
     () => applyDagreLayout(initialNodes, initialEdges),
     [initialNodes, initialEdges]
@@ -78,31 +94,42 @@ function ReactFlowGraphInner({
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<ServiceMapEdgeType>(initialEdges);
 
-  // Update nodes and edges when props change
   useEffect(() => {
     setNodes(layoutedNodes);
-    // Apply edge highlighting preserving selection state
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
-    // Fit view after nodes are updated
     if (layoutedNodes.length > 0) {
       setTimeout(() => fitView(fitViewOptions), 50);
     }
   }, [layoutedNodes, initialEdges, setNodes, setEdges, fitView, applyEdgeHighlighting]);
 
-  // Handle node click - update node selection and edge highlighting
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
+      setSelectedNodeForPopover(newSelectedId ? node : null);
+      setSelectedEdgeForPopover(null);
     },
     [selectedNodeId, setEdges, applyEdgeHighlighting]
   );
+  const handleEdgeClick: EdgeMouseHandler<ServiceMapEdgeType> = useCallback(
+    (_, edge) => {
+      setSelectedNodeId(null);
+      setSelectedNodeForPopover(null);
+      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
+      setSelectedEdgeForPopover(newSelectedEdge);
+      setEdges((currentEdges) =>
+        applyEdgeHighlighting(currentEdges, { selectedEdgeId: newSelectedEdge?.id ?? null })
+      );
+    },
+    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+  );
 
-  // Handle pane click to deselect
   const handlePaneClick = useCallback(() => {
     setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
     setNodes((currentNodes) =>
       currentNodes.map((n) => ({
         ...n,
@@ -111,6 +138,26 @@ function ReactFlowGraphInner({
     );
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
+
+  const handlePopoverClose = useCallback(() => {
+    setSelectedNodeId(null);
+    setSelectedNodeForPopover(null);
+    setSelectedEdgeForPopover(null);
+    setNodes((currentNodes) =>
+      currentNodes.map((n) => ({
+        ...n,
+        selected: false,
+      }))
+    );
+    setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+  }, [setNodes, setEdges, applyEdgeHighlighting]);
+
+  // Close popover when user starts dragging (map panning or node dragging)
+  const handleDragStart = useCallback(() => {
+    if (selectedNodeForPopover || selectedEdgeForPopover) {
+      handlePopoverClose();
+    }
+  }, [selectedNodeForPopover, selectedEdgeForPopover, handlePopoverClose]);
 
   const containerStyle = useMemo(
     () => ({
@@ -179,7 +226,10 @@ function ReactFlowGraphInner({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        onEdgeClick={handleEdgeClick}
         onPaneClick={handlePaneClick}
+        onMoveStart={handleDragStart}
+        onNodeDragStart={handleDragStart}
         onInit={onInit}
         fitView
         fitViewOptions={fitViewOptions}
@@ -188,7 +238,7 @@ function ReactFlowGraphInner({
         proOptions={{ hideAttribution: true }}
         nodesDraggable={true}
         nodesConnectable={false}
-        edgesFocusable={false}
+        edgesFocusable={true}
         aria-label={i18n.translate('xpack.apm.serviceMap.ariaLabel', {
           defaultMessage:
             'Service map showing {nodeCount} services and dependencies. Use tab or arrow keys to navigate between nodes, enter or space to view details.',
@@ -198,6 +248,16 @@ function ReactFlowGraphInner({
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles} />
       </ReactFlow>
+      <ReactFlowPopover
+        selectedNode={selectedNodeForPopover}
+        selectedEdge={selectedEdgeForPopover}
+        focusedServiceName={serviceName}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        onClose={handlePopoverClose}
+      />
     </div>
   );
 }
