@@ -24,6 +24,17 @@ import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
+// Vite config is stored in global by the CLI dev mode
+interface ViteConfig {
+  serverUrl: string;
+  pluginIds: string[];
+  pluginDependencies?: Record<string, string[]>;
+}
+
+function getViteConfig(): ViteConfig | null {
+  return (global as any).__kbnViteConfig || null;
+}
+
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;
 
@@ -106,11 +117,33 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       ),
     });
 
+    // Check if Vite dev server is configured
+    // Note: Vite config is set via global.__kbnViteConfig when using --use-vite flag
+    let viteConfigData:
+      | { serverUrl: string; pluginIds: string[]; pluginDependencies: Record<string, string[]> }
+      | undefined;
+    try {
+      const viteConfig = getViteConfig();
+      if (viteConfig && viteConfig.serverUrl && Array.isArray(viteConfig.pluginIds)) {
+        // eslint-disable-next-line no-console
+        console.log('[bootstrap] Using Vite ESM mode with', viteConfig.pluginIds.length, 'plugins');
+        viteConfigData = {
+          serverUrl: viteConfig.serverUrl,
+          pluginIds: viteConfig.pluginIds,
+          pluginDependencies: viteConfig.pluginDependencies || {},
+        };
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('[bootstrap] Vite config not available, using traditional loading');
+    }
+
     const body = renderTemplate({
       colorMode,
       themeTagName,
       jsDependencyPaths,
       publicPathMap,
+      viteConfig: viteConfigData,
     });
 
     const hash = createHash('sha256');
