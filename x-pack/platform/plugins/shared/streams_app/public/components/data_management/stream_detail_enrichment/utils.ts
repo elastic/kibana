@@ -299,6 +299,7 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
   source_ip: '',
   destination_ip: '',
   internal_networks: [],
+  target_field: 'attributes.network.direction',
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
