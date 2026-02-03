@@ -173,10 +173,10 @@ describe('attachment tools', () => {
           ({
             id: AttachmentType.visualizationRef,
             validate: () => ({ valid: true, data: {} }),
-            format: (attachment: Attachment) => ({
+            format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
                 type: 'text',
-                value: JSON.stringify(attachment.data),
+                value: JSON.stringify(formattedAttachment.data),
               }),
             }),
             resolve: async (_a: Attachment, ctx: AttachmentResolveContext) => {
