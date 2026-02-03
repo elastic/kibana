@@ -121,7 +121,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled, isTemplatesEnabled } = useCasesFeatures();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -624,6 +624,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+    console.log('isTemplatesEnabled', isTemplatesEnabled);
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
@@ -703,19 +704,21 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
           <EuiSpacer size="xl" />
 
-          <div css={sectionWrapperCss}>
-            <EuiFlexItem grow={false}>
-              <Templates
-                templates={templates}
-                isLoading={isLoadingCaseConfiguration}
-                disabled={isLoadingCaseConfiguration}
-                onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
-                onEditTemplate={onEditTemplate}
-                onDeleteTemplate={onDeleteTemplate}
-              />
-            </EuiFlexItem>
-          </div>
-
+          {isTemplatesEnabled && (
+            <div css={sectionWrapperCss}>
+              <EuiFlexItem grow={false}>
+                <Templates
+                  templates={templates}
+                  isLoading={isLoadingCaseConfiguration}
+                  disabled={isLoadingCaseConfiguration}
+                  onAddTemplate={() => setFlyOutVisibility({ type: 'template', visible: true })}
+                  onEditTemplate={onEditTemplate}
+                  onDeleteTemplate={onDeleteTemplate}
+                />
+              </EuiFlexItem>
+            </div>
+          )}
+          
           {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>
               <EuiSpacer size="xl" />

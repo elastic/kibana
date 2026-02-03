@@ -64,6 +64,7 @@ export interface CasesContextFeatures {
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
+  templates?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
