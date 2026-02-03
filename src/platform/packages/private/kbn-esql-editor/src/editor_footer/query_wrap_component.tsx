@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 export function QueryWrapComponent({ onPrettifyQuery }: { onPrettifyQuery: () => void }) {
   return (
@@ -22,7 +22,7 @@ export function QueryWrapComponent({ onPrettifyQuery }: { onPrettifyQuery: () =>
         disableScreenReaderOutput
       >
         <EuiButtonIcon
-          iconType={'pipeBreaks'}
+          iconType="pipeBreaks"
           color="text"
           size="xs"
           data-test-subj="ESQLEditor-toggleWordWrap"

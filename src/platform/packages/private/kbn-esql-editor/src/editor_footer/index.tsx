@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -104,7 +104,6 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
@@ -140,21 +139,27 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               <KeyboardShortcuts />
-              {displayDocumentationAsFlyout && !Boolean(editorIsInline) && (
+              <QueryWrapComponent onPrettifyQuery={onPrettifyQuery} />
+              {displayDocumentationAsFlyout && (
                 <>
-                  <EuiButtonEmpty
-                    iconType="documentation"
-                    color="text"
-                    data-test-subj="ESQLEditor-documentation"
-                    size="m"
-                    onClick={() => toggleLanguageComponent()}
-                    aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                  <EuiToolTip
+                    position="top"
+                    content={i18n.translate('esqlEditor.query.documentationAriaLabel', {
                       defaultMessage: 'Open documentation',
                     })}
-                    css={css`
-                      cursor: pointer;
-                    `}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="documentation"
+                      color="text"
+                      data-test-subj="ESQLEditor-documentation"
+                      size="xs"
+                      onClick={() => toggleLanguageComponent()}
+                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                        defaultMessage: 'Open documentation',
+                      })}
+                    />
+                  </EuiToolTip>
                   <LanguageDocumentationFlyout
                     searchInDescription
                     linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
