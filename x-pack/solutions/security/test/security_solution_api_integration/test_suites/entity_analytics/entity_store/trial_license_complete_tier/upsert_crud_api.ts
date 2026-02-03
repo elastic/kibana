@@ -58,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         await enableEntityStore(providerContext);
+        await ensureTransformStarted(providerContext);
         log.info('beforeEach complete');
       });
 
@@ -284,6 +285,16 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
   });
+}
+
+async function ensureTransformStarted(providerContext: FtrProviderContext): Promise<void> {
+  const es = providerContext.getService('es');
+  await es.transform.startTransform(
+    {
+      transform_id: USER_TRANSFORM_ID,
+    },
+    { ignore: [409] }
+  );
 }
 
 async function assertEntityFromES(
