@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
-import { useIsDevMode } from '@kbn/react-env';
+import { getLensFeatureFlags } from '../../../get_feature_flags';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import {
   useLensSelector,
@@ -316,11 +316,9 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
-  const isDevMode = useIsDevMode();
-
   const showConvertToEsqlButton = useMemo(() => {
-    return isDevMode && !textBasedMode;
-  }, [isDevMode, textBasedMode]);
+    return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
+  }, [textBasedMode]);
 
   const {
     isConvertToEsqlButtonDisabled,
