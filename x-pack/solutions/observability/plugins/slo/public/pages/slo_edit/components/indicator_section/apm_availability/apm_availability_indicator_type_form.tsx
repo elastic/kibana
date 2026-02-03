@@ -233,7 +233,7 @@ function ApmAvailabilityFullPage() {
   );
 }
 
-interface ApmAvailabilityIndicatorTypeFormProps {
+export interface ApmAvailabilityIndicatorTypeFormProps {
   isFlyout?: boolean;
 }
 

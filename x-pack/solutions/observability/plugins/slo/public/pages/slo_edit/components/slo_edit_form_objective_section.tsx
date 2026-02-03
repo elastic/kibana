@@ -442,7 +442,7 @@ function ObjectiveSectionFullPage() {
   );
 }
 
-interface SloEditFormObjectiveSectionProps {
+export interface SloEditFormObjectiveSectionProps {
   formSettings?: FormSettings;
 }
 

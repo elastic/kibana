@@ -11,7 +11,7 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
-interface SloEditFormObjectiveSectionTimeslicesProps {
+export interface SloEditFormObjectiveSectionTimeslicesProps {
   isFlyout?: boolean;
 }
 

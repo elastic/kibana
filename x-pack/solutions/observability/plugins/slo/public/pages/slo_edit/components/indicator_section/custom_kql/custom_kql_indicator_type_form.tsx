@@ -17,7 +17,7 @@ import { QueryBuilder } from '../../common/query_builder';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 
-interface CustomKqlIndicatorTypeFormProps {
+export interface CustomKqlIndicatorTypeFormProps {
   isFlyout?: boolean;
 }
 

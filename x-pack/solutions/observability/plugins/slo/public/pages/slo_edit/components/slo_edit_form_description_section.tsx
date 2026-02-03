@@ -28,7 +28,7 @@ import { OptionalText } from './common/optional_text';
 import { MAX_WIDTH } from '../constants';
 import { DataPreviewChart } from './common/data_preview_chart';
 
-interface SloEditFormDescriptionSectionProps {
+export interface SloEditFormDescriptionSectionProps {
   formSettings?: FormSettings;
 }
 

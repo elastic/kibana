@@ -30,7 +30,7 @@ export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
 const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
 
-interface CustomMetricIndicatorTypeFormProps {
+export interface CustomMetricIndicatorTypeFormProps {
   isFlyout?: boolean;
 }
 

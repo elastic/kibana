@@ -287,7 +287,7 @@ function ApmLatencyFullPage() {
   );
 }
 
-interface ApmLatencyIndicatorTypeFormProps {
+export interface ApmLatencyIndicatorTypeFormProps {
   isFlyout?: boolean;
 }
 
