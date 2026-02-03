@@ -22,6 +22,8 @@ export const transformRawRuleTemplateToRuleTemplate = (
     id,
     name: attributes.name,
     params: attributes.params,
+    description: attributes.description,
+    artifacts: attributes.artifacts,
     ruleTypeId: attributes.ruleTypeId,
     schedule: attributes.schedule,
     tags: attributes.tags,
