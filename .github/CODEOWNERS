@@ -3238,6 +3238,7 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 # Leads approval
 /AGENTS.md @elastic/kibana-tech-leads
+/.claude/ @elastic/kibana-tech-leads
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
