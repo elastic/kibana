@@ -257,8 +257,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         },
       });
     } else {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+      navigateToApp('triggersActions', {
+        path: getEditRuleRoute(rule.id),
         state: {
           returnApp: 'management',
           returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,

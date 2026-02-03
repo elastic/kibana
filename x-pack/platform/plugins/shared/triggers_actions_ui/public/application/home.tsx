@@ -161,15 +161,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         <RuleTypeModal
           onClose={() => setRuleTypeModalVisibility(false)}
           onSelectRuleType={(ruleTypeId) => {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+            navigateToApp('triggersActions', {
+              path: getCreateRuleRoute(ruleTypeId),
             });
           }}
           onSelectTemplate={(templateId) => {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                encodeURIComponent(templateId)
-              )}`,
+            navigateToApp('triggersActions', {
+              path: getCreateRuleFromTemplateRoute(encodeURIComponent(templateId)),
             });
           }}
           http={http}

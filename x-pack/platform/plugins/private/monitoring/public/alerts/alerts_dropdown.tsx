@@ -68,9 +68,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
       }),
       icon: 'tableOfContents',
       onClick: () =>
-        unifiedRulesPageEnabled
-          ? navigateToApp('rules')
-          : navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
+        unifiedRulesPageEnabled ? navigateToApp('rules') : navigateToApp('triggersActions'),
     },
   ];
 

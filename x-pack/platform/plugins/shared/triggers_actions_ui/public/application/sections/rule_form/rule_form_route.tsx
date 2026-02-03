@@ -125,9 +125,7 @@ export const RuleFormRoute = () => {
           } else if (returnApp && returnPath) {
             navigateToApp(returnApp, { path: returnPath });
           } else {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/rules`,
-            });
+            navigateToApp('triggersActions');
           }
         }}
         onSubmit={(ruleId) => {
@@ -140,8 +138,8 @@ export const RuleFormRoute = () => {
           } else if (returnApp && returnPath) {
             navigateToApp(returnApp, { path: returnPath });
           } else {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            navigateToApp('triggersActions', {
+              path: getRuleDetailsRoute(ruleId),
             });
           }
         }}

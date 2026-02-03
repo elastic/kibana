@@ -130,8 +130,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
         return;
       }
 
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+      navigateToApp('triggersActions', {
+        path: getEditRuleRoute(rule.id),
         state: {
           returnApp: 'management',
           returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,

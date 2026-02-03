@@ -133,7 +133,7 @@ const RulesPage = () => {
           state: { returnPath },
         });
       } else {
-        navigateToApp('management', {
+        navigateToApp('triggersActions', {
           path: getCreateRuleRoute(ruleTypeId),
           state: {
             returnApp: 'management',
@@ -228,18 +228,16 @@ const RulesPage = () => {
             if (navigateToCreateRuleForm) {
               navigateToCreateRuleForm(ruleTypeId);
             } else {
-              navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              navigateToApp('triggersActions', {
+                path: getCreateRuleRoute(ruleTypeId),
               });
             }
           }}
           onSelectTemplate={(templateId) => {
             // For templates, we need to extract the ruleTypeId or handle it differently
             // For now, fall back to default behavior
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                encodeURIComponent(templateId)
-              )}`,
+            navigateToApp('triggersActions', {
+              path: getCreateRuleFromTemplateRoute(encodeURIComponent(templateId)),
             });
           }}
           http={http}
