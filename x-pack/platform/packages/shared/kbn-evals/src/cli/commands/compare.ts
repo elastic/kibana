@@ -62,7 +62,9 @@ export const compareCmd: Command<void> = {
     const secondRunDatasets = new Map(
       secondRunScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const overlappingDatasetIds = [...firstRunDatasets.keys()].filter((id) => secondRunDatasets.has(id));
+    const overlappingDatasetIds = [...firstRunDatasets.keys()].filter((id) =>
+      secondRunDatasets.has(id)
+    );
 
     if (overlappingDatasetIds.length === 0) {
       throw new Error('No overlapping datasets found between the two runs.');

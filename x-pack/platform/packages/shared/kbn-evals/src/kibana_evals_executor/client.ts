@@ -97,14 +97,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 `🔧 Running task "task" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
               );
 
-              
               const { taskOutput, traceId } = await withTaskSpan('task', {}, async () => {
                 const traceId = getCurrentTraceId();
                 const taskOutput = await task(example);
                 return {
                   taskOutput,
                   traceId,
-                }
+                };
               });
 
               runs[runKey] = {
@@ -126,19 +125,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const { result, traceId } = await withEvaluatorSpan(evaluator.name, {}, async () => {
-                    const traceId = getCurrentTraceId();
-                    const result = await evaluator.evaluate({
-                      input: example.input,
-                      output: taskOutput,
-                      expected: example.output ?? null,
-                      metadata: example.metadata ?? {},
-                    });
-                    return {
-                      result,
-                      traceId,
+                  const { result, traceId } = await withEvaluatorSpan(
+                    evaluator.name,
+                    {},
+                    async () => {
+                      const traceId = getCurrentTraceId();
+                      const result = await evaluator.evaluate({
+                        input: example.input,
+                        output: taskOutput,
+                        expected: example.output ?? null,
+                        metadata: example.metadata ?? {},
+                      });
+                      return {
+                        result,
+                        traceId,
+                      };
                     }
-                  });
+                  );
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
