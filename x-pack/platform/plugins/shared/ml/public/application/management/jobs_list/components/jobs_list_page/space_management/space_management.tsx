@@ -185,6 +185,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload })
               data-test-subj={`mlSpacesManagementTable-${currentTabId} ${
                 isLoading ? 'loading' : 'loaded'
               }`}
+              tableCaption={i18n.translate('xpack.ml.management.spaceManagement.tableCaption', {
+                defaultMessage: 'Machine learning spaces management',
+              })}
               items={items}
               columns={columns}
               search={{

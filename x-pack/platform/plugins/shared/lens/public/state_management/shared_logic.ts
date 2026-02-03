@@ -19,8 +19,8 @@ import type {
   Datasource,
   LensDocument,
 } from '@kbn/lens-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(

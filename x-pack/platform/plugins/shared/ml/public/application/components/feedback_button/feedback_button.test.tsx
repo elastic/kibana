@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FeedBackButton, getSurveyFeedbackURL } from './feedback_button';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 // Mock the required dependencies
 const mockUseMlKibana = jest.fn();
@@ -39,6 +40,7 @@ describe('FeedBackButton', () => {
     useMlKibana: {
       services: {
         kibanaVersion: '9.3.0',
+        notifications: notificationServiceMock.createStartContract(),
       },
     },
     useEnabledFeatures: {
@@ -67,6 +69,20 @@ describe('FeedBackButton', () => {
 
     it('does not render when no jobIds are provided', () => {
       render(<FeedBackButton jobIds={[]} />);
+
+      expect(screen.queryByTestId('mlFeatureFeedbackButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render when feedback is not enabled', () => {
+      const notificationsMock = notificationServiceMock.createStartContract();
+      notificationsMock.feedback.isEnabled.mockReturnValue(false);
+      mockUseMlKibana.mockReturnValue({
+        services: {
+          kibanaVersion: '9.3.0',
+          notifications: notificationsMock,
+        },
+      });
+      render(<FeedBackButton jobIds={['test-job-1', 'test-job-2']} />);
 
       expect(screen.queryByTestId('mlFeatureFeedbackButton')).not.toBeInTheDocument();
     });
@@ -119,6 +135,7 @@ describe('FeedBackButton', () => {
       mockUseMlKibana.mockReturnValue({
         services: {
           kibanaVersion: undefined,
+          notifications: notificationServiceMock.createStartContract(),
         },
       });
 

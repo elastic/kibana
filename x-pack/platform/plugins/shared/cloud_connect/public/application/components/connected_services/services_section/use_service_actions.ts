@@ -129,6 +129,30 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     window.open(url, '_blank');
   };
 
+  const handleRotateServiceApiKey = async (serviceKey: ServiceType) => {
+    setLoadingService(serviceKey);
+
+    const { error } = await apiService.rotateServiceApiKey(serviceKey);
+
+    setLoadingService(null);
+
+    if (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.cloudConnect.services.rotateApiKey.errorTitle', {
+          defaultMessage: 'Failed to rotate API key',
+        }),
+        text: error.message,
+      });
+      return;
+    }
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.cloudConnect.services.rotateApiKey.successTitle', {
+        defaultMessage: 'Service API key rotated successfully',
+      }),
+    });
+  };
+
   return {
     loadingService,
     disableModalService,
@@ -137,5 +161,6 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
+    handleRotateServiceApiKey,
   };
 };

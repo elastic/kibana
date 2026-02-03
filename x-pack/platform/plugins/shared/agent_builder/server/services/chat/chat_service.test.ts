@@ -128,6 +128,32 @@ describe('ChatService', () => {
     );
   });
 
+  it('passes configurationOverrides to executeAgent$', async () => {
+    const obs$ = chatService.converse({
+      agentId: 'my-agent',
+      request,
+      nextInput: {
+        message: 'hello',
+      },
+      configurationOverrides: {
+        instructions: 'custom instructions',
+        tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
+      },
+    });
+
+    await firstValueFrom(obs$.pipe(toArray()));
+
+    expect(executeAgentMock$).toHaveBeenCalledTimes(1);
+    expect(executeAgentMock$).toHaveBeenCalledWith(
+      expect.objectContaining({
+        configurationOverrides: {
+          instructions: 'custom instructions',
+          tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
+        },
+      })
+    );
+  });
+
   describe('autoCreateConversationWithId', () => {
     it('creates new conversation when autoCreateConversationWithId=true and conversation does not exist', async () => {
       getConversationMock.mockResolvedValue({

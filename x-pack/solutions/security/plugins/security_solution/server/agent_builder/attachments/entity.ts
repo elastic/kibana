@@ -17,12 +17,6 @@ const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
 });
 
 /**
- * Data for a risk entity attachment.
- * Note: After validation, the data is stored as a formatted string.
- */
-type EntityRiskAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
-
-/**
  * Type guard to check if data is a formatted risk entity string
  */
 const isEntityRiskFormattedData = (data: unknown): data is string => {
@@ -40,7 +34,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
-        return { valid: true, data: formatEntityRiskData(parseResult.data) };
+        return { valid: true, data: parseResult.data };
       } else {
         return { valid: false, error: parseResult.error.message };
       }
@@ -73,8 +67,4 @@ RISK ENTITY DATA:
       return description;
     },
   };
-};
-
-const formatEntityRiskData = (data: EntityRiskAttachmentData): string => {
-  return `identifier: ${data.identifier}, identifierType: ${data.identifierType}`;
 };

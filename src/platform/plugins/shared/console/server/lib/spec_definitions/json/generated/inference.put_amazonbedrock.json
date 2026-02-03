@@ -13,6 +13,7 @@
     },
     "url_components": {
       "task_type": [
+        "chat_completion",
         "completion",
         "text_embedding"
       ]

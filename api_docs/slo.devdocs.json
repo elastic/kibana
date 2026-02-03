@@ -1445,7 +1445,7 @@
         "label": "SloClient",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
-        "lineNumber": 16,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1461,11 +1461,55 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
-            "lineNumber": 17,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-server.SloClient.getGroupedStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getGroupedStats",
+            "description": [],
+            "signature": [
+              "(params: { type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.GetSLOGroupedStatsResponse",
+                "text": "GetSLOGroupedStatsResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "slo",
+                "id": "def-server.SloClient.getGroupedStats.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }"
+                ],
+                "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+                "lineNumber": 21,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -1514,14 +1558,15 @@
           "signature": [
             "(request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>) => ",
+            "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "slo",
               "scope": "server",
               "docId": "kibSloPluginApi",
               "section": "def-server.SloClient",
               "text": "SloClient"
-            }
+            },
+            ">"
           ],
           "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
           "lineNumber": 35,

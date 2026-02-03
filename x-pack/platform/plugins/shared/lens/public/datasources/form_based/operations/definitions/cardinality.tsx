@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { snakeCase } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -175,7 +176,12 @@ export const cardinalityOperation: OperationDefinition<
   },
   toESQL: (column, columnId) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
-    return `COUNT_DISTINCT(${column.sourceField})`;
+    // Use columnId to make param name unique
+    const paramKey = `field_${snakeCase(columnId)}`;
+    return {
+      template: `COUNT_DISTINCT(??${paramKey})`,
+      params: { [paramKey]: column.sourceField },
+    };
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
