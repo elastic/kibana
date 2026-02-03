@@ -8,10 +8,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { JsonModelShapeSchema } from './json_model_shape_schema';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
-import { isValidJsonSchema } from './lib/validate_json_schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
 import { TriggerSchema } from './schema/triggers/trigger_schema';
+export type { JsonModelSchemaType } from './schema/common/json_model_schema';
+export { JsonModelSchema };
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -400,47 +401,6 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputArraySchema,
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
-
-// JSON Schema model structure
-// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
-// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
-// structured data models.
-export const JsonModelSchema = JsonModelShapeSchema.refine(
-  (data) => {
-    // Validate that properties is a valid JSON Schema object
-    if (data.properties) {
-      // Validate each property is a valid JSON Schema
-      for (const value of Object.values(data.properties)) {
-        // $ref objects are valid JSON Schema but can't be validated in isolation
-        // since they reference definitions that exist in the parent schema
-        if (typeof value === 'object' && value !== null && '$ref' in value) {
-          // $ref is a valid JSON Schema construct, skip validation
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-        if (!isValidJsonSchema(value)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'properties must contain valid JSON Schema definitions' }
-).refine(
-  (data) => {
-    // Validate that required fields exist in properties
-    if (data.required && data.properties) {
-      for (const field of data.required) {
-        if (!(field in data.properties)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  },
-  { message: 'required fields must exist in properties' }
-);
-export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
