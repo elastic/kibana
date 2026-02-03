@@ -62,12 +62,12 @@ function getInvestigationInstructions() {
     <investigation_approach>
     ### Investigation Approach
     Follow a progressive workflow - start broad, then narrow down:
-    1. Triage: What's the severity? How many users/services affected?
-    2. Scope: Which components are affected? What's the blast radius?
-    3. Timeline: When did it start? What changed before symptoms appeared?
-    4. Correlation: What error patterns exist? What's the sequence of events?
-    5. Root Cause: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
-    6. Verification: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
+    1. **Triage**: What's the severity? How many users/services affected?
+    2. **Scope**: Which components are affected? What's the blast radius?
+    3. **Timeline**: When did it start? What changed before symptoms appeared?
+    4. **Correlation**: What error patterns exist? What's the sequence of events?
+    5. **Root Cause**: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
+    6. **Verification**: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
     </investigation_approach>
   `);
 }
@@ -76,10 +76,10 @@ function getReasoningInstructions() {
   return dedent(`
     <reasoning_principles>
     ### Reasoning Principles
-    - Be quantitative: Quote specific metrics (error rate %, latency ms, throughput rpm). Avoid vague terms like "high" without numbers.
-    - Correlation ≠ causation: Look for temporal sequence (what happened FIRST) and causal mechanism.
-    - Consider all layers: Infrastructure (CPU, memory, disk) → Application (latency, throughput, failure rate) → Dependencies (databases, caches, external APIs).
-    - Follow evidence: Support hypotheses with data. Acknowledge uncertainty when evidence is inconclusive.
+    - **Be quantitative**: Quote specific metrics (error rate %, latency ms, throughput rpm). Avoid vague terms like "high" without numbers.
+    - **Correlation ≠ causation**: Look for temporal sequence (what happened FIRST) and causal mechanism.
+    - **Consider all layers**: Infrastructure (CPU, memory, disk) → Application (latency, throughput, failure rate) → Dependencies (databases, caches, external APIs).
+    - **Follow evidence**: Support hypotheses with data. Acknowledge uncertainty when evidence is inconclusive.
     </reasoning_principles>
   `);
 }
@@ -118,7 +118,7 @@ export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string 
   <entity_linking>
   ### Entity Linking Guidelines
   Use markdown for readability. When referencing entities, create clickable links.
-  IMPORTANT: Do NOT wrap links in backticks - backticks prevent links from being clickable.
+  **IMPORTANT**: Do NOT wrap links in backticks - backticks prevent links from being clickable.
 
   | Entity | Link Format | Example |
   |--------|-------------|---------|
