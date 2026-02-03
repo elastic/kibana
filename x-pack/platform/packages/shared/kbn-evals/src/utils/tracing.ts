@@ -6,7 +6,7 @@
  */
 
 import { createWithActiveSpan, type WithActiveSpanOptions } from '@kbn/tracing-utils';
-import { ROOT_CONTEXT, context, trace } from '@opentelemetry/api';
+import { ROOT_CONTEXT, context, propagation, trace } from '@opentelemetry/api';
 
 const EVALS_TRACER = trace.getTracer('@kbn/evals');
 const withActiveEvalsSpan = createWithActiveSpan({
@@ -14,8 +14,11 @@ const withActiveEvalsSpan = createWithActiveSpan({
 });
 
 export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
-  return context.with(ROOT_CONTEXT, () => {
-    return withActiveEvalsSpan(
+  const baggage = propagation.getBaggage(context.active());
+  const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+
+  return context.with(parentContext, () =>
+    withActiveEvalsSpan(
       name,
       {
         ...opts,
@@ -25,9 +28,10 @@ export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () =
           ...opts.attributes,
         },
       },
+      parentContext,
       cb
-    );
-  });
+    )
+  );
 }
 
 /**
@@ -36,8 +40,11 @@ export function withTaskSpan(name: string, opts: WithActiveSpanOptions, cb: () =
  */
 export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb: () => any) {
   // Execute callback in the context with baggage
-  return context.with(ROOT_CONTEXT, () => {
-    return withActiveEvalsSpan(
+  const baggage = propagation.getBaggage(context.active());
+  const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+
+  return context.with(parentContext, () =>
+    withActiveEvalsSpan(
       name,
       {
         ...opts,
@@ -47,9 +54,10 @@ export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb:
           ...opts.attributes,
         },
       },
+      parentContext,
       cb
-    );
-  });
+    )
+  );
 }
 
 export function getCurrentTraceId(): string | null {
