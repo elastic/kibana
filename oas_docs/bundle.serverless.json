@@ -1,0 +1,33 @@
+{
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basicAuth": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Kibana HTTP APIs",
+    "version": "0.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {},
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5622"
+    }
+  ],
+  "tags": []
+}

@@ -13,7 +13,7 @@ import type { ActionConnector } from '../../types';
  * @returns True if the connector uses oauth_authorization_code auth type
  */
 export function usesOAuthAuthorizationCode(connector: ActionConnector): boolean {
-  if (!connector || !connector.config) {
+  if (!connector || connector.isPreconfigured || connector.isSystemAction) {
     return false;
   }
 
