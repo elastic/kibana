@@ -14,7 +14,11 @@ const fetch = require('node-fetch');
 const { camelCase, sortBy } = require('lodash');
 const { resolve } = require('path');
 
-const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
+// Output is written to @kbn/security-solution-common package (run from plugin root)
+const OUTPUT_DIRECTORY = resolve(
+  __dirname,
+  '../../../../../../src/platform/packages/shared/kbn-security-solution-common/src'
+);
 
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
@@ -264,7 +268,7 @@ async function main() {
 
           import { i18n } from '@kbn/i18n';
 
-          import { MitreTactic, MitreTechnique, MitreSubTechnique } from './types';
+          import type { MitreTactic, MitreTechnique, MitreSubTechnique } from './mitre_types';
 
           export const tactics: MitreTactic[] =
             ${JSON.stringify(getTacticsOptions(tactics), null, 2)

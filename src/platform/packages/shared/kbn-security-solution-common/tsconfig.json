@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "../../../../../typings/@emotion"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/securitysolution-io-ts-alerting-types",
+    "@elastic/eui",
+    "@emotion/react"
+  ]
+}

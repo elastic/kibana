@@ -33,7 +33,7 @@ import type {
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
-import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
+import { ThreatEuiFlexGroup } from '@kbn/security-solution-common';
 
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';

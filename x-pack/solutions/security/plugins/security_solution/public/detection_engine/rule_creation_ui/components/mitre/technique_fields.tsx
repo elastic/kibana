@@ -23,7 +23,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
-import type { MitreSubTechnique, MitreTechnique } from '../../../../detections/mitre/types';
+import type { MitreSubTechnique, MitreTechnique } from '@kbn/security-solution-common';
 
 const lazyMitreConfiguration = () => {
   /**
@@ -32,7 +32,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '@kbn/security-solution-common'
   );
 };
 

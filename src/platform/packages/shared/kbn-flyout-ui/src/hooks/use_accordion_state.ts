@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useReducer } from 'react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 const CLOSED = 'closed' as const;
 const OPEN = 'open' as const;
@@ -72,7 +74,7 @@ export interface UseAccordionStateValue {
  * @param expandedInitially - is accordion expanded on first render
  */
 export const useAccordionState = (expandedInitially: boolean): UseAccordionStateValue => {
-  const { storage } = useKibana().services;
+  const { storage } = useKibana().services as { storage?: Storage };
 
   const initialState = expandedInitially ? OPEN : CLOSED;
   const [state, toggleState] = useReducer(toggleReducer, initialState);

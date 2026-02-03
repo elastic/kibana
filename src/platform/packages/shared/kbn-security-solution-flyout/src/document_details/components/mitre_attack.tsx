@@ -1,26 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SearchHit } from '../../../../../common/search_strategy';
-import { buildThreatDescription } from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
+import { buildThreatDescription } from '@kbn/security-solution-common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from '../test_ids';
 
 /**
  * Retrieves mitre attack information from the alert information
  */
-const getMitreComponentParts = (searchHit?: SearchHit) => {
-  const ruleParameters = searchHit?.fields
-    ? searchHit?.fields['kibana.alert.rule.parameters']
-    : null;
+const getMitreComponentParts = (hit?: DataTableRecord) => {
+  const ruleParameters = hit?.raw?.fields['kibana.alert.rule.parameters'] || null;
   const threat: Threat = ruleParameters ? ruleParameters[0]?.threat : null;
   if (!threat) {
     return null;
@@ -33,9 +32,12 @@ const getMitreComponentParts = (searchHit?: SearchHit) => {
   });
 };
 
-export const MitreAttack: FC = () => {
-  const { searchHit } = useDocumentDetailsContext();
-  const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
+export interface MitreAttackProps {
+  hit: DataTableRecord;
+}
+
+export const MitreAttack: FC<MitreAttackProps> = ({ hit }) => {
+  const threatDetails = useMemo(() => getMitreComponentParts(hit), [hit]);
 
   if (!threatDetails || !threatDetails[0]) {
     // Do not render empty message on MITRE attack because other frameworks could be used

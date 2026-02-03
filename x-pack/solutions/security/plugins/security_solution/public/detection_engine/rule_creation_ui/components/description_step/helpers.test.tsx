@@ -16,11 +16,11 @@ import type { DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
+import { buildThreatDescription } from '@kbn/security-solution-common';
 import * as i18n from './translations';
 import {
   isNotEmptyArray,
   buildQueryBarDescription,
-  buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildStringArrayDescription,
   buildSeverityDescription,

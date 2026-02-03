@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
+import React, { useCallback, useMemo, useState } from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
 import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
 import {
-  EuiTitle,
-  EuiSpacer,
   EuiAccordion,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSkeletonText,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { AlertDescription, MitreAttack, Reason } from '@kbn/security-solution-flyout';
 import * as i18n from '../translations';
 import { getSecurityTimelineRedirectUrl } from '../utils';
-import { getEcsAllowedValueDescription } from '../utils/ecs_description';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
@@ -63,23 +62,15 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
 export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
   const {
     application: { getUrlForApp },
-    fieldsMetadata,
   } = useDiscoverServices();
 
   const timelinesURL = getUrlForApp('securitySolutionUI', {
     path: 'alerts',
   });
 
-  const result = fieldsMetadata?.useFieldsMetadata({
-    attributes: ['allowed_values', 'name', 'flat_name'],
-    fieldNames: [fieldConstants.EVENT_CATEGORY_FIELD],
-  });
+  const openRulePreview = useCallback(() => console.log('Open Rule Preview'), []);
+  const openReason = useCallback(() => console.log('Open Reason'), []);
 
-  const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
-  const description = useMemo(
-    () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
-    [hit]
-  );
   const alertURL = useMemo(() => getFieldValue(hit, 'kibana.alert.url') as string, [hit]);
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const isAlert = useMemo(() => eventKind === 'signal', [eventKind]);
@@ -96,61 +87,49 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
     [hit, eventId, timelinesURL]
   );
 
-  const eventCategory = useMemo(() => getFieldValue(hit, 'event.category') as string, [hit]);
-
   return (
-    <EuiFlexGroup
-      data-test-subj={isAlert ? 'alertOverview' : 'eventOverview'}
-      gutterSize="m"
-      direction="column"
-      style={{ paddingBlock: '20px' }}
-    >
-      <EuiFlexItem>
-        <ExpandableSection title={i18n.aboutSectionTitle}>
-          {result?.loading ? (
-            <EuiSkeletonText
-              lines={2}
-              size={'s'}
-              isLoading={result?.loading}
-              contentAriaLabel={i18n.ecsDescriptionLoadingAriaLable}
-            />
-          ) : (
-            <EuiText size="s" data-test-subj="about">
-              {getEcsAllowedValueDescription(result?.fieldsMetadata, eventCategory)}
-            </EuiText>
-          )}
-        </ExpandableSection>
-      </EuiFlexItem>
-      {description ? (
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiSpacer size="m" />
+      <EuiFlexGroup
+        data-test-subj={isAlert ? 'alertOverview' : 'eventOverview'}
+        gutterSize="m"
+        direction="column"
+      >
         <EuiFlexItem>
-          <ExpandableSection title={i18n.descriptionSectionTitle}>
-            <EuiText size="s" data-test-subj="description">
-              {description}
-            </EuiText>
+          <ExpandableSection title={i18n.aboutSectionTitle}>
+            {isAlert ? (
+              <EuiFlexGroup gutterSize="m" direction="column">
+                <EuiFlexItem>
+                  <AlertDescription
+                    hit={hit}
+                    onShowRuleSummary={openRulePreview}
+                    ruleSummaryDisabled={true}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <Reason hit={hit} onOpenReason={openReason} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <MitreAttack hit={hit} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
           </ExpandableSection>
         </EuiFlexItem>
-      ) : null}
-      {isAlert ? (
-        <EuiFlexItem>
-          <ExpandableSection title={i18n.reasonSectionTitle}>
-            <EuiText size="s" data-test-subj="reason">
-              {reason}
-            </EuiText>
-          </ExpandableSection>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="exploreSecurity"
+            href={isAlert && alertURL ? alertURL : eventURL}
+            target="_blank"
+            iconType="link"
+            fill
+            aria-label={i18n.overviewExploreButtonLabel(isAlert)}
+          >
+            {i18n.overviewExploreButtonLabel(isAlert)}
+          </EuiButton>
         </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="exploreSecurity"
-          href={isAlert && alertURL ? alertURL : eventURL}
-          target="_blank"
-          iconType="link"
-          fill
-          aria-label={i18n.overviewExploreButtonLabel(isAlert)}
-        >
-          {i18n.overviewExploreButtonLabel(isAlert)}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

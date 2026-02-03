@@ -6,7 +6,6 @@
  */
 
 import type { ReactNode } from 'react';
-import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
@@ -25,9 +24,4 @@ export interface BuildQueryBarDescription {
   indexPatterns?: DataViewBase;
   queryLabel?: string;
   savedQueryName?: string;
-}
-
-export interface BuildThreatDescription {
-  threat: Threats;
-  'data-test-subj'?: string;
 }

@@ -14,21 +14,23 @@ import {
   getMockCoverageOverviewTechniques,
 } from '../../model/coverage_overview/__mocks__';
 
-const mockTactics = getMockCoverageOverviewTactics();
-const mockTechniques = getMockCoverageOverviewTechniques();
-const mockSubtechniques = getMockCoverageOverviewSubtechniques();
+jest.mock('@kbn/security-solution-common', () => {
+  const {
+    getMockCoverageOverviewTactics,
+    getMockCoverageOverviewTechniques,
+    getMockCoverageOverviewSubtechniques,
+  } = require('../../model/coverage_overview/__mocks__');
+  return {
+    tactics: getMockCoverageOverviewTactics(),
+    techniques: getMockCoverageOverviewTechniques(),
+    subtechniques: getMockCoverageOverviewSubtechniques(),
+    getMockThreatData: jest.fn(),
+    getDuplicateTechniqueThreatData: jest.fn(),
+    getValidThreat: jest.fn(),
+  };
+});
 
 describe('buildCoverageOverviewDashboardModel', () => {
-  beforeEach(() => {
-    jest.mock('../../../../detections/mitre/mitre_tactics_techniques', () => {
-      return {
-        tactics: mockTactics,
-        techniques: mockTechniques,
-        subtechniques: mockSubtechniques,
-      };
-    });
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
