@@ -259,7 +259,7 @@ export const Navigation = ({
     >
       <SideNav isCollapsed={isCollapsed} showLabels={showLabels}>
         <SideNav.Logo
-          isCollapsed={isCollapsed}
+          isCollapsed={!showLabels}
           isCurrent={actualActiveItemId === logo.id}
           isHighlighted={visuallyActivePageId === logo.id}
           onClick={() => onItemClick?.(logo)}
