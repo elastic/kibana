@@ -23,7 +23,7 @@ export const editorComparators: StateComparators<EditorState> = {
   singleSelect: 'referenceEquality',
 };
 
-const defaultEditorState: WithAllKeys<EditorState> = {
+const defaultEditorState: EditorState = {
   searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
   singleSelect: undefined,
   runPastTimeout: undefined,
