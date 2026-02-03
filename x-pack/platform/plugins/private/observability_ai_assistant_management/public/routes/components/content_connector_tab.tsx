@@ -14,9 +14,11 @@ import { useKibana } from '../../hooks/use_kibana';
 export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.lastUsedConnector';
 
-export function SearchConnectorTab() {
+export function ContentConnectorTab() {
   const { application } = useKibana().services;
-  const url = application.getUrlForApp('elasticsearch', { path: '/content/connectors' });
+  const url = application.getUrlForApp('management', {
+    path: 'data/content_connectors/connectors',
+  });
 
   return (
     <>
