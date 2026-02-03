@@ -9,10 +9,14 @@ import qs from 'query-string';
 import axios from 'axios';
 import stringify from 'json-stable-stringify';
 import type { Logger } from '@kbn/core/server';
+import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
+import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
+import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
 import { getBasicAuthHeader } from './get_basic_auth_header';
+import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
 
 export interface OAuthTokenResponse {
   tokenType: string;
@@ -32,9 +36,17 @@ export async function requestOAuthToken<T>(
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
+  type OAuthBodyRequest =
+    | AuthorizationCodeOAuthRequestParams
+    | ClientCredentialsOAuthRequestParams
+    | JWTOAuthRequestParams
+    | RefreshTokenOAuthRequestParams;
   // Extract client credentials for Basic Auth if needed
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { client_id: clientId, client_secret: clientSecret, ...restBody } = bodyRequest as any;
+  const {
+    client_id: clientId,
+    client_secret: clientSecret,
+    ...restBody
+  } = bodyRequest as AsApiContract<OAuthBodyRequest>;
 
   const requestData = {
     ...(useBasicAuth ? restBody : bodyRequest),
