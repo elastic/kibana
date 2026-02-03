@@ -66,7 +66,11 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
-      features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))),
+      features: JSON.stringify(
+        features.map((feature) =>
+          omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+        )
+      ),
     },
     maxSteps,
     toolCallbacks: {

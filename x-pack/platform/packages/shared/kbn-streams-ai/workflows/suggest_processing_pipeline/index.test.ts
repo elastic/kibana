@@ -404,11 +404,13 @@ describe('suggestProcessingPipeline feature serialization', () => {
   const sampleFeatures: Feature[] = [
     {
       id: 'feature-1',
+      uuid: 'uuid-1',
+      stream_name: 'logs',
       type: 'programming_language',
-      name: 'python',
+      title: 'Python',
       description: 'Python programming language detected',
-      value: { version: '3.11' },
-      confidence: 0.93,
+      properties: { version: '3.11' },
+      confidence: 93,
       evidence: ['import statement', 'traceback format'],
       tags: ['backend', 'scripting'],
       meta: { detected_at: '2024-01-01' },
@@ -417,11 +419,13 @@ describe('suggestProcessingPipeline feature serialization', () => {
     },
     {
       id: 'feature-2',
+      uuid: 'uuid-2',
+      stream_name: 'logs',
       type: 'log_format',
-      name: 'json-structured',
+      title: 'JSON Structured',
       description: 'JSON structured logging detected',
-      value: { has_timestamp: true, has_level: true },
-      confidence: 0.98,
+      properties: { has_timestamp: true, has_level: true },
+      confidence: 98,
       evidence: ['JSON parsing success'],
       tags: ['structured', 'json'],
       meta: {},
@@ -430,62 +434,75 @@ describe('suggestProcessingPipeline feature serialization', () => {
     },
   ];
 
-  it('should serialize features omitting id, status, and last_seen', () => {
+  it('should serialize features omitting id, status, last_seen, expires_at, evidence, and meta', () => {
     // This mirrors the serialization pattern used in suggestProcessingPipeline:
-    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen'])))
+    // features: JSON.stringify(features.map((feature) => omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])))
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
 
     expect(parsed).toHaveLength(2);
 
-    // Verify first feature
+    // Verify first feature - omitted fields should not be present
     expect(parsed[0]).not.toHaveProperty('id');
     expect(parsed[0]).not.toHaveProperty('status');
     expect(parsed[0]).not.toHaveProperty('last_seen');
+    expect(parsed[0]).not.toHaveProperty('expires_at');
+    expect(parsed[0]).not.toHaveProperty('evidence');
+    expect(parsed[0]).not.toHaveProperty('meta');
+    // Essential semantic fields should be preserved
     expect(parsed[0]).toHaveProperty('type', 'programming_language');
-    expect(parsed[0]).toHaveProperty('name', 'python');
+    expect(parsed[0]).toHaveProperty('title', 'Python');
     expect(parsed[0]).toHaveProperty('description');
-    expect(parsed[0]).toHaveProperty('value');
-    expect(parsed[0]).toHaveProperty('confidence', 0.93);
-    expect(parsed[0]).toHaveProperty('evidence');
+    expect(parsed[0]).toHaveProperty('properties');
+    expect(parsed[0]).toHaveProperty('confidence', 93);
     expect(parsed[0]).toHaveProperty('tags');
-    expect(parsed[0]).toHaveProperty('meta');
+    expect(parsed[0]).toHaveProperty('stream_name', 'logs');
+    expect(parsed[0]).toHaveProperty('uuid', 'uuid-1');
 
     // Verify second feature
     expect(parsed[1]).not.toHaveProperty('id');
     expect(parsed[1]).not.toHaveProperty('status');
     expect(parsed[1]).not.toHaveProperty('last_seen');
+    expect(parsed[1]).not.toHaveProperty('expires_at');
+    expect(parsed[1]).not.toHaveProperty('evidence');
+    expect(parsed[1]).not.toHaveProperty('meta');
     expect(parsed[1]).toHaveProperty('type', 'log_format');
-    expect(parsed[1]).toHaveProperty('name', 'json-structured');
+    expect(parsed[1]).toHaveProperty('title', 'JSON Structured');
   });
 
   it('should handle empty features array', () => {
     const emptyFeatures: Feature[] = [];
     const serialized = JSON.stringify(
-      emptyFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      emptyFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     expect(serialized).toBe('[]');
   });
 
-  it('should preserve nested value objects for processing context', () => {
-    const featureWithComplexValue: Feature[] = [
+  it('should preserve nested properties objects but omit meta', () => {
+    const featureWithComplexProperties: Feature[] = [
       {
         id: 'feature-3',
+        uuid: 'uuid-3',
+        stream_name: 'logs',
         type: 'service',
-        name: 'elasticsearch',
+        title: 'Elasticsearch',
         description: 'Elasticsearch service detected',
-        value: {
+        properties: {
           version: '8.x',
           config: {
             cluster_name: 'production',
             nodes: ['node-1', 'node-2'],
           },
         },
-        confidence: 0.88,
+        confidence: 88,
         evidence: ['connection logs'],
         tags: ['database', 'search'],
         meta: { indices: ['logs', 'metrics'] },
@@ -495,24 +512,30 @@ describe('suggestProcessingPipeline feature serialization', () => {
     ];
 
     const serialized = JSON.stringify(
-      featureWithComplexValue.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      featureWithComplexProperties.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
 
-    expect(parsed[0].value).toEqual({
+    expect(parsed[0].properties).toEqual({
       version: '8.x',
       config: {
         cluster_name: 'production',
         nodes: ['node-1', 'node-2'],
       },
     });
-    expect(parsed[0].meta).toEqual({ indices: ['logs', 'metrics'] });
+    // meta should be omitted
+    expect(parsed[0]).not.toHaveProperty('meta');
+    expect(parsed[0]).not.toHaveProperty('evidence');
   });
 
   it('should produce JSON that can be used as prompt input', () => {
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     // The serialized string should be valid JSON
@@ -522,30 +545,36 @@ describe('suggestProcessingPipeline feature serialization', () => {
     const promptContent = `## Features\n${serialized}`;
     expect(promptContent).toContain('## Features');
     expect(promptContent).toContain('programming_language');
-    expect(promptContent).toContain('python');
+    expect(promptContent).toContain('Python');
     expect(promptContent).toContain('log_format');
-    expect(promptContent).toContain('json-structured');
+    expect(promptContent).toContain('JSON Structured');
   });
 
   it('should preserve all relevant fields for LLM context', () => {
     const serialized = JSON.stringify(
-      sampleFeatures.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+      sampleFeatures.map((feature) =>
+        omit(feature, ['id', 'status', 'last_seen', 'expires_at', 'evidence', 'meta'])
+      )
     );
 
     const parsed = JSON.parse(serialized);
 
-    // LLM needs these fields to understand the context
+    // LLM needs these essential semantic fields to understand the context
     for (const feature of parsed) {
       // These fields help identify what the feature is
       expect(feature).toHaveProperty('type');
-      expect(feature).toHaveProperty('name');
+      expect(feature).toHaveProperty('title');
       expect(feature).toHaveProperty('description');
 
       // These fields provide context for pipeline generation
-      expect(feature).toHaveProperty('value');
+      expect(feature).toHaveProperty('properties');
       expect(feature).toHaveProperty('confidence');
-      expect(feature).toHaveProperty('evidence');
       expect(feature).toHaveProperty('tags');
+
+      // Internal/operational data should be omitted
+      expect(feature).not.toHaveProperty('evidence');
+      expect(feature).not.toHaveProperty('meta');
+      expect(feature).not.toHaveProperty('expires_at');
     }
   });
 });
