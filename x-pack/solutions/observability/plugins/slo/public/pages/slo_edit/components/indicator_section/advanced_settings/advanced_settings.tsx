@@ -240,6 +240,6 @@ function AdvancedSettingsFullPage() {
   );
 }
 
-export function AdvancedSettings({ isFlyout }: { isFlyout: boolean }) {
+export function AdvancedSettings({ isFlyout = false }: { isFlyout?: boolean }) {
   return isFlyout ? <AdvancedSettingsFlyout /> : <AdvancedSettingsFullPage />;
 }
