@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
 import { z } from '@kbn/zod/v4';
 import { JsonModelShapeSchema } from './json_model_shape_schema';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { isValidJsonSchema } from './lib/validate_json_schema';
+import { TriggerSchema } from './schema/triggers/trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -89,58 +89,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
 
   return schema;
 }
-
-/* --- Triggers --- */
-export const AlertRuleTriggerSchema = z.object({
-  type: z.literal('alert'),
-  with: z
-    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
-    .optional(),
-});
-
-export const ScheduledTriggerSchema = z.object({
-  type: z.literal('scheduled'),
-  with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
-    z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
-    }),
-    z.object({
-      rrule: z.object({
-        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-        interval: z.number().int().positive(),
-        tzid: z
-          .enum(moment.tz.names() as [string, ...string[]])
-          .optional()
-          .default('UTC'),
-        dtstart: z.string().optional(),
-        byhour: z.array(z.number().int().min(0).max(23)).optional(),
-        byminute: z.array(z.number().int().min(0).max(59)).optional(),
-        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-      }),
-    }),
-  ]),
-});
-
-export const ManualTriggerSchema = z.object({
-  type: z.literal('manual'),
-});
-
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
-
-export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type.value,
-  ScheduledTriggerSchema.shape.type.value,
-  ManualTriggerSchema.shape.type.value,
-];
-export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({

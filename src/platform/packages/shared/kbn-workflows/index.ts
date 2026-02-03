@@ -23,4 +23,5 @@ export * from './server/constants';
 export * from './server/repositories/workflow_repository';
 
 // Export specific types that are commonly used
-export type { BuiltInStepType, TriggerType } from './spec/schema';
+export type { BuiltInStepType } from './spec/schema';
+export type { TriggerType } from './spec/schema/triggers/trigger_schema';
