@@ -53,14 +53,6 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  const addLensPanelFromLibrary = async (pageObjects: PageObjects) => {
-    await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
-  };
-
-  const addMarkdownPanelByValue = async (pageObjects: PageObjects) => {
-    await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
-  };
-
   const getClonedPanelTitle = async (pageObjects: PageObjects) => {
     const titles = await pageObjects.dashboard.getPanelTitles();
     const clonedTitle = titles.find((title) => title.includes('(copy)'));
@@ -70,7 +62,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
   spaceTest('new panel by value has empty title', async ({ pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {
-      await addMarkdownPanelByValue(pageObjects);
+      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
     await spaceTest.step('verify title is empty', async () => {
@@ -80,7 +72,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
   spaceTest('blank title clears unsaved changes', async ({ page, pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {
-      await addMarkdownPanelByValue(pageObjects);
+      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
     await spaceTest.step('set blank title and save', async () => {
@@ -98,7 +90,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
   spaceTest('custom title causes unsaved changes and saving clears it', async ({ pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {
-      await addMarkdownPanelByValue(pageObjects);
+      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
     await spaceTest.step('set custom title and save', async () => {
@@ -117,7 +109,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
   spaceTest('reset title is hidden on a by value panel', async ({ pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {
-      await addMarkdownPanelByValue(pageObjects);
+      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
     await spaceTest.step('set custom title', async () => {
@@ -135,7 +127,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
 
   spaceTest('reset description is hidden on a by value panel', async ({ pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {
-      await addMarkdownPanelByValue(pageObjects);
+      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
     await spaceTest.step('set custom description', async () => {
@@ -157,7 +149,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
       const libraryTitle = `Vis Library Title - ${testInfo.title.replace(/\s+/g, '-')}`;
 
       await spaceTest.step('add lens panel from library and clone to by value', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
         await pageObjects.dashboard.clonePanel(LENS_BASIC_TITLE);
       });
 
@@ -182,7 +174,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     'resetting title on a by reference panel uses the library title',
     async ({ pageObjects }) => {
       await spaceTest.step('add lens panel from library', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
       });
 
       await spaceTest.step('set custom title and reset', async () => {
@@ -218,7 +210,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
       });
 
       await spaceTest.step('add lens panel from library', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
       });
 
       await spaceTest.step('set custom description and reset', async () => {
@@ -244,7 +236,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     'unlinking a by reference panel with a custom title keeps the title',
     async ({ pageObjects }) => {
       await spaceTest.step('add lens panel from library', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
       });
 
       await spaceTest.step('set custom title and unlink', async () => {
@@ -267,7 +259,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
       const libraryTitle = `Vis Library Title - ${testInfo.title.replace(/\s+/g, '-')}`;
 
       await spaceTest.step('add lens panel from library and clone to by value', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
         await pageObjects.dashboard.clonePanel(LENS_BASIC_TITLE);
         await pageObjects.dashboard.removePanel(LENS_BASIC_TITLE);
       });
@@ -291,7 +283,7 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     'unlinking a by reference panel without a custom title keeps the library title',
     async ({ pageObjects }) => {
       await spaceTest.step('add lens panel from library', async () => {
-        await addLensPanelFromLibrary(pageObjects);
+        await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
       });
 
       await spaceTest.step('unlink panel and verify title', async () => {
