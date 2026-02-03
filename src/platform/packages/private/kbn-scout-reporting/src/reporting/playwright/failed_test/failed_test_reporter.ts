@@ -22,15 +22,15 @@ import {
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
-  getRunTarget,
+  getTestTargetFromProcessArguments,
   parseStdout,
   stripFilePath,
   stripRunCommand,
@@ -49,9 +49,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
+  private readonly testTarget: string;
   private failureTracker?: ScoutFailureTracker;
-
-  private target = 'undefined'; // when '--grep' is not provided in the command line
   private kibanaModule: TestFailure['kibanaModule'];
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -64,6 +63,8 @@ export class ScoutFailedTestReporter implements Reporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
     this.command = stripRunCommand(process.argv);
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -89,8 +90,6 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.target = getRunTarget();
-
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getKibanaModuleData(config.configFile);
@@ -124,7 +123,7 @@ export class ScoutFailedTestReporter implements Reporter {
       id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
-      target: this.target,
+      target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
       owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
