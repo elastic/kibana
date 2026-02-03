@@ -164,7 +164,7 @@ describe('attachment tools', () => {
         getTypeDefinition: () =>
           ({
             id: AttachmentType.visualizationRef,
-            validate: () => ({ valid: true, data: {} }),
+            validate: (input: unknown) => ({ valid: true, data: input }),
             format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
                 type: 'text',
