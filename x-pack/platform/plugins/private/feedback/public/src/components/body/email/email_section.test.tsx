@@ -15,6 +15,7 @@ const mockProps = {
   allowEmailContact: false,
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
+  onEmailValidationChange: jest.fn(),
 };
 
 describe('EmailSection', () => {
@@ -41,16 +42,10 @@ describe('EmailSection', () => {
   });
 
   it('should call onEmailValidationChange when validation changes', () => {
-    const onEmailValidationChange = jest.fn();
     renderWithI18n(
-      <EmailSection
-        {...mockProps}
-        allowEmailContact={true}
-        email="capybara@elastic.co"
-        onEmailValidationChange={onEmailValidationChange}
-      />
+      <EmailSection {...mockProps} allowEmailContact={true} email="capybara@elastic.co" />
     );
 
-    expect(onEmailValidationChange).toHaveBeenCalled();
+    expect(mockProps.onEmailValidationChange).toHaveBeenCalled();
   });
 });

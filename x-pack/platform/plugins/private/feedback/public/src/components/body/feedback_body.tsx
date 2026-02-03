@@ -28,7 +28,7 @@ interface Props {
   handleChangeQuestionAnswer: (questionId: string, answer: string) => void;
   handleChangeAllowEmailContact: (allow: boolean) => void;
   handleChangeEmail: (email: string) => void;
-  onEmailValidationChange?: (isValid: boolean) => void;
+  onEmailValidationChange: (isValid: boolean) => void;
 }
 export const FeedbackBody = ({
   core,

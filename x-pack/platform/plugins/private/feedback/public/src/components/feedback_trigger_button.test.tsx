@@ -14,20 +14,20 @@ import userEvent from '@testing-library/user-event';
 
 const coreStartMock = coreMock.createStart();
 
-const propsMock = {
+const mockProps = {
   core: coreStartMock,
 };
 
 describe('FeedbackButton', () => {
   it('should render feedback trigger button', () => {
-    renderWithI18n(<FeedbackTriggerButton {...propsMock} />);
+    renderWithI18n(<FeedbackTriggerButton {...mockProps} />);
 
     const feedbackButton = screen.getByTestId('feedbackTriggerButton');
     expect(feedbackButton).toBeInTheDocument();
   });
 
   it('should open feedback container when clicked', async () => {
-    renderWithI18n(<FeedbackTriggerButton {...propsMock} />);
+    renderWithI18n(<FeedbackTriggerButton {...mockProps} />);
 
     const feedbackButton = screen.getByTestId('feedbackTriggerButton');
 

@@ -10,12 +10,13 @@ import type { ChangeEvent } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { SecurityServiceStart } from '@kbn/core/public';
 import { parseOneAddress } from 'email-addresses';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   email: string;
   security?: SecurityServiceStart;
   handleChangeEmail: (email: string) => void;
-  onValidationChange?: (isValid: boolean) => void;
+  onValidationChange: (isValid: boolean) => void;
 }
 
 const validateEmail = (value: string): boolean => {
@@ -39,9 +40,7 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
   const showError = touched && !isValid;
 
   useEffect(() => {
-    if (onValidationChange) {
-      onValidationChange(isValid);
-    }
+    onValidationChange(isValid);
   }, [isValid, onValidationChange]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +82,9 @@ export const EmailInput = ({ email, security, handleChangeEmail, onValidationCha
         value={email}
         fullWidth
         isInvalid={showError}
+        placeholder={i18n.translate('feedback.emailInput.placeholder', {
+          defaultMessage: 'Your email',
+        })}
       />
     </EuiFormRow>
   );

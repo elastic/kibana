@@ -14,11 +14,12 @@ import { getFeedbackQuestionsForApp } from '@kbn/feedback-registry';
 
 const coreStartMock = coreMock.createStart();
 
-const propsMock = {
+const mockProps = {
   handleChangeCsatOptionId: jest.fn(),
   handleChangeQuestionAnswer: jest.fn(),
   handleChangeAllowEmailContact: jest.fn(),
   handleChangeEmail: jest.fn(),
+  onEmailValidationChange: jest.fn(),
   email: '',
   questions: getFeedbackQuestionsForApp(),
   allowEmailContact: false,
@@ -35,7 +36,7 @@ describe('FeedbackBody', () => {
 
   it('should render', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...mockProps} />);
     });
 
     const body = screen.getByTestId('feedbackBody');
@@ -50,7 +51,7 @@ describe('FeedbackBody', () => {
     await act(async () => {
       renderWithI18n(
         <FeedbackBody
-          {...propsMock}
+          {...mockProps}
           questions={questions}
           questionAnswers={{ [questionId]: 'Test feedback' }}
         />
@@ -72,7 +73,7 @@ describe('FeedbackBody', () => {
     const questionId = questions[0]?.id || 'test-question';
 
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} questions={questions} />);
+      renderWithI18n(<FeedbackBody {...mockProps} questions={questions} />);
     });
 
     const feedbackTextarea = screen.getByTestId(`feedback-${questionId}-text-area`);
@@ -83,13 +84,13 @@ describe('FeedbackBody', () => {
       target: { value: 'Test feedback' },
     });
 
-    expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledWith(questionId, 'Test feedback');
-    expect(propsMock.handleChangeQuestionAnswer).toHaveBeenCalledTimes(1);
+    expect(mockProps.handleChangeQuestionAnswer).toHaveBeenCalledWith(questionId, 'Test feedback');
+    expect(mockProps.handleChangeQuestionAnswer).toHaveBeenCalledTimes(1);
   });
 
   it('should render CSAT buttons', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...mockProps} />);
     });
 
     expect(screen.getByTestId('feedbackCsatButtonGroup')).toBeInTheDocument();
@@ -97,25 +98,19 @@ describe('FeedbackBody', () => {
 
   it('should render email consent checkbox', async () => {
     await act(async () => {
-      renderWithI18n(<FeedbackBody {...propsMock} />);
+      renderWithI18n(<FeedbackBody {...mockProps} />);
     });
 
     expect(screen.getByTestId('feedbackEmailConsentCheckbox')).toBeInTheDocument();
   });
 
   it('should call onEmailValidationChange when provided', async () => {
-    const onEmailValidationChange = jest.fn();
     await act(async () => {
       renderWithI18n(
-        <FeedbackBody
-          {...propsMock}
-          allowEmailContact={true}
-          email="capybara@elastic.co"
-          onEmailValidationChange={onEmailValidationChange}
-        />
+        <FeedbackBody {...mockProps} allowEmailContact={true} email="capybara@elastic.co" />
       );
     });
 
-    expect(onEmailValidationChange).toHaveBeenCalled();
+    expect(mockProps.onEmailValidationChange).toHaveBeenCalled();
   });
 });

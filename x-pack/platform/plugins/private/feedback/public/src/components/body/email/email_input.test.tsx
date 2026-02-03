@@ -17,6 +17,7 @@ const mockSecurityService = securityServiceMock.createStart();
 const mockProps = {
   email: '',
   handleChangeEmail: jest.fn(),
+  onValidationChange: jest.fn(),
 };
 
 describe('EmailInput', () => {
@@ -78,31 +79,20 @@ describe('EmailInput', () => {
   });
 
   it('should call onValidationChange with false for empty email', () => {
-    const onValidationChange = jest.fn();
-    renderWithI18n(<EmailInput {...mockProps} email="" onValidationChange={onValidationChange} />);
+    renderWithI18n(<EmailInput {...mockProps} email="" />);
 
-    expect(onValidationChange).toHaveBeenCalledWith(false);
+    expect(mockProps.onValidationChange).toHaveBeenCalledWith(false);
   });
 
   it('should call onValidationChange with true for valid email', () => {
-    const onValidationChange = jest.fn();
-    renderWithI18n(
-      <EmailInput
-        {...mockProps}
-        email="capybara@elastic.co"
-        onValidationChange={onValidationChange}
-      />
-    );
+    renderWithI18n(<EmailInput {...mockProps} email="capybara@elastic.co" />);
 
-    expect(onValidationChange).toHaveBeenCalledWith(true);
+    expect(mockProps.onValidationChange).toHaveBeenCalledWith(true);
   });
 
   it('should call onValidationChange with false for invalid email', () => {
-    const onValidationChange = jest.fn();
-    renderWithI18n(
-      <EmailInput {...mockProps} email="invalid-email" onValidationChange={onValidationChange} />
-    );
+    renderWithI18n(<EmailInput {...mockProps} email="invalid-email" />);
 
-    expect(onValidationChange).toHaveBeenCalledWith(false);
+    expect(mockProps.onValidationChange).toHaveBeenCalledWith(false);
   });
 });

@@ -17,7 +17,7 @@ interface Props {
   security?: SecurityServiceStart;
   handleChangeAllowEmailContact: (allow: boolean) => void;
   handleChangeEmail: (email: string) => void;
-  onEmailValidationChange?: (isValid: boolean) => void;
+  onEmailValidationChange: (isValid: boolean) => void;
 }
 
 export const EmailSection = ({
