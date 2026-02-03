@@ -33,10 +33,7 @@ export function getMarkdownCRUResponseBody(
 ) {
   return {
     id: savedObject.id,
-    data: {
-      ...(savedObject.attributes as StoredMarkdownState),
-    },
+    ...(savedObject.attributes as StoredMarkdownState),
     meta: getMarkdownMeta(savedObject, operation),
-    spaces: savedObject.namespaces,
   };
 }

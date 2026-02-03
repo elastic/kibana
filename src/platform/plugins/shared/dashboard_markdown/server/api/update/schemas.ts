@@ -12,9 +12,7 @@ import { markdownByValueEmbeddableSchema } from '../../schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema() {
-  return schema.object({
-    data: markdownByValueEmbeddableSchema,
-  });
+  return markdownByValueEmbeddableSchema;
 }
 
 export function getUpdateResponseBodySchema() {

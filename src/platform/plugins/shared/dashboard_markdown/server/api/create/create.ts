@@ -19,13 +19,13 @@ export async function create(
   createBody: MarkdownCreateRequestBody
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
+  const { id, ...attributes } = createBody;
 
   const savedObject = await core.savedObjects.client.create<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
-    createBody.data,
+    attributes as StoredMarkdownState,
     {
       ...(createBody.id && { id: createBody.id }),
-      ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
     }
   );
 
