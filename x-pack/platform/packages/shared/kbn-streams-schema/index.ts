@@ -6,7 +6,7 @@
  */
 
 export { Streams } from './src/models/streams';
-export { IngestBase } from './src/models/ingest/base';
+export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
@@ -24,6 +24,7 @@ export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -143,7 +144,9 @@ export {
   type Feature,
   type BaseFeature,
   type FeatureStatus,
+  DATASET_ANALYSIS_FEATURE_TYPE,
   isFeature,
+  isComputedFeature,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,
