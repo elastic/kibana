@@ -192,6 +192,10 @@ const createAliasesForNamespacedFields = (
   targetCollection: InheritedFieldDefinition
 ) => {
   getSortedFields(fields).forEach(([key, fieldDef]) => {
+    // Skip unmapped fields - they're documentation-only and don't have actual ES mappings
+    if (fieldDef.type === 'unmapped') {
+      return;
+    }
     if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
       const aliasKey = key.replace(allNamespacesRegex, '');
       const from = typeof fromSource === 'function' ? fromSource(key) : fromSource;
@@ -206,6 +210,10 @@ const createAliasesForNamespacedFields = (
   // check whether the field has an otel equivalent. If yes, set the ECS equivalent as an alias
   // This needs to be done after the initial properties are set, so the ECS equivalent aliases win out
   getSortedFields(fields).forEach(([key, fieldDef]) => {
+    // Skip unmapped fields - they're documentation-only and don't have actual ES mappings
+    if (fieldDef.type === 'unmapped') {
+      return;
+    }
     if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
       const aliasKey = key.replace(allNamespacesRegex, '');
       const from = typeof fromSource === 'function' ? fromSource(key) : fromSource;

@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
 import { Streams, getAdvancedParameters } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -141,15 +140,9 @@ export const useSchemaFields = ({
   );
 
   const pendingChangesCount = useMemo(() => {
-    const addedOrChanged = fields.filter((field) => {
-      const stored = storedFields.find((storedField) => storedField.name === field.name);
-      if (!stored) {
-        return field.status !== 'unmapped';
-      }
-      return !isEqual(field, stored);
-    });
-
-    return addedOrChanged.length;
+    // Reuse isFieldUncommitted for consistent comparison logic
+    // (it handles field defaults like additionalParameters: {} properly)
+    return fields.filter((field) => isFieldUncommitted(field, storedFields)).length;
   }, [fields, storedFields]);
 
   const discardChanges = useCallback(() => {

@@ -214,5 +214,41 @@ describe('logs_layer', () => {
         alias_for: 'resource.attributes.user',
       });
     });
+
+    it('should not create aliases for unmapped fields', () => {
+      // Unmapped fields are documentation-only and don't have actual ES mappings
+      const streamWithUnmappedField = {
+        name: 'test-stream',
+        ingest: {
+          wired: {
+            fields: {
+              'attributes.some.field': { type: 'keyword' },
+              'attributes.unmapped.field': { type: 'unmapped', description: 'A documented field' },
+            },
+          },
+        },
+      } as unknown as Streams.WiredStream.Definition;
+
+      const inheritedWithUnmapped: InheritedFieldDefinition = {
+        'resource.attributes.inherited.unmapped': {
+          type: 'unmapped',
+          description: 'An inherited unmapped field',
+          from: 'parent-stream',
+        },
+      };
+
+      const result = addAliasesForNamespacedFields(streamWithUnmappedField, inheritedWithUnmapped);
+
+      // Should create alias for the mapped field
+      expect(result['some.field']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'attributes.some.field',
+      });
+
+      // Should NOT create aliases for unmapped fields
+      expect(result['unmapped.field']).toBeUndefined();
+      expect(result['inherited.unmapped']).toBeUndefined();
+    });
   });
 });

@@ -211,6 +211,40 @@ describe('useSchemaFields', () => {
 
       expect(result.current.pendingChangesCount).toBe(1);
     });
+
+    it('does not show pending changes for fields with descriptions on initial load', async () => {
+      // Regression test: fields with descriptions should not be counted as pending changes
+      // on initial load due to comparison issues with optional properties
+      const definition = createMockWiredStreamDefinition({
+        stream: {
+          name: 'logs.wired-test',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            wired: {
+              fields: {
+                'attributes.field_with_description': {
+                  type: 'keyword',
+                  description: 'This field has a description',
+                },
+              },
+              routing: [],
+            },
+          },
+        },
+        inherited_fields: {},
+      });
+
+      const { result } = renderUseSchemaFields(definition);
+      await waitForFieldsToInitialize(result);
+
+      // Should have no pending changes on initial load
+      expect(result.current.pendingChangesCount).toBe(0);
+    });
   });
 
   describe('Field status transitions', () => {
