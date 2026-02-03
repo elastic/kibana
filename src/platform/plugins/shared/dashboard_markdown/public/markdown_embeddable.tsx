@@ -31,6 +31,7 @@ import type {
   MarkdownEmbeddableState,
   MarkdownByValueState,
   MarkdownByReferenceState,
+  MarkdownState,
 } from '../server';
 import { APP_NAME, MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 import type { MarkdownEditorApi } from './types';
@@ -41,8 +42,11 @@ import { loadFromLibrary } from './markdown_client/load_from_library';
 import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
 import { markdownClient } from './markdown_client/markdown_client';
 
-const defaultMarkdownState: WithAllKeys<MarkdownByValueState> = {
+const defaultMarkdownState: WithAllKeys<MarkdownState> = {
   content: '',
+  title: undefined,
+  description: undefined,
+  hide_title: undefined,
 };
 
 const flexCss = css({
@@ -60,20 +64,20 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const titleManager = initializeTitleManager(initialState);
     const savedObjectId = (initialState as MarkdownByReferenceState).savedObjectId;
     const initialMarkdownState = savedObjectId
       ? await loadFromLibrary(savedObjectId)
-      : (initialState as MarkdownByValueState);
+      : initialState;
 
-    const markdownStateManager = initializeStateManager<MarkdownByValueState>(
+    const titleManager = initializeTitleManager(initialMarkdownState);
+    const markdownStateManager = initializeStateManager<MarkdownState>(
       initialMarkdownState,
       defaultMarkdownState
     );
 
     const isByReference = savedObjectId !== undefined;
-    const defaultTitle$ = new BehaviorSubject(initialState.title);
-    const defaultDescription$ = new BehaviorSubject(initialState.description);
+    const defaultTitle$ = new BehaviorSubject(initialMarkdownState.title);
+    const defaultDescription$ = new BehaviorSubject(initialMarkdownState.description);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
