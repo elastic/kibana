@@ -692,7 +692,7 @@
         "sub_type": "GCP Service Account",
         "type": "Service Account",
         "relationships": {
-          "Owns": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"],
+          "Owns": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1", "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"],
           "Communicates_with": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"]
         }
       },
@@ -810,49 +810,6 @@
           "id": "my-gcp-project",
           "name": "My GCP Project"
         },
-        "region": "us-west1",
-        "service": {
-          "name": "GCP Compute Engine"
-        }
-      },
-      "entity": {
-        "EngineMetadata": {
-          "Type": "generic"
-        },
-        "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
-        "name": "GCP Compute Operator",
-        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-default-2025.07.16-000005",
-        "sub_type": "GCP IAM User",
-        "type": "Identity"
-      },
-      "event": {
-        "ingested": "2025-07-20T17:27:13.583Z"
-      },
-      "user": {
-        "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
-        "name": "GCP Compute Operator"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "22",
-    "index": ".entities.v2.latest.security_generic_default",
-    "source": {
-      "@timestamp": "2025-07-20T17:26:09.361Z",
-      "cloud": {
-        "account": {
-          "id": "my-gcp-project-123456",
-          "name": "My GCP Project"
-        },
-        "provider": "gcp",
-        "project": {
-          "id": "my-gcp-project",
-          "name": "My GCP Project"
-        },
         "region": "us-west1-a",
         "service": {
           "name": "GCP Compute Engine"
@@ -862,21 +819,18 @@
         "EngineMetadata": {
           "Type": "generic"
         },
-        "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1",
-        "name": "database-server-prod-1",
+        "id": "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1",
+        "name": "db-server-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-default-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
-        "type": "Host",
-        "relationships": {
-          "Communicates_with": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"]
-        }
+        "type": "Host"
       },
       "event": {
         "ingested": "2025-07-20T17:27:13.583Z"
       },
       "host": {
-        "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1",
-        "name": "database-server-prod-1"
+        "id": "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1",
+        "name": "db-server-prod-1"
       }
     }
   }
@@ -885,7 +839,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "23",
+    "id": "22",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -924,7 +878,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "24",
+    "id": "23",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -963,7 +917,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "25",
+    "id": "24",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1003,7 +957,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "26",
+    "id": "25",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1045,7 +999,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "27",
+    "id": "26",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1087,7 +1041,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "28",
+    "id": "27",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1129,7 +1083,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "29",
+    "id": "28",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1172,7 +1126,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "30",
+    "id": "29",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1207,7 +1161,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "31",
+    "id": "30",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1242,7 +1196,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "32",
+    "id": "31",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1277,7 +1231,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "33",
+    "id": "32",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1312,7 +1266,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "34",
+    "id": "33",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1347,7 +1301,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "35",
+    "id": "34",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
@@ -1382,7 +1336,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "36",
+    "id": "35",
     "index": ".entities.v2.latest.security_generic_default",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",

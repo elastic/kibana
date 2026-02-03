@@ -1769,16 +1769,13 @@
     "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
     "source": {
       "@timestamp": "2024-09-01T12:40:00.789Z",
-      "user": {
-        "name": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
+      "service": {
         "entity": {
-          "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
-        }
-      },
-      "host": {
+          "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
+        },
         "target": {
           "entity": {
-            "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1"
+            "id": "projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
           }
         }
       },
@@ -1791,24 +1788,24 @@
           "id": "my-gcp-project",
           "name": "My GCP Project"
         },
-        "region": "us-west1"
+        "region": "us-central1"
       },
       "ecs": {
         "version": "8.11.0"
       },
       "event": {
-        "action": "google.compute.instances.start",
+        "action": "google.storage.buckets.update",
         "agent_id_status": "missing",
         "category": [
-          "host"
+          "file"
         ],
         "id": "multi-relationships-event-id-67890",
-        "ingested": "2024-10-07T17:48:35Z",
+        "ingested": "2024-10-07T17:47:35Z",
         "kind": "event",
         "outcome": "success",
         "provider": "gcp",
         "type": [
-          "start"
+          "change"
         ]
       },
       "log": {
@@ -1817,7 +1814,7 @@
       },
       "related": {
         "user": [
-          "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com"
+          "data-pipeline@my-gcp-project.iam.gserviceaccount.com"
         ]
       },
       "tags": [],

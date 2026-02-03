@@ -519,7 +519,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            expectedCount: 35,
           });
         });
 
@@ -531,8 +531,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         runEnrichmentTests();
 
-        // will be skipped until https://github.com/elastic/kibana/issues/247770 is implemented
-        describe.skip('Entity Relationships', () => {
+        describe('Entity Relationships', () => {
           it('expanded flyout - event with service target and entity relationships', async () => {
             // Navigate to events page with the SetIamPolicy event
             // Note: getFlyoutFilter uses document id, not event.id
@@ -557,85 +556,117 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.expandGraph();
             await expandedFlyoutGraph.waitGraphIsLoaded();
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
-
             // Verify actor node
             const actorNodeId = 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com';
             await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Service Account');
-            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP Service Account');
+            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP Admin User');
 
             // Verify service target node
             const serviceTargetNodeId = 'data-pipeline@my-gcp-project.iam.gserviceaccount.com';
             await expandedFlyoutGraph.assertNodeEntityTag(serviceTargetNodeId, 'Service Account');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               serviceTargetNodeId,
-              'GCP Service Account'
+              'data-pipeline Service Account'
             );
-          });
 
-          it('expanded flyout - event with host target and entity relationships', async () => {
-            // Navigate to events page with the instances.start event
-            // Note: getFlyoutFilter uses document id, not event.id
-            await networkEventsPage.navigateToNetworkEventsPage(
-              `${networkEventsPage.getAbsoluteTimerangeFilter(
-                '2024-09-01T00:00:00.000Z',
-                '2024-09-02T00:00:00.000Z'
-              )}&${networkEventsPage.getFlyoutFilter('multi-relationships-event-2')}`
+            await expandedFlyoutGraph.showEntityDetails(
+              'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
             );
-            await networkEventsPage.waitForListToHaveEvents();
+            await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
 
-            await networkEventsPage.flyout.expandVisualizations();
-            await networkEventsPage.flyout.assertGraphPreviewVisible();
+            await expandedFlyoutGraph.closePreviewSection();
+
+            await expandedFlyoutGraph.showEntityRelationships(
+              'data-pipeline@my-gcp-project.iam.gserviceaccount.com'
+            );
+
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            await expandedFlyoutGraph.dismissCallout();
 
             // Expected nodes:
-            // - 1 actor node (gcp-compute-operator)
-            // - 1 host target node (database-server-prod-1)
-            // - 1 label node (instances.start action)
-            const expectedNodes = 3;
-            await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
+            // - 1 actor node (gcp-admin-user)
+            // - 1 service target node (data-pipeline)
+            // - 1 label node (SetIamPolicy action)
+            // - 2 relationship nodes (Owns, Communicates_with)
+            // - 2 grouped target nodes (Owns targets: 3 items, Communicates_with targets: 2 items)
+            const expectedNodesWithRelationships = 7;
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesWithRelationships);
 
-            await expandedFlyoutGraph.expandGraph();
-            await expandedFlyoutGraph.waitGraphIsLoaded();
-            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
+            const communicatesWithRelationshipNodeId =
+              'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Communicates_with)';
+            await expandedFlyoutGraph.assertNodeExists(communicatesWithRelationshipNodeId);
 
-            // Verify actor node
-            const actorNodeId = 'gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com';
-            await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
-            await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+            const ownsRelationshipNodeId =
+              'rel(data-pipeline@my-gcp-project.iam.gserviceaccount.com-Owns)';
+            await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            // Verify host target node
-            const hostTargetNodeId =
-              'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(hostTargetNodeId, 'Host');
+            const communicatesWithIdRelationshipTargetNodeId = 'd4f3b950f4345da123745ee6c3806cf1';
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              communicatesWithIdRelationshipTargetNodeId,
+              'Host'
+            );
             await expandedFlyoutGraph.assertNodeEntityDetails(
-              hostTargetNodeId,
+              communicatesWithIdRelationshipTargetNodeId,
               'GCP Compute Instance'
             );
-          });
-
-          it('expanded flyout - entity with Owns and Communicates_with relationships', async () => {
-            // Navigate to events page with the SetIamPolicy event to get service account target
-            // Note: getFlyoutFilter uses document id, not event.id
-            await networkEventsPage.navigateToNetworkEventsPage(
-              `${networkEventsPage.getAbsoluteTimerangeFilter(
-                '2024-09-01T00:00:00.000Z',
-                '2024-09-02T00:00:00.000Z'
-              )}&${networkEventsPage.getFlyoutFilter('multi-relationships-event-1')}`
+            await expandedFlyoutGraph.assertNodeEntityTagCount(
+              communicatesWithIdRelationshipTargetNodeId,
+              2
             );
-            await networkEventsPage.waitForListToHaveEvents();
 
-            await networkEventsPage.flyout.expandVisualizations();
-            await networkEventsPage.flyout.assertGraphPreviewVisible();
-
-            await expandedFlyoutGraph.expandGraph();
-            await expandedFlyoutGraph.waitGraphIsLoaded();
-
-            // Verify the service target node which has relationships
-            const serviceTargetNodeId = 'data-pipeline@my-gcp-project.iam.gserviceaccount.com';
-            await expandedFlyoutGraph.assertNodeEntityTag(serviceTargetNodeId, 'Service Account');
+            const ownsIdRelationshipTargetNodeId = '6cf356f3b9190616a3d11bd98e0acdfd';
+            await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
-              serviceTargetNodeId,
-              'GCP Service Account'
+              ownsIdRelationshipTargetNodeId,
+              'GCP Compute Instance'
             );
+            await expandedFlyoutGraph.assertNodeEntityTagCount(ownsIdRelationshipTargetNodeId, 3);
+
+            // Click on "Show this entity's actions" for data-pipeline entity
+            // This should reveal another event where data-pipeline is the actor
+            await expandedFlyoutGraph.showActionsByEntity(serviceTargetNodeId);
+
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            // Expected nodes after showing entity's actions:
+            // - 1 actor node (gcp-admin-user)
+            // - 1 service target node (data-pipeline) - now also an actor
+            // - 1 label node (SetIamPolicy action)
+            // - 2 relationship nodes (Owns, Communicates_with)
+            // - 2 grouped target nodes (Owns targets: 3 items, Communicates_with targets: 2 items)
+            // - 1 new label node (google.storage.buckets.update action)
+            // - 1 new target node (db-server-prod-1)
+            const expectedNodesWithActions = 9;
+            await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesWithActions);
+
+            const eventTargetNodeId =
+              'projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(eventTargetNodeId, 'Host');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              eventTargetNodeId,
+              'db-server-prod-1'
+            );
+
+            // assrt that that existing grouped target nodes still exist
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              communicatesWithIdRelationshipTargetNodeId,
+              'Host'
+            );
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              communicatesWithIdRelationshipTargetNodeId,
+              'GCP Compute Instance'
+            );
+            await expandedFlyoutGraph.assertNodeEntityTagCount(
+              communicatesWithIdRelationshipTargetNodeId,
+              2
+            );
+
+            await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              ownsIdRelationshipTargetNodeId,
+              'GCP Compute Instance'
+            );
+            await expandedFlyoutGraph.assertNodeEntityTagCount(ownsIdRelationshipTargetNodeId, 3);
           });
 
           it('expanded flyout - hierarchical relationships with grouped targets and event', async () => {
@@ -661,53 +692,116 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.waitGraphIsLoaded();
 
             // Expected nodes:
-            // - 8 entity nodes: root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 supervisor
-            // - 5 relationship nodes: 1 Owns + 3 Communicates_with + 1 Supervised_by
+            // - 1 actor node: root user
             // - 1 label node: for the event action (google.iam.admin.v1.UpdatePolicy)
+            // - 2 target nodes: host-1 and identity-1
             // Total: 14 nodes
-            const expectedTotalNodes = 14;
+            const expectedTotalNodes = 4;
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedTotalNodes);
+
+            await expandedFlyoutGraph.dismissCallout();
 
             // Verify root user (actor) node
             const rootNodeId = 'rel-hierarchy-root-user';
             await expandedFlyoutGraph.assertNodeEntityTag(rootNodeId, 'Identity');
-            await expandedFlyoutGraph.assertNodeEntityDetails(rootNodeId, 'AWS IAM User');
+            await expandedFlyoutGraph.assertNodeEntityDetails(rootNodeId, 'Hierarchy Root User');
+
+            // Verify intermediate identity node
+            const hostNodeId = 'rel-hierarchy-identity-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(hostNodeId, 'Identity');
+            await expandedFlyoutGraph.assertNodeEntityDetails(hostNodeId, 'Hierarchy Identity 1');
 
             // Verify intermediate host node
-            const hostNodeId = 'rel-hierarchy-host-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(hostNodeId, 'Host');
-            await expandedFlyoutGraph.assertNodeEntityDetails(hostNodeId, 'AWS EC2 Instance');
+            const serviceNodeId = 'rel-hierarchy-host-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Host');
+            await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'Hierarchy Host 1');
 
-            // Verify intermediate service node
-            const serviceNodeId = 'rel-hierarchy-service-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
-            await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'AWS Lambda Function');
+            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-root-user');
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
-            // Verify intermediate identity node (different from root - AWS IAM Role)
-            const identityNodeId = 'rel-hierarchy-identity-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(identityNodeId, 'Identity');
-            await expandedFlyoutGraph.assertNodeEntityDetails(identityNodeId, 'AWS IAM Role');
-
-            // Verify supervisor node (different type: User)
-            const supervisorNodeId = 'rel-hierarchy-supervisor-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(supervisorNodeId, 'User');
-            await expandedFlyoutGraph.assertNodeEntityDetails(
-              supervisorNodeId,
-              'AWS Organizations Admin'
+            const expectedNodesWithSingleOwnsRelationship = 6;
+            await expandedFlyoutGraph.assertGraphNodesNumber(
+              expectedNodesWithSingleOwnsRelationship
             );
 
-            // Verify 3 grouped entity nodes exist (Storage, Database, Networking)
-            await expandedFlyoutGraph.assertGraphGroupNodesNumber(3);
-            // Click on first grouped node to open preview panel
-            // TODO: fix id passed to showEntityDetails
-            await expandedFlyoutGraph.showEntityDetails('rel-hierarchy-storage-1');
-            await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
+            const ownsRelationshipNodeId = 'rel(rel-hierarchy-root-user-Owns)';
+            await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            // The preview panel should show 2 linked entity items
-            // (each grouped target contains 2 entities of the same type)
+            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-host-1');
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-service-1');
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            const expectedNodesWithMultipleRelationships = 14;
+            await expandedFlyoutGraph.assertGraphNodesNumber(
+              expectedNodesWithMultipleRelationships
+            );
+
+            // rel-hierarchy-identity-1 entity has the following relationships:
+            // - Supervised_by: rel-hierarchy-supervisor-1
+            // - Communicates_with: rel-hierarchy-network-1, rel-hierarchy-network-2
+            // we should have two relationship nodes for each relationship and two target nodes for each relationship
+            // single entity target node connected to Supervised_by relationships and another grouped target node connected to Communicates_with relationships
+            const supervisedByIdRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Supervised_by)';
+            await expandedFlyoutGraph.assertNodeExists(supervisedByIdRelationshipNodeId);
+
+            const communicatesWithRelationshipNodeId =
+              'rel(rel-hierarchy-identity-1-Communicates_with)';
+            await expandedFlyoutGraph.assertNodeExists(communicatesWithRelationshipNodeId);
+
+            const supervisedByIdRelationshipTargetNodeId = 'rel-hierarchy-supervisor-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              supervisedByIdRelationshipTargetNodeId,
+              'User'
+            );
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              supervisedByIdRelationshipTargetNodeId,
+              'Hierarchy Supervisor Admin'
+            );
+
+            const communicatesWithIdRelationshipTargetNodeId = '3ed488a2068243098af41d666693f341';
+            await expandedFlyoutGraph.assertNodeEntityTag(
+              communicatesWithIdRelationshipTargetNodeId,
+              'Networking'
+            );
+            await expandedFlyoutGraph.assertNodeEntityDetails(
+              communicatesWithIdRelationshipTargetNodeId,
+              'AWS VPC'
+            );
+
+            await expandedFlyoutGraph.showEntityDetails(communicatesWithIdRelationshipTargetNodeId);
+            // check the preview panel grouped items rendered correctly
+            await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
+            await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
             await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
 
             await expandedFlyoutGraph.closePreviewSection();
+
+            const communicatesWithHostRelationshipNodeId =
+              'rel(rel-hierarchy-host-1-Communicates_with)';
+            await expandedFlyoutGraph.assertNodeExists(communicatesWithHostRelationshipNodeId);
+
+            const communicatesWithStorageRelationshipNodeId =
+              'rel(rel-hierarchy-service-1-Communicates_with)';
+            await expandedFlyoutGraph.assertNodeExists(communicatesWithStorageRelationshipNodeId);
+
+            await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+            // hide entity relationships
+            await expandedFlyoutGraph.assertNodeDoesNotExist(supervisedByIdRelationshipNodeId);
+            await expandedFlyoutGraph.assertNodeDoesNotExist(communicatesWithRelationshipNodeId);
+
+            await expandedFlyoutGraph.assertNodeDoesNotExist(
+              supervisedByIdRelationshipTargetNodeId
+            );
+            await expandedFlyoutGraph.assertNodeDoesNotExist(
+              communicatesWithIdRelationshipTargetNodeId
+            );
           });
         });
       });
