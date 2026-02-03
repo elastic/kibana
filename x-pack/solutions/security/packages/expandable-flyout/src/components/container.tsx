@@ -170,6 +170,11 @@ export const Container: React.FC<ContainerProps> = memo(
       type,
     ]);
 
+    const flyoutAriaLabel = useMemo(() => {
+      const registeredPanel = registeredPanels.find((panel) => panel.key === right?.id);
+      return registeredPanel?.['aria-label'];
+    }, [registeredPanels, right?.id]);
+
     // callback function called when user changes the flyout's width
     const onResize = useCallback(
       (width: number) => {
@@ -219,6 +224,7 @@ export const Container: React.FC<ContainerProps> = memo(
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}
+        aria-label={flyoutAriaLabel}
       >
         <ResizableContainer
           leftComponent={leftComponent as React.ReactElement}
