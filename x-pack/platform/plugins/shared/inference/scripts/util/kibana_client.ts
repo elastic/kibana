@@ -244,12 +244,10 @@ export class KibanaClient {
   }
 
   async getConnectors() {
-    const connectors: AxiosResponse<{ connectors: InferenceConnector[] }> = await axios.get(
-      this.getUrl({
-        pathname: '/internal/inference/connectors',
-      })
-    );
+    const response = await this.callKibana<{ connectors: InferenceConnector[] }>('GET', {
+      pathname: '/internal/inference/connectors',
+    });
 
-    return connectors.data.connectors;
+    return response.data.connectors;
   }
 }
