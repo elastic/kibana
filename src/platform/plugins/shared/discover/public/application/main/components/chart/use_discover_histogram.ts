@@ -49,6 +49,7 @@ import {
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
+import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -237,7 +238,7 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
-      controlsState: currentTabControlState,
+      controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,

@@ -18,6 +18,7 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
 /**
  * Custom hook to manage ESQL variables in the control group for Discover.
@@ -143,10 +144,7 @@ export const useESQLVariables = ({
 
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
-    if (currentControlGroupState && Object.keys(currentControlGroupState).length > 0) {
-      return currentControlGroupState;
-    }
-    return {};
+    return getDefinedControlGroupState(currentControlGroupState) || {};
   }, [currentControlGroupState]);
 
   return {
