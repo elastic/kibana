@@ -11,26 +11,33 @@ import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasti
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
-  public readonly asInternalUser;
-
+  readonly #asInternalUserFactory: () => ElasticsearchClient;
   readonly #asCurrentUserFactory: () => ElasticsearchClient;
   readonly #asSecondaryAuthUserFactory: () => ElasticsearchClient;
 
+  #asInternalUserClient?: ElasticsearchClient;
   #asCurrentUserClient?: ElasticsearchClient;
   #asSecondaryAuthUserClient?: ElasticsearchClient;
 
   constructor({
-    asInternalUser,
+    asInternalUserFactory,
     asCurrentUserFactory,
     asSecondaryAuthUserFactory,
   }: {
-    asInternalUser: ElasticsearchClient;
+    asInternalUserFactory: () => ElasticsearchClient;
     asCurrentUserFactory: () => ElasticsearchClient;
     asSecondaryAuthUserFactory: () => ElasticsearchClient;
   }) {
-    this.asInternalUser = asInternalUser;
+    this.#asInternalUserFactory = asInternalUserFactory;
     this.#asCurrentUserFactory = asCurrentUserFactory;
     this.#asSecondaryAuthUserFactory = asSecondaryAuthUserFactory;
+  }
+
+  public get asInternalUser() {
+    if (this.#asInternalUserClient === undefined) {
+      this.#asInternalUserClient = this.#asInternalUserFactory();
+    }
+    return this.#asInternalUserClient;
   }
 
   public get asCurrentUser() {

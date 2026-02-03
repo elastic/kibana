@@ -38,13 +38,16 @@ const noop = () => undefined;
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
   private readonly authHeaders?: IAuthHeadersStorage;
-  private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
+  private readonly logger: Logger;
+  private readonly agentFactoryProvider: AgentFactoryProvider;
+  private readonly type: string;
   private isClosed = false;
 
-  public readonly asInternalUser: Client;
+  #rootScopedClient?: Client;
+  #asInternalUser?: Client;
 
   constructor({
     config,
@@ -70,22 +73,36 @@ export class ClusterClient implements ICustomClusterClient {
     this.kibanaVersion = kibanaVersion;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
+    this.logger = logger;
+    this.agentFactoryProvider = agentFactoryProvider;
+    this.type = type;
+  }
 
-    this.asInternalUser = configureClient(config, {
-      logger,
-      type,
-      getExecutionContext,
-      agentFactoryProvider,
-      kibanaVersion,
-    });
-    this.rootScopedClient = configureClient(config, {
-      scoped: true,
-      logger,
-      type,
-      getExecutionContext,
-      agentFactoryProvider,
-      kibanaVersion,
-    });
+  public get asInternalUser() {
+    if (!this.#asInternalUser) {
+      this.#asInternalUser = configureClient(this.config, {
+        logger: this.logger,
+        type: this.type,
+        getExecutionContext: this.getExecutionContext,
+        agentFactoryProvider: this.agentFactoryProvider,
+        kibanaVersion: this.kibanaVersion,
+      });
+    }
+    return this.#asInternalUser!;
+  }
+
+  private get rootScopedClient() {
+    if (!this.#rootScopedClient) {
+      this.#rootScopedClient = configureClient(this.config, {
+        scoped: true,
+        logger: this.logger,
+        type: this.type,
+        getExecutionContext: this.getExecutionContext,
+        agentFactoryProvider: this.agentFactoryProvider,
+        kibanaVersion: this.kibanaVersion,
+      });
+    }
+    return this.#rootScopedClient;
   }
 
   asScoped(request: ScopeableRequest) {
@@ -112,7 +129,7 @@ export class ClusterClient implements ICustomClusterClient {
     };
 
     return new ScopedClusterClient({
-      asInternalUser: this.asInternalUser,
+      asInternalUserFactory: () => this.asInternalUser,
       asCurrentUserFactory: createScopedClient,
       asSecondaryAuthUserFactory: createSecondaryScopedClient,
     });
@@ -123,7 +140,7 @@ export class ClusterClient implements ICustomClusterClient {
       return;
     }
     this.isClosed = true;
-    await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
+    await Promise.all([this.#asInternalUser?.close(), this.#rootScopedClient?.close()]);
   }
 
   private createInternalErrorHandlerAccessor = (
