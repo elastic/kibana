@@ -7,7 +7,6 @@
 
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import startCase from 'lodash/startCase';
 import type { Logger } from '@kbn/core/server';
 import type { GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
@@ -19,7 +18,6 @@ import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
-import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -37,7 +35,7 @@ interface AxiosErrorWithRetry {
   message: string;
 }
 
-interface OAuth2RefreshParams {
+interface OAuth2AuthCodeParams {
   clientId?: string;
   clientSecret?: string;
   tokenUrl?: string;
@@ -56,7 +54,7 @@ async function handleOAuth401Error({
 }: {
   error: AxiosErrorWithRetry;
   connectorId: string;
-  secrets: OAuth2RefreshParams;
+  secrets: OAuth2AuthCodeParams;
   connectorTokenClient: ConnectorTokenClientContract;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -70,61 +68,44 @@ async function handleOAuth401Error({
   error.config._retry = true;
   logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
 
-  try {
-    // Fetch current token to get refresh token
-    const { connectorToken, hasErrors } = await connectorTokenClient.get({
-      connectorId,
-      tokenType: 'access_token',
-    });
-    if (hasErrors || !connectorToken?.refreshToken) {
-      throw new Error('No refresh token available');
-    }
+  const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } = secrets;
+  if (!clientId || !clientSecret || !tokenUrl) {
+    error.message =
+      'Authentication failed: Missing required OAuth configuration (clientId, clientSecret, tokenUrl).';
+    return Promise.reject(error);
+  }
 
-    const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } = secrets;
-    if (!clientId || !clientSecret || !tokenUrl) {
-      throw new Error('Missing required OAuth configuration (clientId, clientSecret, tokenUrl)');
-    }
-
-    // Request new access token using refresh token
-    const tokenResult = await requestOAuthRefreshToken(
-      tokenUrl,
-      logger,
-      {
-        refreshToken: connectorToken.refreshToken,
+  // Use the shared token refresh function with mutex protection
+  const newAccessToken = await getOAuthAuthorizationCodeAccessToken({
+    connectorId,
+    logger,
+    configurationUtilities,
+    credentials: {
+      config: {
         clientId,
-        clientSecret,
-        scope,
+        tokenUrl,
+        useBasicAuth,
       },
-      configurationUtilities,
-      useBasicAuth ?? true
-    );
+      secrets: {
+        clientSecret,
+      },
+    },
+    connectorTokenClient,
+    scope,
+    forceRefresh: true,
+  });
 
-    // Update stored token
-    const normalizedTokenType = startCase(tokenResult.tokenType);
-    const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
-    await connectorTokenClient.updateWithRefreshToken({
-      id: connectorToken.id!,
-      token: newAccessToken,
-      refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
-      expiresIn: tokenResult.expiresIn,
-      refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
-      tokenType: 'access_token',
-    });
-
-    logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
-
-    // Update request with the new token and retry
-    error.config.headers.Authorization = newAccessToken;
-    return axiosInstance.request(error.config);
-  } catch (refreshError) {
-    const errorMessage =
-      refreshError instanceof Error ? refreshError.message : String(refreshError);
-    logger.error(`Token refresh failed for connectorId ${connectorId}: ${errorMessage}`);
-
+  if (!newAccessToken) {
     error.message =
       'Authentication failed: Unable to refresh access token. Please re-authorize the connector.';
     return Promise.reject(error);
   }
+
+  logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
+
+  // Update request with the new token and retry
+  error.config.headers.Authorization = newAccessToken;
+  return axiosInstance.request(error.config);
 }
 
 export interface GetAxiosInstanceWithAuthFnOpts {
@@ -206,7 +187,7 @@ export const getAxiosInstanceWithAuth = ({
               return handleOAuth401Error({
                 error,
                 connectorId,
-                secrets: secrets as OAuth2RefreshParams,
+                secrets: secrets as OAuth2AuthCodeParams,
                 connectorTokenClient,
                 logger,
                 configurationUtilities,

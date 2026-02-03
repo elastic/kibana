@@ -44,6 +44,12 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
   };
   connectorTokenClient: ConnectorTokenClientContract;
   scope?: string;
+  /**
+   * When true, skip the expiration check and force a token refresh.
+   * Use this when you've received a 401 and know the token is invalid
+   * even if it hasn't "expired" according to the stored timestamp.
+   */
+  forceRefresh?: boolean;
 }
 
 /**
@@ -57,6 +63,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   credentials,
   connectorTokenClient,
   scope,
+  forceRefresh = false,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
   const { clientSecret } = credentials.secrets;
@@ -96,7 +103,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     const now = Date.now();
     const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
-    if (expiresAt > now) {
+    if (!forceRefresh && expiresAt > now) {
       // Token still valid
       logger.debug(`Using stored access token for connectorId: ${connectorId}`);
       return connectorToken.token;
