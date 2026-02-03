@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/content-management-table-list-view-table'
   - '@kbn/content-management-tabbed-table-list-view'
+  - '@kbn/content-management-plugin'
   - '@kbn/event-annotation-plugin'
   - '@kbn/event-annotation-components'
   - '@kbn/event-annotation-common'
