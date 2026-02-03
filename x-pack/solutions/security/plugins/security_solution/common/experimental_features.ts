@@ -47,7 +47,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Memory Dump response actions support for Elastic Defend.
    * Release: v9.3
    */
-  responseActionsEndpointMemoryDump: false,
+  responseActionsEndpointMemoryDump: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -114,7 +114,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: false,
+  filterProcessDescendantsForTrustedAppsEnabled: true,
 
   /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
@@ -180,7 +180,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  attacksAlertsAlignment: false,
+  enableAlertsAndAttacksAlignment: false,
   /**
    *  Enables the QRadar rules import feature
    */
@@ -204,7 +204,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables DNS events toggle for Linux in Endpoint policy configuration.
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
-  linuxDnsEvents: false,
+  linuxDnsEvents: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
