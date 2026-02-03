@@ -124,8 +124,10 @@ export const useEsqlConversionCheck = (
     const [, esAggEntries] = partition(
       columnEntries,
       ([, col]) =>
-        operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-        operationDefinitionMap[col.operationType]?.input === 'managedReference'
+        (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+          operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
+        // Keep static_value columns - they'll be converted to EVAL statements
+        col.operationType !== 'static_value'
     );
 
     let esqlLayer;

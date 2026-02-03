@@ -19,6 +19,7 @@ import type {
   IndexPattern,
   ValueFormatConfig,
   GenericIndexPatternColumn,
+  StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
 import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
@@ -138,11 +139,51 @@ export function generateEsqlQuery(
     ([_, col]) => !col.isBucketed
   );
 
+  // Separate static_value columns from regular metrics
+  const [staticValueEntries, regularMetricEntries] = partition(
+    metricEsAggsEntries,
+    ([_, col]) => col.operationType === 'static_value'
+  );
+
+  // Process static value columns - these will become EVAL statements
+  const staticValueEvals: string[] = [];
+  staticValueEntries.forEach(([colId, col], index) => {
+    const staticCol = col as StaticValueIndexPatternColumn;
+    const value = staticCol.params?.value ?? '100';
+
+    // Generate a unique column name for the static value
+    const esAggsId = `static_${index}`;
+
+    const format = isColumnFormatted(col) ? col.params?.format : undefined;
+
+    // Add to esAggsIdMap so the column can be mapped in text-based layer
+    esAggsIdMap[esAggsId] = [
+      {
+        ...col,
+        id: colId,
+        format: format as unknown as ValueFormatConfig,
+        interval: undefined as never,
+        label: col.customLabel
+          ? col.label
+          : operationDefinitionMap[col.operationType].getDefaultLabel(
+              col,
+              layer.columns,
+              indexPattern,
+              uiSettings,
+              dateRange
+            ),
+      },
+    ];
+
+    // Generate EVAL statement for the static value
+    staticValueEvals.push(`${esAggsId} = ${value}`);
+  });
+
   // Collect all params from metrics and buckets
   const allParamObjects: Array<Record<string, string | number>> = [];
 
-  // Process metrics
-  const metricsResult: EsqlConversion[] = metricEsAggsEntries.map(([colId, col], index) => {
+  // Process metrics (excluding static_value which is handled above)
+  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     // Check for specific unsupported operations before general toESQL check
@@ -166,9 +207,7 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('reduced_time_range_not_supported');
     }
 
-    const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-      ? `bucket_${index + 1}_${aggId}`
-      : `bucket_${index}_${aggId}`;
+    const esAggsId = `bucket_${index}_${aggId}`;
 
     const format =
       // 1. User-configured format in Lens (highest priority)
@@ -279,9 +318,7 @@ export function generateEsqlQuery(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-      ? `col_${index}-${aggId}`
-      : `col_${index}_${aggId}`;
+    let esAggsId = `col_${index}_${aggId}`;
 
     let interval: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
@@ -417,9 +454,7 @@ export function generateEsqlQuery(
 
     const sortFields = bucketEsAggsEntries.map(([colId, col], index) => {
       const aggId = String(index);
-      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col_${index}-${aggId}`
-        : `col_${index}_${aggId}`;
+      let esAggsId = `col_${index}_${aggId}`;
 
       if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
         esAggsId = col.sourceField;
@@ -434,6 +469,11 @@ export function generateEsqlQuery(
       const statsBody = validMetrics.join(', ');
       queryParts.push(`STATS ${statsBody}`);
     }
+  }
+
+  // Add EVAL statements for static values after STATS/SORT
+  if (staticValueEvals.length > 0) {
+    queryParts.push(`EVAL ${staticValueEvals.join(', ')}`);
   }
 
   try {

@@ -8,21 +8,7 @@
 import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-
-const defaultUiSettingsGet = (key: string) => {
-  switch (key) {
-    case 'dateFormat':
-      return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    case 'dateFormat:scaled':
-      return [[]];
-    case 'dateFormat:tz':
-      return 'UTC';
-    case 'histogram:barTarget':
-      return 50;
-    case 'histogram:maxBars':
-      return 100;
-  }
-};
+import { defaultUiSettingsGet } from './__mocks__/ui_settings';
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
