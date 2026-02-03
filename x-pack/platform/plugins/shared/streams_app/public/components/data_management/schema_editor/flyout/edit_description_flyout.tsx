@@ -41,16 +41,21 @@ export const EditDescriptionFlyout = ({
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-description' });
 
   const handleSave = () => {
-    // When editing a description on an unmapped field, we need to:
+    // When editing a description on an unmapped or inherited field, we need to:
     // 1. Set status to 'mapped' so the field gets saved to the stream definition
-    // 2. Set type to 'unmapped' if no type exists (documentation-only field)
+    // 2. Set type to 'unmapped' if no type exists (documentation-only field for unmapped)
+    // 3. For inherited fields, keep the inherited type as an override
     const isUnmappedField = field.status === 'unmapped';
+    const isInheritedField = field.status === 'inherited';
     onSave({
       ...field,
       description: description || undefined,
       ...(isUnmappedField && {
         status: 'mapped' as const,
         type: field.type ?? 'unmapped',
+      }),
+      ...(isInheritedField && {
+        status: 'mapped' as const,
       }),
     } as SchemaField);
     onClose();
@@ -89,7 +94,7 @@ export const EditDescriptionFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiCallOut
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
                 title={i18n.translate(
                   'xpack.streams.editDescriptionFlyout.inheritedFieldCalloutTitle',
                   {

@@ -416,5 +416,80 @@ describe('useSchemaFields', () => {
 
       expect(fields).toEqual([]);
     });
+
+    it('extracts fields with type "unmapped" from wired stream definition with status "mapped"', () => {
+      // Fields with type: 'unmapped' are documentation-only fields that exist in the definition
+      // but are not mapped to Elasticsearch. The getDefinitionFields function correctly assigns
+      // them status: 'mapped' (since they ARE in the definition). The UI layer (schema_editor_table.tsx)
+      // then handles the display by showing them as "Unmapped" status and hiding the type.
+      const definition = createMockWiredStreamDefinition({
+        stream: {
+          name: 'logs.wired-test',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            wired: {
+              fields: {
+                'attributes.documented_unmapped_field': {
+                  type: 'unmapped',
+                  description: 'This field is documented but not mapped',
+                },
+              },
+              routing: [],
+            },
+          },
+        },
+      });
+
+      const fields = getDefinitionFields(definition);
+
+      expect(fields).toContainEqual(
+        expect.objectContaining({
+          name: 'attributes.documented_unmapped_field',
+          type: 'unmapped',
+          description: 'This field is documented but not mapped',
+          status: 'mapped', // This is correct - it's in the definition
+        })
+      );
+    });
+
+    it('extracts fields with type "unmapped" from classic stream definition', () => {
+      const definition = createMockClassicStreamDefinition({
+        stream: {
+          name: 'logs.classic-test',
+          description: '',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: '2024-01-01T00:00:00.000Z' },
+            settings: {},
+            failure_store: { inherit: {} },
+            classic: {
+              field_overrides: {
+                'attributes.documented_unmapped_field': {
+                  type: 'unmapped',
+                  description: 'Classic stream documented unmapped field',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const fields = getDefinitionFields(definition);
+
+      expect(fields).toContainEqual(
+        expect.objectContaining({
+          name: 'attributes.documented_unmapped_field',
+          type: 'unmapped',
+          description: 'Classic stream documented unmapped field',
+          status: 'mapped',
+        })
+      );
+    });
   });
 });

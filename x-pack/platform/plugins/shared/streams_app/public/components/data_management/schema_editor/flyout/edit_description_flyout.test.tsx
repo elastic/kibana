@@ -162,7 +162,7 @@ describe('EditDescriptionFlyout', () => {
   });
 
   describe('saving description on inherited fields', () => {
-    it('should preserve inherited status when editing description', async () => {
+    it('should convert inherited field to mapped when saving description (creates override)', async () => {
       const inheritedField: MappedSchemaField = {
         name: 'inherited_field',
         parent: 'parent_stream',
@@ -185,11 +185,11 @@ describe('EditDescriptionFlyout', () => {
       const saveButton = screen.getByTestId('streamsAppEditDescriptionFlyoutSaveButton');
       await userEvent.click(saveButton);
 
-      // Inherited fields should preserve their inherited status (not convert to mapped)
+      // Inherited fields should be converted to 'mapped' status so they get saved to the server
       expect(mockOnSave).toHaveBeenCalledWith({
         name: 'inherited_field',
         parent: 'parent_stream',
-        status: 'inherited',
+        status: 'mapped',
         type: 'keyword',
         description: 'Override description',
       });
