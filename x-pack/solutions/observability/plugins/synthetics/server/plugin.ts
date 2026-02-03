@@ -36,6 +36,11 @@ import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_
 import { getTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
 import { getTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/constants';
+import {
+  syntheticsStatsOverviewEmbeddableSchema,
+  syntheticsMonitorsEmbeddableSchema,
+} from './schemas';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -110,9 +115,17 @@ export class Plugin implements PluginType {
     );
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
+
+    // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
       transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
       transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
+      getSchema: () => syntheticsStatsOverviewEmbeddableSchema,
+    });
+
+    // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
+    plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
+      getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });
 
     return {};
