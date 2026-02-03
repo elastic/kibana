@@ -17,11 +17,65 @@
  */
 
 const Fs = require('fs');
-const minimist = require('minimist');
 
 function die(message) {
   process.stderr.write(`${message}\n`);
   process.exit(1);
+}
+
+function usage() {
+  return [
+    'Usage: node validate_config.js [--config <path>] [--stdin]',
+    '',
+    'Options:',
+    '  --config, -c   Path to JSON config file',
+    '  --stdin        Read JSON from stdin instead of a file',
+    '  --help, -h     Show this help',
+  ].join('\n');
+}
+
+function parseArgs(argv) {
+  const parsed = {
+    config: 'x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json',
+    stdin: false,
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+
+    if (arg === '--help' || arg === '-h') {
+      process.stdout.write(`${usage()}\n`);
+      process.exit(0);
+    }
+
+    if (arg === '--stdin') {
+      parsed.stdin = true;
+      continue;
+    }
+
+    if (arg === '--config' || arg === '-c') {
+      const value = argv[i + 1];
+      if (!value) {
+        die('Missing value for --config');
+      }
+      parsed.config = value;
+      i++;
+      continue;
+    }
+
+    if (arg.startsWith('--config=')) {
+      const value = arg.slice('--config='.length);
+      if (!value) {
+        die('Missing value for --config');
+      }
+      parsed.config = value;
+      continue;
+    }
+
+    die(`Unknown argument: ${arg}`);
+  }
+
+  return parsed;
 }
 
 function redact(message) {
@@ -106,14 +160,7 @@ async function readStdin() {
 }
 
 async function main() {
-  const argv = minimist(process.argv.slice(2), {
-    string: ['config'],
-    boolean: ['stdin'],
-    default: {
-      config: 'x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json',
-      stdin: false,
-    },
-  });
+  const argv = parseArgs(process.argv.slice(2));
 
   const useStdin = Boolean(argv.stdin);
   const configPath = String(argv.config);
