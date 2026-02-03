@@ -101,7 +101,6 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence must be actual text snippets from the provided log messages',
         'Must correctly identify: Go runtime, PostgreSQL database, Redis cache, AWS provider, Kubernetes orchestrator, Ubuntu OS, and both service dependencies',
         'Version numbers must match exactly what appears in logs',
@@ -189,11 +188,10 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence contains direct quotes from log messages',
         'Extracts all major stack components: Java, Spring Boot, MySQL, Kafka, GCP, CentOS, and inventory-service dependency',
         'Version strings accurately reflect what logs contain',
-        'Distinguishes stable identifiers in value from variable data in meta',
+        'Distinguishes stable identifiers in properties from variable data in meta',
       ],
     },
     metadata: {
@@ -273,11 +271,10 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence must be actual log message content',
         'Should detect all technologies: Rust, MongoDB, NATS, Azure, Debian, plus gRPC dependency',
         'Versions must match the strings found in logs',
-        'Subscription IDs and VM identifiers should not appear in value field',
+        'Subscription IDs and VM identifiers should not appear in properties field',
       ],
     },
     metadata: {
@@ -356,7 +353,6 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Evidence must be extracted from actual log content',
         'Should identify Node.js, Express, Elasticsearch, Redis, RHEL, and recommendation-engine dependency',
         'Version information must be accurate',
@@ -497,7 +493,6 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Should handle version upgrade scenario correctly',
         'Could optionally note version change in meta.observed_versions or meta.notes',
         'Express and MongoDB versions remain stable across upgrade',
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
       ],
     },
     metadata: {
@@ -587,7 +582,6 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Features identified from indirect signals must be tagged as inferred with meta.notes explaining the reasoning',
         'Moderate confidence levels appropriate for indirect evidence (not highly confident)',
         'No version information should be invented when not present in logs',
@@ -671,7 +665,6 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Inferred features must have "inferred" tag and meta.notes with explanation',
         'Confidence should reflect uncertainty from indirect signals',
         'Should identify Ruby, Rails, PostgreSQL, Redis, AWS, and ECS from ecosystem patterns',
@@ -754,7 +747,6 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Inferred features must be tagged and include meta.notes explanation',
         'Moderate confidence for features identified through indirect evidence',
         'Should detect PHP, Laravel, MariaDB, Redis, Nginx, and DigitalOcean',
@@ -837,7 +829,6 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
     },
     output: {
       criteria: [
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
         'Scala, PostgreSQL, and IBM Cloud need "inferred" tag with meta.notes',
         'Cassandra has explicit version so higher confidence is appropriate',
         'Should extract Scala, PostgreSQL, Cassandra, IBM Cloud, and reporting-service dependency',
@@ -897,7 +888,6 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         'Go has explicit version, Python inferred from subprocess and imports',
         'Should handle polyglot architecture correctly',
         'Python confidence should be moderate due to subprocess context',
-        'All required fields must be present: type, name, description, value, confidence, evidence, tags, meta',
       ],
     },
     metadata: {
