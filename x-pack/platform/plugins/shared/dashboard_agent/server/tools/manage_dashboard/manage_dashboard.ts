@@ -129,12 +129,35 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
       { logger, attachments, esClient, modelProvider, events }
     ) => {
       try {
-        const isNewDashboard = !dashboardAttachmentId;
-        let currentAttachmentId = dashboardAttachmentId;
-        let previousData: DashboardAttachmentData | undefined;
+        let currentAttachmentId: string;
+        let previousData: DashboardAttachmentData;
+        let isNewDashboard = false;
 
-        // Validate required fields for new dashboard
-        if (isNewDashboard) {
+        if (dashboardAttachmentId) {
+          // Updating existing dashboard
+          currentAttachmentId = dashboardAttachmentId;
+
+          const dashboardAttachment = attachments.get(currentAttachmentId);
+          if (!dashboardAttachment) {
+            throw new Error(`Dashboard attachment "${currentAttachmentId}" not found.`);
+          }
+
+          if (dashboardAttachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
+            throw new Error(`Attachment "${currentAttachmentId}" is not a dashboard attachment.`);
+          }
+
+          const latestVersion = attachments.getLatest(currentAttachmentId);
+          if (!latestVersion) {
+            throw new Error(
+              `Could not retrieve latest version of dashboard attachment "${currentAttachmentId}".`
+            );
+          }
+
+          previousData = latestVersion.data as DashboardAttachmentData;
+        } else {
+          // Creating new dashboard
+          isNewDashboard = true;
+
           if (!title) {
             throw new Error('Title is required when creating a new dashboard.');
           }
@@ -142,7 +165,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
             throw new Error('Description is required when creating a new dashboard.');
           }
 
-          // Create the dashboard attachment early so we have a stable ID for events
           const initialData: DashboardAttachmentData = {
             title,
             description,
@@ -159,25 +181,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           currentAttachmentId = newAttachment.id;
           previousData = initialData;
           logger.debug(`Created new dashboard attachment: ${currentAttachmentId}`);
-        } else {
-          // Get existing dashboard data
-          const dashboardAttachment = attachments.get(currentAttachmentId!);
-          if (!dashboardAttachment) {
-            throw new Error(`Dashboard attachment "${currentAttachmentId}" not found.`);
-          }
-
-          if (dashboardAttachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
-            throw new Error(`Attachment "${currentAttachmentId}" is not a dashboard attachment.`);
-          }
-
-          const latestVersion = attachments.getLatest(currentAttachmentId!);
-          if (!latestVersion) {
-            throw new Error(
-              `Could not retrieve latest version of dashboard attachment "${currentAttachmentId}".`
-            );
-          }
-
-          previousData = latestVersion.data as DashboardAttachmentData;
         }
 
         // Build updated metadata
@@ -337,7 +340,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           }
         }
 
-        const updatedAttachment = await attachments.update(currentAttachmentId!, {
+        const updatedAttachment = await attachments.update(currentAttachmentId, {
           data: {
             title: updatedTitle,
             description: updatedDescription,
