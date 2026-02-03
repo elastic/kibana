@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const fn = require('./load_functions');
+import fn from './load_functions';
 
 import expect from '@kbn/expect';
 

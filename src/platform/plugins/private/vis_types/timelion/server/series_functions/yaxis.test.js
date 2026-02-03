@@ -10,11 +10,12 @@
 import fn from './yaxis';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('yaxis.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
   });
 
   it('creates the yaxes array', () => {

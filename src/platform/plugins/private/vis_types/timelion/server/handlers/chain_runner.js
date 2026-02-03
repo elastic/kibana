@@ -16,6 +16,7 @@ import repositionArguments from './lib/reposition_arguments';
 import indexArguments from './lib/index_arguments';
 import validateTime from './lib/validate_time';
 import { calculateInterval } from '../../common/lib';
+import preProcessChainFn from './lib/preprocess_chain';
 
 /**
  * The processing implementation allows more then one sheet per request, but
@@ -29,7 +30,7 @@ const MAX_SHEETS = 1;
 const MAX_SERIES_PER_SHEET = 100;
 
 export default function chainRunner(tlConfig) {
-  const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
+  const preprocessChain = preProcessChainFn(tlConfig);
 
   let queryCache = {};
   const stats = {};

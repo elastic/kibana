@@ -11,8 +11,10 @@ import fn from './abs';
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-const seriesList = require('./fixtures/series_list')();
+import getSeriesList from './fixtures/series_list';
 import invoke from './test_helpers/invoke_series_fn';
+
+const seriesList = getSeriesList();
 
 describe('abs.js', function () {
   it('should return the positive value of every value', function () {

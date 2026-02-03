@@ -12,14 +12,22 @@ import alter from '../../lib/alter';
 import Chainable from '../../lib/classes/chainable';
 import _ from 'lodash';
 
+import avg from './avg';
+import cardinality from './cardinality';
+import min from './min';
+import max from './max';
+import last from './last';
+import first from './first';
+import sum from './sum';
+
 const functions = {
-  avg: require('./avg'),
-  cardinality: require('./cardinality'),
-  min: require('./min'),
-  max: require('./max'),
-  last: require('./last'),
-  first: require('./first'),
-  sum: require('./sum'),
+  avg,
+  cardinality,
+  min,
+  max,
+  last,
+  first,
+  sum,
 };
 
 export default new Chainable('aggregate', {

@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fn from './first';
+import average from './average';
+import carry from './carry';
+import nearest from './nearest';
+import none from './none';
+import scale from './scale';
 
-import expect from '@kbn/expect';
-import getSeriesList from './fixtures/series_list';
-import invoke from './test_helpers/invoke_series_fn';
-
-const seriesList = getSeriesList();
-
-describe('first.js', function () {
-  it('should return exactly the data input', function () {
-    return invoke(fn, [seriesList]).then(function (result) {
-      expect(result.input[0]).to.eql(result.output);
-    });
-  });
-});
+export const fitFunctions = {
+  average,
+  carry,
+  nearest,
+  none,
+  scale,
+};

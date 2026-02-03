@@ -12,11 +12,12 @@ import fn from './range';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('range.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
     seriesList.list[0].data = [
       [1000, 20],
       [2000, 10],

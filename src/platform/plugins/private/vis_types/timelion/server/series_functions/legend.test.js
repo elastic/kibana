@@ -11,11 +11,12 @@ import fn from './legend';
 
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('legend.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
   });
 
   it('should create the _global object if it does not exist', () => {

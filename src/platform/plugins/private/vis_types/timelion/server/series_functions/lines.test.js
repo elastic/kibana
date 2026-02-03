@@ -11,11 +11,12 @@ import fn from './lines';
 
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('lines.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
   });
 
   it('should simply set show, steps, stack and lineWidth', () => {

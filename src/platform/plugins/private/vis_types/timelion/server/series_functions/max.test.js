@@ -12,11 +12,12 @@ import fn from './max';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('max.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
   });
 
   it('keeps the max of a series vs a number', () => {

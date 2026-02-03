@@ -12,11 +12,12 @@ import fn from './cusum';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './fixtures/series_list';
 
 describe('cusum.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesList();
   });
 
   it('progressively adds the numbers in the list', () => {

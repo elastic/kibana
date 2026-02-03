@@ -12,13 +12,14 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
 import getSeriesList from './test_helpers/get_single_series_list';
+import getSeriesListFixture from './fixtures/series_list';
 import _ from 'lodash';
 
 describe('condition.js', function () {
   let comparable;
   let seriesList;
   beforeEach(function () {
-    seriesList = require('./fixtures/series_list')();
+    seriesList = getSeriesListFixture();
     comparable = getSeriesList('', [
       [moment.utc('1980-01-01T00:00:00.000Z'), 12],
       [moment.utc('1981-01-01T00:00:00.000Z'), 33],

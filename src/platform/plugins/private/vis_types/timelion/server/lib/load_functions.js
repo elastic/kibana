@@ -8,43 +8,32 @@
  */
 
 import _ from 'lodash';
-import { globSync } from 'fs';
-import normalizePath from 'normalize-path';
 import processFunctionDefinition from './process_function_definition';
+import { seriesFunctions } from '../series_functions';
+import { fitFunctions } from '../fit_functions';
 
-export default function (directory) {
-  function getTuple(directory, name) {
-    return [name, require(`../${directory}/${name}`)]; // eslint-disable-line import/no-dynamic-require
+const functionModules = {
+  series_functions: seriesFunctions,
+  // Handle trailing slash variant
+  'series_functions/': seriesFunctions,
+  fit_functions: fitFunctions,
+};
+
+export default function loadFunctions(directory) {
+  const moduleMap = functionModules[directory];
+
+  if (!moduleMap) {
+    throw new Error(`Unknown function directory: ${directory}`);
   }
 
-  // Get a list of all files and use the filename as the object key
-  const files = _.map(
-    globSync(`../${directory}/*.js`, { cwd: __dirname })
-      .filter((filename) => !filename.includes('.test'))
-      .map((p) => normalizePath(p)),
+  // For fit_functions, return as-is (they're simple functions keyed by name)
+  if (directory === 'fit_functions') {
+    return moduleMap;
+  }
 
-    function (file) {
-      const name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
-      return getTuple(directory, name);
-    }
-  );
-
-  // Get a list of all directories with an index.js, use the directory name as the key in the object
-  const directories = _.chain(
-    globSync(`../${directory}/*/index.js`, {
-      cwd: __dirname,
-    })
-  )
-    .map(function (file) {
-      const parts = normalizePath(file).split('/');
-      const name = parts[parts.length - 2];
-      return getTuple(directory, name);
-    })
-    .value();
-
-  const functions = _.fromPairs(files.concat(directories));
-
-  _.each(functions, function (func) {
+  // For series_functions, process each function definition to handle aliases
+  const functions = {};
+  _.each(moduleMap, function (func) {
     _.assign(functions, processFunctionDefinition(func));
   });
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const fn = require('./fit');
+import fn from './fit';
 import moment from 'moment';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
