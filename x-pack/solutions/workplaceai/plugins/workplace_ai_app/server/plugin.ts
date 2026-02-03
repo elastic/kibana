@@ -57,6 +57,7 @@ export class WorkplaceAIAppPlugin
       core,
       router,
       logger: this.loggerFactory.get('routes'),
+      config: this.config,
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');

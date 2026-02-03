@@ -76,7 +76,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('dscViewModeDocumentButton');
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
+        await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('shareTopNavButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('dataGridColumnSortingButton');
@@ -99,7 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
+        await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
+        await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('shareTopNavButton');
         await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
@@ -277,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -292,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -303,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
@@ -319,7 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });

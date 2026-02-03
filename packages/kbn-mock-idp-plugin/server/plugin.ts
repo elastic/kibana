@@ -23,6 +23,7 @@ import {
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
+import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
 
@@ -35,6 +36,7 @@ const createSAMLResponseSchema = schema.object({
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
+  url: schema.string(),
 });
 
 // BOOKMARK - List of Kibana project types
@@ -154,6 +156,11 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             : {};
 
           try {
+            const requestId = await getSAMLRequestId(request.body.url);
+            if (requestId) {
+              logger.info(`Sending SAML response for request ID: ${requestId}`);
+            }
+
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
@@ -162,6 +169,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
                   roles: request.body.roles,
+                  ...(requestId ? { authnRequestId: requestId } : {}),
                   ...serverlessOptions,
                 }),
               },

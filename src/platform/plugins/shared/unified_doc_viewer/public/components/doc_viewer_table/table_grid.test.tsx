@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import type { TableGridProps } from './table_grid';
 import { TableGrid, GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE } from './table_grid';
 import { FieldRow } from './field_row';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
@@ -41,7 +41,7 @@ jest.mock('./get_pin_control', () => ({
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 const mockHit = buildHitMock({}, 'index', mockDataView);

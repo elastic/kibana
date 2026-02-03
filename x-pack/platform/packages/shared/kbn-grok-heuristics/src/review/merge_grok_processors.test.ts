@@ -43,4 +43,30 @@ describe('mergeGrokProcessors', () => {
       CUSTOM_PATTERN2: '%{INT}',
     });
   });
+
+  it('deduplicates identical patterns', () => {
+    const processors: GrokProcessorResult[] = [
+      {
+        description: 'Log A',
+        patterns: ['%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:message}'],
+        pattern_definitions: {},
+      },
+      {
+        description: 'Log B',
+        patterns: ['%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:message}'],
+        pattern_definitions: {},
+      },
+      {
+        description: 'Log C',
+        patterns: ['%{TIMESTAMP_ISO8601:timestamp} %{WORD:service} %{GREEDYDATA:message}'],
+        pattern_definitions: {},
+      },
+    ];
+    const result = mergeGrokProcessors(processors);
+    expect(result.patterns).toEqual([
+      '%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:message}',
+      '%{TIMESTAMP_ISO8601:timestamp} %{WORD:service} %{GREEDYDATA:message}',
+    ]);
+    expect(result.description).toBe('Log A, Log B, Log C');
+  });
 });

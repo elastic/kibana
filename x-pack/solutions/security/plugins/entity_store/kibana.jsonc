@@ -10,8 +10,13 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "taskManager"
+      "spaces",
+      "taskManager",
+      "dataViews"
     ],
-    "optionalPlugins": []
+    "optionalPlugins": [
+      "security",
+      "encryptedSavedObjects"
+    ]
   }
 }

@@ -25,10 +25,10 @@ export const QUERIES_COLUMN_HEADER = i18n.translate(
   }
 );
 
-export const FEATURES_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
+export const SYSTEMS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.systemsColumnName',
   {
-    defaultMessage: 'Features',
+    defaultMessage: 'Systems',
   }
 );
 

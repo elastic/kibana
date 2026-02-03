@@ -328,6 +328,45 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-public.DashboardNavigationOptionsEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardNavigationOptionsEditor",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "Props",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/public/dashboard_navigation/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DashboardNavigationOptionsEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_navigation/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 50,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-public.DashboardTopNav",
         "type": "Function",
         "tags": [],
@@ -437,15 +476,7 @@
             "section": "def-public.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
-          ">>>, options: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.DashboardDrilldownOptions",
-            "text": "DashboardDrilldownOptions"
-          },
-          ") => Partial<Partial<",
+          ">>>, options: Required<Readonly<{ use_filters?: boolean | undefined; use_time_range?: boolean | undefined; open_in_new_tab?: boolean | undefined; } & {}>>) => Partial<Partial<",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -570,13 +601,7 @@
               "- The drilldown options that control which parameters to include."
             ],
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardDrilldownOptions",
-                "text": "DashboardDrilldownOptions"
-              }
+              "Required<Readonly<{ use_filters?: boolean | undefined; use_time_range?: boolean | undefined; open_in_new_tab?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/plugins/shared/dashboard/common/locator/get_dashboard_locator_params.ts",
             "lineNumber": 26,
@@ -2834,7 +2859,63 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DASHBOARD_NAVIGATION_OPTIONS",
+        "description": [],
+        "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab",
+            "type": "boolean",
+            "tags": [],
+            "label": "open_in_new_tab",
+            "description": [],
+            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range",
+            "type": "boolean",
+            "tags": [],
+            "label": "use_time_range",
+            "description": [],
+            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-public.DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters",
+            "type": "boolean",
+            "tags": [],
+            "label": "use_filters",
+            "description": [],
+            "path": "src/platform/plugins/shared/dashboard/common/page_bundle_constants.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "start": {
       "parentPluginId": "dashboard",
       "id": "def-public.DashboardStart",
@@ -3090,6 +3171,23 @@
         ],
         "path": "src/platform/plugins/shared/dashboard/server/api/types.ts",
         "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.DashboardNavigationOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardNavigationOptions",
+        "description": [],
+        "signature": [
+          "{ readonly use_filters: boolean; readonly use_time_range: boolean; readonly open_in_new_tab: boolean; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/dashboard_navigation/types.ts",
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3401,6 +3499,54 @@
         ],
         "path": "src/platform/plugins/shared/dashboard/server/index.ts",
         "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.dashboardNavigationOptionsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardNavigationOptionsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ use_filters: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; use_time_range: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; open_in_new_tab: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; }>"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/dashboard_navigation/schemas.ts",
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

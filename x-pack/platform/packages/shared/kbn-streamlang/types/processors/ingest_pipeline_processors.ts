@@ -24,6 +24,7 @@ import type {
   TrimProcessor,
   LowercaseProcessor,
   JoinProcessor,
+  ConcatProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -127,6 +128,12 @@ export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Concat
+export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
+  ConcatProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -150,4 +157,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineLowercaseProcessor
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
+  | IngestPipelineConcatProcessor
   | IngestPipelineManualIngestPipelineProcessor;

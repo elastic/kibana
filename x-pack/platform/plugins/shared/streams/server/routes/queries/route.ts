@@ -12,6 +12,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
+import { assertFeatureNotChanged } from '../utils/assert_feature_not_changed';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -96,6 +97,11 @@ const upsertQueryRoute = createServerRoute({
     await assertEnterpriseLicense(licensing);
 
     await streamsClient.ensureStream(streamName);
+    await assertFeatureNotChanged({
+      queryClient,
+      streamName,
+      queries: [{ id: queryId, feature: body.feature }],
+    });
     await queryClient.upsert(streamName, {
       id: queryId,
       title: body.title,
@@ -208,6 +214,12 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
+
+    const indexOperations = operations.flatMap((op) =>
+      'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
+    );
+    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
+
     await queryClient.bulk(streamName, operations);
 
     logger

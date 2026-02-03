@@ -3255,9 +3255,11 @@
           },
           "; } & { profilingSetup: ",
           "ProfilingSetupFixture",
+          "; } & { sloData: ",
+          "SloDataFixture",
           "; }>"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/global_hooks/profiling_setup.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/global_hook/index.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
@@ -8196,6 +8198,14 @@
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": [
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
                       {
                         "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"

@@ -43,11 +43,11 @@ export function registerStop(router: EntityStorePluginRouter) {
 
         logger.debug('Stop API invoked');
 
-        const stoppedTasks = await Promise.all(entityTypes.map((type) => assetManager.stop(type)));
+        await Promise.all(entityTypes.map((type) => assetManager.stop(type)));
 
         return res.ok({
           body: {
-            stoppedTasks,
+            ok: true,
           },
         });
       })

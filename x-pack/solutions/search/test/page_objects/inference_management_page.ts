@@ -40,6 +40,32 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(hasE5).to.be(true);
       },
 
+      async expectModelColumnToBeDisplayed() {
+        // Verify model column cells exist using data-test-subj
+        const modelCells = await testSubjects.findAll('modelCell');
+        expect(modelCells.length).to.greaterThan(0);
+      },
+
+      async expectSearchByModelName() {
+        // Search for a model name that exists in preconfigured endpoints
+        const searchField = await testSubjects.find('search-field-endpoints');
+        await searchField.clearValue();
+        await searchField.type('elser_model');
+
+        // Wait for the table to update
+        const table = await testSubjects.find('inferenceEndpointTable');
+        const rows = await table.findAllByClassName('euiTableRow');
+
+        // Verify results are filtered and contain the searched model
+        expect(rows.length).to.greaterThan(0);
+        const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+        const allContainElser = texts.every((text) => text.toLowerCase().includes('elser'));
+        expect(allContainElser).to.be(true);
+
+        // Clear the search field
+        await searchField.clearValue();
+      },
+
       async expectPreconfiguredEndpointsCannotBeDeleted() {
         const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
         await actionButton.click();

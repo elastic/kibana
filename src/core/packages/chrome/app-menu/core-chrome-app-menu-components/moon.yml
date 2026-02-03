@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/split-button'
   - '@kbn/i18n'
+  - '@kbn/router-utils'
 tags:
   - shared-browser
   - package

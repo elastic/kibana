@@ -3149,7 +3149,7 @@
         ">"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-      "lineNumber": 35,
+      "lineNumber": 36,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3181,7 +3181,7 @@
             ">) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 36,
+          "lineNumber": 37,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3212,7 +3212,7 @@
                 ">"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 36,
+              "lineNumber": 37,
               "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
@@ -3240,7 +3240,7 @@
             "<any, any>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 45,
+          "lineNumber": 46,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3256,7 +3256,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 45,
+              "lineNumber": 46,
               "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
@@ -3280,7 +3280,7 @@
                 "<any, any>"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "lineNumber": 45,
+              "lineNumber": 46,
               "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
@@ -3307,7 +3307,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 46,
+          "lineNumber": 47,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3349,7 +3349,7 @@
             "[]; }"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 47,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3413,7 +3413,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "lineNumber": 48,
+          "lineNumber": 49,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3512,7 +3512,7 @@
         "<object, object> | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-      "lineNumber": 51,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3663,7 +3663,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined; }) | undefined; schema?: ",
+          "[] | undefined; }) | undefined; getSchema?: (() => ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -3671,7 +3671,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<object> | undefined; throwOnUnmappedPanel?: ((config: EmbeddableState) => void) | undefined; }"
+          "<object> | undefined) | undefined; throwOnUnmappedPanel?: ((config: EmbeddableState) => void) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "lineNumber": 13,

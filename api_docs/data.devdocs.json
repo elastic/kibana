@@ -9596,7 +9596,7 @@
         "label": "KBN_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -16381,7 +16381,7 @@
         "label": "KBN_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19067,7 +19067,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19740,6 +19740,21 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewField.isComputedColumn",
+            "type": "boolean",
+            "tags": [],
+            "label": "isComputedColumn",
+            "description": [
+              "\nReturns true if the field is not part of the index and is a computed column"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
+            "lineNumber": 342,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -19751,7 +19766,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 342,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19771,7 +19786,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 349,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19799,7 +19814,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 357,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19827,7 +19842,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 365,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19847,7 +19862,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 373,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19875,7 +19890,7 @@
               " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 381,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19910,7 +19925,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 404,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -19934,7 +19949,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-                "lineNumber": 409,
+                "lineNumber": 416,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -19958,7 +19973,7 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/data_views/common/fields/data_view_field.ts",
-            "lineNumber": 444,
+            "lineNumber": 451,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24939,7 +24954,7 @@
         "label": "KBN_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25036,7 +25051,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 495,
+        "lineNumber": 500,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25418,7 +25433,7 @@
           " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 497,
+        "lineNumber": 502,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25520,7 +25535,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25838,7 +25853,7 @@
           "{ value: string; clientId?: string | number | undefined; }"
         ],
         "path": "src/platform/plugins/shared/data_views/common/types.ts",
-        "lineNumber": 572,
+        "lineNumber": 577,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

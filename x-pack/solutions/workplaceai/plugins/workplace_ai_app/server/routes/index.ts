@@ -6,8 +6,14 @@
  */
 
 import type { RouteDependencies } from './types';
+import { registerStartOAuthRoute, registerFetchSecretsRoute } from './ears';
 import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
 
-export const registerRoutes = ({ router }: RouteDependencies) => {
+export const registerRoutes = (dependencies: RouteDependencies) => {
+  const { router, logger, config } = dependencies;
   registerGetInferenceEndpointsRoute(router);
+
+  // EARS OAuth routes
+  registerStartOAuthRoute({ router, logger, config });
+  registerFetchSecretsRoute({ router, logger, config });
 };

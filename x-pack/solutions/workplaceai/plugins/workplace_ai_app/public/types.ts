@@ -29,3 +29,14 @@ export interface WorkplaceAIAppPluginStartDependencies {
   cloud?: CloudStart;
   share?: SharePluginStart;
 }
+
+/**
+ * Client-side config exposed from server via exposeToBrowser
+ */
+export interface WorkplaceAIClientConfig {
+  ears: {
+    url?: string;
+    ui_enabled: boolean;
+    allow_insecure: boolean;
+  };
+}

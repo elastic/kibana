@@ -17,7 +17,7 @@ import {
 } from '../../../..';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
 import { SuggestionCategory } from '../../../shared/sorting/types';
-import { settings } from '../generated/settings';
+import { EsqlSettingNames, settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
   return (
@@ -79,7 +79,7 @@ export function getUnmappedFieldsStrategy(
   headers.forEach((comand) => {
     if (comand.name.toUpperCase() === 'SET') {
       const { settingName, settingValue } = getSettingData(comand as ESQLAstSetHeaderCommand);
-      if (settingName?.toUpperCase() === 'UNMAPPED_FIELDS') {
+      if (settingName?.toUpperCase() === EsqlSettingNames.UNMAPPED_FIELDS.toUpperCase()) {
         switch (settingValue?.toUpperCase()) {
           case UnmappedFieldsStrategy.NULLIFY:
             unmappedFieldsStrategy = UnmappedFieldsStrategy.NULLIFY;

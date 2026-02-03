@@ -9,13 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
-import {
-  generateGithubSearchIssuesWorkflow,
-  generateGithubSearchCodeWorkflow,
-  generateGithubSearchPullRequestsWorkflow,
-  generateGithubSearchRepositoriesWorkflow,
-  generateGithubSearchUsersWorkflow,
-} from './workflows';
 
 export const githubDataSource: DataSource = {
   id: 'github',
@@ -23,6 +16,8 @@ export const githubDataSource: DataSource = {
   description: i18n.translate('xpack.dataSources.github.description', {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
+
+  iconType: '.github',
 
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.GITHUB,
@@ -58,28 +53,7 @@ export const githubDataSource: DataSource = {
     ],
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      {
-        content: generateGithubSearchIssuesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchCodeWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchPullRequestsWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchRepositoriesWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      {
-        content: generateGithubSearchUsersWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };

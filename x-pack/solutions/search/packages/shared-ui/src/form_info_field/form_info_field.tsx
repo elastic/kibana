@@ -72,6 +72,8 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       css={css({
         maxWidth: maxWidth ? `${maxWidth}px` : undefined,
         minWidth: minWidth ? `${minWidth}px` : undefined,
+        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
+        borderRadius: `${euiTheme.border.radius.medium}`,
       })}
     >
       {label && (
@@ -81,7 +83,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} css={css({ flexBasis: 'content', maxWidth: '100%' })}>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup
           css={css({
             color: euiTheme.colors.textParagraph,
@@ -91,7 +93,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           gutterSize="xs"
           responsive={false}
         >
-          <EuiFlexItem css={{ minWidth: 0 }} grow={false}>
+          <EuiFlexItem css={{ minWidth: 0, maxWidth: `${euiTheme.base * 18.75}px` }} grow={false}>
             <code
               data-test-subj={dataTestSubj}
               style={{
@@ -99,7 +101,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
                 fontSize: euiTheme.size.m,
-                padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+                padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
               }}
             >
               {value}

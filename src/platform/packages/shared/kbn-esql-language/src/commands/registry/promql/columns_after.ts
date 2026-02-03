@@ -6,59 +6,35 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
+import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
-import { synth } from '../../../..';
+import { isBinaryExpression, isIdentifier } from '../../../ast/is';
+import { PromqlParamName } from './utils';
 
 export const columnsAfter = async (
   command: ESQLCommand,
   _previousColumns: ESQLColumnData[],
   _query: string,
-  { fromFrom }: IAdditionalFields
+  { fromPromql }: IAdditionalFields
 ): Promise<ESQLColumnData[]> => {
   const promqlCommand = command as ESQLAstPromqlCommand;
-  const sourceColumns = await getSourceColumns(promqlCommand, fromFrom);
+  const sourceColumns = fromPromql ? await fromPromql(promqlCommand) : [];
   const userDefinedColumn = getUserDefinedColumn(promqlCommand);
+  const stepColumn = getStepColumn(promqlCommand);
 
-  return userDefinedColumn ? [...sourceColumns, userDefinedColumn] : sourceColumns;
+  const columns: ESQLColumnData[] = [...sourceColumns];
+
+  if (stepColumn) {
+    columns.push(stepColumn);
+  }
+
+  if (userDefinedColumn) {
+    columns.push(userDefinedColumn);
+  }
+
+  return columns;
 };
-
-async function getSourceColumns(
-  command: ESQLAstPromqlCommand,
-  fromFrom: IAdditionalFields['fromFrom']
-): Promise<ESQLColumnData[]> {
-  const indexName = getIndexFromParams(command);
-
-  if (!indexName) {
-    return [];
-  }
-
-  /*
-   * PROMQL stores the index in params, not as a source arg like FROM/TS:
-   *   FROM metrics  → args: [{ type: "source", name: "metrics" }]
-   *   PROMQL index=metrics → params.entries: [{ key: "index", value: "metrics" }]
-   *
-   * We create a synthetic FROM command to reuse the existing field fetching infrastructure.
-   */
-  return fromFrom(synth.cmd`FROM ${indexName}`);
-}
-
-function getIndexFromParams({ params }: ESQLAstPromqlCommand): string | undefined {
-  if (!params?.entries) {
-    return undefined;
-  }
-
-  const indexEntry = params.entries.find(
-    (entry): entry is ESQLMapEntry =>
-      isIdentifier(entry.key) && entry.key.name.toLowerCase() === 'index'
-  );
-
-  const { value } = indexEntry ?? {};
-
-  return isIdentifier(value) || isSource(value) ? value.name : undefined;
-}
 
 function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedColumn | undefined {
   const { query } = command;
@@ -78,5 +54,21 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
     type: 'unknown', // TODO: infer type once PROMQL query AST is available
     location: target.location,
     userDefined: true,
+  };
+}
+
+function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
+  const hasStep = command.params?.entries?.some(
+    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
+  );
+
+  if (!hasStep) {
+    return undefined;
+  }
+
+  return {
+    name: PromqlParamName.Step,
+    type: 'date',
+    userDefined: false,
   };
 }

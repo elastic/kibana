@@ -4,6 +4,19 @@ info:
   version: '1.0.0'
 paths: {}
 components:
+  examples:
+    SetAlertTagsBodyAdd:
+      value:
+        tags:
+          tags_to_add: ['Duplicate']
+          tags_to_remove: []
+        ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
+    SetAlertTagsBodyRemove:
+      value:
+        tags:
+          tags_to_add: []
+          tags_to_remove: ['Duplicate']
+        ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
   schemas:
     SetAlertTagsBody:
       type: object
@@ -15,20 +28,6 @@ components:
       required:
         - ids
         - tags
-      examples:
-        add:
-          value:
-            tags:
-              tags_to_add: ['Duplicate']
-              tags_to_remove: []
-            ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
-        remove:
-          value:
-            tags:
-              tags_to_add: []
-              tags_to_remove: ['Duplicate']
-            ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
-
     SetAlertTags:
       description: Object with list of tags to add and remove.
       type: object
