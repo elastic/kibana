@@ -110,4 +110,12 @@ export interface DataSource {
 
   /** OAuth configuration for authentication */
   oauthConfiguration?: EARSOAuthConfiguration | CustomOAuthConfiguration;
+
+  /**
+   * Generates workflow info objects with the given stack connector ID injected.
+   * Each data source implements this to load and configure its workflows.
+   *
+   * @param stackConnectorId - The ID of the stack connector to inject into workflows
+   */
+  generateWorkflows(stackConnectorId: string): Promise<WorkflowInfo[]>;
 }

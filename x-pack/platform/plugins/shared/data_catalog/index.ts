@@ -13,4 +13,10 @@ export type {
   WorkflowInfo,
 } from './common';
 
-export { PLUGIN_ID, PLUGIN_NAME, API_BASE_PATH, EARSSupportedOAuthProvider } from './common';
+export {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  API_BASE_PATH,
+  EARSSupportedOAuthProvider,
+  loadWorkflows,
+} from './common';

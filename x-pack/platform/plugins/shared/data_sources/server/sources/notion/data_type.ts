@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
+import { EARSSupportedOAuthProvider, loadWorkflows } from '@kbn/data-catalog-plugin';
 
 export const notionDataSource: DataSource = {
   id: 'notion',
@@ -32,5 +32,15 @@ export const notionDataSource: DataSource = {
 
   workflows: {
     directory: __dirname + '/workflows',
+  },
+
+  generateWorkflows: (stackConnectorId: string) => {
+    return loadWorkflows({
+      ...notionDataSource.workflows,
+      templateInputs: {
+        ...notionDataSource.workflows.templateInputs,
+        stackConnectorId,
+      },
+    });
   },
 };

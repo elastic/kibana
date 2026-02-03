@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
+import { EARSSupportedOAuthProvider, loadWorkflows } from '@kbn/data-catalog-plugin';
 
 export const githubDataSource: DataSource = {
   id: 'github',
@@ -55,5 +55,15 @@ export const githubDataSource: DataSource = {
 
   workflows: {
     directory: __dirname + '/workflows',
+  },
+
+  generateWorkflows: (stackConnectorId: string) => {
+    return loadWorkflows({
+      ...githubDataSource.workflows,
+      templateInputs: {
+        ...githubDataSource.workflows.templateInputs,
+        stackConnectorId,
+      },
+    });
   },
 };
