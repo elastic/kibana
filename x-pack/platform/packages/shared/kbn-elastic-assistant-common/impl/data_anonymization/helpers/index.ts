@@ -56,10 +56,28 @@ export const replaceOriginalValuesWithUuidValues = ({
 }: {
   messageContent: string;
   replacements: Replacements;
-}): string =>
-  replacements != null
-    ? Object.keys(replacements).reduce((acc, key) => {
-        const value = replacements[key];
-        return value ? acc.replaceAll(value, key) : acc;
-      }, messageContent)
-    : messageContent;
+}): string => {
+  if (replacements == null || Object.keys(replacements).length === 0) {
+    return messageContent;
+  }
+
+  // De-dupe replacements just in case, and sort by length descending to avoid partial matches
+  const values = Array.from(new Set(Object.values(replacements))).sort(
+    (a, b) => b.length - a.length
+  );
+
+  // Swap uuid->value for quick lookup, first in wins if duplicates exist
+  const valueToUuid = Object.entries(replacements).reduce<Record<string, string>>(
+    (acc, [uuid, value]) => {
+      if (value && acc[value] === undefined) {
+        acc[value] = uuid;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  // Escape regex special characters
+  const pattern = values.map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  return messageContent.replace(new RegExp(pattern, 'g'), (match) => valueToUuid[match] ?? match);
+};
