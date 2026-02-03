@@ -33,7 +33,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
 import { InfoPanel } from '../../info_panel';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor, getStatusColor } from './use_stream_features_table';
+import { getConfidenceColor } from './use_stream_features_table';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;
@@ -63,30 +63,34 @@ export function FeatureDetailsFlyout({
     showDeleteModal();
   };
 
-  const displayTitle = feature.title ?? Object.values(feature.value).join(', ');
-  const formattedValue = Object.values(feature.value).join(', ');
-
+  const displayTitle = feature.title ?? feature.id;
   const generalInfoItems = [
     {
-      title: NAME_LABEL,
-      description: <EuiText size="s">{feature.name || noDataPlaceholder}</EuiText>,
-    },
-    {
-      title: VALUE_LABEL,
-      description: <EuiText size="s">{formattedValue || noDataPlaceholder}</EuiText>,
+      title: ID_LABEL,
+      description: (
+        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
+          {feature.id}
+        </EuiText>
+      ),
     },
     {
       title: TYPE_LABEL,
       description: <EuiBadge color="hollow">{upperFirst(feature.type)}</EuiBadge>,
     },
     {
-      title: CREATED_BY_LABEL,
-      description: <EuiBadge color="hollow">{CREATED_BY_LLM}</EuiBadge>,
+      title: SUBTYPE_LABEL,
+      description: <EuiBadge color="hollow">{feature.subtype ?? noDataPlaceholder}</EuiBadge>,
     },
     {
-      title: STATUS_LABEL,
+      title: PROPERTIES_LABEL,
       description: (
-        <EuiHealth color={getStatusColor(feature.status)}>{upperFirst(feature.status)}</EuiHealth>
+        <EuiText size="s">
+          {Object.entries(feature.properties).map(([key, value]) => (
+            <div key={key}>
+              <b>{key}</b> {value}
+            </div>
+          ))}
+        </EuiText>
       ),
     },
     {
@@ -109,21 +113,6 @@ export function FeatureDetailsFlyout({
         ) : (
           <EuiText size="s">{noDataPlaceholder}</EuiText>
         ),
-    },
-    {
-      title: ID_LABEL,
-      description: (
-        <EuiText size="s" data-test-subj="streamsAppFeatureDetailsFlyoutId">
-          <code
-            css={css`
-              font-family: ${euiTheme.font.familyCode};
-              font-size: ${euiTheme.font.scale.s};
-            `}
-          >
-            {feature.id}
-          </code>
-        </EuiText>
-      ),
     },
     {
       title: LAST_SEEN_LABEL,
@@ -207,6 +196,7 @@ export function FeatureDetailsFlyout({
               {generalInfoItems.map((item, index) => (
                 <React.Fragment key={index}>
                   <EuiDescriptionList
+                    titleProps={{ css: { alignSelf: 'center' } }}
                     type="column"
                     columnWidths={[1, 2]}
                     compressed
@@ -274,28 +264,16 @@ const ID_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.idLabel', {
   defaultMessage: 'ID',
 });
 
-const NAME_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.nameLabel', {
-  defaultMessage: 'Name',
+const SUBTYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.subtypeLabel', {
+  defaultMessage: 'Subtype',
 });
 
-const VALUE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.valueLabel', {
-  defaultMessage: 'Value',
+const PROPERTIES_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.propertiesLabel', {
+  defaultMessage: 'Properties',
 });
 
 const TYPE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.typeLabel', {
   defaultMessage: 'Type',
-});
-
-const CREATED_BY_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLabel', {
-  defaultMessage: 'Created by',
-});
-
-const CREATED_BY_LLM = i18n.translate('xpack.streams.featureDetailsFlyout.createdByLLM', {
-  defaultMessage: 'LLM',
-});
-
-const STATUS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.statusLabel', {
-  defaultMessage: 'Status',
 });
 
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.confidenceLabel', {
