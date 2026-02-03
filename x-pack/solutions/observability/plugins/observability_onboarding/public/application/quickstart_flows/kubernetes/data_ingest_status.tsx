@@ -139,42 +139,36 @@ export function DataIngestStatus({ onboardingId, ingestionMode }: Props) {
             actionLinks={[
               ...(metricsOnboardingEnabled
                 ? [
-                  {
-                    id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                    label: i18n.translate(
-                      'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
-                      {
-                        defaultMessage: 'Explore Kubernetes cluster',
-                      }
-                    ),
-                    title: i18n.translate(
-                      'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
-                      {
-                        defaultMessage:
-                          'Overview your Kubernetes cluster with this pre-made dashboard',
-                      }
-                    ),
-                    href:
-                      dashboardLocator?.getRedirectUrl({
-                        dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                      }) ?? '',
-                  },
-                ]
+                    {
+                      id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                      label: i18n.translate(
+                        'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+                        {
+                          defaultMessage: 'Explore Kubernetes cluster',
+                        }
+                      ),
+                      title: i18n.translate(
+                        'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+                        {
+                          defaultMessage:
+                            'Overview your Kubernetes cluster with this pre-made dashboard',
+                        }
+                      ),
+                      href:
+                        dashboardLocator?.getRedirectUrl({
+                          dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                        }) ?? '',
+                    },
+                  ]
                 : []),
               {
                 id: 'logs',
-                title: i18n.translate(
-                  'xpack.observability_onboarding.kubernetesPanel.logsTitle',
-                  {
-                    defaultMessage: 'View and analyze your logs:',
-                  }
-                ),
-                label: i18n.translate(
-                  'xpack.observability_onboarding.kubernetesPanel.logsLabel',
-                  {
-                    defaultMessage: 'Explore logs',
-                  }
-                ),
+                title: i18n.translate('xpack.observability_onboarding.kubernetesPanel.logsTitle', {
+                  defaultMessage: 'View and analyze your logs:',
+                }),
+                label: i18n.translate('xpack.observability_onboarding.kubernetesPanel.logsLabel', {
+                  defaultMessage: 'Explore logs',
+                }),
                 href: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
               },
             ]}
