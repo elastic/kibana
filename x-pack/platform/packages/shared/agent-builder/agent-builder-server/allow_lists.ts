@@ -19,7 +19,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
-  `${internalNamespaces.observability}.get_log_categories`,
+  `${internalNamespaces.observability}.get_log_groups`,
   `${internalNamespaces.observability}.get_alerts`,
   `${internalNamespaces.observability}.get_services`,
   `${internalNamespaces.observability}.get_downstream_dependencies`,
