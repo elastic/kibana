@@ -67,7 +67,7 @@ export function getDrilldownRegistry() {
             ),
             {
               // 100 is an arbitrary limit
-              maxSize: 100
+              maxSize: 100,
             }
           )
         ),
