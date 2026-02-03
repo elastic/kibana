@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
 
 /**
  * Custom Scout server configuration for OAS (OpenAPI Specification) schema validation tests.
@@ -18,7 +18,7 @@ import { defaultConfig } from '../../../default/stateful/base.config';
  * dashboard/test/scout_oas_schema/
  *
  * Usage:
- *   node scripts/scout.js start-server --stateful --config-dir oas_schema
+ *   node scripts/scout.js start-server --arch serverless --domain observability_complete --serverConfigSet oas_schema
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

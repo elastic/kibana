@@ -23,8 +23,8 @@ import {
   MOCK_IDP_UIAM_PROJECT_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutServerConfig } from '../../../../types';
-import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../constants';
+import type { ScoutServerConfig } from '../../../../../types';
+import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
