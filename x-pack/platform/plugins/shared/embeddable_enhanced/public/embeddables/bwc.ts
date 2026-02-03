@@ -42,7 +42,7 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
                 name: drilldown.label ?? '',
               },
               eventId: uuidv4(),
-              triggers: drilldown.triggers,
+              triggers: [drilldown.trigger],
             };
           }
 
@@ -59,7 +59,7 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
                 name: drilldown.label ?? '',
               },
               eventId: uuidv4(),
-              triggers: drilldown.triggers,
+              triggers: [drilldown.trigger],
             };
           }
 
@@ -82,7 +82,7 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
                 name: drilldown.label ?? '',
               },
               eventId: uuidv4(),
-              triggers: drilldown.triggers,
+              triggers: [drilldown.trigger],
             };
           }
         })
@@ -105,7 +105,7 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
           dashboard_id: dashboardId,
           label: event.action.name,
           open_in_new_tab: openInNewTab ?? false,
-          triggers: event.triggers,
+          trigger: event.triggers[0] ?? 'unknown',
           type: 'dashboard_drilldown',
           use_time_range: useCurrentDateRange ?? true,
           use_filters: useCurrentFilters ?? true,
@@ -117,7 +117,7 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
         return {
           label: event.action.name,
           open_in_new_tab: openInNewTab ?? false,
-          triggers: event.triggers,
+          trigger: event.triggers[0] ?? 'unknown',
           type: 'discover_drilldown',
         };
       }
@@ -132,7 +132,7 @@ export function serializeEnhancements(enhancements: DynamicActionsSerializedStat
           label: event.action.name,
           encode_url: encodeUrl ?? true,
           open_in_new_tab: openInNewTab ?? true,
-          triggers: event.triggers,
+          trigger: event.triggers[0] ?? 'unknown',
           type: 'url_drilldown',
           url: url?.template ?? '',
         };

@@ -39,9 +39,7 @@ describe('transformEnhancementsOut', () => {
             "dashboardRefName": "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:8aeddba7-a7ed-42e2-988e-794c8435028d:dashboardId",
             "label": "Go to Dashboard",
             "open_in_new_tab": false,
-            "triggers": Array [
-              "FILTER_TRIGGER",
-            ],
+            "trigger": "FILTER_TRIGGER",
             "type": "dashboard_drilldown",
             "use_filters": true,
             "use_time_range": true,
@@ -77,9 +75,7 @@ describe('transformEnhancementsOut', () => {
           Object {
             "label": "Open in Discover",
             "open_in_new_tab": false,
-            "triggers": Array [
-              "FILTER_TRIGGER",
-            ],
+            "trigger": "FILTER_TRIGGER",
             "type": "discover_drilldown",
           },
         ],
@@ -118,9 +114,7 @@ describe('transformEnhancementsOut', () => {
             "encode_url": true,
             "label": "Go to URL",
             "open_in_new_tab": true,
-            "triggers": Array [
-              "VALUE_CLICK_TRIGGER",
-            ],
+            "trigger": "VALUE_CLICK_TRIGGER",
             "type": "url_drilldown",
             "url": "https://localhost/?{{event.key}}",
           },

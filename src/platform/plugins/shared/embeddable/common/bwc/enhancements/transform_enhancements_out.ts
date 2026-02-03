@@ -55,7 +55,7 @@ function convertToDashboardDrilldown(event: SerializedEvent) {
     dashboardRefName: generateRefName(event.eventId),
     label: event.action.name,
     open_in_new_tab: openInNewTab ?? false,
-    triggers: event.triggers,
+    trigger: event.triggers[0] ?? 'unknown',
     type: 'dashboard_drilldown',
     use_filters: useCurrentFilters ?? true,
     use_time_range: useCurrentDateRange ?? true,
@@ -68,7 +68,7 @@ function convertToDiscoverDrilldown(event: SerializedEvent) {
   return {
     label: event.action.name,
     open_in_new_tab: openInNewTab ?? false,
-    triggers: event.triggers,
+    trigger: event.triggers[0] ?? 'unknown',
     type: 'discover_drilldown',
   };
 }
@@ -83,7 +83,7 @@ function convertToUrlDrilldown(event: SerializedEvent) {
     label: event.action.name,
     encode_url: encodeUrl ?? true,
     open_in_new_tab: openInNewTab ?? true,
-    triggers: event.triggers,
+    trigger: event.triggers[0] ?? 'unknown',
     type: 'url_drilldown',
     url: url?.template ?? '',
   };

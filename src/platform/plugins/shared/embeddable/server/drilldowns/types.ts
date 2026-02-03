@@ -10,7 +10,7 @@
 import type { ObjectType, Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 
-export type DrilldownState = { label: string; triggers: string[]; type: string };
+export type DrilldownState = { label: string; trigger: string; type: string };
 
 export type DrilldownsState = {
   drilldowns?: DrilldownState[];
