@@ -22,6 +22,6 @@ export function getUpdateResponseBodySchema() {
     id: schema.string(),
     data: markdownByValueEmbeddableSchema,
     meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
+    spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
   });
 }

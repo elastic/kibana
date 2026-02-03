@@ -15,7 +15,7 @@ export const markdownSavedObjectType: SavedObjectsType = {
   name: MARKDOWN_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
-  namespaceType: 'multiple',
+  namespaceType: 'multiple-isolated',
   management: {
     icon: APP_ICON,
     defaultSearchField: 'title',
