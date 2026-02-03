@@ -911,7 +911,6 @@
     "@kbn/router-utils": "link:src/platform/packages/shared/kbn-router-utils",
     "@kbn/routing-example-plugin": "link:examples/routing_example",
     "@kbn/rrule": "link:src/platform/packages/shared/kbn-rrule",
-    "@kbn/rspack-optimizer": "link:packages/kbn-rspack-optimizer",
     "@kbn/rule-data-utils": "link:src/platform/packages/shared/kbn-rule-data-utils",
     "@kbn/rule-registry-plugin": "link:x-pack/platform/plugins/shared/rule_registry",
     "@kbn/runtime-fields-plugin": "link:x-pack/platform/plugins/private/runtime_fields",
