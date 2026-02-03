@@ -14,7 +14,7 @@ interface UseDocViewerExtensionActionsParams {
 }
 
 const useDocViewerExtensionActions = ({ actions }: UseDocViewerExtensionActionsParams) => {
-  return actions ?? undefined;
+  return actions;
 };
 
 export const [DocViewerExtensionActionsProvider, useDocViewerExtensionActionsContext] =
