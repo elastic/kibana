@@ -53,53 +53,35 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [integrationDisplayNames.data]
   );
 
-  const integrationsFromEnabledRules = useMemo(() => {
-    if (!getDetectionRules.data?.data || getDetectionRules.data.data.length === 0) {
-      return {
-        relatedIntegrationNames: [],
-        installedIntegrationNames: [],
-      };
-    }
+  // Create a Set for O(1) lookups instead of O(n) with .includes()
+  const installedIntegrationSet = useMemo(
+    () => new Set(getInstalledIntegrations.map((item) => item.name)),
+    [getInstalledIntegrations]
+  );
 
-    const integrationsSet = new Set<string>();
+  // Get unique integration names from enabled rules using flatMap
+  const relatedIntegrationNames = useMemo(() => {
+    if (!getDetectionRules.data?.data) return [];
 
-    getDetectionRules.data.data.forEach((rule) => {
-      if (rule.enabled && rule.related_integrations) {
-        rule.related_integrations.forEach((integration) => {
-          if (integration.package) {
-            integrationsSet.add(integration.package);
-          }
-        });
-      }
-    });
+    const integrations = getDetectionRules.data.data
+      .filter((rule) => rule.enabled && rule.related_integrations)
+      .flatMap((rule) => (rule.related_integrations ?? []).map((i) => i.package))
+      .filter((pkg): pkg is string => Boolean(pkg));
 
-    return {
-      relatedIntegrationNames: Array.from(integrationsSet),
-      installedIntegrationNames: getInstalledIntegrations.map((item) => item.name),
-    };
-  }, [getDetectionRules.data?.data, getInstalledIntegrations]);
+    return [...new Set(integrations)];
+  }, [getDetectionRules.data?.data]);
 
   const installedIntegrationsOptions = useMemo(() => {
-    const installedIntegrations = integrationsFromEnabledRules.relatedIntegrationNames.filter(
-      (integration) => integrationsFromEnabledRules.installedIntegrationNames.includes(integration)
-    );
-
-    return installedIntegrations.map((integration) => ({
-      label: getIntegrationDisplayName(integration),
-      key: integration,
-    }));
-  }, [integrationsFromEnabledRules, getIntegrationDisplayName]);
+    return relatedIntegrationNames
+      .filter((name) => installedIntegrationSet.has(name))
+      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+  }, [relatedIntegrationNames, installedIntegrationSet, getIntegrationDisplayName]);
 
   const missingIntegrationsOptions = useMemo(() => {
-    const missingIntegrations = integrationsFromEnabledRules.relatedIntegrationNames.filter(
-      (integration) => !integrationsFromEnabledRules.installedIntegrationNames.includes(integration)
-    );
-
-    return missingIntegrations.map((integration) => ({
-      label: getIntegrationDisplayName(integration),
-      key: integration,
-    }));
-  }, [integrationsFromEnabledRules, getIntegrationDisplayName]);
+    return relatedIntegrationNames
+      .filter((name) => !installedIntegrationSet.has(name))
+      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+  }, [relatedIntegrationNames, installedIntegrationSet, getIntegrationDisplayName]);
 
   const chartBaseTheme = useMemo(
     () => ({
