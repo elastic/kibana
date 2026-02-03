@@ -58,6 +58,7 @@ import { ReplaceProcessorForm } from './replace';
 import { SetProcessorForm } from './set';
 import { TransformStringProcessorForm } from './transform_string';
 import { ConcatProcessorForm } from './concat';
+import { JoinProcessorForm } from './join';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -199,6 +200,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                   />
                 )}
                 {type === 'concat' && <ConcatProcessorForm />}
+                {type === 'join' && <JoinProcessorForm />}
                 {!SPECIALISED_TYPES.includes(type) && (
                   <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
                 )}
