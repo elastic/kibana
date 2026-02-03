@@ -260,6 +260,9 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
         // Create inline visualizations
         if (addVisualizations && addVisualizations.length > 0) {
+          const model = await modelProvider.getDefaultModel();
+          const graph = createVisualizationGraph(model, logger, events, esClient);
+
           for (let i = 0; i < addVisualizations.length; i++) {
             const vizInput = addVisualizations[i];
             const { query: nlQuery, index, chartType, esql } = vizInput;
@@ -278,10 +281,6 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
               // Get schema for chart type
               const schema = getSchemaForChartType(selectedChartType);
-
-              // Generate visualization configuration
-              const model = await modelProvider.getDefaultModel();
-              const graph = createVisualizationGraph(model, logger, events, esClient);
 
               const finalState = await graph.invoke({
                 nlQuery,
