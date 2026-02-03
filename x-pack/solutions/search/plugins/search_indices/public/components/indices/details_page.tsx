@@ -235,18 +235,20 @@ export const SearchIndexDetailsPage = () => {
                 {hasDocuments ? (
                   <>
                     <EuiFlexItem>
-                      <EuiButtonEmpty
-                        isLoading={isInitialLoading}
-                        data-test-subj="viewInDiscoverLink"
-                        onClick={navigateToDiscover}
-                      >
-                        <FormattedMessage
-                          id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
-                          defaultMessage="View in Discover"
-                        />
-                      </EuiButtonEmpty>
+                      <div>
+                        <EuiButtonEmpty
+                          isLoading={isInitialLoading}
+                          data-test-subj="viewInDiscoverLink"
+                          onClick={navigateToDiscover}
+                        >
+                          <FormattedMessage
+                            id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
+                            defaultMessage="View in Discover"
+                          />
+                        </EuiButtonEmpty>
+                      </div>
                     </EuiFlexItem>
-                    <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="m">
                       <EuiButton
                         isLoading={isInitialLoading}
                         data-test-subj="useInPlaygroundLink"
@@ -259,10 +261,15 @@ export const SearchIndexDetailsPage = () => {
                           defaultMessage="Search in Playground"
                         />
                       </EuiButton>
-                    </EuiFlexItem>
+                      <SearchIndexDetailsPageMenuItemPopover
+                        handleDeleteIndexModal={handleDeleteIndexModal}
+                        showApiReference={hasDocuments}
+                        userPrivileges={userPrivileges}
+                      />
+                    </EuiFlexGroup>
                   </>
                 ) : (
-                  <EuiFlexItem>
+                  <>
                     <EuiButtonEmpty
                       href={docLinks.links.apis.restApis}
                       target="_blank"
@@ -275,15 +282,14 @@ export const SearchIndexDetailsPage = () => {
                         defaultMessage="API Reference"
                       />
                     </EuiButtonEmpty>
-                  </EuiFlexItem>
+
+                    <SearchIndexDetailsPageMenuItemPopover
+                      handleDeleteIndexModal={handleDeleteIndexModal}
+                      showApiReference={hasDocuments}
+                      userPrivileges={userPrivileges}
+                    />
+                  </>
                 )}
-                <EuiFlexItem>
-                  <SearchIndexDetailsPageMenuItemPopover
-                    handleDeleteIndexModal={handleDeleteIndexModal}
-                    showApiReference={hasDocuments}
-                    userPrivileges={userPrivileges}
-                  />
-                </EuiFlexItem>
               </EuiFlexGroup>,
             ]}
           />
