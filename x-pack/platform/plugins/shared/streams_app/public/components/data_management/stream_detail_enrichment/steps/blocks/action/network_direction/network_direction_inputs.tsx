@@ -92,11 +92,6 @@ export const NetworkDirectionTargetField = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionTargetFieldLabel',
         { defaultMessage: 'Target field' }
       )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionTargetFieldHelpText',
-        { defaultMessage: 'Defaults to "network.direction".' }
-      )}
-      isRequired={false}
     />
   );
 };
