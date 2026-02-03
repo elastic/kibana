@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/247685
-test.describe.skip('Onboarding UI Validation', () => {
+test.describe('Onboarding UI Validation', () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.onboarding.goto();

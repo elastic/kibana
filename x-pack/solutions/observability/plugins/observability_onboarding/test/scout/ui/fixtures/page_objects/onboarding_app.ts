@@ -84,7 +84,7 @@ export class OnboardingApp {
   }
 
   public get useCaseGridByTestId() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseGrid');
+    return this.page.getByTestId('observabilityOnboardingUseCaseGridyz');
   }
 
   async getTileCount() {
