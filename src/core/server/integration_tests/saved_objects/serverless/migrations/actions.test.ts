@@ -14,7 +14,9 @@ const { startES } = createTestServerlessInstances({
   adjustTimeout: jest.setTimeout,
 });
 
-describe('Migration actions - serverless environment', () => {
+// Failing: See https://github.com/elastic/kibana/issues/167290
+// Serverless test only need to run on main
+describe.skip('Migration actions - serverless environment', () => {
   runActionTestSuite({
     startEs: async () => {
       const serverlessEs = await startES();
