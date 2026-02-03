@@ -215,7 +215,10 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
                 </EuiFlexItem>
                 {Boolean(summary && summary.trim()) && (
                   <EuiFlexItem grow={false}>
-                    <StartConversationButton onClick={handleStartConversation} />
+                    <StartConversationButton
+                      insightType={insightType}
+                      onClick={handleStartConversation}
+                    />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -227,10 +230,13 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <FeedbackButtons onClickFeedback={handleFeedback} />
+                  <FeedbackButtons insightType={insightType} onClickFeedback={handleFeedback} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <StartConversationButton onClick={handleStartConversation} />
+                  <StartConversationButton
+                    insightType={insightType}
+                    onClick={handleStartConversation}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </>

@@ -9,11 +9,16 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
 import { robotIconType } from '@kbn/observability-nav-icons';
+import type { InsightType } from '../../analytics';
 
-export function StartConversationButton(props: React.ComponentProps<typeof EuiButton>) {
+type StartConversationButtonProps = React.ComponentProps<typeof EuiButton> & {
+  insightType: InsightType;
+};
+
+export function StartConversationButton({ insightType, ...props }: StartConversationButtonProps) {
   return (
     <EuiButton
-      data-test-subj="aiAgentStartConversationButton"
+      data-test-subj={`obsAgentBuilder-${insightType}-startConversationButton`}
       fill
       iconType={robotIconType}
       size="s"
