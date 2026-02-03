@@ -102,13 +102,18 @@ export const mapProviderFields = (
         (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
         (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
-    .map(
-      (k): ConfigEntryView => ({
+    .map((k): ConfigEntryView => {
+      // Use override defaultValues if provider config doesn't have a default_value set
+      const configDefaultValue = newProvider.configurations[k].default_value;
+      const overrideDefaultValue = fieldOverrides?.defaultValues?.[k];
+      const resolvedDefaultValue = configDefaultValue ?? overrideDefaultValue ?? null;
+
+      return {
         key: k,
         isValid: true,
         validationErrors: [],
-        value: newProvider.configurations[k].default_value ?? null,
-        default_value: newProvider.configurations[k].default_value ?? null,
+        value: resolvedDefaultValue,
+        default_value: resolvedDefaultValue,
         description: newProvider.configurations[k].description ?? null,
         label: newProvider.configurations[k].label ?? '',
         required: newProvider.configurations[k].required ?? false,
@@ -116,6 +121,6 @@ export const mapProviderFields = (
         updatable: newProvider.configurations[k].updatable ?? false,
         type: newProvider.configurations[k].type ?? FieldType.STRING,
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-      })
-    );
+      };
+    });
 };

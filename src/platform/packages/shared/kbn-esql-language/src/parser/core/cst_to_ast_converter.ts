@@ -17,8 +17,10 @@ import { nonNullable, unescapeColumn } from './helpers';
 import { firstItem, lastItem, resolveItem, singleItems } from '../../ast/visitor/utils';
 import { type AstNodeParserFields, Builder } from '../../ast/builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
+import { PromQLParser } from '../../promql/parser/parser';
 import type { AstNodeTemplate } from '../../ast/builder';
 import type { Parser } from './parser';
+import type { PromQLAstQueryExpression } from '../../promql/types';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
@@ -1779,7 +1781,6 @@ export class CstToAstConverter {
     const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
     const args: ast.ESQLAstExpression[] = command.args;
     const paramCtxs = ctx.promqlParam_list();
-    const query = this.toPromqlCommandQuery(ctx);
 
     // PromQL params: (key = value) pairs
     if (paramCtxs.length > 0) {
@@ -1788,6 +1789,8 @@ export class CstToAstConverter {
       args.push(params);
       command.incomplete ||= params.incomplete;
     }
+
+    const query = this.toPromqlCommandQuery(ctx);
 
     // PromQL query
     if (query) {
@@ -2077,7 +2080,11 @@ export class CstToAstConverter {
     const valueNameCtx = ctx.valueName();
     let node: ast.ESQLAstPromqlCommandQuery | undefined = this.fromPromqlQueryParts(queryPartCtxs);
 
-    // No parenthesis: ( promqlQueryPart+ )
+    if (!node) {
+      return undefined;
+    }
+
+    // No parenthesis
     if (!lp) {
       return node;
     }
@@ -2091,7 +2098,7 @@ export class CstToAstConverter {
       incomplete: !hasCloseParen || node.incomplete,
     });
 
-    // There's a "name = ( query )"" assignment
+    // There's a "name = ( query )" assignment
     if (valueNameCtx) {
       const valueNameId = this.fromIdentifier(valueNameCtx);
       node = Builder.expression.func.binary(
@@ -2112,33 +2119,27 @@ export class CstToAstConverter {
    * Converts promql query parts to an "unknown" node.
    * The detailed parsing of PromQL query will be done later.
    */
-  private fromPromqlQueryParts(queryPartCtxs: cst.PromqlQueryPartContext[]): ast.ESQLUnknownItem {
+  private fromPromqlQueryParts(
+    queryPartCtxs: cst.PromqlQueryPartContext[]
+  ): PromQLAstQueryExpression | undefined {
     if (queryPartCtxs.length === 0) {
-      return {
-        type: 'unknown',
-        name: 'unknown',
-        text: '',
-        location: { min: 0, max: 0 },
-        incomplete: true,
-      };
+      return undefined;
     }
 
     const firstPart = queryPartCtxs[0];
     const lastPart = queryPartCtxs[queryPartCtxs.length - 1];
     const location = getPosition(firstPart.start, lastPart.stop);
     const text = this.parser.src.slice(location.min, location.max + 1);
-
-    // If the text is empty, only whitespace, or only empty parens like "()", mark as incomplete
     const trimmedText = text.trim();
     const isEmpty = !trimmedText || trimmedText === '()';
 
-    return {
-      type: 'unknown',
-      name: 'unknown',
-      text,
-      location,
-      incomplete: isEmpty,
-    };
+    if (isEmpty) {
+      return undefined;
+    }
+
+    const parsed = PromQLParser.parse(text, { offset: location.min });
+
+    return parsed.root;
   }
 
   // --------------------------------------------------------------------- FORK
