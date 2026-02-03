@@ -38,6 +38,13 @@ import {
 export { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT };
 
 /**
+ * Type-safe extraction of error message from unknown error.
+ */
+const getErrorMessage = (error: unknown): string => {
+  return error instanceof Error ? error.message : String(error);
+};
+
+/**
  * Helper to extract panel ID from any panel entry type.
  */
 const getPanelId = (panel: AttachmentPanel): string => {
@@ -238,7 +245,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
               });
             } catch (error) {
               logger.error(
-                `Error resolving visualization attachment "${attachmentId}": ${error.message}`
+                `Error resolving visualization attachment "${attachmentId}": ${getErrorMessage(error)}`
               );
             }
           }
@@ -320,9 +327,9 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
               });
 
               logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
-            } catch (vizError) {
+            } catch (error) {
               logger.error(
-                `Error creating visualization for query "${nlQuery}": ${vizError.message}`
+                `Error creating visualization for query "${nlQuery}": ${getErrorMessage(error)}`
               );
               // Continue with other visualizations even if one fails
             }
@@ -340,26 +347,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           ...normalizePanels(panels, yOffset),
         ];
 
-        const spaceId = spaces?.spacesService?.getSpaceId(request);
-
-        // Generate dashboard URL with attachmentId for agent context persistence
-        const dashboardUrl = await dashboardLocator.getRedirectUrl(
-          {
-            panels: dashboardPanels,
-            title: updatedTitle,
-            description: updatedDescription,
-            viewMode: 'edit',
-            time_range: { from: 'now-24h', to: 'now' },
-            dashboardAttachmentId: currentAttachmentId,
-          },
-          { spaceId }
-        );
-
-        logger.info(
-          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panels.length} panels`
-        );
-
-        // Update the dashboard attachment
+        // Update the dashboard attachment first to get the version
         const updatedDashboardData: DashboardAttachmentData = {
           title: updatedTitle,
           description: updatedDescription,
@@ -371,6 +359,27 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           data: updatedDashboardData,
           description: `Dashboard: ${updatedTitle}`,
         });
+
+        logger.info(
+          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panels.length} panels`
+        );
+
+        const spaceId = spaces?.spacesService?.getSpaceId(request);
+
+        // Generate dashboard URL with attachmentId and version for agent context persistence
+        // The versionAttachmentId ensures each version gets a unique URL to trigger navigation
+        const dashboardUrl = await dashboardLocator.getRedirectUrl(
+          {
+            panels: dashboardPanels,
+            title: updatedTitle,
+            description: updatedDescription,
+            viewMode: 'edit',
+            time_range: { from: 'now-24h', to: 'now' },
+            dashboardAttachmentId: currentAttachmentId,
+            versionAttachmentId: updatedAttachment?.version?.id,
+          },
+          { spaceId }
+        );
 
         return {
           results: [
@@ -395,13 +404,14 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
           ],
         };
       } catch (error) {
-        logger.error(`Error in manage_dashboard tool: ${error.message}`);
+        const errorMessage = getErrorMessage(error);
+        logger.error(`Error in manage_dashboard tool: ${errorMessage}`);
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to manage dashboard: ${error.message}`,
+                message: `Failed to manage dashboard: ${errorMessage}`,
                 metadata: { dashboardAttachmentId, title, description },
               },
             },
