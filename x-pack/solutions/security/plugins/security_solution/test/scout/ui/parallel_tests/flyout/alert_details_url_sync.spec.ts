@@ -20,6 +20,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
 
   spaceTest.afterEach(async ({ apiServices }) => {
     await apiServices.detectionRule.deleteAll();
+    await apiServices.detectionAlerts.deleteAll();
   });
 
   spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
