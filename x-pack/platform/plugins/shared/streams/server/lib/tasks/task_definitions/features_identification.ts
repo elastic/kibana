@@ -7,10 +7,10 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { BaseFeature } from '@kbn/streams-schema';
-import { identifyFeatures } from '@kbn/streams-ai';
+import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
+import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { getSampleDocuments } from '@kbn/ai-tools/src/tools/describe_dataset/get_sample_documents';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -80,13 +80,26 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   size: 20,
                 });
 
-                const { features: identifiedFeatures } = await identifyFeatures({
-                  sampleDocuments,
-                  inferenceClient: boundInferenceClient,
-                  logger: taskContext.logger.get('features_identification'),
-                  signal: runContext.abortController.signal,
-                  systemPrompt: featurePromptOverride,
-                });
+                const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
+                  identifyFeatures({
+                    sampleDocuments,
+                    inferenceClient: boundInferenceClient,
+                    logger: taskContext.logger.get('features_identification'),
+                    signal: runContext.abortController.signal,
+                    systemPrompt: featurePromptOverride,
+                  }),
+                  generateAllComputedFeatures({
+                    stream,
+                    start,
+                    end,
+                    esClient,
+                  }),
+                ]);
+
+                const identifiedFeatures: BaseFeature[] = [
+                  ...inferredBaseFeatures,
+                  ...computedFeatures,
+                ];
 
                 const { hits: existingFeatures } = await featureClient.getFeatures(stream.name, {
                   id: identifiedFeatures.map(({ id }) => id),
@@ -109,7 +122,9 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     status: 'active' as const,
                     last_seen: new Date(now).toISOString(),
                     expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
-                    uuid: existing?.uuid ?? uuid(),
+                    uuid: isComputedFeature(feature)
+                      ? uuidv5(`${streamName}:${feature.id}`, uuidv5.DNS)
+                      : existing?.uuid ?? uuid(),
                   };
                 });
 
