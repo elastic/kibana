@@ -505,7 +505,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
         {
           defaultMessage:
-            'When configured, only events from the specified data stream namespaces are searched during rule execution.',
+            "When configured, only events from the specified data stream namespaces are searched during rule execution, e.g. 'data_stream.namespace':['namespace1', 'namespace2']",
         }
       ),
       type: 'json',
@@ -513,9 +513,10 @@ export const initUiSettings = (
         query: schema.object({
           bool: schema.object({
             filter: schema.object({
-              terms: schema.object({
-                'data_stream.namespace': schema.arrayOf(schema.string()),
-              }),
+              terms: schema.recordOf(
+                schema.string({ defaultValue: 'data_stream.namespace' }),
+                schema.any({ defaultValue: [] })
+              ),
             }),
           }),
         }),
