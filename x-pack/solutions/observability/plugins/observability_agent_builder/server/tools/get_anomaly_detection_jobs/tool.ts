@@ -23,6 +23,7 @@ export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
   'observability.get_anomaly_detection_jobs';
 
 const DEFAULT_JOBS_LIMIT = 10;
+const DEFAULT_ANOMALY_RECORDS_LIMIT = 10;
 const DEFAULT_MIN_ANOMALY_SCORE = 50;
 const DEFAULT_TIME_RANGE = {
   start: 'now-24h',
@@ -52,6 +53,15 @@ const getAnomalyDetectionJobsSchema = z.object({
     .max(25)
     .default(DEFAULT_JOBS_LIMIT)
     .describe('Maximum number of jobs to return.'),
+  anomalyRecordsLimit: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(DEFAULT_ANOMALY_RECORDS_LIMIT)
+    .describe(
+      'Maximum anomaly records to return per job. Set to 0 to skip anomaly records entirely.'
+    ),
   minAnomalyScore: z
     .number()
     .min(0)
@@ -116,6 +126,7 @@ When to use:
       const {
         jobIds,
         limit: jobsLimit,
+        anomalyRecordsLimit,
         minAnomalyScore,
         includeExplanation,
         partitionFieldValue,
@@ -135,6 +146,7 @@ When to use:
           logger,
           jobIds,
           jobsLimit,
+          anomalyRecordsLimit,
           minAnomalyScore,
           includeExplanation,
           partitionFieldValue,

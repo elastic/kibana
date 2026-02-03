@@ -24,6 +24,7 @@ export async function getToolHandler({
   logger,
   jobIds = [],
   jobsLimit,
+  anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
   partitionFieldValue,
@@ -38,6 +39,7 @@ export async function getToolHandler({
   logger: Logger;
   jobIds?: string[];
   jobsLimit: number;
+  anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
   partitionFieldValue?: string;
@@ -76,16 +78,20 @@ export async function getToolHandler({
 
   return Promise.all(
     jobs.slice(0, jobsLimit).map(async (job) => {
-      const topAnomalies = await getTopAnomalyRecords({
-        mlSystem,
-        jobId: job.job_id,
-        minAnomalyScore,
-        includeExplanation,
-        partitionFieldValue,
-        byFieldValue,
-        start: rangeStart,
-        end: rangeEnd,
-      });
+      const topAnomalies =
+        anomalyRecordsLimit > 0
+          ? await getTopAnomalyRecords({
+              mlSystem,
+              jobId: job.job_id,
+              anomalyRecordsLimit,
+              minAnomalyScore,
+              includeExplanation,
+              partitionFieldValue,
+              byFieldValue,
+              start: rangeStart,
+              end: rangeEnd,
+            })
+          : [];
 
       const jobStats = jobsStatsMap.get(job.job_id);
 
@@ -113,6 +119,7 @@ export async function getToolHandler({
 async function getTopAnomalyRecords({
   mlSystem,
   jobId,
+  anomalyRecordsLimit,
   minAnomalyScore,
   includeExplanation,
   partitionFieldValue,
@@ -122,6 +129,7 @@ async function getTopAnomalyRecords({
 }: {
   mlSystem: MlSystem;
   jobId: string;
+  anomalyRecordsLimit: number;
   minAnomalyScore: number;
   includeExplanation: boolean;
   partitionFieldValue?: string;
@@ -162,7 +170,7 @@ async function getTopAnomalyRecords({
   const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
     {
       track_total_hits: false,
-      size: 10,
+      size: anomalyRecordsLimit,
       sort: [{ record_score: { order: 'desc' as const } }],
       query: {
         bool: {

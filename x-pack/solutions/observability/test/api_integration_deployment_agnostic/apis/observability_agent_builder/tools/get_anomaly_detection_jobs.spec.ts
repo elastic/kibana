@@ -313,5 +313,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const { topAnomalies } = toolResults[0].data.jobs[0];
       expect(topAnomalies).to.be.empty();
     });
+
+    it('limits anomaly records per job with anomalyRecordsLimit', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, anomalyRecordsLimit: 3 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies.length).to.be.lessThan(4);
+    });
+
+    it('returns no anomalies when anomalyRecordsLimit is 0', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: { start: START_ISO, end: END_ISO, anomalyRecordsLimit: 0 },
+        });
+
+      const { topAnomalies } = toolResults[0].data.jobs[0];
+      expect(topAnomalies).to.be.empty();
+    });
   });
 }
