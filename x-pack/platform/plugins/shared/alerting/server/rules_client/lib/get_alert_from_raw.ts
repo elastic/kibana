@@ -29,7 +29,6 @@ import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
-import { fieldsToExcludeFromPublicApi } from '../rules_client';
 import { transformRawArtifactsToDomainArtifacts } from '../../application/rule/transforms/transform_raw_artifacts_to_domain_artifacts';
 
 export interface GetAlertFromRawParams {
@@ -44,10 +43,7 @@ export interface GetAlertFromRawParams {
 }
 
 interface GetAlertFromRawOpts {
-  excludeFromPublicApi?: boolean;
   id: string;
-  includeLegacyId?: boolean;
-  includeSnoozeData?: boolean;
   isSystemAction: (actionId: string) => boolean;
   logger: Logger;
   omitGeneratedValues?: boolean;
@@ -66,21 +62,13 @@ type GetPartialRuleFromRawOpts = Omit<GetAlertFromRawOpts, 'ruleTypeRegistry'> &
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   opts: GetAlertFromRawOpts
 ): Rule | RuleWithLegacyId {
-  const {
-    excludeFromPublicApi = false,
-    includeLegacyId = false,
-    includeSnoozeData = false,
-    omitGeneratedValues = true,
-  } = opts;
+  const { omitGeneratedValues = true } = opts;
   const ruleType = opts.ruleTypeRegistry.get(opts.ruleTypeId);
   // In order to support the partial update API of Saved Objects we have to support
   // partial updates of an Alert, but when we receive an actual RawRule, it is safe
   // to cast the result to an Alert
   const res = getPartialRuleFromRaw<Params>({
-    excludeFromPublicApi,
     id: opts.id,
-    includeLegacyId,
-    includeSnoozeData,
     isSystemAction: opts.isSystemAction,
     logger: opts.logger,
     omitGeneratedValues,
@@ -89,24 +77,14 @@ export function getAlertFromRaw<Params extends RuleTypeParams>(
     ruleTypeId: opts.ruleTypeId,
     ruleType,
   });
-  // include to result because it is for internal rules client usage
-  if (includeLegacyId) {
-    return res as RuleWithLegacyId;
-  }
-  // exclude from result because it is an internal variable
-  return omit(res, ['legacyId']) as Rule;
+
+  return res as Rule;
 }
 
 function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   opts: GetPartialRuleFromRawOpts
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
-  const {
-    excludeFromPublicApi = false,
-    includeLegacyId = false,
-    includeSnoozeData = false,
-    omitGeneratedValues = true,
-    rawRule,
-  } = opts;
+  const { omitGeneratedValues = true, rawRule } = opts;
 
   const {
     createdAt,
@@ -136,20 +114,20 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
-  const includeSnoozeSchedule =
-    snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
+  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
   const isSnoozedUntil = includeSnoozeSchedule
     ? getRuleSnoozeEndTime({
         muteAll: partialRawRule.muteAll ?? false,
         snoozeSchedule,
       })
     : null;
-  const includeMonitoring = monitoring && !excludeFromPublicApi;
+
+  const includeMonitoring = monitoring;
 
   const rule: PartialRule<Params> = {
     id: opts.id,
     notifyWhen,
-    ...omit(partialRawRule, excludeFromPublicApi ? [...fieldsToExcludeFromPublicApi] : ''),
+    ...partialRawRule,
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
@@ -178,8 +156,8 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       params,
       opts.references || []
     ) as Params,
-    ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
-    ...(includeSnoozeData && !excludeFromPublicApi
+    snoozeSchedule: snoozeScheduleDates ?? [],
+    ...(includeSnoozeSchedule
       ? {
           activeSnoozes: getActiveScheduledSnoozes({
             snoozeSchedule,
@@ -219,20 +197,11 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   }
 
   // Need the `rule` object to build a URL
-  if (!excludeFromPublicApi) {
-    const viewInAppRelativeUrl =
-      opts.ruleType.getViewInAppRelativeUrl && opts.ruleType.getViewInAppRelativeUrl({ rule });
-    if (viewInAppRelativeUrl) {
-      rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
-    }
-  }
+  const viewInAppRelativeUrl =
+    opts.ruleType.getViewInAppRelativeUrl && opts.ruleType.getViewInAppRelativeUrl({ rule });
 
-  if (includeLegacyId) {
-    const result: PartialRuleWithLegacyId<Params> = {
-      ...rule,
-      legacyId,
-    };
-    return result;
+  if (viewInAppRelativeUrl) {
+    rule.viewInAppRelativeUrl = viewInAppRelativeUrl;
   }
 
   return rule;

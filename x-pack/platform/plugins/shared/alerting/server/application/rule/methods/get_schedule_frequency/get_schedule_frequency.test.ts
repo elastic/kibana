@@ -178,7 +178,6 @@ describe('validateScheduleLimit', () => {
     ...rulesClientParams,
     maxScheduledPerMinute: 5,
     minimumScheduleIntervalInMs: 1000,
-    fieldsToExcludeFromPublicApi: [],
   };
 
   beforeEach(() => {

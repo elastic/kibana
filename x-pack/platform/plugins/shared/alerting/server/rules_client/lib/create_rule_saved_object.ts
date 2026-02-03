@@ -140,9 +140,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
   }
 
   return getAlertFromRaw<Params>({
-    excludeFromPublicApi: true,
     id: createdAlert.id,
-    includeLegacyId: false,
     isSystemAction: context.isSystemAction,
     logger: context.logger,
     rawRule: createdAlert.attributes,

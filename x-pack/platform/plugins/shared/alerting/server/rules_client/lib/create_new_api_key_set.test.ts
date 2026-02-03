@@ -52,7 +52,6 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
-  fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),

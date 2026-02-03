@@ -490,6 +490,12 @@ export const artifactsSchema = schema.object({
   investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
+/**
+ * This schema is used to generate the OpenAPI schema for all of our public APIs that return a rule response.
+ * Be aware that adding a field here will be documented and exposed to users but maybe not returned by the API
+ * because the transform logic might omit it.
+ */
+
 export const ruleResponseSchema = schema.object({
   id: schema.string({
     meta: {

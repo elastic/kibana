@@ -81,7 +81,6 @@ const rulesClientContext: RulesClientContext = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
 };
 

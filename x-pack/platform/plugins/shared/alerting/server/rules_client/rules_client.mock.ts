@@ -21,7 +21,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { alertingAuthorizationMock } from '../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { fieldsToExcludeFromPublicApi } from './rules_client';
 import type { RulesClientContext } from './types';
 
 const create = () => {
@@ -64,7 +63,6 @@ const create = () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
-    fieldsToExcludeFromPublicApi,
   };
 
   return rulesClientParams;
